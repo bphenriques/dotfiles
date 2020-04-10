@@ -1,0 +1,4 @@
+install_packages
+run installer.macos.link-application.sh
+stow_dotfiles
+run installer.doom-emacs.sh

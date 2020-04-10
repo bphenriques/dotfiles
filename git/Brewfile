@@ -1,0 +1,2 @@
+brew "git"
+brew "diff-so-fancy"

@@ -1,0 +1,4 @@
+# Useful
+brew "ripgrep"
+brew "jq"
+brew "fzf"

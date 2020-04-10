@@ -1,0 +1,10 @@
+# https://news.ycombinator.com/item?id=9869613
+if [[ "$#" < 1 ]] ; then
+    cd ..
+else
+    CDSTR=""
+    for i in {1..$1} ; do
+        CDSTR="../$CDSTR"
+    done
+    cd $CDSTR
+fi

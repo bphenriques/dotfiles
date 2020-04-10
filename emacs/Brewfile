@@ -1,0 +1,6 @@
+tap "d12frosted/emacs-plus"
+brew "git" 
+brew "ripgrep"
+brew "coreutils"
+brew "fd"
+brew "emacs-plus"

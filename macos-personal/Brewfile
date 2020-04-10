@@ -1,0 +1,5 @@
+tap "homebrew/cask"
+cask "steam"
+cask "transmission"
+cask "vlc"
+# dropbox

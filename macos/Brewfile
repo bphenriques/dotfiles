@@ -1,0 +1,13 @@
+tap "homebrew/cask"
+brew "mas"
+cask "firefox"
+cask "spectacle"
+cask "keybase"
+cask "docker"
+cask "jetbrains-toolbox"
+
+# Window manager (no tiling WM for now)
+cask "rectangle"
+
+mas "Xcode", id: 497799835
+mas "The Unarchiver", id: 425424353

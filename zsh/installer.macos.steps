@@ -1,0 +1,4 @@
+install_packages
+stow_dotfiles
+run installer.oh-my-zsh.sh
+run installer.zsh-auto-completion.sh
