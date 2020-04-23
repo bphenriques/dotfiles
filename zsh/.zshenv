@@ -11,9 +11,6 @@ export EDITOR=vim
 export VISUAL=vim
 export PAGER="less -iMR"
 
-# Changing EDITOR to vi family leads to vi-mode getting in the way. Use the other one.
-set -o emacs
-
 # Enable ls colors in MacOS (TODO: Consistent coloring between different OSs
 export CLICOLOR=1
 
