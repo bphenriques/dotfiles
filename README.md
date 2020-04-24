@@ -1,16 +1,19 @@
+# Screenshots
+
+TODO
+
 # Description
 
-Yet another workspace installer. Saw many, took inspiration of some and
+Personal workspace installer. Saw many, took inspiration of some and
 got confused by others. In the end I decided to learn by doing one myself
 with the following guidelines:
-* Portable
-* Minimalistic which means:
+* Cross-platform to keep workflow consistency between different OS.
+* Sensible settings and avoid being too couple to my own settings.
+* Simplify installation as possible which means:
     * Using `stow` to manage dotfiles seamlessly.
     * Automate `Brewfile` installation.
-* Extensible as (unfortunately) some programs are not as seamless as `brew install <module>` 
-  followed by `stow <module>`.
-* Idempotent as much as possible so that I can run the installer as many times as I want.
-* Consistency between the operating systems I use.
+    * Unfortunately some programs are not installed with just `brew install <module>` followed by `stow <module>`, therefore had to get creative.
+* Idempotenty so the installer can be run as many times as possible.
 
 # Installation
 
@@ -23,7 +26,7 @@ After this:
 1. Setup sensitive information.
 2. You may have to manually open the UI applications in order to set them up.
 
-# Dev
+# Development
 
 ## Requirements
 
@@ -32,6 +35,36 @@ After this:
 ## Commands
 
 Check the `README.md` file for the available commands.
+
+# Modules
+
+## Allacrity
+
+### Keybindings
+
+| Shortcut | Command                        |
+|----------|--------------------------------|
+| Cmd-N    | Open new window                |
+
+## Tmux
+
+* Made sure that the default `#!Z` indicators are present.
+* Added `Ψ` as indicator that the panels in a window have their input syncronized.
+* Some tweaks to the theme.
+
+### Keybindings
+
+| Shortcut    | Command                        |
+|-------------|--------------------------------|
+| `C-a`       | Prefix                         |
+| `C-a -`     | Split Horizontally             |
+| `C-a \|`    | Split Vertically               |
+| `C-a b`     | Toggle Broadcast input         |
+| `C-a h`     | Go to pane on the Left         |
+| `C-a j`     | Go to pane up                  |
+| `C-a k`     | Go to the pane down            |
+| `C-a l`     | Go to pane on the right        |
+| `C-a C`     | Open and and rename new window |
 
 # TODO TODO
 
@@ -49,3 +82,4 @@ Check the `README.md` file for the available commands.
 * https://github.com/go-jira/jira
 * https://github.com/erroneousboat/slack-term
 * https://github.com/zsh-users/zsh-autosuggestions
+* https://github.com/tmuxinator/tmuxinator
