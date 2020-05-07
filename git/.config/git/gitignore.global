@@ -1,5 +1,8 @@
 # Setat as follows: `git config --global core.excludesfile ~/.gitignore.global`
 
+# NPM
+node_modules/
+
 # Compiled source #
 ###################
 *.com
