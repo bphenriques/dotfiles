@@ -4,8 +4,6 @@ SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # shellcheck source=helpers.sh
 source "$SCRIPT_PATH/helpers.sh"
 
-DEFAULT_STEPS_ORDER=( install_packages stow_dotfiles )
-
 stow_dotfiles() {
     module="$1"
     location="$2"
@@ -32,9 +30,8 @@ install_module() {
         fail "$module - Does not exist!"            
     fi
 
-    installation_steps="${DEFAULT_STEPS_ORDER[@]}"
+    installation_steps=()
     if [ -f "$steps_override" ]; then
-        installation_steps=()
         while IFS='\n' read -r step; do
             case ${step%% *} in
                 install_packages)   installation_steps+=("$step")
@@ -47,9 +44,13 @@ install_module() {
                                     ;;
             esac            
         done < "$steps_override"
+    else
+        installation_steps+=("install_packages")
+        installation_steps+=("stow_dotfiles")
     fi
 
     for step in "${installation_steps[@]}"; do
+        echo $step "$1" "$2"
         $step "$1" "$2"
     done
 }
