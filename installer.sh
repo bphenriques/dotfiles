@@ -43,12 +43,13 @@ install_module() {
                                     ;;
                 run)                installation_steps+=("$step") 
                                     ;;
-                *)                  fail "Illegal step $step";;                
-            esac
+                *)                  fail "Illegal step $step"
+                                    ;;
+            esac            
         done < "$steps_override"
     fi
 
-    for step in $installation_steps; do
+    for step in "${installation_steps[@]}"; do
         $step "$1" "$2"
     done
 }
