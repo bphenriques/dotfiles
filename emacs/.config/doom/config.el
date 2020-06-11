@@ -1,21 +1,25 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; No need to run 'doom sync' after modifying this file.
-
-;; Fix MacOS
-(setq mac-option-key-is-meta t)
-(setq mac-right-option-modifier nil)
-
 (setq user-full-name "Bruno Henriques"
       user-mail-address "john@doe.com")
 
 ;; Theming
-(setq doom-font (font-spec :family "monospace" :size 14))
-(setq doom-theme 'doom-one)
-(setq display-line-numbers-type t)
-
-;; Org-Mode
-(setq org-directory "~/org/")
+(load! "+utils")
+(load! "+theme")
+(load! "+macos")
+(load! "org-capture")
 
 
+(setq undo-limit 80000000                         ; Raise undo-limit to 80Mb
+      evil-want-fine-undo t)                      ; By default while in insert all changes are one big blob. Be more granular
 
+
+;
+(setq evil-vsplit-window-right t
+      evil-split-window-below t)
+
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (+ivy/switch-buffer))
+
+(setq +ivy-buffer-preview t)
