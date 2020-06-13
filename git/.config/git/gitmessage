@@ -1,9 +1,7 @@
 # <type>: <subject>
-# |<----  Using a Maximum Of 50 Characters  ---->|
-# |<----   Why this change (max. 72 characters)                   ---->|
-# |<----   Multi-line description (max. 72 characters)             ---->|
-
-Ticket
+# Subject: Max. 50 Characters               ---->|
+# Content: Max. 72 Characters per line                            ---->|
+# Optional: Ticket
 
 # --- COMMIT END ---
 # Type can be 
