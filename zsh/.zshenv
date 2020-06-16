@@ -4,7 +4,7 @@ export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
 # Set locale and UTF-8
 export LANG=en_US.UTF-8
-export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # Default editors
 export EDITOR=vim
