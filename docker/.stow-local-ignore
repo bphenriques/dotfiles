@@ -1,0 +1,4 @@
+\.gitignore
+installer.*
+Brewfile
+Brewfile.lock.json
