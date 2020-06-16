@@ -20,7 +20,7 @@ autoload -Uz $fpath[1]/*(.:t)
 # Aliases
 source "$ZDOTDIR/aliases.zsh"
 
-# Auto compeltions
+# Auto completions
 source "$ZDOTDIR/auto-completions.zsh"
 
 # Fzf
