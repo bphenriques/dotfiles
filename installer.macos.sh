@@ -7,7 +7,11 @@ source "$SCRIPT_PATH/helpers.sh"
 install_prequirements() {
     if ! command_exists brew; then
         info "Installing homebrew..."
-        xcode-select --install
+
+        if [ $(xcode-select -p 1>/dev/null) -ne 0 ]; then
+           info "Installing XCode Commandline tools"
+           xcode-select --install 
+        fi
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
 

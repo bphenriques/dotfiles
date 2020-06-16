@@ -13,7 +13,7 @@ chkstow:
 	chkstow --target $(HOME) --badlinks 2>/dev/null | grep -v ".*/Library/.*"
 
 install-macos:
-	sh installer.sh git emacs git scala terminal utils zsh macos 
+	sh installer.sh git emacs git scala terminal utils zsh tmux docker macos 
 
 install-macos-personal:
-	sh installer.sh git emacs git scala terminal utils zsh macos-personal
+	sh installer.sh git emacs git scala terminal utils zsh tmux docker macos-personal
