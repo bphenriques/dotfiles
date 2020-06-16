@@ -25,3 +25,6 @@ source "$ZDOTDIR/auto-completions.zsh"
 
 # Fzf
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
+
+# Create tmux sessions per new window
+[ -z "$TMUX" ] && { exec tmux new-session && exit;}
