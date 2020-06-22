@@ -4,17 +4,17 @@ font:
 
   # The normal (roman) font face to use.
   normal:
-    family: Droid Sans Mono Slashed for Powerline
+    family: Hack Nerd Font Mono
     style: Regular
 
   # The bold font face
   bold:
-    family: Droid Sans Mono Slashed for Powerline
+    family: Hack Nerd Font Mono
     style: Bold
 
   # The italic font face
   italic:
-    family: Droid Sans Mono Slashed for Powerline
+    family: Hack Nerd Font Mono
     style: Italic
 
 # Colors (Doom One): https://github.com/hlissner/emacs-doom-themes

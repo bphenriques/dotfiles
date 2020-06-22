@@ -50,8 +50,8 @@ install_module() {
     fi
 
     for step in "${installation_steps[@]}"; do
-        echo $step "$1" "$2"
-        $step "$1" "$2"
+        echo $step "$module" "$location"
+        $step "$module" "$location"
     done
 }
 
