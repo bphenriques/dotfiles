@@ -1,5 +1,6 @@
 ;;; ~/Documents/repos/workspace/emacs/.config/doom/org-capture.el -*- lexical-binding: t; -*-
 
+(require 'cl)
 ;;;
 ;;; Constants
 ;;;
