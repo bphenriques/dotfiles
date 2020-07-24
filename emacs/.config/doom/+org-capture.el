@@ -1,5 +1,7 @@
 ;;; ~/Documents/repos/workspace/emacs/.config/doom/org-capture.el -*- lexical-binding: t; -*-
 
+(require 'cl)
+
 ;;;
 ;;; Constants
 ;;;
@@ -18,7 +20,6 @@
 (defun knowledge-base/new-section/template ()
   (let* ((sections (custom/list-directories org-knowledge-base-docs-directory))
          (section (completing-read "Section: " sections)))
-
     (if (member section sections)
         (error (concat "Section '%s' already exists! Skipping." section))
       (progn
@@ -31,7 +32,7 @@
             (format "%s/_index.org" (org-hugo-slug (org-capture-get :knowledge-base-section))))))
 
 (defun knowledge-base/entry/template ()
-  (let* ((sections (cons "." (custom/list-directories org-knowledge-base-docs-directory)))
+  (let* ((sections (custom/list-directories org-knowledge-base-docs-directory))
          (section (completing-read "Section: " sections nil t)) ; guarantee one option is selected
          (section-directory (concat (file-name-as-directory org-knowledge-base-docs-directory) section))
          (entries (remove-if (lambda (entry) (equal entry "_index.org")) (directory-files section-directory nil "\\.org$")))
