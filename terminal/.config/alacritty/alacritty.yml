@@ -43,5 +43,4 @@ alt_send_esc: false
 # Shortcuts
 key_bindings:
   # General Alacritty key bindings
-  - { key: N,           mods: Command,        action: SpawnNewInstance   }
   - { key: Space,       mods: Alt,            chars: " "                 }  
