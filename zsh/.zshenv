@@ -11,7 +11,7 @@ export EDITOR=vim
 export VISUAL=vim
 export PAGER="less -iMR"
 
-# Enable ls colors in MacOS (TODO: Consistent coloring between different OSs
+# Enable ls colors in MacOS (TODO: Consistent coloring between different Operating Systems)
 export CLICOLOR=1
 
 # Configure GPG

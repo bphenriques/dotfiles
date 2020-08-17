@@ -140,6 +140,7 @@
        ;;ocaml             ; an objective camel
        (org               ; organize your plain life in plain text
         +hugo
+        +pretty
         +roam)
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
