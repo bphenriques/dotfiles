@@ -7,7 +7,7 @@
 (load! "+utils")
 (load! "+theme")
 (load! "+macos")
-(load! "+org-capture")
+(load! "+org-mode")
 (load! "+org-roam")
 
 (setq undo-limit 80000000                         ; Raise undo-limit to 80Mb
