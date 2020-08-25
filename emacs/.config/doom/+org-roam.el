@@ -1,6 +1,7 @@
 ;;; ~/Documents/repos/workspace/emacs/.config/doom/+org-roam.el -*- lexical-binding: t; -*-
 
 (require 'cl-lib)
+(require 'cl)
 
 (setq
  org-roam-tag-sources '(prop last-directory)
