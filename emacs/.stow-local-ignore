@@ -2,3 +2,4 @@
 installer.*
 Brewfile
 Brewfile.lock.json
+org-protocol-macos
