@@ -1,6 +1,6 @@
 [core]
 	editor = vim
-	excludesfile = ~/config/git/.gitignore.global
+	excludesfile = ~/.config/git/gitignore.global
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [alias]
 	co = checkout
