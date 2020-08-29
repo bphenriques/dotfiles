@@ -1,0 +1,47 @@
+[
+    {
+        "code": "dc091c6ba918fcf6a60e04ecab4fd0c2",
+        "env": "280890727bcc049396c05410e0d2d0b9",
+        "classPathWhitelistHash": "835491922"
+    },
+    [
+        {
+            "id": {
+                "wrapperPath": "ammonite.predef.FilePredef",
+                "tag": {
+                    "code": "cbcac51bd11ec6c19611a60d9a02e098",
+                    "env": "280890727bcc049396c05410e0d2d0b9",
+                    "classPathWhitelistHash": "835491922"
+                }
+            },
+            "leadingSpaces": "",
+            "hookInfo": {
+                "imports": [
+                    
+                ],
+                "stmts": [
+                    "repl.prompt() = \"scala> \"\n"
+                ],
+                "trees": [
+                    
+                ]
+            },
+            "finalImports": [
+                {
+                    "fromName": "res",
+                    "toName": "res",
+                    "prefix": [
+                        "_root_",
+                        "ammonite",
+                        "predef",
+                        "FilePredef"
+                    ],
+                    "importType": {
+                        "$type": "ammonite.util.ImportData.ImportType",
+                        "name": "Term"
+                    }
+                }
+            ]
+        }
+    ]
+]

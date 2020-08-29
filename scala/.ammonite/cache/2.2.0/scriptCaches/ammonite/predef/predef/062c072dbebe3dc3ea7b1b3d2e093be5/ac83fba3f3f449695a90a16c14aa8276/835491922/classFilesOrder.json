@@ -1,0 +1,34 @@
+[
+    {
+        "code": "062c072dbebe3dc3ea7b1b3d2e093be5",
+        "env": "ac83fba3f3f449695a90a16c14aa8276",
+        "classPathWhitelistHash": "835491922"
+    },
+    [
+        {
+            "id": {
+                "wrapperPath": "ammonite.predef.predef",
+                "tag": {
+                    "code": "14e9163069274aab52f16ffe2f990959",
+                    "env": "ac83fba3f3f449695a90a16c14aa8276",
+                    "classPathWhitelistHash": "835491922"
+                }
+            },
+            "leadingSpaces": "//repl.prompt() = \"scala> \"\n",
+            "hookInfo": {
+                "imports": [
+                    
+                ],
+                "stmts": [
+                    
+                ],
+                "trees": [
+                    
+                ]
+            },
+            "finalImports": [
+                
+            ]
+        }
+    ]
+]
