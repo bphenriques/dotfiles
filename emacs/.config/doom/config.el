@@ -8,6 +8,7 @@
 (load! "+macos")
 (load! "+org-mode")
 (load! "+org-roam")
+(load! "+scala")
 
 (setq-default
  delete-by-moving-to-trash t                      ; Delete files to trash
@@ -16,7 +17,6 @@
  evil-want-fine-undo t                            ; By default while in insert all changes are one big blob. Be more granular
  inhibit-compacting-font-caches t                 ; When there are lots of glyphs, keep them in memory
 )
-
 
 ;;;
 ;;; Display list of buffers on the right/bottom when splitting windows
