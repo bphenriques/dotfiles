@@ -28,11 +28,9 @@ node_modules/
 *.zip
 *.msi
 
-# Logs and databases #
+# Logs #
 ######################
 *.log
-*.sql
-*.sqlite
 
 # OS generated files #
 ######################
