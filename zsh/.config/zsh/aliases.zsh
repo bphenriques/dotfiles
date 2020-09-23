@@ -1,5 +1,9 @@
+# Navigation
+alias ..='cd ..'
+
+# Files
 alias la='ls -la'
 alias mkdir='mkdir -pv'
-alias work='cd "$HOME/work"'
-alias projects='cd "$HOME/projects"'
+
+# Shell
 alias reload='source $HOME/.zshenv' 
