@@ -4,3 +4,6 @@ brew "ripgrep"
 brew "coreutils"
 brew "fd"
 brew "emacs-plus"
+
+# Required for babel exports
+brew "plantuml"
