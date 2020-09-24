@@ -7,6 +7,7 @@
  org-knowledge-base-directory (concat (file-name-as-directory org-knowledge-base-repository) "org")
  org-knowledge-base-section-template (concat (file-name-as-directory org-knowledge-base-repository) "template-section.org")
  org-knowledge-base-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-entry.org")
+ org-knowledge-base-web-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-web-entry.org")
  org-knowledge-base-quick-note-section "uncategorized"
 
  ; Org-roam set globally to take notes anywhere.
@@ -51,6 +52,22 @@
            "%?"
            :file-name "%(knowledge-base/prompt-section)/${slug}"
            :head ,(get-string-from-file org-knowledge-base-entry-template)
+           :unnarrowed t)
+          )))
+
+;;;
+;;; Org-Roam Ref Capture
+;;;
+
+(after! org-roam
+ ;; The following requires a bookmarklet:
+ ;; javascript:location.href ='org-protocol://roam-ref?template=r&ref='+ encodeURIComponent(location.href)+ '&title='+ encodeURIComponent(document.title)
+ (setq org-roam-capture-ref-templates
+        `(
+          ("r" "ref" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name ,(format "%s/web-note__${slug}" org-knowledge-base-quick-note-section)
+           :head ,(get-string-from-file org-knowledge-base-web-entry-template)
            :unnarrowed t)
           )))
 
