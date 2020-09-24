@@ -9,6 +9,8 @@
 (load! "+org-mode")
 (load! "+org-roam")
 (load! "+scala")
+(load! "+deft")
+(load! "+keybindings")
 
 (setq-default
  delete-by-moving-to-trash t                      ; Delete files to trash

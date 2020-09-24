@@ -2,3 +2,7 @@
 brew "ripgrep"
 brew "jq"
 brew "fzf"
+
+# Publish/Subscribe broker events
+tap "batchcorp/public"
+brew "plumber"
