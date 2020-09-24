@@ -1,13 +1,13 @@
 ;;; ~/Documents/repos/workspace/emacs/.config/doom/+org-roam.el -*- lexical-binding: t; -*-
 
 (require 'cl-lib)
-(require 'cl)
 
 (setq
  org-knowledge-base-repository "~/Documents/repos/knowledge-base"
  org-knowledge-base-directory (concat (file-name-as-directory org-knowledge-base-repository) "org")
  org-knowledge-base-section-template (concat (file-name-as-directory org-knowledge-base-repository) "template-section.org")
  org-knowledge-base-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-entry.org")
+ org-knowledge-base-quick-note-section "uncategorized"
 
  ; Org-roam set globally to take notes anywhere.
  ; - Due to https://github.com/org-roam/org-roam-server/issues/8 org-roam-server does not respect .dir-locals.el
@@ -23,8 +23,8 @@
 ;;;
 
 (defun knowledge-base/prompt-section ()
-   (let* ((sections (custom/list-directories org-knowledge-base-directory))
-          (section (completing-read "Section: " sections)))
+  (let* ((sections (cons  org-knowledge-base-quick-note-section (remove  org-knowledge-base-quick-note-section (custom/list-directories org-knowledge-base-directory))))
+         (section (completing-read "Section: " sections)))
      (org-capture-put :knowledge-base-section section)
      (org-hugo-slug section)))
 
