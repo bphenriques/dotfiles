@@ -8,6 +8,7 @@
  org-knowledge-base-section-template (concat (file-name-as-directory org-knowledge-base-repository) "template-section.org")
  org-knowledge-base-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-entry.org")
  org-knowledge-base-web-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-web-entry.org")
+ org-knowledge-base-stack-web-entries-template (concat (file-name-as-directory org-knowledge-base-repository) "template-stack-web-entries.org")
  org-knowledge-base-quick-note-section "uncategorized"
 
  ; Org-roam set globally to take notes anywhere.
@@ -60,16 +61,21 @@
 ;;;
 
 (after! org-roam
- ;; The following requires a bookmarklet:
- ;; javascript:location.href ='org-protocol://roam-ref?template=r&ref='+ encodeURIComponent(location.href)+ '&title='+ encodeURIComponent(document.title)
  (setq org-roam-capture-ref-templates
         `(
-          ("r" "ref" plain (function org-roam--capture-get-point)
+          ;; javascript:location.href ='org-protocol://roam-ref?template=n&ref='+ encodeURIComponent(location.href)+ '&title='+ encodeURIComponent(document.title)
+          ("n" "Note Reference" plain (function org-roam--capture-get-point)
            "%?"
            :file-name ,(format "%s/web-note__${slug}" org-knowledge-base-quick-note-section)
            :head ,(get-string-from-file org-knowledge-base-web-entry-template)
            :unnarrowed t)
-          )))
+          ;; javascript:location.href ='org-protocol://roam-ref?template=e&ref='+ encodeURIComponent(location.href)+ '&title='+ encodeURIComponent(document.title)
+           ("e" "Enqueue Reference" plain (function org-roam--capture-get-point)
+           "\n* ${title}\n\nSource: ${ref}\n\n%?"
+           :file-name ,(format "%s/web-stack-enties" org-knowledge-base-quick-note-section)
+           :head ,(get-string-from-file org-knowledge-base-stack-web-entries-template)
+           :unnarrowed t :empty-lines-before 1)
+        )))
 
 ;;;
 ;;; Org-Roam Server
