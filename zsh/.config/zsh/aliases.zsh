@@ -7,3 +7,4 @@ alias mkdir='mkdir -pv'
 
 # Shell
 alias reload='source $HOME/.zshenv' 
+

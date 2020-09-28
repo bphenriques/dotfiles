@@ -17,6 +17,9 @@ export CLICOLOR=1
 # Configure GPG
 export GPG_TTY=$(tty)
 
+# Default directory for repositories
+export REPOS=$HOME/Documents/repos
+
 # Sensitive/local variables are stored separately
 export PRIVATE_VARS="$HOME/.zshenv.local"
 [ -s "$PRIVATE_VARS" ] && source "$PRIVATE_VARS"

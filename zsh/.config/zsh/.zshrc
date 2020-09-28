@@ -30,4 +30,7 @@ export GPG_TTY=$(tty)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
 
 # Create tmux sessions per new window
-[ -z "$TMUX" ] && { exec tmux new-session && exit;}
+[ -z "$TMUX" ] && { exec tmux new-session && exit; }
+
+# Integration with Tmux: when opening new window with window prompt, attempt to navigate to that directory
+[[ -v NAVIGATE_TO_PROJECT_DIRECTORY ]] && cd $(ls -d $REPOS/* | fzf --select-1 --filter=$(tmux display-message -p '#{window_name}') | awk 'NR==1')
