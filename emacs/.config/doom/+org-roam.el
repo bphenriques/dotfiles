@@ -47,6 +47,7 @@
 (add-hook 'org-capture-after-finalize-hook 'knowledge-base/setup-section-if-needed)
 
 (after! org-roam
+ (set-face-attribute 'org-roam-tag nil :foreground "tan1")
  (setq org-roam-capture-templates
         `(
           ("d" "default" plain (function org-roam--capture-get-point)
