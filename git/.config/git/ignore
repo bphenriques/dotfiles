@@ -57,3 +57,6 @@ desktop.ini
 .idea
 .iml
 *.sublime-workspace
+
+# Personal tools
+bphenriques-tools/
