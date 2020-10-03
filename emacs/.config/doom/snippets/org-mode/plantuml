@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: plantuml
-# key: <plantuml
+# key: plantuml
 # --
 #+BEGIN_SRC plantuml :file $1 :exports results :eval never-export
   $0

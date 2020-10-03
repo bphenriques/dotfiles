@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: scala
-# key: <scala
+# key: scala
 # --
 #+BEGIN_SRC scala :eval never-export
   $0
