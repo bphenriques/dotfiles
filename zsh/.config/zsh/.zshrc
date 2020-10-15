@@ -33,8 +33,4 @@ export GPG_TTY=$(tty)
 [ -z "$TMUX" ] && { exec tmux new-session && exit; }
 
 # Integration with Tmux: when opening new window with window prompt, attempt to navigate to that directory
-if [[ -v NAVIGATE_TO_PROJECT_DIRECTORY ]]; then 
-  target_project=$(ls -d $REPOS/* | xargs basename | fzf --filter=$(tmux display-message -p '#{window_name}') | fzf --exit-0 --select-1 --layout=reverse)
-  cd "$REPOS/$target_project"
-  tmux rename-window -t $(tmux display-message -p '#I') "$target_project"
-fi
+[[ -v NAVIGATE_TO_PROJECT_DIRECTORY ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 
