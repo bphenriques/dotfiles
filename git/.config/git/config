@@ -11,6 +11,12 @@
 	# Create patches by using git patch > changes.patch
 	patch = !git --no-pager diff --no-color
 
+	addz = !git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add
+        ia =   !git add $(git ls-files --modified --others --exclude-standard | \
+			  fzf --keep-right --multi --reverse --marker='A ' --color="marker:#98be64" \
+			      --preview-window=right:70% \
+                              --preview 'git status -s {-1} && git add --all --intent-to-add && git diff $@ --color=always -- {-1}')
+
 [commit]
 	template = ~/.config/git/gitmessage
 	gpgsign = true
