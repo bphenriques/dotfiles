@@ -32,5 +32,5 @@ export GPG_TTY=$(tty)
 # Create tmux sessions per new window
 [ -z "$TMUX" ] && { exec tmux new-session && exit; }
 
-# Integration with Tmux: when opening new window with window prompt, attempt to navigate to that directory
-[[ -v NAVIGATE_TO_PROJECT_DIRECTORY ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 
+# Custom Tmux initializer. Find and open project given the window name.
+[[ -v TMUX_NEW_WINDOW_INIT ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 
