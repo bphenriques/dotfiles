@@ -3,7 +3,7 @@
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [alias]
 	co = checkout
-	l = log --pretty=oneline -n 20 --graph --abbrev-commit
+	g = log --pretty=oneline --graph --abbrev-commit
 	s = status -s
 	pushf = push --force-with-lease
 	amend = commit --amend
@@ -11,11 +11,17 @@
 	# Create patches by using git patch > changes.patch
 	patch = !git --no-pager diff --no-color
 
-	addz = !git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add
-        ia =   !git add $(git ls-files --modified --others --exclude-standard | \
-			  fzf --keep-right --multi --reverse --marker='A ' --color="marker:#98be64" \
-			      --preview-window=right:70% \
-                              --preview 'git status -s {-1} && git add --all --intent-to-add && git diff $@ --color=always -- {-1}')
+        # A more concise and readable git log
+        ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate
+   
+        iadd = !git ls-files --modified --others --exclude-standard | \
+		fzf --keep-right --multi --reverse --marker='* ' --preview-window='right:70%' \
+	            --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
+                    xarg | git add
+
+        idiff= !git ls-files --modified --others --exclude-standard | \
+                fzf --keep-right --reverse --marker='* ' --preview-window=right:70% \
+                    --preview 'git diff --color=always -- {-1} | diff-so-fancy'
 
 [commit]
 	template = ~/.config/git/gitmessage
