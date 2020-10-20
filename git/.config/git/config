@@ -17,7 +17,7 @@
         fadd = !git ls-files --modified --others --exclude-standard | \
 		fzf --keep-right --multi --reverse \
 	            --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
-                    xargs git add
+                    xargs -t -o git add
 
         fdiff= !git ls-files --modified --others --exclude-standard | \
                 fzf --keep-right --reverse \
