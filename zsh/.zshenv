@@ -6,13 +6,13 @@ export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# Enable ls colors in MacOS
+export CLICOLOR=1
+
 # Default editors
 export EDITOR=vim
 export VISUAL=vim
 export PAGER="less -iMR"
-
-# Enable ls colors in MacOS (TODO: Consistent coloring between different Operating Systems)
-export CLICOLOR=1
 
 # Configure GPG
 export GPG_TTY=$(tty)

@@ -14,13 +14,13 @@
         # A more concise and readable git log
         ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate
    
-        iadd = !git ls-files --modified --others --exclude-standard | \
-		fzf --keep-right --multi --reverse --marker='* ' --preview-window='right:70%' \
+        fadd = !git ls-files --modified --others --exclude-standard | \
+		fzf --keep-right --multi --reverse \
 	            --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
-                    xarg | git add
+                    xargs git add
 
-        idiff= !git ls-files --modified --others --exclude-standard | \
-                fzf --keep-right --reverse --marker='* ' --preview-window=right:70% \
+        fdiff= !git ls-files --modified --others --exclude-standard | \
+                fzf --keep-right --reverse \
                     --preview 'git diff --color=always -- {-1} | diff-so-fancy'
 
 [commit]

@@ -23,9 +23,6 @@ source "$ZDOTDIR/aliases.zsh"
 # Auto completions
 source "$ZDOTDIR/auto-completions.zsh"
 
-# GPG
-export GPG_TTY=$(tty)
-
 # Fzf
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
 
