@@ -16,12 +16,12 @@
    
         fadd = !git ls-files --modified --others --exclude-standard | \
 		fzf --keep-right --multi --reverse \
-	            --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
+	            --preview-window '' --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
                     xargs -t -o git add
 
         fdiff= !git ls-files --modified --others --exclude-standard | \
                 fzf --keep-right --reverse \
-                    --preview 'git diff --color=always -- {-1} | diff-so-fancy'
+                    --preview-window '' --preview 'git diff --color=always -- {-1} | diff-so-fancy'
 
 [commit]
 	template = ~/.config/git/gitmessage

@@ -1,10 +1,10 @@
 # History - http://zsh.sourceforge.net/Doc/Release/Options.html @ 16.2.4 History
-HISTFILE="$ZDOTDIR/.zsh_history"                                                    # Change default file away from my $HOME.
-HISTSIZE=10000                                                                      # Number of entries to keep in memory.
-SAVEHIST=$HISTSIZE                                                                  # Number of entries to keep in file.
-HISTIGNORE="ls:la:cd:up:mkcd"                                                       # Filter uninteresting commands.
-setopt HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   # How entries are stored/evicted.
-setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                              # Share between sessions and write immediately.
+HISTFILE="$ZDOTDIR/.zsh_history"                                                    				# Change default file away from my $HOME.
+HISTSIZE=10000                                                                      				# Number of entries to keep in memory.
+SAVEHIST=$HISTSIZE                                                                  				# Number of entries to keep in file.
+HISTORY_IGNORE="(ls|la|cd|mkcd)"                                                      				# Filter uninteresting commands.
+setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   		# How entries are stored/evicted.
+setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                             		 		# Share between sessions and write immediately.
 
 # Antibody - http://getantibody.github.io/
 source <(antibody init)
@@ -25,9 +25,18 @@ source "$ZDOTDIR/auto-completions.zsh"
 
 # Fzf
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
+export FZF_DEFAULT_OPTS="
+	--bind='ctrl-p:toggle-preview'
+	--bind='ctrl-a:select-all'
+        --bind='ctrl-f:jump'
+        --marker='* '
+        --pointer='▶'
+"
+export CUSTOM_FDZ_PREVIEW_FILE_OR_DIR_OPTS="--preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || bat --style=numbers --color=always {-1} 2> /dev/null'"
 
 # Create tmux sessions per new window
 [ -z "$TMUX" ] && { exec tmux new-session && exit; }
 
 # Custom Tmux initializer. Find and open project given the window name.
 [[ -v TMUX_NEW_WINDOW_INIT ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 
+
