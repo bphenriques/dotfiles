@@ -3,6 +3,7 @@ shift
 
 case "$command" in
   cd)           fzf "$@" --preview 'tree -C {} | head -50' ;;
+  vi)           fzf "$@" --preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || bat --style=numbers --color=always {-1} 2> /dev/null' ;;
   export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
   *)            fzf "$@" ;;
 esac
