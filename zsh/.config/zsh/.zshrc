@@ -2,18 +2,8 @@
 HISTFILE="$ZDOTDIR/.zsh_history"                                                    				# Change default file away from my $HOME.
 HISTSIZE=10000                                                                      				# Number of entries to keep in memory.
 SAVEHIST=$HISTSIZE                                                                  				# Number of entries to keep in file.
-HISTORY_IGNORE="(ls *|la *|cd *|mkcd *|man *|rm *|git add *|mkdir *)"                                           # Filter uninteresting commands.
 setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   		# How entries are stored/evicted.
 setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                             		 		# Share between sessions and write immediately.
-
-# http://zsh.sourceforge.net/Doc/Release/Parameters.html#Parameters-Used-By-The-Shell
-zshaddhistory() {
-  emulate -L zsh
-  ## uncomment if HISTORY_IGNORE
-  ## should use EXTENDED_GLOB syntax
-  # setopt extendedglob
-  [[ $1 != ${~HISTORY_IGNORE} ]]
-}
 
 # Antibody - http://getantibody.github.io/
 source <(antibody init)
