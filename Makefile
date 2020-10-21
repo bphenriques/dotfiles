@@ -9,11 +9,11 @@ stow:
 	stow --dir $(MAKEFILE_LOCATION) --target $(HOME) $(module)
 
 # Check for bogus links
-chkstow:
+doctor:
 	chkstow --target $(HOME) --badlinks 2>/dev/null | grep -v ".*/Library/.*"
 
 install-macos:
-	sh installer.sh git emacs git scala terminal utils zsh tmux docker macos 
+	sh installer.sh git emacs scala terminal utils zsh tmux docker macos
 
 install-macos-personal:
-	sh installer.sh git emacs git scala terminal utils zsh tmux docker macos-personal
+	sh installer.sh git emacs scala terminal utils zsh tmux docker macos-personal
