@@ -5,6 +5,9 @@ SAVEHIST=$HISTSIZE                                                              
 setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   		# How entries are stored/evicted.
 setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                             		 		# Share between sessions and write immediately.
 
+# EDITOR=vi affects keybindings. Revert back to emacs for some sanity (for now).
+bindkey -e
+
 # Antibody - http://getantibody.github.io/
 source <(antibody init)
 antibody bundle < "$HOME/.config/zsh/antibody_plugins"
