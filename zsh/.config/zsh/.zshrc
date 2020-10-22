@@ -15,9 +15,6 @@ zshaddhistory() {
   [[ $1 != ${~HISTORY_IGNORE} ]]
 }
 
-# EDITOR=vi affects keybindings. Revert back to emacs for some sanity (for now).
-bindkey -e
-
 # Antibody - http://getantibody.github.io/
 source <(antibody init)
 antibody bundle < "$HOME/.config/zsh/antibody_plugins"
