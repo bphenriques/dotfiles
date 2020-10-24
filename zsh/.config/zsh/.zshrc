@@ -1,10 +1,10 @@
 # History - http://zsh.sourceforge.net/Doc/Release/Options.html @ 16.2.4 History
-HISTFILE="$ZDOTDIR/.zsh_history"                                                    				# Change default file away from my $HOME.
+HISTFILE="$ZDOTDIR/.zsh_history"                                                    				# Change default file away from $HOME.
 HISTSIZE=10000                                                                      				# Number of entries to keep in memory.
 SAVEHIST=$HISTSIZE                                                                  				# Number of entries to keep in file.
-HISTORY_IGNORE="(ls *|la *|cd *|mkcd *|man *|rm *|git add *|mkdir *)"                                           # Filter uninteresting commands.
+HISTORY_IGNORE="(ls *|la *|cd *|mkcd *|man *|rm *|git add *|git rm *|mkdir *)"                            # Filter uninteresting commands.
 setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   		# How entries are stored/evicted.
-setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                             		 		# Share between sessions and write immediately.
+setopt SHARE_HISTORY APPEND_HISTORY INC_APPEND_HISTORY                             		 		            # Share between sessions and write immediately.
 
 # http://zsh.sourceforge.net/Doc/Release/Parameters.html#Parameters-Used-By-The-Shell
 zshaddhistory() {
@@ -34,9 +34,9 @@ source "$ZDOTDIR/auto-completions.zsh"
 
 # Fzf
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
-export FZF_DEFAULT_OPTS="--bind='ctrl-p:toggle-preview --bind='ctrl-a:select-all' --bind='ctrl-f:jump' --marker='* ' --pointer='▶'"
-export FZF_DEFAULT_COMMAND="rg --smart-case --files --no-ignore --hidden --follow --glob '!{.git,node_modules}/*'"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+#export FZF_DEFAULT_OPTS="--bind='ctrl-p:toggle-preview --bind='ctrl-a:select-all' --bind='ctrl-f:jump' --marker='* ' --pointer='▶'"
+#export FZF_DEFAULT_COMMAND="rg --smart-case --files --no-ignore --hidden --follow --glob '!{.git,node_modules}/*'"
+#export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 # Create tmux sessions per new window
 [ -z "$TMUX" ] && { exec tmux new-session && exit; }
