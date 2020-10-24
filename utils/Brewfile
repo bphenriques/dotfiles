@@ -1,16 +1,7 @@
 tap "homebrew/cask"
 
-# Search
-brew "ripgrep"
-
 # Json Processor
 brew "jq"
-
-# Fuzzy Search
-brew "fzf"
-
-# Better alternative to cat
-brew "bat"
 
 # Publish/Subscribe broker events
 tap "batchcorp/public"

@@ -1,3 +1,11 @@
 brew "zsh"
 brew "getantibody/tap/antibody"
+
+# Search
+brew "ripgrep"
+
+# Fuzzy Search
 brew "fzf"
+
+# Better alternative to cat
+brew "bat"
