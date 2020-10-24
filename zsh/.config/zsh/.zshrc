@@ -6,7 +6,7 @@ SAVEHIST=$HISTSIZE                                                              
 setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE   		# How entries are stored/evicted.
 
 # Setup ignored cmds: http://zsh.sourceforge.net/Doc/Release/Parameters.html#Parameters-Used-By-The-Shell
-HISTORY_IGNORE="(ls *|la *|cd *|mkcd *|man *|rm *|git add *|git rm *|mkdir *)"
+HISTORY_IGNORE="(ls *|la *|cd *|mkcd *|man *|rm *|git add *|git rm *|git commit *|git pull *|mkdir *|history *|proj *)"
 zshaddhistory() {
   emulate -L zsh
   ## uncomment if HISTORY_IGNORE
