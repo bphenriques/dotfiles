@@ -3,6 +3,8 @@
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [alias]
 	co = checkout
+
+	# Git Graph
 	g = log --pretty=oneline --graph --abbrev-commit
 	s = status -s
 	pushf = push --force-with-lease
@@ -11,15 +13,15 @@
 	# Create patches by using git patch > changes.patch
 	patch = !git --no-pager diff --no-color
 
-        # A more concise and readable git log
-        ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate
+	# A more concise and readable git log
+    ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate
    
-        fadd = !git ls-files --modified --others --exclude-standard | \
-		fzf --keep-right --multi --reverse \
-	            --preview-window '' --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
+	fadd = !git ls-files --modified --others --exclude-standard | \
+				fzf --keep-right --multi --reverse \
+					--preview-window '' --preview 'git diff --color=always -- {-1} | diff-so-fancy' | \
                     xargs -t -o git add
 
-        fdiff= !git ls-files --modified --others --exclude-standard | \
+    fdiff= !git ls-files --modified --others --exclude-standard | \
                 fzf --keep-right --reverse \
                     --preview-window '' --preview 'git diff --color=always -- {-1} | diff-so-fancy'
 
