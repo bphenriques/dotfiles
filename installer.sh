@@ -12,6 +12,16 @@ stow_dotfiles() {
     stow --dir "$SCRIPT_PATH" --target "$HOME" "$module"
 }
 
+post_install() {
+    module="$1"
+    location="$2"
+    post_install_script="$location/installer.post-install.sh"
+    if [ -f "$post_install_script" ]; then
+        info "$module - Post install.."
+        sh "$post_install_script"
+    fi
+}
+
 run() {
     custom_script="$1"
     module="$2"
@@ -36,10 +46,12 @@ install_module() {
             case ${step%% *} in
                 install_packages)   installation_steps+=("$step")
                                     ;;
-                stow_dotfiles)      installation_steps+=("$step") 
+                stow_dotfiles)      installation_steps+=("$step")
                                     ;;
-                run)                installation_steps+=("$step") 
+                run)                installation_steps+=("$step")
                                     ;;
+                post_install)       installation_steps+=("$step")
+			            ;;
                 *)                  fail "Illegal step $step"
                                     ;;
             esac            
@@ -47,6 +59,7 @@ install_module() {
     else
         installation_steps+=("install_packages")
         installation_steps+=("stow_dotfiles")
+        installation_steps+=("post_install")
     fi
 
     for step in "${installation_steps[@]}"; do
