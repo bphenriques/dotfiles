@@ -1,4 +1,0 @@
-tap "homebrew/cask"
-tap "homebrew/cask-fonts"
-cask "font-hack-nerd-font"
-cask "alacritty"

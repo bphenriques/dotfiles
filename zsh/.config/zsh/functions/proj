@@ -1,8 +1,0 @@
-BASE_FOLDER="$REPOS"
-project="$1"
-
-target="$(ls -d "$BASE_FOLDER"/* | xargs basename | fzf --filter="$project" | fzf --exit-0 --select-1 --layout=reverse)"
-if [ ! -z "$target" ]; then
-   cd "$BASE_FOLDER/$target"
-fi
-
