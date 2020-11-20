@@ -1,3 +1,0 @@
-install_packages
-stow_dotfiles
-run installer.zsh-auto-completion.sh

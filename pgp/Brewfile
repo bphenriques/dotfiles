@@ -1,4 +1,0 @@
-brew "gpg2" 
-brew "gnupg" 
-brew "pinentry-mac"
-

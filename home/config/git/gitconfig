@@ -1,0 +1,52 @@
+[user]
+    name = Bruno Henriques
+    email = 4727729+bphenriques@users.noreply.github.com
+    signingkey = 792C2768AD3A4930BCCFA467075389B5C3ADA858
+
+[core]
+    editor = vim
+    pager = diff-so-fancy | less --tabs=4 -RFX
+
+[alias]
+    co = checkout
+    g = log --pretty=oneline --graph --abbrev-commit
+    s = status -s
+    pushf = push --force-with-lease
+    amend = commit --amend
+
+    # Create patches by using `git patch > changes.patch`.
+    patch = !git --no-pager diff --no-color
+
+    # A more concise and readable git log.
+    ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate
+   
+[commit]
+    template = ~/.config/git/gitmessage
+    gpgsign = true
+
+[pull]
+	rebase = true
+    
+[rebase]
+	autosquash = true           # Automatic fixup! and/or !squash!
+
+# ------------------------------
+# Color settings for diff-so-fancy
+# ------------------------------
+[color]
+    ui = auto
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
+[diff-so-fancy]
+    stripLeadingSymbols = false
+

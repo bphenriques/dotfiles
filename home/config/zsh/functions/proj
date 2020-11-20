@@ -1,0 +1,10 @@
+test -z "$WORKSPACE" && echo "Environment variable WORKSPACE is not set. Aborting!" && exit 1
+
+BASE_FOLDER="$WORKSPACE"
+project="$1"
+
+target="$(ls -d "$BASE_FOLDER"/* | xargs -n 1 basename | fzf --filter="$project" | fzf --exit-0 --select-1 --layout=reverse)"
+if [ ! -z "$target" ]; then
+   cd "$BASE_FOLDER/$target"
+fi
+
