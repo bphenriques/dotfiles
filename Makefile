@@ -1,19 +1,41 @@
-MAKEFILE_LOCATION = $(CURDIR)
+# Installs all the required dependencies.
+.PHONY: bootstrap
+bootstrap:
+	@$(CURDIR)/scripts/bootstrap.sh
 
-# Ignore Array related checks and the source path.
+# Runs static analysis
+.PHONY: lint
 lint:
-	shellcheck -P SCRIPTDIR/ **/*.sh
+	@nix-shell --packages shellcheck --run "shellcheck -P $(CURDIR)/ **/*.sh"
 
-# Manually stow files: make module=<module> stow
-stow:
-	stow --dir $(MAKEFILE_LOCATION) --target $(HOME) $(module)
-
-# Check for bogus links
+# Checks for missing dependencies
+.PHONY: doctor
 doctor:
-	chkstow --target $(HOME) --badlinks 2>/dev/null | grep -v ".*/Library/.*"
+	@$(CURDIR)/scripts/doctor.sh
 
-install-macos:
-	sh installer.sh git emacs scala terminal utils zsh tmux docker macos
+# Updates both flake.lock and Doom emacs
+.PHONY: update
+update: doctor
+	@$(CURDIR)/scripts/update.sh
 
-install-macos-personal:
-	sh installer.sh git emacs scala terminal utils zsh tmux docker macos-personal
+########################
+#    Main Targets      #
+########################
+
+.PHONY: sync-personal-macos
+sync-personal-macos: doctor
+	# Building...
+	@nix build .#darwinConfigurations.personal-macos.system
+	# Applying...
+	@$(CURDIR)/result/sw/bin/darwin-rebuild switch --flake .#personal-macos
+	# Syncing Doom Emacs...
+	@$(CURDIR)/scripts/sync-doom-emacs.sh
+
+.PHONY: sync-work-macos
+sync-work-macos: doctor
+	# Building...
+	@nix build .#darwinConfigurations.work-macos.system
+	# Applying...
+	@$(CURDIR)/result/sw/bin/darwin-rebuild switch --flake .#work-macos
+	# Syncing Doom Emacs...
+	@$(CURDIR)/scripts/sync-doom-emacs.sh

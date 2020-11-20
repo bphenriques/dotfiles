@@ -1,0 +1,21 @@
+. "$ZDOTDIR/config.zsh"    # Load ZSH and Interactive Shell Configuration.
+. "$ZDOTDIR/plugins.zsh"   # Load Plugins.
+
+# Load Functions - Lazy autoload every file in "$ZDOTDIR/functions"
+fpath=("$ZDOTDIR/functions" $fpath);
+autoload -Uz $fpath[1]/*(.:t)
+
+# Load Application specific modules
+for module in $ZDOTDIR/modules/*.zsh; do
+  . $module
+done
+
+. "$ZDOTDIR/aliases.zsh"                         # Load Aliases.
+. "$ZDOTDIR/auto-completions.zsh"                # Load Auto completions.
+
+# Should this go to zlogin file?
+command -v tmux > /dev/null && [ -z "$TMUX" ] && { exec tmux new-session && exit; }  # Create tmux sessions per new window.
+
+# Should this go to zlogin file?
+# Custom Tmux initializer. Find and open project given the window name.
+[[ -v TMUX_OPEN_PROJECT ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 

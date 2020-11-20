@@ -1,0 +1,22 @@
+# XDG Compliant
+export XDG_CONFIG_HOME="$HOME"/.config
+export XDG_DATA_HOME="$XDG_CONFIG_HOME"/local/share
+export XDG_CACHE_HOME="$XDG_CONFIG_HOME"/cache
+
+# Override zsh folders to unclutter $HOME folder
+export ZDOTDIR="$XDG_CONFIG_HOME"/zsh
+
+# Set locale and UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# Default editors and settings
+export EDITOR=vim
+export VISUAL=vim
+export PAGER="less -iMR"
+
+# Default directory for repositories
+export WORKSPACE="$HOME"/workspace
+
+# Sensitive/local variables are stored separately
+[ -s "$HOME"/.zshenv.local ] && source "$HOME"/.zshenv.local
