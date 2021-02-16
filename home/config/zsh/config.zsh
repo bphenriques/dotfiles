@@ -1,9 +1,9 @@
 #
 # History - http://zsh.sourceforge.net/Doc/Release/Options.html @ 16.2.4 History
 #
-HISTFILE="$ZDOTDIR/.zsh_history" # Change default file away from zsh folder.
+HISTFILE="$ZDOTDIR"/.zsh_history # Change default file away from zsh folder.
 HISTSIZE=10000                   # Number of entries to keep in memory.
-SAVEHIST=$HISTSIZE               # Number of entries to keep in file.
+SAVEHIST="$HISTSIZE"             # Number of entries to keep in file.
 
 setopt APPEND_HISTORY            # Appends history to history file on exit
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.

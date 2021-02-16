@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable=SC2016,SC1091
+# shellcheck disable=SC2016,SC1091,SC1090
 #
 # Bootstraps the required dependencies for non-NixOS operating systems.
 #
