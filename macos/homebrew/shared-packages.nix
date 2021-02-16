@@ -1,8 +1,8 @@
 {
   homebrew.enable = true;
 
-  imports = [ 
-    ./emacs-package.nix 
+  imports = [
+    ./emacs-package.nix
   ];
 
   homebrew.taps = [

@@ -10,9 +10,12 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Setup
 
-## NixOS
+| Host | Operating System |
+|-|-|
+| [`personal-macos`](hosts/personal-macos.nix) | macOS |
+| [`work-macos`](hosts/work-macos.nix) | macOS |
 
-Soon™ :)
+If you are looking for the dotfiles, they are grouped [here](home/config).
 
 ## MacOS
 
@@ -59,15 +62,17 @@ Make sure that you have the following in your `$ZDOTDIR/.zprofile` (here to ensu
 # If Home-Manager binaries can't be found
 . /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
-
-# If brew cant't be found
-export PATH="/usr/local/bin:$PATH"
-export PATH="/usr/local/sbin:$PATH"
 ```
 
-I suspect that this is related with some mess up when applying `nix-darwin`, maybe [this](https://github.com/LnL7/nix-darwin/pull/286) will fix.
+I suspect this is related with [this](https://github.com/LnL7/nix-darwin/pull/286).
 
-#### 2. `zsh compinit: insecure directories, run compaudit for list.`
+#### 2. Fail to find `brew`.
+
+Make sure that `/etc/zprofile` is calling `/usr/libexec/path_helper`. You might have `/etc/zprofile.orig` instead.
+
+I suspect this is related with [this](https://github.com/LnL7/nix-darwin/pull/286).
+
+#### 3. `zsh compinit: insecure directories, run compaudit for list.`
 
 The mentioned directories are considered as they can be written by users that are not either the `root` or the current user ([source](http://zsh.sourceforge.net/Doc/Release/Completion-System.html##Use-of-compinit)). For this purpose, remove the rogue permissions:
 ```sh
@@ -82,8 +87,8 @@ compaudit | xargs chmod go-w
 - [Nix Darwin Docs](https://daiderd.com/nix-darwin/manual/index.html)
 - [Flakes Docs](https://nixos.wiki/wiki/Flakes)
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
-- [`hlissner`](https://github.com/hlissner/dotfiles), [`malob`](https://github.com/malob/nixpkgs) and [`kclejeune`](https://github.com/kclejeune/system) dotfiles.
+- Among many, [`hlissner`](https://github.com/hlissner/dotfiles), [`malob`](https://github.com/malob/nixpkgs) and [`kclejeune`](https://github.com/kclejeune/system) dotfiles.
 
-If you are new to dotfiles, I suggest looking for a more direct solution using a mixture of bare git repository and [`stow`](https://www.gnu.org/software/stow/) to symlink all the dotfiles. Start small and build up and let the tools work for you, not the way around :)
+If you are new to dotfiles, I suggest looking for a more direct solution using a mixture of bare git repository and [`stow`](https://www.gnu.org/software/stow/) to symlink all the dotfiles. Start small and build up and make the tools work for you :)
 
-Feel free to contact me!
+Feel free to contact me if you need help!

@@ -25,10 +25,10 @@
   ];
 
   imports = [
-    ./config/git    
+    ./config/git
     ./config/scala
     ./config/emacs
-    ./config/alacritty    
+    ./config/alacritty
     ./config/zsh
     ./config/fzf
     ./config/tmux
