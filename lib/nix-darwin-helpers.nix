@@ -1,8 +1,7 @@
-{ 
-  darwin, 
-  home-manager, 
-  darwin-additional-modules ? [],
-  ...
+{ darwin
+, home-manager
+, darwin-additional-modules ? [ ]
+, ...
 }:
 
 {

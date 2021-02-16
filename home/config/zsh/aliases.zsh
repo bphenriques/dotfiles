@@ -7,7 +7,7 @@ alias mkdir='mkdir -pv'
 grep='grep --color'
 
 # Shell
-alias reload='source $HOME/.zshenv'
+alias reload='source "$HOME"/.zshenv'
 
 # Java
 alias javals='/usr/libexec/java_home -V'

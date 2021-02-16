@@ -17,11 +17,12 @@
 
   outputs = { self, nixpkgs, darwin, darwin-malob-nixpkgs, home-manager, ... }@inputs:
     let
-      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { 
-        inherit darwin home-manager; 
-        darwin-additional-modules = [ darwin-malob-nixpkgs.darwinModules.homebrew ]; 
+      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix {
+        inherit darwin home-manager;
+        darwin-additional-modules = [ darwin-malob-nixpkgs.darwinModules.homebrew ];
       };
-    in {
+    in
+    {
       darwinConfigurations = with nixDarwinHelpers; {
         personal-macos = mkMacOSHost ./hosts/personal-macos.nix;
         work-macos = mkMacOSHost ./hosts/work-macos.nix;

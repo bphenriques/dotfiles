@@ -27,8 +27,9 @@
     "zsh/config.zsh".source              = ./config.zsh;
     "zsh/aliases.zsh".source             = ./aliases.zsh;
     "zsh/auto-completions.zsh".source    = ./auto-completions.zsh;
-    "zsh/functions".source               = ./functions;    
-    "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
+    "zsh/functions".source               = ./functions;
+
+    # Setup Zsh Plugins
     "zsh/plugins.zsh".text               = ''
       # Load Zsh Plugin Manager
       . "${pkgs.zinit}/share/zinit/zinit.zsh"       
@@ -42,5 +43,6 @@
       # Load Theme - https://github.com/romkatv/powerlevel10k
       . "$ZDOTDIR/powerlevel10k.theme.zsh"
     '';
+    "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
   };
 }

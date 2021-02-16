@@ -24,6 +24,6 @@
   ];
 
   xdg.configFile = {
-     "doom".source = ./doom;
+    "doom".source = ./doom;
   };
 }
