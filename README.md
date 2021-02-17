@@ -19,9 +19,9 @@ If you are looking for the dotfiles, they are grouped [here](home/config).
 
 ## MacOS
 
-1. Register your's machine's SSH key on Github:
+1. Register your's machine's SSH key on Github, replace `<email-address>` with your email address:
 ```sh
-$ ssh-keygen -t ed25519 -C "bphenriques@outlook.com"
+$ ssh-keygen -t ed25519 -C "<email-address>"
 $ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
 ```
 
@@ -52,7 +52,7 @@ This will update both `flake.lock` and Doom Emacs. Check if everything is stable
 
 # Troubleshooting
 
-#### 1. Fail to find `nix`, `darwin`, `brew` nor any home-manager binary.
+#### 1. Fail to find `nix` nor any home-manager binary.
 
 Make sure that you have the following in your `$ZDOTDIR/.zprofile` (here to ensure precedence):
 ```sh
