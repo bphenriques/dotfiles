@@ -8,19 +8,15 @@
     # MacOS inputs
     darwin.url = "github:lnl7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
-    darwin-malob-nixpkgs.url = "github:malob/nixpkgs"; # Remove once https://github.com/LnL7/nix-darwin/pull/262 is merged.
 
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, darwin, darwin-malob-nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix {
-        inherit darwin home-manager;
-        darwin-additional-modules = [ darwin-malob-nixpkgs.darwinModules.homebrew ];
-      };
+      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { inherit darwin home-manager; };
     in
     {
       darwinConfigurations = with nixDarwinHelpers; {
