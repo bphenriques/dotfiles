@@ -1,3 +1,15 @@
+#
+# Scala
+#
+.metals
+.ammonite
+
+#
+# Visual Code
+#
+.vscode
+
+
 # NPM
 node_modules/
 
@@ -51,10 +63,8 @@ desktop.ini
 
 # IDE files #
 #############
-.vscode
 .idea
 .iml
-*.sublime-workspace
 
 # Personal tools
 bphenriques-tools/
