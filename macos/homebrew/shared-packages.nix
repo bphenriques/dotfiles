@@ -25,5 +25,6 @@
     #android-studio             # IDE for Android projects.
     "keybase"                   # E2E encrypted vauls and chats.
     "vlc"                       # Media player.
+    "vscodium"                  # Open-Source counter-part of Microsoft Visual Studio Code
   ];
 }

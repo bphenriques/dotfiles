@@ -66,5 +66,8 @@ desktop.ini
 .idea
 .iml
 
+# Scala
+.metals
+
 # Personal tools
 bphenriques-tools/

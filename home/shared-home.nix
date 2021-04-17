@@ -32,6 +32,10 @@
     ./config/zsh
     ./config/fzf
     ./config/tmux
+    
+    # Packages I am experimenting with.
+    ./config/neovim
+    ./config/vscodium
   ];
 
   # This value determines the Home Manager release that your configuration is compatible with. This
