@@ -18,4 +18,4 @@ command -v tmux > /dev/null && [ -z "$TMUX" ] && { exec tmux new-session && exit
 
 # Should this go to zlogin file?
 # Custom Tmux initializer. Find and open project given the window name.
-[[ -v TMUX_OPEN_PROJECT ]] && proj $(tmux display-message -p '#{window_name}') && tmux rename-window -t $(tmux display-message -p '#I') "$(basename $PWD)" 
+[[ -v TMUX_OPEN_PROJECT ]] && proj --change-tmux-window-name --project "$(tmux display-message -p '#{window_name}')"
