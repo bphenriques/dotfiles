@@ -14,7 +14,7 @@ done
 . "$ZDOTDIR/auto-completions.zsh"                # Load Auto completions.
 
 # Should this go to zlogin file?
-command -v tmux > /dev/null && [ -z "$TMUX" ] && { exec tmux new-session && exit; }  # Create tmux sessions per new window.
+command -v tmux > /dev/null && [ -z "$TMUX" ] && { exec tmux new-session; exit; }  # Create independent sessions.
 
 # Should this go to zlogin file?
 # Custom Tmux initializer. Find and open project given the window name.
