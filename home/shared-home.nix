@@ -20,7 +20,7 @@
 
     # Tools I am experimenting:
     htop        # Fancy `top`.
-    bottom      # Fancy `top` with ASCII graphics. Use with `btm`.
+    # Unstable: bottom      # Fancy `top` with ASCII graphics. Use with `btm`.
     exa         # Fancy `ls`.
   ];
 
