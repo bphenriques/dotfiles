@@ -6,7 +6,7 @@
 
     # Notes:
     # - Does not unistall extensions once removed.
-    # - Update using the following: export temp=$(mktemp) && curl -s https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/misc/vscode-extensions/update_installed_exts.sh > $temp && chmod +x $temp && $temp codium
+    # - Update using the following: export temp=$(mktemp) && curl -s https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/misc/vscode-extensions/update_installed_exts.sh > $temp && chmod +x $temp && $temp $(whereis codium)
     extensions = with pkgs.vscode-extensions; [
       scalameta.metals    # Scala Language Server
       scala-lang.scala    # Scala Language
@@ -33,14 +33,14 @@
       {
         name = "foam-vscode";
         publisher = "foam";
-        version = "0.12.1";
-        sha256 = "192vgpjaxczv8j0b3az8x9nwg5aqy9aflr7hmbmdgckhs9g2xy00";
+        version = "0.13.3";
+        sha256 = "0ih2a3xl4ki6r14nwx968sg1avz43jvs59z6ijm0l7xhgqv3dl8h";
       }
       {
         name = "spellright";
         publisher = "ban";
-        version = "3.0.56";
-        sha256 = "0y0plri6z7l49h4j4q071hn7khf9j9r9h3mhz0y96xd0na4f2k3v";
+        version = "3.0.58";
+        sha256 = "07891rad3261ciaql2s6adaxmd2sm5w6z4s8r5zfldiv4wrk2370";
       }
     ];
 
