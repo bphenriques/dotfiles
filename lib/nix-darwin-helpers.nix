@@ -1,5 +1,6 @@
 { darwin
 , home-manager
+, nixpkgs
 , darwin-additional-modules ? [ ]
 , ...
 }:
@@ -14,7 +15,7 @@
       home-manager.darwinModules.home-manager
       ./enable-flakes.nix                                     # Can't be inline as the pkgs here does not include the nixFlakes attribute (unclear why).
       {
-        nixpkgs.config = { allowUnfree = true; };             # :nothing-to-see-here:
+        nixpkgs = nixpkgs;
         home-manager.useGlobalPkgs = true;                    # For consistency, use global pkgs configured via the system level nixpkgs options.        
         home-manager.useUserPackages = true;                  # Install packages defined in home-manager.
       }

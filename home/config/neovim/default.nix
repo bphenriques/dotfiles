@@ -1,7 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [ neovim ]; # Not using `enable = true;` as I manage by my own config.
+  # Using package provided by contrib@neovim/neovim Github repo
+  home.packages = with pkgs; [ neovim-nightly ];
   
   xdg.configFile = {
     "nvim/init.vim".source = ./init.vim;

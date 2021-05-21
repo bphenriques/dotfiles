@@ -12,11 +12,27 @@
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Custom
+    neovim.url = "github:neovim/neovim/4be0e92db01a502863ac4bb26dd0fee16d833145?dir=contrib";
+    neovim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { inherit darwin home-manager; };
+    overlays = with inputs; [
+        (
+          final: prev: {
+            # Additional neo-vim package provided within the neovim repository.
+            neovim-nightly = neovim.packages.${prev.stdenv.system}.neovim;
+          }
+        )
+      ];
+      nixpkgsConfig = with inputs; {
+        config = { allowUnfree = true; }; # :nothing-to-see-here:
+        overlays = overlays;
+      };
+      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
     in
     {
       darwinConfigurations = with nixDarwinHelpers; {

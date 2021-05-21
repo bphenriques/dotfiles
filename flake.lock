@@ -21,6 +21,21 @@
         "type": "github"
       }
     },
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1610051610,
+        "narHash": "sha256-U9rPz/usA1/Aohhk7Cmc2gBrEEKRzcW4nwPWMPwja4Y=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "3982c9903e93927c2164caa727cd3f6a0e6d14cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -28,11 +43,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1621417094,
-        "narHash": "sha256-Csk4p8jFUma7FtMnjEJGTPGxCOnTbb30xr8AXwrUTMM=",
+        "lastModified": 1621563835,
+        "narHash": "sha256-Btxd5nzsEDRXue/J/IjDHLJp0bNIMTYZGJ+AHPoZt78=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "3d18912f5ae7c98bd5249411d98cdf3b28fe1f09",
+        "rev": "82ab1ad46746cd05e992c02d4636177e1b55ce1f",
         "type": "github"
       },
       "original": {
@@ -41,13 +56,37 @@
         "type": "github"
       }
     },
+    "neovim": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "contrib",
+        "lastModified": 1620389233,
+        "narHash": "sha256-woFlXOU2sBHfn/k1Czb6v6Ls5ae8jd1IqiR2UZaNesA=",
+        "owner": "neovim",
+        "repo": "neovim",
+        "rev": "4be0e92db01a502863ac4bb26dd0fee16d833145",
+        "type": "github"
+      },
+      "original": {
+        "dir": "contrib",
+        "owner": "neovim",
+        "repo": "neovim",
+        "rev": "4be0e92db01a502863ac4bb26dd0fee16d833145",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1621395914,
-        "narHash": "sha256-jo4JVNxxaqY9BJ3poaKUdhNqUuU/n6Q5ksefiKIcfCk=",
+        "lastModified": 1621560542,
+        "narHash": "sha256-qGuBUXCgdytRWl+BYAVSyl4nasNDt7KFPKiaZI7E2Vc=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "761f95efa6aadb84cfd397809cb0a56a65bd5a6c",
+        "rev": "22c86a0466969819fb7bf9c7a0c65711e5f1a005",
         "type": "github"
       },
       "original": {
@@ -61,6 +100,7 @@
       "inputs": {
         "darwin": "darwin",
         "home-manager": "home-manager",
+        "neovim": "neovim",
         "nixpkgs": "nixpkgs"
       }
     }
