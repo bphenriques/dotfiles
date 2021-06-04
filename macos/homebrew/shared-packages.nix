@@ -3,6 +3,7 @@
 
   imports = [
     ./emacs-package.nix
+    ./jdk-packages.nix
   ];
 
   homebrew.taps = [
