@@ -123,7 +123,7 @@ compaudit | xargs chmod go-w
 - [Nix Darwin Docs](https://daiderd.com/nix-darwin/manual/index.html)
 - [Flakes Docs](https://nixos.wiki/wiki/Flakes)
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
-- Among many, [`hlissner`](https://github.com/hlissner/dotfiles), [`malob`](https://github.com/malob/nixpkgs) and [`kclejeune`](https://github.com/kclejeune/system) dotfiles.
+- Several dotfiles. For example [`hlissner`](https://github.com/hlissner/dotfiles), [`malob`](https://github.com/malob/nixpkgs), and [`kclejeune`](https://github.com/kclejeune/system).
 
 If you are new to dotfiles, I suggest looking for a more direct solution using a mixture of bare git repository and [`stow`](https://www.gnu.org/software/stow/) to symlink all the dotfiles. Start small and build up and make the tools work for you :)
 
