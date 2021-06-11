@@ -1,8 +1,10 @@
 
-# <type>: <subject>
-# Subject: Max. 50 Characters               ---->|
-# Content: Max. 72 Characters per line                            ---->|
-# Optional: Ticket
+# <type>: Title (Max. 50 characters)        ---->
+#
+# Start of body:
+# - What, why and how
+# - Max. 72 characters per line                                   ---->
+# - Optional Ticket
 #
 # Type can be 
 #    feat     (new feature)

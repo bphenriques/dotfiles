@@ -18,7 +18,7 @@
     imports = [ ../home/shared-home.nix ];
   };
 
-  homebrew.cleanup = "zap";     # Exclusively track homebrew modules through nix.
+  homebrew.cleanup = "none";     # To support private Homebrew formulas.
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog

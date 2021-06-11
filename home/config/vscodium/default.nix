@@ -48,13 +48,15 @@
       "window.title" = "\${activeEditorLong}\${separator}\${rootName}"; # Let me use the free space!
       "explorer.confirmDragAndDrop" = false;                            # Don't bother me when I want to drag-and-drop files.
       "editor.tabSize" = 2;                                             # Because I prefer smaller tab sizes.
-      "editor.formatOnPaste" = true;                                    # Format on paste to keep things tidier.
-      "editor.formatOnSave" = true;                                     # Format on save to keep things tidier.
+      "editor.formatOnPaste" = false;                                   # Do not mess with my code by default. Will trust automatic rules language by language.
+      "editor.formatOnSave" = false;                                    # Do not mess with my code by default. Will trust automatic rules language by language.
       "files.trimFinalNewlines" = true;                                 # Keep files trimmed.
       "files.insertFinalNewline" = true;                                # Because POSIX compliance (todo: read why is that really important, maybe to identify the last line?)
       "files.autoSave" = "onFocusChange";                               # Because I am lazy and I often source control the files.
       "workbench.editor.highlightModifiedTabs" = true;                  # Better highlight on modified tabs.
       "workbench.editor.enablePreview" = false;                         # I often prefer small files therefore I thank the extra space.
+
+      # Markdown
       "markdown.preview.scrollEditorWithPreview" = true;                # Syncronize editor with preview.
       "markdown.preview.scrollPreviewWithEditor" = true;                # Syncronize preview with editor.editor with preview.
     };
