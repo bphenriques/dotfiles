@@ -11,6 +11,8 @@
     jq          # Json Processor.
     bat         # Preview with code highlight.
     fd          # A better `find`.
+    gnupg       # To manage GNUPG keys.
+    pinentry    # To input keys.
     
     # Other tools that I use from time to time:
     httpie      # Alternative to curl. Use with `http`.

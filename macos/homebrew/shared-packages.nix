@@ -13,10 +13,8 @@
   ];
 
   homebrew.brews = [
-    "dateutils"                 # Date utilities. Not available in nix-pkgs.
+    "dateutils"                 # Date utilities. Not supported currently by nix-pkgs.
     "plumber"                   # Useful utility for messaging queues.
-    "gnupg2"                    # GPG. Consider using the one in nixpkgs.
-    "pinentry-mac"              # GPG.
   ];
   
   homebrew.casks = [
