@@ -8,7 +8,7 @@ SCRIPT_PATH="$(dirname "$0")"
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 
 info 'Nix Flake - Upgrading...'
-nix flake update --recreate-lock-file
+nix flake update
 success 'Nix Flake - Complete!'
 
 info 'Doom Emacs - Upgrading...'

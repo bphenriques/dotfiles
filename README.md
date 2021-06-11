@@ -43,7 +43,7 @@ $ mkdir -p "$HOME"/workspace && cd "$_" && git clone git@github.com:bphenriques/
 
 3. Bootstrap the dependencies and sync the nix configuration:
 ```sh
-$ make bootstrap sync-personal-mac
+$ make bootstrap sync-<host>
 ```
 
 4. Import your public GPG key:
@@ -63,7 +63,7 @@ $ base64 -d <private-key-location> | gpg --import
 # Updating
 
 ```sh
-$ make update
+$ make update sync-<host>
 ```
 
 This will update both `flake.lock` and Doom Emacs. Check if everything is stable before commiting.
