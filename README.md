@@ -19,7 +19,7 @@ If you are looking for the regular dotfiles, check [home/config](home/config).
 
 ## MacOS
 
-If using M1:
+If using Apple Silicon Processor:
 1. Enable Rosetta:
 ```sh
 $ /usr/sbin/softwareupdate --install-rosetta --agree-to-license
