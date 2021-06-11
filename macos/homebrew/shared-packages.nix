@@ -1,6 +1,7 @@
 {
   homebrew.enable = true;
-
+  homebrew.cleanup = "zap";
+  
   imports = [
     ./emacs-package.nix
     ./jdk-packages.nix
@@ -21,11 +22,8 @@
   homebrew.casks = [
     "rectangle"                 # Window management.
     "alacritty"                 # Terminal.
-    "docker"                    # Containers.
-    "intellij-idea-ce"          # IDE for JVM projects.
-    #android-studio             # IDE for Android projects.
-    "keybase"                   # E2E encrypted vauls and chats.
     "vlc"                       # Media player.
     "vscodium"                  # Open-Source counter-part of Microsoft Visual Studio Code
+    "keybase"                   # E2E encrypted vauls and chats.
   ];
 }

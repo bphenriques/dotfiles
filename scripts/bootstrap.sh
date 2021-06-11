@@ -9,15 +9,18 @@ SCRIPT_PATH="$(dirname "$0")"
 . "$SCRIPT_PATH"/util.sh
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
+ZDOTDIR=${ZDOTDIR:-"$XDG_CONFIG_HOME/.zsh"} # Set if absent
 WORKSPACE="$HOME/workspace"
 
+mkdir -p "$ZDOTDIR"
+touch "$ZDOTDIR"/.zprofile
 install_nix() {
     info 'Nix - Checking...'
     if ! command -v nix > /dev/null; then
         info 'Nix - Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
         info 'Nix - Setting up "$ZDOTDIR/.zprofile'
+        info 'Nix - Press any key to continue (do not close the terminal)' && read -r
         append_if_absent 'test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh' "$ZDOTDIR"/.zprofile
-        info 'Nix - Press any key to continue.' && read -r
         . "$ZDOTDIR"/.zprofile
     fi
     success 'Nix - Installed!'
@@ -51,7 +54,7 @@ install_homebrew() {
 install_nix_darwin() {
     info 'Nix Darwin - Checking...'
     if ! command -v /run/current-system/sw/bin/darwin-rebuild > /dev/null; then
-        info 'Nix Darwin - Installing nix-darwin...'
+        info 'Nix Darwin - Installing nix-darwin (say yes to everything)...'
         nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
         ./result/bin/darwin-installer
     fi

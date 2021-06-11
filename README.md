@@ -15,9 +15,20 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 | [`personal-macos`](hosts/personal-macos.nix) | macOS |
 | [`work-macos`](hosts/work-macos.nix) | macOS |
 
-If you are looking for the dotfiles, they are grouped [here](home/config).
+If you are looking for the regular dotfiles, check [home/config](home/config).
 
 ## MacOS
+
+If using M1:
+1. Enable Rosetta:
+```sh
+$ /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+``` 
+2. Duplicate `Terminal` App and rename the duplicate to `Terminal (Rosetta)`.
+3. Under `Get Info`, set the application to open using Rosetta.
+4. Open Terminal Rosetta.
+
+Now the setup itself:
 
 1. Register your's machine's SSH key on Github, replace `<email-address>` with your email address:
 ```sh
@@ -35,12 +46,19 @@ $ mkdir -p "$HOME"/workspace && cd "$_" && git clone git@github.com:bphenriques/
 $ make bootstrap sync-personal-mac
 ```
 
-4. Import your personal GPG keys:
-``` sh
-$ gpg --import <key> 
+4. Import your public GPG key:
+```sh
+$ gpg --import <public-key-location>
 ```
 
-5. Reboot!
+5. Import your private GPG key:
+``` sh
+$ base64 -d <private-key-location> | gpg --import
+```
+
+**Warning**: Do not forget to delete the GPG keys.
+
+1. Reboot!
 
 # Updating
 
@@ -68,9 +86,27 @@ I suspect this is related with [this](https://github.com/LnL7/nix-darwin/pull/28
 
 #### 2. Fail to find `brew`.
 
-Make sure that `/etc/zprofile` is calling `/usr/libexec/path_helper`. You might have `/etc/zprofile.orig` instead.
+Make sure that `/etc/zprofile` is calling `/usr/libexec/path_helper` as follows:
+```sh
+if [ -x /usr/libexec/path_helper ]; then
+        eval `/usr/libexec/path_helper -s`
+fi
+```
 
-I suspect this is related with [this](https://github.com/LnL7/nix-darwin/pull/286).
+You might need to create copy `/etc/zprofile.orig` to `/etc/zprofile`:
+```sh
+$ sudo cp /etc/zprofile.orig /etc/zprofile
+```
+
+Or if it does not work, add the following:
+```sh
+CPU=$(uname -p)
+if [[ "$CPU" == "arm" ]]; then
+    eval $(/opt/homebrew/bin/brew shellenv)
+else
+    eval $(/usr/local/bin/brew shellenv)
+fi
+```
 
 #### 3. `zsh compinit: insecure directories, run compaudit for list.`
 

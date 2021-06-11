@@ -11,14 +11,13 @@
     # Host specific settings
     ../macos/dns-settings.nix
     ../macos/homebrew/personal-packages.nix
+    ../macos/homebrew/intel-cpu-only-packages.nix
   ];
 
   # Setup Home-manager
   home-manager.users.brunohenriques = {
     imports = [ ../home/shared-home.nix ];
   };
-
-  homebrew.cleanup = "none";     # To support private Homebrew formulas.
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog

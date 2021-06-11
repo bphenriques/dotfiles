@@ -8,7 +8,7 @@
   ];
 
   # Setups
-  # - Emacs GUI app has it has to be copied manually (https://github.com/d12frosted/homebrew-emacs-plus/issues/41).
+  # - Emacs GUI app has to be copied manually (https://github.com/d12frosted/homebrew-emacs-plus/issues/41).
   # - Org-Protocol
   system.activationScripts.postUserActivation.text = ''
     echo "Copying emacs-plus/Emacs.app to /Applications"
