@@ -17,7 +17,7 @@
     # Other tools that I use from time to time:
     httpie      # Alternative to curl. Use with `http`.
     ngrok       # Tunneling.
-    hugo        # Blogging.
+    hugo        # Blogging. TODO: Move to project instead.
     parallel    # Useful to parallelize tasks.
 
     # Tools I am experimenting:
@@ -45,5 +45,5 @@
   #
   # You can update Home Manager without changing this value. See the Home Manager release notes for
   # a list of state version changes in each release.
-  home.stateVersion = "21.05";
+  home.stateVersion = "21.11";
 }

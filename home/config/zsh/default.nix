@@ -5,7 +5,7 @@
     # Basic Packages
     coreutils   # Consistency across different Operating Systems.
     zsh         # The Shell.
-    vivid       # LS_COLORS generator because I refuse to use that syntax >.<
+    vivid       # LS_COLORS generator because I refuse to use the syntax >.<
 
     # Zsh Plugins.
     zinit                           # Zsh plugin manager.

@@ -3,34 +3,29 @@
 
   inputs = {
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.05";               # Default to stable for most things.
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     # MacOS inputs
     darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
+    darwin.inputs.nixpkgs.follows = "nixpkgs";                      # Ensure versions are consistent.
 
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Custom
-    neovim.url = "github:neovim/neovim/4be0e92db01a502863ac4bb26dd0fee16d833145?dir=contrib";
-    neovim.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";                # Ensure versions are consistent.
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-    overlays = with inputs; [
-        (
-          final: prev: {
-            # Additional neo-vim package provided within the neovim repository.
-            neovim-nightly = neovim.packages.${prev.stdenv.system}.neovim;
-          }
-        )
-      ];
       nixpkgsConfig = with inputs; {
-        config = { allowUnfree = true; }; # :nothing-to-see-here:
-        overlays = overlays;
+        config = { allowUnfree = true; }; # :monkey-close-eyes:
+        overlays = [
+          (
+            final: prev: {
+              unstable = nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
+            }
+          )
+        ];
       };
       nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
     in
