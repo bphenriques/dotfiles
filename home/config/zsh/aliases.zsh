@@ -6,9 +6,6 @@ alias mkdir='mkdir -pv'
 # Text Processing
 grep='grep --color'
 
-# Shell
-alias reload='source "$HOME"/.zshenv'
-
 # Java
 alias javals='/usr/libexec/java_home -V'
 alias java8='export JAVA_HOME=$(/usr/libexec/java_home -v1.8)'
