@@ -36,7 +36,6 @@
     ./config/tmux
     
     # Packages I am experimenting with.
-    ./config/neovim
     ./config/vscodium
   ];
 
