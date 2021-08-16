@@ -15,9 +15,15 @@
       home-manager.darwinModules.home-manager
       ./enable-flakes.nix                                     # Can't be inline as the pkgs here does not include the nixFlakes attribute (unclear why).
       {
+        # Nix
         nixpkgs = nixpkgs;
+
+        # Home-Manager
         home-manager.useGlobalPkgs = true;                    # For consistency, use global pkgs configured via the system level nixpkgs options.        
         home-manager.useUserPackages = true;                  # Install packages defined in home-manager.
+
+        # Nix-Darwin
+        system.stateVersion = 4;
       }
       hostModule
     ] ++ darwin-additional-modules;

@@ -23,10 +23,6 @@
     ];
   };
 
-  # Used for backwards compatibility, please read the changelog before changing.
-  # $ darwin-rebuild changelog
-  system.stateVersion = 4;
-
   # Ugly bit: This host uses Apple M1 Silicon Processor. This means that some apps have to be installed manually.
   system.activationScripts.postUserActivation.text = ''
     echo
