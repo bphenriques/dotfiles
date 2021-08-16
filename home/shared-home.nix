@@ -22,7 +22,6 @@
 
     # Tools I am experimenting:
     htop        # Fancy `top`.
-    # Unstable: bottom      # Fancy `top` with ASCII graphics. Use with `btm`.
     exa         # Fancy `ls`.
   ];
 

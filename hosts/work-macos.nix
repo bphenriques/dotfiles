@@ -14,7 +14,13 @@
 
   # Setup Home-manager
   home-manager.users."brunohenriques" = {
-    imports = [ ../home/shared-home.nix ];
+    imports = [ 
+      # Shared Home Settings
+      ../home/shared-home.nix 
+
+      # Host specific
+      ../home/work.nix
+    ];
   };
 
   # Used for backwards compatibility, please read the changelog before changing.
