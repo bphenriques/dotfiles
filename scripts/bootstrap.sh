@@ -1,8 +1,12 @@
+# TODO: Check https://github.com/macalinao/dotfiles/blob/4227de3084c7abcaf1139a1b49c9c1a2472a2a6f/install.sh
+
+
 #!/bin/sh
 # shellcheck disable=SC2016,SC1091,SC1090
 #
 # Bootstraps the required dependencies for non-NixOS operating systems.
 #
+
 set -euf 
 SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
@@ -31,12 +35,15 @@ install_nix_flakes() {
     if ! nix flake check 2>/dev/null; then 
         info 'Nix Flakes - Installing...'
         nix-env -iA nixpkgs.nixFlakes
-        mkdir -p "$XDG_CONFIG_HOME"/nix && touch "$XDG_CONFIG_HOME"/nix/nix.conf
-        append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
     fi
+    mkdir -p "$XDG_CONFIG_HOME"/nix && touch "$XDG_CONFIG_HOME"/nix/nix.conf
+    append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
     success 'Nix Flakes - Installed!'
 }
 
+# TODO: Check if Apple Silicon and install that as well
+## arch --arm64 zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+## arch --x86_64 zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 install_homebrew() {
     info 'Homebrew - Checking...'
     if ! command -v brew > /dev/null; then

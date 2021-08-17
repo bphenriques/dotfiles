@@ -7,7 +7,7 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     # MacOS inputs
-    darwin.url = "github:lnl7/nix-darwin/master";
+    darwin.url = "github:bphenriques/nix-darwin/pass-system";       # Keep while https://github.com/LnL7/nix-darwin/issues/319 is not fixed.
     darwin.inputs.nixpkgs.follows = "nixpkgs";                      # Ensure versions are consistent.
 
     # Home inputs
@@ -23,6 +23,7 @@
           (
             final: prev: {
               unstable = nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
+              x86-pkgs = nixpkgs-unstable.legacyPackages.x86_64-darwin; # Make available intel packages
             }
           )
         ];

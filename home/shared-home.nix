@@ -13,11 +13,11 @@
     fd          # A better `find`.
     gnupg       # To manage GNUPG keys.
     pinentry    # To input keys.
-    
+
     # Other tools that I use from time to time:
     httpie      # Alternative to curl. Use with `http`.
-    ngrok       # Tunneling.
-    hugo        # Blogging. TODO: Move to project instead.
+    # x86-pkgs.ngrok       # Tunneling. FIXME: Doesn't support Apple Silicon
+    hugo        # Blogging. FIXME: Move to project instead.
     parallel    # Useful to parallelize tasks.
 
     # Tools I am experimenting:
@@ -33,15 +33,10 @@
     ./config/zsh
     ./config/fzf
     ./config/tmux
-    
+
     # Packages I am experimenting with.
-    ./config/vscodium
+    # ./config/vscodium
   ];
 
-  # This value determines the Home Manager release that your configuration is compatible with. This
-  # helps avoid breakage when a new Home Manager release introduces backwards incompatible changes.
-  #
-  # You can update Home Manager without changing this value. See the Home Manager release notes for
-  # a list of state version changes in each release.
-  home.stateVersion = "21.11";
+  home.stateVersion = "21.05";
 }

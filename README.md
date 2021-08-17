@@ -19,15 +19,6 @@ If you are looking for the regular dotfiles, check [home/config](home/config).
 
 ## MacOS
 
-If using Apple Silicon Processor:
-1. Enable Rosetta:
-```sh
-$ /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-``` 
-2. Duplicate `Terminal` App and rename the duplicate to `Terminal (Rosetta)`.
-3. Under `Get Info`, set the application to open using Rosetta.
-4. Open Terminal Rosetta.
-
 Now the setup itself:
 
 1. Register your's machine's SSH key on Github, replace `<email-address>` with your email address:
@@ -41,24 +32,29 @@ $ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings
 $ mkdir -p "$HOME"/workspace && cd "$_" && git clone git@github.com:bphenriques/dotfiles.git && cd dotfiles
 ```
 
-3. Bootstrap the dependencies and sync the nix configuration:
+3. Bootstrap the dependencies:
 ```sh
 $ make bootstrap sync-<host>
 ```
 
-4. Import your public GPG key:
+4. Apply flake:
+```sh
+$ make sync-<host>
+```
+
+5. Import your public GPG key:
 ```sh
 $ gpg --import <public-key-location>
 ```
 
-5. Import your private GPG key:
+6. Import your private GPG key:
 ``` sh
 $ base64 -d <private-key-location> | gpg --import
 ```
 
 **Warning**: Do not forget to delete the GPG keys.
 
-1. Reboot!
+Reboot!
 
 # Updating
 
@@ -67,6 +63,29 @@ $ make update sync-<host>
 ```
 
 This will update both `flake.lock` and Doom Emacs. Check if everything is stable before commiting.
+
+# Uninstall
+
+## MacOS
+1. Remove [nix-darwin](https://github.com/LnL7/nix-darwin#uninstalling).
+2. `rm -rf $HOME/{.nix-channels,.nix-defexpr,.nix-profile,.config/nixpkgs}`
+3. Reboot.
+4. (MacOS): On Disk Utility, unmount Nix Storage
+5. Remove Nix Storage
+6. Check that `/etc/synthetic.conf` does not contain Nix. If so, remove it. Reboot.
+7. `sudo rm -rf /nix`
+
+If on multi-user installation:
+```
+for num in {1..32}; do sudo dscl . -delete /Users/nixbld$num; done
+sudo dscl . -delete /Groups/nixbld
+```
+
+Sources:
+- https://github.com/NixOS/nix/issues/1402
+- https://gist.github.com/expelledboy/c00aebb004b178cf78b2c9b344526ff6
+
+Brew tip: Remove everything from brew: `brew list | xargs brew uninstall --force`
 
 # Troubleshooting
 
