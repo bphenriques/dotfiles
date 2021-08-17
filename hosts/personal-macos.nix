@@ -14,6 +14,9 @@
     ../macos/homebrew/intel-cpu-only-packages.nix
   ];
 
+  # Intel CPU
+  homebrew.brewPrefix = "/usr/local/bin"
+
   # Setup Home-manager
   home-manager.users.brunohenriques = {
     imports = [ ../home/shared-home.nix ];

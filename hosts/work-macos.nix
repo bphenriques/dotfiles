@@ -12,6 +12,9 @@
     ../macos/homebrew/work-packages.nix
   ];
 
+  # Apple Silicon
+  homebrew.brewPrefix = "/opt/homebrew/bin";
+
   # Setup Home-manager
   home-manager.users."brunohenriques" = {
     imports = [ 
