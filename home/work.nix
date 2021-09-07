@@ -4,7 +4,7 @@
   home.packages = with pkgs; [
     google-cloud-sdk
     awscli
-    terraform
+    unstable.terraform
     python39Full
   ];
 }
