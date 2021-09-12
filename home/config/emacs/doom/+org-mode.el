@@ -1,4 +1,4 @@
-;;; ../../Documents/repos/dotfiles/emacs/.config/doom/+org-mode.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
 (after! org
   (setq

@@ -1,4 +1,4 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
 (setq user-full-name "Bruno Henriques"
       user-mail-address "4727729+bphenriques@users.noreply.github.com")

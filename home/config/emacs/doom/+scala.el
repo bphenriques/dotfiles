@@ -1,4 +1,4 @@
-;;; ../../Documents/repos/dotfiles/emacs/.config/doom/+scala.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
 (require 'ob-ammonite)
 

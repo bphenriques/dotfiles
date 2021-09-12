@@ -1,4 +1,4 @@
-;;; ~/Documents/repos/workspace/emacs/.config/doom/+macos.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
 ;; Fix MacOS
 (setq mac-option-key-is-meta t)

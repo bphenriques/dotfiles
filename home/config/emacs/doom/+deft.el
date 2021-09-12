@@ -1,4 +1,4 @@
-;;; ../../Documents/repos/dotfiles/emacs/.config/doom/+deft.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
 (setq
  deft-directory "~/workspace/knowledge-base/org"
