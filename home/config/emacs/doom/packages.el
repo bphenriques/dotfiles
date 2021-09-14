@@ -2,10 +2,10 @@
 ;;; $DOOMDIR/packages.el
 
 (package! ox-hugo
-  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "a86ea7ed782f3e04f67329f95109749ad231c60a")
+  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "1b8f2627cd63ac21b84c5abe3d5b607bc778670a")
 
 (package! org-roam
-  :recipe (:host github :repo "org-roam/org-roam") :pin "b0fd12647b94ba6e3cf82a2a5b1ee7655ac07760")
+  :recipe (:host github :repo "org-roam/org-roam") :pin "9065f6a999b98d4b495e3d8fa1fa4424eddd25a8")
 
 (package! org-roam-server
-  :recipe (:host github :repo "org-roam/org-roam-server") :pin "2093ea5a1a1f2d128dd377778472a481913717b4")
+  :recipe (:host github :repo "org-roam/org-roam-server") :pin "a207ecd36e29dad55eb66431f041e39144130ee5")
