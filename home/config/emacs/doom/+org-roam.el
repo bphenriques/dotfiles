@@ -7,6 +7,9 @@
  org-knowledge-base-directory (concat (file-name-as-directory org-knowledge-base-repository) "org")
  org-knowledge-base-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-entry.org")
 
+ ; Ox-Hugo
+ org-hugo-base-dir org-knowledge-base-repository
+
  ; Org-roam set globally to take notes anywhere.
  ; - Due to https://github.com/org-roam/org-roam-server/issues/8 org-roam-server does not respect .dir-locals.el
  org-roam-directory org-knowledge-base-directory
