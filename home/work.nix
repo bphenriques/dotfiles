@@ -5,6 +5,5 @@
     google-cloud-sdk
     awscli
     unstable.terraform
-    python39Full
   ];
 }

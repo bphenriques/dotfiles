@@ -21,7 +21,5 @@
     "rectangle"                 # Window management.
     "alacritty"                 # Terminal.
     "vlc"                       # Media player.
-    "vscodium"                  # Open-Source counter-part of Microsoft Visual Studio Code
-    "keybase"                   # E2E encrypted vauls and chats.
   ];
 }

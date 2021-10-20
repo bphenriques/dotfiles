@@ -32,6 +32,7 @@
     echo "Using Apple Silicon requires some apps to be manually installed:"
     echo "Manually install Docker: https://docs.docker.com/docker-for-mac/apple-silicon/"
     echo "Manually install IntelliJ: https://www.jetbrains.com/idea/download/#section=mac"
+    echo "Manually instal pyenv: /usr/local/bin/brew install pyenv"
     echo
   '';
 }

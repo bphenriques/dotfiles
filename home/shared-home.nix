@@ -32,10 +32,7 @@
     ./config/alacritty
     ./config/zsh
     ./config/fzf
-    ./config/tmux
-    
-    # Packages I am experimenting with.
-    ./config/vscodium
+    ./config/tmux    
   ];
 
 
