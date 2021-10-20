@@ -34,5 +34,9 @@
         personal-macos = mkMacOSHost ./hosts/personal-macos.nix;
         work-macos = mkMacOSHost ./hosts/work-macos.nix;
       };
+
+      # Handy aliases 
+      work-macos     = self.darwinConfigurations.work-macos.system;
+      personal-macos = self.darwinConfigurations.personal-macos.system;
     };
 }
