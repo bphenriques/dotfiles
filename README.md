@@ -37,51 +37,58 @@ $ echo <host> >> $HOME/.dotfiles/.host
 If using Apple Silicon Processor:
 1. Enable Rosetta:
 ```sh
-$ /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-``` 
-2. Duplicate `Terminal` App and rename the duplicate to `Terminal (Rosetta)`.
-3. Under `Get Info`, set the application to open using Rosetta.
-4. Open Terminal Rosetta.
-
-Now the setup itself:
-
-1. Register your's machine's SSH key on Github, replace `<email-address>` with your email address:
-```sh
-$ ssh-keygen -t ed25519 -C "<email-address>"
-$ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
+$ ssh-keygen -t ed25519 -C "4727729+bphenriques@users.noreply.github.com>"
 ```
 
-2. Clone the repository:
+2. Import the SSH-Key to Github:
+
+   If MacOS:
+   ```sh
+   $ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
+   ```
+
+   If Linux:
+   ```sh
+   $ (cat "$HOME"/.ssh/id_ed25519.pub | xclip -selection clipboard) && xdg-open https://github.com/settings/ssh/new
+   ```
+   
+4. Clone the repository:
 ```sh
 $ git clone git@github.com:bphenriques/dotfiles.git && "$HOME/dotfiles" && mv $HOME/dotfiles $HOME/.dotfiles
 ```
 
-3. Bootstrap the dependencies and sync the nix configuration:
+5. Setup `.host` file with a single line containing the id of the host:
 ```sh
-$ make bootstrap sync-<host>
+$ git clone git@github.com:bphenriques/dotfiles.git && "$HOME/dotfiles" && mv $HOME/dotfiles $HOME/.dotfiles
 ```
 
-4. Import your public GPG key:
+6. Bootstrap
 ```sh
-$ gpg --import <public-key-location>
+$ make bootstrap
 ```
 
-5. Import your private GPG key:
-``` sh
-$ base64 -d <private-key-location> | gpg --import
+7. Sync flake
+```sh
+$ make sync
+```
+
+8. Export your public and private keys and import them:
+```sh
+$ cat public.pgp  | pgp --import
+$ cat private.pgp | pgp --import
 ```
 
 **Warning**: Do not forget to delete the GPG keys.
 
-1. Reboot!
+9. Reboot!
 
 # Updating
 
 ```sh
-$ make update sync-<host>
+$ make update
 ```
 
-This will update both `flake.lock` and Doom Emacs. Check if everything is stable before commiting.
+This will update both `flake.lock` and Doom Emacs. Check if everything is stable before committing.
 
 # Troubleshooting
 

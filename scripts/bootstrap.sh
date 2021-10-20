@@ -11,6 +11,7 @@ SCRIPT_PATH="$(dirname "$0")"
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 ZDOTDIR=${ZDOTDIR:-"$XDG_CONFIG_HOME/.zsh"} # Set if absent
 WORKSPACE="$HOME/workspace"
+SSH_KEY_EMAIL_ADDRESS="4727729+bphenriques@users.noreply.github.com"
 
 mkdir -p "$ZDOTDIR"
 touch "$ZDOTDIR"/.zprofile
@@ -38,6 +39,9 @@ install_nix_flakes() {
 }
 
 install_homebrew() {
+    if
+
+
     info 'Homebrew - Checking...'
     if ! command -v brew > /dev/null; then
         info 'Homebrew - Installing...'
@@ -70,13 +74,34 @@ clone_default_repos() {
     success 'Cloning Repos - finished!'
 }
 
+setup_ssh() {
+  info 'SSH Key - Checking...'
+  if [ ! -f "$HOME"/.ssh/id_ed25519.pub ]; then
+    info 'SSH Key - Setting it up!'
+    ssh-keygen -t ed25519 -C "$SSH_KEY_EMAIL_ADDRESS"
+    cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
+  fi
+  info 'SSH Key - finished!'
+}
+
+set_unix_alias() {
+  # Depends whether which option is available
+  # alias pbcopy='xsel --clipboard --input'
+  # alias pbpaste='xsel --clipboard --output'
+  # alias pbcopy='xclip -selection clipboard'
+  # alias pbpaste='xclip -selection clipboard -o'
+  alias open='xdg-open'
+}
+
+setup_ssh
 install_nix
 install_nix_flakes
 case "$(uname -s)" in
     Darwin)     install_nix_darwin
                 install_homebrew
                 ;;
-   *)           ;;
+   *)           set_unix_alias
+                ;;
 esac
 clone_default_repos
 
