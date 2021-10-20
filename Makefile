@@ -1,3 +1,5 @@
+HOST_TARGET := $(shell cat $(CURDIR)/.host)
+
 # Installs all the required dependencies.
 .PHONY: bootstrap
 bootstrap:
@@ -22,20 +24,12 @@ update: doctor
 #    Main Targets      #
 ########################
 
-.PHONY: sync-personal-macos
-sync-personal-macos: doctor
+.PHONY: sync
+sync: doctor
 	# Building...
-	@nix build .#personal-macos
+	@echo "Syncing $(HOST_TARGET)"
+	@nix build .#$(HOST_TARGET)
 	# Applying...
-	@$(CURDIR)/result/sw/bin/darwin-rebuild switch --flake .#personal-macos
-	# Syncing Doom Emacs...
-	@$(CURDIR)/scripts/sync-doom-emacs.sh
-
-.PHONY: sync-work-macos
-sync-work-macos: doctor
-	# Building...
-	@nix build .#work-macos
-	# Applying...
-	@$(CURDIR)/result/sw/bin/darwin-rebuild switch --flake .#work-macos
+	@$(CURDIR)/result/sw/bin/darwin-rebuild switch --flake .#$(HOST_TARGET)
 	# Syncing Doom Emacs...
 	@$(CURDIR)/scripts/sync-doom-emacs.sh

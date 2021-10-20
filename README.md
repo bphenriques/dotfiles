@@ -15,7 +15,22 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 | [`personal-macos`](hosts/personal-macos.nix) | macOS |
 | [`work-macos`](hosts/work-macos.nix) | macOS |
 
-If you are looking for the regular dotfiles, check [home/config](home/config).
+1. Register your's machine's SSH key on Github:
+```sh
+$ ssh-keygen -t ed25519 -C "4727729+bphenriques@users.noreply.github.com>"
+$ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
+```
+
+2. Clone the repository:
+```sh
+$ git clone git@github.com:bphenriques/dotfiles.git && "$HOME/dotfiles" && mv $HOME/dotfiles $HOME/.dotfiles
+```
+
+1. Setup `.nix-host` file with a single line containing the id of the host:
+```sh
+$ echo <host> >> $HOME/.dotfiles/.host
+```
+
 
 ## MacOS
 
@@ -38,7 +53,7 @@ $ (cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings
 
 2. Clone the repository:
 ```sh
-$ mkdir -p "$HOME"/workspace && cd "$_" && git clone git@github.com:bphenriques/dotfiles.git && cd dotfiles
+$ git clone git@github.com:bphenriques/dotfiles.git && "$HOME/dotfiles" && mv $HOME/dotfiles $HOME/.dotfiles
 ```
 
 3. Bootstrap the dependencies and sync the nix configuration:
