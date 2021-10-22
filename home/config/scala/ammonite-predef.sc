@@ -1,1 +1,20 @@
 repl.prompt() = "scala>"
+
+object load {
+  def fs2Version(version: String) = {
+    repl.load.apply(s"""
+      import $$ivy.`co.fs2::fs2-core:$version`
+      import $$ivy.`co.fs2::fs2-reactive-streams:$version`
+      import $$ivy.`co.fs2::fs2-io:$version`
+
+      import cats.implicits._
+      import cats.syntax.all._
+      import cats.effect.{IO, Resource}
+
+      // For unsafeRunSync
+      implicit val runtime = cats.effect.unsafe.IORuntime.global
+    """)
+  }
+
+  def fs2 = fs2Version("3.1.6")
+}
