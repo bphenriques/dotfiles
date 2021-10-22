@@ -35,6 +35,5 @@
     ./config/tmux    
   ];
 
-
   home.stateVersion = "21.05";
 }

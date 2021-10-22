@@ -15,7 +15,7 @@
   ];
 
   # Intel CPU
-  homebrew.brewPrefix = "/usr/local/bin"
+  homebrew.brewPrefix = "/usr/local/bin";
 
   # Setup Home-manager
   home-manager.users.brunohenriques = {
