@@ -1,30 +1,57 @@
 #!/bin/sh
-# shellcheck disable=SC2016,SC1091,SC1090
+# shellcheck disable=SC2016,SC1091,SC1090,SC2002
 #
 # Bootstraps the required dependencies for non-NixOS operating systems.
 #
-set -euf 
-SCRIPT_PATH="$(dirname "$0")"
-# shellcheck source=util.sh
-. "$SCRIPT_PATH"/util.sh
+set -euf
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
-ZDOTDIR=${ZDOTDIR:-"$XDG_CONFIG_HOME/.zsh"} # Set if absent
-WORKSPACE="$HOME/workspace"
-SSH_KEY_EMAIL_ADDRESS="4727729+bphenriques@users.noreply.github.com"
 
-mkdir -p "$ZDOTDIR"
-touch "$ZDOTDIR"/.zprofile
-install_nix() {
-    info 'Nix - Checking...'
-    if ! command -v nix > /dev/null; then
-        info 'Nix - Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
-        info 'Nix - Setting up "$ZDOTDIR/.zprofile'
-        info 'Nix - Press any key to continue (do not close the terminal)' && read -r
-        append_if_absent 'test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh' "$ZDOTDIR"/.zprofile
-        . "$ZDOTDIR"/.zprofile
-    fi
-    success 'Nix - Installed!'
+# Utility methods
+info() {
+    # shellcheck disable=SC2059
+    printf '\r  [ \033[00;34m..\033[0m ] %s\n' "$1"
+}
+
+success() {
+    # shellcheck disable=SC2059
+    printf '\r\033[2K  [ \033[00;32mOK\033[0m ] %s\n' "$1"
+}
+
+warn() {
+    # shellcheck disable=SC2059
+    printf '\r\033[2K  [ \033[00;33mWARN\033[0m ] %s\n' "$1"
+}
+
+fail() {
+    # shellcheck disable=SC2059
+    printf '\r\033[2K  [\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2 # Redirect to stderror
+    exit 1
+}
+
+press_to_continue() {
+  info 'Press any key to continue' && read -r <&1
+}
+
+append_if_absent() {
+    line="$1"
+    file="$2"
+
+    # Append if absent
+    touch "$file"
+    grep -qF -- "$line" "$file" || echo "$line" >> "$file"
+}
+
+WORKSPACE="$HOME/workspace"
+DOTFILES_LOCATION="$HOME"/.dotfiles
+HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
+
+SSH_KEY_EMAIL_ADDRESS="4727729+bphenriques@users.noreply.github.com"
+SSH_KEY_LOCATION="$HOME"/.ssh/id_ed25519.pub
+SSH_TYPE=ed25519
+
+check_requirements() {
+  (command -v nix > /dev/null && success 'Nix - Installed!') || fail 'Nix is not installed. Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
 }
 
 install_nix_flakes() {
@@ -32,16 +59,13 @@ install_nix_flakes() {
     if ! nix flake check 2>/dev/null; then 
         info 'Nix Flakes - Installing...'
         nix-env -iA nixpkgs.nixFlakes
-        mkdir -p "$XDG_CONFIG_HOME"/nix && touch "$XDG_CONFIG_HOME"/nix/nix.conf
+        mkdir -p "$XDG_CONFIG_HOME"/nix
         append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
     fi
     success 'Nix Flakes - Installed!'
 }
 
 install_homebrew() {
-    if
-
-
     info 'Homebrew - Checking...'
     if ! command -v brew > /dev/null; then
         info 'Homebrew - Installing...'
@@ -71,30 +95,53 @@ clone_default_repos() {
         info 'Cloning Repos - Knowledge Base...'
         git clone git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
     fi
+
+    if [ ! -d "$DOTFILES_LOCATION" ]; then
+        info 'Cloning Repos - dotfiles...'
+        # Unfortunately, can't create the hidden folder directly.
+        tmp=$(mktmp -d)
+        git clone git@github.com:bphenriques/dotfiles.git "$tmp" && mv "$tmp" "$DOTFILES_LOCATION"
+    fi
     success 'Cloning Repos - finished!'
 }
 
 setup_ssh() {
   info 'SSH Key - Checking...'
-  if [ ! -f "$HOME"/.ssh/id_ed25519.pub ]; then
+  if [ ! -f "$SSH_KEY_LOCATION" ]; then
     info 'SSH Key - Setting it up!'
-    ssh-keygen -t ed25519 -C "$SSH_KEY_EMAIL_ADDRESS"
-    cat "$HOME"/.ssh/id_ed25519.pub | pbcopy) && open https://github.com/settings/ssh/new
+    ssh-keygen -t $SSH_TYPE -C "$SSH_KEY_EMAIL_ADDRESS"
+    (cat "$SSH_KEY_LOCATION" | pbcopy) && open https://github.com/settings/ssh/new && press_to_continue
   fi
-  info 'SSH Key - finished!'
+  success 'SSH Key - Done!'
+  # Probably wait for prompt here...
 }
 
 set_unix_alias() {
-  # Depends whether which option is available
-  # alias pbcopy='xsel --clipboard --input'
-  # alias pbpaste='xsel --clipboard --output'
-  # alias pbcopy='xclip -selection clipboard'
-  # alias pbpaste='xclip -selection clipboard -o'
+  alias pbcopy='xclip -selection clipboard'
   alias open='xdg-open'
 }
 
+select_host() {
+  info 'Nix Host Type - Checking...'
+
+  if [ ! -f "$HOST_FILE_LOCATION" ]; then
+    info 'Nix Host Type - Setting up...'
+    nix_host=
+
+    # shellcheck disable=SC2039
+    select nix_host in $(find "$DOTFILES_LOCATION/hosts/" -type f -name '*.nix' -print0 | xargs -0 -I % basename % .nix );
+    do
+       test -n "$nix_host" && break
+       warn "Invalid host!"
+    done
+    printf '%s' "$nix_host" >> "$HOST_FILE_LOCATION"
+  fi
+  success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
+}
+
+check_requirements
+
 setup_ssh
-install_nix
 install_nix_flakes
 case "$(uname -s)" in
     Darwin)     install_nix_darwin
@@ -104,5 +151,6 @@ case "$(uname -s)" in
                 ;;
 esac
 clone_default_repos
+select_host
 
-success 'Bootstrap - Complete! Restart your terminal!' && read -r
+success 'Bootstrap - Complete! Restart your terminal!'

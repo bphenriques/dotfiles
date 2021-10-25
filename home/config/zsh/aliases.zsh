@@ -13,3 +13,6 @@ alias java11='export JAVA_HOME=$(/usr/libexec/java_home -v11)'
 
 # Nix
 alias nix-cleanup='nix-collect-garbage -d --delete-older-than 30d'
+
+# Shortcuts
+alias dotfiles='cd $HOME"/.dotfiles'

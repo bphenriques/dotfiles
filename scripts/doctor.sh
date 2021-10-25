@@ -7,12 +7,14 @@ SCRIPT_PATH="$(dirname "$0")"
 
 # Set if absent.
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
+HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 
 (command -v nix > /dev/null && success 'Nix - Installed!') || fail 'Nix - Not installed!'
 (command -v nix flake check > /dev/null && success 'Nix flake - Installed!') || fail 'Nix flake - Not installed!'
-
 case "$(uname -s)" in
     Darwin)     (command -v brew > /dev/null && success 'Homebrew - Installed!') || fail 'Homebrew - Not installed!'
                 ;;
    *)           ;;
 esac
+
+(test -f "$HOST_FILE_LOCATION" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail 'Nix Host - Not Set!'
