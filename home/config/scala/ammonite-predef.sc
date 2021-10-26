@@ -10,6 +10,8 @@ object load {
       import cats.implicits._
       import cats.syntax.all._
       import cats.effect.{IO, Resource}
+      import fs2.io.file.{Files, Path}
+      import fs2.{Stream, text}
 
       // For unsafeRunSync
       implicit val runtime = cats.effect.unsafe.IORuntime.global
