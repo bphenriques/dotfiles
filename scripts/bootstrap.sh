@@ -30,7 +30,9 @@ fail() {
 }
 
 press_to_continue() {
-  info 'Press any key to continue' && read -r <&1
+  info 'Press any key to continue'
+  # shellcheck disable=SC2162
+  read _
 }
 
 append_if_absent() {
