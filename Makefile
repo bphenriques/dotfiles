@@ -17,6 +17,10 @@ update: doctor
 doctor:
 	@$(CURDIR)/scripts/doctor.sh
 
+.PHONY: test
+test:
+	nix flake check
+
 # Runs static analysis
 .PHONY: lint
 lint:
