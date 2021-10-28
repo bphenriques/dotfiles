@@ -17,12 +17,12 @@
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-      nixpkgsConfig = with inputs; {
+      nixpkgsConfig = {
         config = { allowUnfree = true; }; # :monkey-close-eyes:
         overlays = [
           (
             final: prev: {
-              unstable = nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
+              unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
             }
           )
         ];
@@ -35,8 +35,22 @@
         work-macos = mkMacOSHost ./hosts/work-macos.nix;
       };
 
+      homeManagerConfigurations = {
+        ubuntu-vm = home-manager.lib.homeManagerConfiguration {
+            system = "x86_64-linux";
+            homeDirectory = "/home/bphenriques";
+            username = "bphenriques";
+            stateVersion = "21.05";
+            configuration = { pkgs, ... }: {
+                imports = [ ./home/shared-home.nix ];
+                nixpkgs = nixpkgsConfig;
+            };
+        };
+      };
+
       # Handy aliases 
       work-macos     = self.darwinConfigurations.work-macos.system;
       personal-macos = self.darwinConfigurations.personal-macos.system;
+      ubuntu-vm      = self.homeManagerConfigurations.ubuntu-vm.activationPackage;
     };
 }
