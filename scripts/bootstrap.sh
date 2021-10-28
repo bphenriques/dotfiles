@@ -58,7 +58,7 @@ check_requirements() {
 
 install_nix_flakes() {
     info 'Nix Flakes - Checking...'
-    if ! nix flake check 2>/dev/null; then 
+    if ! nix flake check 2>/dev/null; then
         info 'Nix Flakes - Installing...'
         nix-env -iA nixpkgs.nixFlakes
         mkdir -p "$XDG_CONFIG_HOME"/nix
@@ -101,7 +101,7 @@ clone_default_repos() {
     if [ ! -d "$DOTFILES_LOCATION" ]; then
         info 'Cloning Repos - dotfiles...'
         # Unfortunately, can't create the hidden folder directly.
-        tmp=$(mktmp -d)
+        tmp=$(mktemp -d)
         git clone git@github.com:bphenriques/dotfiles.git "$tmp" && mv "$tmp" "$DOTFILES_LOCATION"
     fi
     success 'Cloning Repos - finished!'
