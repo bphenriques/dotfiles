@@ -22,10 +22,11 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 |-|-|
 | [`personal-macos`](hosts/personal-macos.nix) | macOS |
 | [`work-macos`](hosts/work-macos.nix) | macOS |
+| [`ubuntu-vm`](hosts/ubuntu-vm.nix) | Ubuntu |
 
 1. Run the bootstrap:
 ```sh
-$ /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/scripts/bootstrap.sh)"
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/scripts/bootstrap.sh)"
 ```
 
 2. Sync flake
