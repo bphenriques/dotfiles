@@ -18,7 +18,7 @@ sync_flake() {
   case "$(uname -s)" in
       Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
                   ;;
-      *)          fail "Unsupported operating system $(uname -s)"
+      *)          ./results/activate
                   ;;
   esac
 }

@@ -44,6 +44,8 @@
             configuration = { pkgs, ... }: {
                 imports = [ ./home/shared-home.nix ];
                 nixpkgs = nixpkgsConfig;
+
+                programs.zsh.enable = true;
             };
         };
       };

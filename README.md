@@ -31,6 +31,7 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfi
 
 2. Sync flake
 ```sh
+$ cd "$HOME"/.dotfiles
 $ make sync
 ```
 
