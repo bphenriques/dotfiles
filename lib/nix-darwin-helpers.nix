@@ -15,7 +15,14 @@
     system = "x86_64-darwin";
     modules = [
       home-manager.darwinModules.home-manager
-      ./enable-flakes.nix                                     # Can't be inline as the pkgs here does not include the nixFlakes attribute (unclear why).
+      ({ pkgs, ... }:
+        {
+          nix = {
+            package = pkgs.nixFlakes;
+            extraOptions = "experimental-features = nix-command flakes";
+          };
+        }
+      )
       {
         # Nix
         nixpkgs = nixpkgs;
