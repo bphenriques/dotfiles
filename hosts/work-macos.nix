@@ -3,13 +3,8 @@
 { 
   # MacOS specific settings
   imports = [
-    # Shared Settings
-    ../macos/shared-settings.nix
-    ../macos/shared-fonts.nix
-    ../macos/homebrew/shared-packages.nix
-
-    # Host specific settings
-    ../macos/homebrew/work-packages.nix
+    ../macos/common.nix
+    ../macos/work.nix
   ];
 
   # Apple Silicon
@@ -19,7 +14,7 @@
   home-manager.users."brunohenriques" = {
     imports = [ 
       # Shared Home Settings
-      ../home/shared-home.nix 
+      ../home/common.nix
 
       # Host specific
       ../home/work.nix

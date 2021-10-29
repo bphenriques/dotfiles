@@ -1,11 +1,11 @@
 {
-  homebrew.enable = true;
-  
-  homebrew.taps = [ "d12frosted/emacs-plus" ];
-  homebrew.brews = [
-    "emacs-plus"    # Emacs itself.
-    "pngpaste"      # org-download dependency in MacOS.
-  ];
+  homebrew = {
+    taps = [ "d12frosted/emacs-plus" ];
+    brews = [
+      "emacs-plus"    # Emacs itself.
+      "pngpaste"      # org-download dependency in MacOS.
+    ];
+  };
 
   # Setups
   # - Emacs GUI app has to be copied manually (https://github.com/d12frosted/homebrew-emacs-plus/issues/41).

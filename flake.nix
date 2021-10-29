@@ -27,26 +27,19 @@
           )
         ];
       };
-      nixDarwinHelpers = import ./lib/nix-darwin-helpers.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
+      macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
+      hmLib = import ./lib/home-manager.nix { inherit home-manager; nixpkgs=nixpkgsConfig; };
     in
     {
-      darwinConfigurations = with nixDarwinHelpers; {
+      darwinConfigurations = with macosLib; {
         personal-macos = mkMacOSHost ./hosts/personal-macos.nix;
         work-macos = mkMacOSHost ./hosts/work-macos.nix;
       };
 
-      homeManagerConfigurations = {
-        ubuntu-vm = home-manager.lib.homeManagerConfiguration {
-            system = "x86_64-linux";
-            homeDirectory = "/home/bphenriques";
+      homeManagerConfigurations = with hmLib; {
+        ubuntu-vm = mkHMHost {
             username = "bphenriques";
-            stateVersion = "21.05";
-            configuration = { pkgs, ... }: {
-                imports = [ ./home/shared-home.nix ];
-                nixpkgs = nixpkgsConfig;
-
-                programs.zsh.enable = true;
-            };
+            homeConfig = ./hosts/ubuntu-vm.nix;
         };
       };
 

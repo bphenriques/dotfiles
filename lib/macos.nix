@@ -16,16 +16,14 @@
       home-manager.darwinModules.home-manager
       ({ pkgs, ... }:
         {
-          nix = {
-            package = pkgs.nixFlakes;
-            extraOptions = "experimental-features = nix-command flakes";
-          };
+          nix.package = pkgs.nixFlakes;
+          nix.extraOptions = "experimental-features = nix-command flakes";
         }
       )
       {
         nixpkgs = nixpkgs;
-        home-manager.useGlobalPkgs = true;                    # For consistency, use global pkgs configured via the system level nixpkgs options.
-        home-manager.useUserPackages = true;                  # Install packages defined in home-manager.
+        home-manager.useGlobalPkgs = true;      # For consistency, use global pkgs configured via the system level nixpkgs options.
+        home-manager.useUserPackages = true;    # Install packages defined in home-manager.
 
         # Nix-Darwin
         system.stateVersion = 4;
