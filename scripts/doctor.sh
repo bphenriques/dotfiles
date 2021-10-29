@@ -10,7 +10,7 @@ XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 
 (command -v nix > /dev/null && success 'Nix - Installed!') || fail 'Nix - Not installed!'
-(command -v nix flake check > /dev/null && success 'Nix flake - Installed!') || fail 'Nix flake - Not installed!'
+(command -v nix flake show templates > /dev/null && success 'Nix flake - Installed!') || fail 'Nix flake - Not installed!'
 case "$(uname -s)" in
     Darwin)     (command -v brew > /dev/null && success 'Homebrew - Installed!') || fail 'Homebrew - Not installed!'
                 ;;

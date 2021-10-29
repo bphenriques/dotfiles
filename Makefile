@@ -19,7 +19,7 @@ doctor:
 
 .PHONY: test
 test:
-	nix flake check
+	@nix flake check
 
 # Runs static analysis
 .PHONY: lint

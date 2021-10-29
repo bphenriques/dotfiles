@@ -58,7 +58,7 @@ check_requirements() {
 
 install_nix_flakes() {
     info 'Nix Flakes - Checking...'
-    if ! nix flake check 2>/dev/null; then
+    if ! nix flake show templates >/dev/null; then
         info 'Nix Flakes - Installing...'
         nix-env -iA nixpkgs.nixFlakes
         mkdir -p "$XDG_CONFIG_HOME"/nix
