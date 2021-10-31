@@ -57,5 +57,5 @@
       "adoptopenjdk11"            # JDK11
     ];
   };
-  imports = [ ./emacs ];
+  imports = [ ./org-protocol ];
 }
