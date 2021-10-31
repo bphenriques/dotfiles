@@ -13,6 +13,10 @@
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";                # Ensure versions are consistent.
+
+    # Specific packages
+    ## Compiling Emacs GCC takes forever, let's pin it. Currently Emacs 29.0.50
+    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=cb54bfe99cdc0eeefbba60418690c4f42b790105";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
@@ -25,6 +29,7 @@
               unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
             }
           )
+          (import inputs.emacs-overlay)
         ];
       };
       macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
@@ -38,8 +43,8 @@
 
       homeManagerConfigurations = with hmLib; {
         ubuntu-vm = mkHMHost {
-            username = "bphenriques";
-            homeConfig = ./hosts/ubuntu-vm.nix;
+          username = "bphenriques";
+          homeConfig = ./hosts/ubuntu-vm.nix;
         };
       };
 

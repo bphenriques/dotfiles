@@ -2,6 +2,8 @@
 
 {
   home.packages = with pkgs; [
+    emacsGcc     # See options here: https://github.com/nix-community/emacs-overlay
+
     # Doom emacs dependencies
     # https://github.com/hlissner/doom-emacs
     coreutils   # Consistency across different Operating Systems.
@@ -12,7 +14,8 @@
     # Modules dependencies
     sqlite      # Org Roam.
     plantuml    # Plant UML.
-    
+
+    # For nixOS
     (makeDesktopItem {
       name = "org-protocol";
       exec = "emacsclient %u";

@@ -1,6 +1,8 @@
 {
-  homebrew.taps = [ "homebrew/cask" ];
-  homebrew.casks = [
-    "slack"             # Communication. Oh god.. you can be annoying.
-  ];
+  homebrew = {
+    taps = [ "homebrew/cask" ];
+    casks = [
+      "slack"
+    ];
+  };
 }
