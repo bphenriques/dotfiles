@@ -4,6 +4,9 @@ let
   # See options here: https://github.com/nix-community/emacs-overlay
   # https://emacs.stackexchange.com/questions/33065/on-linux-why-should-one-choose-lucid-over-gtk-gui-for-emacs
   # Still not sure if I am going to be full-blown terminal for Emacs.
+  # TODO: Review why this happens:
+  # EmacsGCC: 29.50
+  # EmacsPgtkGcc: 28.50
   emacs-package = if pkgs.stdenv.isDarwin then pkgs.emacsGcc else pkgs.emacsPgtkGcc;
 
   # Pasting images to emacs

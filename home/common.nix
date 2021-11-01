@@ -21,8 +21,10 @@
     parallel    # Useful to parallelize tasks.
 
     # Tools I am experimenting:
+    procs       # Fancy `ps`.
     htop        # Fancy `top`.
     exa         # Fancy `ls`.
+    tealdeer    # Faster `tldr`.
   ];
 
   imports = [
