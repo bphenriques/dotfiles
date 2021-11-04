@@ -22,6 +22,7 @@
   ];
 
   # Setup Home-manager
+  environment.shells = [ pkgs.zsh ];
   home-manager.users.brunohenriques = {
     imports = [ ../home/common.nix ];
   };
