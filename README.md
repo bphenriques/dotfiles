@@ -113,6 +113,10 @@ compaudit | xargs chmod go-w
     - [`malob`](https://github.com/malob/nixpkgs)
     - [`kclejeune`](https://github.com/kclejeune/system)
     - [`mitchellh`](https://github.com/mitchellh/nixos-config)
+    - [`mjlbach`](https://github.com/mjlbach/nix-dotfiles)
+    - [`sei40kr`](https://github.com/sei40kr/dotfiles)
+    - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
+    - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)
 
 If you are new to dotfiles, I suggest looking for a more direct solution using a mixture of bare git repository and [`stow`](https://www.gnu.org/software/stow/) to symlink all the dotfiles. Start small and build up and make the tools work for you :)
 
