@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 {
-  programs.zsh.enable = true;
   home.packages = with pkgs; [
     # Basic Packages
     coreutils   # Consistency across different Operating Systems.
