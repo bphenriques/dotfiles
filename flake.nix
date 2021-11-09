@@ -42,15 +42,15 @@
       };
 
       homeManagerConfigurations = with hmLib; {
-        ubuntu-vm = mkHMHost {
+        wsl = mkHMHost {
           username = "bphenriques";
-          homeConfig = ./hosts/ubuntu-vm.nix;
+          homeConfig = ./hosts/wsl.nix;
         };
       };
 
       # Handy aliases 
       work-macos     = self.darwinConfigurations.work-macos.system;
       personal-macos = self.darwinConfigurations.personal-macos.system;
-      ubuntu-vm      = self.homeManagerConfigurations.ubuntu-vm.activationPackage;
+      wsl            = self.homeManagerConfigurations.wsl.activationPackage;
     };
 }
