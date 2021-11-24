@@ -16,6 +16,7 @@
     ripgrep     # Alternative to grep.
     fzf         # Fuzzy search.
     bat         # Better file preview.
+    thefuck     # Amend previous command.
   ];
 
   # I manage my own zsh folder as I enjoy knowing what I put there.
@@ -44,5 +45,6 @@
       . "$ZDOTDIR/powerlevel10k.theme.zsh"
     '';
     "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
+    "zsh/modules/thefuck.zsh".text = ''eval $(${pkgs.thefuck}/bin/thefuck --alias)'';
   };
 }
