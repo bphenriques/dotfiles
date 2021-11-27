@@ -4,6 +4,7 @@
   home.packages = with pkgs; [
     # Basic Packages
     coreutils   # Consistency across different Operating Systems.
+    gnugrep     # Consistency across different Operating Systems.
     zsh         # The Shell.
     vivid       # LS_COLORS generator because I refuse to use the syntax >.<
 

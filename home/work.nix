@@ -5,5 +5,6 @@
     google-cloud-sdk
     awscli
     unstable.terraform
+    kubelogin-oidc
   ];
 }

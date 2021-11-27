@@ -1,7 +1,7 @@
 test -z "$WORKSPACE" && echo "Environment variable WORKSPACE is not set. Aborting!" && exit 1
 BASE_FOLDER="$WORKSPACE"
 
-function usage() {
+usage() {
    echo "proj --project <project-name> [--change-tmux-window-name]"
 }
 

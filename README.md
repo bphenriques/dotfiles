@@ -53,6 +53,11 @@ $ make update
 
 This will update both `flake.lock` and Doom Emacs. Check if everything is stable before committing.
 
+It is also possible to see the list of updated packages between Nix generations:
+```sh
+$ nix profile diff-closures --profile /nix/var/nix/profiles/system
+```
+
 # Troubleshooting
 
 #### 1. Fail to find `nix` nor any home-manager binary.
