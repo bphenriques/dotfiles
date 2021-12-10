@@ -42,7 +42,10 @@ alt_send_esc: false
 # Shortcuts
 key_bindings:
   # General Alacritty key bindings
-  - { key: Space,       mods: Alt,            chars: " "                 }  
+  - { key: Space,       mods: Alt,            chars: " "                }
+  - { key: Left,        mods: Alt,            chars: "\x1bb"            } # one word left
+  - { key: Right,       mods: Alt,            chars: "\x1bf"            } # one word right
+
   # Fixes lack of proper bindings. See
   # - https://github.com/alacritty/alacritty/issues/2017
   # - https://github.com/alacritty/alacritty/issues/623
@@ -99,23 +102,24 @@ key_bindings:
   - { key: Y,           mods: Alt|Shift,       chars: "\x1BY"           }
   - { key: Z,           mods: Alt,             chars: "\x1Bz"           }
   - { key: Z,           mods: Alt|Shift,       chars: "\x1BZ"           }
-  - { key: Key1,        mods: Alt,             chars: "\x1B1"           }
-  - { key: Key1,        mods: Alt|Shift,       chars: "\x1B!"           }
-  - { key: Key2,        mods: Alt,             chars: "\x1B2"           }
-  - { key: Key2,        mods: Alt|Shift,       chars: "\x1B#"           }
-  - { key: Key3,        mods: Alt,             chars: "\x1B3"           }
-  - { key: Key3,        mods: Alt|Shift,       chars: "\x1B#"           }
-  - { key: Key4,        mods: Alt,             chars: "\x1B4"           }
-  - { key: Key4,        mods: Alt|Shift,       chars: "\x1B$"           }
-  - { key: Key5,        mods: Alt,             chars: "\x1B5"           }
-  - { key: Key5,        mods: Alt|Shift,       chars: "\x1B%"           }
-  - { key: Key6,        mods: Alt,             chars: "\x1B6"           }
-  - { key: Key6,        mods: Alt|Shift,       chars: "\x1B^"           }
-  - { key: Key7,        mods: Alt,             chars: "\x1B7"           }
-  - { key: Key7,        mods: Alt|Shift,       chars: "\x1B&"           }
-  - { key: Key8,        mods: Alt,             chars: "\x1B8"           }
-  - { key: Key8,        mods: Alt|Shift,       chars: "\x1B*"           }
-  - { key: Key9,        mods: Alt,             chars: "\x1B9"           }
-  - { key: Key9,        mods: Alt|Shift,       chars: "\x1B("           }
-  - { key: Key0,        mods: Alt,             chars: "\x1B0"           }
-  - { key: Key0,        mods: Alt|Shift,       chars: "\x1B)"           }
+  # Worst thing about alacritty... Having to hack around the keyboard keys which is not portable at all.
+  - { key: Key1,        mods: Alt,             chars: ""           }
+  - { key: Key1,        mods: Alt|Shift,       chars: "¡"           }
+  - { key: Key2,        mods: Alt,             chars: "@"           }
+  - { key: Key2,        mods: Alt|Shift,       chars: "ﬁ"           }
+  - { key: Key3,        mods: Alt,             chars: "€"           }
+  - { key: Key3,        mods: Alt|Shift,       chars: "ﬂ"           }
+  - { key: Key4,        mods: Alt,             chars: "£"           }
+  - { key: Key4,        mods: Alt|Shift,       chars: "¢"           }
+  - { key: Key5,        mods: Alt,             chars: "‰"           }
+  - { key: Key5,        mods: Alt|Shift,       chars: "∞"           }
+  - { key: Key6,        mods: Alt,             chars: "¶"           }
+  - { key: Key6,        mods: Alt|Shift,       chars: "•"           }
+  - { key: Key7,        mods: Alt,             chars: "÷"           }
+  - { key: Key7,        mods: Alt|Shift,       chars: "⁄"           }
+  - { key: Key8,        mods: Alt,             chars: "["           }
+  - { key: Key8,        mods: Alt|Shift,       chars: "{"           }
+  - { key: Key9,        mods: Alt,             chars: "]"           }
+  - { key: Key9,        mods: Alt|Shift,       chars: "}"           }
+  - { key: Key0,        mods: Alt,             chars: "≠"           }
+  - { key: Key0,        mods: Alt|Shift,       chars: "≈"           }

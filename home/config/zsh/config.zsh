@@ -25,6 +25,7 @@ setopt AUTO_CD                   # Auto changes to a directory without typing cd
 #
 # More interactive sessions settings
 #
+set -o emacs                                    # Explicitly set emacs as my keyboard mapping.
 export GPG_TTY=$(tty)                           # Load GPG.
 export CLICOLOR=1                               # Enable ls colors in MacOS. Is it relevant when using coreutils?
 export LS_COLORS="$(vivid generate snazzy)"     # Generates the color palette. Alternative is to use `eval "$(dircolors <path>)"" with an awkard syntax.
