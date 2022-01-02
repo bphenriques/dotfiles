@@ -57,7 +57,7 @@
         '(
           ("d" "default" plain
            "%?"
-           :if-new (file+head "${slug}.org" "#+title: ${title}\n#+filetags: \n")
+           :if-new (file+head "${slug}.org" "#+title: ${title}\n#+filetags: \n\n")
            :kill-buffer t
            :unnarrowed t)
           )))
@@ -67,9 +67,9 @@
   (setq org-roam-dailies-directory dailies-directory)
   (setq org-roam-dailies-capture-templates
         '(
-          ("d" "default" entry
+          ("d" "default" plain
            "%?"
-           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: \n")
+           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: \n\n")
            :kill-buffer t
            :unnarrowed t)
            )))
