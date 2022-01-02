@@ -3,7 +3,6 @@
 (setq user-full-name "Bruno Henriques"
       user-mail-address "4727729+bphenriques@users.noreply.github.com")
 
-(load! "+utils")
 (load! "+theme")
 (load! "+macos")
 (load! "+org-mode")
