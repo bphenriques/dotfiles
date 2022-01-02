@@ -1,4 +1,4 @@
-;;; ~/Documents/repos/workspace/emacs/.config/doom/+utils.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t; -*-
 
 (defun get-string-from-file (filePath)
   "Return filePath's file content."

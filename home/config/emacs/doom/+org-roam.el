@@ -1,44 +1,74 @@
-;;; ~/Documents/repos/workspace/emacs/.config/doom/+org-roam.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t; -*-
 
 (require 'cl-lib)
 
 (setq
- org-knowledge-base-repository "~/workspace/knowledge-base"
+ org-knowledge-base-repository "~/workspace/knowledge-base/"
  org-knowledge-base-directory (concat (file-name-as-directory org-knowledge-base-repository) "org")
- org-knowledge-base-entry-template (concat (file-name-as-directory org-knowledge-base-repository) "template-entry.org")
+ org-knowledge-base-template (concat (file-name-as-directory org-knowledge-base-repository) "template.org")
+ dailies-directory "~/workspace/dailies/")
 
- ; Ox-Hugo
- org-hugo-base-dir org-knowledge-base-repository
+(after! org-mode
+ :init
+ (setq
+   org-id-link-to-org-use-id t                                                             ; Use ids when linking files.
+   org-id-extra-files (directory-files-recursively org-knowledge-base-directory "org")))   ; Follow ids in org-roam.
 
- ; Org-roam set globally to take notes anywhere.
- ; - Due to https://github.com/org-roam/org-roam-server/issues/8 org-roam-server does not respect .dir-locals.el
- org-roam-directory org-knowledge-base-directory
- org-roam-file-exclude-regexp "_index.org"
- org-roam-tag-sources '(prop)
+(after! ox-hugo
+  :init
+  (setq org-hugo-base-dir org-knowledge-base-repository))
 
- ; Org-roam-server
- org-roam-server-port 8090)
+;; ox-hugo file based exports rely on "#+HUGO_TAGS" and not on "#+FILETAGS" org-roam does. This syncs both values.
+;; If filetags is set, overwrite hugo_tags with its values.
+;; If filetags is not set but hugo_tags is, set filetags with the value of hugo_tags.
+(defun sync-hugo-tags ()
+  (interactive)
+  (let ((filetags (car (cdr (car (org-collect-keywords '("filetags"))))))
+        (hugotags (car (cdr (car (org-collect-keywords '("HUGO_TAGS")))))))
+    (if filetags
+        (org-roam-set-keyword "hugo_tags" filetags)
+        (when hugotags (org-roam-set-keyword "filetags" hugotags)))))
+
+(add-hook 'before-save-hook 'sync-hugo-tags) ;; Using before so that it works during the capture process.
 
 (after! org-roam
- (set-face-attribute 'org-roam-tag nil :foreground "tan1")
- (setq org-roam-capture-templates
-        `(
-          ("d" "default" plain (function org-roam--capture-get-point)
+  :init
+  (map! :leader
+      (:prefix-map ("k" . "knowledge-base")
+       :desc "Roam Toggle Side Pane"    "l"    #'org-roam-buffer-toggle
+       :desc "Roam Insert"              "i"    #'org-roam-node-insert
+       :desc "Roam Node Find"           "f"    #'org-roam-node-find
+       :desc "Global Find"              "F"    #'notdeft
+       :desc "Roam UI"                  "g"    #'org-roam-ui-open
+       :desc "Roam Capture"             "c"    #'org-roam-capture
+       (:prefix-map ("d" . "Daily")
+        :desc "Capture Today"           "T"    #'org-roam-dailies-capture-today
+        :desc "Goto Today"              "t"    #'org-roam-dailies-goto-today
+        :desc "Capture Yesterday"       "Y"    #'org-roam-dailies-capture-yesterday
+        :desc "Goto Yesterday"          "y"    #'org-roam-dailies-goto-yesterday
+        :desc "Capture Date"            "D"    #'org-roam-dailies-goto-date
+        :desc "Goto Date"               "d"    #'org-roam-dailies-capture-date
+        :desc "List"                    "l"    #'org-roam-dailies-find-directory)))
+
+  (setq org-roam-directory org-knowledge-base-directory)
+  (org-roam-db-autosync-mode) ; Ensure org-roam is available at startup.
+  (setq org-roam-capture-templates
+        '(
+          ("d" "default" plain
            "%?"
-           :file-name "${slug}"
-           :head ,(get-string-from-file org-knowledge-base-entry-template)
+           :if-new (file+head "${slug}.org" "#+title: ${title}\n#+filetags: \n")
+           :kill-buffer t
            :unnarrowed t)
           )))
 
-;;;
-;;; Org-Roam Server
-;;;
-;;; Requires Org-Server Protocol
-;;;
-
-(defun org-roam-server-open ()
-  "Ensure the server is active, then open the roam graph."
-  (interactive)
-  (when (eq org-roam-server-mode nil)
-    (org-roam-server-mode 1))
-  (call-process "open" nil nil nil (format "http://%s:%d" org-roam-server-host org-roam-server-port)))
+(after! org-roam-dailies
+  :init
+  (setq org-roam-dailies-directory dailies-directory)
+  (setq org-roam-dailies-capture-templates
+        '(
+          ("d" "default" entry
+           "%?"
+           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: \n")
+           :kill-buffer t
+           :unnarrowed t)
+           )))

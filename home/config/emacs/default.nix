@@ -31,6 +31,7 @@ in
     # Modules dependencies
     sqlite      # Org Roam.
     plantuml    # Plant UML.
+    xapian      # Notdeft backend to index files.
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     pngpaste
   ] ++ lib.optionals pkgs.stdenv.isLinux [

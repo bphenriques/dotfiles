@@ -98,6 +98,11 @@ clone_default_repos() {
         git clone git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
     fi
 
+    if [ ! -d "$WORKSPACE/dailies" ]; then
+        info 'Cloning Repos - dailies...'
+        git clone git@github.com:bphenriques/dailies.git "$WORKSPACE/dailies"
+    fi
+
     if [ ! -d "$DOTFILES_LOCATION" ]; then
         info 'Cloning Repos - dotfiles...'
         # Unfortunately, can't create the hidden folder directly.
