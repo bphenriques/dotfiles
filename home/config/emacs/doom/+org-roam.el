@@ -57,7 +57,8 @@
         '(
           ("d" "default" plain
            "%?"
-           :if-new (file+head "${slug}.org" "#+title: ${title}\n#+filetags: \n\n")
+           :if-new (file+head "${slug}.org" "#+title: ${title}\n#+filetags: ")
+           :empty-lines 1
            :kill-buffer t
            :unnarrowed t)
           )))
@@ -69,7 +70,8 @@
         '(
           ("d" "default" plain
            "%?"
-           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: \n\n")
+           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: ")
+           :empty-lines 1
            :kill-buffer t
            :unnarrowed t)
            )))
