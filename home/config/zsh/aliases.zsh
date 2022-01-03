@@ -4,7 +4,10 @@ alias la='ls -la'
 alias mkdir='mkdir -pv'
 
 # Text Processing
-grep='grep --color'
+alias grep='grep --color'
+
+# Test Editor
+alias emacs='emacsclient --tty --alternate-editor ""' # Start emacs daemon if not running already.
 
 # Java
 alias javals='/usr/libexec/java_home -V'
