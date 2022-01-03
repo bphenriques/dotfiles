@@ -11,8 +11,8 @@
 (after! org-mode
  :config
  (setq
-   org-id-link-to-org-use-id t                                                             ; Use ids when linking files.
-   org-id-extra-files (directory-files-recursively org-knowledge-base-directory "org")))   ; Follow ids in org-roam.
+   org-id-link-to-org-use-id t                                                                ; Use ids when linking files.
+   org-id-extra-files (directory-files-recursively org-knowledge-base-directory "\.org$")))   ; Follow ids in org-roam.
 
 (after! ox-hugo
   :config
