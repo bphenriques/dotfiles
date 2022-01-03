@@ -51,7 +51,8 @@
 
     casks = [
       "rectangle"                 # Window management.
-      "alacritty"                 # Terminal.
+      "alacritty"                 # Terminal. Too much hacks around keybindings and broken emacs experience.
+      "kitty"                     # Terminal. Experimenting this alternative.
       "vlc"                       # Media player.
       "adoptopenjdk8"             # JDK8
       "adoptopenjdk11"            # JDK11
