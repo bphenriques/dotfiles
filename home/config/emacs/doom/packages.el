@@ -8,7 +8,7 @@
   :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "3f4141242620e2b3a6e5301a14d1cb1fea4acc9c")
 
 (package! org-roam
-  :recipe (:host github :repo "org-roam/org-roam") :pin "ee9a8d423e24923ec60c3116a00c8a0e93095d86")
+  :recipe (:host github :repo "org-roam/org-roam") :pin "679ef6ef001fd1a69b691108178721aa913e7f0f")
 
 (package! org-roam-ui
   :recipe (:host github :repo "org-roam/org-roam-ui") :pin "9ed0c5705a302a91fab2b8bcc777a12dcf9b3682")

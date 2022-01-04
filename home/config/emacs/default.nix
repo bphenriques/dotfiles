@@ -24,14 +24,14 @@ in
     # Doom emacs dependencies
     # https://github.com/hlissner/doom-emacs
     coreutils   # Consistency across different Operating Systems.
-    git         # git should be already installed.
-    ripgrep     # Alternative to grep.
-    fd          # Faster and more user-friendly find.
+    git         # Doom Emacs's dependency. Should be already installed.
+    ripgrep     # Doom Emacs's dependency. Alternative to grep.
+    fd          # Doom Emacs's dependency. Faster and more user-friendly find.
 
     # Modules dependencies
-    sqlite      # Org Roam.
-    plantuml    # Plant UML.
-    xapian      # Notdeft backend to index files.
+    sqlite      # Org Roam's database.
+    plantuml    # To export Plant UML diagrams.
+    xapian      # Notdeft's backend to index files.
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     pngpaste
   ] ++ lib.optionals pkgs.stdenv.isLinux [
