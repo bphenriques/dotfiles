@@ -5,7 +5,7 @@
   :recipe (:host github :repo "hasu/notdeft"))
 
 (package! ox-hugo
-  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "3f4141242620e2b3a6e5301a14d1cb1fea4acc9c")
+  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "de5dfdfdcdc3ec50cb27d1f6cf7314a5c9aa1385")
 
 (package! org-roam
   :recipe (:host github :repo "org-roam/org-roam") :pin "679ef6ef001fd1a69b691108178721aa913e7f0f")
