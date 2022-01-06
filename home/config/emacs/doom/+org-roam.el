@@ -2,9 +2,7 @@
 
 (require 'cl-lib)
 
-(setq
-  org-knowledge-base-directory "~/workspace/knowledge-base/org"
-  dailies-directory "~/workspace/dailies/")
+(setq org-knowledge-base-directory "~/workspace/knowledge-base/org")
 
 (after! org-mode
   :config
@@ -43,16 +41,3 @@
            :kill-buffer t
            :unnarrowed t)
           )))
-
-(after! org-roam-dailies
-  :config
-  (setq org-roam-dailies-directory dailies-directory)
-  (setq org-roam-dailies-capture-templates
-        '(
-          ("d" "default" plain
-           "%?"
-           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: ")
-           :empty-lines 1
-           :kill-buffer t
-           :unnarrowed t)
-           )))

@@ -7,6 +7,7 @@
 (load! "+macos")
 (load! "+org-mode")
 (load! "+org-roam")
+(load! "+org-journal")
 (load! "+scala")
 (load! "+notdeft")
 (load! "custom")

@@ -2,6 +2,6 @@
 
 (after! notdeft
   :config
-  (setq notdeft-extension "org")
-  (setq notdeft-directories '("~/workspace/dailies/"
+  (setq notdeft-extension "org"
+        notdeft-directories '("~/workspace/journal/"
                               "~/workspace/knowledge-base/org")))
