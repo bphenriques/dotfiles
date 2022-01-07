@@ -16,9 +16,10 @@
 
     # Custom Commands
     graph = log --pretty=oneline --graph --abbrev-commit
-    patch = !git --no-pager diff --no-color                                               # Create patches by using `git patch > changes.patch`.
-    ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate # A more concise and readable git log.
-   
+    patch = !git --no-pager diff --no-color                                                     # Create patches by using `git patch > changes.patch`.
+    ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate       # A more concise and readable git log.
+    fzadd = "!git ls-files -m -o --exclude-standard | fzf --print0 -m --preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || git diff --color=always {-1} 2>/dev/null' | xargs -0 -t -o git add" # Friendlier way to pick which files to add. Append -p to patch.
+
 [commit]
     template = ~/.config/git/gitmessage
     gpgsign = true

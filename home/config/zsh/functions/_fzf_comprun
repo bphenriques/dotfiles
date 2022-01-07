@@ -6,7 +6,7 @@ case "$command" in
   cd)               fzf "$@" --preview 'tree -C {} | head -50' ;;
 
   # Use `tree` if it is a directory and `bat` otherwise.
-  vi|vim)           fzf "$@" --preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || bat --style=numbers --color=always {-1} 2> /dev/null' ;;
+  vi|vim|emacs|e)           fzf "$@" --preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || bat --style=numbers --color=always {-1} 2> /dev/null' ;;
 
   # Use `echo` to show the value. 
   export|unset)     fzf "$@" --preview "eval 'echo \$'{}" ;;
