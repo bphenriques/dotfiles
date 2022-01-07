@@ -11,8 +11,8 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Default editors and settings
-export EDITOR=vim
-export VISUAL=vim
+export EDITOR=emacs
+export VISUAL=emacs
 export PAGER="less -iMR"
 
 # Default directory for repositories

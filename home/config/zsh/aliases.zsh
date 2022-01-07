@@ -8,6 +8,7 @@ alias grep='grep --color'
 
 # Test Editor
 alias emacs='emacsclient --tty --alternate-editor ""' # Start emacs daemon if not running already.
+alias e="$EDITOR"
 
 # Java
 alias javals='/usr/libexec/java_home -V'
