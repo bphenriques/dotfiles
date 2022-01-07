@@ -47,12 +47,17 @@ sync_repository() {
       fail "Repo '$name' - Does not exist!"
    fi
 
-   # If it is out-of-sync, pull which should fail automatically if is dirty which is expected.
+   # If it is out-of-sync and behind, rebase which should fail automatically if is dirty which is expected.
    if [ $(git -C "$location" rev-parse HEAD) = $(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
       info "Repo '$name' - Up to date! Nothing to do!"
    else
-      info "Repo '$name' - Pulling changes..."
-      git -C "$location" pull --rebase
+      git -C "$location" fetch origin
+      if (git status -uno | grep --quiet "branch is ahead"); then
+        warn "Repo '$name' - Has unpushed changes!"
+      else
+        info "Repo '$name' - Pulling changes..."
+        git -C "$location" pull --rebase
+      fi
    fi
    success "Repo '$name' - Done!"
 }
