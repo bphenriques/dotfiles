@@ -10,6 +10,7 @@ DOOM_EMACS_PATH="$XDG_CONFIG_HOME"/emacs
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
+WORKSPACE="$HOME/workspace"
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
@@ -38,6 +39,27 @@ sync_emacs() {
   success 'Doom Emacs - Done!'
 }
 
+sync_repository() {
+   location="$1"
+   name="$(basename "$location")"
+
+   if [ ! -d "$location" ]; then
+      fail "Repo '$name' - Does not exist!"
+   fi
+
+   # If it is out-of-sync, pull which should fail automatically if is dirty which is expected.
+   if [ $(git -C "$location" rev-parse HEAD) = $(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
+      info "Repo '$name' - Up to date! Nothing to do!"
+   else
+      info "Repo '$name' - Pulling changes..."
+      git -C "$location" pull --rebase
+   fi
+   success "Repo '$name' - Done!"
+}
+
+sync_repository "$HOME/.dotfiles"
 sync_flake
 sync_emacs
+sync_repository "$WORKSPACE/journal"
+sync_repository "$WORKSPACE/knowledge-base"
 
