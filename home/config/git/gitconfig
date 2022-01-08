@@ -8,27 +8,25 @@
     pager = diff-so-fancy | less --tabs=4 -RFX
 
 [alias]
-    # Alias
-    co = checkout
-    s = status -s
-    pushf = push --force-with-lease
-    amend = commit --amend
-
-    # Custom Commands
-    graph = log --pretty=oneline --graph --abbrev-commit
-    patch = !git --no-pager diff --no-color                                                     # Create patches by using `git patch > changes.patch`.
-    ls = log --pretty=format:"%C(yellow)%h\\ %Creset%s%Cblue\\ [%cn]\\%Cred%d" --decorate       # A more concise and readable git log.
-    fzadd = "!git ls-files -m -o --exclude-standard | fzf --print0 -m --preview '([ -d {-1} ] && tree -C {-1} | head -n 50) || git diff --color=always {-1} 2>/dev/null' | xargs -0 -t -o git add" # Friendlier way to pick which files to add. Append -p to patch.
+    co      = checkout
+    s       = status -s
+    pick    = cherry-pick
+    rb      = rebase
+    pushf   = push --force-with-lease
+    amend   = commit --amend
+    graph   = log --pretty=oneline --graph --abbrev-commit
+    patch   = !git --no-pager diff --no-color                                                                                 # Create patches by using `git patch > changes.patch`.
+    ls      = log --pretty=format:"%C(yellow)%h%d\\ %Creset%s%Cblue\\ [%cn]\\%C %C(black)%C(bold)%cr%Creset" --decorate       # A more concise and readable git log.
 
 [commit]
     template = ~/.config/git/gitmessage
     gpgsign = true
 
 [pull]
-	rebase = true
+    rebase = true
     
 [rebase]
-	autosquash = true           # Automatic fixup! and/or squash!
+    autosquash = true           # Automatic fixup! and/or squash!
 
 # ------------------------------
 # Color settings for diff-so-fancy

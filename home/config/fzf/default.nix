@@ -7,7 +7,7 @@
     . ${pkgs.fzf}/share/fzf/completion.zsh
     . ${pkgs.fzf}/share/fzf/key-bindings.zsh
 
-    export FZF_DEFAULT_OPTS="--bind='ctrl-p:toggle-preview' --bind "ctrl-alt-a:select-all" --bind='ctrl-f:jump' --marker='* ' --pointer='▶'"
+    export FZF_DEFAULT_OPTS="--height='80%' --preview-window='right:60%' --bind='ctrl-p:toggle-preview' --bind "alt-a:select-all" --bind='ctrl-f:jump' --marker='* ' --pointer='▶'"
     export FZF_DEFAULT_COMMAND="fd --type file --hidden"
     export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
   '';
