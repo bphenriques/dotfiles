@@ -1,7 +1,7 @@
 . "$ZDOTDIR/config.zsh"    # Load ZSH and Interactive Shell Configuration.
 . "$ZDOTDIR/plugins.zsh"   # Load Plugins.
 
-# Load Functions - Lazy autoload every file in "$ZDOTDIR/functions"
+# Load Functions - Lazy autoload every file under $ZDOTDIR/functions
 fpath=("$ZDOTDIR/functions" $fpath);
 autoload -Uz $fpath[1]/*(.:t)
 

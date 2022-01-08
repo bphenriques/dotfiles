@@ -20,3 +20,6 @@ alias nix-cleanup='nix-collect-garbage -d --delete-older-than 30d'
 
 # Shortcuts
 alias dotfiles='cd "$HOME"/.dotfiles'
+
+# Tmux
+alias reload='tmux respawn-pane -k'
