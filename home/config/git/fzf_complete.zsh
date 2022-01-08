@@ -16,7 +16,7 @@ git_rm() {
 
 # TODO: Not perfect as it doesn't return the stash ids (_fzf_complete_git_post does not work for that). Fine for now :)
 git_stash() {
-    git stash list | _fzf_complete --preview 'echo {} | cut -d: -f1 | git stash show --color=always' -- "$@"
+    git stash list | _fzf_complete --preview 'echo {} | cut -d: -f1 | xargs -I% git stash show --color=always %' -- "$@"
 }
 
 # TODO: Not perfect as it doesn't return the commit ids (_fzf_complete_git_post does not work for that). Fine for now :)
