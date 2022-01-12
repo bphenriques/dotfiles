@@ -22,7 +22,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 |-|-|
 | [`personal-macos`](hosts/personal-macos.nix) | macOS |
 | [`work-macos`](hosts/work-macos.nix) | macOS |
-| [`ubuntu-vm`](hosts/ubuntu-vm.nix) | Ubuntu |
+| [`wsl`](hosts/wsl.nix) | Ubuntu (WSL) |
 
 1. Run the bootstrap:
 ```sh
@@ -35,13 +35,11 @@ $ cd "$HOME"/.dotfiles
 $ make sync
 ```
 
-3. Export your public and private keys and import them:
+3. Import keys:
 ```sh
 $ cat public.pgp  | pgp --import
 $ cat private.pgp | pgp --import
 ```
-
-**Warning**: Do not forget to delete the GPG keys.
 
 4. Reboot!
 
@@ -72,8 +70,6 @@ Make sure that you have the following in your `$ZDOTDIR/.zprofile` (here to ensu
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
 
-I suspect this is related with [this](https://github.com/LnL7/nix-darwin/pull/286).
-
 #### 2. Fail to find `brew`.
 
 Make sure that `/etc/zprofile` is calling `/usr/libexec/path_helper` as follows:
@@ -83,7 +79,7 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 ```
 
-You might need to create copy `/etc/zprofile.orig` to `/etc/zprofile`:
+You might need to copy `/etc/zprofile.orig` to `/etc/zprofile`:
 ```sh
 $ sudo cp /etc/zprofile.orig /etc/zprofile
 ```
