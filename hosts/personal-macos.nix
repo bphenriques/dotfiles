@@ -13,7 +13,7 @@
     dns = [ "8.8.8.8" "8.8.4.4" "2001:4860:4860::8888" "2001:4860:4860::8844" ];
   };
 
-  # Intel CPU specific
+  # Intel CPU - Nix Darwin sets it according to the environment but it doesnt work fine.
   homebrew.brewPrefix = "/usr/local/bin";
   homebrew.taps = [ "homebrew/cask" ];
   homebrew.casks = [

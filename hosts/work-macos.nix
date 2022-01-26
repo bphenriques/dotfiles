@@ -7,7 +7,7 @@
     ../macos/work.nix
   ];
 
-  # Apple Silicon
+  # Apple Silicon - Nix Darwin sets it according to the environment but it doesnt work fine.
   homebrew.brewPrefix = "/opt/homebrew/bin";
 
   # Setup Home-manager

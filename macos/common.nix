@@ -56,6 +56,7 @@
       "vlc"                       # Media player.
       "adoptopenjdk8"             # JDK8
       "adoptopenjdk11"            # JDK11
+      "keka"                      # Compression.
     ];
   };
   imports = [ ./org-protocol ];
