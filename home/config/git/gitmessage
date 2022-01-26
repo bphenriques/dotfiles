@@ -1,6 +1,10 @@
-
-# Title (Max. 50 characters)                ---->
+# <type>(<scope>): Max. 50 characters    ------->
+# type: build ci chore docs feat fix perf refactor revert style test
 #
-# Body:
-# - What, why and how
-# - Max. 72 characters per line                                   ---->
+# Problem:
+#
+# Solution:
+#
+# Test Plan:
+#
+# Body: Max. 72 characters per line                               ---->
