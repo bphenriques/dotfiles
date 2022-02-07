@@ -11,13 +11,18 @@ HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
 WORKSPACE="$HOME/workspace"
+DEBUG=${DEBUG:-0}
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
-  nix build ".#$HOST_TARGET"
+  flake_args=""
+  if [ "$DEBUG" ]; then
+    flake_args="--show-trace"
+  fi
 
+  nix build ".#$HOST_TARGET" "$flake_args"
   case "$(uname -s)" in
-      Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
+      Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET" --show-trace
                   ;;
       *)          ./result/activate
                   ;;
@@ -48,7 +53,7 @@ sync_repository() {
    fi
 
    # If it is out-of-sync and behind, rebase which should fail automatically if is dirty which is expected.
-   if [ $(git -C "$location" rev-parse HEAD) = $(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
+   if [ "$(git -C "$location" rev-parse HEAD)" = "$(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1)" ]; then
       info "Repo '$name' - Up to date! Nothing to do!"
    else
       git -C "$location" fetch origin
