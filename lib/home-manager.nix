@@ -5,7 +5,7 @@
     home-manager.lib.homeManagerConfiguration {
         inherit system username;
         homeDirectory = "/home/${username}";
-        stateVersion = "21.05";
+        stateVersion = "22.05";
         configuration = { pkgs, ... }: {
             inherit nixpkgs;
             imports = [ homeConfig ];

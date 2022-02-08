@@ -19,7 +19,7 @@ let
 in
 {
   home.packages = with pkgs; [
-    emacsGcc
+    #emacsGcc
 
     # Doom emacs dependencies
     # https://github.com/hlissner/doom-emacs

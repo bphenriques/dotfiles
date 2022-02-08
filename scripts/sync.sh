@@ -11,16 +11,10 @@ HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
 WORKSPACE="$HOME/workspace"
-DEBUG=${DEBUG:-0}
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
-  flake_args=""
-  if [ "$DEBUG" ]; then
-    flake_args="--show-trace"
-  fi
-
-  nix build ".#$HOST_TARGET" "$flake_args"
+  nix build ".#$HOST_TARGET"
   case "$(uname -s)" in
       Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET" --show-trace
                   ;;

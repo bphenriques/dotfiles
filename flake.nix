@@ -16,20 +16,39 @@
 
     # Specific packages
     ## Compiling Emacs GCC takes forever, let's pin it. Currently Emacs 29.0.50
-    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=cb54bfe99cdc0eeefbba60418690c4f42b790105";
+    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=206e22c6ba3f8cd28649d5360e2838f3bb90aa55";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
+      inherit (inputs.nixpkgs-unstable.lib) optionalAttrs;
+
+      # Overlays
+      unstableOverlay = final: prev: {
+        unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
+      };
+      #emacs-overlay = import inputs.emacs-overlay;
+      x86-packages = final: prev: (optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
+        inherit (final.pkgs-x86)
+        google-cloud-sdk
+        ngrok;
+      });
+      apple-silicon = final: prev: optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
+        # Add access to x86 packages system is running Apple Silicon
+        pkgs-x86 = import inputs.nixpkgs-unstable {
+          system = "x86_64-darwin";
+          inherit (nixpkgsConfig) config;
+        };
+      };
+
+      # Nixpkgs
       nixpkgsConfig = {
         config = { allowUnfree = true; }; # :monkey-close-eyes:
         overlays = [
-          (
-            final: prev: {
-              unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
-            }
-          )
-          (import inputs.emacs-overlay)
+          unstableOverlay
+          x86-packages
+          #emacs-overlay
+          apple-silicon
         ];
       };
       macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
@@ -37,8 +56,8 @@
     in
     {
       darwinConfigurations = with macosLib; {
-        personal-macos = mkMacOSHost ./hosts/personal-macos.nix;
-        work-macos = mkMacOSHost ./hosts/work-macos.nix;
+        personal-macos = mkMacOSHost { hostModule=./hosts/personal-macos.nix; system="x86_64-darwin"; };
+        work-macos = mkMacOSHost { hostModule=./hosts/work-macos.nix; system="aarch64-darwin"; };
       };
 
       homeManagerConfigurations = with hmLib; {

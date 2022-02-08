@@ -9,15 +9,19 @@
   # Build with:
   # $ nix build .#darwinConfigurations.<host-name>.system
   # $ ./result/sw/bin/darwin-rebuild switch --flake .#<host-name>
-  mkMacOSHost = hostModule: darwin.lib.darwinSystem {
-    # system = "aarch64-darwin";
-    system = "x86_64-darwin";
+  mkMacOSHost = {hostModule, system}: darwin.lib.darwinSystem {
+    system = system;
     modules = [
       home-manager.darwinModules.home-manager
-      ({ pkgs, ... }:
+      ({ pkgs, lib, ... }:
         {
           nix.package = pkgs.nixFlakes;
-          nix.extraOptions = "experimental-features = nix-command flakes";
+          nix.extraOptions = ''
+            auto-optimise-store = true
+            experimental-features = nix-command flakes
+          '' + lib.optionalString (pkgs.system == "aarch64-darwin") ''
+            extra-platforms = x86_64-darwin aarch64-darwin
+          '';
         }
       )
       {

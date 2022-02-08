@@ -60,7 +60,7 @@ install_nix_flakes() {
     info 'Nix Flakes - Checking...'
     if ! nix flake show templates >/dev/null; then
         info 'Nix Flakes - Installing...'
-        nix-env -iA nixpkgs.nixFlakes
+        nix-env -iA nixpkgs.nixUnstable
         mkdir -p "$XDG_CONFIG_HOME"/nix
         append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
     fi
