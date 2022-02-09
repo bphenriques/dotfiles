@@ -19,8 +19,6 @@
           nix.extraOptions = ''
             auto-optimise-store = true
             experimental-features = nix-command flakes
-          '' + lib.optionalString (pkgs.system == "aarch64-darwin") ''
-            extra-platforms = x86_64-darwin aarch64-darwin
           '';
         }
       )
@@ -28,6 +26,9 @@
         nixpkgs = nixpkgs;
         home-manager.useGlobalPkgs = true;      # For consistency, use global pkgs configured via the system level nixpkgs options.
         home-manager.useUserPackages = true;    # Install packages defined in home-manager.
+
+        # Mark as using nix-daemon (which is the only supported way).
+        services.nix-daemon.enable = true;
 
         # Nix-Darwin
         system.stateVersion = 4;
