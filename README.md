@@ -24,12 +24,12 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 | [`work-macos`](hosts/work-macos.nix) | macOS |
 | [`wsl`](hosts/wsl.nix) | Ubuntu (WSL) |
 
-1. Run the bootstrap:
+1. Bootstrap:
 ```sh
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/scripts/bootstrap.sh)"
 ```
 
-2. Sync flake
+2. Sync flake:
 ```sh
 $ cd "$HOME"/.dotfiles
 $ make sync
@@ -54,51 +54,6 @@ This will update both `flake.lock` and Doom Emacs. Check if everything is stable
 It is also possible to see the list of updated packages between Nix generations:
 ```sh
 $ nix profile diff-closures --profile /nix/var/nix/profiles/system
-```
-
-# Troubleshooting
-
-#### 1. Fail to find `nix` nor any home-manager binary.
-
-Make sure that you have the following in your `$ZDOTDIR/.zprofile` (here to ensure precedence):
-```sh
-# If nix can't be found
-. /Users/$USER/.nix-profile/etc/profile.d/nix.sh
-
-# If Home-Manager binaries can't be found
-. /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
-export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
-```
-
-#### 2. Fail to find `brew`.
-
-Make sure that `/etc/zprofile` is calling `/usr/libexec/path_helper` as follows:
-```sh
-if [ -x /usr/libexec/path_helper ]; then
-        eval `/usr/libexec/path_helper -s`
-fi
-```
-
-You might need to copy `/etc/zprofile.orig` to `/etc/zprofile`:
-```sh
-$ sudo cp /etc/zprofile.orig /etc/zprofile
-```
-
-Or if it does not work, add the following:
-```sh
-CPU=$(uname -p)
-if [[ "$CPU" == "arm64" ]]; then
-    export PATH="/opt/homebrew/bin:$PATH"
-else
-    export PATH="/usr/local/bin:$PATH"
-fi
-```
-
-#### 3. `zsh compinit: insecure directories, run compaudit for list.`
-
-The mentioned directories are considered as they can be written by users that are not either the `root` or the current user ([source](http://zsh.sourceforge.net/Doc/Release/Completion-System.html##Use-of-compinit)). For this purpose, remove the rogue permissions:
-```sh
-compaudit | xargs chmod go-w
 ```
 
 # Acknowledgments

@@ -40,8 +40,14 @@
     in
     {
       darwinConfigurations = with macosLib; {
-        personal-macos = mkMacOSHost { hostModule=./hosts/personal-macos.nix; system="x86_64-darwin"; };
-        work-macos = mkMacOSHost { hostModule=./hosts/work-macos.nix; system="aarch64-darwin"; };
+        personal-macos = mkMacOSHost {
+          system = "x86_64-darwin";
+          hostModule = ./hosts/personal-macos.nix;
+        };
+        work-macos = mkMacOSHost {
+          hostModule = ./hosts/work-macos.nix;
+          system = "aarch64-darwin";
+        };
       };
 
       homeManagerConfigurations = with hmLib; {
