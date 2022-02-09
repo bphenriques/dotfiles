@@ -10,7 +10,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Pre-Requirements
 
-1. Ensure `nix` is installed and sourced: https://nixos.org/manual/nix/stable/#chap-installation
+1. Ensure `nix` is installed and sourced: https://nixos.org/manual/nix/stable/installation/installing-binary.html
 
    ```aidl
    test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
@@ -87,10 +87,10 @@ $ sudo cp /etc/zprofile.orig /etc/zprofile
 Or if it does not work, add the following:
 ```sh
 CPU=$(uname -p)
-if [[ "$CPU" == "arm" ]]; then
-    eval $(/opt/homebrew/bin/brew shellenv)
+if [[ "$CPU" == "arm64" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
 else
-    eval $(/usr/local/bin/brew shellenv)
+    export PATH="/usr/local/bin:$PATH"
 fi
 ```
 

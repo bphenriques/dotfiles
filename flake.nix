@@ -3,7 +3,7 @@
 
   inputs = {
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.05";               # Default to stable for most things.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";               # Default to stable for most things.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     # MacOS inputs
@@ -21,34 +21,18 @@
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-      inherit (inputs.nixpkgs-unstable.lib) optionalAttrs;
-
       # Overlays
       unstableOverlay = final: prev: {
         unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
       };
-      #emacs-overlay = import inputs.emacs-overlay;
-      x86-packages = final: prev: (optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
-        inherit (final.pkgs-x86)
-        google-cloud-sdk
-        ngrok;
-      });
-      apple-silicon = final: prev: optionalAttrs (prev.stdenv.system == "aarch64-darwin") {
-        # Add access to x86 packages system is running Apple Silicon
-        pkgs-x86 = import inputs.nixpkgs-unstable {
-          system = "x86_64-darwin";
-          inherit (nixpkgsConfig) config;
-        };
-      };
+      emacs-overlay = import inputs.emacs-overlay;
 
       # Nixpkgs
       nixpkgsConfig = {
         config = { allowUnfree = true; }; # :monkey-close-eyes:
         overlays = [
           unstableOverlay
-          x86-packages
-          #emacs-overlay
-          apple-silicon
+          emacs-overlay
         ];
       };
       macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };

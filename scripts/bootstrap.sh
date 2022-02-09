@@ -123,11 +123,6 @@ setup_ssh() {
   # Probably wait for prompt here...
 }
 
-set_unix_alias() {
-  alias pbcopy='xclip -selection clipboard'
-  alias open='xdg-open'
-}
-
 select_host() {
   info 'Nix Host Type - Checking...'
 
@@ -154,8 +149,7 @@ case "$(uname -s)" in
     Darwin)     install_nix_darwin
                 install_homebrew
                 ;;
-   *)           set_unix_alias
-                ;;
+    *)          ;;
 esac
 clone_default_repos
 select_host

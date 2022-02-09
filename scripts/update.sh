@@ -17,8 +17,19 @@ success 'Doom Emacs - Complete!'
 
 case "$(uname -s)" in
     Darwin)     info 'Homebrew - Upgrading...'
-                brew upgrade && brew update
+                if [ "$(uname -p)" = "arm64" ]; then
+                    info "Homebrew - Using arm64 brew"
+                    brew_bin="/opt/homebrew/bin/brew"
+                else
+                    info "Homebrew - Using x86 brew"
+                    brew_bin="/usr/local/bin/brew"
+                fi
+                $brew_bin upgrade && $brew_bin update
                 success 'Homebrew - Complete!'
                 ;;
    *)           ;;
 esac
+
+
+
+

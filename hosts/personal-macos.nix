@@ -14,7 +14,6 @@
   };
 
   # Intel CPU - Nix Darwin sets it according to the environment but it doesnt work fine.
-  homebrew.brewPrefix = "/usr/local/bin";
   homebrew.taps = [ "homebrew/cask" ];
   homebrew.casks = [
     "docker"                    # Containers.
