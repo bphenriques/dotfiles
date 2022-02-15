@@ -45,18 +45,20 @@
     ];
 
     brews = [
-      "dateutils"                 # Date utilities. Not supported currently by nix-pkgs.
-      "plumber"                   # Useful utility for messaging queues.
+      "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
+      "plumber"                   # Useful utility for messaging queues
     ];
 
     casks = [
-      "rectangle"                 # Window management.
-      "alacritty"                 # Terminal. Too much hacks around keybindings and broken emacs experience.
-      "kitty"                     # Terminal. Experimenting this alternative.
-      "vlc"                       # Media player.
+      "rectangle"                 # Window management
+      "alacritty"                 # Terminal. Too much hacks around keybindings and broken emacs experience
+      "kitty"                     # Terminal. Experimenting this alternative
+      "vlc"                       # Media player
+      "firefox"                   # Browser
+      "intellij-idea-ce"          # JVM IDE
+      "keka"                      # Compression
       "adoptopenjdk8"             # JDK8
       "adoptopenjdk11"            # JDK11
-      "keka"                      # Compression.
     ];
   };
   imports = [ ./org-protocol ];

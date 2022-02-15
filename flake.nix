@@ -15,8 +15,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";                # Ensure versions are consistent.
 
     # Specific packages
-    ## Compiling Emacs GCC takes forever, let's pin it. Currently Emacs 29.0.50
-    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=cb54bfe99cdc0eeefbba60418690c4f42b790105";
+    ## Compiling Emacs GCC takes forever, let's pin it.
+    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=216093fad31b410b92d3915fc9750f0399bca817";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:

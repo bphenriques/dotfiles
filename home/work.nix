@@ -4,7 +4,7 @@
   home.packages = with pkgs; [
     google-cloud-sdk
     awscli
-    unstable.terraform
+    terraform
     kubelogin-oidc
   ];
 }
