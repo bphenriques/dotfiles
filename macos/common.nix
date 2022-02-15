@@ -10,10 +10,36 @@
       };
 
       NSGlobalDomain = {
-        AppleInterfaceStyle = "Dark";               # I prefer it.
+        # Style
+        AppleInterfaceStyle = "Dark";               # Personal preference.
+
+        # Keybboard
         InitialKeyRepeat = 15;                      # Reduce the initial delay when pressing keys.
         KeyRepeat = 2;                              # Reduce delay when holding buttons.
-        NSAutomaticCapitalizationEnabled = false;   # Let me handle capitalization.
+
+        # Typing experience.
+        NSAutomaticSpellingCorrectionEnabled = false;
+        NSAutomaticCapitalizationEnabled = false;
+        NSAutomaticDashSubstitutionEnabled = false;
+        NSAutomaticPeriodSubstitutionEnabled = false;
+        NSAutomaticQuoteSubstitutionEnabled = false;
+      };
+
+      dock = {
+        autohide = true;                    # Dont need the dock by default.
+        tilesize = 30;                      # Small size.
+        mru-spaces = false;                 # Dont rearrange spaces by most recently used.
+        expose-group-by-app = true;         # Group by apps.
+        show-recents = false;               # Dont show recent apps.
+      };
+
+      finder = {
+        AppleShowAllExtensions = true;          # Show extensions in Finder by default.
+        FXEnableExtensionChangeWarning = false; # Disable warning
+      };
+
+      screencapture = {
+        location = "~/Pictures/screenshots";    # Avoid bloating the Desktop with screenshots.
       };
 
       SoftwareUpdate = {

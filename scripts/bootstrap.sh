@@ -141,6 +141,11 @@ select_host() {
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
 
+misc_macos() {
+  info 'MacOS - Creating screenshots directory'
+  mkdir "$HOME"/Pictures/screenshots
+}
+
 check_requirements
 
 setup_ssh
@@ -148,6 +153,7 @@ install_nix_flakes
 case "$(uname -s)" in
     Darwin)     install_nix_darwin
                 install_homebrew
+                misc_macos
                 ;;
     *)          ;;
 esac
