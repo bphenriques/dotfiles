@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # System settings.
@@ -73,6 +73,8 @@
     brews = [
       "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
       "plumber"                   # Useful utility for messaging queues
+    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [
+      "openjdk@17"                # JDK17
     ];
 
     casks = [
@@ -83,7 +85,7 @@
       "firefox"                   # Browser
       "intellij-idea-ce"          # JVM IDE
       "keka"                      # Compression
-      "adoptopenjdk8"             # JDK8
+    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [
       "adoptopenjdk11"            # JDK11
     ];
   };

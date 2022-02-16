@@ -1,6 +1,3 @@
-# Ensure Nix is sourced.
-test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-
-# Ensure Home-Manager is sourced.
+# Ensure Home-Manager packages are sourced.
 test -f /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh && . /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"

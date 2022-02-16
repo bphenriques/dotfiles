@@ -35,10 +35,9 @@ $ cd "$HOME"/.dotfiles
 $ make sync
 ```
 
-3. Import keys:
+3. Import the GPG keys:
 ```sh
-$ cat public.pgp  | pgp --import
-$ cat private.pgp | pgp --import
+$ pbpaste  | gpg --import
 ```
 
 4. Reboot!

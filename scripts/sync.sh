@@ -5,11 +5,13 @@ SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
-DOOM_EMACS_PATH="$XDG_CONFIG_HOME"/emacs
+# Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
+
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
+DOOM_EMACS_PATH="$XDG_CONFIG_HOME"/emacs
 WORKSPACE="$HOME/workspace"
 
 sync_flake() {

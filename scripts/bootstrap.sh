@@ -41,7 +41,7 @@ append_if_absent() {
 
     # Append if absent
     touch "$file"
-    grep -qF -- "$line" "$file" || echo "$line" >> "$file"
+    grep --quiet --fixed-strings -- "$line" "$file" || echo "$line" >> "$file"
 }
 
 WORKSPACE="$HOME/workspace"
@@ -70,13 +70,19 @@ install_nix_flakes() {
 install_homebrew() {
     info 'Homebrew - Checking...'
     if ! command -v brew > /dev/null; then
-        info 'Homebrew - Installing...'
-
         if ! xcode-select -p > /dev/null; then
            info 'Homebrew - Installing XCode Commandline tools'
            xcode-select --install
         fi
+
+        info 'Homebrew - Installing...'
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        info 'Homebrew - Setting up PATH...'
+        HOMEBREW_PREFIX=/opt/homebrew
+        info "Homebrew - Follow homebrew's instruction but set it up at /etc/zprofile and not ~/.zprofile"
+        press_to_continue
+        source /etc/zprofile
     fi
     success 'Homebrew - Installed!'
 }
@@ -112,6 +118,15 @@ clone_default_repos() {
     success 'Cloning Repos - finished!'
 }
 
+normalize_command_names() {
+  case "$(uname -s)" in
+      Linux*)     alias pbcopy='xsel — clipboard — input'
+                  alias open='xdg-open'
+                  ;;
+      *)          ;;
+  esac
+}
+
 setup_ssh() {
   info 'SSH Key - Checking...'
   if [ ! -f "$SSH_KEY_LOCATION" ]; then
@@ -143,11 +158,12 @@ select_host() {
 
 misc_macos() {
   info 'MacOS - Creating screenshots directory'
-  mkdir "$HOME"/Pictures/screenshots
+  mkdir -pv "$HOME"/Pictures/screenshots
 }
 
 check_requirements
 
+normalize_command_names
 setup_ssh
 install_nix_flakes
 case "$(uname -s)" in

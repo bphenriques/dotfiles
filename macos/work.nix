@@ -2,7 +2,8 @@
   homebrew = {
     taps = [ "homebrew/cask" ];
     casks = [
-      "slack"
+      "google-chrome" # Google Meet
+      "slack"         # The usual rabbit-hole of channels.
     ];
   };
 }
