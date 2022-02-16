@@ -79,15 +79,16 @@
 
     casks = [
       "rectangle"                 # Window management
-      "alacritty"                 # Terminal. Too much hacks around keybindings and broken emacs experience
       "kitty"                     # Terminal. Experimenting this alternative
       "vlc"                       # Media player
       "firefox"                   # Browser
       "intellij-idea-ce"          # JVM IDE
       "keka"                      # Compression
+      "rancher"                   # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576
     ] ++ lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [
       "adoptopenjdk11"            # JDK11
     ];
   };
+
   imports = [ ./org-protocol ];
 }

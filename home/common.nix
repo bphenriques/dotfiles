@@ -32,7 +32,6 @@
     ./config/git
     ./config/scala
     ./config/emacs
-    ./config/alacritty
     ./config/kitty
     ./config/zsh
     ./config/fzf

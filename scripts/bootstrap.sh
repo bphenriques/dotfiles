@@ -80,7 +80,9 @@ install_homebrew() {
 
         info 'Homebrew - Setting up PATH...'
         HOMEBREW_PREFIX=/opt/homebrew
-        info "Homebrew - Follow homebrew's instruction but set it up at /etc/zprofile and not ~/.zprofile"
+        info 'Homebrew - Now follow Homebrew instruction above with extra instructions...'
+        info 'Homebrew - Ensure that /etc/zprofile.orig content is restored to bring back path_helper'
+        info 'Homebrew - Then add add the shellenv helper in /etc/zprofile and not ~/.zprofile'
         press_to_continue
         source /etc/zprofile
     fi
