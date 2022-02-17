@@ -67,14 +67,11 @@
     taps = [
       "homebrew/cask"             # Desktop Apps
       "batchcorp/public"          # For Plumber.
-      "adoptopenjdk/openjdk"      # For JDK
     ];
 
     brews = [
       "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
       "plumber"                   # Useful utility for messaging queues
-    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [
-      "openjdk@17"                # JDK17
     ];
 
     casks = [
@@ -85,8 +82,7 @@
       "intellij-idea-ce"          # JVM IDE
       "keka"                      # Compression
       "rancher"                   # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576
-    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isx86_64 [
-      "adoptopenjdk11"            # JDK11
+      "temurin"                   # JDK: Successor of AdoptOpenJDK
     ];
   };
 
