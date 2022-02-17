@@ -103,7 +103,7 @@ clone_default_repos() {
     info 'Cloning Repos - Checking...'
     if [ ! -d "$WORKSPACE/knowledge-base" ]; then
         info 'Cloning Repos - Knowledge Base...'
-        git clone git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
+        git clone --recurse-submodules git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
     fi
 
     if [ ! -d "$WORKSPACE/journal" ]; then
