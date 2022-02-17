@@ -44,6 +44,13 @@ Thumbs.db
 desktop.ini
 
 ######################
+# Custom Tools
+######################
+
+# direnv temporary directory
+.direnv/
+
+######################
 # Other
 ######################
 

@@ -7,8 +7,10 @@
     gnugrep     # Consistency across different Operating Systems.
     zsh         # The Shell.
     vivid       # LS_COLORS generator because I refuse to use the syntax >.<
+    unstable.direnv      # Automatically load .envrc or .env.
+    unstable.nix-direnv  # Faster direnv for nix environments.
 
-    # Zsh Plugins.
+    # Zsh Plugins
     zinit                           # Zsh plugin manager.
     zsh-powerlevel10k               # Zsh theme.
     zsh-fast-syntax-highlighting    # Zsh syntax highlight.
@@ -44,7 +46,12 @@
 
       # Load Theme - https://github.com/romkatv/powerlevel10k
       . "$ZDOTDIR/powerlevel10k.theme.zsh"
+
+      # Setup direnv with low verbosity
+      export DIRENV_LOG_FORMAT=
+      eval "$(direnv hook zsh)"
     '';
+    "direnv/direnvrc".text = "source ${pkgs.unstable.nix-direnv}/share/nix-direnv/direnvrc"; # Add nix-direnv extension.
     "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
     "zsh/modules/thefuck.zsh".text = ''eval $(${pkgs.thefuck}/bin/thefuck --alias)'';
   };

@@ -14,11 +14,10 @@
     gnupg       # To manage GNUPG keys.
     pinentry    # To input keys.
     wget        # Download stuff.
-    
+
     # Other tools that I use from time to time:
     httpie      # Alternative to curl. Use with `http`.
     ngrok       # Tunneling.
-    hugo        # Blogging. TODO: Move to project instead.
     parallel    # Useful to parallelize tasks.
 
     # Tools I am experimenting:
