@@ -41,7 +41,7 @@
       # Load Plugins
       zinit light "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k"
       zinit light "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions"
-      zinit light "${pkgs.zsh-autosuggestions}//share/zsh-autosuggestions"
+      zinit light "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions"
       export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"
 
       # Load Theme - https://github.com/romkatv/powerlevel10k
