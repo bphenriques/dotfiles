@@ -55,7 +55,7 @@
 
   # Fonts
   fonts = {
-    enableFontDir = true;
+    fontDir.enable = true;
     fonts = [ (pkgs.nerdfonts.override { fonts = [ "Hack" ]; }) ]; # List here: https://github.com/ryanoasis/nerd-fonts
   };
 

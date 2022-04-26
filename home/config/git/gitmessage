@@ -1,5 +1,5 @@
 # <type>(<scope>): Max. 50 characters    ------->
-# type: build ci chore docs feat fix perf refactor revert style test
+# type: feat fix doc perf refactor style test infra ci chore
 #
 # Problem:
 #

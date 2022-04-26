@@ -16,7 +16,7 @@
 
     # Specific packages
     ## Compiling Emacs GCC takes forever, let's pin it.
-    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=216093fad31b410b92d3915fc9750f0399bca817";
+    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=0ab31957afc748f9d618e197dff88a8be1989600";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
