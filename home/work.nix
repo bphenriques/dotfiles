@@ -5,6 +5,7 @@
     google-cloud-sdk
     awscli
     terraform
+    kubectl
     kubelogin-oidc
   ];
 }

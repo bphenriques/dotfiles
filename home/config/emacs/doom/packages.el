@@ -5,10 +5,10 @@
   :recipe (:host github :repo "hasu/notdeft") :pin "1b7054dcfc3547a7cafeb621552cec01d0540478")
 
 (package! ox-hugo
-  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "262b7b432a7f81124fe181c07b57a4f42b6eedc9")
+  :recipe (:host github :repo "kaushalmodi/ox-hugo") :pin "3c699a1ed3f666735974fb90610d60b41e86a3b2")
 
 (package! org-roam
-  :recipe (:host github :repo "org-roam/org-roam") :pin "e8b4822a859ef5d2f2b5b33a4ee3c8c2a3b73d1d")
+  :recipe (:host github :repo "org-roam/org-roam") :pin "007e76725cdee4b16c003aec096e2dd7ab399b56")
 
 (package! org-roam-ui
   :recipe (:host github :repo "org-roam/org-roam-ui") :pin "9474a254390b1e42488a1801fed5826b32a8030b")
