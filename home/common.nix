@@ -1,14 +1,13 @@
 { config, pkgs, lib, ... }:
 {
-  # Basic packages
   home.packages = with pkgs; [
-    # Common Tools:
-    coreutils   # Consistency across different Operating Systems.
+    coreutils   # Consistency across different OS.
+    findutils   # Consistent find and xargs across different OS.
     watch       # Commands on loop.
     tree        # File navigation.
     ripgrep     # Alternative to grep. Use with `rg`.
     fzf         # Fuzzy search.
-    jq          # Json Processor.
+    jq          # Query JSON.
     bat         # Preview with code highlight.
     fd          # A better `find`.
     gnupg       # To manage GNUPG keys.
@@ -25,6 +24,7 @@
     htop        # Fancy `top`.
     exa         # Fancy `ls`.
     tealdeer    # Faster `tldr`.
+    yq          # Query YAML. Similar to JQ.
   ];
 
   imports = [

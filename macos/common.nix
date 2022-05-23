@@ -66,12 +66,10 @@
 
     taps = [
       "homebrew/cask"             # Desktop Apps
-      "batchcorp/public"          # For Plumber.
     ];
 
     brews = [
       "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
-      "plumber"                   # Useful utility for messaging queues
     ];
 
     casks = [

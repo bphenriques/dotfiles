@@ -1,5 +1,5 @@
 {
-  description = "Bruno Henriques's Nix configuration for his machines";
+  description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
     # Packages
