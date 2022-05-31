@@ -32,6 +32,7 @@ in
     sqlite      # Org Roam's database.
     plantuml    # To export Plant UML diagrams.
     xapian      # Notdeft's backend to index files.
+    pandoc      # Preview markdown.
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     pngpaste
   ] ++ lib.optionals pkgs.stdenv.isLinux [

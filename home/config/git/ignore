@@ -20,6 +20,7 @@
 # Scala
 .metals
 .ammonite
+.bsp
 
 # NPM
 node_modules/

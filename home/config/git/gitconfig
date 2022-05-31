@@ -16,7 +16,7 @@
     amend   = commit --amend
     graph   = log --pretty=oneline --graph --abbrev-commit
     patch   = !git --no-pager diff --no-color
-    ls      = log --pretty=format:"%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset" --decorate       # A more concise and readable git log.
+    ls      = log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate
 
 [commit]
     template = ~/.config/git/gitmessage
