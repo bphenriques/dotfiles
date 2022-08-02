@@ -22,7 +22,6 @@
 
     # Web
     wget        # Download stuff.
-    httpie      # Alternative to curl. Use with `http`.
     ngrok       # Tunneling.
 
     # Other
@@ -32,7 +31,10 @@
     procs       # Fancy `ps`.
     htop        # Fancy `top`.
     exa         # Fancy `ls`.
-    yq          # Query YAML. Similar to JQ.
+
+    # Broken packages due to https://github.com/NixOS/nixpkgs/issues/174457
+    #httpie
+    #yq          # Query YAML. Similar to JQ.
   ];
 
   imports = [

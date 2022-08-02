@@ -3,7 +3,7 @@
 
   inputs = {
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";               # Default to stable for most things.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";               # Default to stable for most things.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     # MacOS inputs
