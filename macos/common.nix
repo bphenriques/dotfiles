@@ -69,7 +69,8 @@
     ];
 
     brews = [
-      "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
+      "dateutils"                     # Date utilities. Not supported currently by nix-pkgs
+      "Virtuslab/scala-cli/scala-cli" # Scala scripts
     ];
 
     casks = [

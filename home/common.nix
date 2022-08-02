@@ -7,6 +7,7 @@
     watch
     tree
     parallel
+    gnused
 
     # Search
     ripgrep     # Alternative to grep. Use with `rg`.
