@@ -40,10 +40,6 @@
     in
     {
       darwinConfigurations = with macosLib; {
-        personal-macos = mkMacOSHost {
-          system = "x86_64-darwin";
-          hostModule = ./hosts/personal-macos.nix;
-        };
         work-macos = mkMacOSHost {
           hostModule = ./hosts/work-macos.nix;
           system = "aarch64-darwin";
@@ -59,7 +55,6 @@
 
       # Handy aliases 
       work-macos     = self.darwinConfigurations.work-macos.system;
-      personal-macos = self.darwinConfigurations.personal-macos.system;
       wsl            = self.homeManagerConfigurations.wsl.activationPackage;
     };
 }
