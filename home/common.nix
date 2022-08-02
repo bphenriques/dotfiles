@@ -10,7 +10,7 @@
     gnused
 
     # Search
-    ripgrep     # Alternative to grep. Use with `rg`.
+    ripgrep     # Faster grep.
     fzf         # Fuzzy search.
     jq          # Query JSON.
     fd          # A better `find`.
@@ -24,7 +24,7 @@
     wget        # Download stuff.
     ngrok       # Tunneling.
 
-    # Other
+    # Text
     bat         # Preview with code highlight.
 
     # Experimenting with:
@@ -32,7 +32,7 @@
     htop        # Fancy `top`.
     exa         # Fancy `ls`.
 
-    # Broken packages due to https://github.com/NixOS/nixpkgs/issues/174457
+    # FIXME: Broken packages due to https://github.com/NixOS/nixpkgs/issues/174457
     #httpie
     #yq          # Query YAML. Similar to JQ.
   ];
@@ -47,5 +47,5 @@
     ./config/tmux
   ];
 
-  home.stateVersion = "22.05";
+  home.stateVersion = "22.11";
 }

@@ -8,11 +8,11 @@
 
     # MacOS inputs
     darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";                      # Ensure versions are consistent.
+    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";         # Ensure versions are consistent.
 
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";                # Ensure versions are consistent.
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";   # Ensure versions are consistent.
 
     # Specific packages
     ## Compiling Emacs GCC takes forever, let's pin it.
