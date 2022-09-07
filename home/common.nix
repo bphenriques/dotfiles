@@ -22,10 +22,13 @@
 
     # Web
     wget        # Download stuff.
-    ngrok       # Tunneling.
+    # ngrok       # Tunneling.
 
     # Text
     bat         # Preview with code highlight.
+
+    # Coding
+    gh          # Github Cli
 
     # Experimenting with:
     procs       # Fancy `ps`.

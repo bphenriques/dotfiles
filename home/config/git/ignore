@@ -21,6 +21,7 @@
 .metals
 .ammonite
 .bsp
+.scala-build
 
 # NPM
 node_modules/

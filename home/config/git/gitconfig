@@ -13,10 +13,15 @@
     pick    = cherry-pick
     rb      = rebase
     pushf   = push --force-with-lease
-    amend   = commit --amend
-    graph   = log --pretty=oneline --graph --abbrev-commit
+    amend   = commit --amend --no-edit
+    uncommit = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
+
+    # Tools
     patch   = !git --no-pager diff --no-color
+
+    # History
     ls      = log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate
+    graph   = log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
 
 [commit]
     template = ~/.config/git/gitmessage
@@ -31,11 +36,18 @@
 [rebase]
     autosquash = true           # Automatic fixup! and/or squash!
 
+[fetch]
+    prune = true
+    pruneTags = true
+
+[branch]
+    sort = -committerdate
+
 # ------------------------------
 # Color settings for diff-so-fancy
 # ------------------------------
 [color]
-    ui = auto
+    ui = auto                    # Enable colors in color-supporting terminals
 [color "diff"]
     meta = 11
     frag = magenta bold
