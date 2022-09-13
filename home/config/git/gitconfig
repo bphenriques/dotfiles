@@ -13,7 +13,7 @@
     pick    = cherry-pick
     rb      = rebase
     pushf   = push --force-with-lease
-    amend   = commit --amend --no-edit
+    amend   = commit --amend
     uncommit = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
 
     # Tools
@@ -29,6 +29,7 @@
 
 [tag]
 	gpgSign = true
+  sort    = version:refname # Ensure natural order of commits
 
 [pull]
     rebase = true
