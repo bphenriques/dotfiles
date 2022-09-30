@@ -8,15 +8,15 @@
 
     # MacOS inputs
     darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";         # Ensure versions are consistent.
+    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";             # Ensure versions are consistent.
 
     # Home inputs
     home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";   # Ensure versions are consistent.
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Ensure versions are consistent.
 
     # Specific packages
     ## Compiling Emacs GCC takes forever, let's pin it.
-    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=0ab31957afc748f9d618e197dff88a8be1989600";
+    emacs-overlay.url = "github:nix-community/emacs-overlay?rev=550ce5667fee8f74aa20ad6456720ed84ebdd241";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
@@ -40,10 +40,7 @@
     in
     {
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost {
-          hostModule = ./hosts/work-macos.nix;
-          system = "aarch64-darwin";
-        };
+        work-macos = mkMacOSHost { hostModule = ./hosts/work-macos.nix; };
       };
 
       homeManagerConfigurations = with hmLib; {
