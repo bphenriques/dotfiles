@@ -3,8 +3,9 @@
 {
   home.packages = with pkgs; [
     sbt                     # Build tool.
-    ammonite                # REPL.
     scalafmt                # Linter formatter.
+    unstable.scala-cli      # Scala cli
+    ammonite                # REPL.
   ];
   
   # Ammonite is not XDG_CONFIG_HOME compliant: https://github.com/lihaoyi/Ammonite/issues/696

@@ -73,15 +73,13 @@
     ];
 
     brews = [
-      "dateutils"                     # Date utilities. Not supported currently by nix-pkgs
-      "Virtuslab/scala-cli/scala-cli" # Scala scripts
+      "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
     ];
 
     casks = [
       "rectangle"                 # Window management
       "kitty"                     # Terminal. Experimenting this alternative
       "vlc"                       # Media player
-      "firefox"                   # Browser
       "intellij-idea-ce"          # JVM IDE
       "keka"                      # Compression
       "rancher"                   # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576

@@ -35,8 +35,8 @@
           emacs-overlay
         ];
       };
-      macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs=nixpkgsConfig; };
-      hmLib = import ./lib/home-manager.nix { inherit home-manager; nixpkgs=nixpkgsConfig; };
+      macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs = nixpkgsConfig; };
+      hmLib = import ./lib/home-manager.nix { inherit home-manager; nixpkgs = nixpkgsConfig; };
     in
     {
       darwinConfigurations = with macosLib; {
