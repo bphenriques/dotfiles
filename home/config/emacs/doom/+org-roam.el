@@ -30,8 +30,8 @@
         :desc "List"                    "l"    #'org-roam-dailies-find-directory)))
 
   (setq org-roam-directory org-knowledge-base-directory)    ; Ensure org-roam is pointing to my knowledge-base by default.
-  (org-roam-db-autosync-mode)                               ; Ensure org-roam is available at startup.
   :config
+  (org-roam-db-autosync-mode +1)                               ; Ensure org-roam is available at startup.
   (setq org-roam-capture-templates
         '(
           ("d" "default" plain

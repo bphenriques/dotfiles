@@ -42,3 +42,30 @@ The mentioned directories are considered as they can be written by users that ar
 ```sh
 compaudit | xargs chmod go-w
 ```
+
+### 3. Nix Darwin warning regarding `/etc/nix/nix.conf`
+
+This file already exists after first install. Back it up and re-apply nix-darwin:
+```shell
+sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.bkup
+```
+
+See https://github.com/LnL7/nix-darwin/issues/458
+
+### 4. Emacs do not start
+
+If emacs hangs while starting:
+```
+$ e
+emacsclient: can't find socket; have you started the server?
+emacsclient: To start the server in Emacs, type "M-x server-start".
+Package cl is deprecated
+```
+
+This is due to the sqlite that is not available as it is not compiled yet. Force it to compile by:
+1. Comment `(org-roam-db-autosync-mode +1)`
+2. `make sync`
+3. Start emacs
+4. Run the `org-roam-node-find` (`SPC-k-f`)
+5. Uncomment `(org-roam-db-autosync-mode +1)`
+6. `make sync`

@@ -16,22 +16,20 @@
       ({ pkgs, lib, ... }:
         {
           nix.package = pkgs.nixVersions.stable;
-          nix.extraOptions = ''
-            auto-optimise-store = true
-            experimental-features = nix-command flakes
-          '';
         }
       )
       {
         nixpkgs = nixpkgs;
         home-manager.useGlobalPkgs = true;      # For consistency, use global pkgs configured via the system level nixpkgs options.
         home-manager.useUserPackages = true;    # Install packages defined in home-manager.
+        services.nix-daemon.enable = true;      # Using nix-daemon (the only supported way).
 
-        # Mark as using nix-daemon (which is the only supported way).
-        services.nix-daemon.enable = true;
+        nix.settings = {
+          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+          auto-optimise-store = true;                         # Ensure /nix/store does not grow eternally.
+        };
 
-        # Nix-Darwin
-        system.stateVersion = 4;
+        system.stateVersion = 4;                              # Nix-Darwin config version.
       }
       hostModule
     ];
