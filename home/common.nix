@@ -26,6 +26,7 @@
 
     # Text
     bat         # Preview with code highlight.
+    nb          # Notebook CLI tool.
 
     # Coding
     gh          # Github Cli

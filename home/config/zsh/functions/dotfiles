@@ -1,0 +1,50 @@
+LOCATION="$HOME/.dotfiles"
+
+usage() {
+   echo "dotfiles [o]pen"
+   echo "dotfiles [e]dit"
+   echo "dotfiles [s]ync"
+   echo "dotfiles [u]pdate"
+}
+
+open() {
+  cd "$LOCATION"
+}
+
+edit() {
+  $EDITOR "$LOCATION"
+}
+
+sync() {
+  cd "$LOCATION"
+  make sync
+}
+
+update() {
+  cd "$LOCATION"
+  make update
+}
+
+
+if [ $# -eq 0 ]; then
+    open
+else
+  while [ "$1" != "" ]; do
+      case $1 in
+          o | open )          shift
+                              open
+                              ;;
+          e | edit )          shift
+                              edit
+                              ;;
+          s | sync )          shift
+                              sync
+                              ;;
+          u | update )        shift
+                              update
+                              ;;
+          * )                 usage
+                              exit 1
+      esac
+  done
+fi
