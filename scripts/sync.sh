@@ -18,7 +18,7 @@ sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
   nix build ".#$HOST_TARGET"
   case "$(uname -s)" in
-      Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET" --show-trace
+      Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
                   ;;
       *)          ./result/activate
                   ;;
