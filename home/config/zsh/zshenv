@@ -1,7 +1,7 @@
-# Ensure term is set
+# Ensure term is set with the right color
 export TERM=screen-256color
 
-# XDG Compliant
+# XDG compliance
 export XDG_CONFIG_HOME="$HOME"/.config
 export XDG_DATA_HOME="$XDG_CONFIG_HOME"/local/share
 export XDG_CACHE_HOME="$XDG_CONFIG_HOME"/cache
