@@ -15,7 +15,6 @@
     pushf     = push --force-with-lease
     amend     = commit --amend
     uncommit  = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
-    pwd       = symbolic-ref --short HEAD # current branch
 
     # Tools
     patch   = !git --no-pager diff --no-color

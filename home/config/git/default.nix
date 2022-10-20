@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
 
-
 {
   home.packages = with pkgs; [
     git                             # Should be already installed.
