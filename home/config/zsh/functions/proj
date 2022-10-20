@@ -1,15 +1,11 @@
 test -z "$WORKSPACE" && echo "Environment variable WORKSPACE is not set. Aborting!" && exit 1
-BASE_FOLDER="$WORKSPACE"
 
 usage() {
-   echo "proj --project <project-name> [--change-tmux-window-name]"
+   echo "proj [project-name]"
 }
 
 while [ "$1" != "" ]; do
     case $1 in
-        --change-tmux-window-name )
-                                change_tmux_window_name=1
-                                ;;
         -p | --project )        shift
                                 project="$1"
                                 ;;
@@ -20,14 +16,10 @@ while [ "$1" != "" ]; do
 done
 
 if [ ! -z "$project" ]; then
-   target="$(ls -d "$BASE_FOLDER"/* | xargs -n 1 basename | fzf --filter="$project" | fzf --exit-0 --select-1 --layout=reverse)"
-
-   if [[ -d "$BASE_FOLDER/$target" ]]; then
-      cd "$BASE_FOLDER/$target"
-      if [ ! -z "$change_tmux_window_name" ]; then
-         tmux rename-window -t $(tmux display-message -p '#I') "$target" 
-      fi
+   target="$(ls -d "$WORKSPACE"/* | xargs -n 1 basename | fzf --filter="$project" | fzf --exit-0 --select-1 --layout=reverse)"
+   if [[ -d "$WORKSPACE/$target" ]]; then
+      cd "$WORKSPACE/$target"
    fi
 else
-   cd "$BASE_FOLDER"
+   cd "$WORKSPACE"
 fi
