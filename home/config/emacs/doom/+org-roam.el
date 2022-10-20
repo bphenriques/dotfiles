@@ -30,8 +30,14 @@
         :desc "List"                    "l"    #'org-roam-dailies-find-directory)))
 
   (setq org-roam-directory org-knowledge-base-directory)    ; Ensure org-roam is pointing to my knowledge-base by default.
+  ; Force emacsql lite to compile as triggering org-roam-db-autosync-mode minor mode does not.
+  (unless (file-executable-p emacsql-sqlite-executable)
+        (emacsql-sqlite-compile 2)
+        (unless (file-executable-p emacsql-sqlite-executable)
+          (message (concat "Failed to build emacsql; forge may not work correctly.\n"
+                           "See *Compile-Log* buffer for details"))))
   :config
-  (org-roam-db-autosync-mode +1)                               ; Ensure org-roam is available at startup.
+  (org-roam-db-autosync-mode)                               ; Ensure org-roam is available at startup.
   (setq org-roam-capture-templates
         '(
           ("d" "default" plain
