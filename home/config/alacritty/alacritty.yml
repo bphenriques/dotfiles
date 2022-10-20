@@ -15,10 +15,7 @@ font:
     family: Hack Nerd Font Mono
     style: Italic
 
-# Colors (Doom One): https://github.com/hlissner/emacs-doom-themes
-# Nice Themes:
-#  - https://github.com/eendroroy/alacritty-theme
-#  - https://github.com/sindresorhus/hyper-snazzy
+# Theme inspired by Doom One: https://github.com/hlissner/emacs-doom-themes
 colors:
   # Default colors
   primary:

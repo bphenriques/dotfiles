@@ -13,12 +13,13 @@ done
 . "$ZDOTDIR/aliases.zsh"                         # Load Aliases.
 . "$ZDOTDIR/auto-completions.zsh"                # Load Auto completions.
 
+# Load any local zshrc scripts if present.
+[ -s "$HOME"/.zshrc.local ] && source "$HOME"/.zshrc.local
+
 # Should this go to zlogin file?
 if command -v tmux > /dev/null; then
   if [ -z "$TMUX" ]; then
     exec tmux new-session;
     exit;
-  else
-    [[ -v TMUX_OPEN_PROJECT ]] && proj --change-tmux-window-name --project "$(tmux display-message -p '#{window_name}')"
   fi
 fi
