@@ -28,12 +28,9 @@ Follows main sources:
 
 Add the following in your `$ZDOTDIR/.zprofile` (here to ensure precedence):
 ```sh
-# Ensure Nix is sourced.
+# Source Nix and Home-Manager
 test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-
-# Ensure Home-Manager is sourced.
 test -f /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh && . /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
-export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
 
 #### 2. `zsh compinit: insecure directories, run compaudit for list.`
@@ -52,20 +49,9 @@ sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.bkup
 
 See https://github.com/LnL7/nix-darwin/issues/458
 
-### 4. Emacs do not start
+### 5. Can't run `p10k configure` as the `/nix/store/` is readonly
 
-If emacs hangs while starting:
+Manually change the p10k location and run the command ([source](https://github.com/romkatv/powerlevel10k/issues/967)):
+```shell
+$ POWERLEVEL9K_CONFIG_FILE=hello.p10k p10k configure
 ```
-$ e
-emacsclient: can't find socket; have you started the server?
-emacsclient: To start the server in Emacs, type "M-x server-start".
-Package cl is deprecated
-```
-
-This is due to the sqlite that is not available as it is not compiled yet. Force it to compile by:
-1. Comment `(org-roam-db-autosync-mode +1)`
-2. `make sync`
-3. Start emacs
-4. Run the `org-roam-node-find` (`SPC-k-f`)
-5. Uncomment `(org-roam-db-autosync-mode +1)`
-6. `make sync`
