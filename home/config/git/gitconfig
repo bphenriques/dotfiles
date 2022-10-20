@@ -8,13 +8,14 @@
     pager = diff-so-fancy | less --tabs=4 -RFX
 
 [alias]
-    co      = checkout
-    s       = status -s
-    pick    = cherry-pick
-    rb      = rebase
-    pushf   = push --force-with-lease
-    amend   = commit --amend
-    uncommit = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
+    co        = checkout
+    s         = status -s
+    pick      = cherry-pick
+    rb        = rebase
+    pushf     = push --force-with-lease
+    amend     = commit --amend
+    uncommit  = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
+    pwd       = symbolic-ref --short HEAD # current branch
 
     # Tools
     patch   = !git --no-pager diff --no-color
@@ -24,12 +25,12 @@
     graph   = log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
 
 [commit]
-    template = ~/.config/git/gitmessage
-    gpgsign = true
+    template  = ~/.config/git/gitmessage
+    gpgsign   = true
 
 [tag]
 	gpgSign = true
-  sort    = version:refname # Ensure natural order of commits
+  sort    = version:refname     # Ensure natural order of commits
 
 [pull]
     rebase = true
@@ -38,7 +39,7 @@
     autosquash = true           # Automatic fixup! and/or squash!
 
 [fetch]
-    prune = true
+    prune     = true
     pruneTags = true
 
 [branch]
