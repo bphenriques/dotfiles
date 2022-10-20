@@ -35,10 +35,6 @@
     procs       # Fancy `ps`.
     htop        # Fancy `top`.
     exa         # Fancy `ls`.
-
-    # FIXME: Broken packages due to https://github.com/NixOS/nixpkgs/issues/174457
-    #httpie
-    #yq          # Query YAML. Similar to JQ.
   ];
 
   imports = [
