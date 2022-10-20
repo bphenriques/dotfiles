@@ -1,11 +1,12 @@
 #
-# History - http://zsh.sourceforge.net/Doc/Release/Options.html @ 16.2.4 History
+# History - http://zsh.sourceforge.net/Doc/Release/Options.html @16.2.4 History
 #
 HISTFILE="$ZDOTDIR"/.zsh_history # Change default file away from zsh folder.
 HISTSIZE=10000                   # Number of entries to keep in memory.
 SAVEHIST="$HISTSIZE"             # Number of entries to keep in file.
 
-setopt APPEND_HISTORY            # Appends history to history file on exit
+setopt HIST_FCNTL_LOCK           # Safer and faster locking in newer OS.
+setopt APPEND_HISTORY            # Appends history to history file on exit.
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
 setopt SHARE_HISTORY             # Share history between all sessions.
 setopt HIST_EXPIRE_DUPS_FIRST    # Expire a duplicate event first when trimming history.
@@ -26,6 +27,6 @@ setopt AUTO_CD                   # Auto changes to a directory without typing cd
 # More interactive sessions settings
 #
 set -o emacs                                    # Explicitly set emacs as my keyboard mapping.
-export GPG_TTY=$(tty)                           # Load GPG.
+export GPG_TTY=$TTY                             # Load GPG.
 export CLICOLOR=1                               # Enable ls colors in MacOS. Is it relevant when using coreutils?
 export LS_COLORS="$(vivid generate snazzy)"     # Generates the color palette. Alternative is to use `eval "$(dircolors <path>)"" with an awkard syntax.

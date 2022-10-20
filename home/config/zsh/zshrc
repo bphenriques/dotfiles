@@ -1,3 +1,10 @@
+if command -v tmux > /dev/null; then
+  if [ -z "$TMUX" ]; then
+    exec tmux new-session;
+    exit;
+  fi
+fi
+
 . "$ZDOTDIR/config.zsh"    # Load ZSH and Interactive Shell Configuration.
 . "$ZDOTDIR/plugins.zsh"   # Load Plugins.
 
@@ -15,11 +22,3 @@ done
 
 # Load any local zshrc scripts if present.
 [ -s "$HOME"/.zshrc.local ] && source "$HOME"/.zshrc.local
-
-# Should this go to zlogin file?
-if command -v tmux > /dev/null; then
-  if [ -z "$TMUX" ]; then
-    exec tmux new-session;
-    exit;
-  fi
-fi

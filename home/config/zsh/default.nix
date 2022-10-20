@@ -11,7 +11,6 @@
     unstable.nix-direnv  # Faster direnv for nix environments.
 
     # Zsh Plugins
-    zinit                           # Zsh plugin manager.
     zsh-powerlevel10k               # Zsh theme.
     zsh-fast-syntax-highlighting    # Zsh syntax highlight.
 
@@ -35,21 +34,23 @@
 
     # Setup Zsh Plugins
     "zsh/plugins.zsh".text               = ''
-      # Load Zsh Plugin Manager
-      . "${pkgs.zinit}/share/zinit/zinit.zsh"       
+      (( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
+
+      if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+      fi
+
+      (( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"
+      export DIRENV_LOG_FORMAT=
 
       # Load Plugins
-      zinit light "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k"
-      zinit light "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions"
-      zinit light "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions"
+      . ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      . ${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh
+      . ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
       export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"
 
       # Load Theme - https://github.com/romkatv/powerlevel10k
       . "$ZDOTDIR/powerlevel10k.theme.zsh"
-
-      # Setup direnv with low verbosity
-      export DIRENV_LOG_FORMAT=
-      eval "$(direnv hook zsh)"
     '';
     "direnv/direnvrc".text = "source ${pkgs.unstable.nix-direnv}/share/nix-direnv/direnvrc"; # Add nix-direnv extension.
     "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
