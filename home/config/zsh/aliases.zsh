@@ -6,8 +6,9 @@ alias mkdir='mkdir -pv'
 # Text Processing
 alias grep='grep --color'
 
-# Test Editor
+# Text Editor
 alias e="$EDITOR"
+alias p="$PAGER"
 alias emacsclient='emacsclient --tty --alternate-editor ""' # Start emacs daemon if not running already.
 alias killemacs='emacsclient --eval "(kill-emacs)"'
 
