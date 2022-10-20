@@ -21,5 +21,12 @@ export PAGER="less -iMR"
 # Default directory for repositories
 export WORKSPACE="$HOME"/workspace
 
+# Colors
+export CLICOLOR=1                               # Enable ls colors in MacOS. Is it relevant when using coreutils?
+export LS_COLORS="$(vivid generate snazzy)"     # Generates the color palette. Alternative is to use `eval "$(dircolors <path>)"" with an awkard syntax.
+
+# Other
+export GPG_TTY=$TTY                             # Set GPG.
+
 # Sensitive/local variables are stored separately
 [ -s "$HOME"/.zshenv.local ] && source "$HOME"/.zshenv.local
