@@ -10,17 +10,15 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Pre-Requirements
 
-1. Ensure `nix` is installed and sourced: https://nixos.org/manual/nix/stable/installation/installing-binary.html
-
-   ```aidl
-   test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
+   ```shell
+   $ test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
    ```
 
 # Setup
 
 | Host | Operating System |
 |-|-|
-| [`personal-macos`](hosts/personal-macos.nix) | macOS |
 | [`work-macos`](hosts/work-macos.nix) | macOS |
 | [`wsl`](hosts/wsl.nix) | Ubuntu (WSL) |
 
@@ -44,13 +42,14 @@ $ pbpaste  | gpg --import
 
 # Updating
 
+The following will update `flack.lock` and Doom Emacs.
 ```sh
 $ make update
 ```
 
-This will update both `flake.lock` and Doom Emacs. Check if everything is stable before committing.
+Check if everything is stable before committing.
 
-It is also possible to see the list of updated packages between Nix generations:
+For reference, it is also possible to see the list of updated packages between Nix generations:
 ```sh
 $ nix profile diff-closures --profile /nix/var/nix/profiles/system
 ```
@@ -73,6 +72,6 @@ $ nix profile diff-closures --profile /nix/var/nix/profiles/system
     - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
     - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)
 
-If you are new to dotfiles, I suggest looking for a more direct solution using a mixture of bare git repository and [`stow`](https://www.gnu.org/software/stow/) to symlink all the dotfiles. Start small and build up and make the tools work for you :)
+If you are new to dotfiles, I suggest looking for a more direct solution using a bare git repository. Start small and build up and make the tools work for you.
 
 Feel free to contact me if you need help!
