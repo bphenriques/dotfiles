@@ -15,15 +15,15 @@ edit() {
   $EDITOR "$LOCATION"
 }
 
-sync() {
+sync() (
   cd "$LOCATION"
   make sync
-}
+)
 
-update() {
+update() (
   cd "$LOCATION"
   make update
-}
+)
 
 
 if [ $# -eq 0 ]; then
