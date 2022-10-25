@@ -1,6 +1,6 @@
 test -z "$WORKSPACE" && echo "Environment variable WORKSPACE is not set. Aborting!" && exit 1
 
-usage() {
+__proj_usage() {
    echo "proj [project-name]"
 }
 
@@ -9,7 +9,7 @@ while [ "$1" != "" ]; do
         -p | --project )        shift
                                 project="$1"
                                 ;;
-        * )                     usage
+        * )                     __proj_usage
                                 exit 1
     esac
     shift
