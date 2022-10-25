@@ -5,6 +5,8 @@ SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
 
+DEBUG=${DEBUG:-0}
+
 # Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
@@ -16,7 +18,11 @@ WORKSPACE="$HOME/workspace"
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
-  nix build ".#$HOST_TARGET"
+  if [[ "$DEBUG" != "0" ]]; then
+    nix build ".#$HOST_TARGET"  --show-trace
+  else
+    nix build ".#$HOST_TARGET"
+  fi
   case "$(uname -s)" in
       Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
                   ;;
