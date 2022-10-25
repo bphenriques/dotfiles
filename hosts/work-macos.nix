@@ -9,6 +9,8 @@
 
   # Setup Home-manager
   environment.shells = [ pkgs.zsh ];
+
+  users.users."brunohenriques".home = "/Users/brunohenriques";
   home-manager.users."brunohenriques" = {
     imports = [
       ../home/common.nix
