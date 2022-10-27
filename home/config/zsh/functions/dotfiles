@@ -1,26 +1,26 @@
 LOCATION="$HOME/.dotfiles"
 
-__dot_usage() {
+__dotfiles_usage() {
    echo "dot [o]pen"
    echo "dot [e]dit"
    echo "dot [s]ync"
    echo "dot [u]pdate"
 }
 
-__dot_open() {
+__dotfiles_open() {
   cd "$LOCATION"
 }
 
-__dot_edit() {
+__dotfiles_edit() {
   $EDITOR "$LOCATION"
 }
 
-__dot_sync() (
+__dotfiles_sync() (
   cd "$LOCATION"
   make sync
 )
 
-__dot_update() (
+__dotfiles_update() (
   cd "$LOCATION"
   make update
 )
@@ -31,18 +31,18 @@ else
   while [ "$1" != "" ]; do
       case $1 in
           o | open )          shift
-                              __dot_open
+                              __dotfiles_open
                               ;;
           e | edit )          shift
-                              __dot_edit
+                              __dotfiles_edit
                               ;;
           s | sync )          shift
-                              __dot_sync
+                              __dotfiles_sync
                               ;;
           u | update )        shift
-                              __dot_update
+                              __dotfiles_update
                               ;;
-          * )                 __dot_usage
+          * )                 __dotfiles_usage
                               exit 1
       esac
   done
