@@ -52,7 +52,7 @@
       # Load Theme - https://github.com/romkatv/powerlevel10k
       . "$ZDOTDIR/powerlevel10k.theme.zsh"
     '';
-    "direnv/direnvrc".text = "source ${pkgs.unstable.nix-direnv}/share/nix-direnv/direnvrc"; # Add nix-direnv extension.
+    "direnv/direnvrc".text = "source ${pkgs.unstable.nix-direnv}/share/nix-direnv/direnvrc";
     "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
     "zsh/modules/thefuck.zsh".text = ''eval $(${pkgs.thefuck}/bin/thefuck --alias)'';
   };

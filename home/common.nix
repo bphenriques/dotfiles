@@ -11,7 +11,6 @@
 
     # Search
     ripgrep     # Faster grep.
-    fzf         # Fuzzy search.
     jq          # Query JSON.
     fd          # A better `find`.
     tealdeer    # Faster `tldr`.
@@ -22,7 +21,6 @@
 
     # Web
     wget        # Download stuff.
-    # ngrok       # Tunneling.
 
     # Text
     bat         # Preview with code highlight.

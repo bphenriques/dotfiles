@@ -1,16 +1,16 @@
 { config, pkgs, lib, ... }:
 
-{ 
-  # MacOS specific settings
+{
   imports = [
     ../macos/common.nix
     ../macos/work.nix
   ];
 
-  # Setup Home-manager
+  # Nix Darwin
   environment.shells = [ pkgs.zsh ];
-
   users.users."brunohenriques".home = "/Users/brunohenriques";
+
+  # Home Manager
   home-manager.users."brunohenriques" = {
     imports = [
       ../home/common.nix

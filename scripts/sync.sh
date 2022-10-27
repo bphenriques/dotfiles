@@ -31,7 +31,6 @@ sync_flake() {
   esac
 }
 
-
 sync_emacs() {
   if [ ! -d "$DOOM_EMACS_PATH" ]; then
       info 'Doom Emacs - Not installed. Installing...'
