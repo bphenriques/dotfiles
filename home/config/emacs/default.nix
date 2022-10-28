@@ -23,10 +23,10 @@ in
 
     # Doom emacs dependencies
     # https://github.com/hlissner/doom-emacs
-    coreutils   # Consistency across different Operating Systems.
-    git         # Doom Emacs's dependency. Should be already installed.
-    ripgrep     # Doom Emacs's dependency. Alternative to grep.
-    fd          # Doom Emacs's dependency. Faster and more user-friendly find.
+    coreutils
+    git
+    ripgrep
+    fd
 
     # Modules dependencies
     sqlite      # Org Roam's database.
@@ -46,7 +46,9 @@ in
     })
   ];
 
-  xdg.configFile = {
-    "doom".source = ./doom;
+  xdg.configFile."doom".source = ./doom;
+  home.shellAliases = {
+    emacsclient = ''emacsclient --tty --alternate-editor ""''; # Start emacs daemon if not running already.
+    killemacs   = ''emacsclient --eval "(kill-emacs)"'';
   };
 }

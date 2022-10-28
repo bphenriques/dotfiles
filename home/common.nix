@@ -1,9 +1,11 @@
 { config, pkgs, lib, ... }:
 {
+  xdg.enable = true;              # XDG Compliance to unclutter $HOME folder.
   home.packages = with pkgs; [
     # Consistent UNIX command line tools
     coreutils
     findutils
+    gnugrep
     watch
     tree
     parallel
@@ -43,6 +45,13 @@
     ./config/zsh
     ./config/fzf
     ./config/tmux
+
+    # Modules
+    ../modules/shell/zsh.nix
+    ../modules/shell/fzf-extra.nix
+    ../modules/shell/thefuck.nix
+    ../modules/shell/direnv.nix
+    ../modules/shell/powerlevel10k.nix
   ];
 
   home.stateVersion = "22.11";

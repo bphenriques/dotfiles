@@ -1,59 +1,108 @@
 { config, lib, pkgs, ... }:
 
+with lib;
 {
   home.packages = with pkgs; [
-    # Basic Packages
-    coreutils   # Consistency across different Operating Systems.
-    gnugrep     # Consistency across different Operating Systems.
-    zsh         # The Shell.
     vivid       # LS_COLORS generator because I refuse to use the syntax >.<
-    unstable.direnv      # Automatically load .envrc or .env.
-    unstable.nix-direnv  # Faster direnv for nix environments.
 
-    # Zsh Plugins
-    zsh-powerlevel10k               # Zsh theme.
-    zsh-fast-syntax-highlighting    # Zsh syntax highlight.
-
-    # Utilitary
+    # Utility
     ripgrep     # Alternative to grep.
-    fzf         # Fuzzy search.
     bat         # Better file preview.
-    thefuck     # Amend previous command.
+    thefuck     # Fix some commands
   ];
 
-  # I manage my own zsh folder as I enjoy knowing what I put there.
-  home.file.".zshenv".source = ./zshenv;
-  xdg.configFile = {
-    # Main files
-    "zsh/.zprofile".source               = ./zprofile;
-    "zsh/.zshrc".source                  = ./zshrc;
-    "zsh/config.zsh".source              = ./config.zsh;
-    "zsh/aliases.zsh".source             = ./aliases.zsh;
-    "zsh/auto-completions.zsh".source    = ./auto-completions.zsh;
-    "zsh/functions".source               = ./functions;
+  home = {
+    sessionVariables = {
+      TERM    = "screen-256color";              # Ensure term is set with the right color
 
-    # Setup Zsh Plugins
-    "zsh/plugins.zsh".text               = ''
-      (( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
+      # Set locale and UTF-8
+      LANG    = "en_US.UTF-8";
+      LC_ALL  = "en_US.UTF-8";
 
-      if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-        source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-      fi
+      # Default editors and settings
+      EDITOR  = "emacsclient";
+      VISUAL  = "$EDITOR";
+      PAGER   = "less -iMR";
 
-      (( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"
-      export DIRENV_LOG_FORMAT=
+      # Colors
+      CLICOLOR  = 1;                            # Enable ls colors in MacOS.
+      LS_COLORS ="$(vivid generate snazzy)";    # Generates the color palette.
 
-      # Load Plugins
-      . ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-      . ${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh
-      . ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-      export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"
+      WORKSPACE = "$HOME/workspace";            # Default directory for repositories
+    };
 
-      # Load Theme - https://github.com/romkatv/powerlevel10k
-      . "$ZDOTDIR/powerlevel10k.theme.zsh"
-    '';
-    "direnv/direnvrc".text = "source ${pkgs.unstable.nix-direnv}/share/nix-direnv/direnvrc";
-    "zsh/powerlevel10k.theme.zsh".source = ./powerlevel10k.theme.zsh;
-    "zsh/modules/thefuck.zsh".text = ''eval $(${pkgs.thefuck}/bin/thefuck --alias)'';
+    shellAliases = {
+      # Files
+      ls    = "ls --color=auto";
+      la    = "ls -la";
+      mkdir = "mkdir -pv";
+
+      # Text Processor
+      e           = "$EDITOR";
+      p           = "$PAGER";
+      grep        = "grep --color";
+    };
+  };
+
+
+  programs.zsh.enable = false;    # Manage ZSH myself.
+  modules = {
+    powerlevel10k = {
+      enable                = true;
+      enableZshIntegration  = true;
+      configuration         = ./powerlevel10k.theme.zsh;
+      fastPrompt.enable     = true;
+    };
+
+    thefuck = {
+      enable                = true;
+      enableZshIntegration  = true;
+    };
+
+    direnv = {
+      enable                        = true; # Automatically load .envrc or .env.
+      nix-direnv.enable             = true; # Faster direnv for nix environments.
+      enableZshIntegration          = true;
+      enablePowerlevel10kFastPrompt = true;
+    };
+
+    zsh = {
+      enable = true;
+      envExtra = concatStringsSep "\n" [
+        # MacOS: Homebrew
+        (optionalString (pkgs.stdenv.system == "aarch64-darwin") ''eval "$(/opt/homebrew/bin/brew shellenv)"'')
+
+        # Local session variables
+        ''[ -s "$HOME"/.zshenv.local ] && source "$HOME"/.zshenv.local''
+      ];
+
+      initExtraBeforePlugins = (builtins.readFile ./config.zsh);
+
+      plugins = {
+        enableFastSyntaxHighlighting = true;
+        list = [
+          {
+            name = "zsh-autosuggestions";
+            src = pkgs.zsh-autosuggestions;
+            file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
+            afterSource = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
+          }
+        ];
+      };
+
+      functions = [
+        ./functions/dotfiles
+        ./functions/load-env
+      ];
+
+      initExtraBeforeCompInit = ''
+        zstyle ':completion:*' menu select=2        # Makes sure that tab-completion is available iff number_items > 2
+      '';
+
+      initExtraAfterCompInit = ''
+        # Load any local zshrc scripts if present.
+        [ -s "$HOME"/.zshrc.local ] && source "$HOME"/.zshrc.local
+      '';
+    };
   };
 }
