@@ -1,8 +1,6 @@
-if command -v tmux > /dev/null; then
-  if [ -z "$TMUX" ]; then
-    exec tmux new-session;
-    exit;
-  fi
+if test -z "$SKIP_TMUX" && command -v tmux > /dev/null && test -z "$TMUX"; then
+  exec tmux new-session -A -s main;
+  exit;
 fi
 
 . "$ZDOTDIR/config.zsh"    # Load ZSH and Interactive Shell Configuration.
