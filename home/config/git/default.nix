@@ -12,6 +12,6 @@
      "git/config".source                       = ./gitconfig;
      "git/ignore".source                       = ./ignore;
      "git/gitmessage".source                   = ./gitmessage;
-     "zsh/modules/git_fzf_complete.zsh".source = ./fzf_complete.zsh;
+     "zsh/modules/git_fzf_complete.zsh".source = ./_fzf_complete_git.zsh;
   };
 }
