@@ -1,7 +1,7 @@
 #
 # History - http://zsh.sourceforge.net/Doc/Release/Options.html @16.2.4 History
 #
-HISTFILE="$XDG_DATA_HOME"/.zsh_history  # Change default file away from zsh folder.
+HISTFILE="$ZDOTDIR"/.zsh_history  # Change default file away from zsh folder.
 HISTSIZE=10000                          # Number of entries to keep in memory.
 SAVEHIST="$HISTSIZE"                    # Number of entries to keep in file.
 
