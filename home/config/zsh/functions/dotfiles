@@ -1,10 +1,10 @@
 LOCATION="$HOME/.dotfiles"
 
 __dotfiles_usage() {
-   echo "dot [o]pen"
-   echo "dot [e]dit"
-   echo "dot [s]ync"
-   echo "dot [u]pdate"
+   echo "dotfiles [o]pen"
+   echo "dotfiles [e]dit"
+   echo "dotfiles [s]ync"
+   echo "dotfiles [u]pdate"
 }
 
 __dotfiles_open() {
@@ -26,7 +26,7 @@ __dotfiles_update() (
 )
 
 if [ $# -eq 0 ]; then
-    open
+    __dotfiles_open
 else
   while [ "$1" != "" ]; do
       case $1 in
