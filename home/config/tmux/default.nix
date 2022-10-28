@@ -4,7 +4,11 @@
   home.packages = with pkgs; [
     tmux
     tmuxPlugins.yank
-  ]; # Not using `enable: true` as I manage by my own config.
+  ];
+
+  home.shellAliases = {
+    reload      = "tmux respawn-pane -k";
+  };
 
   xdg.configFile = {
     "tmux/tmux.conf".source        = ./tmux.conf;
@@ -13,4 +17,11 @@
       run-shell ${pkgs.tmuxPlugins.yank}/share/tmux-plugins/yank/yank.tmux
     '';
   };
+
+  modules.powerlevel10k.fastPrompt.beforeInit = ''
+    if test -z "$SKIP_TMUX" && command -v tmux > /dev/null && test -z "$TMUX"; then
+      exec tmux new-session;
+      exit;
+    fi
+  '';
 }

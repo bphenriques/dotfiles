@@ -1,4 +1,0 @@
-# Source Nix & Home-Manager
-test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-test -f /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh && . /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
-export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
