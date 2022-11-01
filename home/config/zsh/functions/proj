@@ -1,25 +1,34 @@
 test -z "$WORKSPACE" && echo "Environment variable WORKSPACE is not set. Aborting!" && exit 1
 
 __proj_usage() {
-   echo "proj [project-name]"
+   echo "proj [name]"
 }
 
-while [ "$1" != "" ]; do
-    case $1 in
-        -p | --project )        shift
-                                project="$1"
-                                ;;
-        * )                     __proj_usage
-                                exit 1
-    esac
-    shift
-done
+__proj_cd() {
+  cd "$WORKSPACE"
+}
 
-if [ ! -z "$project" ]; then
-   target="$(ls -d "$WORKSPACE"/* | xargs -n 1 basename | fzf --filter="$project" | fzf --exit-0 --select-1 --layout=reverse)"
-   if [[ -d "$WORKSPACE/$target" ]]; then
-      cd "$WORKSPACE/$target"
-   fi
+__proj_find_project() {
+  project_name="$1"
+  ls -d "$WORKSPACE"/* | xargs -n 1 basename | \
+    fzf --filter="$project_name" | \
+    fzf --exit-0 --select-1 --layout=reverse
+}
+
+__proj_goto() {
+  project_name="$1"
+  target="$(__proj_find_project "$1")"
+  if [[ -d "$WORKSPACE/$target" ]]; then
+    cd "$WORKSPACE/$target"
+  else
+    __proj_cd
+  fi
+}
+
+if [ $# -eq 0 ]; then
+  __proj_cd
+elif [ $# -eq 1 ]; then
+  __proj_goto "$1"
 else
-   cd "$WORKSPACE"
+  __proj_usage
 fi
