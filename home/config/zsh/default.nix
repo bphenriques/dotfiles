@@ -96,8 +96,8 @@ with lib;
       };
 
       functions = [
-        ./functions/dotfiles
-        ./functions/load-env
+        ./functions/dotfiles.zsh
+        ./functions/load-env.zsh
       ];
 
       initExtraBeforeCompInit = ''
