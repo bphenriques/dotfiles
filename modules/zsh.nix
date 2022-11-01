@@ -54,6 +54,7 @@ let
   };
 in
 {
+
   options.modules.zsh = {
     enable = mkEnableOption "Z shell (Zsh)";
 
@@ -110,22 +111,20 @@ in
     {
       assertions = [
         {
-          assertion =  true;#$config.zsh.enable;
-          message = "This module does not work at the same time as the Home-Manager zsh module";
+          assertion = !config.programs.zsh.enable;
+          message = "Home-Manager's zsh module is enabled. This custom module is not compatible with both setups at the same time.";
         }
       ];
     }
-
     # Setup ZSHENV
     {
       home.file.".zshenv".text = ''
-        # Source nix & home-manager
+        # Source nix & Home-Manager packages
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-        test -f "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh" && . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
         export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 
         # Source session variables
-        ${config.lib.zsh.exportAll config.home.sessionVariables}
+        test -f "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh" && . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
 
         # Override ZSH location to unclutter $HOME folder
         export ZDOTDIR="$XDG_CONFIG_HOME"/zsh

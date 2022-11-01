@@ -1,17 +1,17 @@
-PREVIEW_DIRECTORY="([ -d {-1} ] && tree -C {-1} | head -n 50)"
-PREVIEW_FILE="([ -f {-1} ] && bat --style=numbers --color=always {-1} 2>/dev/null)"
-DIFF_FILE="(git add --intent-to-add {-1} && git diff --color=always {-1} 2>/dev/null)"
+__FZF_CUSTOM_GIT_PREVIEW_DIRECTORY="([ -d {-1} ] && tree -C {-1} | head -n 50)"
+__FZF_CUSTOM_GIT_PREVIEW_FILE="([ -f {-1} ] && bat --style=numbers --color=always {-1} 2>/dev/null)"
+__FZF_CUSTOM_GIT_DIFF_FILE="(git add --intent-to-add {-1} && git diff --color=always {-1} 2>/dev/null)"
 
 __fzf_git_add() {
-    git ls-files -m | _fzf_complete --multi --preview "$PREVIEW_DIRECTORY || $DIFF_FILE" -- "$@"
+    git ls-files -m | _fzf_complete --multi --preview "$__FZF_CUSTOM_GIT_PREVIEW_DIRECTORY || $__FZF_CUSTOM_GIT_DIFF_FILE" -- "$@"
 }
 
 __fzf_git_diff() {
-    git ls-files -m | _fzf_complete --multi --preview "$PREVIEW_DIRECTORY || $DIFF_FILE" -- "$@"
+    git ls-files -m | _fzf_complete --multi --preview "$__FZF_CUSTOM_GIT_PREVIEW_DIRECTORY || $__FZF_CUSTOM_GIT_DIFF_FILE" -- "$@"
 }
 
 __fzf_git_rm() {
-    git ls-files | _fzf_complete --multi --preview "$PREVIEW_DIRECTORY || $PREVIEW_FILE" -- "$@"
+    git ls-files | _fzf_complete --multi --preview "$__FZF_CUSTOM_GIT_PREVIEW_DIRECTORY || $__FZF_CUSTOM_GIT_PREVIEW_FILE" -- "$@"
 }
 
 # TODO: Not perfect as it doesn't return the stash ids (_fzf_complete_git_post does not work for that). Fine for now :)

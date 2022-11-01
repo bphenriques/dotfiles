@@ -47,11 +47,11 @@
     ./config/tmux
 
     # Modules
-    ../modules/shell/zsh.nix
-    ../modules/shell/fzf-extra.nix
-    ../modules/shell/thefuck.nix
-    ../modules/shell/direnv.nix
-    ../modules/shell/powerlevel10k.nix
+    ../modules/zsh.nix
+    ../modules/fzf-extra.nix
+    ../modules/thefuck.nix
+    ../modules/direnv-extra.nix
+    ../modules/powerlevel10k.nix
   ];
 
   home.stateVersion = "22.11";
