@@ -44,8 +44,15 @@ with lib;
     };
   };
 
+  programs.direnv = {
+    enable                          = true; # Automatically load .envrc or .env.
+    nix-direnv.enable               = true; # Faster direnv for nix environments.
+    extra = {
+      enablePowerlevel10kFastPrompt = true; # Setup fast-prompt
+      disableLogging = true;                # Disable verbose messages when entering a directory.
+    };
+  };
 
-  programs.zsh.enable = false;    # Manage ZSH myself.
   modules = {
     powerlevel10k = {
       enable                = true;
@@ -57,13 +64,6 @@ with lib;
     thefuck = {
       enable                = true;
       enableZshIntegration  = true;
-    };
-
-    direnv = {
-      enable                        = true; # Automatically load .envrc or .env.
-      nix-direnv.enable             = true; # Faster direnv for nix environments.
-      enableZshIntegration          = true;
-      enablePowerlevel10kFastPrompt = true;
     };
 
     zsh = {
@@ -86,6 +86,11 @@ with lib;
             src = pkgs.zsh-autosuggestions;
             file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
             afterSource = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
+          }
+          {
+            name = "zsh-fzf-tab";
+            src = pkgs.zsh-fzf-tab;
+            file = "share/fzf-tab/fzf-tab.plugin.zsh";
           }
         ];
       };
