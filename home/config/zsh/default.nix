@@ -87,11 +87,6 @@ with lib;
             file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
             afterSource = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
           }
-          {
-            name = "zsh-fzf-tab";
-            src = pkgs.zsh-fzf-tab;
-            file = "share/fzf-tab/fzf-tab.plugin.zsh";
-          }
         ];
       };
 
