@@ -2,7 +2,7 @@
 {
   xdg.enable = true;              # XDG Compliance to unclutter $HOME folder.
   home.packages = with pkgs; [
-    # Consistent UNIX command line tools
+    # Consistent UNIX command line tools regardless of the OS
     coreutils
     findutils
     gnugrep
@@ -26,15 +26,10 @@
 
     # Text
     bat         # Preview with code highlight.
-    nb          # Notebook CLI tool.
 
-    # Coding
-    gh          # Github Cli
-
-    # Experimenting with:
+    # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.
-    exa         # Fancy `ls`.
   ];
 
   imports = [

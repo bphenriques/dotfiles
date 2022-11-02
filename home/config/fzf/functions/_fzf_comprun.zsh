@@ -5,8 +5,6 @@ local command=$1
 shift
 
 case "$command" in
-  export|unset)     fzf "$@" --preview "eval 'echo \$'{}" ;;      # Use `echo` to show the value.
-
   # By default, show a preview if it is a folder or file.
   *)                fzf "$@" --preview "$__FZF_CUSTOM_COMPRUN_PREVIEW_DIRECTORY || $__FZF_CUSTOM_COMPRUN_PREVIEW_FILE" ;;
 esac
