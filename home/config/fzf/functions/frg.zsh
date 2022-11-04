@@ -1,6 +1,10 @@
-if [ ! "$#" -gt 0 ]; then
-  echo "Usage: frg <text>";
-  return 1;
-fi
+initial_query="$1"
+search='rg --column --line-number --no-heading --color=always --smart-case '
+FZF_DEFAULT_COMMAND="$search '$initial_query' ."
 
-rg --hidden --files-with-matches --no-messages "$1" | fzf --preview-window '' --preview "rg --ignore-case --pretty --context 10 '$1' {}"
+fzf --bind "change:reload:$search {q} . || true" \
+  --ansi --query "$initial_query" --disabled \
+  --delimiter : \
+  --preview "rg --ignore-case --pretty --context 10 '{q}' {1}" \
+  | cut -d ':' -f1
+

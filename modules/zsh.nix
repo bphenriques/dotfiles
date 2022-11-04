@@ -3,19 +3,21 @@
 with lib;
 with types;
 
+# Alternative (and inspired by) Home-Manager's zsh module: https://github.com/nix-community/home-manager/blob/master/modules/programs/zsh.nix
 #
-# Inspired by Home-Manager's zsh module: https://github.com/nix-community/home-manager/blob/master/modules/programs/zsh.nix
-#
-# To learn and to have more control over what is happening.
-# TODO: Normalize Paths
+# Reasons: learn and to have more control over what is happening.
 let
   cfg = config.modules.zsh;
+
+  functionsDir  = "functions";
+  widgetsDir    = "widgets";
+  pluginsDir    = "plugins";
 
   aliasesStr = concatStringsSep "\n" (
     mapAttrsToList (k: v: "alias ${k}=${lib.escapeShellArg v}") config.home.shellAliases # TODO: Why cfg.shellAliases?
   );
 
-  pluginsDir = config.xdg.configHome + "/zsh/plugins";
+  pluginsFullDir = config.xdg.configHome + "/zsh/${pluginsDir}";
   pluginModule = submodule {
     options = {
       name = mkOption {
@@ -47,6 +49,40 @@ let
       };
     };
   };
+
+  functionsModule = submodule {
+    options = {
+       name = mkOption {
+         type = str;
+         description = "The name of the function";
+       };
+
+       text = mkOption {
+         type = lines;
+         description = "The function's source code";
+       };
+     };
+  };
+
+  widgetsModule = submodule {
+    options = {
+       name = mkOption {
+         type = str;
+         description = "The name of the widget function";
+       };
+
+       text = mkOption {
+         type = lines;
+         description = "The widgets's source code";
+       };
+
+       keybinding = mkOption {
+         type = str;
+         description = "The keybinding";
+       };
+     };
+  };
+
   zshFastSyntaxHighlightingOptPlugin = {
     name = "zsh-fast-syntax-highlighting";
     src = pkgs.zsh-fast-syntax-highlighting;
@@ -69,7 +105,12 @@ in
     };
 
     functions = mkOption {
-      type = listOf path;
+      type = listOf (either path functionsModule);
+      default = [];
+    };
+
+    widgets = mkOption {
+      type = listOf widgetsModule;
       default = [];
     };
 
@@ -147,8 +188,8 @@ in
           # Load plugins
           (concatMapStrings (plugin:
               ''
-              if [[ -f "${pluginsDir}/${plugin.name}/${plugin.file}" ]]; then
-                . "${pluginsDir}/${plugin.name}/${plugin.file}"
+              if [[ -f "${pluginsFullDir}/${plugin.name}/${plugin.file}" ]]; then
+                . "${pluginsFullDir}/${plugin.name}/${plugin.file}"
                 ${plugin.afterSource}
               fi
               ''
@@ -156,15 +197,24 @@ in
 
           cfg.initExtraAfterPlugins
 
-          "typeset -aU path"    # Prune duplicate entries in $PATH
+          # Prune duplicate entries in $PATH
+          "typeset -aU path"
 
+          # Autoload functions and widgets
           ''
-            # Load functions
-            fpath=("$ZDOTDIR/functions" $fpath);
+            fpath=("$ZDOTDIR/${functionsDir}" "$ZDOTDIR/${widgetsDir}" $fpath);
             autoload -Uz $fpath[1]/*(:t)
           ''
 
-          # Load Aliases
+          # Register widgets and keybindings
+          (concatMapStrings (widget:
+              ''
+              zle -N ${widget.name}
+              bindkey '${widget.keybinding}' ${widget.name}
+              ''
+            ) cfg.widgets)
+
+          # Register Aliases
           aliasesStr
 
           cfg.initExtraBeforeCompInit
@@ -172,7 +222,7 @@ in
           cfg.initExtraAfterCompInit
 
           (optionalString cfg.plugins.enableFastSyntaxHighlighting ''
-            . "${pluginsDir}/${zshFastSyntaxHighlightingOptPlugin.name}/${zshFastSyntaxHighlightingOptPlugin.file}"
+            . "${pluginsFullDir}/${zshFastSyntaxHighlightingOptPlugin.name}/${zshFastSyntaxHighlightingOptPlugin.file}"
           '')
         ];
       };
@@ -187,14 +237,28 @@ in
         pluginsToMount = cfg.plugins.list ++ optional cfg.plugins.enableFastSyntaxHighlighting zshFastSyntaxHighlightingOptPlugin;
       in
         foldl' (a: b: a // b) {}
-        (map (plugin: { "zsh/plugins/${plugin.name}".source = plugin.src; }) pluginsToMount);
+        (map (plugin: { "zsh/${pluginsDir}/${plugin.name}".source = plugin.src; }) pluginsToMount);
     }
 
     # Mount auto-load functions
     {
       xdg.configFile =
         foldl' (a: b: a // b) {}
-        (map (function: { "zsh/functions/${removeSuffix ".zsh" (baseNameOf function)}".source = function; }) cfg.functions);
+        (map (function:
+          if builtins.isPath function then
+            { "zsh/${functionsDir}/${removeSuffix ".zsh" (baseNameOf function)}".source = function; }
+          else
+            { "zsh/${functionsDir}/${function.name}".text = function.text; }
+        ) (cfg.functions));
+    }
+
+    # Mount auto-load widgets
+    {
+      xdg.configFile =
+        foldl' (a: b: a // b) {}
+        (map (widget:
+          { "zsh/${widgetsDir}/${widget.name}".text = widget.text; }
+        ) (cfg.widgets));
     }
   ]);
 }
