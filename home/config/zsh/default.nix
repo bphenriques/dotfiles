@@ -39,7 +39,6 @@ with lib;
 
       # Text Processor
       e           = "$EDITOR";
-      p           = "$PAGER";
       grep        = "grep --color";
     };
   };
