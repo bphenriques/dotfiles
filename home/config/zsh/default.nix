@@ -57,8 +57,8 @@ with lib;
     };
 
     thefuck = {
-      enable                = true;
-      enableZshIntegration  = true;
+      enable                  = true;
+      personalZshIntegration  = true;
     };
 
     zsh = {
