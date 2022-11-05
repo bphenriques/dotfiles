@@ -13,11 +13,7 @@ in
       default = true;
     };
 
-    enablePowerlevel10kFastPrompt = mkOption {
-      type = bool;
-      default = false;
-    };
-
+    enablePowerlevel10kFastPrompt = mkEnableOption "enable-powerlevel10k-fast-prompt";
     disableLogging = mkEnableOption "direnv-disable-log";
   };
 

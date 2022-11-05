@@ -9,7 +9,7 @@ in
 {
   options.modules.thefuck = {
     enable = mkEnableOption "thefuck";
-    enableZshIntegration = mkOption {
+    personalZshIntegration = mkOption {
       type = bool;
       default = false;
     };
@@ -18,7 +18,7 @@ in
   config = mkIf cfg.enable {
     home.packages = with pkgs; [ thefuck ];
 
-    modules.zsh = mkIf cfg.enableZshIntegration {
+    modules.zsh = mkIf cfg.personalZshIntegration {
       initExtraAfterPlugins = ''eval "$(${pkgs.thefuck}/bin/thefuck --alias)"'';
     };
   };
