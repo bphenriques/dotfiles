@@ -49,38 +49,27 @@ in
           name = "zsh-fzf-tab";
           src = pkgs.zsh-fzf-tab;
           file = "share/fzf-tab/fzf-tab.plugin.zsh";
+          sourceTiming = "after-compinit";
         }
       ];
     };
 
-    # TODO: migrate git completions as part of the TAB-TAB
-
     functions = [
       ./functions/frg.zsh
       ./functions/proj.zsh
-      {
-        name = "_fzf_comprun";
-        text = ''
-          local command=$1
-          shift
-          case "$command" in
-            *)  fzf "$@" --preview ''\'preview {-1}''\' ;;
-          esac
-        '';
-      }
+      ./functions/_proj.zsh
     ];
 
     widgets = [
       {
-        name = "_frg-find-file";
-        text = fileContents ./widgets/_frg-find-file.zsh;
+        name = "frg-find-file";
+        text = fileContents ./widgets/frg-find-file.zsh;
         keybinding = "^f";
       }
     ];
 
     initExtraBeforeCompInit = ''
-      zstyle ':fzf-tab:complete:(cd|ls):*' fzf-preview 'tree -C $realpath | head -200'        # Preview folders.
-      zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff --color=always $word'
+      zstyle ':fzf-tab:complete:*:*' fzf-preview 'preview ''\${(Q)realpath''\}'
     '';
   };
 }

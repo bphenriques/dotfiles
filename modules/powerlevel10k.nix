@@ -59,7 +59,7 @@ in
           name = "zsh-powerlevel10k";
           src = pkgs.zsh-powerlevel10k;
           file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-          afterSource = ''. "${config.xdg.configHome}/powerlevel10k/${configFileName}"'';
+          sourceExtra = ''. "${config.xdg.configHome}/powerlevel10k/${configFileName}"'';
         }
       ];
     };
