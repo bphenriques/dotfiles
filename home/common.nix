@@ -27,6 +27,9 @@
     # Text
     bat         # Preview with code highlight.
 
+    # Dev
+    shellcheck  # Linter for shell scripts.
+
     # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.

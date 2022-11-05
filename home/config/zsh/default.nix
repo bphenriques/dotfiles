@@ -4,10 +4,6 @@ with lib;
 {
   home.packages = with pkgs; [
     vivid       # LS_COLORS generator because I refuse to use the syntax >.<
-
-    # Utility
-    ripgrep     # Alternative to grep.
-    bat         # Better file preview.
     thefuck     # Fix some commands
   ];
 
@@ -38,7 +34,7 @@ with lib;
       mkdir = "mkdir -pv";
 
       # Text Processor
-      e           = "$EDITOR";
+      e           = "emacsclient";
       grep        = "grep --color";
     };
   };

@@ -58,6 +58,7 @@ in
       ./functions/frg.zsh
       ./functions/proj.zsh
       ./functions/_proj.zsh
+      ./functions/_fzf_complete_git.zsh
     ];
 
     widgets = [
@@ -68,8 +69,25 @@ in
       }
     ];
 
-    initExtraBeforeCompInit = ''
+    initExtraBeforeCompInit = concatStringsSep "\n" [
+      # Disable sorting of all completions.
+      "zstyle ':completion:complete:*:options' sort false"
+
+      # Enable zsh groups and set nicer shorcuts
+      ''
+      zstyle ':completion:*:descriptions' format '[%d]'
+      zstyle ':fzf-tab:*' switch-group ',' '.'
+      ''
+
+      # Set colors of files and directories.
+      "zstyle ':completion:*' list-colors \${(s.:.)LS_COLORS\}"
+
+      # Set default preview (file or directories) but disable it if passing arguments or options.
+      ''
       zstyle ':fzf-tab:complete:*:*' fzf-preview 'preview ''\${(Q)realpath''\}'
-    '';
+      zstyle ':fzf-tab:complete:*:options' fzf-preview
+      zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
+      ''
+    ];
   };
 }
