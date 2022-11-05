@@ -9,8 +9,8 @@
   # Build with:
   # $ nix build .#darwinConfigurations.<host-name>.system
   # $ ./result/sw/bin/darwin-rebuild switch --flake .#<host-name>
-  mkMacOSHost = {hostModule, system ? "aarch64-darwin"}: darwin.lib.darwinSystem {
-    system = system;
+  mkMacOSHost = hostModule: darwin.lib.darwinSystem {
+    system = "aarch64-darwin";
     modules = [
       home-manager.darwinModules.home-manager
       ({ pkgs, lib, ... }:

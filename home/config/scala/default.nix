@@ -4,7 +4,7 @@
   home.packages = with pkgs; [
     sbt                     # Build tool.
     scalafmt                # Linter formatter.
-    unstable.scala-cli      # Scala cli
+    scala-cli      # Scala cli
     ammonite                # REPL.
   ];
   

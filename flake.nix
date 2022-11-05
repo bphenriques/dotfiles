@@ -2,39 +2,27 @@
   description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
-    # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";               # Default to stable for most things.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
-    # MacOS inputs
     darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";             # Ensure versions are consistent.
+    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";             # Pin Darwin to unstable.
 
-    # Home inputs
     home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Ensure versions are consistent.
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
     let
-      # Overlays
-      unstableOverlay = final: prev: {
-        unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.system}; # Make available unstable channel.
-      };
-
-      # Nixpkgs
       nixpkgsConfig = {
-        config = { allowUnfree = true; }; # :monkey-close-eyes:
-        overlays = [
-          unstableOverlay
-        ];
+        config = { allowUnfree = true; };
       };
       macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs = nixpkgsConfig; };
       hmLib = import ./lib/home-manager.nix { inherit home-manager; nixpkgs = nixpkgsConfig; };
     in
     {
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost { hostModule = ./hosts/work-macos.nix; };
+        work-macos = mkMacOSHost ./hosts/work-macos.nix;
       };
 
       homeManagerConfigurations = with hmLib; {
@@ -44,7 +32,7 @@
         };
       };
 
-      # Handy aliases 
+      # Handy aliases
       work-macos     = self.darwinConfigurations.work-macos.system;
       wsl            = self.homeManagerConfigurations.wsl.activationPackage;
     };

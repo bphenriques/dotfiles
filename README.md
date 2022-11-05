@@ -12,7 +12,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
    ```shell
-   $ test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+   $ . "$HOME"/.nix-profile/etc/profile.d/nix.sh
    ```
 
 # Setup
