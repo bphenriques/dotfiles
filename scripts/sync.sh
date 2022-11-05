@@ -19,25 +19,27 @@ WORKSPACE="$HOME/workspace"
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
   if [[ "$DEBUG" != "0" ]]; then
-    nix build ".#$HOST_TARGET"  --show-trace
+    nix build ".#$HOST_TARGET" --show-trace
   else
     nix build ".#$HOST_TARGET"
   fi
   case "$(uname -s)" in
-      Darwin)     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
-                  ;;
-      *)          ./result/activate
-                  ;;
+    Darwin)
+      ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
+      ;;
+    *)
+      ./result/activate
+      ;;
   esac
 }
 
 sync_emacs() {
   if [ ! -d "$DOOM_EMACS_PATH" ]; then
-      info 'Doom Emacs - Not installed. Installing...'
-      git clone --depth 1 https://github.com/hlissner/doom-emacs "$DOOM_EMACS_PATH"
-      "$DOOM_EMACS_PATH"/bin/doom install
-      emacs --batch -f all-the-icons-install-fonts
-      success 'Doom Emacs - Done!'
+    info 'Doom Emacs - Not installed. Installing...'
+    git clone --depth 1 https://github.com/hlissner/doom-emacs "$DOOM_EMACS_PATH"
+    "$DOOM_EMACS_PATH"/bin/doom install
+    emacs --batch -f all-the-icons-install-fonts
+    success 'Doom Emacs - Done!'
   fi
 
   info 'Doom Emacs - Syncing...'
@@ -46,31 +48,30 @@ sync_emacs() {
 }
 
 sync_repository() {
-   location="$1"
-   name="$(basename "$location")"
+  location="$1"
+  name="$(basename "$location")"
 
-   if [ ! -d "$location" ]; then
-      fail "Repo '$name' - Does not exist!"
-   fi
+  if [ ! -d "$location" ]; then
+    fail "Repo '$name' - Does not exist!"
+  fi
 
-   # If it is out-of-sync and behind, rebase which should fail automatically if is dirty which is expected.
-   if [ "$(git -C "$location" rev-parse HEAD)" = "$(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1)" ]; then
-      info "Repo '$name' - Up to date! Nothing to do!"
-   else
-      git -C "$location" fetch origin
-      if (git status -uno | grep --quiet "branch is ahead"); then
-        warn "Repo '$name' - Has unpushed changes!"
-      else
-        info "Repo '$name' - Pulling changes..."
-        git -C "$location" pull --rebase
-      fi
-   fi
-   success "Repo '$name' - Done!"
+  # If it is out-of-sync and behind, rebase which should fail automatically if is dirty which is expected.
+  if [ "$(git -C "$location" rev-parse HEAD)" = "$(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1)" ]; then
+    info "Repo '$name' - Up to date! Nothing to do!"
+  else
+    git -C "$location" fetch origin
+    if (git status -uno | grep --quiet "branch is ahead"); then
+      warn "Repo '$name' - Has unpushed changes!"
+    else
+      info "Repo '$name' - Pulling changes..."
+      git -C "$location" pull --rebase
+    fi
+  fi
+  success "Repo '$name' - Done!"
 }
 
-sync_repository "$HOME/.dotfiles"
+#sync_repository "$HOME/.dotfiles"
 sync_flake
 sync_emacs
 sync_repository "$WORKSPACE/journal"
 sync_repository "$WORKSPACE/knowledge-base"
-

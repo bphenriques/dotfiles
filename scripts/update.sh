@@ -1,6 +1,6 @@
 #!/bin/sh
 # shellcheck disable=SC1091
-set -euf 
+set -euf
 SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
@@ -16,16 +16,17 @@ info 'Doom Emacs - Upgrading...'
 success 'Doom Emacs - Complete!'
 
 case "$(uname -s)" in
-    Darwin)     info 'Homebrew - Upgrading...'
-                if [ "$(uname -m)" = "arm64" ]; then
-                    info "Homebrew - Using arm64 brew"
-                    brew_bin="/opt/homebrew/bin/brew"
-                else
-                    info "Homebrew - Using x86 brew"
-                    brew_bin="/usr/local/bin/brew"
-                fi
-                $brew_bin upgrade && $brew_bin update
-                success 'Homebrew - Complete!'
-                ;;
-   *)           ;;
+  Darwin)
+    info 'Homebrew - Upgrading...'
+    if [ "$(uname -m)" = "arm64" ]; then
+      info "Homebrew - Using arm64 brew"
+      brew_bin="/opt/homebrew/bin/brew"
+    else
+      info "Homebrew - Using x86 brew"
+      brew_bin="/usr/local/bin/brew"
+    fi
+    $brew_bin upgrade && $brew_bin update
+    success 'Homebrew - Complete!'
+    ;;
+  *) ;;
 esac
