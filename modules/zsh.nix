@@ -42,13 +42,29 @@ let
         description = "The plugin script to source.";
       };
 
-      afterSource = mkOption {
+      sourceTiming = mkOption {
+        type = enum [ "before-compinit" "after-compinit" ];
+        default = "before-compinit";
+        description = "When to source the plugin";
+      };
+
+      sourceExtra = mkOption {
         type = lines;
         default = "";
         description = "Additional configuration desired after sourcing";
       };
     };
   };
+
+  sourcePlugins = plugins:
+    (concatMapStrings (plugin:
+       ''
+       if [[ -f "${pluginsFullDir}/${plugin.name}/${plugin.file}" ]]; then
+         . "${pluginsFullDir}/${plugin.name}/${plugin.file}"
+         ${plugin.sourceExtra}
+       fi
+       ''
+      ) plugins);
 
   functionsModule = submodule {
     options = {
@@ -185,15 +201,8 @@ in
 
           cfg.initExtraBeforePlugins
 
-          # Load plugins
-          (concatMapStrings (plugin:
-              ''
-              if [[ -f "${pluginsFullDir}/${plugin.name}/${plugin.file}" ]]; then
-                . "${pluginsFullDir}/${plugin.name}/${plugin.file}"
-                ${plugin.afterSource}
-              fi
-              ''
-            ) cfg.plugins.list)
+          # Load plugins Before compinit
+          (sourcePlugins (filter (plugin: plugin.sourceTiming == "before-compinit") cfg.plugins.list))
 
           cfg.initExtraAfterPlugins
 
@@ -220,6 +229,8 @@ in
           cfg.initExtraBeforeCompInit
           "autoload -Uz compinit && compinit"
           cfg.initExtraAfterCompInit
+
+          (sourcePlugins (filter (plugin: plugin.sourceTiming == "after-compinit") cfg.plugins.list))
 
           (optionalString cfg.plugins.enableFastSyntaxHighlighting ''
             . "${pluginsFullDir}/${zshFastSyntaxHighlightingOptPlugin.name}/${zshFastSyntaxHighlightingOptPlugin.file}"

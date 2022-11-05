@@ -7,7 +7,6 @@ __preview() {
     tree -C "$1"
   elif [ -f "$1" ]; then
     case "$category" in
-        image)        chafa "$1" ;;
         text)         bat --style=numbers --color=always "$1" 2>/dev/null ;;
         application)
                       case "$kind" in
@@ -15,6 +14,7 @@ __preview() {
                         *)      bat --style=numbers --color=always "$1" 2>/dev/null ;;
                       esac
                       ;;
+        image)        chafa "$1" ;;
         *)            bat --color=always "$1" 2>/dev/null ;;
      esac
   fi

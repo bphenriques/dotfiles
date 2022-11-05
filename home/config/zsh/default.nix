@@ -84,7 +84,7 @@ with lib;
             name = "zsh-autosuggestions";
             src = pkgs.zsh-autosuggestions;
             file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
-            afterSource = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
+            sourceExtra = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
           }
         ];
       };

@@ -43,7 +43,7 @@ else
                               __dotfiles_update
                               ;;
           * )                 __dotfiles_usage
-                              exit 1
+                              return
       esac
   done
 fi
