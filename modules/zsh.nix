@@ -212,8 +212,11 @@ in
           # Autoload functions and widgets
           ''
             fpath=("$ZDOTDIR/${functionsDir}" "$ZDOTDIR/${widgetsDir}" $fpath);
-            autoload -Uz $fpath[1]/*(:t)
+            autoload -Uz $fpath[1]/*(:t) $fpath[2]/*(:t)
           ''
+
+          aliasesStr      # Register Aliases
+
 
           # Register widgets and keybindings
           (concatMapStrings (widget:
@@ -223,8 +226,6 @@ in
               ''
             ) cfg.widgets)
 
-          # Register Aliases
-          aliasesStr
 
           cfg.initExtraBeforeCompInit
           "autoload -Uz compinit && compinit"

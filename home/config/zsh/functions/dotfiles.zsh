@@ -30,20 +30,26 @@ if [ $# -eq 0 ]; then
 else
   while [ "$1" != "" ]; do
       case $1 in
-          o | open )          shift
+          o | open)
+                              shift
                               __dotfiles_open
                               ;;
-          e | edit )          shift
+          e | edit)
+                              shift
                               __dotfiles_edit
                               ;;
-          s | sync )          shift
+          s | sync)
+                              shift
                               __dotfiles_sync
                               ;;
-          u | update )        shift
+          u | update)
+                              shift
                               __dotfiles_update
                               ;;
-          * )                 __dotfiles_usage
+          *)
+                              __dotfiles_usage
                               return
-      esac
+        ;;
+    esac
   done
 fi
