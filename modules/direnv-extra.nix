@@ -8,26 +8,13 @@ let
 in
 {
   options.programs.direnv.extra = {
-    personalZshIntegration = mkOption {
-      type = bool;
-      default = true;
-    };
-
-    enablePowerlevel10kFastPrompt = mkEnableOption "enable-powerlevel10k-fast-prompt";
-    disableLogging = mkEnableOption "direnv-disable-log";
+    personalZshIntegration = mkEnableOption "direnv-extra-personal-zsh-integration";
+    disableLogging = mkEnableOption "direnv-extra-disable-log";
   };
 
   config = {
-    modules.powerlevel10k.fastPrompt = mkIf cfg.enablePowerlevel10kFastPrompt {
-      beforeInit = ''(( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"'';
-      afterInit = ''(( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"'';
-    };
-
     modules.zsh = mkIf cfg.personalZshIntegration {
-      initExtraAfterPlugins = concatStringsSep "\n" [
-        (optionalString (!cfg.enablePowerlevel10kFastPrompt) ''eval "$(${pkgs.direnv}/bin/direnv hook zsh)"'')
-        (optionalString (cfg.disableLogging) ''export DIRENV_LOG_FORMAT='')
-      ];
+      initExtraAfterPlugins = mkIf cfg.disableLogging ''export DIRENV_LOG_FORMAT='';
     };
   };
 }

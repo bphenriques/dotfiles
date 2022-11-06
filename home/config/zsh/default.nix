@@ -40,20 +40,16 @@ with lib;
   };
 
   programs.direnv = {
-    enable                          = true; # Automatically load .envrc or .env.
-    nix-direnv.enable               = true; # Faster direnv for nix environments.
-    extra = {
-      enablePowerlevel10kFastPrompt = true; # Setup fast-prompt
-      disableLogging = true;                # Disable verbose messages when entering a directory.
-    };
+    enable                  = true; # Automatically load .envrc or .env.
+    nix-direnv.enable       = true; # Faster direnv for nix environments.
+    extra.disableLogging    = true; # Disable verbose messages when entering a directory.
   };
 
   modules = {
     powerlevel10k = {
-      enable                = true;
-      enableZshIntegration  = true;
-      configuration         = ./powerlevel10k.theme.zsh;
-      fastPrompt.enable     = true;
+      enable                  = true;
+      personalZshIntegration  = true;
+      configuration           = ./powerlevel10k.theme.zsh;
     };
 
     thefuck = {
@@ -92,10 +88,6 @@ with lib;
         ./functions/dotfiles.zsh
         ./functions/load-env.zsh
       ];
-
-      initExtraBeforeCompInit = ''
-        zstyle ':completion:*' menu select=2        # Makes sure that tab-completion is available iff number_items > 2
-      '';
 
       initExtraAfterCompInit = ''
         # Load any local zshrc scripts if present.
