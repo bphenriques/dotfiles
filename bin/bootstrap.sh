@@ -91,7 +91,7 @@ install_homebrew() {
 install_nix_darwin() {
   info 'Nix Darwin - Checking...'
   if ! command -v /run/current-system/sw/bin/darwin-rebuild >/dev/null; then
-    info 'Nix Darwin - Installing nix-darwin (say yes to everything)...'
+    info 'Nix Darwin - Installing nix-darwin as installing from flakes is not sufficient (say yes to everything)...'
     nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
     ./result/bin/darwin-installer
   fi
@@ -137,7 +137,7 @@ setup_ssh() {
     (cat "$SSH_KEY_LOCATION" | pbcopy) && open https://github.com/settings/ssh/new && press_to_continue
   fi
   success 'SSH Key - Done!'
-  # Probably wait for prompt here...
+  press_to_continue
 }
 
 select_host() {

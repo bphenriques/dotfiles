@@ -36,7 +36,7 @@ sync_flake() {
 sync_emacs() {
   if [ ! -d "$DOOM_EMACS_PATH" ]; then
     info 'Doom Emacs - Not installed. Installing...'
-    git clone --depth 1 https://github.com/hlissner/doom-emacs "$DOOM_EMACS_PATH"
+    git clone --depth 1 --single-branch https://github.com/hlissner/doom-emacs "$DOOM_EMACS_PATH"
     "$DOOM_EMACS_PATH"/bin/doom install
     emacs --batch -f all-the-icons-install-fonts
     success 'Doom Emacs - Done!'

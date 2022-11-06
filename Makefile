@@ -1,21 +1,21 @@
 # Installs all the required dependencies.
 .PHONY: bootstrap
 bootstrap:
-	@$(CURDIR)/scripts/bootstrap.sh
+	@$(CURDIR)/bin/bootstrap.sh
 
 .PHONY: sync
 sync: doctor
-	@$(CURDIR)/scripts/sync.sh
+	@$(CURDIR)/bin/sync.sh
 
 # Updates both flake.lock and Doom emacs
 .PHONY: update
 update: doctor
-	@$(CURDIR)/scripts/update.sh
+	@$(CURDIR)/bin/update.sh
 
 # Checks for missing dependencies
 .PHONY: doctor
 doctor:
-	@$(CURDIR)/scripts/doctor.sh
+	@$(CURDIR)/bin/doctor.sh
 
 .PHONY: test
 test:

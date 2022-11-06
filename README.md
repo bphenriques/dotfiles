@@ -71,6 +71,14 @@ $ nix profile diff-closures --profile /nix/var/nix/profiles/system
     - [`sei40kr`](https://github.com/sei40kr/dotfiles)
     - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
     - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)
+    - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
+- Ad-hoc documentation for reference that I find useful:
+  - https://nixpkgs-manual-sphinx-markedown-example.netlify.app/development/option-types.xml.html
+  - https://teu5us.github.io/nix-lib.html#builtins.replacestrings
+  - https://nixos.org/manual/nix/stable/language/operators.html
+  - https://nixos.org/manual/nix/stable/language/builtins.html
+  - https://github.com/NixOS/nixpkgs/blob/master/lib/strings.nix
+  - https://github.com/NixOS/nixpkgs/blob/master/lib/types.nix
 
 If you are new to dotfiles, I suggest looking for a more direct solution using a bare git repository. Start small and build up and make the tools work for you.
 
