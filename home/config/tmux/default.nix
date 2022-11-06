@@ -7,7 +7,8 @@
   ];
 
   home.shellAliases = {
-    reload      = "tmux respawn-pane -k";
+    reload    = "tmux respawn-pane -k";
+    killtmux  = "tmux kill-server";
   };
 
   xdg.configFile = {
@@ -18,8 +19,8 @@
     '';
   };
 
-  modules.powerlevel10k.fastPrompt.beforeInit = ''
-    if test -z "$SKIP_TMUX" && command -v tmux > /dev/null && test -z "$TMUX"; then
+  modules.zsh.initExtraAfterCompInit = ''
+    if test -z "$SKIP_TMUX" && command -v tmux >/dev/null && test -z "$TMUX"; then
       exec tmux new-session;
       exit;
     fi

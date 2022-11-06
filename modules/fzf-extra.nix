@@ -8,7 +8,7 @@ let
 in
 {
   options.programs.fzf.extras = {
-    personalZshIntegration = mkEnableOption "personal-zsh-integration";
+    personalZshIntegration = mkEnableOption "fzf-extra-personal-zsh-integration";
   };
 
   config.modules.zsh.initExtraAfterPlugins = mkIf cfg.personalZshIntegration
