@@ -1,9 +1,7 @@
-#
 # History - http://zsh.sourceforge.net/Doc/Release/Options.html @16.2.4 History
-#
-HISTFILE="$ZDOTDIR"/.zsh_history  # Change default file away from zsh folder.
-HISTSIZE=10000                          # Number of entries to keep in memory.
-SAVEHIST="$HISTSIZE"                    # Number of entries to keep in file.
+HISTFILE="$ZDOTDIR"/.zsh_history        # Change default file away from zsh folder.
+HISTSIZE=100000                         # Number of entries to keep in memory.
+SAVEHIST=100000                         # Number of entries to keep in file.
 
 setopt HIST_FCNTL_LOCK                  # Safer and faster locking in newer OS.
 setopt APPEND_HISTORY                   # Appends history to history file on exit.
@@ -15,15 +13,9 @@ setopt HIST_IGNORE_ALL_DUPS             # Delete an old recorded event if a new 
 setopt HIST_FIND_NO_DUPS                # Do not display a previously found event.
 setopt HIST_IGNORE_SPACE                # Do not record an event starting with a space.
 setopt HIST_SAVE_NO_DUPS                # Do not write a duplicate event to the history file.
+setopt HIST_REDUCE_BLANKS               # Minimize unnecessary whitespace
 setopt HIST_VERIFY                      # Do not execute immediately upon history expansion.
 setopt HIST_BEEP                        # Beep when accessing non-existent history.
 
-#
-# Directories
-#
-setopt AUTO_CD                          # Auto changes to a directory without typing cd.
-
-#
 # More interactive sessions settings
-#
 set -o emacs                            # Explicitly set emacs as my keyboard mapping.

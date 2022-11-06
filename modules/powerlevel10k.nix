@@ -10,12 +10,8 @@ in
 {
   options.modules.powerlevel10k = {
     enable = mkEnableOption "zsh-powerlevel10k";
-
     enableZshIntegration = mkEnableOption "powerlevel10k-zsh-integration";
-
-    configuration = mkOption {
-      type = path;
-    };
+    configuration = mkOption { type = path; };
 
     fastPrompt = {
       enable = mkEnableOption "fast-prompt";
@@ -54,7 +50,7 @@ in
         ${cfg.fastPrompt.afterInit}
       '';
 
-      plugins.list = [
+      plugins = [
         {
           name = "zsh-powerlevel10k";
           src = pkgs.zsh-powerlevel10k;

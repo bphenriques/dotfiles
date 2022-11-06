@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 {
-  xdg.enable = true;              # XDG Compliance to unclutter $HOME folder.
+  xdg.enable = true;              # XDG Compliance to tidy up $HOME folder.
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils

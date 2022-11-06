@@ -4,7 +4,6 @@ with lib;
 with types;
 
 # Alternative (and inspired by) Home-Manager's zsh module: https://github.com/nix-community/home-manager/blob/master/modules/programs/zsh.nix
-#
 # Reasons: learn and to have more control over what is happening.
 let
   cfg = config.modules.zsh;
@@ -13,111 +12,62 @@ let
   widgetsDir    = "widgets";
   pluginsDir    = "plugins";
 
-  aliasesStr = concatStringsSep "\n" (
-    mapAttrsToList (k: v: "alias ${k}=${lib.escapeShellArg v}") config.home.shellAliases # TODO: Why cfg.shellAliases?
-  );
-
   pluginsFullDir = config.xdg.configHome + "/zsh/${pluginsDir}";
   pluginModule = submodule {
     options = {
-      name = mkOption {
-        type = str;
-        description = ''
-          The name of the plugin.
-          Don't forget to add <option>file</option>
-          if the script name does not follow convention.
-        '';
-      };
-
-      src = mkOption {
-        type = path;
-        description = ''
-          Path to the plugin folder.
-          Will be added to <envar>fpath</envar> and <envar>PATH</envar>.
-        '';
-      };
-
-      file = mkOption {
-        type = str;
-        description = "The plugin script to source.";
-      };
+      name = mkOption { type = str; };
+      src = mkOption { type = path; };
+      file = mkOption { type = str; };
 
       sourceTiming = mkOption {
         type = enum [ "before-compinit" "after-compinit" ];
         default = "before-compinit";
-        description = "When to source the plugin";
       };
 
       sourceExtra = mkOption {
         type = lines;
         default = "";
-        description = "Additional configuration desired after sourcing";
       };
     };
   };
 
-  sourcePlugins = plugins:
-    (concatMapStrings (plugin:
-       ''
-       if [[ -f "${pluginsFullDir}/${plugin.name}/${plugin.file}" ]]; then
-         . "${pluginsFullDir}/${plugin.name}/${plugin.file}"
-         ${plugin.sourceExtra}
-       fi
-       ''
-      ) plugins);
-
   functionsModule = submodule {
     options = {
-       name = mkOption {
-         type = str;
-         description = "The name of the function";
-       };
-
-       text = mkOption {
-         type = lines;
-         description = "The function's source code";
-       };
+       name = mkOption { type = str; };
+       text = mkOption { type = lines; };
      };
   };
 
   widgetsModule = submodule {
     options = {
-       name = mkOption {
-         type = str;
-         description = "The name of the widget function";
-       };
-
-       text = mkOption {
-         type = lines;
-         description = "The widgets's source code";
-       };
-
-       keybinding = mkOption {
-         type = str;
-         description = "The keybinding";
-       };
+       name = mkOption { type = str; };
+       text = mkOption { type = lines; };
+       keybinding = mkOption { type = str; };
      };
   };
 
-  zshFastSyntaxHighlightingOptPlugin = {
-    name = "zsh-fast-syntax-highlighting";
-    src = pkgs.zsh-fast-syntax-highlighting;
-    file = "share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
-  };
+  sourcePlugins = plugins:
+    (concatMapStringsSep "\n" (plugin:
+      let
+        path = "${pluginsFullDir}/${plugin.name}/${plugin.file}";
+      in
+        ''
+        . "${path}" || echo "Failed to load ${plugin.name}!"
+        '' + (optionalString (plugin.sourceExtra != "") plugin.sourceExtra)
+    ) plugins);
 in
 {
-
   options.modules.zsh = {
     enable = mkEnableOption "Z shell (Zsh)";
-
-    aliases = mkOption {
-      type = attrsOf str;
-      default = {};
-    };
 
     envExtra = mkOption {
       type = lines;
       default = "";
+    };
+
+    aliases = mkOption {
+      type = attrsOf str;
+      default = {};
     };
 
     functions = mkOption {
@@ -130,12 +80,9 @@ in
       default = [];
     };
 
-    plugins = {
-      enableFastSyntaxHighlighting = mkEnableOption "fast-syntax-highlighting";
-      list = mkOption {
-        type = listOf pluginModule;
-        default = [];
-      };
+    plugins = mkOption {
+      type = listOf pluginModule;
+      default = [];
     };
 
     initExtraFirst = mkOption {
@@ -173,15 +120,16 @@ in
         }
       ];
     }
+
     # Setup ZSHENV
     {
       home.file.".zshenv".text = ''
         # Source nix & Home-Manager packages
-        test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+        . "$HOME"/.nix-profile/etc/profile.d/nix.sh
         export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 
         # Source session variables
-        test -f "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh" && . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+        . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
 
         # Override ZSH location to unclutter $HOME folder
         export ZDOTDIR="$XDG_CONFIG_HOME"/zsh
@@ -190,66 +138,81 @@ in
       '';
     }
 
-    # Setup ZSHRC
+    # Aliases
     {
-      home.packages = with pkgs; [zsh]
-        ++ optional cfg.plugins.enableFastSyntaxHighlighting zsh-fast-syntax-highlighting;
-
-      xdg.configFile = {
-        "zsh/.zshrc".text = lib.concatStringsSep "\n" [
-          cfg.initExtraFirst
-
-          cfg.initExtraBeforePlugins
-
-          # Load plugins Before compinit
-          (sourcePlugins (filter (plugin: plugin.sourceTiming == "before-compinit") cfg.plugins.list))
-
-          cfg.initExtraAfterPlugins
-
-          # Prune duplicate entries in $PATH
-          "typeset -aU path"
-
-          # Autoload functions and widgets
-          ''
-            fpath=("$ZDOTDIR/${functionsDir}" "$ZDOTDIR/${widgetsDir}" $fpath);
-            autoload -Uz $fpath[1]/*(:t) $fpath[2]/*(:t)
-          ''
-
-          aliasesStr      # Register Aliases
-
-
-          # Register widgets and keybindings
-          (concatMapStrings (widget:
-              ''
-              zle -N ${widget.name}
-              bindkey '${widget.keybinding}' ${widget.name}
-              ''
-            ) cfg.widgets)
-
-
-          cfg.initExtraBeforeCompInit
-          "autoload -Uz compinit && compinit"
-          cfg.initExtraAfterCompInit
-
-          (sourcePlugins (filter (plugin: plugin.sourceTiming == "after-compinit") cfg.plugins.list))
-
-          (optionalString cfg.plugins.enableFastSyntaxHighlighting ''
-            . "${pluginsFullDir}/${zshFastSyntaxHighlightingOptPlugin.name}/${zshFastSyntaxHighlightingOptPlugin.file}"
-          '')
-        ];
-      };
+      xdg.configFile."zsh/aliases.zsh".text =
+        concatStringsSep "\n" (mapAttrsToList (k: v: "alias ${k}=${escapeShellArg v}") config.home.shellAliases);
     }
 
-    # Setup Plugins: Ensure plugins are symlinked outside /nix/store folder
+    # Completions
+    {
+      xdg.configFile."zsh/completion.zsh".text = concatStringsSep "\n" [
+        cfg.initExtraBeforeCompInit
+        "autoload -Uz compinit && compinit"
+        cfg.initExtraAfterCompInit
+      ];
+    }
+
+    # Widgets and keybindings
+    {
+      xdg.configFile =
+        foldl' (a: b: a // b) {}
+        (map (widget: { "zsh/${widgetsDir}/${widget.name}".text = widget.text; } ) cfg.widgets);
+    }
+    {
+      xdg.configFile."zsh/keybindings.zsh".text = concatStringsSep "\n" [
+        ''
+          fpath=("$ZDOTDIR/${widgetsDir}" $fpath);
+          autoload -Uz $fpath[1]/*(:t)
+        ''
+        (concatMapStrings (widget:
+          ''
+          zle -N ${widget.name}
+          bindkey '${widget.keybinding}' ${widget.name}
+          ''
+        ) cfg.widgets)
+      ];
+    }
+
+    # Setup ZSHRC
+    {
+      home.packages = with pkgs; [zsh];
+      xdg.configFile."zsh/.zshrc".text = concatStringsSep "\n" [
+        cfg.initExtraFirst
+
+        cfg.initExtraBeforePlugins
+
+        "# Plugins to load before compinit"
+        (sourcePlugins (filter (plugin: plugin.sourceTiming == "before-compinit") cfg.plugins))
+
+        cfg.initExtraAfterPlugins
+
+        # Prune duplicate entries in $PATH
+        "typeset -aU path"
+
+        # Autoload functions and widgets
+        ''
+          fpath=("$ZDOTDIR/${functionsDir}" "$ZDOTDIR/${widgetsDir}" $fpath);
+          autoload -Uz $fpath[1]/*(:t) $fpath[2]/*(:t)
+        ''
+
+        ''. "$ZDOTDIR"/keybindings.zsh''
+        ''. "$ZDOTDIR"/completion.zsh''
+        ''. "$ZDOTDIR"/aliases.zsh''
+
+        "# Plugins to load after compinit"
+        (sourcePlugins (filter (plugin: plugin.sourceTiming == "after-compinit") cfg.plugins))
+      ];
+    }
+
+    # Mount Plugins: Ensure plugins are symlinked outside /nix/store folder
     # See:
     # - https://github.com/nix-community/home-manager/pull/56#issuecomment-328057513
     # - https://github.com/nix-community/home-manager/commit/cff9ee7cce1bd40f63beef4b4f3044c29a5a41cb
     {
-      xdg.configFile = let
-        pluginsToMount = cfg.plugins.list ++ optional cfg.plugins.enableFastSyntaxHighlighting zshFastSyntaxHighlightingOptPlugin;
-      in
+      xdg.configFile =
         foldl' (a: b: a // b) {}
-        (map (plugin: { "zsh/${pluginsDir}/${plugin.name}".source = plugin.src; }) pluginsToMount);
+        (map (plugin: { "zsh/${pluginsDir}/${plugin.name}".source = plugin.src; }) cfg.plugins);
     }
 
     # Mount auto-load functions
@@ -261,16 +224,7 @@ in
             { "zsh/${functionsDir}/${removeSuffix ".zsh" (baseNameOf function)}".source = function; }
           else
             { "zsh/${functionsDir}/${function.name}".text = function.text; }
-        ) (cfg.functions));
-    }
-
-    # Mount auto-load widgets
-    {
-      xdg.configFile =
-        foldl' (a: b: a // b) {}
-        (map (widget:
-          { "zsh/${widgetsDir}/${widget.name}".text = widget.text; }
-        ) (cfg.widgets));
+        ) cfg.functions);
     }
   ]);
 }

@@ -43,16 +43,14 @@ in
   };
 
   modules.zsh = {
-    plugins = {
-      list = [
-        {
-          name = "zsh-fzf-tab";
-          src = pkgs.zsh-fzf-tab;
-          file = "share/fzf-tab/fzf-tab.plugin.zsh";
-          sourceTiming = "after-compinit";
-        }
-      ];
-    };
+    plugins = [
+      {
+        name = "zsh-fzf-tab";
+        src = pkgs.zsh-fzf-tab;
+        file = "share/fzf-tab/fzf-tab.plugin.zsh";
+        sourceTiming = "after-compinit";
+      }
+    ];
 
     functions = [
       ./functions/frg.zsh
