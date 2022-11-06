@@ -73,17 +73,20 @@ with lib;
 
       initExtraBeforePlugins = (builtins.readFile ./config.zsh);
 
-      plugins = {
-        enableFastSyntaxHighlighting = true;
-        list = [
-          {
-            name = "zsh-autosuggestions";
-            src = pkgs.zsh-autosuggestions;
-            file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
-            sourceExtra = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
-          }
-        ];
-      };
+      plugins = mkAfter [
+        {
+          name = "zsh-autosuggestions";
+          src = pkgs.zsh-autosuggestions;
+          file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
+          sourceExtra = ''export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#3e4551"'';
+        }
+        {
+          name = "zsh-fast-syntax-highlighting";
+          src = pkgs.zsh-fast-syntax-highlighting;
+          file = "share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
+          sourceTiming = "after-compinit";
+        }
+      ];
 
       functions = [
         ./functions/dotfiles.zsh

@@ -23,14 +23,11 @@ in
       afterInit = ''(( ''${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"'';
     };
 
-    modules.zsh = mkIf cfg.personalZshIntegration (mkMerge [
-      {
-        initExtraAfterPlugins = mkIf (!cfg.enablePowerlevel10kFastPrompt)
-          ''eval "$(${pkgs.direnv}/bin/direnv hook zsh)"'';
-      }
-      {
-        initExtraAfterPlugins = mkIf (cfg.disableLogging) ''export DIRENV_LOG_FORMAT='';
-      }
-    ]);
+    modules.zsh = mkIf cfg.personalZshIntegration {
+      initExtraAfterPlugins = concatStringsSep "\n" [
+        (optionalString (!cfg.enablePowerlevel10kFastPrompt) ''eval "$(${pkgs.direnv}/bin/direnv hook zsh)"'')
+        (optionalString (cfg.disableLogging) ''export DIRENV_LOG_FORMAT='')
+      ];
+    };
   };
 }
