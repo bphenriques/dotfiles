@@ -67,7 +67,7 @@ in
       }
     ];
 
-    initExtraBeforeCompInit = concatStringsSep "\n" [
+    completions = concatStringsSep "\n" [
       # Disable sorting of all completions.
       "zstyle ':completion:complete:*:options' sort false"
 

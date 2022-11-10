@@ -67,8 +67,7 @@ with lib;
         ''[ -s "$HOME"/.zshenv.local ] && source "$HOME"/.zshenv.local''
       ];
 
-      initExtraBeforePlugins = (builtins.readFile ./config.zsh);
-
+      options = builtins.readFile ./options.zsh;
       plugins = mkAfter [
         {
           name = "zsh-autosuggestions";
@@ -80,7 +79,7 @@ with lib;
           name = "zsh-fast-syntax-highlighting";
           src = pkgs.zsh-fast-syntax-highlighting;
           file = "share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
-          sourceTiming = "after-compinit";
+          sourceTiming = "last";
         }
       ];
 
@@ -89,10 +88,8 @@ with lib;
         ./functions/load-env.zsh
       ];
 
-      initExtraAfterCompInit = ''
-        # Load any local zshrc scripts if present.
-        [ -s "$HOME"/.zshrc.local ] && source "$HOME"/.zshrc.local
-      '';
+      # Load any local zshrc scripts if present.
+      initExtraAfterCompInit = ''[ -s "$HOME"/.zshrc.local ] && source "$HOME"/.zshrc.local'';
     };
   };
 }

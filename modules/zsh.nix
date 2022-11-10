@@ -20,7 +20,7 @@ let
       file = mkOption { type = str; };
 
       sourceTiming = mkOption {
-        type = enum [ "before-compinit" "after-compinit" ];
+        type = enum [ "before-compinit" "after-compinit" "last" ];
         default = "before-compinit";
       };
 
@@ -70,6 +70,11 @@ in
       default = {};
     };
 
+    completions = mkOption {
+      type = lines;
+      default = "";
+    };
+
     functions = mkOption {
       type = listOf (either path functionsModule);
       default = [];
@@ -85,23 +90,13 @@ in
       default = [];
     };
 
-    initExtraFirst = mkOption {
+    options = mkOption {
       type = lines;
       default = "";
     };
 
-    initExtraBeforePlugins = mkOption {
+    initExtraBeforeCompinit = mkOption {
       type =  lines;
-      default = "";
-    };
-
-    initExtraAfterPlugins = mkOption {
-      type =  lines;
-      default = "";
-    };
-
-    initExtraBeforeCompInit = mkOption {
-      type = lines;
       default = "";
     };
 
@@ -147,9 +142,8 @@ in
     # Completions
     {
       xdg.configFile."zsh/completion.zsh".text = concatStringsSep "\n" [
-        cfg.initExtraBeforeCompInit
+        cfg.completions
         "autoload -Uz compinit && compinit"
-        cfg.initExtraAfterCompInit
       ];
     }
 
@@ -178,14 +172,7 @@ in
     {
       home.packages = with pkgs; [zsh];
       xdg.configFile."zsh/.zshrc".text = concatStringsSep "\n" [
-        cfg.initExtraFirst
-
-        cfg.initExtraBeforePlugins
-
-        "# Plugins to load before compinit"
-        (sourcePlugins (filter (plugin: plugin.sourceTiming == "before-compinit") cfg.plugins))
-
-        cfg.initExtraAfterPlugins
+        cfg.options
 
         # Prune duplicate entries in $PATH
         "typeset -aU path"
@@ -196,12 +183,16 @@ in
           autoload -Uz $fpath[1]/*(:t) $fpath[2]/*(:t)
         ''
 
-        ''. "$ZDOTDIR"/keybindings.zsh''
+        (sourcePlugins (filter (plugin: plugin.sourceTiming == "before-compinit") cfg.plugins))
+        cfg.initExtraBeforeCompinit
         ''. "$ZDOTDIR"/completion.zsh''
+        cfg.initExtraAfterCompInit
+        (sourcePlugins (filter (plugin: plugin.sourceTiming == "after-compinit") cfg.plugins))
+
+        ''. "$ZDOTDIR"/keybindings.zsh''
         ''. "$ZDOTDIR"/aliases.zsh''
 
-        "# Plugins to load after compinit"
-        (sourcePlugins (filter (plugin: plugin.sourceTiming == "after-compinit") cfg.plugins))
+        (sourcePlugins (filter (plugin: plugin.sourceTiming == "last") cfg.plugins))
       ];
     }
 

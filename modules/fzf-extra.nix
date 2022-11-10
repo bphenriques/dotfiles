@@ -11,7 +11,7 @@ in
     personalZshIntegration = mkEnableOption "fzf-extra-personal-zsh-integration";
   };
 
-  config.modules.zsh.initExtraAfterPlugins = mkIf cfg.personalZshIntegration
+  config.modules.zsh.completions = mkIf cfg.personalZshIntegration
     ''
       . "${pkgs.fzf}/share/fzf/completion.zsh"
       . "${pkgs.fzf}/share/fzf/key-bindings.zsh"

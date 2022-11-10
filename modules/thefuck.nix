@@ -15,7 +15,7 @@ in
   config = mkIf cfg.enable {
     home.packages = with pkgs; [ thefuck ];
     modules.zsh = mkIf cfg.personalZshIntegration {
-      initExtraAfterPlugins = ''eval "$(${pkgs.thefuck}/bin/thefuck --alias)"'';
+      initExtraBeforeCompinit = ''eval "$(${pkgs.thefuck}/bin/thefuck --alias)"'';
     };
   };
 }
