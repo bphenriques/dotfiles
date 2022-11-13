@@ -6,9 +6,8 @@
 
 Add the following in your `$ZDOTDIR/.zprofile` (here to ensure precedence):
 ```sh
-# Source Nix and Home-Manager
+# Update PATH with Nix and Home-Manager packages
 test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-test -f /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh && . /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
 

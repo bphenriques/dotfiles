@@ -119,7 +119,7 @@ in
     # Setup ZSHENV
     {
       home.file.".zshenv".text = ''
-        # Source nix & Home-Manager packages
+        # Update PATH with Nix and Home-Manager packages
         . "$HOME"/.nix-profile/etc/profile.d/nix.sh
         export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 
