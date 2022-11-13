@@ -21,7 +21,7 @@
       nixConfig = {
         settings = {
           experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store = true;                         # Ensure /nix/store does not grow eternally.
+          auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
         };
       };
 
@@ -33,11 +33,11 @@
 
             # Nix Darwin
             services.nix-daemon.enable = true;      # Using nix-daemon (the only supported way).
-            system.stateVersion = 4;                # Nix-Darwin config version.
+            system.stateVersion        = 4;         # Nix-Darwin config version.
 
             # Home-Manager
-            home-manager.useGlobalPkgs = true;      # For consistency, use global pkgs configured via the system level nixpkgs options.
-            home-manager.useUserPackages = true;    # Install packages defined in home-manager.
+            home-manager.useGlobalPkgs    = true;    # For consistency, use global pkgs configured via the system level nixpkgs options.
+            home-manager.useUserPackages  = true;    # Install packages defined in home-manager.
          };
         in darwin.lib.darwinSystem {
           system = "aarch64-darwin";
@@ -51,7 +51,7 @@
       mkHomeManagerHost = { system ? "x86_64-linux", username, hostModule }:
         let
           baseModule = {
-            nix = nixConfig;
+            # nix = nixConfig;
             home = {
               inherit username;
               homeDirectory = "/home/${username}";
@@ -59,7 +59,10 @@
           };
         in
           home-manager.lib.homeManagerConfiguration {
-            pkgs = nixpkgs.legacyPackages.${system};
+            pkgs = import nixpkgs {
+              inherit system;
+              inherit (nixpkgsConfig) config;
+            };
             modules = [ baseModule hostModule ];
           };
     in
@@ -70,8 +73,8 @@
 
       homeManagerConfigurations = {
         wsl = mkHomeManagerHost {
-          username = "bphenriques";
-          hostModule = ./hosts/wsl.nix;
+          username    = "bphenriques";
+          hostModule  = ./hosts/wsl.nix;
         };
       };
 
