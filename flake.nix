@@ -59,10 +59,7 @@
           };
         in
           home-manager.lib.homeManagerConfiguration {
-            pkgs = import inputs.nixpkgs-unstable {
-              system = "x86_64-linux";
-              inherit nixpkgsConfig;
-            };
+            pkgs = nixpkgs.legacyPackages.${system};
             modules = [ baseModule hostModule ];
           };
     in

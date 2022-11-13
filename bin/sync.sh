@@ -18,7 +18,7 @@ WORKSPACE="$HOME/workspace"
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
-  if [[ "$DEBUG" != "0" ]]; then
+  if [ "$DEBUG" != "0" ]; then
     nix build ".#$HOST_TARGET" --show-trace
   else
     nix build ".#$HOST_TARGET"
