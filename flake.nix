@@ -12,8 +12,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
+  outputs = inputs @ { self, nixpkgs, darwin, home-manager, ... }:
     let
+      inherit (inputs.nixpkgs-unstable.lib) attrValues;
+
       nixpkgsConfig = {
         config = { allowUnfree = true; };
       };
@@ -25,61 +27,83 @@
         };
       };
 
-      mkMacOSHost = hostModule:
+      mkMacOSHost = { system ? "aarch64-darwin", username, hostDarwinModules ? [], hostHomeManagerModules ? []}:
         let
-          commonDarwinModule = {
+          common = {
             nixpkgs = nixpkgsConfig;
             nix = nixConfig;
 
             # Nix Darwin
-            services.nix-daemon.enable = true;      # Using nix-daemon (the only supported way).
-            system.stateVersion        = 4;         # Nix-Darwin config version.
+            services.nix-daemon.enable      = true;                 # Using nix-daemon (the only supported way).
+            users.users."${username}".home  = "/Users/${username}"; # Set user's home.
+            imports                         = [./macos/common.nix]; # Import common settings
 
             # Home-Manager
-            home-manager.useGlobalPkgs    = true;    # For consistency, use global pkgs configured via the system level nixpkgs options.
-            home-manager.useUserPackages  = true;    # Install packages defined in home-manager.
-         };
+            home-manager.useGlobalPkgs        = true; # Consistency: use pkgs set via the system level nixpkgs options.
+            home-manager.useUserPackages      = true; # Install packages defined in home-manager.
+            home-manager.users."${username}"  = {
+              imports = [./home/common.nix] ++ attrValues self.homeManagerModules;
+            };
+
+            system.stateVersion = 4; # Nix-Darwin config version.
+          };
+
+          host = {
+            imports = hostDarwinModules;
+            home-manager.users."${username}" = {
+              imports = hostHomeManagerModules;
+            };
+          };
         in darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
-          modules = [
-            home-manager.darwinModules.home-manager
-            commonDarwinModule
-            hostModule
-          ];
+          inherit system;
+          modules = [home-manager.darwinModules.home-manager common host];
         };
 
-      mkHomeManagerHost = { system ? "x86_64-linux", username, hostModule }:
+      mkHomeManagerHost = { system ? "x86_64-linux", username, hostModules ? [] }:
         let
           baseModule = {
+            # TODO: Cant put more settings here.. Likely makes sense as this only manages my home?
             # nix = nixConfig;
+            # nix.settings = nixConfig.settings;
             home = {
               inherit username;
               homeDirectory = "/home/${username}";
             };
+            imports = [./home/common.nix];
           };
         in
           home-manager.lib.homeManagerConfiguration {
-            pkgs = import nixpkgs {
+            pkgs = import inputs.nixpkgs-unstable {
               inherit system;
               inherit (nixpkgsConfig) config;
             };
-            modules = [ baseModule hostModule ];
+            modules = [baseModule] ++ attrValues self.homeManagerModules ++ hostModules;
           };
     in
     {
       darwinConfigurations = {
-        work-macos = mkMacOSHost ./hosts/work-macos.nix;
+        work-macos = mkMacOSHost {
+          username                = "brunohenriques";
+          hostDarwinModules       = [./macos/work.nix];
+          hostHomeManagerModules  = [./home/work.nix];
+        };
       };
 
       homeManagerConfigurations = {
-        wsl = mkHomeManagerHost {
-          username    = "bphenriques";
-          hostModule  = ./hosts/wsl.nix;
-        };
+        wsl = mkHomeManagerHost { username = "bphenriques"; };
       };
 
       # Handy aliases
       work-macos     = self.darwinConfigurations.work-macos.system;
       wsl            = self.homeManagerConfigurations.wsl.activationPackage;
+
+      # Custom modules. Either adds functionality or redefines in order to finer grain control over the output.
+      homeManagerModules = {
+        bphenriques-zsh           = ./modules/home-manager/zsh.nix;
+        bphenriques-fzf-extra     = ./modules/home-manager/fzf-extra.nix;
+        bphenriques-thefuck       = ./modules/home-manager/thefuck.nix;
+        bphenriques-direnv-extra  = ./modules/home-manager/direnv-extra.nix;
+        bphenriques-powerlevel10k = ./modules/home-manager/powerlevel10k.nix;
+      };
     };
 }

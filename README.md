@@ -30,8 +30,8 @@ Otherwise, install [`nix`](https://nixos.org/manual/nix/stable/installation/inst
 
 | Host | Operating System |
 |-|-|
-| [`work-macos`](hosts/work-macos.nix) | macOS |
-| [`wsl`](hosts/wsl.nix) | Ubuntu (WSL) |
+| `work-macos` | macOS |
+| `wsl` | Ubuntu (WSL) |
 
 1. Bootstrap:
 ```sh
@@ -53,7 +53,7 @@ $ pbpaste  | gpg --import
 
 # Updating
 
-The following will update `flack.lock` and Doom Emacs.
+The following will update `flake.lock` and Doom Emacs.
 ```sh
 $ make update
 ```

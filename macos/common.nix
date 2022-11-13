@@ -1,6 +1,8 @@
 { pkgs, lib, ... }:
 
 {
+  environment.shells = [ pkgs.zsh ];
+
   # System settings.
   system = {
     defaults = {

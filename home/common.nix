@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 {
-  xdg.enable = true;              # XDG Compliance to tidy up $HOME folder.
+  xdg.enable = true;  # XDG Compliance to tidy up $HOME folder.
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils
@@ -43,13 +43,6 @@
     ./config/zsh
     ./config/fzf
     ./config/tmux
-
-    # Modules
-    ../modules/zsh.nix
-    ../modules/fzf-extra.nix
-    ../modules/thefuck.nix
-    ../modules/direnv-extra.nix
-    ../modules/powerlevel10k.nix
   ];
 
   home.stateVersion = "22.11";
