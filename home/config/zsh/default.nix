@@ -33,6 +33,10 @@ with lib;
       la    = "ls -la";
       mkdir = "mkdir -pv";
 
+      # Navigation
+      ".."  = "cd ..";
+      "..."  = "cd ../..";
+
       # Text Processor
       e           = "emacsclient";
       grep        = "grep --color";
