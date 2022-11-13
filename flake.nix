@@ -17,18 +17,64 @@
       nixpkgsConfig = {
         config = { allowUnfree = true; };
       };
-      macosLib = import ./lib/macos.nix { inherit darwin home-manager; nixpkgs = nixpkgsConfig; };
-      hmLib = import ./lib/home-manager.nix { inherit home-manager; nixpkgs = nixpkgsConfig; };
+
+      nixConfig = {
+        settings = {
+          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+          auto-optimise-store = true;                         # Ensure /nix/store does not grow eternally.
+        };
+      };
+
+      mkMacOSHost = hostModule:
+        let
+          commonDarwinModule = {
+            nixpkgs = nixpkgsConfig;
+            nix = nixConfig;
+
+            # Nix Darwin
+            services.nix-daemon.enable = true;      # Using nix-daemon (the only supported way).
+            system.stateVersion = 4;                # Nix-Darwin config version.
+
+            # Home-Manager
+            home-manager.useGlobalPkgs = true;      # For consistency, use global pkgs configured via the system level nixpkgs options.
+            home-manager.useUserPackages = true;    # Install packages defined in home-manager.
+         };
+        in darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+          modules = [
+            home-manager.darwinModules.home-manager
+            commonDarwinModule
+            hostModule
+          ];
+        };
+
+      mkHomeManagerHost = { system ? "x86_64-linux", username, hostModule }:
+        let
+          baseModule = {
+            nix = nixConfig;
+            home = {
+              inherit username;
+              homeDirectory = "/home/${username}";
+            };
+          };
+        in
+          home-manager.lib.homeManagerConfiguration {
+            pkgs = import inputs.nixpkgs-unstable {
+              system = "x86_64-linux";
+              inherit nixpkgsConfig;
+            };
+            modules = [ baseModule hostModule ];
+          };
     in
     {
-      darwinConfigurations = with macosLib; {
+      darwinConfigurations = {
         work-macos = mkMacOSHost ./hosts/work-macos.nix;
       };
 
-      homeManagerConfigurations = with hmLib; {
-        wsl = mkHMHost {
+      homeManagerConfigurations = {
+        wsl = mkHomeManagerHost {
           username = "bphenriques";
-          homeConfig = ./hosts/wsl.nix;
+          hostModule = ./hosts/wsl.nix;
         };
       };
 
