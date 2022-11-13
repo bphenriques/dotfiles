@@ -10,7 +10,18 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Pre-Requirements
 
-1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
+If Windows, from a admin powershell:
+   ```
+   $ wsl install
+   ```
+
+Then:
+   ```
+   $ 
+   ```
+   
+
+Otherwise, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
    ```shell
    $ . "$HOME"/.nix-profile/etc/profile.d/nix.sh
    ```
@@ -67,7 +78,6 @@ $ nix profile diff-closures --profile /nix/var/nix/profiles/system
     - [`malob`](https://github.com/malob/nixpkgs)
     - [`kclejeune`](https://github.com/kclejeune/system)
     - [`mitchellh`](https://github.com/mitchellh/nixos-config)
-    - [`mjlbach`](https://github.com/mjlbach/nix-dotfiles)
     - [`sei40kr`](https://github.com/sei40kr/dotfiles)
     - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
     - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)

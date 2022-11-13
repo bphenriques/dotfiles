@@ -53,7 +53,8 @@ SSH_KEY_LOCATION="$HOME"/.ssh/id_ed25519.pub
 SSH_TYPE=ed25519
 
 check_requirements() {
-  (command -v nix >/dev/null  && success 'Nix - Installed!') || fail 'Nix is not installed. Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
+  (command -v nix >/dev/null && success 'Nix - Installed!') || fail 'Nix is not installed. Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
+  (command -v make >/dev/null && success 'Make - Installed!') || fail 'Make is not installed.'
 }
 
 install_nix_flakes() {
@@ -119,25 +120,26 @@ clone_default_repos() {
   success 'Cloning Repos - finished!'
 }
 
-normalize_command_names() {
-  case "$(uname -s)" in
-    Linux*)
-            alias pbcopy='xsel — clipboard — input'
-            alias open='xdg-open'
-            ;;
-      *)    ;;
-  esac
-}
-
 setup_ssh() {
-  info 'SSH Key - Checking...'
+  info "SSH Key - Checking if '$SSH_KEY_LOCATION' public key already exists..."
   if [ ! -f "$SSH_KEY_LOCATION" ]; then
     info 'SSH Key - Setting it up!'
     ssh-keygen -t $SSH_TYPE -C "$SSH_KEY_EMAIL_ADDRESS"
-    (cat "$SSH_KEY_LOCATION" | pbcopy) && open https://github.com/settings/ssh/new && press_to_continue
+
+    case "$(uname -s)" in
+        Darwin)
+            cat "$SSH_KEY_LOCATION" | pbcopy
+            open https://github.com/settings/ssh/new
+            press_to_continue
+            ;;
+        *)  cat "$SSH_KEY_LOCATION"
+            info "SSH Key - Copy the above key and go to https://github.com/settings/ssh/new"
+            press_to_continue
+            ;;
+    esac
+    press_to_continue
   fi
   success 'SSH Key - Done!'
-  press_to_continue
 }
 
 select_host() {
@@ -164,7 +166,6 @@ misc_macos() {
 
 check_requirements
 
-normalize_command_names
 setup_ssh
 install_nix_flakes
 case "$(uname -s)" in
