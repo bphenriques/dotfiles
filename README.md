@@ -10,18 +10,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Pre-Requirements
 
-If Windows, from a admin powershell:
-   ```
-   $ wsl install
-   ```
-
-Then:
-   ```
-   $ 
-   ```
-   
-
-Otherwise, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
+Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
    ```shell
    $ . "$HOME"/.nix-profile/etc/profile.d/nix.sh
    ```
@@ -31,24 +20,31 @@ Otherwise, install [`nix`](https://nixos.org/manual/nix/stable/installation/inst
 | Host | Operating System |
 |-|-|
 | `work-macos` | macOS |
-| `wsl` | Ubuntu (WSL) |
+| `wsl` | Ubuntu (Windows Subsystem for Linux) |
 
 1. Bootstrap:
-```sh
-$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/scripts/bootstrap.sh)"
-```
+   ```sh
+   $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/bin/bootstrap.sh)"
+   ```
 
 2. Sync flake:
-```sh
-$ cd "$HOME"/.dotfiles
-$ make sync
-```
+   ```sh
+   $ cd "$HOME"/.dotfiles
+   $ make sync
+   ```
 
-3. Import the GPG keys:
-```sh
-$ pbpaste  | gpg --import
-```
+3. Import the GPG Key:
+   
+   From clipboard:
+   ```sh
+   $ pbpaste  | gpg --import
+   ```
 
+   From file:
+   ```sh
+   $ gpg --import private.key
+   ```
+   
 4. Reboot!
 
 # Updating
