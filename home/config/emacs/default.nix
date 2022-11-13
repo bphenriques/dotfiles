@@ -29,6 +29,7 @@ in
     fd
 
     # Modules dependencies
+    gcc         # Required to build sqlite if not compiled.
     sqlite      # Org Roam's database.
     plantuml    # To export Plant UML diagrams.
     xapian      # Notdeft's backend to index files.
