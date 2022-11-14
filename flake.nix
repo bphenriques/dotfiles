@@ -45,7 +45,7 @@
               imports = [./home/common.nix] ++ attrValues self.homeManagerModules;
             };
 
-            system.stateVersion = 4; # Nix-Darwin config version.
+            system.stateVersion = 4;                                # Nix-Darwin config version.
           };
 
           host = {
@@ -56,12 +56,13 @@
           };
         in darwin.lib.darwinSystem {
           inherit system;
-          modules = [home-manager.darwinModules.home-manager common host];
+          modules = [home-manager.darwinModules.home-manager common host] ++ attrValues self.darwinModules;
+          inputs = { inherit username; };
         };
 
-      mkHomeManagerHost = { system ? "x86_64-linux", username, hostModules ? [] }:
+      mkHomeManagerHost = { system, username, hostModules ? [] }:
         let
-          baseModule = {
+          common = {
             # TODO: Cant put more settings here.. Likely makes sense as this only manages my home?
             # nix = nixConfig;
             # nix.settings = nixConfig.settings;
@@ -77,7 +78,7 @@
               inherit system;
               inherit (nixpkgsConfig) config;
             };
-            modules = [baseModule] ++ attrValues self.homeManagerModules ++ hostModules;
+            modules = [common] ++ attrValues self.homeManagerModules ++ hostModules;
           };
     in
     {
@@ -90,7 +91,10 @@
       };
 
       homeManagerConfigurations = {
-        wsl = mkHomeManagerHost { username = "bphenriques"; };
+        wsl = mkHomeManagerHost {
+          system    = "x86_64-linux";
+          username  = "bphenriques";
+        };
       };
 
       # Handy aliases
@@ -104,6 +108,11 @@
         bphenriques-thefuck       = ./modules/home-manager/thefuck.nix;
         bphenriques-direnv-extra  = ./modules/home-manager/direnv-extra.nix;
         bphenriques-powerlevel10k = ./modules/home-manager/powerlevel10k.nix;
+      };
+
+      darwinModules = {
+        org-protocol = ./modules/darwin/org-protocol;
+        system-screencapture = ./modules/darwin/system/screencapture;
       };
     };
 }

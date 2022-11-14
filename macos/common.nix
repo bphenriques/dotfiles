@@ -1,14 +1,18 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 {
-  environment.shells = [ pkgs.zsh ];
+  environment.shells = [ pkgs.zsh ];  # Register the shell
+
+  programs.org-protocol.enable = true;
 
   # System settings.
   system = {
+    screencapture.createLocation = true;
+
     defaults = {
       trackpad = {
-        Clicking = true;                            # Because tapping is zappier.
-        TrackpadThreeFingerDrag = true;             # Much more practical.
+        Clicking = true;                # Because tapping is zappier.
+        TrackpadThreeFingerDrag = true; # Much more practical.
       };
 
       NSGlobalDomain = {
@@ -41,7 +45,7 @@
       };
 
       screencapture = {
-        location = "~/Pictures/screenshots";    # Avoid bloating the Desktop with screenshots.
+        location = "~/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
       };
 
       SoftwareUpdate = {
@@ -50,8 +54,8 @@
     };
 
     keyboard = {
-      enableKeyMapping = true;
-      remapCapsLockToControl = true;                # Sorry pal. Need that for more useful things.
+      enableKeyMapping = true;        # Ensure that I can change keys.
+      remapCapsLockToControl = true;  # The key is more useful elsewhere.
     };
   };
 
@@ -88,6 +92,4 @@
       "temurin"                   # JDK: Successor of AdoptOpenJDK
     ];
   };
-
-  imports = [ ./org-protocol ];
 }

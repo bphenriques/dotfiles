@@ -133,11 +133,10 @@ setup_ssh() {
             press_to_continue
             ;;
         *)  cat "$SSH_KEY_LOCATION"
-            info "SSH Key - Copy the above key and go to https://github.com/settings/ssh/new"
+            info "SSH Key - Copy public key to https://github.com/settings/ssh/new"
             press_to_continue
             ;;
     esac
-    press_to_continue
   fi
   success 'SSH Key - Done!'
 }
@@ -160,11 +159,6 @@ select_host() {
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
 
-misc_macos() {
-  info 'MacOS - Creating screenshots directory'
-  mkdir -pv "$HOME"/Pictures/screenshots
-}
-
 check_requirements
 
 setup_ssh
@@ -173,7 +167,6 @@ case "$(uname -s)" in
     Darwin)
                 install_nix_darwin
                 install_homebrew
-                misc_macos
                 ;;
     *)          ;;
 esac
