@@ -32,6 +32,7 @@
       };
 
       dock = {
+        mineffect = "genie";                # Animation.
         autohide = true;                    # Dont need the dock by default.
         tilesize = 30;                      # Small size.
         mru-spaces = false;                 # Dont rearrange spaces by most recently used.
@@ -40,8 +41,10 @@
       };
 
       finder = {
-        AppleShowAllExtensions = true;          # Show extensions in Finder by default.
-        FXEnableExtensionChangeWarning = false; # Disable warning
+        AppleShowAllExtensions = true;              # Show extensions in Finder by default.
+        FXEnableExtensionChangeWarning = false;     # Disable warning when changing file extension.
+        ShowPathbar = true;                         # Show breadcrumbs.
+        FXPreferredViewStyle = "clmv";              # Show preview window by default.
       };
 
       screencapture = {
@@ -50,6 +53,25 @@
 
       SoftwareUpdate = {
         AutomaticallyInstallMacOSUpdates = false;   # Only when I want.
+      };
+
+      CustomSystemPreferences = {
+        "com.apple.TextEdit" = {
+          RichText = false;                         # Let me use plain-text.
+        };
+
+        "com.apple.screencapture" = {
+          show-thumbnail = false;                   # Dont need the thumbnail.
+        };
+
+        "com.apple.finder" = {
+          _FXSortFoldersFirst = true;               # Show folders first.
+          _FXSortFoldersFirstOnDesktop = true;      # Show folders first on desktop.
+          ShowHardDrivesOnDesktop = false;          # Hide hard disks on desktop.
+          ShowExternalHardDrivesOnDesktop = false;  # Hide external disks on desktop.
+          ShowRemovableMediaOnDesktop = false;      # Hide removal media on desktop.
+          ShowMountedServersOnDesktop = false;      # Hide mounted servers on desktop.
+        };
       };
     };
 
