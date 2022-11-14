@@ -111,8 +111,9 @@
       };
 
       darwinModules = {
-        org-protocol = ./modules/darwin/org-protocol;
-        system-screencapture = ./modules/darwin/system/screencapture;
+        org-protocol          = ./modules/darwin/org-protocol;
+        system-screencapture  = ./modules/darwin/system/screencapture;
+        system-dock           = ./modules/darwin/system/dock;
       };
     };
 }
