@@ -1,3 +1,4 @@
+#test
 # Installs all the required dependencies.
 .PHONY: bootstrap
 bootstrap:
