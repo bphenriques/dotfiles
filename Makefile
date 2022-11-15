@@ -27,6 +27,6 @@ lint:
 	@nix-shell --packages shellcheck --run "shellcheck -P $(CURDIR)/ **/*.sh"
 
 # Util for convenience
-.PHONE: changelog
+.PHONY: changelog
 changelog:
 	nix profile diff-closures --profile /nix/var/nix/profiles/system
