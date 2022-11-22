@@ -7,7 +7,6 @@
           inherit username;
           homeDirectory = "/home/${username}";
         };
-        imports = [../home/common.nix];
       };
     in
       home-manager.lib.homeManagerConfiguration {

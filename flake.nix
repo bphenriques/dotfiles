@@ -20,12 +20,12 @@
         config = { allowUnfree = true; };                     # Well..
       };
 
-      nixConfig = {
-        settings = {
-          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
+        nixConfig = {
+          settings = {
+            experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+            auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
+          };
         };
-      };
 
       macosLib = import ./lib/macos.nix {
         inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.

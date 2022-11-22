@@ -15,16 +15,15 @@
         # Nix Darwin
         services.nix-daemon.enable      = true;                   # Using nix-daemon (the only supported way).
         users.users."${username}".home  = "/Users/${username}";   # Set user's home.
-        imports                         = [../macos/common.nix];  # Import common settings
 
         # Home-Manager
         home-manager.useGlobalPkgs        = true; # Consistency: use pkgs set via the system level nixpkgs options.
         home-manager.useUserPackages      = true; # Install packages defined in home-manager.
         home-manager.users."${username}"  = {
-          imports = [../home/common.nix] ++ attrValues homeManagerModules;
+          imports = attrValues homeManagerModules;
         };
 
-        system.stateVersion = 4;                                # Nix-Darwin config version.
+        system.stateVersion = 4;                  # Nix-Darwin config version.
       };
 
       host = {
