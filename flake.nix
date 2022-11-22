@@ -17,7 +17,7 @@
       inherit (inputs.nixpkgs-unstable.lib) attrValues;
 
       nixpkgsConfig = {
-        config = { allowUnfree = true; };
+        config = { allowUnfree = true; };                     # Well..
       };
 
       nixConfig = {
@@ -27,74 +27,26 @@
         };
       };
 
-      mkMacOSHost = { system ? "aarch64-darwin", username, hostDarwinModules ? [], hostHomeManagerModules ? []}:
-        let
-          common = {
-            nixpkgs = nixpkgsConfig;
-            nix = nixConfig;
+      macosLib = import ./lib/macos.nix {
+        inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.
+        darwinModules = self.darwinModules;                   # Custom darwin modules.
+        homeManagerModules = self.homeManagerModules;         # Custom home-manager modules.
+        lib = inputs.nixpkgs-unstable.lib;                    # Requires specific stage of nixpkgs.
+      };
 
-            # Nix Darwin
-            services.nix-daemon.enable      = true;                 # Using nix-daemon (the only supported way).
-            users.users."${username}".home  = "/Users/${username}"; # Set user's home.
-            imports                         = [./macos/common.nix]; # Import common settings
-
-            # Home-Manager
-            home-manager.useGlobalPkgs        = true; # Consistency: use pkgs set via the system level nixpkgs options.
-            home-manager.useUserPackages      = true; # Install packages defined in home-manager.
-            home-manager.users."${username}"  = {
-              imports = [./home/common.nix] ++ attrValues self.homeManagerModules;
-            };
-
-            system.stateVersion = 4;                                # Nix-Darwin config version.
-          };
-
-          host = {
-            imports = hostDarwinModules;
-            home-manager.users."${username}" = {
-              imports = hostHomeManagerModules;
-            };
-          };
-        in darwin.lib.darwinSystem {
-          inherit system;
-          modules = [home-manager.darwinModules.home-manager common host] ++ attrValues self.darwinModules;
-          inputs = { inherit username; };
-        };
-
-      mkHomeManagerHost = { system, username, hostModules ? [] }:
-        let
-          common = {
-            # TODO: Cant put more settings here.. Likely makes sense as this only manages my home?
-            # nix = nixConfig;
-            # nix.settings = nixConfig.settings;
-            home = {
-              inherit username;
-              homeDirectory = "/home/${username}";
-            };
-            imports = [./home/common.nix];
-          };
-        in
-          home-manager.lib.homeManagerConfiguration {
-            pkgs = import inputs.nixpkgs-unstable {
-              inherit system;
-              inherit (nixpkgsConfig) config;
-            };
-            modules = [common] ++ attrValues self.homeManagerModules ++ hostModules;
-          };
+      homeManagerLib = import ./lib/home-manager.nix {
+        inherit home-manager nixpkgsConfig;           # Modules and configurations.
+        nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
+        homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
+      };
     in
     {
       darwinConfigurations = {
-        work-macos = mkMacOSHost {
-          username                = "brunohenriques";
-          hostDarwinModules       = [./macos/work.nix];
-          hostHomeManagerModules  = [./home/work.nix];
-        };
+        work-macos = macosLib.mkMacOSHost (import ./host/work-macos {});
       };
 
       homeManagerConfigurations = {
-        wsl = mkHomeManagerHost {
-          system    = "x86_64-linux";
-          username  = "bphenriques";
-        };
+        wsl = homeManagerLib.mkHomeManagerHost (import ./host/wsl {});
       };
 
       # Handy aliases
@@ -113,7 +65,7 @@
       darwinModules = {
         org-protocol          = ./modules/darwin/org-protocol;
         system-screencapture  = ./modules/darwin/system/screencapture;
-        system-dock           = ./modules/darwin/system/dock;
+        system-desktop        = ./modules/darwin/system/desktop;
       };
     };
 }

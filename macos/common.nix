@@ -8,8 +8,6 @@
   # System settings.
   system = {
     screencapture.createLocation = true;
-    dock.picture = ./Day_at_Camp.png;
-
     defaults = {
       trackpad = {
         Clicking = true;                # Because tapping is zappier.
