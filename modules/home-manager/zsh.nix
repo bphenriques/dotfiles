@@ -213,8 +213,10 @@ in
         (map (function:
           if builtins.isPath function then
             { "zsh/${functionsDir}/${removeSuffix ".zsh" (baseNameOf function)}".source = function; }
-          else
+          else if builtins.isString function then
             { "zsh/${functionsDir}/${function.name}".text = function.text; }
+          else
+            throw "invalid type of function"
         ) cfg.functions);
     }
   ]);

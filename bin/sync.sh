@@ -19,9 +19,9 @@ WORKSPACE="$HOME/workspace"
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'"
   if [ "$DEBUG" != "0" ]; then
-    nix build ".#$HOST_TARGET" --show-trace
+    nix build ".#hosts.$HOST_TARGET" --show-trace
   else
-    nix build ".#$HOST_TARGET"
+    nix build ".#hosts.$HOST_TARGET"
   fi
   case "$(uname -s)" in
     Darwin)

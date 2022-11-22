@@ -14,18 +14,16 @@
 
   outputs = inputs @ { self, nixpkgs, darwin, home-manager, ... }:
     let
-      inherit (inputs.nixpkgs-unstable.lib) attrValues;
-
       nixpkgsConfig = {
         config = { allowUnfree = true; };                     # Well..
       };
 
-        nixConfig = {
-          settings = {
-            experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-            auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
-          };
+      nixConfig = {
+        settings = {
+          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+          auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
         };
+      };
 
       macosLib = import ./lib/macos.nix {
         inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.
@@ -39,33 +37,23 @@
         nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
       };
-    in
-    {
-      darwinConfigurations = {
-        work-macos = macosLib.mkMacOSHost (import ./host/work-macos {});
+    in {
+      darwinConfigurations = with macosLib; {
+        work-macos = mkMacOSHost (import (./host + "/work-macos") {});
       };
 
-      homeManagerConfigurations = {
-        wsl = homeManagerLib.mkHomeManagerHost (import ./host/wsl {});
+      homeManagerConfigurations = with homeManagerLib; {
+        wsl = mkHomeManagerHost (import ./host + "/wsl" {});
       };
 
-      # Handy aliases
-      work-macos     = self.darwinConfigurations.work-macos.system;
-      wsl            = self.homeManagerConfigurations.wsl.activationPackage;
-
-      # Custom modules. Either adds functionality or redefines in order to finer grain control over the output.
-      homeManagerModules = {
-        bphenriques-zsh           = ./modules/home-manager/zsh.nix;
-        bphenriques-fzf-extra     = ./modules/home-manager/fzf-extra.nix;
-        bphenriques-thefuck       = ./modules/home-manager/thefuck.nix;
-        bphenriques-direnv-extra  = ./modules/home-manager/direnv-extra.nix;
-        bphenriques-powerlevel10k = ./modules/home-manager/powerlevel10k.nix;
+      # Aliases to standadize builds.
+      hosts = {
+        work-macos = self.darwinConfigurations.work-macos.system;
+        wsl        = self.darwinConfigurations.wsl.activationPackage;
       };
 
-      darwinModules = {
-        org-protocol          = ./modules/darwin/org-protocol;
-        system-screencapture  = ./modules/darwin/system/screencapture;
-        system-desktop        = ./modules/darwin/system/desktop;
-      };
+      # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.
+      homeManagerModules = import ./modules/home-manager;
+      darwinModules = import ./modules/darwin;
     };
 }

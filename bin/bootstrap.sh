@@ -146,11 +146,8 @@ select_host() {
 
   if [ ! -f "$HOST_FILE_LOCATION" ]; then
     info 'Nix Host Type - Setting up...'
-    macOSOptions="$(awk '/self.darwinConfigurations/{ print $1 }' "$DOTFILES_LOCATION"/flake.nix)"
-    homeManagerOptions="$(awk '/self.homeManagerConfigurations/{ print $1 }' "$DOTFILES_LOCATION"/flake.nix)"
-
     nix_host=
-    select nix_host in $(echo "$macOSOptions $homeManagerOptions"); do
+    select nix_host in $(find "$DOTFILES_LOCATION/hosts/" -mindepth 1 -type d -exec basename {} \; | xargs); do
        test -n "$nix_host" && break
        warn "Invalid host!"
     done
