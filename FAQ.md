@@ -1,19 +1,19 @@
 # FAQ
 
-# Troubleshooting
-
 #### 1. Fail to find `nix` nor any home-manager binary.
 
-Add the following in your `$ZDOTDIR/.zprofile` (here to ensure precedence):
+Add the following in your default shell you have the following:
 ```sh
 # Update PATH with Nix and Home-Manager packages
 test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
 
+Once done, you run the existing commands.
+
 #### 2. `zsh compinit: insecure directories, run compaudit for list.`
 
-The mentioned directories are considered as they can be written by users that are not either the `root` or the current user ([source](http://zsh.sourceforge.net/Doc/Release/Completion-System.html##Use-of-compinit)). For this purpose, remove the rogue permissions:
+The mentioned directories are mentioned because they can be written by users that are not either the `root` or the current user ([source](http://zsh.sourceforge.net/Doc/Release/Completion-System.html##Use-of-compinit)). For this purpose, remove the rogue permissions:
 ```sh
 compaudit | xargs chmod go-w
 ```
@@ -31,5 +31,5 @@ See https://github.com/LnL7/nix-darwin/issues/458
 
 Manually change the p10k location and run the command ([source](https://github.com/romkatv/powerlevel10k/issues/967)):
 ```shell
-$ POWERLEVEL9K_CONFIG_FILE=hello.p10k p10k configure
+$ POWERLEVEL9K_CONFIG_FILE=/tmp/setup.p10k p10k configure
 ```

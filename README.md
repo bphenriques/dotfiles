@@ -2,10 +2,6 @@
 
 Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) configurations to manage my machines. A declarative and _more_ reproducible way to set working environments.
 
-<p align="center">
-    <img src="./screenshots/macos.png" width="85%" />
-</p>
-
 ----
 
 # Pre-Requirements
@@ -17,10 +13,7 @@ Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-bina
 
 # Setup
 
-| Host | Operating System |
-|-|-|
-| `work-macos` | macOS |
-| `wsl` | Ubuntu (Windows Subsystem for Linux) |
+In the [`host`](https://github.com/bphenriques/dotfiles/tree/master/host) directory you'll find the available hosts.
 
 1. Bootstrap:
    ```sh
@@ -37,7 +30,7 @@ Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-bina
    
    From clipboard:
    ```sh
-   $ pbpaste  | gpg --import
+   $ pbpaste | gpg --import
    ```
 
    From file:
@@ -58,7 +51,7 @@ Check if everything is stable before committing.
 
 For reference, it is also possible to see the list of updated packages between Nix generations:
 ```sh
-$ nix profile diff-closures --profile /nix/var/nix/profiles/system
+$ make changelog
 ```
 
 # Acknowledgments

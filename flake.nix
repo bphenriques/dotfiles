@@ -53,7 +53,7 @@
       };
 
       # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.
-      homeManagerModules = import ./modules/home-manager;
-      darwinModules = import ./modules/darwin;
+      homeManagerModules = import ./home/modules;
+      darwinModules = import ./darwin/modules;
     };
 }

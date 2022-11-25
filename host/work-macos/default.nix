@@ -2,8 +2,8 @@
 {
   username = "brunohenriques";
   hostDarwinModules = [
-    ../../macos/common.nix
-    ../../macos/work.nix
+    ../../darwin/common.nix
+    ../../darwin/work.nix
     { system.desktop.picture = ./wallpaper.png; } # From simpledesktops
   ];
 
