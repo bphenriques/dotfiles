@@ -1,6 +1,13 @@
 {
   homebrew = {
-    taps = [ "homebrew/cask" ];
+    taps = [
+      "homebrew/cask"
+      "snyk/tap"
+    ];
+
+    brews = [
+      "snyk"          # Security.
+    ];
 
     casks = [
       "google-chrome" # Google Meet.
