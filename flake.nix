@@ -2,7 +2,7 @@
   description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";               # Default to stable for most things.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";               # Default to stable for most things.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     darwin.url = "github:lnl7/nix-darwin/master";
