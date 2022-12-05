@@ -1,7 +1,8 @@
-{ home-manager, homeManagerModules, nixpkgs, nixpkgsConfig, }:
+{ home-manager, homeManagerModules, nixpkgs, nixpkgsConfig, lib, ... }:
 {
   mkHomeManagerHost = { system, username, hostModules ? [] }:
     let
+      inherit (lib) attrValues;
       common = {
         home = {
           inherit username;

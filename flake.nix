@@ -36,6 +36,7 @@
         inherit home-manager nixpkgsConfig;           # Modules and configurations.
         nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
+        lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
       };
     in {
       darwinConfigurations = with macosLib; {
@@ -49,7 +50,7 @@
       # Aliases to standadize builds.
       hosts = {
         work-macos = self.darwinConfigurations.work-macos.system;
-        wsl        = self.darwinConfigurations.wsl.activationPackage;
+        wsl        = self.homeManagerConfigurations.wsl.activationPackage;
       };
 
       # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.
