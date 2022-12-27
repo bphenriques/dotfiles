@@ -3,10 +3,13 @@
     taps = [
       "homebrew/cask"
       "snyk/tap"
+      "int128/kubelogin"
     ];
 
     brews = [
-      "snyk"          # Security.
+      "kubectl"
+      "snyk"                        # Security.
+      "int128/kubelogin/kubelogin"  # K8s stuff
     ];
 
     casks = [
