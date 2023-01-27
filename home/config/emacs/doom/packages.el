@@ -15,3 +15,5 @@
 
 (package! git-auto-commit-mode
   :recipe (:host github :repo "ryuslash/git-auto-commit-mode") :pin "a6b6e0fa183be381463e2b44ef128db1b6c4234b")
+
+(package! straight :pin "3eca39d")
