@@ -8,8 +8,9 @@
 
     brews = [
       "kubectl"
+      "awscli"
       "snyk"                        # Security.
-      "int128/kubelogin/kubelogin"  # K8s stuff
+      "int128/kubelogin/kubelogin"  # Kubernetes
     ];
 
     casks = [
