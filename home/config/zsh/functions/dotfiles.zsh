@@ -5,6 +5,7 @@ __dotfiles_usage() {
    echo "dotfiles [e]dit"
    echo "dotfiles [s]ync"
    echo "dotfiles [u]pdate"
+   echo "dotfiles [c]hangelog"
 }
 
 __dotfiles_open() {
@@ -16,13 +17,15 @@ __dotfiles_edit() {
 }
 
 __dotfiles_sync() (
-  cd "$LOCATION"
-  make sync
+  "$LOCATION"/bin/sync.sh
 )
 
 __dotfiles_update() (
-  cd "$LOCATION"
-  make update
+  "$LOCATION"/bin/update.sh
+)
+
+__dotfiles_changelog() (
+  nix profile diff-closures --profile /nix/var/nix/profiles/system
 )
 
 if [ $# -eq 0 ]; then
@@ -45,6 +48,10 @@ else
           u | update)
                               shift
                               __dotfiles_update
+                              ;;
+          c | changelog)
+                              shift
+                              __dotfiles_changelog
                               ;;
           *)
                               __dotfiles_usage
