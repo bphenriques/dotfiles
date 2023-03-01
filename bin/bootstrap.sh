@@ -1,11 +1,20 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # shellcheck disable=SC2016,SC1091,SC1090,SC2002
 #
-# Bootstraps the required dependencies for non-NixOS operating systems.
+# Bootstraps the system for the dotfiles.
 #
 set -euf
 
+# Constants
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
+
+WORKSPACE="$HOME/workspace"
+DOTFILES_LOCATION="$HOME"/.dotfiles
+HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
+
+SSH_KEY_EMAIL_ADDRESS="4727729+bphenriques@users.noreply.github.com"
+SSH_KEY_LOCATION="$HOME"/.ssh/id_ed25519.pub
+SSH_TYPE=ed25519
 
 # Utility methods
 info() {
@@ -39,33 +48,37 @@ append_if_absent() {
   line="$1"
   file="$2"
 
-  # Append if absent
   touch "$file"
-  grep --quiet --fixed-strings -- "$line" "$file" || echo "$line" >>"$file"
+  grep --quiet --fixed-strings -- "$line" "$file" || echo "$line" >> "$file"
 }
-
-WORKSPACE="$HOME/workspace"
-DOTFILES_LOCATION="$HOME"/.dotfiles
-HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
-
-SSH_KEY_EMAIL_ADDRESS="4727729+bphenriques@users.noreply.github.com"
-SSH_KEY_LOCATION="$HOME"/.ssh/id_ed25519.pub
-SSH_TYPE=ed25519
 
 check_requirements() {
   (command -v nix >/dev/null && success 'Nix - Installed!') || fail 'Nix is not installed. Install it manually: https://nixos.org/manual/nix/stable/#chap-installation'
-  (command -v make >/dev/null && success 'Make - Installed!') || fail 'Make is not installed.'
+  (command -v git >/dev/null && success 'Git - Installed!') || fail 'Git is not installed.'
 }
 
 install_nix_flakes() {
   info 'Nix Flakes - Checking...'
   if ! nix flake show templates >/dev/null; then
-    info 'Nix Flakes - Installing...'
-    nix-env -iA nixpkgs.nixUnstable
-    mkdir -p "$XDG_CONFIG_HOME"/nix
-    append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
+    if [ -d /etc/nixos ]; then
+      info 'Nix Flakes - Encountered NixOS. Run sudo nano /etc/nixos/configuration.nix and update the file with:'
+      echo 'nix.settings.experimental-features = [ "nix-command" "flakes" ];'
+      echo ''
+      echo 'Once done:'
+      echo '1. sudo nixos-rebuild switch'
+      echo '2. reboot'
+      press_to_continue
+      exit 1
+    else
+      info 'Nix Flakes - Installing...'
+      nix-env -iA nixpkgs.nixUnstable
+      mkdir -p "$XDG_CONFIG_HOME"/nix
+      append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
+    fi
+    success 'Nix Flakes - Installed!'
+  else
+    success 'Nix Flakes - Already available!'
   fi
-  success 'Nix Flakes - Installed!'
 }
 
 install_homebrew() {
@@ -132,8 +145,11 @@ setup_ssh() {
             open https://github.com/settings/ssh/new
             press_to_continue
             ;;
-        *)  cat "$SSH_KEY_LOCATION"
-            info "SSH Key - Copy public key to https://github.com/settings/ssh/new"
+        *)
+            info "SSH Key - Copy the following public key to https://github.com/settings/ssh/new"
+            info "---------------"
+            cat "$SSH_KEY_LOCATION"
+            info "---------------"
             press_to_continue
             ;;
     esac
@@ -143,15 +159,20 @@ setup_ssh() {
 
 select_host() {
   info 'Nix Host Type - Checking...'
-
   if [ ! -f "$HOST_FILE_LOCATION" ]; then
-    info 'Nix Host Type - Setting up...'
-    nix_host=
-    select nix_host in $(find "$DOTFILES_LOCATION/hosts/" -mindepth 1 -type d -exec basename {} \; | xargs); do
-       test -n "$nix_host" && break
-       warn "Invalid host!"
+    printf "Available hosts:\n"
+    find "$DOTFILES_LOCATION"/host/ -mindepth 1 -type d -exec basename {} \; | xargs -I{} echo "- {}"
+    printf "\n"
+    while true; do
+      printf "Introduce the host type: "
+      read -r nix_host
+      if [ -d "$DOTFILES_LOCATION/host/$nix_host" ]; then
+        break
+      fi
     done
-    printf '%s' "$nix_host" >>"$HOST_FILE_LOCATION"
+    printf '%s' "$nix_host" > "$HOST_FILE_LOCATION"
+  elif [ ! -d "$DOTFILES_LOCATION/host/$(cat $HOST_FILE_LOCATION)" ]; then
+    fail "Nix Host - Already set to a invalid host! It is $(cat $HOST_FILE_LOCATION). Delete the file and resume."
   fi
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
@@ -162,12 +183,12 @@ setup_ssh
 install_nix_flakes
 case "$(uname -s)" in
     Darwin)
-                install_nix_darwin
-                install_homebrew
-                ;;
-    *)          ;;
+      install_nix_darwin
+      install_homebrew
+      ;;
+    *)  ;;
 esac
 clone_default_repos
 select_host
 
-success 'Bootstrap - Complete! Restart your terminal!'
+success 'Bootstrap - Complete!'

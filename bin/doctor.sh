@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # shellcheck disable=SC1091
 set -euf
 SCRIPT_PATH="$(dirname "$0")"
@@ -7,7 +7,8 @@ SCRIPT_PATH="$(dirname "$0")"
 
 # Set if absent.
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
-HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
+DOTFILES_LOCATION="$HOME/.dotfiles"
+HOST_FILE_LOCATION="$DOTFILES_LOCATION"/.nix-host
 
 check_zsh() {
   case $SHELL in
@@ -26,10 +27,13 @@ check_zsh() {
               ;;
             *)
               info "Zsh - Run the following and restart:":
-              echo
-              echo "echo '$location' | sudo tee -a /etc/shells > /dev/null"
-              echo "chsh -s $location"
-              echo
+              if [ -d /etc/nixos ]; then
+                echo "For some reason, the default shell is not set correctly. Was it applied?"
+                echo
+              else
+                echo "echo '$location' | sudo tee -a /etc/shells > /dev/null"
+                echo "chsh -s $location"
+              fi
               ;;
         esac
       else
@@ -47,7 +51,7 @@ case "$(uname -s)" in
   *) ;;
 esac
 
-(test -f "$HOST_FILE_LOCATION" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail 'Nix Host - Not Set!'
+(test -d "$DOTFILES_LOCATION/host/$(cat $HOST_FILE_LOCATION)" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail "Nix Host - Invalid host! It is $(cat $HOST_FILE_LOCATION)"
 
 check_zsh
 
