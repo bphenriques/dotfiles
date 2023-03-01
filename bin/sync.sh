@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # shellcheck disable=SC1091
 set -euf
 SCRIPT_PATH="$(dirname "$0")"
@@ -17,20 +17,21 @@ DOOM_EMACS_PATH="$XDG_CONFIG_HOME"/emacs
 WORKSPACE="$HOME/workspace"
 
 sync_flake() {
-  info "Syncing Host '$HOST_TARGET'"
-  if [ "$DEBUG" != "0" ]; then
-    nix build ".#hosts.$HOST_TARGET" --show-trace
+  info "Syncing Host '$HOST_TARGET'.."
+  if [ -d /etc/nixos ]; then
+    sudo nixos-rebuild switch --flake ".#$HOST_TARGET"
   else
-    nix build ".#hosts.$HOST_TARGET"
+    if [ "$DEBUG" != "0" ]; then
+      nix build ".#hosts.$HOST_TARGET" --show-trace
+    else
+      nix build ".#hosts.$HOST_TARGET"
+    fi
+
+    case "$(uname -s)" in
+        Darwin) ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET" ;;
+        *) ./result/activate ;;
+    esac
   fi
-  case "$(uname -s)" in
-    Darwin)
-      ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
-      ;;
-    *)
-      ./result/activate
-      ;;
-  esac
 }
 
 sync_emacs() {
@@ -70,7 +71,6 @@ sync_repository() {
   success "Repo '$name' - Done!"
 }
 
-#sync_repository "$HOME/.dotfiles"
 sync_flake
 sync_emacs
 sync_repository "$WORKSPACE/journal"
