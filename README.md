@@ -4,40 +4,29 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 ----
 
-# Pre-Requirements
+# Quick start
 
-Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) and source it:
-   ```shell
-   $ . "$HOME"/.nix-profile/etc/profile.d/nix.sh
-   ```
+> **Disclaimer:** This is a personal configuration tested on fresh installs of NixOS/MacOS/WSL. I am no expert, however 
+> I hope that this configuration helps you out setting up your own! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
+> 
+> If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
-# Setup
+1. If not available, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
 
-In the [`host`](https://github.com/bphenriques/dotfiles/tree/master/host) directory you'll find the available hosts.
+2. Bootstrap:
 
-1. Bootstrap:
    ```sh
-   $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/bin/bootstrap.sh)"
+   $ nix-shell --packages git --command "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/bin/bootstrap.sh)"
    ```
 
-2. Sync flake:
+3. Apply:
    ```sh
    $ "$HOME"/.dotfiles/bin/sync.sh
    ```
 
-3. Import the GPG Key:
+4. Import the GPG Key using `gpg --import`. If pinentry fails, you may need to restart.
    
-   From clipboard:
-   ```sh
-   $ pbpaste | gpg --import
-   ```
-
-   From file:
-   ```sh
-   $ gpg --import private.key
-   ```
-   
-4. Reboot!
+5. Reboot!
 
 # Updating
 
@@ -70,7 +59,3 @@ $ dotfiles update
   - https://nixos.org/manual/nix/stable/language/builtins.html
   - https://github.com/NixOS/nixpkgs/blob/master/lib/strings.nix
   - https://github.com/NixOS/nixpkgs/blob/master/lib/types.nix
-
-If you are new to dotfiles, I suggest looking for a more direct solution using a bare git repository. Start small and build up and make the tools work for you.
-
-Feel free to contact me if you need help!
