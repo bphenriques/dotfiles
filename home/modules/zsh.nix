@@ -119,11 +119,13 @@ in
     # Setup ZSHENV
     {
       home.file.".zshenv".text = ''
-        # Update PATH with Nix and Home-Manager packages
-        . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+        # This file is absent in NixOS but present on other regular setups.
+        test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+
+        # Add home-manager binaries to PATH
         export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 
-        # Source session variables
+        # Source home-manager session variables
         . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
 
         # Override ZSH location to unclutter $HOME folder

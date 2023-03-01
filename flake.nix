@@ -25,6 +25,14 @@
         };
       };
 
+      nixosLib = import ./lib/nixos.nix {
+        inherit home-manager nixpkgsConfig nixConfig;           # Modules and configurations.
+        nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
+        nixosModules = {};                            # Nothing for now.
+        homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
+        lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
+      };
+
       macosLib = import ./lib/macos.nix {
         inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.
         darwinModules = self.darwinModules;                   # Custom darwin modules.
@@ -39,15 +47,20 @@
         lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
       };
     in {
+      # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.
+      nixosConfigurations = with nixosLib; {
+        desktop = mkRegularNixOSHost (import (./host/desktop) {});
+      };
+
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost (import (./host + "/work-macos") {});
+        work-macos = mkMacOSHost (import (./host/work-macos) {});
       };
 
       homeManagerConfigurations = with homeManagerLib; {
-        wsl = mkHomeManagerHost (import ./host + "/wsl" {});
+        wsl = mkHomeManagerHost (import ./host/wsl {});
       };
 
-      # Aliases to standadize builds.
+      # Aliases to that sets a common interface to call: nix build ".#hosts.<target>"
       hosts = {
         work-macos = self.darwinConfigurations.work-macos.system;
         wsl        = self.homeManagerConfigurations.wsl.activationPackage;
