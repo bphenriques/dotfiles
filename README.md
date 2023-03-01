@@ -22,8 +22,7 @@ In the [`host`](https://github.com/bphenriques/dotfiles/tree/master/host) direct
 
 2. Sync flake:
    ```sh
-   $ cd "$HOME"/.dotfiles
-   $ make sync
+   $ "$HOME"/.dotfiles/bin/sync.sh
    ```
 
 3. Import the GPG Key:
@@ -44,14 +43,7 @@ In the [`host`](https://github.com/bphenriques/dotfiles/tree/master/host) direct
 
 The following will update `flake.lock` and Doom Emacs.
 ```sh
-$ make update
-```
-
-Check if everything is stable before committing.
-
-For reference, it is also possible to see the list of updated packages between Nix generations:
-```sh
-$ make changelog
+$ dotfiles update
 ```
 
 # Acknowledgments
