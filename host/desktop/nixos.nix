@@ -37,6 +37,12 @@
     pulse.enable = true;
   };
 
+  # Programs
+  environment.systemPackages = with pkgs; [
+    jetbrains.idea-community
+  ];
+  
+
   # Set zsh shell
   users.defaultUserShell = pkgs.zsh;
   environment.shells = with pkgs; [ zsh ];
