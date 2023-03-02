@@ -2,6 +2,7 @@
 {
   username = "bphenriques";
   hostNixOSModules = [
+    ../../nixos
     ./nixos.nix
   ];
   hostHomeManagerModules = [

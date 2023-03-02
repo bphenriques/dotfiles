@@ -17,6 +17,7 @@ __dotfiles_edit() {
 }
 
 __dotfiles_sync() (
+  cd "$LOCATION"
   "$LOCATION"/bin/sync.sh
 )
 

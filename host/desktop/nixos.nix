@@ -4,20 +4,34 @@
   imports = [ ./hardware-configuration.nix ];
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  boot = {
+    supportedFilesystems = [ "ntfs" ];
+    loader.grub = {
+      enable = true;
+      device = "/dev/sda";
+      useOSProber = true;
+    };
+  };
+
+  # Display
+  services.xserver = {
+    enable = true; # Enable the X11 windowing system.
+    videoDrivers = [ "nvidia" ];
+
+    # Plasma Desktop Environment
+    displayManager.sddm.enable = true;
+    desktopManager.plasma5.enable = true;
+  };
+  hardware.opengl.enable = true;
+
+
+  hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen issues
 
   # Networking
-  networking.hostName = "bphenriques-desktop";
-  networking.networkmanager.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Plasma Desktop Environment.
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  networking = {
+    hostName = "bphenriques-desktop";
+    networkmanager.enable = true;
+  };
 
   # Keymapping
   services.xserver = {
@@ -29,6 +43,8 @@
   # Sound
   sound.enable = true;
   hardware.pulseaudio.enable = false;
+
+  # What does this do?
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -37,35 +53,10 @@
     pulse.enable = true;
   };
 
-  # Programs
-  environment.systemPackages = with pkgs; [
-    jetbrains.idea-community
-  ];
-  
-
-  # Set zsh shell
-  users.defaultUserShell = pkgs.zsh;
-  environment.shells = with pkgs; [ zsh ];
 
   # TODO verify:
   #environment.homeBinInPath
 
-  # Localization
-  time.timeZone = "Europe/Lisbon";
-  i18n = {
-    defaultLocale = "en_GB.UTF-8";
-    extraLocaleSettings = {
-      LC_ADDRESS = "pt_PT.UTF-8";
-      LC_IDENTIFICATION = "pt_PT.UTF-8";
-      LC_MEASUREMENT = "pt_PT.UTF-8";
-      LC_MONETARY = "pt_PT.UTF-8";
-      LC_NAME = "pt_PT.UTF-8";
-      LC_NUMERIC = "pt_PT.UTF-8";
-      LC_PAPER = "pt_PT.UTF-8";
-      LC_TELEPHONE = "pt_PT.UTF-8";
-      LC_TIME = "pt_PT.UTF-8";
-    };
-  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

@@ -9,7 +9,8 @@
 
   # Fonts
   fonts.fontconfig.enable = true;
-  home.packages = [
-    (pkgs.nerdfonts.override { fonts = [ "Hack" ]; })
+  home.packages = with pkgs; [
+    python3
+    (nerdfonts.override { fonts = [ "Hack" ]; })
   ];
 }
