@@ -26,6 +26,7 @@
 
     # Text
     bat         # Preview with code highlight.
+    vim         # editor
 
     # Dev
     shellcheck  # Linter for shell scripts.

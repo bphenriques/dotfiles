@@ -12,7 +12,7 @@
     desktopManager.plasma5.enable = true;             # Plasma environment.
     displayManager.defaultSession = "plasmawayland";  # Ensure it starts with wayland.
   };
-  programs.sway.enabled = true;
+  programs.sway.enable = true;
 
   # Input
   services.xserver.xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
