@@ -1,6 +1,9 @@
 { config, pkgs, lib, ... }:
 {
-  # Gpg
+  # programs
+  programs.firefox.enable = true;
+
+  # gpg
   programs.gpg.enable = true;
   services.gpg-agent.enable = true;
 
@@ -8,14 +11,7 @@
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
     xclip
-    firefox-wayland
     python3
     (nerdfonts.override { fonts = [ "Hack" ]; })
   ];
-
-  # Firefox hacks around wayland (see https://github.com/swaywm/sway/wiki/Running-programs-natively-under-wayland#gtk3)
-  home.sessionVariables = {
-    MOZ_ENABLE_WAYLAND = 1;
-    XDG_CURRENT_DESKTOP = "sway";
-  };
 }
