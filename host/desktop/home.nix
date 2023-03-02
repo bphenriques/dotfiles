@@ -7,6 +7,7 @@
   # Fonts
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
+    xclip
     firefox-wayland
     python3
     (nerdfonts.override { fonts = [ "Hack" ]; })
