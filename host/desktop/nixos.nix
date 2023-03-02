@@ -13,18 +13,8 @@
     };
   };
 
-  # Display
-  services.xserver = {
-    enable = true; # Enable the X11 windowing system.
-    videoDrivers = [ "nvidia" ];
-
-    # Plasma Desktop Environment
-    displayManager.sddm.enable = true;
-    desktopManager.plasma5.enable = true;
-  };
-  hardware.opengl.enable = true;
-
-
+  # Nvidia drivers
+  services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen issues
 
   # Networking
@@ -37,26 +27,11 @@
   services.xserver = {
     layout = "us";
     xkbVariant = "";
-    xkbOptions = "caps:ctrl_modifier";
   };
 
-  # Sound
-  sound.enable = true;
-  hardware.pulseaudio.enable = false;
-
-  # What does this do?
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-
-
-  # TODO verify:
+  # TODO explore:
   #environment.homeBinInPath
-
+  # https://nixos.org/manual/nixos/stable/index.html#sec-x11-auto-login
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

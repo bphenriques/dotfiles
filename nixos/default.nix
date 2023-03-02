@@ -5,11 +5,26 @@
   users.defaultUserShell = pkgs.zsh;
   environment.shells = with pkgs; [ zsh ];
 
-  imports = [
-    ./gaming.nix
-    ./media.nix
-    ./development.nix
-  ];
+  # Display environment
+  services.xserver = {
+    enable = true;                        # X11 because setting up Wayland is more complicated than it is worth for me.
+    displayManager.sddm.enable = true;    # SDDM login page.
+    desktopManager.plasma5.enable = true; # Plasma environment.
+  };
+
+  # Input
+  services.xserver.xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+
+  # Sound
+  sound.enable = true;
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true; # Recommended for pulseaudio.
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
 
   # Basic programs
   environment.systemPackages = with pkgs; [
@@ -32,4 +47,10 @@
       LC_TIME = "pt_PT.UTF-8";
     };
   };
+
+  imports = [
+    ./gaming.nix
+    ./media.nix
+    ./development.nix
+  ];
 }
