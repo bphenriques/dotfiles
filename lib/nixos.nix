@@ -12,11 +12,6 @@
         nixpkgs = nixpkgsConfig;
         nix = nixConfig;
 
-        users.users."${username}" = {
-          isNormalUser = true;
-          extraGroups = [ "networkmanager" "wheel" ];
-        };
-
         # Home-Manager
         home-manager.useGlobalPkgs        = true; # Consistency: use pkgs set via the system level nixpkgs options.
         home-manager.useUserPackages      = true; # Install packages defined in home-manager.

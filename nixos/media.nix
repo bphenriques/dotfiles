@@ -10,4 +10,6 @@
     openFirewall = true;
     # This leads to buggy shutdowns. Disable with sudo systemctl stop plex.service
   };
+
+  # Consider evince as a PDF reader as opposed to firefox
 }

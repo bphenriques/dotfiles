@@ -29,6 +29,11 @@
   # Basic programs
   environment.systemPackages = with pkgs; [
     ark             # Zip/Unzip
+
+    # Filesystems (will I use this? doesnt hurt to have this)
+    exfat     # Windows drives
+    ntfs3g    # Windows drives
+    hfsprogs  # MacOS drives
   ];
 
   # Localization

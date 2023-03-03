@@ -13,6 +13,16 @@
     };
   };
 
+  # Disk management
+  fileSystems."/mnt/files" = {
+    device = "/dev/disk/by-label/files";
+    fsType = "auto";
+    options = [ "nosuid" "nodev" "nofail"]; # standard security plus allow booting if fails.
+  };
+
+  # Trim SSD because for some reason is not a default :shrug:
+  services.fstrim.enable = true;
+
   # Nvidia drivers
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen issues
@@ -27,6 +37,11 @@
   services.xserver = {
     layout = "us";
     xkbVariant = "";
+  };
+
+  users.users.bphenriques = {
+    isNormalUser = true;
+    extraGroups = [ "networkmanager" "wheel" ];
   };
 
   # TODO explore:
