@@ -14,14 +14,12 @@
   };
 
   # Disk management
-  fileSystems."/mnt/files" = {
-    device = "/dev/disk/by-label/files";
+  fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-label/data";      # Previously formatted.
     fsType = "auto";
-    options = [ "nosuid" "nodev" "nofail"]; # standard security plus allow booting if fails.
+    options = [ "nosuid" "nodev" "nofail" ]; # Standard security plus allow booting if fails.
   };
-
-  # Trim SSD because for some reason is not a default :shrug:
-  services.fstrim.enable = true;
+  services.fstrim.enable = true;             # Trim SSD because for some reason is not a default :shrug:
 
   # Nvidia drivers
   services.xserver.videoDrivers = [ "nvidia" ];

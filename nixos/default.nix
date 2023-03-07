@@ -27,6 +27,7 @@
   };
 
   # Basic programs
+  programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
     ark             # Zip/Unzip
 
