@@ -39,8 +39,12 @@
 
   users.users.bphenriques = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "qbittorrent" ];
   };
+
+
+  # TODO: Automatically create Downloads directory on the secundary disk
+  # TODO: Autoamtically set torrent parth location to that same place
 
   # TODO explore:
   #environment.homeBinInPath
