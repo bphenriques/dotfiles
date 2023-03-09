@@ -38,7 +38,7 @@ with lib;
       "..."  = "cd ../..";
 
       # Text Processor
-      e           = "emacsclient";
+      e           = "$EDITOR";
       grep        = "grep --color";
     };
   };

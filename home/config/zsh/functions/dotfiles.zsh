@@ -33,30 +33,30 @@ if [ $# -eq 0 ]; then
     __dotfiles_open
 else
   while [ "$1" != "" ]; do
-      case $1 in
-          o | open)
-                              shift
-                              __dotfiles_open
-                              ;;
-          e | edit)
-                              shift
-                              __dotfiles_edit
-                              ;;
-          s | sync)
-                              shift
-                              __dotfiles_sync
-                              ;;
-          u | update)
-                              shift
-                              __dotfiles_update
-                              ;;
-          c | changelog)
-                              shift
-                              __dotfiles_changelog
-                              ;;
-          *)
-                              __dotfiles_usage
-                              return
+    case $1 in
+      o | open)
+        shift
+        __dotfiles_open
+        ;;
+      e | edit)
+        shift
+        __dotfiles_edit
+        ;;
+      s | sync)
+        shift
+        __dotfiles_sync
+        ;;
+      u | update)
+        shift
+        __dotfiles_update
+        ;;
+      c | changelog)
+        shift
+        __dotfiles_changelog
+        ;;
+      *)
+        __dotfiles_usage
+        return
         ;;
     esac
   done
