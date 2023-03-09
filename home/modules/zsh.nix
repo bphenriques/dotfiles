@@ -104,6 +104,8 @@ in
       type = lines;
       default = "";
     };
+
+    debugStartup = mkEnableOption "Z Shell Debug Startup";
   };
 
   config = mkIf cfg.enable (mkMerge [
@@ -145,7 +147,13 @@ in
     {
       xdg.configFile."zsh/completion.zsh".text = concatStringsSep "\n" [
         cfg.completions
-        "autoload -Uz compinit && compinit"
+        ''
+        autoload -Uz compinit
+        for dump in ~/.zcompdump(N.mh+24); do
+          compinit
+        done
+        compinit -C
+        ''
       ];
     }
 
@@ -174,6 +182,7 @@ in
     {
       home.packages = with pkgs; [zsh];
       xdg.configFile."zsh/.zshrc".text = concatStringsSep "\n" [
+        # "zmodload zsh/zprof"
         cfg.options
 
         # Prune duplicate entries in $PATH
@@ -195,6 +204,7 @@ in
         ''. "$ZDOTDIR"/aliases.zsh''
 
         (sourcePlugins (filter (plugin: plugin.sourceTiming == "last") cfg.plugins))
+        # "zprof"
       ];
     }
 

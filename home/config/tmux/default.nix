@@ -21,7 +21,7 @@
 
   modules.zsh.initExtraAfterCompInit = ''
     if test -z "$SKIP_TMUX" && command -v tmux >/dev/null && test -z "$TMUX"; then
-      exec tmux new-session;
+      exec tmux new-session -A -s default;
       exit;
     fi
   '';

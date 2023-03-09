@@ -4,7 +4,6 @@ with lib;
 {
   home.packages = with pkgs; [
     vivid       # LS_COLORS generator because I refuse to use the syntax >.<
-    thefuck     # Fix some commands
   ];
 
   home = {
@@ -38,7 +37,7 @@ with lib;
       "..."  = "cd ../..";
 
       # Text Processor
-      e           = "$EDITOR";
+      e           = "emacsclient";
       grep        = "grep --color";
     };
   };
@@ -57,7 +56,7 @@ with lib;
     };
 
     thefuck = {
-      enable                  = true;
+      enable                  = false;
       personalZshIntegration  = true;
     };
 
