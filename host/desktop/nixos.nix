@@ -25,11 +25,10 @@
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen issues
 
+  user.name = "bphenriques";
+
   # Networking
-  networking = {
-    hostName = "bphenriques-desktop";
-    networkmanager.enable = true;
-  };
+  networking.hostName = "bphenriques-desktop";
 
   # Keymapping
   services.xserver = {
@@ -37,10 +36,10 @@
     xkbVariant = "";
   };
 
-  users.users.bphenriques = {
-    isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "qbittorrent" ];
-  };
+  #users.users.bphenriques = {
+  #  isNormalUser = true;
+  #  extraGroups = [ "networkmanager" "wheel" "qbittorrent" ];
+  #};
 
 
   # TODO: Automatically create Downloads directory on the secundary disk

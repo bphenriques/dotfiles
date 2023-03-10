@@ -12,6 +12,10 @@
     desktopManager.plasma5.enable = true; # Plasma environment.
   };
 
+  # Network
+  networking.networkmanager.enable = true;
+  user.extraGroups = ["networkmanager" "banana"];
+
   # Input
   services.xserver.xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
 

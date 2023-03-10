@@ -12,6 +12,7 @@
   home.packages = with pkgs; [
     xclip
     python3
+    rofi
     (nerdfonts.override { fonts = [ "Hack" ]; })
   ];
 }

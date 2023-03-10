@@ -1,15 +1,10 @@
 { pkgs, lib, config, ... }:
 {
+  services.qbittorrent.enable = true;
+
   environment.systemPackages = with pkgs; [
-    qbittorrent
     vlc
   ];
-
-   # for transmission
-   networking.firewall = {
-     allowedTCPPorts = [ 8080 ];
-      allowedUDPPorts = [ 8080 ];
-  };
 
   services.plex = {
     # Accessible through: http://127.0.0.1:32400/web

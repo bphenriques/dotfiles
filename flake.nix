@@ -26,9 +26,9 @@
       };
 
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig nixConfig;           # Modules and configurations.
+        inherit home-manager nixpkgsConfig nixConfig; # Modules and configurations.
         nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
-        nixosModules = {};                            # Nothing for now.
+        nixosModules = self.nixosModules;             # Custom nixos modules.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
         lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
       };
@@ -67,6 +67,7 @@
       };
 
       # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.
+      nixosModules = import ./nixos/modules;
       homeManagerModules = import ./home/modules;
       darwinModules = import ./darwin/modules;
     };
