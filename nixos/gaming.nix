@@ -15,6 +15,7 @@
 
   environment.systemPackages = with pkgs; [
     lutris
+    kdialog # Required for lutris?
     heroic-unwrapped
   ];
 }
