@@ -2,6 +2,7 @@
 {
   # programs
   programs.firefox.enable = true;
+  services.dropbox.enable = true;
 
   # gpg
   programs.gpg.enable = true;

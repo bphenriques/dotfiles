@@ -16,7 +16,7 @@ in
     users.users.${cfg.name} = {
       description = "The primary user";
       isNormalUser = true;
-      extraGroups = ["wheel"] ++ traceVal cfg.extraGroups;
+      extraGroups = ["wheel"] ++ cfg.extraGroups;
     };
   };
 }

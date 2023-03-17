@@ -3,7 +3,7 @@
   hardware.opengl = {
     enable = true;
     driSupport = true;
-    driSupport32Bit = true; # Enable OpenGL 32bit programs for Wine.
+    driSupport32Bit = true; # Enable OpenGL 32bit programs for Wine when using a 64bit system.
   };
 
   programs.steam = {
@@ -14,6 +14,7 @@
   systemd.extraConfig = "DefaultLimitNOFILE=1048576"; # Proton Games - Ref: https://github.com/zfigura/wine/blob/esync/README.esync
 
   environment.systemPackages = with pkgs; [
+    lutris
     heroic-unwrapped
   ];
 }

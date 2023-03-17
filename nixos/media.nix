@@ -3,7 +3,8 @@
   services.qbittorrent.enable = true;
 
   environment.systemPackages = with pkgs; [
-    vlc
+    amberol   # Audio
+    vlc       # Video
   ];
 
   services.plex = {

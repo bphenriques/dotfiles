@@ -12,9 +12,14 @@
     desktopManager.plasma5.enable = true; # Plasma environment.
   };
 
+  # Remove default KDE packages that I do not use.
+  services.xserver.desktopManager.plasma5.excludePackages = with pkgs.libsForQt5; [
+    elisa       # Using other music app.
+  ];
+
   # Network
   networking.networkmanager.enable = true;
-  user.extraGroups = ["networkmanager" "banana"];
+  user.extraGroups = ["networkmanager"];
 
   # Input
   services.xserver.xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
@@ -33,9 +38,9 @@
   # Basic programs
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
-    ark             # Zip/Unzip
+    p7zip           # Zip/Unzip that supports all the formats I need
 
-    # Filesystems (will I use this? doesnt hurt to have this)
+    # Filesystems (will I ever need this?)
     exfat     # Windows drives
     ntfs3g    # Windows drives
     hfsprogs  # MacOS drives
