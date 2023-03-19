@@ -1,10 +1,10 @@
 { config, pkgs, lib, ... }:
 {
-  # programs
+  # Programs
   programs.firefox.enable = true;
   services.dropbox.enable = true;
 
-  # gpg
+  # Gpg
   programs.gpg.enable = true;
   services.gpg-agent.enable = true;
 

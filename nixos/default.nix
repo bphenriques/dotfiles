@@ -22,10 +22,14 @@
   user.extraGroups = ["networkmanager"];
 
   # Input
-  services.xserver.xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+  services.xserver = {
+    layout = "us";
+    xkbVariant = "";
+    xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+  };
 
   # Sound - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
-  sound.enable = false;                # Disable ALSA: https://nixos.wiki/wiki/ALSA
+  sound.enable = false;                # Disable ALSA (it is used as a low-level API for pipewire): https://nixos.wiki/wiki/ALSA
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire
   services.pipewire = {
@@ -35,7 +39,7 @@
     pulse.enable = true;               # For better compatibility
   };
 
-  # Basic programs
+  # Programs
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
     p7zip           # Zip/Unzip that supports all the formats I need

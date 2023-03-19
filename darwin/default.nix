@@ -3,8 +3,6 @@
 {
   environment.shells = [ pkgs.zsh ];  # Register the shell
 
-  programs.org-protocol.enable = true;
-
   # System settings.
   system = {
     screencapture.createLocation = true;
@@ -86,7 +84,8 @@
     fonts = [ (pkgs.nerdfonts.override { fonts = [ "Hack" ]; }) ]; # List here: https://github.com/ryanoasis/nerd-fonts
   };
 
-  # Homebrew packages
+  # Programs
+  programs.org-protocol.enable = true;
   homebrew = {
     enable = true;
 
