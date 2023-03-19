@@ -3,17 +3,26 @@
 {
   imports = [ ./hardware-configuration.nix ];
 
-  # Bootloader.
-  boot = {
-    supportedFilesystems = [ "ntfs" ];
-    loader.grub = {
-      enable = true;
-      device = "/dev/sda";
-      useOSProber = true;
-    };
+
+
+  # Bootloader
+  # boot.loader = {
+  #  systemd-boot.enable = true;
+  #  efi = {
+  #    canTouchEfiVariables = true;
+  #    efiSysMountPoint = "/boot/efi";
+  #  };
+  #};
+
+  # Legacy Bootloader.
+  boot.loader.grub = {
+    enable = true;
+    device = "/dev/sda";
+    useOSProber = true;
   };
 
   # Disk management
+  boot.supportedFilesystems = [ "ntfs" ];   # Support regular Windows FS
   fileSystems."/mnt/data" = {
     device = "/dev/disk/by-label/data";      # Previously formatted.
     fsType = "auto";
