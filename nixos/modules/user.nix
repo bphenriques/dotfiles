@@ -16,6 +16,7 @@ in
     users.users.${cfg.name} = {
       description = "The primary user";
       isNormalUser = true;
+      home = "/home/${cfg.name}";
       extraGroups = ["wheel"] ++ cfg.extraGroups;
     };
   };

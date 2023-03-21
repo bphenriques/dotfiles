@@ -2,7 +2,7 @@
 {
   # Programs
   programs.firefox.enable = true;
-  services.dropbox.enable = true;
+  services.dropbox.enable = true; # TODO: Change path but ensure that the folders
 
   # Gpg
   programs.gpg.enable = true;

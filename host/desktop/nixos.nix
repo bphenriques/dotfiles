@@ -1,23 +1,24 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [ ./hardware-configuration.nix ./mouse.nix ];
 
-  # Grub Bootloader
+  # Bootloader
   boot.loader.grub = {
     enable = true;
     device = "/dev/sda";
     useOSProber = true;
   };
 
-  # Latest kernel
+  # Latest kernel (aka the one pinned under flake.lock)
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # Disk management
+  # Hardware
+  ## Disk management
   services.fstrim.enable = true;              # Trim SSD because for some reason is not a default :shrug:
   boot.supportedFilesystems = [ "ntfs" ];     # Support regular Windows FS
 
-  # Video Driver
+  ## Video Driver
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
 
