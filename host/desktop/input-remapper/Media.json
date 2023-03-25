@@ -1,16 +1,16 @@
 {
-  "mapping": {
-    "1,276,1": [
-      "XF86AudioNext",
-      "keyboard"
-    ],
-    "1,275,1": [
-      "XF86AudioPrev",
-      "keyboard"
-    ],
-    "1,277,1": [
-      "XF86AudioPlay",
-      "keyboard"
-    ]
-  }
+    "mapping": {
+        "1,275,1": [
+            "KEY_PREVIOUSSONG",
+            "keyboard"
+        ],
+        "1,277,1": [
+            "KEY_PLAYPAUSE",
+            "keyboard"
+        ],
+        "1,276,1": [
+            "KEY_NEXTSONG",
+            "keyboard"
+        ]
+    }
 }
