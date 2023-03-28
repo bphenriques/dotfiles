@@ -1,5 +1,6 @@
 {
   bphenriques-zsh           = ./zsh.nix;
+  bphenriques-discord       = ./discord.nix;
   bphenriques-fzf-extra     = ./fzf-extra.nix;
   bphenriques-thefuck       = ./thefuck.nix;
   bphenriques-direnv-extra  = ./direnv-extra.nix;

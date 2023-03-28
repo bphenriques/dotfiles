@@ -2,7 +2,15 @@
 {
   services.qbittorrent.enable = true;
 
+  modules.programs.navidrome.enable = true;
+
+  # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home
+
+  services.jellyfin.enable = true;
   environment.systemPackages = with pkgs; [
+    jellyfin-ffmpeg
+    # or https://github.com/tsirysndr/music-player ?
+    # Kid3 for tagging?
     amberol   # Audio
     vlc       # Video
   ];

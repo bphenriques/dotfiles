@@ -8,6 +8,9 @@
   programs.gpg.enable = true;
   services.gpg-agent.enable = true;
 
+  # Media
+  modules.programs.discord.enable = true;
+
   # Fonts
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
