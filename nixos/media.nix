@@ -6,7 +6,10 @@
 
   # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home
 
-  services.jellyfin.enable = true;
+  services.jellyfin = {
+    enable = true;
+    openFirewall = true;
+  };
   environment.systemPackages = with pkgs; [
     jellyfin-ffmpeg
     # or https://github.com/tsirysndr/music-player ?
