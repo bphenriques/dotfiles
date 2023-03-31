@@ -49,7 +49,7 @@
     in {
       # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.
       nixosConfigurations = with nixosLib; {
-        desktop = mkRegularNixOSHost (import (./host/desktop) {});
+        desktop = mkNixOSHost { hostModule = ./host/desktop; };
       };
 
       darwinConfigurations = with macosLib; {
