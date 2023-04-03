@@ -5,6 +5,12 @@
     filezilla
   ];
 
-  # Development - Probabilly need add the user to the  "docker" group
-  # virtualisation.docker.enable = true;
+  # Development
+  virtualisation.docker = {
+    enable = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+  };
 }

@@ -12,10 +12,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
   };
 
-  outputs = inputs @ { self, nixpkgs, darwin, home-manager, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:
     let
       nixpkgsConfig = {
-        config = { allowUnfree = true; };                     # Well..
+        config.allowUnfree = true;                     # Well..
       };
 
       nixConfig = {
@@ -27,24 +27,24 @@
 
       nixosLib = import ./lib/nixos.nix {
         inherit home-manager nixpkgsConfig nixConfig; # Modules and configurations.
-        nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
+        nixpkgs = nixpkgs-unstable;            # Requires specific stage of nixpkgs.
         nixosModules = self.nixosModules;             # Custom nixos modules.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
-        lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
+        lib = nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
       };
 
       macosLib = import ./lib/macos.nix {
         inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.
         darwinModules = self.darwinModules;                   # Custom darwin modules.
         homeManagerModules = self.homeManagerModules;         # Custom home-manager modules.
-        lib = inputs.nixpkgs-unstable.lib;                    # Requires specific stage of nixpkgs.
+        lib = nixpkgs-unstable.lib;                    # Requires specific stage of nixpkgs.
       };
 
       homeManagerLib = import ./lib/home-manager.nix {
         inherit home-manager nixpkgsConfig;           # Modules and configurations.
-        nixpkgs = inputs.nixpkgs-unstable;            # Requires specific stage of nixpkgs.
+        nixpkgs = nixpkgs-unstable;            # Requires specific stage of nixpkgs.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
-        lib = inputs.nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
+        lib = nixpkgs-unstable.lib;            # Requires specific stage of nixpkgs.
       };
     in {
       # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.

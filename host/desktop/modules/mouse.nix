@@ -13,8 +13,8 @@ in
   # mkOutOfStoreSymlink allows me to create a file outside of the store. I.e., to the actual file in the repo.
   home = { config, ... }: { # ensure config is within home-manager's context
     xdg.configFile = {
-      "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/config.json";
-      "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/Media.json";
+      "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/modules/input-remapper/config.json";
+      "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}//modules/input-remapper/Media.json";
     };
   };
 }

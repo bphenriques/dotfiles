@@ -1,29 +1,29 @@
 { pkgs, lib, config, ... }:
 {
-  services.qbittorrent.enable = true;
-
-  modules.programs.navidrome.enable = true;
-
+  # TODO:
   # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home
 
-  services.jellyfin = {
-    enable = true;
-    openFirewall = true;
+  # Music
+  services = {
+    xserver.desktopManager.plasma5.excludePackages = with pkgs.libsForQt5; [ elisa ]; # Using other music app.
+    navidrome = { # Music server
+      enable = true; # localhost:4533
+      settings = {
+        MusicFolder = "/mnt/data/Media/Dropbox/Library/";   # More settings for Subsonic: https://www.navidrome.org/docs/usage/configuration-options/
+      };
+    };
+    plex = {  # Video server
+      enable = true;          # Accessible through: http://127.0.0.1:32400/web.
+      openFirewall = true;    # So that the TV can connect to the server.
+    };
+
+    qbittorrent.enable = true;
   };
+
+  modules.services.jellyfin.enable = true;
+
   environment.systemPackages = with pkgs; [
-    jellyfin-ffmpeg
-    # or https://github.com/tsirysndr/music-player ?
-    # Kid3 for tagging?
-    amberol   # Audio
+    sonixd    # Music Client
     vlc       # Video
   ];
-
-  services.plex = {
-    # Accessible through: http://127.0.0.1:32400/web
-    enable = true;
-    openFirewall = true;
-    # This leads to long shutdowns. Disable with sudo systemctl stop plex.service
-  };
-
-  # Consider evince as a PDF reader as opposed to firefox
 }

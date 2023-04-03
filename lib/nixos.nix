@@ -3,6 +3,7 @@
   mkNixOSHost = {
     system ? "x86_64-linux",
     hostModule,
+    specialArgs ? {}
   }:
     let
       inherit (lib) attrValues;
@@ -16,7 +17,7 @@
         home-manager.sharedModules    = attrValues homeManagerModules; # My custom modules.
       };
     in nixpkgs.lib.nixosSystem {
-      inherit system;
+      inherit system specialArgs;
       modules = [home-manager.nixosModules.home-manager common hostModule] ++ attrValues nixosModules;
     };
 }

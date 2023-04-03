@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, nixpkgs-unstable, config, ... }:
 {
   hardware.opengl = {
     enable = true;
@@ -15,6 +15,9 @@
   modules.programs.lutris.enable = true;
   systemd.extraConfig = "DefaultLimitNOFILE=1048576"; # Proton Games - Ref: https://github.com/zfigura/wine/blob/esync/README.esync
   environment.systemPackages = with pkgs; [
-    heroic-unwrapped
+    sunshine          # Moonlight streaming - learn how to override... https://nixos.org/guides/nix-pills/nixpkgs-overriding-packages.html
+    heroic-unwrapped  # Epic games / GoG
+    protonup-qt
+    # nixpkgs-unstable.pkgs.proton-caller  # Run .exe from terminal
   ];
 }

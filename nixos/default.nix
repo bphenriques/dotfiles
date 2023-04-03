@@ -12,11 +12,6 @@
     desktopManager.plasma5.enable = true; # Plasma environment.
   };
 
-  # Remove default KDE packages that I do not use.
-  services.xserver.desktopManager.plasma5.excludePackages = with pkgs.libsForQt5; [
-    elisa       # Using other music app.
-  ];
-
   # Network
   networking.networkmanager.enable = true;
   user.extraGroups = ["networkmanager"];
