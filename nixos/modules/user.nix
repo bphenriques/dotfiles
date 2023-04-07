@@ -15,6 +15,7 @@ in
   options.user = {
     name = mkOption { type = str; };
     extraGroups = mkOption { type = listOf str; default = []; };
+    musicDir = mkOption { type = str; };
   };
 
   config = {

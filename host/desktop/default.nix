@@ -10,6 +10,7 @@
 
   # Basic settings
   user.name = "bphenriques";
+  user.musicDir = "/mnt/data/Media/Dropbox/Library/";
   networking.hostName = "bphenriques-desktop";
 
   # Bootloader

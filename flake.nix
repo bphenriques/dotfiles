@@ -15,7 +15,10 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:
     let
       nixpkgsConfig = {
-        config.allowUnfree = true;                     # Well..
+        config.allowUnfree = true;
+        overlays = [
+          (final: prev: { ffmpeg = prev.ffmpeg.override { withFdkAac = true; withUnfree = true; }; })
+        ];
       };
 
       nixConfig = {
