@@ -30,10 +30,10 @@
         # - https://beets.readthedocs.io/en/stable/plugins/sonosupdate.html
         # - https://beets.readthedocs.io/en/stable/plugins/subsonicupdate.html
         # chroma requires chromaprint and pyaccoustic
-        plugins = "web fetchart lastgenre chroma spotify";  # web in http://localhost:8337 maybe embedart? or lyrics?
+        plugins = "fetchart lastgenre chroma spotify";  # in http://localhost:8337 maybe embedart? or lyrics?
         paths = {
           default = "$albumartist/$album%aunique{}/$track $title";
-          singleton = "Non-Album/$artist/$title";
+          singleton = "$artist/Non-Album/$title";
           comp = "Compilations/$album%aunique{}/$track $title";
         };
         musicbrainz = {
