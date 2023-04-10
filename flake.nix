@@ -56,17 +56,12 @@
       };
 
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost (import (./host/work-macos) {});
-      };
-
-      homeManagerConfigurations = with homeManagerLib; {
-        wsl = mkHomeManagerHost (import ./host/wsl {});
+        work-macos = mkMacOSHost { hostModule = ./host/work-macos; };
       };
 
       # Aliases to that sets a common interface to call: nix build ".#hosts.<target>"
       hosts = {
         work-macos = self.darwinConfigurations.work-macos.system;
-        wsl        = self.homeManagerConfigurations.wsl.activationPackage;
       };
 
       # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.

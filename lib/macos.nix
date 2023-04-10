@@ -2,9 +2,7 @@
 {
   mkMacOSHost = {
     system ? "aarch64-darwin",
-    username,
-    hostDarwinModules ? [],
-    hostHomeManagerModules ? []
+    hostModule,
   }:
     let
       inherit (lib) attrValues;
@@ -13,8 +11,7 @@
         nix = nixConfig;
 
         # Nix Darwin
-        services.nix-daemon.enable      = true;                   # Using nix-daemon (the only supported way).
-        users.users."${username}".home  = "/Users/${username}";   # Set user's home.
+        services.nix-daemon.enable    = true;                   # Using nix-daemon (the only supported way).
 
         # Home-Manager
         home-manager.useGlobalPkgs    = true; # Consistency: use pkgs set via the system level nixpkgs options.
@@ -23,16 +20,8 @@
 
         system.stateVersion = 4;                  # Nix-Darwin config version.
       };
-
-      host = {
-        imports = hostDarwinModules;
-        home-manager.users."${username}" = {
-          imports = hostHomeManagerModules;
-        };
-      };
     in darwin.lib.darwinSystem {
       inherit system;
-      modules = [home-manager.darwinModules.home-manager common host] ++ attrValues darwinModules;
-      inputs = { inherit username; };
+      modules = [common home-manager.darwinModules.home-manager hostModule] ++ attrValues darwinModules;
     };
 }
