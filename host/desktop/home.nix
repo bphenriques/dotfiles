@@ -20,17 +20,21 @@
     # https://beets.readthedocs.io/en/stable/plugins/convert.html
     # https://beets.readthedocs.io/en/stable/guides/advanced.html#automatically-add-new-music-to-your-library
     # https://beets.readthedocs.io/en/stable/guides/advanced.html#useful-reports
+
+    # https://beets.readthedocs.io/en/stable/plugins/embedart.html ?
+    # https://beets.readthedocs.io/en/stable/plugins/scrub.html
+    # https://beets.readthedocs.io/en/stable/plugins/duplicates.html
     programs.beets = {
       enable = true;
       settings = {
-        directory = "/mnt/data/Media/Music";
-        library = "/mnt/data/Media/music-beets-library.db";
+        directory = "/mnt/data/Media/Music/Library";
+        library = "/mnt/data/Media/Music/beets-library.db";
 
         # More on that here: https://beets.readthedocs.io/en/stable/plugins/index.html
         # - https://beets.readthedocs.io/en/stable/plugins/sonosupdate.html
         # - https://beets.readthedocs.io/en/stable/plugins/subsonicupdate.html
         # chroma requires chromaprint and pyaccoustic
-        plugins = "fetchart lastgenre chroma spotify";  # in http://localhost:8337 maybe embedart? or lyrics?
+        plugins = "edit duplicates fetchart lastgenre chroma spotify";  # maybe embedart?
         paths = {
           default = "$albumartist/$album%aunique{}/$track $title";
           singleton = "$artist/Non-Album/$title";

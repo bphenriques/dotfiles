@@ -20,4 +20,6 @@
     protonup-qt
     # nixpkgs-unstable.pkgs.proton-caller  # Run .exe from terminal
   ];
+
+  # cd /tmp && wget https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton7-53/GE-Proton7-53.tar.gz && tar -C /home/$USER/.local/share/lutris/runners/wine -xf GE-Proton7-53.tar.gz GE-Proton7-53/files/ --one-top-level --strip=2
 }

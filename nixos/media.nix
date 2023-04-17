@@ -4,8 +4,8 @@
   # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home
 
   # Music
+  environment.plasma5.excludePackages = with pkgs.libsForQt5; [ elisa ]; # Using other music app.
   services = {
-    xserver.desktopManager.plasma5.excludePackages = with pkgs.libsForQt5; [ elisa ]; # Using other music app.
 
     # How to convert to AAC:
     # find . -name "*.mp3" -print0 | parallel -0 ffmpeg -i "{}" -map 0:0 -c:a libfdk_aac -vbr 5 -map 0:1 -c:v copy "{1.}".m4a

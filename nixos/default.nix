@@ -2,7 +2,7 @@
 
 {
   # Set zsh shell
-  users.defaultUserShell = pkgs.zsh;
+  # users.defaultUserShell = pkgs.zsh;  # FIXME: I may need to migrate to the zsh config...
   environment.shells = with pkgs; [ zsh ];
 
   # Display environment
