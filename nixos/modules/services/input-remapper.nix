@@ -22,7 +22,7 @@ in
       description = "Loadss input-remapper profiles";
       wantedBy = ["graphical-session.target"];
       after = ["graphical-session.target"];
-      preStart = "/run/current-system/sw/bin/sleep 5";  # Minor hack that I can live with.
+      preStart = "/run/current-system/sw/bin/sleep 15";  # Minor hack that I can live with.
       script = "${pkgs.input-remapper}/bin/input-remapper-control --command stop-all && ${pkgs.input-remapper}/bin/input-remapper-control --command autoload";
     };
   };

@@ -104,7 +104,7 @@
 
     casks = [
       "rectangle"                 # Window management
-      "kitty"                     # Terminal. Experimenting this alternative
+      "kitty"                     # Terminal.
       "vlc"                       # Media player
       "intellij-idea-ce"          # JVM IDE
       "keka"                      # Compression

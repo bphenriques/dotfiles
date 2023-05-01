@@ -23,7 +23,7 @@
     xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
   };
 
-  # Sound - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
+  # Audio - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
   sound.enable = false;                # Disable ALSA (it is used as a low-level API for pipewire): https://nixos.wiki/wiki/ALSA
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire
@@ -66,5 +66,6 @@
     ./gaming.nix
     ./media.nix
     ./development.nix
+    ./syncthing.nix
   ];
 }
