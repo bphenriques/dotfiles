@@ -14,9 +14,11 @@
     rb        = rebase
     pushf     = push --force-with-lease
     amend     = commit --amend
+    wip       = !git add --all && ([[ "$(git log -1 --pretty=%B)" == "WIP" ]] && git commit --amend --no-edit || git commit -m "WIP")
 
     # Tools
     patch   = !git --no-pager diff --no-color
+    fix-upstream = !git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) $(git rev-parse --abbrev-ref HEAD)
 
     # History
     ls      = log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate
