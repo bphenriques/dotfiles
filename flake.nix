@@ -16,9 +16,6 @@
     let
       nixpkgsConfig = {
         config.allowUnfree = true;
-        overlays = [
-          (final: prev: { ffmpeg = prev.ffmpeg.override { withFdkAac = true; withUnfree = true; }; })
-        ];
       };
 
       nixConfig = {

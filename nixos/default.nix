@@ -66,6 +66,6 @@
     ./gaming.nix
     ./media.nix
     ./development.nix
-    ./syncthing.nix
+    ./internet.nix
   ];
 }

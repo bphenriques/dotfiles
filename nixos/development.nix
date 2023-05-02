@@ -5,7 +5,6 @@
     filezilla
   ];
 
-  # Development
   virtualisation.docker = {
     enable = true;
     rootless = {
