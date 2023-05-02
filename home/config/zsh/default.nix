@@ -55,11 +55,6 @@ with lib;
       configuration           = ./powerlevel10k.theme.zsh;
     };
 
-    thefuck = {
-      enable                  = false;
-      personalZshIntegration  = true;
-    };
-
     zsh = {
       enable = true;
       envExtra = concatStringsSep "\n" [
