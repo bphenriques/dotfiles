@@ -10,11 +10,10 @@
 [alias]
     co        = checkout
     s         = status -s
-    pick      = cherry-pick
+    cp        = cherry-pick
     rb        = rebase
     pushf     = push --force-with-lease
     amend     = commit --amend
-    uncommit  = reset --soft HEAD~1 # Undo last commit but keep changed files in stage
 
     # Tools
     patch   = !git --no-pager diff --no-color
