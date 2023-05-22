@@ -95,21 +95,22 @@
     };
 
     taps = [
-      "homebrew/cask"             # Desktop Apps
+      "homebrew/cask"     # Desktop Apps
     ];
 
     brews = [
-      "dateutils"                 # Date utilities. Not supported currently by nix-pkgs
+      "dateutils"         # Date utilities. Not supported currently by nix-pkgs
     ];
 
     casks = [
-      "rectangle"                 # Window management
-      "kitty"                     # Terminal.
-      "vlc"                       # Media player
-      "intellij-idea-ce"          # JVM IDE
-      "keka"                      # Compression
-      "rancher"                   # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576
-      "temurin"                   # JDK: Successor of AdoptOpenJDK
+      "wezterm"           # Terminal
+      "kitty"             # Terminal
+      "rectangle"         # Window management
+      "vlc"               # Media player
+      "intellij-idea-ce"  # JVM IDE
+      "keka"              # Compression
+      "rancher"           # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576
+      "temurin"           # Latest version of JDK
     ];
   };
 }

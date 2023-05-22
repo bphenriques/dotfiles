@@ -44,6 +44,7 @@
     ./config/zsh
     ./config/fzf
     ./config/tmux
+    ./config/wezterm
   ];
 
   home.stateVersion = "22.11";

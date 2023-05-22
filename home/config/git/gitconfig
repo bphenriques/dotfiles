@@ -29,12 +29,15 @@
     gpgsign   = true
 
 [tag]
-	gpgSign = true
-  sort    = version:refname     # Ensure natural order of commits
+    gpgSign = true
+    sort    = version:refname     # Ensure natural order of commits
 
 [pull]
     rebase = true
-    
+
+[push]
+    autoSetupRemote = true
+
 [rebase]
     autosquash = true           # Automatic fixup! and/or squash!
 
