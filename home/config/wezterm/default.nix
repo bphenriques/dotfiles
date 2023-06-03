@@ -1,13 +1,17 @@
 { config, lib, pkgs, ... }:
 
 let
+  term = "screen-256color";
+  font = "Hack Nerd Font Mono";
+  fontSize = 14;
+
   foreground            = "#bbc2cf";
   background            = "#282c34";
-  selection_foreground  = "#bbc2cf";
-  selection_background  = "#3f444a";
+  selectionForeground   = "#bbc2cf";
+  selectionBackground   = "#3f444a";
 
   cursor                = "#bbc2cf";
-  cursor_text_color     = "#282c34";
+  cursorTextColor       = "#282c34";
 
   # Black
   color0 = "#282c34";
@@ -46,9 +50,9 @@ in
     enable = true;
     extraConfig = ''
       return {
-        term = 'screen-256color',
-        font = wezterm.font('Hack Nerd Font Mono'),
-        font_size = 13,
+        term = '${term}',
+        font = wezterm.font('${font}'),
+        font_size = ${toString fontSize},
         color_scheme = 'doom-one',
         enable_tab_bar = false, -- use tmux
         window_close_confirmation = 'NeverPrompt',
@@ -66,11 +70,10 @@ in
         brights = [color8 color9 color10  color11 color12 color13 color14 color15];
         background = background;
         cursor_bg = cursor;
-        # cursor_border = "#BEAF8A";
-        cursor_fg = cursor_text_color;
+        cursor_fg = cursorTextColor;
         foreground = foreground;
-        selection_bg = selection_background;
-        selection_fg = selection_foreground;
+        selection_bg = selectionBackground;
+        selection_fg = selectionForeground;
       };
     };
   };
