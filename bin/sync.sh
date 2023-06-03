@@ -20,17 +20,12 @@ sync_flake() {
   info "Syncing Host '$HOST_TARGET'.."
   if [ -d /etc/nixos ]; then
     sudo nixos-rebuild switch --flake ".#$HOST_TARGET"
+  elif [ "$(uname)" = "Darwin" ]; then
+    nix build ".#darwinConfigurations.$HOST_TARGET.system"
+    ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
   else
-    if [ "$DEBUG" != "0" ]; then
-      nix build ".#hosts.$HOST_TARGET" --show-trace
-    else
-      nix build ".#hosts.$HOST_TARGET"
-    fi
-
-    case "$(uname -s)" in
-        Darwin) ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET" ;;
-        *) ./result/activate ;;
-    esac
+    fail "Unsupported Operating System: $(uname)"
+    # Potentially nix build following by ./result/activate
   fi
 }
 

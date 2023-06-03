@@ -51,7 +51,7 @@ case "$(uname -s)" in
   *) ;;
 esac
 
-(test -d "$DOTFILES_LOCATION/host/$(cat $HOST_FILE_LOCATION)" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail "Nix Host - Invalid host! It is $(cat $HOST_FILE_LOCATION)"
+(test -d "$DOTFILES_LOCATION/host/$(cat "$HOST_FILE_LOCATION")" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail "Nix Host - Invalid host! It is $(cat "$HOST_FILE_LOCATION")"
 
 check_zsh
 

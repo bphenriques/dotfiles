@@ -161,7 +161,7 @@ select_host() {
   info 'Nix Host Type - Checking...'
   if [ ! -f "$HOST_FILE_LOCATION" ]; then
     printf "Available hosts:\n"
-    find "$DOTFILES_LOCATION"/host/ -mindepth 1 -type d -exec basename {} \; | xargs -I{} echo "- {}"
+    find "$DOTFILES_LOCATION"/host/ -mindepth 1 -type d -print0 -exec basename {} \; | xargs -0 -I{} echo "- {}"
     printf "\n"
     while true; do
       printf "Introduce the host type: "
@@ -171,8 +171,8 @@ select_host() {
       fi
     done
     printf '%s' "$nix_host" > "$HOST_FILE_LOCATION"
-  elif [ ! -d "$DOTFILES_LOCATION/host/$(cat $HOST_FILE_LOCATION)" ]; then
-    fail "Nix Host - Already set to a invalid host! It is $(cat $HOST_FILE_LOCATION). Delete the file and resume."
+  elif [ ! -d "$DOTFILES_LOCATION/host/$(cat "$HOST_FILE_LOCATION")" ]; then
+    fail "Nix Host - Invalid host '$(cat "$HOST_FILE_LOCATION")'. Delete and try-again."
   fi
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
