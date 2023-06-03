@@ -59,12 +59,9 @@
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     direnv
     kubecontext
-    terraform
     aws
     gcloud
-    google_app_cred
     nix_shell
-    # virtualenv              # python virtual environment
   )
 
   # Basic style options that define the overall prompt look.

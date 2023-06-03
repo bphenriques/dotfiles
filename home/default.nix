@@ -12,6 +12,9 @@
     gnused
     dateutils
 
+    # Interactive
+    gum           # TODO: Explore https://github.com/charmbracelet/gum
+
     # Search
     ripgrep     # Faster grep.
     jq          # Query JSON.

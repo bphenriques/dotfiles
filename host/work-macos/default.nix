@@ -1,5 +1,7 @@
 { config, pkgs, lib, ... }:
 
+# TODO: Explore https://www.reddit.com/r/unixporn/comments/ytzx9x/yabai_would_you_believe_me_that_this_is_macos/
+
 let username = "brunohenriques";
 in
 {
