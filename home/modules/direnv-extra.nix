@@ -12,6 +12,6 @@ in
   };
 
   config.home.sessionVariables = mkIf cfg.disableLogging {
-    DIRENV_LOG_FORMAT    = "";              # Remove dir-env messages.
+    DIRENV_LOG_FORMAT = "";              # Remove dir-env messages.
   };
 }
