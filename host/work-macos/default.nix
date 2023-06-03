@@ -10,15 +10,6 @@ in
   homebrew = {
     taps = [
       "homebrew/cask"
-      "snyk/tap"
-      "int128/kubelogin"
-    ];
-
-    brews = [
-      "kubectl"
-      "awscli"
-      "snyk"                        # Security.
-      "int128/kubelogin/kubelogin"  # Kubernetes
     ];
 
     casks = [
@@ -32,10 +23,21 @@ in
 
     # Consider moving some of these packages to project's shell.nix if team's okay with that.
     home.packages = with pkgs; [
+      # Cloud Providers
       google-cloud-sdk
-      terraform
+      awscli2
+
+      # Kubernetes
       kubectl
       kubelogin-oidc
+
+      # Security
+      nodePackages.snyk
+
+      # Infra
+      terraform
     ];
   };
+
+  system.stateVersion = 4;
 }
