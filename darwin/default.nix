@@ -85,6 +85,11 @@
   };
 
   # Programs
+  environment.systemPackages = with pkgs; [
+    lima    # Virtual Machine
+    docker  # Docker CLI
+  ];
+
   programs.org-protocol.enable = true;
   homebrew = {
     enable = true;
@@ -98,19 +103,11 @@
       "homebrew/cask"     # Desktop Apps
     ];
 
-    brews = [
-      "dateutils"         # Date utilities. Not supported currently by nix-pkgs
-    ];
-
     casks = [
-      "wezterm"           # Terminal
-      "kitty"             # Terminal
       "rectangle"         # Window management
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
       "keka"              # Compression
-      "rancher"           # Docker Desktop alternative. Refer to https://github.com/rancher-sandbox/rancher-desktop/issues/1155#issuecomment-1007273576
-      "temurin"           # Latest version of JDK
     ];
   };
 }

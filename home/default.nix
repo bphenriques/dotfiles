@@ -10,6 +10,7 @@
     tree
     parallel
     gnused
+    dateutils
 
     # Search
     ripgrep     # Faster grep.
@@ -34,13 +35,15 @@
     # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
+    docker  # Docker CLI
   ];
 
   imports = [
     ./config/git
     ./config/scala
     ./config/emacs
-    ./config/kitty
     ./config/zsh
     ./config/fzf
     ./config/tmux
