@@ -59,8 +59,8 @@
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     direnv
     kubecontext
-    aws
-    gcloud
+    #aws
+    #gcloud
     nix_shell
   )
 
