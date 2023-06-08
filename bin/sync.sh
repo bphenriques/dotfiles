@@ -18,10 +18,16 @@ WORKSPACE="$HOME/workspace"
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'.."
+  if [ "$DEBUG" -ne 0 ]; then
+    local extra_args="--show-trace"
+  else
+    local extra_args=""
+  fi
+
   if [ -d /etc/nixos ]; then
     sudo nixos-rebuild switch --flake ".#$HOST_TARGET"
   elif [ "$(uname)" = "Darwin" ]; then
-    nix build ".#darwinConfigurations.$HOST_TARGET.system"
+    nix build ".#darwinConfigurations.$HOST_TARGET.system" $extra_args
     ./result/sw/bin/darwin-rebuild switch --flake ".#$HOST_TARGET"
   else
     fail "Unsupported Operating System: $(uname)"
