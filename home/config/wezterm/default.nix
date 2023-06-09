@@ -54,7 +54,8 @@ in
         font = wezterm.font('${font}'),
         font_size = ${toString fontSize},
         color_scheme = 'doom-one',
-        enable_tab_bar = false, -- use tmux
+        window_decorations = 'RESIZE',
+        enable_tab_bar = false,
         window_close_confirmation = 'NeverPrompt',
         window_padding = {
           left = '1cell',

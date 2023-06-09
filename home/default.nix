@@ -51,7 +51,6 @@
     ./config/emacs
     ./config/zsh
     ./config/fzf
-    ./config/tmux
     ./config/wezterm
   ];
 

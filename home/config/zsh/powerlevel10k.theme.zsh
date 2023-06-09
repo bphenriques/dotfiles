@@ -51,7 +51,6 @@
     context                   # user@host
     dir                       # current directory
     vcs                       # git status
-    command_execution_time    # previous command duration
     prompt_char               # prompt symbol
   )
 
