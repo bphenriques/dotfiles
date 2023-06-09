@@ -6,6 +6,7 @@ SCRIPT_PATH="$(dirname "$0")"
 . "$SCRIPT_PATH"/util.sh
 
 DEBUG=${DEBUG:-0}
+QUICK=${QUICK:-0}
 
 # Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
@@ -73,6 +74,8 @@ sync_repository() {
 }
 
 sync_flake
-sync_emacs
-sync_repository "$WORKSPACE/journal"
-sync_repository "$WORKSPACE/knowledge-base"
+if [ "$QUICK" -eq 0 ]; then
+  sync_emacs
+  sync_repository "$WORKSPACE/journal"
+  sync_repository "$WORKSPACE/knowledge-base"
+fi

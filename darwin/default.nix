@@ -91,7 +91,11 @@
     docker  # Docker CLI
   ];
 
-  services.sketchybar.enable = true;
+  services.sketchybar = {
+    enable = true;
+    dependencies = with pkgs; [ jq ];
+    debug = true;
+  };
 
   programs.org-protocol.enable = true;
   homebrew = {
@@ -104,10 +108,6 @@
 
     taps = [
       "homebrew/cask"     # Desktop Apps
-    ];
-
-    brews = [
-      "ifstat"
     ];
 
     casks = [
