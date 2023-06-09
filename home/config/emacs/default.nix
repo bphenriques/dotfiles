@@ -12,7 +12,6 @@
     fd
 
     # Modules dependencies
-    pngpaste    # Copy pasta
     gcc         # Required to build sqlite if not compiled.
     sqlite      # Org Roam's database.
     plantuml    # To export Plant UML diagrams.

@@ -41,6 +41,8 @@
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     docker  # Docker CLI
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    iproute2
   ];
 
   imports = [

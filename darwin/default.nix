@@ -15,6 +15,7 @@
       NSGlobalDomain = {
         # Style
         AppleInterfaceStyle = "Dark";               # Personal preference.
+        _HIHideMenuBar      = true;                 # Hide top-bar.
 
         # Keybboard
         InitialKeyRepeat = 15;                      # Reduce the initial delay when pressing keys.
@@ -90,6 +91,8 @@
     docker  # Docker CLI
   ];
 
+  services.sketchybar.enable = true;
+
   programs.org-protocol.enable = true;
   homebrew = {
     enable = true;
@@ -103,8 +106,12 @@
       "homebrew/cask"     # Desktop Apps
     ];
 
+    brews = [
+      "ifstat"
+    ];
+
     casks = [
-      "rectangle"         # Window management
+      "amethyst"          # Tiling Manager
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
       "keka"              # Compression
