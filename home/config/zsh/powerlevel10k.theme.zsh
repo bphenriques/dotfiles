@@ -57,10 +57,10 @@
   # Right prompt segments.
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     direnv
-    kubecontext
+    #kubecontext
     #aws
     #gcloud
-    nix_shell
+    #nix_shell
   )
 
   # Basic style options that define the overall prompt look.
