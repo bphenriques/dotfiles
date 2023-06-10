@@ -94,7 +94,7 @@
   services.sketchybar = {
     enable = true;
     dependencies = with pkgs; [ jq ];
-    debug = true;
+    debug = false;
   };
 
   programs.org-protocol.enable = true;

@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 
-# TODO: Explore https://www.reddit.com/r/unixporn/comments/ytzx9x/yabai_would_you_believe_me_that_this_is_macos/
+# TODO: Explore https://github.com/jarun/nnn
 
 let username = "brunohenriques";
 in
@@ -24,6 +24,7 @@ in
     imports = [
       ../../home
       ../../home/config/sketchybar
+      ../../home/config/amethyst
     ];
 
     # Consider moving some of these packages to project's shell.nix if team's okay with that.
