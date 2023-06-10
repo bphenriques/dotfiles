@@ -2,7 +2,6 @@
 
 {
   # Requires:
-  # - iproute2
   # - Manually setting up Desktop shortcuts (TODO: automate it)
   # - Manually setting up change language shortcut (TODO: automate it)
   # - Nerd Font

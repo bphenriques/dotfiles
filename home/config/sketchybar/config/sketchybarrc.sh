@@ -3,7 +3,7 @@
 # shellcheck disable=SC1091
 . "$HOME/.config/sketchybar/theme.sh"
 
-# Resoruces:
+# Resources:
 # - Plugins: https://github.com/FelixKratz/SketchyBar/discussions/12
 # - Setups: https://github.com/FelixKratz/SketchyBar/discussions/47
 # - Notifications: https://github.com/FelixKratz/SketchyBar/discussions/151
