@@ -85,12 +85,6 @@
     fonts = [ (pkgs.nerdfonts.override { fonts = [ "Hack" ]; }) ]; # List here: https://github.com/ryanoasis/nerd-fonts
   };
 
-  # Programs
-  environment.systemPackages = with pkgs; [
-    lima    # Virtual Machine
-    docker  # Docker CLI
-  ];
-
   services.sketchybar = {
     enable = true;
     dependencies = with pkgs; [ jq ];

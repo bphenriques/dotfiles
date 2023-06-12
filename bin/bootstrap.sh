@@ -71,7 +71,7 @@ install_nix_flakes() {
       exit 1
     else
       info 'Nix Flakes - Installing...'
-      nix-env -iA nixpkgs.nixUnstable
+      # nix-env -iA nixpkgs.nixUnstable - Do I need this?
       mkdir -p "$XDG_CONFIG_HOME"/nix
       append_if_absent 'experimental-features = nix-command flakes' "$XDG_CONFIG_HOME"/nix/nix.conf
     fi
