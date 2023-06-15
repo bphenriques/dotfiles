@@ -12,8 +12,9 @@
     gnused
     dateutils
 
-    # Interactive
+    # Exploring
     gum           # TODO: Explore https://github.com/charmbracelet/gum
+    helix
 
     # Search
     ripgrep     # Faster grep.
@@ -50,6 +51,7 @@
     ./config/zsh
     ./config/fzf
     ./config/wezterm
+    ./config/neovim
   ];
 
   home.stateVersion = "22.11";

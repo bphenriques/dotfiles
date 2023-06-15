@@ -15,7 +15,7 @@ with lib;
       LC_ALL  = "en_US.UTF-8";
 
       # Default editors and settings
-      EDITOR  = "emacsclient";
+      EDITOR  = "nvim";
       VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 
@@ -37,7 +37,7 @@ with lib;
       "..."  = "cd ../..";
 
       # Text Processor
-      e           = "emacsclient";
+      e           = "nvim";
       grep        = "grep --color";
     };
   };

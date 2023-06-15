@@ -7,6 +7,7 @@ in
 {
   imports = [../../darwin];
   users.users."${username}".home  = "/Users/${username}";
+  system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
   system.desktop.picture = ./wallpaper.png; # From simpledesktops
 
   homebrew = {
@@ -16,7 +17,7 @@ in
     ];
 
     brews = [
-      "granted" # Follow https://docs.commonfate.io/granted/getting-started/ to set it up. FIXME: assumego missing if installing in Nix
+      "granted" # Follow https://docs.commonfate.io/granted/getting-started/ to set it up. FIXME: assumego missing if installing through nixpkgs
     ];
 
     casks = [

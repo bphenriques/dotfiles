@@ -45,10 +45,6 @@
         FXPreferredViewStyle = "clmv";              # Show preview window by default.
       };
 
-      screencapture = {
-        location = "~/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
-      };
-
       SoftwareUpdate = {
         AutomaticallyInstallMacOSUpdates = false;   # Only when I want.
       };

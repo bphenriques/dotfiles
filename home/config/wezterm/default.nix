@@ -58,10 +58,10 @@ in
         enable_tab_bar = false,
         window_close_confirmation = 'NeverPrompt',
         window_padding = {
-          left = '1cell',
-          right = '1cell',
-          top = '0.5cell',
-          bottom = '0', -- use tmux
+          left = '0cell',
+          right = '0cell',
+          top = '0cell',
+          bottom = '0',
         }
       }
     '';
