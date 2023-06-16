@@ -49,6 +49,8 @@ in
       # Infra
       terraform
     ];
+
+    home.stateVersion = "22.11";
   };
 
   system.stateVersion = 4;

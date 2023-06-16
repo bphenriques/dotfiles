@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 {
-  xdg.enable = true;  # XDG Compliance to tidy up $HOME folder.
+  xdg.enable = true;  # XDG Compliance to tidy up $HOME.
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils
@@ -42,6 +42,9 @@
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     (pkgs.writeShellScriptBin "docker" ''${lima}/bin/lima nerdctl $@'')
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    unrar
+    xclip
   ];
 
   imports = [
@@ -53,6 +56,4 @@
     ./config/wezterm
     ./config/neovim
   ];
-
-  home.stateVersion = "22.11";
 }

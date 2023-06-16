@@ -12,7 +12,6 @@
     ];
   };
 
-  modules.services.jellyfin.enable = true;
   services.plex = {
     enable = true;          # Accessible through: http://127.0.0.1:32400/web.
     openFirewall = true;    # So that the TV can connect to the server.

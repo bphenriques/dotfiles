@@ -2,7 +2,17 @@
 {
   # This is an alias (see custom module)
   home = {
-    imports = [ ../../home ];
+    imports = [
+      ../../home
+      ../../home/fonts.nix
+      ../../home/config/beets
+      ../../home/config/sunshine
+    ];
+
+    programs.beets.settings = {
+      directory = config.user.musicDir;
+      library = "/mnt/data/Media/Music/beets-library.db";
+    };
 
     # Programs
     programs.firefox.enable = true;
@@ -14,18 +24,10 @@
 
     # Social
     modules.programs.discord.enable = true;
-
-    # Fonts
-    fonts.fontconfig.enable = true;
     home.packages = with pkgs; [
       rofi        # Launcher
-
-      # Util
-      unrar
-      xclip
-      (nerdfonts.override { fonts = [ "Hack" ]; })
     ];
-  };
 
-  imports = [ ./home-media.nix ];
+    home.stateVersion = "22.11";
+  };
 }
