@@ -5,7 +5,6 @@ let
   cfg = config.modules.services.sunshine;
 in
 {
-  # TODO: UPnP
   # TODO: Review systemd ? https://github.com/NixOS/nixpkgs/blob/e6272819a169325163735314cf796166943d5d75/nixos/modules/services/networking/syncthing.nix
   # TODO: Check https://github.com/francocalvo/nixos-eris/blob/main/modules/gaming/default.nix
   options.modules.services.sunshine = {
@@ -18,6 +17,15 @@ in
 
   # From https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/usage.html#linux
   config = mkIf cfg.enable {
+    warnings = [
+      ''You have enabled sunshine which requires a wrapper to run as root which poses a security risk.''
+    ];
+
+    #  ++ lib.optionals (!config.services.avahi.enable && !config.services.avahi.userServices) [
+          #      ''Avahi and userServices are disabled. Sunshine server will be not be discoverable but it is still acessible through its IP''
+          #    ];
+
+
     # https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
     networking.firewall = {
       allowedTCPPorts = [ 47984 47989 47990 48010 ];
@@ -55,16 +63,16 @@ in
        };
     };
 
-    services.avahi = {
-      enable = true;
-      reflector = true;
-      nssmdns = true;
-      publish = {
-        enable = true;
-        addresses = true;
-        userServices = true;
-        workstation = true;
-      };
-    };
+    #services.avahi = {
+    #  enable = true;
+    #  reflector = true;
+    #  nssmdns = true;
+    #  publish = {
+    #    enable = true;
+    #    addresses = true;
+    #    userServices = true;
+    #    workstation = true;
+    #  };
+    #};
   };
 }

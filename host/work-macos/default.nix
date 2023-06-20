@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 # TODO: Explore https://github.com/jarun/nnn
-
+# TODO: Explore SyncThing: https://github.com/kclejeune/system/blob/master/modules/darwin/syncthing.nix#L40
 let username = "brunohenriques";
 in
 {

@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
 
+# TODO:
+# Explore: https://github.com/sei40kr/dotfiles/blob/master/modules/dev/scala.nix
 {
   home.packages = with pkgs; [
     sbt         # Build tool.

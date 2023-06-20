@@ -1,9 +1,13 @@
 { config, pkgs, ... }:
 
+# TODO:
+# Explore: https://github.com/sioodmy/dotfiles
+# https://github.com/shazow/nixfiles
+# https://github.com/infinisil/system/blob/master/config/new-modules/zsh.nix
 {
   imports = [
     ./hardware-configuration.nix
-    ./modules/mouse.nix
+    ./peripherals.nix
     ../../nixos
     ./home.nix
   ];
