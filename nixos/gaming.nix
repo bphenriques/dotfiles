@@ -6,19 +6,40 @@
 # https://github.com/danderson/homelab
 
 let
-  # Rudimentary script to launch ad-hoc Windows applications
+  # Script to run proton on a static prefix (because doesn't really matter for ad-hoc runs)
   # TODO: Avoid using steam-run. Alternative is to use buildFHSEnv by-hand (if I understood correctly...)
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
     runtimeInputs = with pkgs; [ proton-ge-custom steam-run ];
     text = ''
-      STEAM_COMPAT_DATA_PATH="${config.user.protonDefaultPrefixDir}" \
-        STEAM_COMPAT_CLIENT_INSTALL_PATH="${config.user.protonDefaultPrefixDir}" \
-        ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-custom}/bin/proton run "$@"
+      if [ "$#" -gt 0 ]; then
+        STEAM_COMPAT_DATA_PATH="${config.user.protonDefaultPrefixDir}" \
+          STEAM_COMPAT_CLIENT_INSTALL_PATH="${config.user.protonDefaultPrefixDir}" \
+          ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-custom}/bin/proton run "$@"
+      fi
     '';
   };
+
+  proton-run-desktop-launcher =
+    (pkgs.makeDesktopItem {
+      exec = "proton-run %f";
+      name = "Proton Launcher";
+      type = "Application";
+      desktopName = "Proton Launcher";
+      noDisplay = false; # Switch to true temporary so that it appears on right-click?
+      categories = [ "Utility" ];
+      icon = "wine";
+      mimeTypes = ["application/x-ms-dos-executable" "application/x-msi" "application/x-ms-shortcut"];
+    });
 in
 {
+  # Tweaks
+  boot = {
+    kernel.sysctl."vm.max_map_count" = "2147483642";        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
+    kernelParams = [ "tsc=reliable" "clocksource=tsc" ];    # https://wiki.archlinux.org/title/gaming#Improve_clock_gettime_throughput
+  };
+  systemd.extraConfig = "DefaultLimitNOFILE=1048576"; # Proton Games - Ref: https://github.com/zfigura/wine/blob/esync/README.esync
+
   hardware = {
     opengl = {
       enable = true;
@@ -27,13 +48,6 @@ in
     };
     steam-hardware.enable = true;
   };
-
-  boot = {
-    kernel.sysctl."vm.max_map_count" = "2147483642";        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
-    kernelParams = [ "tsc=reliable" "clocksource=tsc" ];    # https://wiki.archlinux.org/title/gaming#Improve_clock_gettime_throughput
-  };
-
-  systemd.extraConfig = "DefaultLimitNOFILE=1048576"; # Proton Games - Ref: https://github.com/zfigura/wine/blob/esync/README.esync
 
   programs = {
     steam = {
@@ -58,17 +72,6 @@ in
   modules.services.sunshine.enable = true;
   modules.programs.lutris.enable = true;
 
-#  user.packages = with pkgs; [
-#    (makeDesktopItem {
-#      name = "steam";
-#      desktopName = "Steam";
-#      icon = "steam";
-#      exec = "steam";
-#      terminal = "false";
-#      categories = [ "Network" "FileTransfer" "Game" ];
-#    })
-#  ];
-
   environment.systemPackages = with pkgs; [
     heroic-unwrapped  # Epic games / GoG
     vulkan-tools      # Vulcan tester
@@ -77,5 +80,6 @@ in
     protonup-qt       # Manage Proton versions
     protontricks      # Install utility within proton
     proton-run        # Run .exe from termional
+    proton-run-desktop-launcher
   ];
 }
