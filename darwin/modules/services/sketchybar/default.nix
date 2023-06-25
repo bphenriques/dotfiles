@@ -51,6 +51,8 @@ in
         KeepAlive = true;
         RunAtLoad = true;
         ProcessType = "Interactive";
+
+        # TODO: Potentially replace with strings.makeBinPath
         EnvironmentVariables = {
           PATH =
             let

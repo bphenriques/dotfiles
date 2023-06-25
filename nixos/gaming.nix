@@ -4,6 +4,20 @@
 # https://github.com/Emiller88/dotfiles/blob/master/modules/desktop/gaming/steam.nix
 # https://github.com/the-argus/nixsys/blob/main/modules/home-manager/gaming/default.nix#LL25C9-L25C22
 # https://github.com/danderson/homelab
+
+let
+  # Rudimentary script to launch ad-hoc Windows applications
+  # TODO: Avoid using steam-run. Alternative is to use buildFHSEnv by-hand (if I understood correctly...)
+  proton-run = pkgs.writeShellApplication {
+    name = "proton-run";
+    runtimeInputs = with pkgs; [ proton-ge-custom steam-run ];
+    text = ''
+      STEAM_COMPAT_DATA_PATH="${config.user.protonDefaultPrefixDir}" \
+        STEAM_COMPAT_CLIENT_INSTALL_PATH="${config.user.protonDefaultPrefixDir}" \
+        ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-custom}/bin/proton run "$@"
+    '';
+  };
+in
 {
   hardware = {
     opengl = {
@@ -57,7 +71,11 @@
 
   environment.systemPackages = with pkgs; [
     heroic-unwrapped  # Epic games / GoG
-    protonup-qt       # List Proton
-    vulkan-tools
+    vulkan-tools      # Vulcan tester
+
+    # Proton
+    protonup-qt       # Manage Proton versions
+    protontricks      # Install utility within proton
+    proton-run        # Run .exe from termional
   ];
 }

@@ -16,6 +16,7 @@
     let
       nixpkgsConfig = {
         config.allowUnfree = true;
+        overlays = [ (import ./overlays) ];
       };
 
       nixConfig = {

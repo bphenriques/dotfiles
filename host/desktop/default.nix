@@ -4,6 +4,14 @@
 # Explore: https://github.com/sioodmy/dotfiles
 # https://github.com/shazow/nixfiles
 # https://github.com/infinisil/system/blob/master/config/new-modules/zsh.nix
+# Start using this:
+#nixpkgs.config.allowUnfreePredicate = pkg:
+#    builtins.elem (lib.getName pkg) [
+#      "steam"
+#      "steam-original"
+#      "steam-runtime"
+#    ];
+
 {
   imports = [
     ./hardware-configuration.nix
@@ -15,6 +23,7 @@
   # Basic settings
   user.name = "bphenriques";
   user.musicDir = "/mnt/data/Media/Music/Library";
+  user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
   networking.hostName = "bphenriques-desktop";
 
   # Bootloader
@@ -25,7 +34,7 @@
   };
 
   # Latest kernel (aka the one pinned under flake.lock)
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Hardware
   ## Disk management

@@ -21,11 +21,6 @@ in
       ''You have enabled sunshine which requires a wrapper to run as root which poses a security risk.''
     ];
 
-    #  ++ lib.optionals (!config.services.avahi.enable && !config.services.avahi.userServices) [
-          #      ''Avahi and userServices are disabled. Sunshine server will be not be discoverable but it is still acessible through its IP''
-          #    ];
-
-
     # https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
     networking.firewall = {
       allowedTCPPorts = [ 47984 47989 47990 48010 ];
@@ -62,17 +57,5 @@ in
          ExecStart = "${pkgs.sunshine}/bin/sunshine";
        };
     };
-
-    #services.avahi = {
-    #  enable = true;
-    #  reflector = true;
-    #  nssmdns = true;
-    #  publish = {
-    #    enable = true;
-    #    addresses = true;
-    #    userServices = true;
-    #    workstation = true;
-    #  };
-    #};
   };
 }

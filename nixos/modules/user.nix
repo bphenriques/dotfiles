@@ -16,6 +16,7 @@ in
     name = mkOption { type = str; };
     extraGroups = mkOption { type = listOf str; default = []; };
     musicDir = mkOption { type = str; };
+    protonDefaultPrefixDir = mkOption { type = str; };
   };
 
   config = {
