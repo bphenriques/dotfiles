@@ -43,7 +43,7 @@ $ dotfiles update
 - [Nix Darwin Docs](https://daiderd.com/nix-darwin/manual/index.html)
 - [Flakes Docs](https://nixos.wiki/wiki/Flakes)
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
-- Several dotfiles:
+- Several dotfiles (thank you!):
     - [`hlissner`](https://github.com/hlissner/dotfiles)
     - [`malob`](https://github.com/malob/nixpkgs)
     - [`kclejeune`](https://github.com/kclejeune/system)
@@ -52,6 +52,7 @@ $ dotfiles update
     - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
     - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)
     - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
+    - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
 - Ad-hoc documentation for reference that I find useful:
   - https://nixpkgs-manual-sphinx-markedown-example.netlify.app/development/option-types.xml.html
   - https://teu5us.github.io/nix-lib.html#builtins.replacestrings

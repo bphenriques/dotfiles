@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
 {
-    # TODO: Can we check if these paths exist?
     assertions = [
       {
          assertion = config.programs.beets.settings ? directory && config.programs.beets.settings ? library;

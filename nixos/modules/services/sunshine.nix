@@ -17,10 +17,6 @@ in
 
   # From https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/usage.html#linux
   config = mkIf cfg.enable {
-    warnings = [
-      ''You have enabled sunshine which requires a wrapper to run as root which poses a security risk.''
-    ];
-
     # https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
     networking.firewall = {
       allowedTCPPorts = [ 47984 47989 47990 48010 ];

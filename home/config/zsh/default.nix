@@ -27,18 +27,24 @@ with lib;
     };
 
     shellAliases = {
-      # Files
-      ls    = "ls --color=auto";
-      la    = "ls -la";
-      mkdir = "mkdir -pv";
+      # Default colorizatio
+      diff = "diff --color=auto";
+      grep = "grep --color=auto";
+      egrep = "egrep --color=auto";
+      fgrep = "fgrep --color=auto";
+      ls = "ls --color=auto";
 
-      # Navigation
+      # The usual aliases
+      l = "ls -alh";
+      ll = "ls -l";
+
+      # Quality of life
+      mkdir = "mkdir -pv";
       ".."  = "cd ..";
       "..."  = "cd ../..";
 
       # Text Processor
-      e           = "nvim";
-      grep        = "grep --color";
+      e           = "$EDITOR";
     };
   };
 
