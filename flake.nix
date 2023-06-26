@@ -15,7 +15,17 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:
     let
       nixpkgsConfig = {
-        config.allowUnfree = true;
+        config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
+          "discord"
+          "dropbox"
+          "nvidia-x11"
+          "nvidia-settings"
+          "steam"
+          "steam-original"
+          "steam-run"
+          "plexmediaserver"
+          "unrar"
+        ];
         overlays = [ (import ./overlays) ];
       };
 

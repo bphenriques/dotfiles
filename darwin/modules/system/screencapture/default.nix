@@ -8,6 +8,7 @@ let
   screenshotsLocation = config.system.defaults.screencapture.location;
 in
 {
+  #TODO: Ensure it is path.isAbsolute
   options.system.screencapture = {
     createLocation = mkEnableOption "darwin-screencapture-ensure-location-exists";
   };

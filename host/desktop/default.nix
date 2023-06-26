@@ -4,13 +4,6 @@
 # Explore: https://github.com/sioodmy/dotfiles
 # https://github.com/shazow/nixfiles
 # https://github.com/infinisil/system/blob/master/config/new-modules/zsh.nix
-# Start using this:
-#nixpkgs.config.allowUnfreePredicate = pkg:
-#    builtins.elem (lib.getName pkg) [
-#      "steam"
-#      "steam-original"
-#      "steam-runtime"
-#    ];
 
 {
   imports = [
