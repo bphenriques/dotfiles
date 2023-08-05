@@ -16,6 +16,7 @@
   # Basic settings
   user.name = "bphenriques";
   user.musicDir = "/mnt/data/Media/Music/Library";
+  user.romsDir = "/mnt/data/Media/Emulation/roms";
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
   networking.hostName = "bphenriques-desktop";
 

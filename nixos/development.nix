@@ -3,6 +3,9 @@
   environment.systemPackages = with pkgs; [
     jetbrains.idea-community
     filezilla
+
+    # Raspberry Pi
+    rpi-imager
   ];
 
   # TODO: Potentially move docker images outside, see https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/docker.nix#L56
