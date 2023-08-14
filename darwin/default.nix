@@ -83,8 +83,7 @@
 
   services.sketchybar = {
     enable = true;
-    dependencies = with pkgs; [ jq ];
-    debug = false;
+    extraPackages = with pkgs; [ jq ];
   };
 
   programs.org-protocol.enable = true;
@@ -97,7 +96,12 @@
     };
 
     taps = [
-      "homebrew/cask"     # Desktop Apps
+      "homebrew/cask"
+      "scalacenter/bloop"
+    ];
+
+    brews = [
+      "scalacenter/bloop/bloop"
     ];
 
     casks = [
