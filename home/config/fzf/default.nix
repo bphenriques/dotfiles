@@ -56,7 +56,6 @@ in
       ./functions/frg.zsh
       ./functions/proj.zsh
       ./functions/_proj.zsh
-      ./functions/_fzf_complete_git.zsh
     ];
 
     widgets = [
