@@ -50,7 +50,6 @@
   imports = [
     ./config/git
     ./config/scala
-    ./config/emacs
     ./config/zsh
     ./config/fzf
     ./config/wezterm

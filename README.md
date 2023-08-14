@@ -30,7 +30,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Updating
 
-The following will update `flake.lock` and Doom Emacs.
+The following will update `flake.lock`:
 ```sh
 $ dotfiles update
 ```

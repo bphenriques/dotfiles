@@ -6,7 +6,6 @@ SCRIPT_PATH="$(dirname "$0")"
 . "$SCRIPT_PATH"/util.sh
 
 DEBUG=${DEBUG:-0}
-QUICK=${QUICK:-0}
 
 # Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
@@ -14,7 +13,6 @@ HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
-DOOM_EMACS_PATH="$XDG_CONFIG_HOME"/emacs
 WORKSPACE="$HOME/workspace"
 
 sync_flake() {
@@ -34,20 +32,6 @@ sync_flake() {
     fail "Unsupported Operating System: $(uname)"
     # Potentially nix build following by ./result/activate
   fi
-}
-
-sync_emacs() {
-  if [ ! -d "$DOOM_EMACS_PATH" ]; then
-    info 'Doom Emacs - Not installed. Installing...'
-    git clone --depth 1 --single-branch https://github.com/hlissner/doom-emacs "$DOOM_EMACS_PATH"
-    "$DOOM_EMACS_PATH"/bin/doom install
-    emacs --batch -f all-the-icons-install-fonts
-    success 'Doom Emacs - Done!'
-  fi
-
-  info 'Doom Emacs - Syncing...'
-  "$XDG_CONFIG_HOME"/emacs/bin/doom sync
-  success 'Doom Emacs - Done!'
 }
 
 sync_repository() {
@@ -74,8 +58,5 @@ sync_repository() {
 }
 
 sync_flake
-if [ "$QUICK" -eq 0 ]; then
-  sync_emacs
-  sync_repository "$WORKSPACE/journal"
-  sync_repository "$WORKSPACE/knowledge-base"
-fi
+sync_repository "$WORKSPACE/journal"
+sync_repository "$WORKSPACE/knowledge-base"
