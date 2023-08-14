@@ -12,7 +12,6 @@ HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 HOST_TARGET=$(cat "$HOST_FILE_LOCATION")
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 WORKSPACE="$HOME/workspace"
 
 sync_flake() {

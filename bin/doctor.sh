@@ -6,7 +6,6 @@ SCRIPT_PATH="$(dirname "$0")"
 . "$SCRIPT_PATH"/util.sh
 
 # Set if absent.
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
 DOTFILES_LOCATION="$HOME/.dotfiles"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION"/.nix-host
 

@@ -33,6 +33,7 @@
         mineffect = "genie";                # Animation.
         autohide = true;                    # Dont need the dock by default.
         tilesize = 30;                      # Small size.
+        magnification = false;              # Dont magnify.
         mru-spaces = false;                 # Dont rearrange spaces by most recently used.
         expose-group-by-app = true;         # Group by apps.
         show-recents = false;               # Dont show recent apps.
@@ -56,16 +57,30 @@
 
         "com.apple.screencapture" = {
           show-thumbnail = false;                   # Dont need the thumbnail.
+          type = "png";                             # Higher quality.
+        };
+
+        # Avoid creating .DS_Store files on network or USB volumes
+        "com.apple.desktopservices" = {
+          DSDontWriteNetworkStores = true;
+          DSDontWriteUSBStores = true;
         };
 
         "com.apple.finder" = {
           _FXSortFoldersFirst = true;               # Show folders first.
           _FXSortFoldersFirstOnDesktop = true;      # Show folders first on desktop.
+          FXDefaultSearchScope = "SCcf";            # Search the current folder by default.
           ShowHardDrivesOnDesktop = false;          # Hide hard disks on desktop.
           ShowExternalHardDrivesOnDesktop = false;  # Hide external disks on desktop.
           ShowRemovableMediaOnDesktop = false;      # Hide removal media on desktop.
           ShowMountedServersOnDesktop = false;      # Hide mounted servers on desktop.
         };
+
+        "com.apple.AdLib" = {
+          allowApplePersonalizedAdvertising = false;  # Limit Apple personalized advertising
+          allowAssistant = false;                     # I do not want Siri.
+        };
+        "com.apple.ImageCapture".disableHotPlug = true; # Stop Photos from automatically opening.
       };
     };
 
@@ -86,7 +101,6 @@
     extraPackages = with pkgs; [ jq ];
   };
 
-  programs.org-protocol.enable = true;
   homebrew = {
     enable = true;
 
@@ -96,12 +110,13 @@
     };
 
     taps = [
-      "homebrew/cask"
-      "scalacenter/bloop"
+      "scalacenter/bloop" # Scala
+      "coursier/formulas" # Scala
     ];
 
     brews = [
-      "scalacenter/bloop/bloop"
+      "scalacenter/bloop/bloop"     # Scala
+      "coursier/formulas/coursier"  # Scala
     ];
 
     casks = [

@@ -5,8 +5,6 @@ SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
-
 info 'Nix Flake - Upgrading...'
 nix flake update
 success 'Nix Flake - Complete!'
