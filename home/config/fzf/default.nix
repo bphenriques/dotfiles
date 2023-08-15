@@ -5,10 +5,14 @@ let
   preview = pkgs.writeShellApplication {
     name = "preview";
     runtimeInputs = with pkgs; [
-      bat       # Preview files.
-      tree      # Preview directories.
-      chafa     # Preview images.
-      jq        # Preview JSON.
+      bat         # Preview files
+      tree        # Preview directories
+      chafa       # Preview images
+      jq          # Preview JSON
+      yq          # Preview YAML
+      unzip       # Preview zip contents
+      imagemagick # Preview PDFs
+      ghostscript # Preview PDFs
     ];
     text = fileContents ./scripts/preview.zsh;
   };
@@ -36,7 +40,7 @@ in
 
     # Ctrl+T
     fileWidgetCommand = "$FZF_DEFAULT_COMMAND";
-    fileWidgetOptions = ["--preview 'preview {}'"];
+    fileWidgetOptions = ["--preview '${preview}/bin/preview {}'"];
 
     # Ctrl+R
     historyWidgetOptions = ["--preview 'echo {}' --preview-window down:3:hidden:wrap"];
@@ -81,7 +85,7 @@ in
 
       # Set default preview (file or directories) but disable it if passing arguments or options.
       ''
-      zstyle ':fzf-tab:complete:*:*' fzf-preview 'preview ''\${(Q)realpath''\}'
+      zstyle ':fzf-tab:complete:*:*' fzf-preview '${preview}/bin/preview ''\${(Q)realpath''\}'
       zstyle ':fzf-tab:complete:*:options' fzf-preview
       zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
       ''
