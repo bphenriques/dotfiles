@@ -27,7 +27,7 @@
           "plexmediaserver"
           "unrar"
         ];
-        overlays = [ (import ./overlays) ];
+        overlays = (import ./overlays { inherit inputs; });
       };
 
       nixConfig = {
