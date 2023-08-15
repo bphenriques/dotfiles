@@ -5,6 +5,7 @@ let
   preview = pkgs.writeShellApplication {
     name = "preview";
     runtimeInputs = with pkgs; [
+      file        # See type of file
       bat         # Preview files
       tree        # Preview directories
       chafa       # Preview images
