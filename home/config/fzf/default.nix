@@ -2,7 +2,7 @@
 
 with lib;
 {
-  home.packages = with pkgs; [ preview ];
+  home.packages = with pkgs; [ preview frg ];
   programs.fzf = {
     enable = true;
 
@@ -41,7 +41,6 @@ with lib;
     ];
 
     functions = [
-      ./functions/frg.zsh
       ./functions/proj.zsh
       ./functions/_proj.zsh
     ];
@@ -49,7 +48,12 @@ with lib;
     widgets = [
       {
         name = "frg-find-file";
-        text = fileContents ./widgets/frg-find-file.zsh;
+        text = ''
+          LBUFFER+="$(${pkgs.frg}/bin/frg)"
+          local ret=$?
+          zle reset-prompt
+          return $ret
+        '';
         keybinding = "^f";
       }
     ];
