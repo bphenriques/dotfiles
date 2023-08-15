@@ -11,6 +11,7 @@
     parallel
     gnused
     dateutils
+    unzip
 
     # Exploring
     gum           # TODO: Explore https://github.com/charmbracelet/gum
