@@ -8,4 +8,5 @@ let
 
 in [additions]
 
+# TODO: new packages "should" not be actually defined as overlays but a rather separate output: inputs.self.packages.${pkgs.system}.example-package
 # Example on how to bring unstable within scope https://github.com/ethanabrooks/nix/blob/main/overlays/default.nix#L18
