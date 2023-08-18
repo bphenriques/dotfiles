@@ -22,9 +22,8 @@
     programs.gpg.enable = true;
     services.gpg-agent.enable = true;
 
-    # Social
-    modules.programs.discord.enable = true;
     home.packages = with pkgs; [
+      discord     # Social
       rofi        # Launcher
     ];
 

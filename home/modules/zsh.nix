@@ -4,7 +4,10 @@ with lib;
 with types;
 
 # Alternative (and inspired by) Home-Manager's zsh module: https://github.com/nix-community/home-manager/blob/master/modules/programs/zsh.nix
-# Reasons: learn and to have more control over what is happening.
+# Reasons:
+# - Finer grain control over what is happening.
+# - Make it easier to extend
+# - Learn
 let
   cfg = config.modules.zsh;
 
@@ -38,6 +41,14 @@ let
      };
   };
 
+  historyModule = submodule {
+    options = {
+       file = mkOption { type = str; };
+       histSize = mkOption { type = int; };
+       saveSize = mkOption { type = int; };
+     };
+  };
+
   widgetsModule = submodule {
     options = {
        name = mkOption { type = str; };
@@ -65,9 +76,28 @@ in
       default = "";
     };
 
+    options = mkOption {
+      type = listOf str;
+      default = [];
+    };
+
     aliases = mkOption {
       type = attrsOf str;
       default = {};
+    };
+
+    history = mkOption {
+      type = historyModule;
+      default = {
+        file = ''"$ZDOTDIR"/.zsh_history''; # Change default file away from zsh folder.
+        histSize = 100000;                  # Number of entries to keep in memory.
+        saveSize = 100000;                  # Number of entries to keep in file.
+      };
+    };
+
+    keyBindingsMode = mkOption {
+      type = nullOr (enum [ "emacs" "vi" ]);
+      default = null;
     };
 
     completions = mkOption {
@@ -88,11 +118,6 @@ in
     plugins = mkOption {
       type = listOf pluginModule;
       default = [];
-    };
-
-    options = mkOption {
-      type = lines;
-      default = "";
     };
 
     initExtraBeforeCompinit = mkOption {
@@ -182,8 +207,22 @@ in
     {
       home.packages = with pkgs; [zsh];
       xdg.configFile."zsh/.zshrc".text = concatStringsSep "\n" [
-        # "zmodload zsh/zprof"
-        cfg.options
+        ''
+          HISTFILE=${cfg.history.file}
+          HISTSIZE=${toString cfg.history.histSize}
+          SAVEHIST=${toString cfg.history.saveSize}
+        ''
+        (optionalString (cfg.options != []) ''
+          setopt ${concatStringsSep " " cfg.options}
+        '')
+
+        (optionalString (cfg.keyBindingsMode != null) ''
+            ${
+              if (cfg.keyBindingsMode == "emacs")   then "bindkey -e"
+              else if (cfg.keyBindingsMode == "vi") then "bindkey -v"
+              else throw "invalid keyBindingMode"
+              }
+        '')
 
         # Prune duplicate entries in $PATH
         "typeset -aU path"
@@ -204,7 +243,6 @@ in
         ''. "$ZDOTDIR"/aliases.zsh''
 
         (sourcePlugins (filter (plugin: plugin.sourceTiming == "last") cfg.plugins))
-        # "zprof"
       ];
     }
 

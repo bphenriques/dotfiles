@@ -1,10 +1,6 @@
 { pkgs, lib, config, ... }:
 
 {
-  # Set zsh shell
-  # users.defaultUserShell = pkgs.zsh;  # FIXME: I may need to migrate to the zsh config...
-  environment.shells = with pkgs; [ zsh ];
-
   # Display environment
   services.xserver = {
     enable = true;                        # X11 because setting up Wayland is more complicated than it is worth for me.
@@ -37,7 +33,7 @@
   # Programs
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
-    p7zip           # Zip/Unzip that supports all the formats I need
+    p7zip     # Zip/Unzip that supports all the formats I need
 
     # Filesystems (will I ever need this?)
     exfat     # Windows drives
