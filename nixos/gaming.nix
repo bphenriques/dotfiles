@@ -81,5 +81,9 @@ in
     protontricks      # Install utility within proton
     proton-run        # Run .exe from termional
     proton-run-desktop-launcher
+
+    # Emulation
+    mame-tools # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso
+    maxciso    # To convert to CSO
   ];
 }
