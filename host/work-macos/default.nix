@@ -29,7 +29,6 @@ in
   home-manager.users."${username}" = {
     imports = [
       ../../home
-      ../../home/config/sketchybar
       ../../home/config/amethyst
     ];
 

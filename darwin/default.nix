@@ -15,7 +15,7 @@
       NSGlobalDomain = {
         # Style
         AppleInterfaceStyle = "Dark";               # Personal preference.
-        _HIHideMenuBar      = true;                 # Hide top-bar.
+        _HIHideMenuBar      = false;                # Show top-bar.
 
         # Keybboard
         InitialKeyRepeat = 15;                      # Reduce the initial delay when pressing keys.
