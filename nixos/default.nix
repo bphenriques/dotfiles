@@ -1,13 +1,6 @@
 { pkgs, lib, config, ... }:
 
 {
-  # Display environment
-  services.xserver = {
-    enable = true;                        # X11 because setting up Wayland is more complicated than it is worth for me.
-    displayManager.sddm.enable = true;    # SDDM login page.
-    desktopManager.plasma5.enable = true; # Plasma environment.
-  };
-
   # Network
   networking.networkmanager.enable = true;
   user.extraGroups = ["networkmanager"];
@@ -17,17 +10,6 @@
     layout = "us";
     xkbVariant = "";
     xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
-  };
-
-  # Audio - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
-  sound.enable = false;                # Disable ALSA (it is used as a low-level API for pipewire): https://nixos.wiki/wiki/ALSA
-  hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
-  security.rtkit.enable = true;        # Recommended for pipewire
-  services.pipewire = {
-    enable = true;                     # Enable pipewire
-    alsa.enable = true;                # For better compatibility
-    alsa.support32Bit = true;          # For better compatibility
-    pulse.enable = true;               # For better compatibility
   };
 
   # Fonts (system-wide)
@@ -64,6 +46,8 @@
   };
 
   imports = [
+    ./desktop-environment.nix
+    ./audio.nix
     ./gaming.nix
     ./media.nix
     ./development.nix

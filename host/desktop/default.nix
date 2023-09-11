@@ -35,9 +35,10 @@
   services.fstrim.enable = true;              # Trim SSD because for some reason is not a default :shrug:
   boot.supportedFilesystems = [ "ntfs" ];     # Support regular Windows FS
 
-  ## Video Driver
+  ## Video Driver - Nvidia
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
+  virtualisation.docker.enableNvidia = true; # sudo docker run --gpus=all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
 
   # The release version of the first install of this system. Leave as it is!
   system.stateVersion = "22.11";

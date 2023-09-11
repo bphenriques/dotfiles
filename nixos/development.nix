@@ -8,7 +8,7 @@
   # - Default options already being set: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/zsh/zsh.nix#L112
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
-  home.modules.zsh.options = [ "NO_GLOBAL_RCS" ];   # Skip loading zshrc under /etc/. It is bloated.
+  home.modules.zsh.options = [ "NO_GLOBAL_RCS" ];   # Skip loading zshrc under /etc/. It contains some defaults that I do not want.
 
   environment.systemPackages = with pkgs; [
     jetbrains.idea-community
@@ -21,10 +21,10 @@
   # TODO: Potentially move docker images outside, see https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/docker.nix#L56
   virtualisation.docker = {
     enable = true;
-    enableNvidia = true; # test with: sudo docker run --gpus=all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi. #FIXME: only work as sudo?
     rootless = {
       enable = true;
       setSocketVariable = true;
     };
   };
 }
+

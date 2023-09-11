@@ -4,13 +4,10 @@
   # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home
 
   # Music
-  environment = {
-    plasma5.excludePackages = with pkgs.libsForQt5; [ elisa ]; # Using other music app.
-    systemPackages = with pkgs; [
-      museeks   # Audio
-      vlc       # Video
-    ];
-  };
+  environment.systemPackages = with pkgs; [
+    museeks   # Audio
+    vlc       # Video
+  ];
 
   services.plex = {
     enable = true;          # Accessible through: http://127.0.0.1:32400/web.
