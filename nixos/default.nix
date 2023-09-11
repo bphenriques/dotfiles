@@ -30,6 +30,11 @@
     pulse.enable = true;               # For better compatibility
   };
 
+  # Fonts (system-wide)
+  fonts.fonts = with pkgs; [
+    (nerdfonts.override { fonts = [ "Hack" ]; })
+  ];
+
   # Programs
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [

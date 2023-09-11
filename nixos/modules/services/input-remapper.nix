@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 # Fix for https://github.com/sezanzeb/input-remapper/issues/653
-
 with lib;
 let
   cfg = config.modules.services.input-remapper;

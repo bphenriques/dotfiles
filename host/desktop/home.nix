@@ -4,7 +4,6 @@
   home = {
     imports = [
       ../../home
-      ../../home/fonts.nix
       ../../home/config/beets
       ../../home/config/sunshine
     ];

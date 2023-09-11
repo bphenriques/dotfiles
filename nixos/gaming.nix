@@ -83,7 +83,7 @@ in
     proton-run-desktop-launcher
 
     # Emulation
-    mame-tools # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso
-    maxciso    # To convert to CSO
+    mame-tools  # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso
+    maxcso      # To convert to CSO
   ];
 }
