@@ -20,6 +20,7 @@
     # Search
     ripgrep     # Faster grep.
     jq          # Query JSON.
+    fx          # Interactively navigate through JSON.
     yq          # Query YAML.
     fd          # A better `find`.
     tealdeer    # Faster `tldr`.

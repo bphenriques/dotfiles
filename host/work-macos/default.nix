@@ -14,10 +14,12 @@ in
     taps = [
       "homebrew/cask"
       "common-fate/granted"
+      "snyk/tap"
     ];
 
     brews = [
       "granted" # Follow https://docs.commonfate.io/granted/getting-started/ to set it up. FIXME: assumego missing if installing through nixpkgs
+      "snyk"    # Security. The NixOS package is broken in MacOS.
     ];
 
     casks = [
@@ -41,9 +43,6 @@ in
       # Kubernetes
       kubectl
       kubelogin-oidc
-
-      # Security
-      nodePackages.snyk
 
       # Infra
       terraform

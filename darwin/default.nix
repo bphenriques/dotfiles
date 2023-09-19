@@ -120,7 +120,7 @@
     ];
 
     casks = [
-      "amethyst"          # Tiling Manager
+      "rectangle"         # Window Manager
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
       "keka"              # Compression
