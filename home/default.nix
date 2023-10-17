@@ -57,5 +57,6 @@
     ./config/fzf
     ./config/wezterm
     ./config/neovim
+    ./config/vscodium
   ];
 }
