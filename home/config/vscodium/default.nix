@@ -53,7 +53,7 @@
       "files.trimFinalNewlines" = true;                                 # Keep files trimmed.
       "files.insertFinalNewline" = true;                                # Because POSIX compliance (todo: read why is that really important, maybe to identify the last line?)
       "files.autoSave" = "onFocusChange";                               # Because I am lazy and I often source control the files.
-      "workbench.colorTheme": "Default Dark Modern";                    # My preference
+      "workbench.colorTheme" = "Default Dark Modern";                   # My preference
       "workbench.editor.highlightModifiedTabs" = true;                  # Better highlight on modified tabs.
       "workbench.editor.enablePreview" = false;                         # I often prefer small files therefore I thank the extra space.
 

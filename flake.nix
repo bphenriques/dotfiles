@@ -26,6 +26,7 @@
           "steam-run"
           "plexmediaserver"
           "unrar"
+          "terraform"
         ];
         overlays = (import ./overlays { inherit inputs; });
       };
