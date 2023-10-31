@@ -9,7 +9,7 @@
         inherit (lib) optional concatMapAttrs;
 
         # Each device is invited to sync any of the folders. They can choose to ignore.
-        romFolders = ["dos" "dreamcast" "fbneo" "gb" "gbc" "gba" "megadrive" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "snes" "switch"];
+        romFolders = ["dos" "dreamcast" "fbneo" "gb" "gbc" "gba" "megadrive" "n64" "nds" "nes" "pico8" "ps2" "ps3" "psp" "psx" "snes" "switch"];
         devices = {
           phone = {
             name = "Bruno's Phone";
@@ -30,6 +30,11 @@
           "Music" = {
             path = config.user.musicDir;
             devices = [ devices.phone.name ];
+            type = "sendonly";
+          };
+          "Shared" = {
+            path = config.user.shareDir;
+            devices = [ devices.phone.name devices.steamDeck.name ];
             type = "sendonly";
           };
         } // foldl' (acc: romFolder: acc // {

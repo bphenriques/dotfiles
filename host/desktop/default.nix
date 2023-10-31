@@ -18,6 +18,7 @@
   user.musicDir = "/mnt/data/Media/Music/Library";
   user.romsDir = "/mnt/data/Media/Emulation/roms";
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
+  user.shareDir = "/mnt/data/Media/Shared";
   networking.hostName = "bphenriques-desktop";
 
   # Bootloader
