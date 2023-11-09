@@ -21,6 +21,7 @@
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
     p7zip     # Zip/Unzip that supports all the formats I need
+    baobab    # Disk Space Analyser
 
     # Filesystems (will I ever need this?)
     exfat     # Windows drives

@@ -28,14 +28,28 @@
           "unrar"
           "terraform"
         ];
+        config.permittedInsecurePackages = [
+          "electron-24.8.6" # Unsure who uses it.
+        ];
         overlays = (import ./overlays { inherit inputs; });
       };
 
       nixConfig = {
         settings = {
           experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store   = true;                       # Ensure /nix/store does not grow eternally.
+          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
         };
+        optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them
+        gc = {
+          automatic = true;
+          dates = "weekly";
+          options = "--delete-older-than 7d";
+        };
+
+        # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
+        extraOptions = ''
+          min-free = ${toString (5 * 1024 * 1024 * 1024)}
+        '';
       };
 
       nixosLib = import ./lib/nixos.nix {

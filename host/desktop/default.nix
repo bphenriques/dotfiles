@@ -26,6 +26,7 @@
     enable = true;
     device = "/dev/sda";
     useOSProber = true;
+    configurationLimit = 5;
   };
 
   # Latest kernel (aka the one pinned under flake.lock)
