@@ -25,25 +25,27 @@
         enable = true;
         overrideDevices = true;     # overrides any devices added or deleted through the WebUI
         overrideFolders = true;     # overrides any folders added or deleted through the WebUI
-        devices = concatMapAttrs (name: device: { "${device.name}" = { id = device.id; }; } ) devices;
-        folders = {
-          "Music" = {
-            path = config.user.musicDir;
-            devices = [ devices.phone.name ];
-            type = "sendonly";
-          };
-          "Shared" = {
-            path = config.user.shareDir;
-            devices = [ devices.phone.name devices.steamDeck.name ];
-            type = "sendonly";
-          };
-        } // foldl' (acc: romFolder: acc // {
-          "${romFolder}" = {
-            path = config.user.romsDir + "/" + romFolder;
-            devices = [ devices.phone.name devices.steamDeck.name ];
-            type = "sendonly";
-          };
-        }) { } romFolders;
+        settings = {
+          devices = concatMapAttrs (name: device: { "${device.name}" = { id = device.id; }; } ) devices;
+          folders = {
+            "Music" = {
+              path = config.user.musicDir;
+              devices = [ devices.phone.name ];
+              type = "sendonly";
+            };
+            "Shared" = {
+              path = config.user.shareDir;
+              devices = [ devices.phone.name devices.steamDeck.name ];
+              type = "sendonly";
+            };
+          } // foldl' (acc: romFolder: acc // {
+            "${romFolder}" = {
+              path = config.user.romsDir + "/" + romFolder;
+              devices = [ devices.phone.name devices.steamDeck.name ];
+              type = "sendonly";
+            };
+          }) { } romFolders;
+        };
       };
   };
 }

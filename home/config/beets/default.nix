@@ -9,6 +9,7 @@
 
    programs.beets = {
      enable = true;
+     package = pkgs.beets-unstable; # The last release is from 2021... want the one in Github.
      settings = {
        paths = {
          default = "$albumartist/$album%aunique{}/$track $title";
@@ -23,7 +24,7 @@
        # Docs: https://beets.readthedocs.io/en/stable/plugins/index.html
        plugins = let
          providers = ["chroma" "spotify" "deezer"];
-         metadata  = ["fetchart" "embedart" "lyrics"];
+         metadata  = ["fetchart" "embedart" "lyrics" "mbsync"];
          utility   = ["edit" "duplicates" "scrub"];
         in builtins.concatStringsSep " " (providers ++ metadata ++ utility);
      };
