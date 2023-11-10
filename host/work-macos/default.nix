@@ -20,6 +20,7 @@ in
     brews = [
       "granted" # Follow https://docs.commonfate.io/granted/getting-started/ to set it up. FIXME: assumego missing if installing through nixpkgs
       "snyk"    # Security. The NixOS package is broken in MacOS.
+      "python3" # Implicit dependency of Aiven client
     ];
 
     casks = [
