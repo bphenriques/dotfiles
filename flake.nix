@@ -34,16 +34,20 @@
         overlays = (import ./overlays { inherit inputs; });
       };
 
-      nixConfig = {
-        settings = {
-          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
-        };
+
+      nixConfigNixOS = {
         optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them
         gc = {
           automatic = true;
           dates = "weekly";
           options = "--delete-older-than 7d";
+        };
+      };
+
+      nixConfig = {
+        settings = {
+          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
         };
 
         # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
@@ -53,7 +57,8 @@
       };
 
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig nixConfig; # Modules and configurations.
+        inherit home-manager nixpkgsConfig;           # Modules and configurations.
+        nixConfig = nixConfig // nixConfigNixOS;      # NixOS specific configuration.
         nixpkgs = nixpkgs-unstable;                   # Requires specific stage of nixpkgs.
         nixosModules = self.nixosModules;             # Custom nixos modules.
         homeManagerModules = self.homeManagerModules; # Custom home-manager modules.

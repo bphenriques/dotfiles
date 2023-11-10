@@ -7,7 +7,9 @@
     let
       inherit (lib) attrValues;
       common = {
-        nixpkgs = nixpkgsConfig;
+        nixpkgs = nixpkgsConfig // {
+          hostPlatform = system;
+        };
         nix = nixConfig;
 
         # Nix Darwin

@@ -21,12 +21,12 @@
         InitialKeyRepeat = 15;                      # Reduce the initial delay when pressing keys.
         KeyRepeat = 2;                              # Reduce delay when holding buttons.
 
-        # Typing experience.
-        NSAutomaticSpellingCorrectionEnabled = false;
-        NSAutomaticCapitalizationEnabled = false;
-        NSAutomaticDashSubstitutionEnabled = false;
-        NSAutomaticPeriodSubstitutionEnabled = false;
-        NSAutomaticQuoteSubstitutionEnabled = false;
+        # Typing
+        NSAutomaticSpellingCorrectionEnabled  = false;
+        NSAutomaticCapitalizationEnabled      = false;
+        NSAutomaticDashSubstitutionEnabled    = false;
+        NSAutomaticPeriodSubstitutionEnabled  = false;
+        NSAutomaticQuoteSubstitutionEnabled   = false;
       };
 
       dock = {
@@ -96,11 +96,6 @@
     fonts = [ (pkgs.nerdfonts.override { fonts = [ "Hack" ]; }) ]; # List here: https://github.com/ryanoasis/nerd-fonts
   };
 
-  services.sketchybar = {
-    enable = true;
-    extraPackages = with pkgs; [ jq ];
-  };
-
   homebrew = {
     enable = true;
 
@@ -124,6 +119,7 @@
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
       "keka"              # Compression
+      "ngrok"             # Useful
     ];
   };
 }
