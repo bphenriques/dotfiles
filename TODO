@@ -1,0 +1,24 @@
+
+
+### Install
+Potentially get back tmux: https://github.com/bphenriques/dotfiles/commit/0c350b96d35d753028eb3de9ee5a3e3f90249efb
+However.. I think my terminal was slower due to that and was tricky to get clipboard working reliably.
+
+### Learn
+
+https://scalameta.org/metals/docs/editors/emacs
+
+###
+
+Setup firefox properly: https://github.com/notthebee/nix-config/tree/main/dots/firefox
+
+Review tmux installation again? https://github.com/notthebee/nix-config/blob/main/dots/tmux/default.nix
+
+###
+
+- Setting passwords by default: https://github.com/notthebee/nix-config/blob/main/machines/nixos/default.nix#L25
+- SSH? https://github.com/notthebee/nix-config/blob/main/machines/nixos/default.nix#L29
+- What does this mean? https://github.com/notthebee/nix-config/blob/main/machines/nixos/default.nix#L62
+- And this? https://github.com/notthebee/nix-config/blob/main/machines/nixos/default.nix#L72
+- Ping isn't bad, right? https://github.com/notthebee/nix-config/blob/main/machines/nixos/default.nix#L70
+- Hmmm, interesting. Is it related to setting up connections to NAS? https://github.com/notthebee/nix-config/blob/main/machines/nixos/emily/shares/default.nix

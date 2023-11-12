@@ -119,11 +119,6 @@ clone_default_repos() {
     git clone --recurse-submodules git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
   fi
 
-  if [ ! -d "$WORKSPACE/journal" ]; then
-    info 'Cloning Repos - journal...'
-    git clone git@github.com:bphenriques/journal.git "$WORKSPACE/journal"
-  fi
-
   if [ ! -d "$DOTFILES_LOCATION" ]; then
     info 'Cloning Repos - dotfiles...'
     # Unfortunately, can't create the hidden folder directly.

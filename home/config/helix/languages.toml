@@ -1,0 +1,7 @@
+[[language]]
+name = "rust"
+auto-format = false
+
+[[language]]
+name = "scala"
+auto-format = false

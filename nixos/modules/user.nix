@@ -8,6 +8,7 @@ let
 in
 {
   # Setup an alias from home-manager's root configuration to just "home".
+  # TBH: Implicits are bad. Workaround to have modular modules that work regardless of the user.
   imports = [
     (mkAliasOptionModule ["home"] ["home-manager" "users" config.user.name])
   ];

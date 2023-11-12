@@ -1,0 +1,24 @@
+theme = "onedark"
+
+[editor]
+bufferline = "multiple"
+color-modes = true
+insert-final-newline = true
+line-number = "absolute"
+rulers = [120]
+text-width = 120
+
+[editor.lsp]
+display-inlay-hints = true
+display-messages = true
+enable = true
+
+[keys.normal]
+C-j = "save_selection"
+C-s = ":w"
+esc = ["collapse_selection", "keep_primary_selection"]
+
+[keys.normal.space]
+q = ":q"
+space = "file_picker"
+w = ":w"

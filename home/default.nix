@@ -13,10 +13,6 @@
     dateutils
     unzip
 
-    # Exploring
-    gum           # TODO: Explore https://github.com/charmbracelet/gum
-    helix
-
     # Search
     ripgrep     # Faster grep.
     jq          # Query JSON.
@@ -38,6 +34,8 @@
 
     # Dev
     shellcheck  # Linter for shell scripts.
+    shfmt       # Format shell scripts
+    nixfmt      # Format nix files
 
     # Monitoring
     procs       # Fancy `ps`.
@@ -46,17 +44,20 @@
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     (pkgs.writeShellScriptBin "docker" ''${lima}/bin/lima nerdctl $@'')
   ] ++ lib.optionals pkgs.stdenv.isLinux [
+    (nerdfonts.override { fonts = [ "Hack" ]; }) # User fonts. Darwin's fonts need to setup differently.
     unrar
     xclip
   ];
 
+  fonts.fontconfig.enable = true;
+
   imports = [
     ./config/git
+    ./config/helix
     ./config/scala
+    ./config/emacs
     ./config/zsh
     ./config/fzf
     ./config/wezterm
-    ./config/neovim
-    ./config/vscodium
   ];
 }

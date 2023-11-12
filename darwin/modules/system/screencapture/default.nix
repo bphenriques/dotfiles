@@ -10,10 +10,10 @@ in
 {
   #TODO: Ensure it is path.isAbsolute
   options.system.screencapture = {
-    createLocation = mkEnableOption "darwin-screencapture-ensure-location-exists";
+    ensureLocation = mkEnableOption "darwin-screencapture-ensure-location-exists";
   };
   
-  config = mkIf (cfg.createLocation && screenshotsLocation != null) {
+  config = mkIf (cfg.ensureLocation && screenshotsLocation != null) {
     system.activationScripts.postUserActivation.text = ''
       if [ ! -d "${screenshotsLocation}" ]; then
         echo "Screencapture - Creating ${screenshotsLocation} .."

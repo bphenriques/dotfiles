@@ -15,7 +15,7 @@ with lib;
       LC_ALL  = "en_US.UTF-8";
 
       # Default editors and settings
-      EDITOR  = "nvim";
+      EDITOR  = "hx";
       VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 

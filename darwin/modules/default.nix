@@ -1,4 +1,4 @@
 {
-  system-screencapture  = ./system/screencapture;
-  system-desktop        = ./system/desktop;
+  darwin-screencapture  = ./system/screencapture;
+  darwin-desktop        = ./system/desktop;
 }

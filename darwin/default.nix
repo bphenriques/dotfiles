@@ -5,7 +5,7 @@
 
   # System settings.
   system = {
-    screencapture.createLocation = true;
+    screencapture.ensureLocation = true;
     defaults = {
       trackpad = {
         Clicking = true;                # Because tapping is zappier.
@@ -93,7 +93,10 @@
   # Fonts
   fonts = {
     fontDir.enable = true;
-    fonts = [ (pkgs.nerdfonts.override { fonts = [ "Hack" ]; }) ]; # List here: https://github.com/ryanoasis/nerd-fonts
+    fonts = with pkgs; [
+      (nerdfonts.override { fonts = [ "Hack" ]; })  # List here: https://github.com/ryanoasis/nerd-fonts
+      emacs-all-the-icons-fonts
+    ];
   };
 
   homebrew = {

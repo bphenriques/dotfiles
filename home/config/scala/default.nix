@@ -1,15 +1,13 @@
 { config, lib, pkgs, ... }:
 
-# TODO:
-# Explore: https://github.com/sei40kr/dotfiles/blob/master/modules/dev/scala.nix
 {
   home.packages = with pkgs; [
     sbt         # Build tool.
-    metals
+    metals      # If Helix doesn't pick up, call: sbt bloopInstall
     scalafmt    # Linter formatter.
     scala-cli   # Scala cli
     ammonite    # REPL.
-    jdk17
+    jdk21
   ];
 
   systemd.user.services.bloop = lib.mkIf pkgs.stdenv.isLinux {
