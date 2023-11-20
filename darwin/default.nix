@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, ... }:
 
 {
   environment.shells = [ pkgs.zsh ];  # Register the shell
@@ -95,7 +95,6 @@
     fontDir.enable = true;
     fonts = with pkgs; [
       (nerdfonts.override { fonts = [ "Hack" ]; })  # List here: https://github.com/ryanoasis/nerd-fonts
-      emacs-all-the-icons-fonts
     ];
   };
 

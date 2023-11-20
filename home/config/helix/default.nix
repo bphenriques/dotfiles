@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   # The path needs to be absolute: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
@@ -18,6 +18,7 @@ in
       texlab                                  # LSP for LaTeX
       nil                                     # LSP for Nix
       terraform-ls                            # LSP for Terraform
+      ltex-ls                                 # LSP for grammar/spell check
     ];
   };
 

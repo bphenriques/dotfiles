@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, config, ... }:
 
 # TODO explore...
 # https://github.com/Emiller88/dotfiles/blob/master/modules/desktop/gaming/steam.nix
@@ -38,6 +38,7 @@ in
     kernel.sysctl."vm.max_map_count" = "2147483642";        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
     kernelParams = [ "tsc=reliable" "clocksource=tsc" ];    # https://wiki.archlinux.org/title/gaming#Improve_clock_gettime_throughput
   };
+  # Alternative? https://github.com/bbigras/nix-config/blob/57d1779de86c0797eaead91640585e21ce8ac83d/core/steam.nix#L15  
   systemd.extraConfig = "DefaultLimitNOFILE=1048576"; # Proton Games - Ref: https://github.com/zfigura/wine/blob/esync/README.esync
 
   hardware = {

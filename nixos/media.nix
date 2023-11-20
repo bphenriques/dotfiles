@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, ... }:
 {
   # TODO:
   # Take a look at https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/home

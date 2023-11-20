@@ -30,7 +30,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Updating
 
-The following will update `flake.lock` and Doom Emacs.
+The following will update `flake.lock`:
 ```sh
 $ dotfiles update
 ```
@@ -45,6 +45,7 @@ $ dotfiles update
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
 - Several dotfiles (thank you!):
     - [`hlissner`](https://github.com/hlissner/dotfiles)
+    - [`bbigras`](https://github.com/bbigras/nix-config)
     - [`malob`](https://github.com/malob/nixpkgs)
     - [`kclejeune`](https://github.com/kclejeune/system)
     - [`mitchellh`](https://github.com/mitchellh/nixos-config)

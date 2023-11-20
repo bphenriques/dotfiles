@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
   home.packages = with pkgs; [
@@ -55,7 +55,6 @@
     ./config/git
     ./config/helix
     ./config/scala
-    ./config/emacs
     ./config/zsh
     ./config/fzf
     ./config/wezterm

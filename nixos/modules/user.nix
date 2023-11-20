@@ -1,4 +1,4 @@
-{ config, home-manager, lib, pkgs, ... }:
+{ config, home-manager, lib, ... }:
 
 with lib;
 with types;

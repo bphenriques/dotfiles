@@ -9,10 +9,6 @@ info 'Nix Flake - Upgrading...'
 nix flake update
 success 'Nix Flake - Complete!'
 
-info 'Doom Emacs - Upgrading...'
-"$XDG_CONFIG_HOME"/emacs/bin/doom upgrade
-success 'Doom Emacs - Complete!'
-
 case "$(uname -s)" in
   Darwin)
     info 'Homebrew - Upgrading...'

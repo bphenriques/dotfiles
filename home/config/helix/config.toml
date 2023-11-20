@@ -7,11 +7,24 @@ insert-final-newline = true
 line-number = "absolute"
 rulers = [120]
 text-width = 120
+auto-format	= false
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
 
 [editor.lsp]
 display-inlay-hints = true
 display-messages = true
 enable = true
+
+[editor.statusline]
+right = ["diagnostics", "selections", "register", "position", "file-encoding", "version-control"]
+
+[editor.indent-guides]
+render = true
+character = "┊"
 
 [keys.normal]
 C-j = "save_selection"

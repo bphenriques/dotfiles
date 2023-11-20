@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ ... }:
 
 # Audio - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
 {
