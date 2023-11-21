@@ -8,7 +8,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 > [!IMPORTANT]
 > **Disclaimer:** This is a personal configuration. I am no expert, however 
-> I hope that this configuration helps you out setting up your own! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
+> I hope that this configuration helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
 > If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
 1. If not available, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
