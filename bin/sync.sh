@@ -20,6 +20,7 @@ sync_flake() {
     extra_args="--show-trace"
   else
     extra_args=""
+    #extra_args="--no-eval-cache"
   fi
 
   if [ -d /etc/nixos ]; then

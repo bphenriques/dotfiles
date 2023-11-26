@@ -10,6 +10,8 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
+
+    nur.url = "github:nix-community/nur";                           # Nix User Repository containing Firefox extensions q 
   };
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:
@@ -27,6 +29,7 @@
           "plexmediaserver"
           "unrar"
           "terraform"
+          "keepa"
         ];
         config.permittedInsecurePackages = [
           "electron-24.8.6" # Unsure who uses it.

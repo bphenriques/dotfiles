@@ -1,7 +1,5 @@
 { config, pkgs, lib, ... }:
 
-# TODO: Explore https://github.com/jarun/nnn
-# TODO: Explore SyncThing: https://github.com/kclejeune/system/blob/master/modules/darwin/syncthing.nix#L40
 let username = "brunohenriques";
 in
 {
@@ -18,7 +16,6 @@ in
     ];
 
     brews = [
-      "granted" # Follow https://docs.commonfate.io/granted/getting-started/ to set it up. FIXME: assumego missing if installing through nixpkgs
       "snyk"    # Security. The NixOS package is broken in MacOS.
       "python3" # Implicit dependency of Aiven client
     ];
@@ -37,6 +34,7 @@ in
       # Cloud Providers
       google-cloud-sdk
       awscli2
+      granted # Follow https://docs.commonfate.io/granted/getting-started/ to set it up
 
       # Kubernetes
       kubectl
@@ -45,6 +43,20 @@ in
       # Infra
       terraform
     ];
+
+    # Extra Firefox profiles
+    programs.firefox.profiles.default.containers = {
+      "OVO Energy" = {
+        id = 8;
+        color = "green";
+        icon = "briefcase";
+      };
+      "Kaluza" = {
+        id = 9;
+        color = "blue";
+        icon = "briefcase";
+      };
+    };
 
     home.stateVersion = "22.11";
   };

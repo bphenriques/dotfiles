@@ -117,6 +117,7 @@
     ];
 
     casks = [
+      "firefox"           # Browser
       "rectangle"         # Window Manager
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE

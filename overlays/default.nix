@@ -6,6 +6,6 @@ let
   getDirs = from: attrNames (filterAttrs (_ : type: type == "directory") (readDir from));
   additions = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
 
-in [additions]
+in [additions inputs.nur.overlay]
 
 # Example on how to bring unstable within scope https://github.com/ethanabrooks/nix/blob/main/overlays/default.nix#L18

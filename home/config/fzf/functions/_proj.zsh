@@ -7,4 +7,5 @@ TRAPEXIT() {
   zle accept-line
   zle reset-prompt
 }
+
 return 0

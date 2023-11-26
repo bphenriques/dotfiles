@@ -10,12 +10,12 @@ let
   # TODO: Avoid using steam-run. Alternative is to use buildFHSEnv by-hand (if I understood correctly...)
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
-    runtimeInputs = with pkgs; [ proton-ge-custom steam-run ];
+    runtimeInputs = with pkgs; [ nur.repos.ataraxiasjel.proton-ge-custom steam-run ];
     text = ''
       if [ "$#" -gt 0 ]; then
         STEAM_COMPAT_DATA_PATH="${config.user.protonDefaultPrefixDir}" \
           STEAM_COMPAT_CLIENT_INSTALL_PATH="${config.user.protonDefaultPrefixDir}" \
-          ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-custom}/bin/proton run "$@"
+          ${pkgs.steam-run}/bin/steam-run ${pkgs.nur.repos.ataraxiasjel.proton-ge-custom}/bin/proton run "$@"
       fi
     '';
   };

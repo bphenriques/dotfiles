@@ -7,9 +7,9 @@
     desktopManager.plasma5.enable = true; # Plasma environment.
 
     displayManager = {
-        autoLogin.enable = true;
-        autoLogin.user = config.user.name;
-        sddm.enable = true;    # SDDM login page.
+      autoLogin.enable = true;
+      autoLogin.user = config.user.name;
+      sddm.enable = true;    # SDDM login page.
     };
   };
 

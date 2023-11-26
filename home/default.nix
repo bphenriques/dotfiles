@@ -54,6 +54,7 @@
   imports = [
     ./config/git
     ./config/helix
+    ./config/firefox
     ./config/scala
     ./config/zsh
     ./config/fzf

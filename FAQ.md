@@ -1,5 +1,9 @@
 # FAQ
 
+#### `error: cached failure of attribute 'darwinConfigurations.work-macos.system'`
+
+Go to `bin/sync.sh` -> `sync_flake` -> set `extra_flags` to `--no-eval-cache` temporary.
+
 #### Fail to find `nix` nor any home-manager binary.
 
 Add the following in your default shell you have the following:

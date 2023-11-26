@@ -44,6 +44,7 @@ $ dotfiles update
 - [Flakes Docs](https://nixos.wiki/wiki/Flakes)
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
 - Several dotfiles (thank you!):
+    - [`Misterio77`](https://github.com/Misterio77/nix-config) 
     - [`hlissner`](https://github.com/hlissner/dotfiles)
     - [`bbigras`](https://github.com/bbigras/nix-config)
     - [`malob`](https://github.com/malob/nixpkgs)

@@ -8,7 +8,7 @@ with lib;
 
     # Ensure that my integration with zsh is enable but not the one from Home-Manager.
     enableZshIntegration = false;
-    extras.personalZshIntegration = true;
+    extra.personalZshIntegration = true;
 
     defaultCommand = "fd --type file --hidden";
     defaultOptions = [
@@ -32,12 +32,13 @@ with lib;
 
   modules.zsh = {
     plugins = [
-      {
-        name = "zsh-fzf-tab";
-        src = pkgs.zsh-fzf-tab;
-        file = "share/fzf-tab/fzf-tab.plugin.zsh";
-        sourceTiming = "after-compinit";
-      }
+# FIXME: Broken
+#      {
+#        name = "zsh-fzf-tab";
+#        src = pkgs.zsh-fzf-tab;
+#        file = "share/fzf-tab/fzf-tab.plugin.zsh";
+#        sourceTiming = "after-compinit";
+#      }
     ];
 
     functions = [

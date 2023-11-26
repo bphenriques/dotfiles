@@ -1,4 +1,5 @@
 # Workaround for https://github.com/NixOS/nixpkgs/issues/73323
+# Review with: https://github.com/nix-community/nur-combined/blob/master/repos/ataraxiasjel/pkgs/proton-ge/default.nix#L6
 { stdenv, lib, fetchurl, writeScript, ... }:
 stdenv.mkDerivation (finalAttrs: {
   name = "proton-ge-custom";

@@ -4,10 +4,10 @@ with lib;
 with types;
 
 let
-  cfg = config.programs.fzf.extras;
+  cfg = config.programs.fzf.extra;
 in
 {
-  options.programs.fzf.extras = {
+  options.programs.fzf.extra = {
     personalZshIntegration = mkEnableOption "fzf-extra-personal-zsh-integration";
   };
 
