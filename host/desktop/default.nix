@@ -8,6 +8,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./network-disks.nix
     ./peripherals.nix
     ../../nixos
     ./home.nix
