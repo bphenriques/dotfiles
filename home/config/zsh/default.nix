@@ -2,52 +2,6 @@
 
 with lib;
 {
-  home.packages = with pkgs; [
-    vivid       # LS_COLORS generator because I refuse to use the syntax >.<
-  ];
-
-  home = {
-    sessionVariables = {
-      TERM    = "screen-256color";              # Ensure term is set with the right color
-
-      # Set locale and UTF-8
-      LANG    = "en_US.UTF-8";
-      LC_ALL  = "en_US.UTF-8";
-
-      # Default editors and settings
-      EDITOR  = "hx";
-      VISUAL  = "$EDITOR";
-      PAGER   = "less -iMR";
-
-      # Colors
-      CLICOLOR  = 1;                            # Enable ls colors in MacOS.
-      LS_COLORS ="$(vivid generate snazzy)";    # Generates the color palette.
-
-      WORKSPACE = "$HOME/workspace";            # Default directory for repositories
-    };
-
-    shellAliases = {
-      # Default colorizatio
-      diff = "diff --color=auto";
-      grep = "grep --color=auto";
-      egrep = "egrep --color=auto";
-      fgrep = "fgrep --color=auto";
-      ls = "ls --color=auto";
-
-      # The usual aliases
-      l = "ls -alh";
-      ll = "ls -l";
-
-      # Quality of life
-      mkdir = "mkdir -pv";
-      ".."  = "cd ..";
-      "..."  = "cd ../..";
-
-      # Text Processor
-      e           = "$EDITOR";
-    };
-  };
-
   programs.direnv = {
     enable                  = true; # Automatically load .envrc or .env.
     nix-direnv.enable       = true; # Faster direnv for nix environments.

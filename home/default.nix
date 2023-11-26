@@ -49,6 +49,48 @@
     xclip
   ];
 
+  home = {
+    sessionVariables = {
+      TERM    = "screen-256color";              # Ensure term is set with the right color
+
+      # Set locale and UTF-8
+      LANG    = "en_US.UTF-8";
+      LC_ALL  = "en_US.UTF-8";
+
+      # Default editors and settings
+      EDITOR  = "hx";
+      VISUAL  = "$EDITOR";
+      PAGER   = "less -iMR";
+
+      # Colors
+      CLICOLOR  = 1;                                           # Enable ls colors in MacOS.
+      LS_COLORS ="$(${pkgs.vivid}/bin/vivid generate snazzy)"; # LS_COLORS generator because I refuse to maintain one >.<
+
+      WORKSPACE = "$HOME/workspace";            # Default directory for repositories
+    };
+
+    shellAliases = {
+      # Default colorizatio
+      diff = "diff --color=auto";
+      grep = "grep --color=auto";
+      egrep = "egrep --color=auto";
+      fgrep = "fgrep --color=auto";
+      ls = "ls --color=auto";
+
+      # The usual aliases
+      l = "ls -alh";
+      ll = "ls -l";
+
+      # Quality of life
+      mkdir = "mkdir -pv";
+      ".."  = "cd ..";
+      "..."  = "cd ../..";
+
+      # Text Processor
+      e = "$EDITOR";
+    };
+  };
+
   fonts.fontconfig.enable = true;
 
   imports = [
