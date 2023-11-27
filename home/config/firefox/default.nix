@@ -7,7 +7,8 @@ in
     enable = true;
     package = if pkgs.stdenv.hostPlatform.isDarwin then null else pkgs.firefox;
 
-    profiles = {
+    # FIXME: Need to handle this when I get the chance. Need a solution for bookmarking.
+    profiles = lib.mkIf pkgs.stdenv.isDarwin {
       default = {
         id = 0;
         name = "Bruno Henriques";
