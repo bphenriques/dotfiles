@@ -2,7 +2,7 @@
   description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";               # Default to stable for most things.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";               # Default to stable for most things.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
 
     darwin.url = "github:lnl7/nix-darwin/master";
@@ -11,7 +11,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
 
-    nur.url = "github:nix-community/nur";                           # Nix User Repository containing Firefox extensions q 
+    nur.url = "github:nix-community/nur";                           # Nix User Repository containing Firefox extensions
   };
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:

@@ -19,29 +19,6 @@
     programs.gpg.enable = true;
     services.gpg-agent.enable = true;
 
-    programs.firefox.profiles.default.containers = {
-      "Personal" = {
-        id = 1;
-        color = "turquoise";
-        icon = "chill";
-      };
-      "Banking" = {
-        id = 2;
-        color = "red";
-        icon = "fingerprint";
-      };
-      "Shopping" = {
-        id = 3;
-        color = "orange";
-        icon = "cart";
-      };
-      "Social" = {
-        id = 4;
-        color = "yellow";
-        icon = "tree";
-      };
-    };
-
     home.packages = with pkgs; [
       discord     # Social
       rofi        # Launcher
