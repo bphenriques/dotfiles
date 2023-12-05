@@ -7,6 +7,7 @@
   environment.systemPackages = with pkgs; [
     museeks   # Audio
     vlc       # Video
+    amberol   # Other music player
   ];
 
   services.plex = {

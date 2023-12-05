@@ -25,8 +25,12 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
    ```
 
 4. Import the GPG Key using `gpg --import`. If pinentry fails, you may need to restart.
+
+5. NixOS:
    
-5. Reboot!
+   1. Create `/etc/nixos/smb-secrets` property file with a `username` and a `password`
+   
+6. Reboot!
 
 # Updating
 

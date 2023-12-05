@@ -2,8 +2,8 @@
 {
     assertions = [
       {
-         assertion = config.programs.beets.settings ? directory && config.programs.beets.settings ? library;
-         message = "programs.beets.settings.directory and programs.beets.settings.library must be set and pointing to a valid path.";
+         assertion = config.programs.beets.settings ? directory;
+         message = "programs.beets.settings.directory must be set and point to a valid directory.";
       }
    ];
 
@@ -11,6 +11,7 @@
      enable = true;
      package = pkgs.beets-unstable; # The last release is from 2021... want the one in Github.
      settings = {
+       library = "${config.xdg.dataHome}/beets-library.db"; # FIXME: Can't live in the NAS due to intermetient DB lock issues. TODO: Backup to NAS.
        paths = {
          default = "$albumartist/$album%aunique{}/$track $title";
          singleton = "$artist/Non-Album/$title";

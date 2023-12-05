@@ -8,12 +8,7 @@
       ../../home/config/sunshine
     ];
 
-    programs.beets.settings = {
-      directory = config.user.musicDir;
-      library = "/mnt/data/Media/Music/beets-library.db";
-    };
-
-    services.dropbox.enable = true; # TODO: Change path but ensure that the folders
+    programs.beets.settings.directory = config.user.musicDir;
 
     # Gpg
     programs.gpg.enable = true;

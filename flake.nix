@@ -60,12 +60,12 @@
       };
 
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig;           # Modules and configurations.
-        nixConfig = nixConfig // nixConfigNixOS;      # NixOS specific configuration.
-        nixpkgs = nixpkgs-unstable;                   # Requires specific stage of nixpkgs.
-        nixosModules = self.nixosModules;             # Custom nixos modules.
-        homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
-        lib = nixpkgs-unstable.lib;                   # Requires specific stage of nixpkgs.
+        inherit home-manager nixpkgsConfig;                                     # Modules and configurations.
+        nixConfig = nixConfig // nixConfigNixOS;                                # NixOS specific configuration.
+        nixpkgs = nixpkgs-unstable;                                             # Requires specific stage of nixpkgs.
+        nixosModules = self.nixosModules;                                       # Custom nixos modules.
+        homeManagerModules = self.homeManagerModules;                           # Custom home-manager modules.
+        lib = nixpkgs-unstable.lib;                                             # Requires specific stage of nixpkgs.
       };
 
       macosLib = import ./lib/macos.nix {

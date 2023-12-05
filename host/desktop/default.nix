@@ -1,10 +1,5 @@
 { config, pkgs, ... }:
 
-# TODO:
-# Explore: https://github.com/sioodmy/dotfiles
-# https://github.com/shazow/nixfiles
-# https://github.com/infinisil/system/blob/master/config/new-modules/zsh.nix
-
 {
   imports = [
     ./hardware-configuration.nix
@@ -15,12 +10,12 @@
   ];
 
   # Basic settings
+  networking.hostName = "bphenriques-desktop";
   user.name = "bphenriques";
-  user.musicDir = "/mnt/data/Media/Music/Library";
-  user.romsDir = "/mnt/data/Media/Emulation/roms";
+  user.musicDir = "/home/${config.user.name}/Music/Library";          # Points to NAS
+  user.romsDir = "/home/${config.user.name}/Gaming/Emulation/roms";   # Points to NAS
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
   user.shareDir = "/mnt/data/Media/Shared";
-  networking.hostName = "bphenriques-desktop";
 
   # Bootloader
   boot.loader.grub = {
