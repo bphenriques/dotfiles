@@ -14,8 +14,8 @@
   user.name = "bphenriques";
 
   # Points to NAS locations
-  user.musicDir = "/home/${config.user.name}/Media/Music/Library";   # Points to NAS
-  user.romsDir = "/home/${config.user.name}/Media/Gaming/Emulation/roms";   # Points to NAS
+  user.musicDir = "/home/${config.user.name}/media/music/library";   # Points to NAS
+  user.romsDir = "/home/${config.user.name}/media/gaming/emulation/roms";   # Points to NAS
 
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
 

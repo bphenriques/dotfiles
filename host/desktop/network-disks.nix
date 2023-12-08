@@ -10,12 +10,12 @@ let
       };
 
       media = {
-        source = "//${homeNetworkAlias}/Media";
+        source = "//${homeNetworkAlias}/media";
         destination = "/home/${config.user.name}/Media";
       };
 
       shared = {
-        source = "//${homeNetworkAlias}/Shared";
+        source = "//${homeNetworkAlias}/shared";
         destination = "/home/${config.user.name}/Shared";
       };
     };
@@ -49,10 +49,10 @@ in
     xdg.userDirs = {
       enable = true;
       createDirectories = false;  # Do not create any of the folders as they are being mounted.
-      documents = "${homeSambaServer.sharedFolder.personal.destination}/Documents";
-      music = "${homeSambaServer.sharedFolder.media.destination}/Music";
-      pictures = "${homeSambaServer.sharedFolder.personal.destination}/Photos";
-      videos = "${homeSambaServer.sharedFolder.personal.destination}/Videos";
+      documents = "${homeSambaServer.sharedFolder.personal.destination}/documents";
+      music = "${homeSambaServer.sharedFolder.media.destination}/music";
+      pictures = "${homeSambaServer.sharedFolder.personal.destination}/photos";
+      videos = "${homeSambaServer.sharedFolder.personal.destination}/videos";
     };
   };
 

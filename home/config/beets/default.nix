@@ -41,6 +41,6 @@
 
    # Fix when moving the files around
    # https://github.com/beetbox/beets/issues/133
-   # sqlite3 beets.db "UPDATE items SET path = replace(path, '/home/bphenriques/Music', '/home/bphenriques/Media/Music');"
-   # sqlite3 beets.db "UPDATE albums SET artpath = replace(artpath, '/home/bphenriques/Music', '/home/bphenriques/Media/Music');"
+   # sqlite3 beets.db "UPDATE items SET path = replace(path, '/home/bphenriques/Media/Music', '/home/bphenriques/Media/music');"
+   # sqlite3 beets.db "UPDATE albums SET artpath = replace(artpath, '/home/bphenriques/Media/Music', '/home/bphenriques/Media/music');"
 }
