@@ -23,6 +23,10 @@
     p7zip     # Zip/Unzip that supports all the formats I need
     baobab    # Disk Space Analyser
 
+    museeks   # Audio
+    amberol   # Another Audio music player. Yet another alternative: https://github.com/jeffvli/sonixd
+    vlc       # Video
+
     # Filesystems (will I ever need this?)
     exfat     # Windows drives
     ntfs3g    # Windows drives
@@ -53,7 +57,6 @@
     ./desktop-environment.nix
     ./audio.nix
     ./gaming.nix
-    ./media.nix
     ./development.nix
   ];
 }

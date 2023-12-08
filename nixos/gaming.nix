@@ -5,6 +5,8 @@
 # https://github.com/the-argus/nixsys/blob/main/modules/home-manager/gaming/default.nix#LL25C9-L25C22
 # https://github.com/danderson/homelab
 
+# TODO: Consider cleaning up Steam folder: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/programs/steam/default.nix
+
 let
   # Script to run proton on a static prefix (because doesn't really matter for ad-hoc runs)
   # TODO: Avoid using steam-run. Alternative is to use buildFHSEnv by-hand (if I understood correctly...)

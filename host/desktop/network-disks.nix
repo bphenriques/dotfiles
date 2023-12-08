@@ -18,11 +18,6 @@ let
         source = "//${homeNetworkAlias}/Shared";
         destination = "/home/${config.user.name}/Shared";
       };
-
-      server-docker = {
-        source = "//${homeNetworkAlias}/docker";
-        destination = "/home/${config.user.name}/.docker-nas";
-      };
     };
 
     credentialsFile = "/etc/nixos/smb-secrets"; # FIXME: Use secret manager (e.g. agenix) and do "username=x poassword=y"
