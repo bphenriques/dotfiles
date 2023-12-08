@@ -10,6 +10,9 @@
     amberol   # Other music player
   ];
 
+  # Other options:
+  # - https://github.com/jeffvli/sonixd
+
   services.plex = {
     enable = true;          # Accessible through: http://127.0.0.1:32400/web.
     openFirewall = true;    # So that the TV can connect to the server.

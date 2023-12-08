@@ -18,7 +18,6 @@ in
     extraGroups = mkOption { type = listOf str; default = []; };
     musicDir = mkOption { type = str; };
     romsDir = mkOption { type = str; };
-    shareDir = mkOption { type = str; };
     protonDefaultPrefixDir = mkOption { type = str; };
   };
 

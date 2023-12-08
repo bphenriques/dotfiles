@@ -11,7 +11,7 @@
      enable = true;
      package = pkgs.beets-unstable; # The last release is from 2021... want the one in Github.
      settings = {
-       library = "${config.xdg.dataHome}/beets-library.db"; # FIXME: Can't live in the NAS due to intermetient DB lock issues. TODO: Backup to NAS.
+       library = "${config.xdg.dataHome}/beets.db"; # FIXME: Can't live in the NAS due to intermetient DB lock issues. TODO: Backup to NAS. Perhaps https://serverfault.com/questions/146961/automatically-run-a-command-every-time-a-file-is-changed ?
        paths = {
          default = "$albumartist/$album%aunique{}/$track $title";
          singleton = "$artist/Non-Album/$title";
@@ -38,4 +38,9 @@
      python39Packages.requests         # Required by lyrics
      python310Packages.beautifulsoup4  # Required by lyrics
    ];
+
+   # Fix when moving the files around
+   # https://github.com/beetbox/beets/issues/133
+   # sqlite3 beets.db "UPDATE items SET path = replace(path, '/home/bphenriques/Music', '/home/bphenriques/Media/Music');"
+   # sqlite3 beets.db "UPDATE albums SET artpath = replace(artpath, '/home/bphenriques/Music', '/home/bphenriques/Media/Music');"
 }

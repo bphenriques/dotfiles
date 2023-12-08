@@ -12,10 +12,12 @@
   # Basic settings
   networking.hostName = "bphenriques-desktop";
   user.name = "bphenriques";
-  user.musicDir = "/home/${config.user.name}/Music/Library";          # Points to NAS
-  user.romsDir = "/home/${config.user.name}/Gaming/Emulation/roms";   # Points to NAS
+
+  # Points to NAS locations
+  user.musicDir = "/home/${config.user.name}/Media/Music/Library";   # Points to NAS
+  user.romsDir = "/home/${config.user.name}/Media/Gaming/Emulation/roms";   # Points to NAS
+
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
-  user.shareDir = "/mnt/data/Media/Shared";
 
   # Bootloader
   boot.loader.grub = {

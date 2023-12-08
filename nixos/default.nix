@@ -29,6 +29,9 @@
     hfsprogs  # MacOS drives
   ];
 
+  # Services
+  services.qbittorrent.enable = true;
+
   # Localization
   time.timeZone = "Europe/Lisbon";
   i18n = {
@@ -52,6 +55,5 @@
     ./gaming.nix
     ./media.nix
     ./development.nix
-    ./internet.nix
   ];
 }
