@@ -10,19 +10,21 @@ in
 
   homebrew = {
     taps = [
-      "homebrew/cask"
       "common-fate/granted"
       "snyk/tap"
     ];
 
     brews = [
-      "snyk"    # Security. The NixOS package is broken in MacOS.
-      "python3" # Implicit dependency of Aiven client
+      "snyk"      # Security. The NixOS package is broken in MacOS.
+      "python3"   # Implicit dependency of Aiven client
+      "kubeseal"  # K8s stuff
     ];
 
     casks = [
       "google-chrome" # Google Meet.
       "slack"         # The usual rabbit-hole of channels.
+      "1password-cli" # Team's 1password
+      "postman"       # Because it is more practical than curl
     ];
   };
 

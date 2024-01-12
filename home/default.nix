@@ -99,6 +99,7 @@
     ./config/firefox
     ./config/scala
     ./config/zsh
+    ./config/zellij
     ./config/fzf
     ./config/wezterm
   ];

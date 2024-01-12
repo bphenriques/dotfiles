@@ -17,6 +17,7 @@ with lib;
 
     zsh = {
       enable = true;
+      keyBindingsMode = "emacs";           # Explicitly set emacs as my keyboard mapping despite having vim as $EDITOR.
       envExtra = concatStringsSep "\n" [
         # MacOS: Homebrew
         (optionalString (pkgs.stdenv.system == "aarch64-darwin") ''eval "$(/opt/homebrew/bin/brew shellenv)"'')
@@ -41,8 +42,6 @@ with lib;
         "HIST_VERIFY"                      # Do not execute immediately upon history expansion.
         "HIST_BEEP"                        # Beep when accessing non-existent history.
       ];
-
-      keyBindingsMode = "emacs";           # Explicitly set emacs as my keyboard mapping despite having vim as $EDITOR.
 
       plugins = mkAfter [
         {

@@ -11,7 +11,9 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
 
-    nur.url = "github:nix-community/nur";                           # Nix User Repository containing Firefox extensions
+    # Other communicaty made repositories
+    nur.url = "github:nix-community/nur";                           # Mostly for Firefox extensions
+    zjstatus.url = "github:dj95/zjstatus";                          # ZelliJ plugin
   };
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:

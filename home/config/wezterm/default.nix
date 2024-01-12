@@ -1,9 +1,9 @@
-{ ... }:
+{ pkgs, ... }:
 
 let
   term = "screen-256color";
   font = "Hack Nerd Font Mono";
-  fontSize = 14;
+  fontSize = 15;
 
   foreground            = "#bbc2cf";
   background            = "#282c34";
@@ -54,7 +54,6 @@ in
         font = wezterm.font('${font}'),
         font_size = ${toString fontSize},
         color_scheme = 'doom-one',
-        window_decorations = 'RESIZE',
         enable_tab_bar = false,
         window_close_confirmation = 'NeverPrompt',
         window_padding = {
