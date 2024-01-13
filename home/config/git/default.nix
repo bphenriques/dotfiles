@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
 
+# TODO: GH cli? https://github.com/malob/nixpkgs/blob/master/home/git.nix#L29
+# https://github.com/malob/nixpkgs/blob/master/home/gh-aliases.nix#L2
 {
   home.packages = with pkgs; [
     git                             # Same git across OS.

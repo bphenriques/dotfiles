@@ -85,9 +85,14 @@
       mkdir = "mkdir -pv";
       ".."  = "cd ..";
       "..."  = "cd ../..";
+      ":q"   = "exit";
+      tmpdir = "cd (mktemp -d)";
 
       # Text Processor
       e = "$EDITOR";
+
+      # Utility
+      whatsmyip = "curl ifconfig.me";
     };
   };
 
@@ -100,6 +105,7 @@
     ./config/scala
     ./config/zsh
     ./config/zellij
+    ./config/fish
     ./config/fzf
     ./config/wezterm
   ];

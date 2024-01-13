@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 
+# TODO: Desktop entry? https://github.com/balsoft/nixos-config/blob/73cc2c3a8bb62a9c3980a16ae70b2e97af6e1abd/profiles/applications/helix.nix#L8
+
 let
   # The path needs to be absolute: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
   helixCfg = "${config.home.homeDirectory}/.dotfiles/home/config/helix/config.toml";
