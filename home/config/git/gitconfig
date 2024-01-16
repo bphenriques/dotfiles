@@ -47,6 +47,10 @@
 [branch]
     sort = -committerdate
 
+# Enforce SSH to clone repos
+[url "ssh://git@github.com/"]
+  insteadOf = https://github.com/
+
 # ------------------------------
 # Color settings for diff-so-fancy
 # ------------------------------
@@ -66,3 +70,5 @@
     newHighlight = green bold 22
 [diff-so-fancy]
     stripLeadingSymbols = false
+
+
