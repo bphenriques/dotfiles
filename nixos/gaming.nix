@@ -90,7 +90,6 @@ in
     # emulationstation  # Does not as it needs additional configuration: perhaps https://github.com/juliosueiras-nix/nix-emulationstation/blob/master/modules/emulationstation/default.nix?
     (retroarch.override { # more: https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/emulators/retroarch/cores.nix
       cores = with libretro; [
-        genesis-plus-gx # Megadrive
         snes9x          # Snes
         swanstation     # PSX
         mgba            # GBA
