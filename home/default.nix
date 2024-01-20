@@ -14,12 +14,16 @@
     unzip
 
     # Search
-    ripgrep     # Faster grep.
-    jq          # Query JSON.
-    fx          # Interactively navigate through JSON.
-    yq          # Query YAML.
     fd          # A better `find`.
     tealdeer    # Faster `tldr`.
+    ripgrep     # Faster grep.
+
+    # Text Processors
+    jq          # Query JSON.
+    fx          # Interactively navigate through JSON.
+    yq-go       # Query YAML.
+    bat         # Preview with code highlight.
+    vim         # Basic editor
 
     # Security
     gnupg       # To manage GNUPG keys.
@@ -27,10 +31,6 @@
 
     # Web
     wget        # Download stuff.
-
-    # Text
-    bat         # Preview with code highlight.
-    vim         # editor
 
     # Dev
     shellcheck  # Linter for shell scripts.
@@ -49,6 +49,11 @@
     xclip
   ];
 
+  programs.man = {
+    enable = true;                  # I want manual pages
+    generateCaches = true;          # Automatically generate manual cache as part of the build
+  };
+
   home = {
     sessionVariables = {
       TERM    = "screen-256color";              # Ensure term is set with the right color
@@ -66,7 +71,8 @@
       CLICOLOR  = 1;                                           # Enable ls colors in MacOS.
       LS_COLORS ="$(${pkgs.vivid}/bin/vivid generate snazzy)"; # LS_COLORS generator because I refuse to maintain one >.<
 
-      WORKSPACE = "$HOME/workspace";            # Default directory for repositories
+      PROJ_ROOT = "$HOME/workspace";            # Default directory for repositories
+      DOTFILES_LOCATION= "$HOME/.dotfiles";     # Default location for my dotfiles
     };
 
     shellAliases = {
@@ -99,14 +105,10 @@
   fonts.fontconfig.enable = true;
 
   imports = [
+    ./config/terminal
     ./config/git
     ./config/helix
     ./config/firefox
     ./config/scala
-    ./config/zsh
-    ./config/zellij
-    ./config/fish
-    ./config/fzf
-    ./config/wezterm
   ];
 }

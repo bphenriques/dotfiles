@@ -8,7 +8,6 @@ set -euf
 # Constants
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 
-WORKSPACE="$HOME/workspace"
 DOTFILES_LOCATION="$HOME"/.dotfiles
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 
@@ -114,11 +113,6 @@ install_nix_darwin() {
 
 clone_default_repos() {
   info 'Cloning Repos - Checking...'
-  if [ ! -d "$WORKSPACE/knowledge-base" ]; then
-    info 'Cloning Repos - Knowledge Base...'
-    git clone --recurse-submodules git@github.com:bphenriques/knowledge-base.git "$WORKSPACE/knowledge-base"
-  fi
-
   if [ ! -d "$DOTFILES_LOCATION" ]; then
     info 'Cloning Repos - dotfiles...'
     # Unfortunately, can't create the hidden folder directly.

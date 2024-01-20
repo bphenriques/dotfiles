@@ -70,5 +70,3 @@
     newHighlight = green bold 22
 [diff-so-fancy]
     stripLeadingSymbols = false
-
-
