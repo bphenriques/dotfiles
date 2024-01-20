@@ -94,7 +94,7 @@ in
         snes9x          # Snes
         swanstation     # PSX
         mgba            # GBA
-        desmume
+        desmume         # NDS
         dosbox-pure     # DOS
         prboom          # Doom
         fbneo           # Most Arcade games

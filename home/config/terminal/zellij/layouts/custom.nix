@@ -36,7 +36,7 @@ layout {
       border_format   "#[fg=${yellow}]{char}"
       border_position "top"
 
-      hide_frame_for_single_pane "true"
+      hide_frame_for_single_pane "false"
 
       mode_normal  ""
       ${lib.concatMapStringsSep "\n" (mode: ''mode_${mode} "#[bg=${green},fg=${black}] {name} "'') nonNormalModes}

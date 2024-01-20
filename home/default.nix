@@ -12,6 +12,7 @@
     gnused
     dateutils
     unzip
+    gnumake
 
     # Search
     fd          # A better `find`.
@@ -40,6 +41,11 @@
     # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.
+
+    # Custom packages
+    frg         # Ripgrep + FZF
+    proj        # FD + FZF to search for local projects
+    ffd         # FD + FZF to search nested directories
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     (pkgs.writeShellScriptBin "docker" ''${lima}/bin/lima nerdctl $@'')
@@ -51,7 +57,7 @@
 
   programs.man = {
     enable = true;                  # I want manual pages
-    generateCaches = true;          # Automatically generate manual cache as part of the build
+    generateCaches = true;          # Required for man completions. They are built during the build.
   };
 
   home = {
