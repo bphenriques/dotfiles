@@ -13,7 +13,8 @@
     rb        = rebase
     pushf     = push --force-with-lease
     amend     = commit --amend
-    wip       = !git add --all && ([[ "$(git log -1 --pretty=%B)" == "WIP" ]] && git commit --amend --no-edit || git commit -m "WIP")
+    wip       = !git add --all && git commit -m "WIP"
+    wipp      = !git wip && git push
 
     # Tools
     patch   = !git --no-pager diff --no-color
