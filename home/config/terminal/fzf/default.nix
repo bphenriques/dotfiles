@@ -31,21 +31,6 @@ with lib;
   };
 
   modules.zsh = {
-    plugins = [
-# FIXME: Broken
-#      {
-#        name = "zsh-fzf-tab";
-#        src = pkgs.zsh-fzf-tab;
-#        file = "share/fzf-tab/fzf-tab.plugin.zsh";
-#        sourceTiming = "after-compinit";
-#      }
-    ];
-
-    functions = [
-      ./functions/proj.zsh
-      ./functions/_proj.zsh
-    ];
-
     widgets = [
       {
         name = "frg-find-file";
@@ -66,18 +51,10 @@ with lib;
       # Enable zsh groups and set nicer shorcuts
       ''
       zstyle ':completion:*:descriptions' format '[%d]'
-      zstyle ':fzf-tab:*' switch-group ',' '.'
       ''
 
       # Set colors of files and directories.
       "zstyle ':completion:*' list-colors \${(s.:.)LS_COLORS\}"
-
-      # Set default preview (file or directories) but disable it if passing arguments or options.
-      ''
-      zstyle ':fzf-tab:complete:*:*' fzf-preview '${pkgs.preview}/bin/preview ''\${(Q)realpath''\}'
-      zstyle ':fzf-tab:complete:*:options' fzf-preview
-      zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
-      ''
     ];
   };
 }

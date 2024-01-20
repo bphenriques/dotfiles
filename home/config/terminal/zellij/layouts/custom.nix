@@ -56,7 +56,3 @@ layout {
   }
 }
 ''
-
-
-# Right, hostname?
-
