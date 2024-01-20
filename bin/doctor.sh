@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # shellcheck disable=SC1091
-set -euf
+set -uf
 SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
@@ -13,10 +13,12 @@ check_shell() {
   case $SHELL in
     */fish) success 'Shell - Already set correctly!' ;;
     *)
-      location="$(which fish)"
-      warn "Fish is not the current shell! You may set using:"
-      echo
-      echo "chsh -s $location"
+      location="$(which fish 2>/dev/null)"
+      if [ $? -eq 0 ]; then
+        warn "Fish is not the current shell! You may set using: chsh -s '$location'"
+      else
+        warn "Fish is not available in PATH"
+      fi
       ;;
   esac
 }
