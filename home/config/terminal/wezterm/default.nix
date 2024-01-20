@@ -50,6 +50,10 @@ in
     enable = true;
     extraConfig = ''
       return {
+        set_environment_variables = {
+          ZELLIJ_AUTO_ATTACH = "true",
+          ZELLIJ_AUTO_EXIT = "true"
+        },
         term = '${term}',
         font = wezterm.font('${font}'),
         font_size = ${toString fontSize},
@@ -62,7 +66,13 @@ in
           top = '0',
           bottom = '0',
         },
+        -- Default keybindings: https://wezfurlong.org/wezterm/config/default-keys.html
         keys = {
+          -- Disable several key-bindings as they conflict with other actions or I do not use them at all
+          {key="Enter", mods="ALT", action=wezterm.action.DisableDefaultAssignment},
+          {key="n", mods="SUPER", action=wezterm.action.DisableDefaultAssignment},
+          -- {key="n", mods="CTRL+SHIFT", action=wezterm.action.DisableDefaultAssignment},
+
           -- Make Option-Left equivalent to Alt-b which many line editors interpret as backward-word
           {key="LeftArrow", mods="OPT", action=wezterm.action{SendString="\x1bb"}},
           -- Make Option-Right equivalent to Alt-f; forward-word
