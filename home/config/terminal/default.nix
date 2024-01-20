@@ -1,3 +1,3 @@
 {
-  imports = [ ./zsh ./fzf ./wezterm ./zellij ./broot ];
+  imports = [ ./fish ./fzf ./wezterm ./zellij ./broot ];
 }

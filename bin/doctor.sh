@@ -9,35 +9,15 @@ SCRIPT_PATH="$(dirname "$0")"
 DOTFILES_LOCATION="$HOME/.dotfiles"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION"/.nix-host
 
-check_zsh() {
+check_shell() {
   case $SHELL in
-    */zsh) success 'Zsh - Already set!' ;;
+    */fish) success 'Shell - Already set correctly!' ;;
     *)
-      warn "Zsh is not the current shell!"
-      location="$(which zsh)"
-      if [ -f "$location" ]; then
-        case "$(uname -s)" in
-            Darwin)
-              info "Zsh - You should have already at least '/bin/zsh' registered in '/etc/shell'. Ideally $location as well"
-              info "Zsh - Run the following to set the default shell:"
-              echo
-              echo "chsh -s /bin/zsh"
-              echo
-              ;;
-            *)
-              info "Zsh - Run the following and restart:":
-              if [ -d /etc/nixos ]; then
-                echo "For some reason, the default shell is not set correctly. Was it applied?"
-                echo
-              else
-                echo "echo '$location' | sudo tee -a /etc/shells > /dev/null"
-                echo "chsh -s $location"
-              fi
-              ;;
-        esac
-      else
-        warn "Zsh - No zsh installation found, is it installed?"
-      fi
+      location="$(which fish)"
+      warn "Fish is not the current shell! You may set using:"
+      echo
+      echo "chsh -s $location"
+      ;;
   esac
 }
 
@@ -52,6 +32,4 @@ esac
 
 (test -d "$DOTFILES_LOCATION/host/$(cat "$HOST_FILE_LOCATION")" && success "Nix Host - Set to '$(cat "$HOST_FILE_LOCATION")'!") || fail "Nix Host - Invalid host! It is $(cat "$HOST_FILE_LOCATION")"
 
-check_zsh
-
-
+check_shell

@@ -1,9 +1,9 @@
 { pkgs, ... }:
 
 {
-  environment.systemPackages = [ pkgs.zsh ]; # Install the shell
-  environment.shells = [ pkgs.zsh ];         # Register the shell
-  
+  environment.systemPackages = [ pkgs.fish ]; # Install the shell
+  environment.shells = [ pkgs.fish ];         # Register the shell that was installed (2 step process)
+
   # System settings.
   system = {
     screencapture.ensureLocation = true;
