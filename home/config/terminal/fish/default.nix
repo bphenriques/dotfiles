@@ -60,7 +60,11 @@ in
         set -U pure_shorten_window_title_current_directory_length 1
         set -g async_prompt_functions _pure_prompt_git
       '';
-      zellij = ''eval (zellij setup --generate-auto-start fish | string collect)'';
+      zellij = ''
+        if test $ZELLIJ_AUTO_START = "true"
+          eval (zellij setup --generate-auto-start fish | string collect)
+        end
+      '';
       extra = [
         ''set fish_greeting''
         (optionalString (pkgs.stdenv.system == "aarch64-darwin") ''eval "$(/opt/homebrew/bin/brew shellenv)"'')
