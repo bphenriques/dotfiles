@@ -21,17 +21,18 @@
       nixpkgsConfig = {
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
           "discord"
-          "dropbox"
           "nvidia-x11"
           "nvidia-settings"
           "nvidia-persistenced"
           "steam"
           "steam-original"
           "steam-run"
-          "plexmediaserver"
           "unrar"
           "terraform"
           "keepa"
+          "libretro-genesis-plus-gx"
+          "libretro-snes9x"
+          "libretro-fbneo"
         ];
         config.permittedInsecurePackages = [
           "electron-24.8.6" # Unsure who uses it.
