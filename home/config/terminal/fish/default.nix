@@ -61,7 +61,7 @@ in
         set -g async_prompt_functions _pure_prompt_git
       '';
       zellij = ''
-        if test $ZELLIJ_AUTO_START = "true"
+        if test "$ZELLIJ_AUTO_START" = "true"
           eval (zellij setup --generate-auto-start fish | string collect)
         end
       '';
