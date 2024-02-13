@@ -1,0 +1,11 @@
+keys:
+  - &home_nixos age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+  - &work_macos age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+creation_rules:
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *home_nixos
+          - *work_macos
+# https://github.com/nix-community/infra/blob/master/.sops.yaml
+# https://samleathers.com/posts/2022-02-11-my-new-network-and-sops.html

@@ -38,6 +38,9 @@
     shfmt       # Format shell scripts
     nixfmt      # Format nix files
 
+    # Tools
+    flameshot   # Cross-platform screenshot tool
+
     # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.

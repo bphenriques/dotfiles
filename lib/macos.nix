@@ -5,7 +5,6 @@
     hostModule,
   }:
     let
-      inherit (lib) attrValues;
       common = {
         nixpkgs = nixpkgsConfig // {
           hostPlatform = system;
@@ -18,10 +17,10 @@
         # Home-Manager
         home-manager.useGlobalPkgs   = true; # Consistency: use pkgs set via the system level nixpkgs options.
         home-manager.useUserPackages = true; # Install packages defined in home-manager.
-        home-manager.sharedModules   = attrValues homeManagerModules; # My custom modules.
+        home-manager.sharedModules   = homeManagerModules; # My custom modules.
       };
     in darwin.lib.darwinSystem {
       inherit system;
-      modules = [common home-manager.darwinModules.home-manager hostModule] ++ attrValues darwinModules;
+      modules = [common home-manager.darwinModules.home-manager hostModule] ++ darwinModules;
     };
 }
