@@ -11,13 +11,7 @@
     rpi-imager
   ];
 
-  virtualisation.docker = {
-    enable = true;
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-  };
-  user.extraGroups = ["docker"];
+  virtualisation.docker.enable = true;
+  user.extraGroups = ["docker"]; # FIXME is this a security liability?
 }
 
