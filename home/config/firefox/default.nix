@@ -21,6 +21,7 @@ in
           multi-account-containers
           vim-vixen
           keepa
+          linkding-extension
           # One day, check auto-redirects
         ];
 

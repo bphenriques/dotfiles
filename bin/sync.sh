@@ -5,7 +5,8 @@ SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
 
-DEBUG=${DEBUG:-0}
+DEBUG=1 #${DEBUG:-0}
+DISABLE_CACHE=1 # ${DISABLE_CACHE:-0}
 
 # Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
@@ -16,12 +17,14 @@ XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 
 sync_flake() {
   info "Syncing Host '$HOST_TARGET'.."
+  extra_args=""
   if [ "$DEBUG" -ne 0 ]; then
     extra_args="--show-trace"
-  else
-    extra_args=""
-    #extra_args="--no-eval-cache"
   fi
+  if [ "$DISABLE_CACHE" -ne 0 ]; then
+    extra_args="$extra_args --no-eval-cache"
+  fi
+
 
   if [ -d /etc/nixos ]; then
     sudo nixos-rebuild switch --flake ".#$HOST_TARGET"
