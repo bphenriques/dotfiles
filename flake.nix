@@ -14,6 +14,7 @@
     # Other communicaty made repositories
     nur.url = "github:nix-community/nur";                           # Mostly for Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";                          # ZelliJ plugin
+    ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";     # Terminal
   };
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:

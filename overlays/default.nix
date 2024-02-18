@@ -10,6 +10,7 @@ let
   newPackages = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
   externalFlakes = with inputs; [
     (final: prev: { zjstatus = zjstatus.packages.${prev.system}.default; })
+    (final: prev: { ghostty = ghostty.packages.${prev.system}.default; })
   ];
 
   fishPluginsOverride = final: prev: {
