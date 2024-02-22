@@ -1,7 +1,6 @@
 { lib, pkgs, ... }:
 
 # TODO: Explore keybindings: https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_default_key_bindings.fish
-# Fish home-manager source-code: https://github.com/nix-community/home-manager/blob/master/modules/programs/fish.nix
 let
   inherit (builtins) readFile readDir attrNames;
   inherit (lib) filterAttrs foldl' optionalString concatStringsSep removeSuffix;

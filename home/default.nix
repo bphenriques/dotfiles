@@ -1,4 +1,6 @@
 { pkgs, lib, ... }:
+
+# TODO: https://github.com/mitchellh/nixos-config/blob/main/users/mitchellh/home-manager.nix
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
   home.packages = with pkgs; [
@@ -62,8 +64,6 @@
 
   home = {
     sessionVariables = {
-      TERM    = "screen-256color";              # Ensure term is set with the right color
-
       # Set locale and UTF-8
       LANG    = "en_US.UTF-8";
       LC_ALL  = "en_US.UTF-8";
@@ -105,7 +105,12 @@
 
       # Utility
       whatsmyip = "curl ifconfig.me";
-    };
+    } // (
+      if pkgs.stdenv.isLinux then {
+        pbcopy = "xclip";
+        pbpaste = "xclip -o";
+      } else { }
+    );
   };
 
   fonts.fontconfig.enable = true;
