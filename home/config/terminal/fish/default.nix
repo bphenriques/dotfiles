@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 
 # TODO: Explore keybindings: https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_default_key_bindings.fish
-# Fish home-maanger source-code: https://github.com/nix-community/home-manager/blob/master/modules/programs/fish.nix
+# Fish home-manager source-code: https://github.com/nix-community/home-manager/blob/master/modules/programs/fish.nix
 let
   inherit (builtins) readFile readDir attrNames;
   inherit (lib) filterAttrs foldl' optionalString concatStringsSep removeSuffix;
@@ -27,7 +27,15 @@ in
 
     plugins = [
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
-      { name = "pure"; src = pkgs.fishPlugins.pure.src; }
+      {
+        name = "pure";
+        src = pkgs.fetchFromGitHub {
+          owner = "pure-fish";
+          repo = "pure";
+          rev = "v4.11.0";
+          sha256 = "sha256-8zxqPU9N5XGbKc0b3bZYkQ3yH64qcbakMsHIpHZSne4=";
+        };
+      }
       {
         name = "fish-async-prompt";
         src = pkgs.fetchFromGitHub {
@@ -58,6 +66,7 @@ in
         set -U pure_enable_virtualenv false
         set -U pure_color_success green
         set -U pure_shorten_window_title_current_directory_length 1
+        set -U pure_enable_nixdevshell true
         set -g async_prompt_functions _pure_prompt_git
       '';
       zellij = ''
