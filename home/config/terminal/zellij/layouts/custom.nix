@@ -15,9 +15,6 @@ let
   weatherLocation = "Lisbon";
   weatherFrequencySeconds = 30 * 60;
   weatherCommand = "curl 'wttr.in/${weatherLocation}?format=%c%t%20${weatherLocation}' | sed 's/\+//g'";
-
-  # https://zellij.dev/documentation/keybindings-modes.html
-  nonNormalModes = ["locked" "resize" "pane" "move" "tab" "scroll" "search" "entersearch" "renametab" "renamepane" "session" "tmux"];
 in
 ''
 layout {
@@ -39,10 +36,12 @@ layout {
       hide_frame_for_single_pane "false"
 
       mode_normal  ""
-      ${lib.concatMapStringsSep "\n" (mode: ''mode_${mode} "#[bg=${green},fg=${black}] {name} "'') nonNormalModes}
+      mode_tab "#[bg=${green},fg=${black}] {name} "
+      mode_default_to_mode "tmux"
 
-      tab_normal   "#[fg=${yellow}] {index} #[fg=${brightWhite}] {name} #[] "
-      tab_active   "#[bg=${yellow},fg=${black}] {index} #[bg=${brightBlack},fg=${white}] {name} #[] "
+      tab_normal   "#[fg=${yellow}] {index} #[fg=${brightWhite}] {name} "
+      tab_active   "#[bg=${yellow},fg=${black}] {index} #[bg=${brightBlack},fg=${white}] {name} "
+      tab_separator "  "
 
       command_weather_command "bash -c \" ${weatherCommand}\""
       command_weather_format "{stdout}"
