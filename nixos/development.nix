@@ -12,6 +12,6 @@
   ];
 
   virtualisation.docker.enable = true;
-  user.extraGroups = ["docker"]; # FIXME is this a security liability?
+  user.extraGroups = [ "docker" ];
 }
 
