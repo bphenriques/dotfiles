@@ -41,6 +41,9 @@
     shfmt       # Format shell scripts
     nixfmt      # Format nix files
 
+    # Media
+    exiftool
+
     # Monitoring
     procs       # Fancy `ps`.
     htop        # Fancy `top`.

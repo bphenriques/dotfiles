@@ -43,7 +43,7 @@ case "$(uname -s)" in
     ;;
   *)
     if [ -d /etc/nixos ]; then
-      update_nix_nioxs
+      update_nix_nixos
     fi
     ;;
 esac
