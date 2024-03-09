@@ -7,9 +7,9 @@
 
   # Input
   services.xserver = {
-    layout = "us";
-    xkbVariant = "";
-    xkbOptions = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+    xkb.layout = "us";
+    xkb.variant = "";
+    xkb.options = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
   };
 
   # Fonts (system-wide)

@@ -17,6 +17,7 @@
   "browser.download.useDownloadDir" = false;                    # Let me decide where to download the files.
   "identity.fxaccounts.enabled" = false;                        # Disable Firefox Sync.
   "browser.toolbars.bookmarks.showInPrivateBrowsing" = true;    # Show bookmarks in private tabs as well.
+  "browser.toolbars.bookmarks.visibility" = "always";           # Always show the toolbar.
 
   # Extra Security
   "privacy.globalprivacycontrol.functionality.enabled" = true;  # Private as much as possible.
