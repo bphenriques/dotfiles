@@ -1,1 +1,1 @@
-home/config/firefox/bookmarks.age.nix filter=ageencrypt
+*.age.nix filter=ageencrypt
