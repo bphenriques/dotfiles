@@ -1,32 +1,30 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 
-let merge = lib.foldr (a: b: a // b) { };
+let
+  merge = lib.foldr (a: b: a // b) { };
 in
 {
   programs.firefox = {
-    enable = true;
-    package = if pkgs.stdenv.hostPlatform.isDarwin then null else pkgs.firefox;
-
-    # FIXME: Need to handle this when I get the chance. Need a solution for bookmarking.
-    profiles = lib.mkIf pkgs.stdenv.isDarwin {
+    enable = pkgs.stdenv.hostPlatform.isLinux;
+    profiles = {
       default = {
         id = 0;
         name = "Bruno Henriques";
         settings = merge [ (import ./basic.nix) (import ./telemetry.nix) ];
+        bookmarks = import ./bookmarks.age.nix;
 
         # Require manual activation once installed
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
+          floccus
           bitwarden
-          multi-account-containers
-          vim-vixen
           keepa
+          multi-account-containers
           linkding-extension
+          # vim-vixen
           # One day, check auto-redirects
         ];
 
-        # Need to look for a better private alternative...
-        # - https://searx.space/ but requires self-hosting...
         search = {
           force = true;
           default = "Google";

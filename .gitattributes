@@ -1,0 +1,1 @@
+*.age.(nix|json|yaml) filter=ageencrypt
