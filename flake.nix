@@ -2,22 +2,27 @@
   description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";               # Default to stable for most things.
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # Unstable for some packages.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";             # Pin Darwin to unstable.
+    darwin.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";       # Pin Home-Manager to unstable.
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+    # Secret Manager
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Other communicaty made repositories
     nur.url = "github:nix-community/nur";                           # Mostly for Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";                          # ZelliJ plugin
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, ... }:
     let
+      inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
           "discord"
@@ -35,11 +40,10 @@
           "libretro-fbneo"
         ];
         config.permittedInsecurePackages = [
-          "electron-24.8.6" # Unsure who uses it.
+          "electron-24.8.6" # FIXME: Unsure who uses it.
         ];
         overlays = (import ./overlays { inherit inputs; });
       };
-
 
       nixConfigNixOS = {
         optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them
@@ -63,26 +67,26 @@
       };
 
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig;                                     # Modules and configurations.
-        nixConfig = nixConfig // nixConfigNixOS;                                # NixOS specific configuration.
-        nixpkgs = nixpkgs-unstable;                                             # Requires specific stage of nixpkgs.
-        nixosModules = self.nixosModules;                                       # Custom nixos modules.
-        homeManagerModules = self.homeManagerModules;                           # Custom home-manager modules.
-        lib = nixpkgs-unstable.lib;                                             # Requires specific stage of nixpkgs.
+        inherit home-manager nixpkgsConfig;
+        nixConfig = nixConfig // nixConfigNixOS;
+        nixpkgs = nixpkgs-unstable;
+        nixosModules = [ sops-nix.nixosModules.sops ] ++ attrValues self.nixosModules;
+        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
+        lib = nixpkgs-unstable.lib;
       };
 
       macosLib = import ./lib/macos.nix {
-        inherit darwin home-manager nixpkgsConfig nixConfig;  # Modules and configurations.
-        darwinModules = self.darwinModules;                   # Custom darwin modules.
-        homeManagerModules = self.homeManagerModules;         # Custom home-manager modules.
-        lib = nixpkgs-unstable.lib;                           # Requires specific stage of nixpkgs.
+        inherit darwin home-manager nixpkgsConfig nixConfig;
+        darwinModules = attrValues self.darwinModules;
+        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
+        lib = nixpkgs-unstable.lib;
       };
 
       homeManagerLib = import ./lib/home-manager.nix {
-        inherit home-manager nixpkgsConfig;           # Modules and configurations.
-        nixpkgs = nixpkgs-unstable;                   # Requires specific stage of nixpkgs.
-        homeManagerModules = self.homeManagerModules; # Custom home-manager modules.
-        lib = nixpkgs-unstable.lib;                   # Requires specific stage of nixpkgs.
+        inherit home-manager nixpkgsConfig;
+        nixpkgs = nixpkgs-unstable;
+        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
+        lib = nixpkgs-unstable.lib;
       };
     in {
       # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.

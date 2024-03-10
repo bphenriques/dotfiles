@@ -14,8 +14,8 @@ in
   # The path actually needs to be full due to: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
   home = { config, ... }: { # ensure config is within home-manager's context
     xdg.configFile = {
-      "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/modules/input-remapper/config.json";
-      "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/modules/input-remapper/Media.json";
+      "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/config.json";
+      "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/Media.json";
     };
   };
 

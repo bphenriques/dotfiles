@@ -2,7 +2,6 @@
 {
   mkHomeManagerHost = { system, username, hostModule }:
     let
-      inherit (lib) attrValues;
       common = {
         home = {
           inherit username;
@@ -15,6 +14,6 @@
           inherit system;
           inherit (nixpkgsConfig) config;
         };
-        modules = [common hostModule] ++ attrValues homeManagerModules;
+        modules = [common hostModule] ++ homeManagerModules;
       };
 }

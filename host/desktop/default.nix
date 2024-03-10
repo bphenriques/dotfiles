@@ -7,6 +7,7 @@
     ./peripherals.nix
     ../../nixos
     ./home.nix
+    ./secrets.nix
   ];
 
   # Basic settings
@@ -14,8 +15,8 @@
   user.name = "bphenriques";
 
   # Points to NAS locations
-  user.musicDir = "/home/${config.user.name}/media/music/library";   # Points to NAS
-  user.romsDir = "/home/${config.user.name}/media/gaming/emulation/roms";   # Points to NAS
+  user.musicDir = "/home/${config.user.name}/media/music/library";
+  user.romsDir = "/home/${config.user.name}/media/gaming/emulation/roms";
 
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
 
@@ -37,7 +38,7 @@
   ## Video Driver - Nvidia
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
-  virtualisation.docker.enableNvidia = true; # sudo docker run --gpus=all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+  virtualisation.docker.enableNvidia = true;
 
   # The release version of the first install of this system. Leave as it is!
   system.stateVersion = "22.11";

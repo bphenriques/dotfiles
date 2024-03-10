@@ -32,6 +32,7 @@
     gnupg       # To manage GNUPG keys.
     pinentry    # To input keys.
     openssl     # Generate keys with openssl rand -hex 32
+    sops
 
     # Web
     wget        # Download stuff.

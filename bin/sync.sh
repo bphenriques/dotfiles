@@ -19,12 +19,13 @@ sync_flake() {
   info "Syncing Host '$HOST_TARGET'.."
   extra_args=""
   if [ "$DEBUG" -ne 0 ]; then
+    info "Enabling debug..."
     extra_args="--show-trace"
   fi
-  if [ "$DISABLE_CACHE" -ne 0 ]; then
+  if [ "$DISABLE_CACHE" -ne 0 ] && [ -d /etc/nixos ]; then
+    info "Disabling cache..."
     extra_args="$extra_args --no-eval-cache"
   fi
-
 
   if [ -d /etc/nixos ]; then
     sudo nixos-rebuild switch --flake ".#$HOST_TARGET"

@@ -19,14 +19,7 @@ let
         destination = "/home/${config.user.name}/Shared";
       };
     };
-
-    credentialsFile = "/etc/nixos/smb-secrets"; # FIXME: Use secret manager (e.g. agenix) and do "username=x poassword=y"
-    credentialsOpts = "credentials=${homeSambaServer.credentialsFile}";
   };
-
-  # CIFS Opts: See https://nixos.wiki/wiki/Samba
-  networkSplitProtectionOpts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-  userOpts = "uid=1000,gid=100";
 in
 {
   # Network Disks
@@ -34,33 +27,42 @@ in
     "192.168.68.53" = [ homeNetworkAlias ];
   };
 
+  # Set Sops secrets and template.
+  sops = {
+    secrets.samba_server_username = { };
+    secrets.samba_server_password = { };
+    templates."smb-credentials" = {
+      owner = config.user.name;
+      content = ''
+        username=${config.sops.placeholder.samba_server_username}
+        password=${config.sops.placeholder.samba_server_password}
+      '';
+    };
+  };
+
   environment.systemPackages = [ pkgs.cifs-utils ];
   fileSystems = concatMapAttrs (type: folder: {
     "${folder.destination}" = {
       device = folder.source;
-      fsType = "cifs";
-      options = ["${networkSplitProtectionOpts},${userOpts},${homeSambaServer.credentialsOpts}"];
+      fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
+      options = let
+        networkSplitProtectionOpts = "x-systemd.automount,noauto,x-systemd.idle-timeout=15,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+        userOpts = "uid=1000,gid=100";
+        credsOpts = "credentials=${config.sops.templates."smb-credentials".path}";
+      in ["${networkSplitProtectionOpts},${userOpts},${credsOpts}"];
     };
   }) homeSambaServer.sharedFolder;
 
-  # FIXME: This might need some fine-tuning as the DESKTOP/TEMPLATES/DOWNLOAD/ folders are not created automatically.
-  # https://github.com/nix-community/home-manager/blob/master/modules/misc/xdg-user-dirs.nix
   home = {
     xdg.userDirs = {
       enable = true;
       createDirectories = false;  # Do not create any of the folders as they are being mounted.
-      documents = "${homeSambaServer.sharedFolder.personal.destination}/documents";
+      documents = "${homeSambaServer.sharedFolder.personal.destination}/paperwork";
       music = "${homeSambaServer.sharedFolder.media.destination}/music";
       pictures = "${homeSambaServer.sharedFolder.personal.destination}/photos";
       videos = "${homeSambaServer.sharedFolder.personal.destination}/videos";
     };
   };
-
-  system.userActivationScripts.checkHomeNasCredentialsFile = ''
-    if [ ! -f "${homeSambaServer.credentialsFile}" ]; then
-      echo "WARNING: The credentials file '${homeSambaServer.credentialsFile}' does not exist!"
-    fi
-  '';
 }
 
 

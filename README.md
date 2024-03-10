@@ -8,7 +8,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 > [!IMPORTANT]
 > **Disclaimer:** This is a personal configuration. I am no expert, however 
-> I hope that this configuration helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
+> I hope that this helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
 > If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
 1. If not available, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
@@ -24,13 +24,9 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
    $ "$HOME"/.dotfiles/bin/sync.sh
    ```
 
-4. Import the GPG Key using `gpg --import`. If pinentry fails, you may need to restart.
-
-5. NixOS:
+4. Import the GPG Key using `gpg --import`. You may need to restart.
    
-   1. Create `/etc/nixos/smb-secrets` property file with a `username` and a `password`
-   
-6. Reboot!
+5. Reboot!
 
 # Updating
 

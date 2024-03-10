@@ -166,9 +166,26 @@ select_host() {
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
 
+setup_secrets() {
+  info 'Sops secrets - Checking...'
+  if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
+    fail "Sops secrets - No SSH key file: ~/.ssh/id_ed25519"
+  else
+    mkdir -p "$XDG_CONFIG_HOME"/sops/age
+
+    if [ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]; then
+      nix-shell -p ssh-to-age --run "ssh-to-age -private-key -i \"$HOME/.ssh/id_ed25519\" > \"$XDG_CONFIG_HOME/sops/age/keys.txt\""
+    else
+      info "Sops secret already set at $XDG_CONFIG_HOME/sops/age/keys.txt"
+    fi
+  fi
+  success "Sops secrets"
+}
+
 check_requirements
 
 setup_ssh
+setup_secrets
 install_nix_flakes
 case "$(uname -s)" in
     Darwin)
