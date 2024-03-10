@@ -28,14 +28,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
    
 5. Reboot!
 
-# Updating
-
-The following will update `flake.lock`:
-```sh
-$ dotfiles update
-```
-
-# Acknowledgments
+# Docs & Acknowledgments
 
 [Nix](https://nixos.org/) can be overwhelming with its steep learning curve. I found it easier reading documentation and ~some~ several dotfiles:
 - [Nix Docs](https://nixos.org/guides/nix-pills/)
@@ -45,14 +38,11 @@ $ dotfiles update
 - [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
 - Several dotfiles (thank you!):
     - [`Misterio77`](https://github.com/Misterio77/nix-config) 
-    - [`hlissner`](https://github.com/hlissner/dotfiles)
     - [`bbigras`](https://github.com/bbigras/nix-config)
     - [`malob`](https://github.com/malob/nixpkgs)
     - [`kclejeune`](https://github.com/kclejeune/system)
     - [`mitchellh`](https://github.com/mitchellh/nixos-config)
     - [`sei40kr`](https://github.com/sei40kr/dotfiles)
-    - [`samuelludwig`](https://github.com/samuelludwig/nixrc)
-    - [`jacobfoard`](https://github.com/jacobfoard/dotfiles)
     - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
     - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
 - Ad-hoc documentation for reference that I find useful:

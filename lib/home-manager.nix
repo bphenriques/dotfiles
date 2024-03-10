@@ -1,4 +1,4 @@
-{ home-manager, homeManagerModules, nixpkgs, nixpkgsConfig, lib, ... }:
+{ home-manager, homeManagerModules, nixpkgs, nixpkgsConfig, ... }:
 {
   mkHomeManagerHost = { system, username, hostModule }:
     let

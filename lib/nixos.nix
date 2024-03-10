@@ -1,4 +1,4 @@
-{ home-manager, nixosModules, homeManagerModules, nixpkgsConfig, nixConfig, nixpkgs, lib, ... }:
+{ home-manager, nixosModules, homeManagerModules, nixpkgsConfig, nixConfig, nixpkgs, ... }:
 {
   mkNixOSHost = {
     system ? "x86_64-linux",

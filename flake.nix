@@ -72,21 +72,18 @@
         nixpkgs = nixpkgs-unstable;
         nixosModules = [ sops-nix.nixosModules.sops ] ++ attrValues self.nixosModules;
         homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
-        lib = nixpkgs-unstable.lib;
       };
 
       macosLib = import ./lib/macos.nix {
         inherit darwin home-manager nixpkgsConfig nixConfig;
         darwinModules = attrValues self.darwinModules;
         homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
-        lib = nixpkgs-unstable.lib;
       };
 
       homeManagerLib = import ./lib/home-manager.nix {
         inherit home-manager nixpkgsConfig;
         nixpkgs = nixpkgs-unstable;
         homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
-        lib = nixpkgs-unstable.lib;
       };
     in {
       # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.
