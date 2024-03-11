@@ -166,26 +166,29 @@ select_host() {
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
 
-setup_secrets() {
+verify_sops_secrets() {
   info 'Sops secrets - Checking...'
-  if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
-    fail "Sops secrets - No SSH key file: ~/.ssh/id_ed25519"
+  if [ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]; then
+    fail "Missing Sops secrets file: $XDG_CONFIG_HOME/sops/age/keys.txt"
   else
-    mkdir -p "$XDG_CONFIG_HOME"/sops/age
-
-    if [ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]; then
-      nix-shell -p ssh-to-age --run "ssh-to-age -private-key -i \"$HOME/.ssh/id_ed25519\" > \"$XDG_CONFIG_HOME/sops/age/keys.txt\""
-    else
-      info "Sops secret already set at $XDG_CONFIG_HOME/sops/age/keys.txt"
-    fi
+    success "Sops secrets present in $XDG_CONFIG_HOME/sops/age/keys.txt"
   fi
-  success "Sops secrets"
+}
+
+setup_git_filter() {
+  info 'Nix Evaluation Secrets - Checking...'
+  if ! "$DOTFILES_LOCATION"/bin/git-secret-filter.sh doctor; then
+    info "Nix Evaluation Secrets - Initialing and checking out to to smudge the secrets"
+    "$DOTFILES_LOCATION"/bin/git-secret-filter.sh init
+    git checkout master
+  fi
+  success "Nix Evaluation Secrets - Done!"
 }
 
 check_requirements
 
+verify_sops_secrets
 setup_ssh
-setup_secrets
 install_nix_flakes
 case "$(uname -s)" in
     Darwin)
@@ -196,5 +199,6 @@ case "$(uname -s)" in
 esac
 clone_default_repos
 select_host
+setup_git_filter
 
 success 'Bootstrap - Complete!'

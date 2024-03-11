@@ -11,7 +11,6 @@ in
         id = 0;
         name = "Bruno Henriques";
         settings = merge [ (import ./basic.nix) (import ./telemetry.nix) ];
-        bookmarks = import ./bookmarks.age.nix;
 
         # Require manual activation once installed
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [

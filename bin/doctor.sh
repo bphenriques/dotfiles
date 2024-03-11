@@ -61,15 +61,10 @@ else
   fail "Sops Secrets - Keys file missing: $XDG_CONFIG_HOME/sops/age/keys.txt"
 fi
 
-current_public_key="$("${SCRIPT_PATH}"/secret.sh public-key)"
-if grep --quiet --fixed-strings -- "$current_public_key" "$SCRIPT_PATH/../.sops.yaml"; then
-  success "Sops Secrets - Public key ${current_public_key} is present under .sops.yaml"
-else
-  fail "Sops Secrets - Public key ${current_public_key} is absent from .sops.yaml!"
-fi
-
 if test -f "$HOME/.ssh/id_ed25519"; then
   success "SSH Key: id_ed25519 set"
 else
   fail "SSH Key: missing id_ed25519 key: $HOME/.ssh/id_ed25519"
 fi
+
+"$SCRIPT_PATH"/git-secret-filter.sh doctor

@@ -1,9 +1,7 @@
 keys:
-  - &home_nixos age1ulrjvmts79e8ft63h0smwpmsj5qfqg8vrdxwkke2hzgrn4vjxfxqjvxr8x
-  - &bphenriques age16wwdta66lx3tzsk9f56arlmf8gx9e5zktxl3vs50dawyg9ctr9ws2c85ng
+  - &desktop age16wwdta66lx3tzsk9f56arlmf8gx9e5zktxl3vs50dawyg9ctr9ws2c85ng
 creation_rules:
   - path_regex: host/desktop/secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
-          - *home_nixos
-          - *bphenriques
+          - *desktop

@@ -11,7 +11,7 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 > I hope that this helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
 > If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
-1. If not available, install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
+1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.
 
 2. Bootstrap:
 
@@ -27,6 +27,17 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 4. Import the GPG Key using `gpg --import`. You may need to restart.
    
 5. Reboot!
+
+# Secrets
+
+In addition to [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets and combination of `age` and `git-filter` (`smudge` `clean`) to hide sensitive information required in Nix evaluation time.
+
+To setup `git-filter` (`smudge` `clean`) initialize it:
+```shell
+$ ./bin/git-secret-filter.sh init
+```
+
+And, as detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys under `.sops.yaml` and the corresponding private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
 
 # Docs & Acknowledgments
 
