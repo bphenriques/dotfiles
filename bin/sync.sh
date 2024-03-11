@@ -38,27 +38,4 @@ sync_flake() {
   fi
 }
 
-sync_repository() {
-  location="$1"
-  name="$(basename "$location")"
-
-  if [ ! -d "$location" ]; then
-    fail "Repo '$name' - Does not exist!"
-  fi
-
-  # If it is out-of-sync and behind, rebase which should fail automatically if is dirty which is expected.
-  if [ "$(git -C "$location" rev-parse HEAD)" = "$(git -C "$location" ls-remote $(git -C "$location" rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1)" ]; then
-    info "Repo '$name' - Up to date! Nothing to do!"
-  else
-    git -C "$location" fetch origin
-    if (git status -uno | grep --quiet "branch is ahead"); then
-      warn "Repo '$name' - Has unpushed changes!"
-    else
-      info "Repo '$name' - Pulling changes..."
-      git -C "$location" pull --rebase
-    fi
-  fi
-  success "Repo '$name' - Done!"
-}
-
 sync_flake
