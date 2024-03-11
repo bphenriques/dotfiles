@@ -91,11 +91,11 @@
     };
   };
 
-  # Fonts
+  # Fonts (system-wide)
   fonts = {
     fontDir.enable = true;
     fonts = with pkgs; [
-      (nerdfonts.override { fonts = [ "Hack" ]; })  # List here: https://github.com/ryanoasis/nerd-fonts
+      (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
     ];
   };
 
