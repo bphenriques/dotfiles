@@ -2,7 +2,12 @@
 #! nix-shell -i bash -p age -p yq-go
 # shellcheck shell=sh disable=SC2046
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
+if [ "$EUID" -eq 0 ]; then
+  echo "Skipping git-secret-filter.sh as it is running as root likely as part of nixos build. This is only meant to run by users."
+  exit
+fi
+
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
 PRIVATE_KEYS_IDENTITY="$XDG_CONFIG_HOME/sops/age/keys.txt"
 SOPS_FILE=".sops.yaml"
 
