@@ -19,7 +19,8 @@ in
           keepa
           multi-account-containers
           linkding-extension
-          # vim-vixen
+          tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
+          consent-o-matic
           # One day, check auto-redirects
         ];
 

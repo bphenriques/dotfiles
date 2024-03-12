@@ -8,6 +8,7 @@
       ../../home/config/sunshine
     ];
 
+    #TODO: Set custom SOPS_AGE_KEY_FILE
     programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.age.nix;
     programs.beets.settings.directory = config.user.musicDir;
 

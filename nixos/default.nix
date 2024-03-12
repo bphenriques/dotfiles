@@ -19,7 +19,6 @@
 
   # Programs
   programs.partition-manager.enable = true;
-  programs.command-not-found.enable = false;
   environment.systemPackages = with pkgs; [
     p7zip     # Zip/Unzip that supports all the formats I need
     baobab    # Disk Space Analyser
@@ -53,6 +52,10 @@
       LC_TIME = "pt_PT.UTF-8";
     };
   };
+
+  # Disabling some defaults
+  programs.command-not-found.enable = false;
+  programs.nano.enable = false;
 
   imports = [
     ./desktop-environment.nix

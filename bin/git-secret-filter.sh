@@ -8,7 +8,7 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config}
-PRIVATE_KEYS_IDENTITY="$XDG_CONFIG_HOME/sops/age/keys.txt"
+SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-$XDG_CONFIG_HOME/sops/age/keys.txt}"
 SOPS_FILE=".sops.yaml"
 
 case $1 in
@@ -28,6 +28,6 @@ case $1 in
       exit 1
     fi
     ;;
-  smudge) shift && age --decrypt --identity "$PRIVATE_KEYS_IDENTITY" -                                            ;;
+  smudge) shift && age --decrypt --identity "$SOPS_AGE_KEY_FILE" -                                                ;;
   clean)  shift && age $(yq '.keys[] | explode(.)' < "${SOPS_FILE}" | xargs -I{} echo '-r {}' | xargs) --output - ;;
 esac
