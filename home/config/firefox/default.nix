@@ -15,7 +15,6 @@ in
         # Require manual activation once installed
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
-          floccus
           bitwarden
           keepa
           multi-account-containers

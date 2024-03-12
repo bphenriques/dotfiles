@@ -17,6 +17,11 @@ case $1 in
     git config --local filter.ageencrypt.smudge "./bin/git-secret-filter.sh smudge"
     git config --local filter.ageencrypt.clean "./bin/git-secret-filter.sh clean"
     ;;
+  deinit)
+    git config --local --unset filter.ageencrypt.required
+    git config --local --unset filter.ageencrypt.smudge
+    git config --local --unset filter.ageencrypt.clean
+    ;;
   doctor)
     if ! (git config --get filter.ageencrypt.smudge && git config --get filter.ageencrypt.clean && git config --get filter.ageencrypt.required) > /dev/null; then
       echo "git-secret-filter not initialized. Run: ./bin/git-secret-filter.sh init"

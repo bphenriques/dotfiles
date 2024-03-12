@@ -19,6 +19,7 @@
 
   # Programs
   programs.partition-manager.enable = true;
+  programs.command-not-found.enable = false;
   environment.systemPackages = with pkgs; [
     p7zip     # Zip/Unzip that supports all the formats I need
     baobab    # Disk Space Analyser

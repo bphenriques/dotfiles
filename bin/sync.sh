@@ -5,8 +5,8 @@ SCRIPT_PATH="$(dirname "$0")"
 # shellcheck source=util.sh
 . "$SCRIPT_PATH"/util.sh
 
-DEBUG=1 #${DEBUG:-0}
-DISABLE_CACHE=1 # ${DISABLE_CACHE:-0}
+DEBUG=${DEBUG:-0}
+DISABLE_CACHE=${DISABLE_CACHE:-0}
 
 # Check type of host.
 HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
