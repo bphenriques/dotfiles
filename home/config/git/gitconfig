@@ -19,6 +19,7 @@
     # Tools
     patch   = !git --no-pager diff --no-color
     fix-upstream = !git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) $(git rev-parse --abbrev-ref HEAD)
+    root = !git rev-parse --show-toplevel
 
     # History
     ls      = log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate
