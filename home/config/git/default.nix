@@ -7,6 +7,7 @@
     git                             # Same git across OS.
     gitAndTools.diff-so-fancy       # Better diffs.
     lazygit                         # Cross-platform GUI to interact with Git
+    git-absorb                      # Trying https://github.com/tummychow/git-absorb
   ];
   
   xdg.configFile = {

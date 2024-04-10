@@ -51,6 +51,7 @@ in
         };
 
         # Default containers for all profiles
+        containersForce = true;
         containers = {
           "Personal" = {
             id = 1;

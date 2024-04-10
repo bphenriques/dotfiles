@@ -13,7 +13,7 @@ let
   ];
 
   fishPluginsOverride = final: prev: {
-    fishPlugins = prev.fishPlugins.overrideScope' (finalx: prevx:
+    fishPlugins = prev.fishPlugins.overrideScope (finalx: prevx:
       (foldl' (acc: packageName: acc // {
          "${packageName}" = prevx.buildFishPlugin {
            pname = packageName;

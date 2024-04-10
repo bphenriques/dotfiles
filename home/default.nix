@@ -1,6 +1,7 @@
 { pkgs, lib, ... }:
 
 # TODO: https://github.com/mitchellh/nixos-config/blob/main/users/mitchellh/home-manager.nix
+# TODO: https://codeberg.org/adamcstephens/dotfiles
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
   home.packages = with pkgs; [
@@ -38,9 +39,9 @@
     wget        # Download stuff.
 
     # Dev
-    shellcheck  # Linter for shell scripts.
-    shfmt       # Format shell scripts
-    nixfmt      # Format nix files
+    shellcheck        # Linter for shell scripts.
+    shfmt             # Format shell scripts
+    nixfmt-rfc-style  # Format nix files
 
     # Media
     exiftool
