@@ -1,4 +1,4 @@
-{ ... }:
+{ config, pkgs, lib, ... }:
 
 let 
   font = {
@@ -49,50 +49,58 @@ let
   };
 in
 {
-  xdg.configFile = {
-    "ghostty/config".text = ''
-      font-family = "${font.name}"
-      font-size = ${toString font.size}
+  programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
+    fish_add_path --append --move ${config.home.homeDirectory}/Applications/Ghostty.app/Contents/MacOS
+  '';
 
-      background = ${colors.background}
-      foreground = ${colors.foreground}
-      selection-foreground = ${colors.selectionForeground}
-      selection-background = ${colors.selectionBackground}
-      cursor-color = ${colors.cursor}
-      cursor-text = ${colors.cursorText}
+  xdg.configFile."ghostty/config".text = ''
+    font-family = "${font.name}"
+    font-size = ${toString font.size}
 
-      # black
-      palette = 0=${colors.color0}
-      palette = 8=${colors.color8}
-      # red
-      palette = 1=${colors.color1}
-      palette = 9=${colors.color9}
-      # green
-      palette = 2=${colors.color2}
-      palette = 10=${colors.color10}
-      # yellow
-      palette = 3=${colors.color3}
-      palette = 11=${colors.color11}
-      # blue
-      palette = 4=${colors.color4}
-      palette = 12=${colors.color12}
-      # purple
-      palette = 5=${colors.color5}
-      palette = 13=${colors.color13}
-      # aqua
-      palette = 6=${colors.color6}
-      palette = 14=${colors.color14}
-      # white
-      palette = 7=${colors.color7}
-      palette = 15=${colors.color15}
+    background = ${colors.background}
+    foreground = ${colors.foreground}
+    selection-foreground = ${colors.selectionForeground}
+    selection-background = ${colors.selectionBackground}
+    cursor-color = ${colors.cursor}
+    cursor-text = ${colors.cursorText}
 
-      # MacOS specific
-      window-colorspace = "display-p3"
-      macos-non-native-fullscreen = visible-menu
-      macos-option-as-alt = left
-      mouse-hide-while-typing = true
-    '';
-  };
+    # black
+    palette = 0=${colors.color0}
+    palette = 8=${colors.color8}
+    # red
+    palette = 1=${colors.color1}
+    palette = 9=${colors.color9}
+    # green
+    palette = 2=${colors.color2}
+    palette = 10=${colors.color10}
+    # yellow
+    palette = 3=${colors.color3}
+    palette = 11=${colors.color11}
+    # blue
+    palette = 4=${colors.color4}
+    palette = 12=${colors.color12}
+    # purple
+    palette = 5=${colors.color5}
+    palette = 13=${colors.color13}
+    # aqua
+    palette = 6=${colors.color6}
+    palette = 14=${colors.color14}
+    # white
+    palette = 7=${colors.color7}
+    palette = 15=${colors.color15}
+
+    copy-on-select = clipboard
+
+  ''+ lib.optionalString pkgs.stdenv.isLinux ''
+    gtk-single-instance = true
+    window-decoration = false
+  ''
+  + lib.optionalString pkgs.stdenv.isDarwin ''
+    window-colorspace = "display-p3"
+    macos-non-native-fullscreen = visible-menu
+    macos-option-as-alt = left
+    mouse-hide-while-typing = true
+  '';
 }
 
 
