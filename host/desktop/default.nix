@@ -28,7 +28,7 @@
   };
 
   # Latest kernel (aka the one pinned under flake.lock)
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Hardware
   ## Disk management
