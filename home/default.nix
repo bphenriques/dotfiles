@@ -127,5 +127,6 @@
     ./config/helix
     ./config/firefox
     ./config/scala
+    ./config/logseq
   ];
 }
