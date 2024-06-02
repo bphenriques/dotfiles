@@ -7,12 +7,24 @@ let
   getDirs = from: attrNames (filterAttrs (_ : type: type == "directory") (readDir from));
 
   # The different types of overlays
-  newPackages = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
-  externalFlakes = with inputs; [
+  add-custom-packages = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
+  add-external-flakes = with inputs; [
     (final: prev: { zjstatus = zjstatus.packages.${prev.system}.default; })
+    inputs.nur.overlay
   ];
 
-  fishPluginsOverride = final: prev: {
+  # Add unstable inside packages for bleeding-edge packages. Home-Manager follows unstable, therefore there is little sense for this.
+  # add-unstable-packages = final: prev: {
+  #   unstable = import inputs.nixpkgs-unstable {
+  #     system = final.system;
+  #   };
+  #   unstable = import inputs.nixpkgs-unstable {
+  #     system = final.system;
+  #   };
+  # };
+
+  # Automatically group fish plugins inside a directory
+  add-fish-plugins = final: prev: {
     fishPlugins = prev.fishPlugins.overrideScope (finalx: prevx:
       (foldl' (acc: packageName: acc // {
          "${packageName}" = prevx.buildFishPlugin {
@@ -23,6 +35,4 @@ let
        }) { } (getDirs ./fish-plugins)));
   };
 
-in [newPackages inputs.nur.overlay fishPluginsOverride] ++ externalFlakes
-
-# Example on how to bring unstable within scope https://github.com/ethanabrooks/nix/blob/main/overlays/default.nix#L18
+in [add-custom-packages inputs.nur.overlay add-fish-plugins] ++ add-external-flakes

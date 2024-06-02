@@ -10,7 +10,7 @@
         nixpkgs = nixpkgsConfig;
         nix = nixConfig;
 
-        # Home-Manager
+        # Home-Manager - It follows unstable by default.
         home-manager.useGlobalPkgs    = true; # Consistency: use pkgs set via the system level nixpkgs options.
         home-manager.useUserPackages  = true; # Install packages defined in home-manager.
         home-manager.sharedModules    = homeManagerModules; # My custom modules.

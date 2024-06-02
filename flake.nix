@@ -2,7 +2,7 @@
   description = "bphenriques's Nix configuration for his machines";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     darwin.url = "github:lnl7/nix-darwin/master";
@@ -16,8 +16,8 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Other communicaty made repositories
-    nur.url = "github:nix-community/nur";                           # Mostly for Firefox extensions
-    zjstatus.url = "github:dj95/zjstatus";                          # ZelliJ plugin
+    nur.url = "github:nix-community/nur";     # Mostly for Firefox extensions
+    zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
   };
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, ... }:
@@ -75,7 +75,7 @@
       };
 
       macosLib = import ./lib/macos.nix {
-        inherit darwin home-manager nixpkgsConfig nixConfig;
+        inherit darwin home-manager nixpkgsConfig;
         darwinModules = attrValues self.darwinModules;
         homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
       };
@@ -86,7 +86,7 @@
         homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
       };
     in {
-      # No alias is required: nixos-rebuild looks for the right configurating under nixosConfigurations by default.
+      # No alias is required: nixos-rebuild looks for the right configuration under nixosConfigurations by default.
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./host/desktop; };
       };
