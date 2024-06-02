@@ -58,7 +58,6 @@
   programs.nano.enable = false;
 
   imports = [
-    ./desktop-environment.nix
     ./audio.nix
     ./gaming.nix
     ./development.nix

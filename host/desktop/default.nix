@@ -7,6 +7,7 @@
     ./peripherals.nix
     ../../nixos
     ./home.nix
+    ./desktop-environment.nix
     ./secrets.nix
   ];
 
