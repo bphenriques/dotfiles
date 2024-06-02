@@ -121,11 +121,11 @@
   fonts.fontconfig.enable = true;
 
   imports = [
-    ./config/terminal
-    ./config/git
-    ./config/helix
-    ./config/firefox
-    ./config/scala
-    ./config/logseq
+    ./terminal
+    ./git
+    ./helix
+    ./firefox
+    ./scala
+    ./logseq
   ];
 }

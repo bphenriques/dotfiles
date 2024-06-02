@@ -5,7 +5,7 @@
     ./hardware-configuration.nix
     ./network-disks.nix
     ./peripherals.nix
-    ../../nixos
+    ../../nixos/config
     ./home.nix
     ./desktop-environment.nix
     ./secrets.nix

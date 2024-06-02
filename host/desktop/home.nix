@@ -3,7 +3,7 @@
   # This is an alias (see custom module)
   home = {
     imports = [
-      ../../home
+      ../../home/config
       ../../home/config/beets
       ../../home/config/sunshine
     ];
