@@ -187,7 +187,6 @@ setup_git_filter() {
 
 check_requirements
 
-verify_sops_secrets
 setup_ssh
 install_nix_flakes
 case "$(uname -s)" in
