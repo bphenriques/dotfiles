@@ -150,7 +150,7 @@ select_host() {
   info 'Nix Host Type - Checking...'
   if [ ! -f "$HOST_FILE_LOCATION" ]; then
     printf "Available hosts:\n"
-    find "$DOTFILES_LOCATION"/host/ -mindepth 1 -type d -print0 -exec basename {} \; | xargs -0 -I{} echo "- {}"
+    find "$DOTFILES_LOCATION"/host/ -mindepth 1 -maxdepth 1 -type d -print0 -exec basename {} \; | xargs -0 -I{} echo "- {}"
     printf "\n"
     while true; do
       printf "Introduce the host type: "
@@ -198,6 +198,6 @@ case "$(uname -s)" in
 esac
 clone_default_repos
 select_host
-setup_git_filter
+#setup_git_filter
 
 success 'Bootstrap - Complete!'

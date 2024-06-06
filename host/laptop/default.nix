@@ -3,24 +3,19 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./network-disks.nix
     ./peripherals.nix
     ../../nixos/config
-    ../../nixos/gaming.nix
-    ../../nixos/development.nix
     ./home.nix
     ./desktop-environment.nix
-    ./secrets.nix
   ];
 
   # Basic settings
-  networking.hostName = "bphenriques-desktop";
+  networking.hostName = "bphenriques-laptop";
   user.name = "bphenriques";
 
   # Points to NAS locations
   user.musicDir = "/home/${config.user.name}/media/music/library";
   user.romsDir = "/home/${config.user.name}/media/gaming/emulation/roms";
-
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
 
   # Bootloader
@@ -39,10 +34,10 @@
   boot.supportedFilesystems = [ "ntfs" ];     # Support regular Windows FS
 
   ## Video Driver - Nvidia
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
-  virtualisation.docker.enableNvidia = true;
+  #services.xserver.videoDrivers = [ "nvidia" ];
+  #hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
+  #virtualisation.docker.enableNvidia = true;
 
   # The release version of the first install of this system. Leave as it is!
-  system.stateVersion = "22.11";
+  system.stateVersion = "24.05";
 }

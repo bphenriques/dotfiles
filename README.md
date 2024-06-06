@@ -30,14 +30,14 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 # Secrets
 
-In addition to [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets and combination of `age` and `git-filter` (`smudge` `clean`) to hide sensitive information required in Nix evaluation time.
+[sops-nix](https://github.com/Mic92/sops-nix) for critical secrets and `age`+`git-filter` (`smudge` `clean`) for non-critical sensitive information required in Nix evaluation time.
 
-To setup `git-filter` (`smudge` `clean`) initialize it:
+To setup `git-filter`:
 ```shell
 $ ./bin/git-secret-filter.sh init
 ```
 
-And, as detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys under `.sops.yaml` and the corresponding private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
+As detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys under `.sops.yaml` and the corresponding private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
 
 # Docs & Acknowledgments
 
