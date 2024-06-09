@@ -6,6 +6,7 @@
       ../../home/config
       ../../home/config/beets
       ../../home/config/sunshine
+      ../../home/config/plasma
     ];
 
     #TODO: Set custom SOPS_AGE_KEY_FILE

@@ -15,12 +15,18 @@
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    # Other communicaty made repositories
+    # Other community flakes
     nur.url = "github:nix-community/nur";     # Mostly for Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
+
+    plasma-manager = {
+      url = "github:pjones/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, plasma-manager, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
@@ -66,30 +72,31 @@
         '';
       };
 
+      homeManagerModules = [
+        sops-nix.homeManagerModules.sops
+        plasma-manager.homeManagerModules.plasma-manager
+      ] ++ attrValues self.homeManagerModules;
+
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig;
+        inherit home-manager nixpkgsConfig homeManagerModules;
         nixConfig = nixConfig // nixConfigNixOS;
         nixpkgs = nixpkgs-unstable;
         nixosModules = [ sops-nix.nixosModules.sops ] ++ attrValues self.nixosModules;
-        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
       };
 
       macosLib = import ./lib/macos.nix {
-        inherit darwin home-manager nixpkgsConfig;
+        inherit darwin home-manager nixpkgsConfig homeManagerModules;
         darwinModules = attrValues self.darwinModules;
-        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
       };
 
       homeManagerLib = import ./lib/home-manager.nix {
-        inherit home-manager nixpkgsConfig;
+        inherit home-manager nixpkgsConfig homeManagerModules;
         nixpkgs = nixpkgs-unstable;
-        homeManagerModules = [ sops-nix.homeManagerModules.sops ] ++ attrValues self.homeManagerModules;
       };
     in {
       # No alias is required: nixos-rebuild looks for the right configuration under nixosConfigurations by default.
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./host/desktop; };
-        laptop = mkNixOSHost { hostModule = ./host/laptop; };
       };
 
       darwinConfigurations = with macosLib; {
