@@ -2,15 +2,13 @@
 
 {
   services = {
-    xserver = {
-      enable = true;                        # X11 because setting up Wayland is more complicated than it is worth for me.
-      desktopManager.plasma6.enable = true; # Plasma environment.
-    };
-
+    xserver.enable = true;    # X11 because setting up Wayland is more complicated than it is worth for me.
+    desktopManager.plasma6.enable = true;
     displayManager = {
       autoLogin.enable = true;
       autoLogin.user = config.user.name;
-      sddm.enable = true;    # SDDM login page.
+      sddm.enable = true;
+      defaultSession = "plasmax11";
     };
   };
 

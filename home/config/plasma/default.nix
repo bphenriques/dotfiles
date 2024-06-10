@@ -16,15 +16,16 @@
         #interval =
       #};
     };
-
     windows.allowWindowsToRememberPositions = false;
 
     panels = [
       {
-        location = "bottom";
+        alignment = "center";
+        location = "floating";
         hiding = "autohide";
         widgets = [
           "org.kde.plasma.kickoff"
+          "org.kde.plasma.pager"
           {
             name = "org.kde.plasma.icontasks";
             config = {
@@ -37,12 +38,11 @@
           {
             systemTray.items = {
               # We explicitly show bluetooth and battery
-              shown = [
-                "org.kde.plasma.battery"
-                "org.kde.plasma.bluetooth"
-              ];
+              shown = [ ];
               # And explicitly hide networkmanagement and volume
               hidden = [
+                "org.kde.plasma.battery"
+                "org.kde.plasma.bluetooth"
                 "org.kde.plasma.networkmanagement"
                 "org.kde.plasma.volume"
               ];
@@ -54,6 +54,7 @@
               time.format = "24h";
             };
           }
+          "org.kde.plasma.showdesktop"
         ];
       }
     ];

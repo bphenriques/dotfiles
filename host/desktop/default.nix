@@ -6,8 +6,8 @@
     ./network-disks.nix
     ./peripherals.nix
     ../../nixos/config
-    ../../nixos/gaming.nix
-    ../../nixos/development.nix
+    ../../nixos/config/gaming.nix
+    ../../nixos/config/development.nix
     ./home.nix
     ./desktop-environment.nix
     ./secrets.nix

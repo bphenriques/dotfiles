@@ -46,7 +46,6 @@ As detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys u
 - [Home Manager Docs](https://nix-community.github.io/home-manager)
 - [Nix Darwin Docs](https://daiderd.com/nix-darwin/manual/index.html)
 - [Flakes Docs](https://nixos.wiki/wiki/Flakes)
-- [Flakes Introduction](https://www.tweag.io/blog/2020-05-25-flakes/).
 - Several dotfiles (thank you!):
     - [`Misterio77`](https://github.com/Misterio77/nix-config) 
     - [`bbigras`](https://github.com/bbigras/nix-config)
@@ -56,10 +55,5 @@ As detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys u
     - [`sei40kr`](https://github.com/sei40kr/dotfiles)
     - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
     - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
-- Ad-hoc documentation for reference that I find useful:
-  - https://nixpkgs-manual-sphinx-markedown-example.netlify.app/development/option-types.xml.html
-  - https://teu5us.github.io/nix-lib.html#builtins.replacestrings
-  - https://nixos.org/manual/nix/stable/language/operators.html
-  - https://nixos.org/manual/nix/stable/language/builtins.html
-  - https://github.com/NixOS/nixpkgs/blob/master/lib/strings.nix
-  - https://github.com/NixOS/nixpkgs/blob/master/lib/types.nix
+
+Disclaimer: I do not claim ownership of the wallpapers appearing in this repository. If you find images in this repository owned by you and are of limited use, please let me know and I will remove them.

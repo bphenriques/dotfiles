@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 {
   # This is an alias (see custom module)
+  home-manager.backupFileExtension = "dotbk";
   home = {
     imports = [
       ../../home/config
@@ -8,6 +9,7 @@
       ../../home/config/sunshine
       ../../home/config/plasma
     ];
+    programs.plasma.workspace.wallpaper = ./wallpaper.png;
 
     #TODO: Set custom SOPS_AGE_KEY_FILE
     programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.age.nix;
