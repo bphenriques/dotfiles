@@ -3,7 +3,8 @@
 # TODO: should I check https://github.com/nix-community/nixos-anywhere-examples/blob/main/configuration.nix ?
 {
   imports = [
-    ./hardware-configuration.nix
+    ./hardware-configuration.nix          # As displayed when using nixos-generate-config
+    ./hardware-configuration-extra.nix    # Extra configurations considering that the specs of the laptop
     ../../nixos/config
     ./home.nix
     ./desktop-environment.nix
@@ -36,14 +37,11 @@
 
   # Latest kernel (aka the one pinned under flake.lock)
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [
+    "amd_pstate=active"   # Enables the amd cpu scaling https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html. On recent AMD CPUs this can be more energy efficient.
+    "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
+  ];
 
-  # Hardware
-  ## Disk management
-  services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
-
-  ## Video Driver - Nvidia
-  #services.xserver.videoDrivers = [ "nvidia" ];
-  #hardware.nvidia.forceFullCompositionPipeline = true; # Fixes screen flickering
   #virtualisation.docker.enableNvidia = true;
 
   # The release version of the first install of this system. Leave as it is!
