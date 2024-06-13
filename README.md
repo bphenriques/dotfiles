@@ -11,6 +11,50 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 > I hope that this helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
 > If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
+# NixOS
+
+Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation. Requires two machines:
+- **Target**: the new machine that we will be installing NixOS.
+- **Source**: the current machine where we will create a bootable USB and remotely install the operating system.
+
+1. On the source machine, create a bootable USB [installer](https://nixos.org/download/):
+
+   ```
+   $ sudo fdisk -l
+   $ sudo dd bs=4M if=<ISO> of=<MOUNTED_USB> status=progress oflag=sync
+   ```
+
+2. On the target machine, setup networking and then note down the hardware/network information:
+
+   ```
+   $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
+   $ lsblk -p
+   $ ip route get 1.2.3.4 | awk '{print $7}'
+   ```
+   
+3. On the target machine, set the SSH password of the `nixos` user (`passwd`). You can set 
+
+4. On the source machine:
+   1. Clone this repository.
+   2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
+   3. Set the `hardware-configuration.nix`.
+   4. Review the disk layout under `disk-config.nix` (see [disko](https://github.com/nix-community/disko)).
+   5. Ensure `users.users.root.openssh.authorizedKeys.keys` contains the public SSH key of the source machine.
+   6. Push the changes
+
+4. Finally, run the following in the source machine (replace `<HOST>` and `<IP>`) in the repository directory:
+
+   ```
+   $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
+   ```
+
+PS: It is possible to [make my own NixOS image installer](https://nixos.org/manual/nixos/stable/index.html#sec-building-image), but I find the `nix-community` one sufficient.
+
+
+$ nix run github:nix-community/nixos-anywhere -- --flake #laptop nixos@192.168.68.55
+
+# Non NixOS machines
+
 1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.
 
 2. Bootstrap:
