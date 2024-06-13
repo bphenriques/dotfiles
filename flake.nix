@@ -15,18 +15,21 @@
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    # Other community flakes
-    nur.url = "github:nix-community/nur";     # Mostly for Firefox extensions
-    zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
+    # Automatically format disks using a declaractive specification
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    plasma-manager = {
+    # Other community flakes
+    nur.url = "github:nix-community/nur";     # Firefox extensions
+    zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
+    plasma-manager = {                        # Manage desktop environment
       url = "github:pjones/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, plasma-manager, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, plasma-manager, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
@@ -77,11 +80,15 @@
         plasma-manager.homeManagerModules.plasma-manager
       ] ++ attrValues self.homeManagerModules;
 
+      nixosModules = [
+        sops-nix.nixosModules.sops
+        disko.nixosModules.disko
+      ] ++ attrValues self.nixosModules;
+
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig homeManagerModules;
+        inherit home-manager nixpkgsConfig homeManagerModules nixosModules;
         nixConfig = nixConfig // nixConfigNixOS;
         nixpkgs = nixpkgs-unstable;
-        nixosModules = [ sops-nix.nixosModules.sops ] ++ attrValues self.nixosModules;
       };
 
       macosLib = import ./lib/macos.nix {
@@ -97,13 +104,14 @@
       # No alias is required: nixos-rebuild looks for the right configuration under nixosConfigurations by default.
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./host/desktop; };
+        laptop = mkNixOSHost { hostModule = ./host/laptop; };
       };
 
       darwinConfigurations = with macosLib; {
         work-macos = mkMacOSHost { hostModule = ./host/work-macos; };
       };
 
-      # Custom modules. Either adds new feature or redefines functionality to have finer grain control over the output.
+      # Custom modules
       nixosModules        = import ./nixos/modules;
       homeManagerModules  = import ./home/modules;
       darwinModules       = import ./darwin/modules;
