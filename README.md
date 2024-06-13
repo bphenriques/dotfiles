@@ -24,34 +24,28 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    $ sudo dd bs=4M if=<ISO> of=<MOUNTED_USB> status=progress oflag=sync
    ```
 
-2. On the target machine, setup networking and then note down the hardware/network information:
+2. On the target machine, set the SSH password of the `nixos` user using `passwd`.
+
+3. On the target machine, setup networking and then note down the hardware/network information:
 
    ```
    $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
    $ lsblk -p
    $ ip route get 1.2.3.4 | awk '{print $7}'
    ```
-   
-3. On the target machine, set the SSH password of the `nixos` user (`passwd`). You can set 
 
 4. On the source machine:
    1. Clone this repository.
    2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
    3. Set the `hardware-configuration.nix`.
    4. Review the disk layout under `disk-config.nix` (see [disko](https://github.com/nix-community/disko)).
-   5. Ensure `users.users.root.openssh.authorizedKeys.keys` contains the public SSH key of the source machine.
-   6. Push the changes
+   5. Commit the changes (optionally push)
 
-4. Finally, run the following in the source machine (replace `<HOST>` and `<IP>`) in the repository directory:
+5. In the source machine run the following (replace `<HOST>` and `<IP>`):
 
    ```
    $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
    ```
-
-PS: It is possible to [make my own NixOS image installer](https://nixos.org/manual/nixos/stable/index.html#sec-building-image), but I find the `nix-community` one sufficient.
-
-
-$ nix run github:nix-community/nixos-anywhere -- --flake #laptop nixos@192.168.68.55
 
 # Non NixOS machines
 

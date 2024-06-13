@@ -25,10 +25,10 @@
 
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
 
-  # Bootloader
+  # Bootloader - Devices are set by disko automatically
   boot.loader.grub = {
     enable = true;
-    device = "nodev";
+    efiSupport = true;
     configurationLimit = 5;
   };
 
