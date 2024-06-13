@@ -30,6 +30,7 @@
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
+    efiInstallAsRemovable = true;
     configurationLimit = 5;
   };
 
@@ -38,7 +39,7 @@
 
   # Hardware
   ## Disk management
-  services.fstrim.enable = true;              # Trim SSD because for some reason is not a default :shrug:
+  services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
 
   ## Video Driver - Nvidia
   #services.xserver.videoDrivers = [ "nvidia" ];
