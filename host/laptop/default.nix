@@ -26,10 +26,10 @@
   user.protonDefaultPrefixDir = "/mnt/data/Games/Other";
 
   # Bootloader - Devices are set by disko automatically
+  # Review options: https://nixos.org/manual/nixos/stable/options#opt-boot.loader.grub.devices
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
-    efiInstallAsRemovable = true;
     configurationLimit = 5;
   };
 

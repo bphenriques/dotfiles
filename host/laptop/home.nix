@@ -1,7 +1,6 @@
 { config, pkgs, lib, ... }:
 {
   # This is an alias (see custom module)
-  home-manager.backupFileExtension = "dotbk";
   home = {
     imports = [
       #../../home/config
