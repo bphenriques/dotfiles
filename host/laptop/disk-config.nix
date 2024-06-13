@@ -13,9 +13,14 @@
        device = "/dev/nvme0n1";
        content = {
          type = "gpt";
+
+         # Both order and keys are important
          partitions = {
+           boot = {
+             size = "1M";
+             type = "EF02"; # for grub MBR
+           };
            ESP = {
-             priority = 1; # Ensure it is the first partition
              type = "EF00";
              size = "1G";
              content = {
@@ -59,7 +64,7 @@
                   mountpoint = "/mnt/data";
                   mountOptions = [ "compress=zstd" "noatime" ];
                 };
-                swap = {
+                "/swap" = {
                   mountpoint = "/swap";
                   mountOptions = [ "noatime" ];
                   swap.swapfile.size = "4G";
