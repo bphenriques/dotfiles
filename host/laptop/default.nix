@@ -12,9 +12,6 @@
   ];
 
   services.openssh.enable = true;
-  users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICFZfCSPN6cPfJKPU/cqEr7rCinDycRKWt2FmOiJdo/Y 4727729+bphenriques@users.noreply.github.com"
-  ];
 
   # Basic settings
   networking.hostName = "bphenriques-laptop";

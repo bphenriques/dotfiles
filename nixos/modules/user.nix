@@ -23,9 +23,11 @@ in
 
   config = {
     users.users.${cfg.name} = {
+      name = cfg.name;
       isNormalUser = true;
       uid = 1000;
       home = "/home/${cfg.name}";
+      password = "test";
       description = cfg.name;
       extraGroups = [ "wheel" ] ++ cfg.extraGroups;
     };
