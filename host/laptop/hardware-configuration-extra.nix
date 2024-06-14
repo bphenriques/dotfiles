@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 # Mirrored from https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
+# Also check https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix
 {
   boot.initrd.kernelModules = [ "amdgpu" ];
   hardware.opengl.extraPackages = with pkgs; [
