@@ -47,6 +47,8 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
    ```
 
+6. Once the initial installation succeeds, feel free to proceed to bootstrapping.
+
 # Non NixOS machines
 
 1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.

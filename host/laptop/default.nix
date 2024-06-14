@@ -42,6 +42,13 @@
     "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
   ];
 
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.libinput = {
+    enable = true;
+    touchpad.naturalScrolling = true;
+    touchpad.tapping = true;
+  };
+
   #virtualisation.docker.enableNvidia = true;
 
   # The release version of the first install of this system. Leave as it is!
