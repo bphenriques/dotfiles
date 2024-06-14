@@ -34,6 +34,8 @@
     efiInstallAsRemovable = true;
     configurationLimit = 5;
   };
+  #fileSystems."@/persist".neededForBoot = true;
+  #fileSystems."@/var-log".neededForBoot = true;
 
   # Latest kernel (aka the one pinned under flake.lock)
   boot.kernelPackages = pkgs.linuxPackages_latest;
