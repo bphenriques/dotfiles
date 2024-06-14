@@ -8,7 +8,7 @@
     ../../nixos/config
     ./home.nix
     ./desktop-environment.nix
-    ./disk-config.nix
+    ./disk2.nix
   ];
 
   services.openssh.enable = true;
