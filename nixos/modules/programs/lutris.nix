@@ -16,7 +16,7 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       lutris
-      kdialog   # Required otherwise installation might not work. Note: may make only make sense for KDE?
+      kdialog   # Required otherwise installation might not work. FIXME: may only make sense for KDE
       protobuf  # Required for battlenet.
     ];
   };
