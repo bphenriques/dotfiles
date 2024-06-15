@@ -12,35 +12,26 @@ in
 {
   imports = [
     ./hardware-configuration.nix          # Output of nixos-generate-config --root /mnt
-    ./hardware-configuration-extra.nix    # Extra configurations considering the specs of the laptop
-    ./disk-config.nix                     # Disk layout
+    ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
+    ./disk-config.nix                     # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos/config                    # My default nixos settings
     ./home.nix
   ];
 
-  # Bootloader - Devices are set by disko automatically
-  # TODO: Increase font-size or increase dpi
+  networking.hostName = "bphenriques-laptop";
+
+  # Bootloader
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
     efiInstallAsRemovable = true;
+    # gfxmodeEfi = "2880x1800";
     configurationLimit = 5;
   };
-
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.libinput = {
+  boot.loader.grub2-theme = {
     enable = true;
-    touchpad.naturalScrolling = true;
-    touchpad.tapping = true;
-  };
-
-  networking.hostName = "bphenriques-laptop";
-  users.users.${username} = {
-    isNormalUser = true;
-    initialPassword = "pass";
-    description = username;
-    extraGroups = [ "wheel" ];
+    theme = "vimix";
+    footer = true;
   };
 
   # Desktop environment
@@ -55,9 +46,14 @@ in
   };
   environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
 
-  home-manager.users.${username} = {
-    imports = [ ./home.nix ];
+  # User
+  users.users.${username} = {
+    isNormalUser = true;
+    initialPassword = "pass";
+    description = username;
+    extraGroups = [ "wheel" ];
   };
+  home-manager.users.${username} = { imports = [ ./home.nix ]; };
 
   # The release version of the first install of this system. Leave as it is!
   system.stateVersion = "24.05";
