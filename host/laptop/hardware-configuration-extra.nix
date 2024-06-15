@@ -1,11 +1,16 @@
 { pkgs, ... }:
 
 # Mirrored from https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
-# Also check https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix
+# Based on Nix-Hardware (see https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
+# TODO: Check https://github.com/NixOS/nixpkgs/pull/318175
 {
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [
+    "amd_pstate=active"   # Enables the amd cpu scaling https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html. On recent AMD CPUs this can be more energy efficient.
+    "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
+  ];
   boot.initrd.kernelModules = [ "amdgpu" ];
   hardware.opengl.extraPackages = with pkgs; [
-    amdvlk      # AMD
     vaapiVdpau  # Nvidia
   ];
 
@@ -15,18 +20,27 @@
 
   hardware.nvidia = {
     modesetting.enable = true;
-    powerManagement.enable = false;
-    powerManagement.finegrained = false;
+    nvidiaSettings = true;
+    powerManagement.enable = true;
+    powerManagement.finegrained = true;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
     open = false;
     prime = {
-      sync.enable = true;
+      offload.enable = true;
+      offload.enableOffloadCmd = true;
       amdgpuBusId = "PCI:5:0:0";
       nvidiaBusId = "PCI:1:0:0";
     };
   };
 
+  environment.systemPackages = with pkgs; [
+    lenovo-legion
+    # (nvtopPackages.nvidia.override { amd = true; })
+    # amdgpu_top
+  ];
+
   # Avoid issues with modesetting causing blank screen
-  services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
+  services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
   # SSD
   services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
