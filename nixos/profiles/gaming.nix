@@ -1,5 +1,8 @@
 { config, lib, pkgs, ... }:
 
+# TODO: https://github.com/wochap/nix-config/blob/main/modules/nixos/gaming/emulators/default.nix intestesting
+# TODO: https://github.com/wochap/nix-config/blob/main/modules/nixos/gaming/utils/default.nix
+
 with lib;
 let
   cfg = config.dotfiles.profiles.gaming;

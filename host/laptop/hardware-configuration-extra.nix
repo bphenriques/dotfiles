@@ -44,4 +44,11 @@
 
   # SSD
   services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
+
+  # Touchpad
+  services.libinput = {
+    enable = true;
+    touchpad.naturalScrolling = true;
+    touchpad.tapping = true;
+  };
 }

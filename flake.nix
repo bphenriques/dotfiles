@@ -20,6 +20,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Other community flakes
+    grub2-themes.url = "github:vinceliuice/grub2-themes";
     nur.url = "github:nix-community/nur";     # Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
     plasma-manager = {                        # Manage desktop environment
@@ -83,6 +84,7 @@
       nixosModules = [
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
+        grub2-themes.nixosModules.default
       ] ++ attrValues self.nixosModules;
 
       nixosLib = import ./lib/nixos.nix {
