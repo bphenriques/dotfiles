@@ -7,6 +7,8 @@
   # TODO: https://git.jdigi.net/Joseph-DiGiovanni/Nix/src/branch/main/hosts
   # https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
   # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
+  # https://documentation.suse.com/sles/12-SP5/html/SLES-all/cha-filesystems.html
+  # Auto scrub ? https://nixos.wiki/wiki/Btrfs
   disko.devices = {
     disk = {
       vda = {
