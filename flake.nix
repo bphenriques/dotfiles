@@ -21,6 +21,7 @@
 
     # Other community flakes
     grub2-themes.url = "github:vinceliuice/grub2-themes";
+    impermanence.url = "github:nix-community/impermanence";
     nur.url = "github:nix-community/nur";     # Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
     plasma-manager = {                        # Manage desktop environment
@@ -68,12 +69,24 @@
         settings = {
           experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
           auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
+          use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
         };
 
         # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
         extraOptions = ''
           min-free = ${toString (5 * 1024 * 1024 * 1024)}
         '';
+
+        substituters = [
+          "https://hyprland.cachix.org"
+          "https://nix-community.cachix.org"
+          "https://ghostty.cachix.org"
+        ];
+        trusted-public-keys = [
+          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
+        ];
       };
 
       homeManagerModules = [
@@ -85,6 +98,7 @@
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
         grub2-themes.nixosModules.default
+        impermanence.nixosModules.impermanence
       ] ++ attrValues self.nixosModules;
 
       nixosLib = import ./lib/nixos.nix {

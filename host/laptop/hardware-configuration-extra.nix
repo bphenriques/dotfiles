@@ -42,6 +42,7 @@
   # Avoid issues with modesetting causing blank screen
   services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
+  #hardware.bluetooth.enable = true;
   # SSD
   services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
 
@@ -52,3 +53,5 @@
     touchpad.tapping = true;
   };
 }
+
+# This one is nice: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L35
