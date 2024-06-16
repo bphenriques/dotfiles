@@ -21,12 +21,12 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
 
    ```
    $ sudo fdisk -l
-   $ sudo dd bs=4M if=<ISO> of=<MOUNTED_USB> status=progress oflag=sync
+   $ sudo dd bs=4M if=<ISO> of=<TARGET_PEN_DRIVE> status=progress oflag=sync
    ```
 
-2. On the target machine, set the SSH password of the `nixos` user using `passwd`.
+2. On the target machine, set `nixos`'s password using `passwd`.
 
-3. On the target machine, setup networking and then note down the hardware/network information:
+3. On the target machine, setup networking and note down the hardware/network information:
 
    ```
    $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
@@ -39,15 +39,26 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
    3. Set the `hardware-configuration.nix`.
    4. Review the disk layout under `disk-config.nix` (see [disko](https://github.com/nix-community/disko)).
-   5. Commit the changes (optionally push)
+   5. (opt): Set secrets:
+      1. Add public keys in `.sops.yaml` and the private key under `$HOME/.config/sops/age/keys.txt`
+      2. Create secret file using `sops host/<HOST>/secrets/sops.yaml`.
+   6. Fine-tune the configuration.
+   7. Commit the changes (optionally push)
 
 5. In the source machine run the following (replace `<HOST>` and `<IP>`):
 
    ```
    $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
    ```
+   # TODO: --extra-files likely copy a key?
 
 6. Once the initial installation succeeds, feel free to proceed to bootstrapping.
+
+TODO:
+1. Import the private key using Bitwarden cli: `bw get item "NAME" | jq --raw-output '.notes' >> $HOME/.config/sops/age/keys.txt`
+2. Clone the repository and set call `./bin/git-secret-filter.sh init`
+
+At this stage, all secrets are setup and you can continue by using the dotfiles as you would normally.
 
 # Non NixOS machines
 
@@ -70,14 +81,16 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
 
 # Secrets
 
-[sops-nix](https://github.com/Mic92/sops-nix) for critical secrets and `age`+`git-filter` (`smudge` `clean`) for non-critical sensitive information required in Nix evaluation time.
+- [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix-store
+- `age`+`git-filter` (`smudge` `clean`) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text.
+  As detailed in `.gitattributes`, only `*.age.nix` are affected.
+
+The public keys are under `.sops.yaml` and the private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
 
 To setup `git-filter`:
 ```shell
 $ ./bin/git-secret-filter.sh init
 ```
-
-As detailed in `.gitattributes`, only `*.age.nix` are affected. My public keys under `.sops.yaml` and the corresponding private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
 
 # Docs & Acknowledgments
 

@@ -25,14 +25,16 @@ in
     enable = true;
     efiSupport = true;
     efiInstallAsRemovable = true;
-    # gfxmodeEfi = "2880x1800";
+    gfxmodeEfi = "2880x1800,auto";
+    gfxmodeBios = "2880x1800,auto";
+    gfxmodeEfi = "2880x1800";
     configurationLimit = 5;
   };
-  boot.loader.grub2-theme = {
-    enable = true;
-    theme = "vimix";
-    footer = true;
-  };
+  #boot.loader.grub2-theme = {
+  #  enable = true;
+  #  theme = "vimix";
+  #  footer = true;
+  #};
 
   # Desktop environment
   services = {
@@ -47,11 +49,12 @@ in
   environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
 
   # User
+  # TODO: check https://github.com/iynaix/dotfiles/blob/main/nixos/users.nix
   users.users.${username} = {
     isNormalUser = true;
-    initialPassword = "pass";
+    initialPassword = "password";
     description = username;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "networkmanager" ];
   };
   home-manager.users.${username} = { imports = [ ./home.nix ]; };
 

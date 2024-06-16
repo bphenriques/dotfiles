@@ -11,6 +11,7 @@
     alsa.support32Bit = true;          # For better compatibility
     pulse.enable = true;               # For better compatibility
   };
+  # TODO: Review these packages: https://github.com/diegofariasm/yggdrasil/blob/main/modules/nixos/hardware/audio.nix
 
   # Network
   networking.networkmanager.enable = true;
