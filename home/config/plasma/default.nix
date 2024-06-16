@@ -2,6 +2,7 @@
 
 # https://github.com/pjones/plasma-manager/blob/trunk/examples/home.nix
 {
+  # Alternative? https://github.com/iynaix/dotfiles/blob/main/nixos/plasma.nix
   programs.plasma = {
     enable = true;
     workspace = {
