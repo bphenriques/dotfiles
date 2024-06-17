@@ -15,7 +15,6 @@ in
     ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
     ./disk-config.nix                     # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos/config                    # My default nixos settings
-    ./home.nix
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -56,24 +55,7 @@ in
     extraGroups = [ "wheel" "networkmanager" ];
   };
   home-manager.users.${username} = {
-    imports = [
-      #../../home/config
-      ../../home/config/plasma
-    ];
-    programs.plasma.workspace.wallpaper = ./wallpaper.png;
-
-    # Gpg
-    programs.gpg.enable = true;
-    services.gpg-agent = {
-      enable = true;
-      pinentryPackage = pkgs.pinentry-gnome3;
-    };
-
-    home.packages = with pkgs; [
-      killall     # Useful
-    ];
-
-    home.stateVersion = "24.05";
+    imports = [ ./home.nix ];
   };
 
   # The release version of the first install of this system. Leave as it is!
