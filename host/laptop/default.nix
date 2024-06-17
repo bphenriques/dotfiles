@@ -27,7 +27,6 @@ in
     efiInstallAsRemovable = true;
     gfxmodeEfi = "2880x1800,auto";
     gfxmodeBios = "2880x1800,auto";
-    gfxmodeEfi = "2880x1800";
     configurationLimit = 5;
   };
   #boot.loader.grub2-theme = {
