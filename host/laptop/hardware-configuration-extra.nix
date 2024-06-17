@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 # Mirrored from https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
 # Based on Nix-Hardware (see https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
