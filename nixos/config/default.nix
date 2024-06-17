@@ -15,7 +15,6 @@
 
   # Network
   networking.networkmanager.enable = true;
-  user.extraGroups = ["networkmanager"];
 
   # Input
   services.xserver = {
