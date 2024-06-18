@@ -2,6 +2,7 @@
 
 # https://github.com/pjones/plasma-manager/blob/trunk/examples/home.nix
 {
+  # Alternative? https://github.com/iynaix/dotfiles/blob/main/nixos/plasma.nix
   programs.plasma = {
     enable = true;
     workspace = {
@@ -38,13 +39,14 @@
           {
             systemTray.items = {
               # We explicitly show bluetooth and battery
-              shown = [ ];
+              shown = [
+                "org.kde.plasma.volume"
+              ];
               # And explicitly hide networkmanagement and volume
               hidden = [
                 "org.kde.plasma.battery"
                 "org.kde.plasma.bluetooth"
                 "org.kde.plasma.networkmanagement"
-                "org.kde.plasma.volume"
               ];
             };
           }

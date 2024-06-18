@@ -17,6 +17,6 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = [ pkgs.qbittorrent ];
-    user.extraGroups = [ "qbittorrent" ];
+    # FIXME: user.extraGroups = [ "qbittorrent" ];
   };
 }
