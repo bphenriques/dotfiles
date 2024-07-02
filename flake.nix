@@ -85,7 +85,7 @@
       };
 
       macosLib = import ./lib/macos.nix {
-        inherit darwin home-manager nixpkgsConfig homeManagerModules;
+        inherit darwin home-manager nixConfig nixpkgsConfig homeManagerModules;
         darwinModules = attrValues self.darwinModules;
       };
 

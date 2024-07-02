@@ -1,4 +1,4 @@
-{ darwin, home-manager, darwinModules, homeManagerModules, nixpkgsConfig, ... }:
+{ darwin, home-manager, nixConfig, darwinModules, homeManagerModules, nixpkgsConfig, ... }:
 {
   mkMacOSHost = {
     system ? "aarch64-darwin",

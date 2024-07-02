@@ -15,7 +15,7 @@ sync_flake() {
     sudo nixos-rebuild switch --flake ".#$host_target"
   elif [ "$(uname)" = "Darwin" ]; then
       info "Syncing MacOS host '$host_target'.."
-    nix build ".#darwinConfigurations.$host_target.system" $extra_args
+    nix build ".#darwinConfigurations.$host_target.system"
     ./result/sw/bin/darwin-rebuild switch --flake ".#$host_target" #--show-trace --no-eval-cache
   else
     fail "Unsupported Operating System: $(uname)"
