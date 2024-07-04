@@ -58,6 +58,8 @@ TODO:
 1. Import the private key using Bitwarden cli: `bw get item "NAME" | jq --raw-output '.notes' >> $HOME/.config/sops/age/keys.txt`
 2. Clone the repository and set call `./bin/git-secret-filter.sh init`
 
+`--experimental-features "nix-command flakes"`
+
 At this stage, all secrets are setup and you can continue by using the dotfiles as you would normally.
 
 # Non NixOS machines

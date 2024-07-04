@@ -8,7 +8,7 @@
     workspace = {
       theme = "breeze-dark";
       colorScheme = "BreezeDark";
-      cursorTheme = "Breeze";
+      cursor.theme = "Breeze";
       clickItemTo = "select";
       lookAndFeel = "org.kde.breezedark.desktop";
       #wallpaper = ;

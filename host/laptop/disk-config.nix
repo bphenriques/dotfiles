@@ -1,14 +1,22 @@
 { lib, ... }:
 {
-  # TODO: Snapper: https://www.reddit.com/r/NixOS/comments/1bqm7hv/do_you_use_btrfs/
-  #      - https://git.jdigi.net/Joseph-DiGiovanni/Nix/src/branch/main/hosts/Joe-Desktop/file-systems.nix
-  # TODO: Add these to persist: /var/lib/bluetooth and /var/lib/fprint
-  # TODO: nix-shell --run 'mkpasswd -m SHA-512 -s' -p mkpasswd) and then users.users.*USERNAME*.initialHashedPassword = "*HASHED_PASSWORD*";
-  # TODO: https://git.jdigi.net/Joseph-DiGiovanni/Nix/src/branch/main/hosts
   # https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
-  # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
-  # https://documentation.suse.com/sles/12-SP5/html/SLES-all/cha-filesystems.html
-  # Auto scrub ? https://nixos.wiki/wiki/Btrfs
+
+
+  # https://github.com/Prometheus7435/nix-config/blob/main/nixos/phoenix/disks.nix
+  # https://github.com/Prometheus7435/nix-config/blob/main/nixos/odyssey/disks.nix
+  # https://grahamc.com/blog/nixos-on-zfs/
+  # https://www.reddit.com/r/NixOS/comments/lvegkr/nixos_zfs_dataset_layout_questions/
+  # https://github.com/bhougland18/nixos_config
+  # https://jrs-s.net/2018/08/17/zfs-tuning-cheat-sheet/
+  # https://grahamc.com/blog/nixos-on-zfs/
+  # https://nixos.wiki/wiki/ZFS
+  # https://grahamc.com/blog/erase-your-darlings/
+  # https://www.reddit.com/r/NixOS/comments/11o5vgp/manage_zfs_pools_in_nixos/
+  # https://www.reddit.com/r/NixOS/comments/1ad0m5n/impermanence_disko_setup/
+  # https://github.com/iynaix/dotfiles/blob/main/recover.sh
+  # https://github.com/iynaix/dotfiles/blob/main/nixos/zfs.nix
+
   disko.devices = {
     disk = {
       vda = {
@@ -25,70 +33,127 @@
            };
            ESP = {
              type = "EF00";
-             size = "1G";
+             size = "512MiB";
              content = {
                type = "filesystem";
                format = "vfat";
                mountpoint = "/boot"; # TODO: See people setting up options = [ "umask=0077" ]; # Limit access to random seed
              };
            };
-           root = {
-            size = "100%";
-            content = {
-              type = "btrfs";
-              extraArgs = [ "-f" ]; # Override existing partition
-              subvolumes = {
-                "@" = { };
-                "@/root" = {
-                  mountpoint = "/";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/home" = {
-                  mountpoint = "/home";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/nix" = {
-                  mountpoint = "/nix";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/persist" = {
-                  mountpoint = "/persist";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/snapshots" = { # https://wiki.archlinux.org/title/Snapper#Suggested_filesystem_layout
-                  mountpoint = "/snapshots";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/var-log" = {
-                  mountpoint = "/var/log";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                # Separate volume for things I likely do not want to snapshots
-                "@/data" = {
-                  mountpoint = "/mnt/data";
-                  mountOptions = [ "compress=zstd" "noatime" ];
-                };
-                "@/swap" = {
-                  mountpoint = "/swap";
-                  mountOptions = [ "noatime" ];
-                  swap.swapfile.size = "4G";
-                };
-                # Prefer to selectively choose what to store
-                #"@/var-lib" = {
-                #  mountpoint = "/var/lib";
-                #  mountOptions = [ "compress=zstd" "noatime" ];
-                #};
-                # Prefer to selectively choose what to store
-                #"@/var-tmp" = {
-                #  mountpoint = "/var/tmp";
-                #  mountOptions = [ "compress=zstd" "noatime" ];
-                #};
+           swap = {
+             size = "6G";
+             content = {
+               type = "swap";
+               resumeDevice = false; # I really don't care about hibernation.
+             };
+           };
+           zfs = {
+             size = "100%";
+             content = {
+               type = "zfs";
+               pool = "zroot";
+             };
+           };
+         };
+       };
+     };
+    zpool = {
+      zroot = {
+        type = "zpool";
+
+        # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#general-recommendations
+        rootFsOptions = {
+          compression = "lz4";
+          xattr = "sa";
+          atime = "off";
+        };
+
+        options = {
+          # SSD supports 512/512 (physical/logical):
+          #   $ lsblk -t /dev/nvme0n1
+          #
+          # But.. it actually supports 4096/4096:
+          #   $ nvme id-ns -H /dev/nvme0n1
+          #
+          # 512/512 is mostly for compatability reasons and, in our case, we can set it by setting it up accordingly:
+          # $ nvme format --lbaf=1 /dev/nvme0n1
+          #
+          # https://wiki.archlinux.org/title/Advanced_Format
+          # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
+          ashift = "12";
+        };
+
+        # https://github.com/KornelJahn/nixos-disko-zfs-test/blob/main/hosts/testhost-disko.nix
+        datasets =
+          let
+            systemDatasets = {
+              system = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "system/root" = {
+                type = "zfs_fs";
+                mountpoint = "/";
+                options.mountpoint = "legacy";
+                postCreateHook = ''zfs snapshot zroot/system/root@blank'';
+              };
+              "system/nix" = {
+                type = "zfs_fs";
+                mountpoint = "/nix";
+                options.mountpoint = "legacy";
+              };
+              "system/log" = {
+                type = "zfs_fs";
+                mountpoint = "/var/log";
+                options.mountpoint = "legacy";
+              };
+              "system/persist" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/system";
+                options.mountpoint = "legacy";
+              };
+              "system/cache" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/system/cache";
+                options.mountpoint = "legacy";
               };
             };
-           };
-          };
-        };
+
+            homeDatasets = {
+              home = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "home/bphenriques" = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "home/bphenriques/documents" = {
+                type = "zfs_fs";
+                mountpoint = "/home/bphenriques/documents";
+                options.mountpoint = "legacy";
+              };
+              "home/bphenriques/persist" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/bphenriques";
+                options.mountpoint = "legacy";
+              };
+              "home/bphenriques/cache" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/bphenriques/cache";
+                options.mountpoint = "legacy";
+              };
+            };
+          in systemdDatasets // homeDatasets // data;
       };
+     };
     };
+  };
+
+  fileSystems = {
+    "/".neededForBoot = true;
+    "/nix".neededForBoot = true;
+    "/boot".neededForBoot = true;
+    "/persist".neededForBoot = true;
   };
 }

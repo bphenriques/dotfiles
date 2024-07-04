@@ -15,6 +15,8 @@ in
     ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
     ./disk-config.nix                     # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos/config                    # My default nixos settings
+    ./impermanence.nix
+    ./zfs.nix
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -61,3 +63,5 @@ in
   # The release version of the first install of this system. Leave as it is!
   system.stateVersion = "24.05";
 }
+
+# File browser: https://github.com/iynaix/dotfiles/blob/e441ab4ff7a775b57b6c79a2fa6be99e3ab2d58b/home-manager/programs/nemo.nix#L79
