@@ -1,41 +1,102 @@
 { ... }:
+
+# Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
+let
+  system = {
+    config = {
+      source = "/persist/system";
+      directories = [
+        "/var/log"
+
+        # Connectivity
+        "/var/lib/bluetooth"
+        "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
+        "/etc/NetworkManager/system-connections"
+      ];
+      files = [
+        "/etc/machine-id"
+      ];
+    };
+    cache = {
+      source = "/persist/system/cache";
+      directories = [];
+      files = [];
+    };
+  };
+
+  bphenriques = {
+    username = "bphenriques";
+    config = rec {
+      source = "/persist/${user}";
+      directories = [
+        "Downloads"
+        ".config/systemd" # git maintenance systemd timers
+        ".config/vlc"
+        ".mozilla"        # Firefox
+        ".config/sops"
+
+        # SSH
+        { directory = ".ssh"; mode = "0700"; }
+
+        # Steam
+        ".local/share/Steam"
+        ".config/lutris"
+
+        ".local/share/nix" # trusted settings and repl history
+      ];
+      files = [
+      ];
+    };
+    cache = {
+      source = "/persist/${user}/cache";
+      directories = [
+        ".cache/dconf"
+        ".config/dconf"
+        ".cache/nix"
+        ".cache/mozilla"  # Firefox
+
+        ".local/share/lutris"
+
+        # Shell
+        "local/share/fish"
+        ".local/share/zoxide"
+        ".bash_history"
+      ];
+      files = [];
+    };
+  };
+in
 {
-  # Docker: probabilly move to somewhere else: https://github.com/iynaix/dotfiles/blob/main/nixos/docker.nix#L19
+  environment.persistence = {
+    "${system.config.source}" = {
+      hideMounts = true;
+      files = system.config.files;
+      directories = system.config.directories;
+    };
 
-    # Persist: "/etc/NetworkManager", any .local/state/SOME_FOLDER  "/var/lib/bluetooth" ".local/share/containers"
-    # ".config/filezilla"
-    #  home = {
-        #      cache = [
-        #        ".cache/nix"
-        #        ".cache/nixpkgs-review"
-        #      ];
-        #    };
-    #
-    environment.persistence = {
-      "/persist" = {
-        hideMounts = true;
-        files = [ "/etc/machine-id" ] ++ cfg.root.files;
-        directories = [
-          "/var/log" # systemd journal is stored in /var/log/journal
-        ] ++ cfg.root.directories;
+    "${system.cache.source}" = {
+      hideMounts = true;
+      files = system.cache.files;
+      directories = system.cache.directories;
+    };
 
-        users.${user} = {
-          files = cfg.home.files ++ hmPersistCfg.home.files;
-          directories = [
-            "projects"
-            ".cache/dconf"
-            ".config/dconf"
-          ] ++ cfg.home.directories ++ hmPersistCfg.home.directories;
-        };
-      };
-
-      "/persist/cache" = {
-        hideMounts = true;
-        directories = cfg.root.cache;
-
-        users.${user} = {
-          directories = hmPersistCfg.home.cache;
-        };
+    "${bphenriques.config.source}" = {
+      hideMounts = true;
+      users.${bphenriques.username} = {
+        directories = bphenriques.config.directories;
+        files = bphenriques.config.files;
       };
     };
+
+    "${bphenriques.cache.source}" = {
+      hideMounts = true;
+      users.${bphenriques.username} = {
+        directories = bphenriques.cache.directories;
+        files = bphenriques.cache.files;
+      };
+    };
+  };
 }
+
+
+
