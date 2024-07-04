@@ -50,7 +50,7 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    ```
    $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
    ```
-   # TODO: --extra-files likely copy a key?
+   # TODO: --extra-files likely copy a key? TODO: Get machine id head -c 8 /etc/machine-id
 
 6. Once the initial installation succeeds, feel free to proceed to bootstrapping.
 

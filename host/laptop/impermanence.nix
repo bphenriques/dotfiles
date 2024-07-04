@@ -26,8 +26,8 @@ let
 
   bphenriques = {
     username = "bphenriques";
-    config = rec {
-      source = "/persist/${user}";
+    config = {
+      source = "/persist/bphenriques}";
       directories = [
         "Downloads"
         ".config/systemd" # git maintenance systemd timers
@@ -48,7 +48,7 @@ let
       ];
     };
     cache = {
-      source = "/persist/${user}/cache";
+      source = "/persist/bphenriques/cache";
       directories = [
         ".cache/dconf"
         ".config/dconf"

@@ -19,6 +19,7 @@ in
     ./zfs.nix
   ];
 
+  networking.hostId = "5b318853";
   networking.hostName = "bphenriques-laptop";
 
   # Bootloader

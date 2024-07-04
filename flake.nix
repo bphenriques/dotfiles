@@ -22,6 +22,7 @@
     # Other community flakes
     nur.url = "github:nix-community/nur";     # Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
+    impermanence.url = "github:nix-community/impermanence";
     plasma-manager = {                        # Manage desktop environment
       url = "github:pjones/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -29,7 +30,7 @@
     };
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, plasma-manager, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, plasma-manager, impermanence, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
@@ -84,6 +85,7 @@
       nixosModules = [
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
+        impermanence.nixosModules.impermanence
       ] ++ attrValues self.nixosModules;
 
       nixosLib = import ./lib/nixos.nix {
