@@ -9,7 +9,7 @@ usage() {
   echo "deploy-machine-with-secrets.sh <flake-target> <host> <home-directory>
 
 E.g.:
-- Remote machine: deploy-machine-with-secrets.sh .#laptop nixos@192.168.68.62 /home/bphenriques
+- Remote machine: ./bin/deploy-machine-with-secrets.sh .#laptop nixos@192.168.68.62 /home/bphenriques
 "
 }
 
