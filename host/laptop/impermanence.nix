@@ -1,6 +1,7 @@
 { ... }:
 
 # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
+# https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
 let
   system = {
     config = {
@@ -27,7 +28,7 @@ let
   bphenriques = {
     username = "bphenriques";
     config = {
-      source = "/persist/bphenriques}";
+      source = "/persist/bphenriques";
       directories = [
         "Downloads"
         ".config/systemd" # git maintenance systemd timers
@@ -96,7 +97,14 @@ in
       };
     };
   };
+
+  boot.initrd.postDeviceCommands = ''zfs rollback -r zroot@blank'';
+  security.sudo.extraConfig = ''
+    # Rollback triggers the lecture everytime
+    Defaults lecture = never
+  '';
 }
 
+# https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
 
 

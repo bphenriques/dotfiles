@@ -115,8 +115,8 @@
       };
 
       # Custom modules
-      nixosModules        = import ./nixos/modules;
-      homeManagerModules  = import ./home/modules;
-      darwinModules       = import ./darwin/modules;
+      nixosModules        = import ./modules/nixos;
+      homeManagerModules  = import ./modules/home-manager;
+      darwinModules       = import ./modules/darwin;
     };
 }

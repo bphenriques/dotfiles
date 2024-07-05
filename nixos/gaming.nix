@@ -28,11 +28,20 @@ let
       name = "Proton Launcher";
       type = "Application";
       desktopName = "Proton Launcher";
-      noDisplay = false; # Switch to true temporary so that it appears on right-click?
-      categories = [ "Utility" ];
+      categories = [ "Utility" "Game" ];
       icon = "wine";
       mimeTypes = ["application/x-ms-dos-executable" "application/x-msi" "application/x-ms-shortcut"];
     });
+
+  steam-desktop-item = (makeDesktopItem {
+    name = "steam";
+    desktopName = "Steam";
+    icon = "steam";
+    exec = "steam";
+    terminal = false;
+    mimeTypes = ["x-scheme-handler/steam"];
+    categories = [ "Network" "FileTransfer" "Game" ];
+  });
 in
 {
   # Tweaks
