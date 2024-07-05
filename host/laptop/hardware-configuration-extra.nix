@@ -41,9 +41,15 @@
   # Avoid issues with modesetting causing blank screen
   services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
-  #hardware.bluetooth.enable = true;
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true; # Power up the bluetooth controller on boot
+  services.blueman.enable = true;
+
   # SSD
   services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
+
+  # Run zramctl to check how good memory is compressed
+  zramSwap.enable = true;
 
   # Touchpad
   services.libinput = {

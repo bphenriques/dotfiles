@@ -45,6 +45,7 @@
              content = {
                type = "swap";
                resumeDevice = false; # I really don't care about hibernation.
+               randomEncryption = true;
              };
            };
            zfs = {
@@ -83,6 +84,8 @@
         # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
         ashift = "12";
       };
+      mountpoint = "/";
+      postCreateHook = "zfs snapshot zroot@blank";
 
       # https://github.com/KornelJahn/nixos-disko-zfs-test/blob/main/hosts/testhost-disko.nix
       datasets =
@@ -95,23 +98,19 @@
             "system/root" = {
               type = "zfs_fs";
               mountpoint = "/";
-              options.mountpoint = "legacy";
               postCreateHook = ''zfs snapshot zroot/system/root@blank'';
             };
             "system/nix" = {
               type = "zfs_fs";
               mountpoint = "/nix";
-              options.mountpoint = "legacy";
             };
             "system/persist" = {
               type = "zfs_fs";
               mountpoint = "/persist/system";
-              options.mountpoint = "legacy";
             };
             "system/cache" = {
               type = "zfs_fs";
               mountpoint = "/persist/system/cache";
-              options.mountpoint = "legacy";
             };
           };
 
@@ -127,17 +126,14 @@
             "home/bphenriques/documents" = {
               type = "zfs_fs";
               mountpoint = "/home/bphenriques/documents";
-              options.mountpoint = "legacy";
             };
             "home/bphenriques/persist" = {
               type = "zfs_fs";
               mountpoint = "/persist/bphenriques";
-              options.mountpoint = "legacy";
             };
             "home/bphenriques/cache" = {
               type = "zfs_fs";
               mountpoint = "/persist/bphenriques/cache";
-              options.mountpoint = "legacy";
             };
           };
 
@@ -145,7 +141,6 @@
             "data" = {
               type = "zfs_fs";
               mountpoint = "/mnt/data";
-              options.mountpoint = "legacy";
             };
           };
 

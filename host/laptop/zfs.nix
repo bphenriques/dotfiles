@@ -25,3 +25,17 @@
 #    };
 #  };
 }
+
+#  boot.initrd.systemd.services.initrd-rollback-root = {
+#    after = [ "zfs-import-rpool.service" ];
+#    requires = [ "zfs-import-rpool.service" ];
+#    before = [
+#      "sysroot.mount"
+#      "local-fs.target"
+#    ];
+#    description = "Rollback root fs";
+#    serviceConfig = {
+#      Type = "oneshot";
+#      ExecStart = "${config.boot.zfs.package}/sbin/zfs rollback -r rpool/local/root@blank";
+#    };
+#  };

@@ -198,6 +198,5 @@ case "$(uname -s)" in
 esac
 clone_default_repos
 select_host
-#setup_git_filter
 
 success 'Bootstrap - Complete!'

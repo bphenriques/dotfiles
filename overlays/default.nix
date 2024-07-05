@@ -36,3 +36,5 @@ let
   };
 
 in [add-custom-packages inputs.nur.overlay add-fish-plugins] ++ add-external-flakes
+
+# TODO: https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos?ref_type=heads
