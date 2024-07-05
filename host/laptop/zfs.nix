@@ -1,5 +1,7 @@
 { config, lib, ... }:
 {
+  networking.hostId = "5b318853";
+
   boot = {
     kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
     supportedFilesystems.zfs = true;

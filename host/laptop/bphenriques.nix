@@ -1,16 +1,17 @@
-{ config, lib, ... }:
+{ config, pkgs, lib, ... }:
 {
   # TODO: check https://github.com/iynaix/dotfiles/blob/main/nixos/users.nix
-  users.users.${username} = {
+  users.users.bphenriques = {
     isNormalUser = true;
     initialPassword = "password";
-    description = username;
+    description = "bphenriques";
     extraGroups = [ "wheel" "networkmanager" "docker" ];
   };
-  home-manager.users.${username} = {
+
+  home-manager.users.bphenriques = { pkgs, ... }: {
     imports = [
-      #../../home/config
-      ../../home/config/plasma
+      ../../home
+      ../../home/plasma
     ];
     programs.plasma.workspace.wallpaper = ./wallpaper.png;
 

@@ -13,7 +13,7 @@ SSH_TYPE=ed25519
 # Utility methods
 info() {
   # shellcheck disable=SC2059
-  printf '\r  [ \033[00;34m..\033[0m ] %s\n' "$1"
+  printf '\r[ \033[00;34m..\033[0m ] %s\n' "$1"
 }
 
 success() {
@@ -23,7 +23,7 @@ success() {
 
 fail() {
   # shellcheck disable=SC2059
-  printf '\r\033[2K  [\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2 # Redirect to stderror
+  printf '\r\033[2K[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2 # Redirect to stderror
   exit 1
 }
 
@@ -72,13 +72,12 @@ initialize_age_key() {
   fi
 }
 
-command -v git > /dev/null || fail "git is not available"
 command -v bw > /dev/null || fail "bitwarden-cli is not available"
 command -v jq > /dev/null || fail "jq is not available"
 
 if [ "$#" -ne 1 ] || [ "$1" == "--help" ]; then
   usage
-  exit
+  exit 1
 fi
 
 HOME_LOCATION="$1"
