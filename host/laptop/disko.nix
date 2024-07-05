@@ -59,94 +59,95 @@
        };
      };
    };
-  zpool = {
-    zroot = {
-      type = "zpool";
+   zpool = {
+     zroot = {
+        type = "zpool";
 
-      # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#general-recommendations
-      rootFsOptions = {
-        compression = "lz4";
-        xattr = "sa";
-        atime = "off";
+        # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#general-recommendations
+        rootFsOptions = {
+          compression = "lz4";
+          xattr = "sa";
+          atime = "off";
+        };
+
+        options = {
+          # SSD supports 512/512 (physical/logical):
+          #   $ lsblk -t /dev/nvme0n1
+          #
+          # But.. it actually supports 4096/4096:
+          #   $ nvme id-ns -H /dev/nvme0n1
+          #
+          # 512/512 is mostly for compatability reasons and, in our case, we can set it by setting it up accordingly:
+          # $ nvme format --lbaf=1 /dev/nvme0n1
+          #
+          # https://wiki.archlinux.org/title/Advanced_Format
+          # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
+          ashift = "12";
+        };
+        #mountpoint = "/";
+        #postCreateHook = "zfs snapshot zroot@blank";
+
+        # https://github.com/KornelJahn/nixos-disko-zfs-test/blob/main/hosts/testhost-disko.nix
+        datasets =
+          let
+            systemDatasets = {
+              system = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "system/root" = {
+                type = "zfs_fs";
+                # options.mountpoint = "legacy";
+                mountpoint = "/";
+                postCreateHook = ''zfs snapshot zroot/system/root@blank'';
+              };
+              "system/nix" = {
+                type = "zfs_fs";
+                mountpoint = "/nix";
+              };
+              "system/persist" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/system";
+              };
+              "system/cache" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/system/cache";
+              };
+            };
+
+            homeDatasets = {
+              home = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "home/bphenriques" = {
+                type = "zfs_fs";
+                options.mountpoint = "none";
+              };
+              "home/bphenriques/documents" = {
+                type = "zfs_fs";
+                mountpoint = "/home/bphenriques/documents";
+              };
+              "home/bphenriques/persist" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/bphenriques";
+              };
+              "home/bphenriques/cache" = {
+                type = "zfs_fs";
+                mountpoint = "/persist/bphenriques/cache";
+              };
+            };
+
+            dataDatasets = {
+              "data" = {
+                type = "zfs_fs";
+                mountpoint = "/mnt/data";
+              };
+            };
+
+          in systemDatasets // homeDatasets // dataDatasets;
       };
-
-      options = {
-        # SSD supports 512/512 (physical/logical):
-        #   $ lsblk -t /dev/nvme0n1
-        #
-        # But.. it actually supports 4096/4096:
-        #   $ nvme id-ns -H /dev/nvme0n1
-        #
-        # 512/512 is mostly for compatability reasons and, in our case, we can set it by setting it up accordingly:
-        # $ nvme format --lbaf=1 /dev/nvme0n1
-        #
-        # https://wiki.archlinux.org/title/Advanced_Format
-        # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
-        ashift = "12";
-      };
-      mountpoint = "/";
-      postCreateHook = "zfs snapshot zroot@blank";
-
-      # https://github.com/KornelJahn/nixos-disko-zfs-test/blob/main/hosts/testhost-disko.nix
-      datasets =
-        let
-          systemDatasets = {
-            system = {
-              type = "zfs_fs";
-              options.mountpoint = "none";
-            };
-            "system/root" = {
-              type = "zfs_fs";
-              mountpoint = "/";
-              postCreateHook = ''zfs snapshot zroot/system/root@blank'';
-            };
-            "system/nix" = {
-              type = "zfs_fs";
-              mountpoint = "/nix";
-            };
-            "system/persist" = {
-              type = "zfs_fs";
-              mountpoint = "/persist/system";
-            };
-            "system/cache" = {
-              type = "zfs_fs";
-              mountpoint = "/persist/system/cache";
-            };
-          };
-
-          homeDatasets = {
-            home = {
-              type = "zfs_fs";
-              options.mountpoint = "none";
-            };
-            "home/bphenriques" = {
-              type = "zfs_fs";
-              options.mountpoint = "none";
-            };
-            "home/bphenriques/documents" = {
-              type = "zfs_fs";
-              mountpoint = "/home/bphenriques/documents";
-            };
-            "home/bphenriques/persist" = {
-              type = "zfs_fs";
-              mountpoint = "/persist/bphenriques";
-            };
-            "home/bphenriques/cache" = {
-              type = "zfs_fs";
-              mountpoint = "/persist/bphenriques/cache";
-            };
-          };
-
-          dataDatasets = {
-            "data" = {
-              type = "zfs_fs";
-              mountpoint = "/mnt/data";
-            };
-          };
-
-        in systemDatasets // homeDatasets // dataDatasets;
     };
-   };
   };
 
   fileSystems = {

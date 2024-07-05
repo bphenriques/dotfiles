@@ -51,6 +51,7 @@
         ];
         config.permittedInsecurePackages = [
           "electron-24.8.6" # FIXME: Unsure who uses it.
+          "electron-28.3.3"
         ];
         overlays = (import ./overlays { inherit inputs; });
       };

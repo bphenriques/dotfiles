@@ -14,13 +14,11 @@
     ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
     ./disko.nix                           # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos                           # My default nixos settings
-    ../../home                             # My default nixos settings
-    ./bphenriques.nix                     # Users
+    ./bphenriques.nix                     # Home
     ./impermanence.nix
     ./zfs.nix                             # Service
   ];
 
-  networking.hostId = "5b318853";
   networking.hostName = "bphenriques-laptop";
 
   # Bootloader
@@ -32,11 +30,6 @@
     gfxmodeBios = "1440x900,auto";
     configurationLimit = 5;
   };
-  #boot.loader.grub2-theme = {
-  #  enable = true;
-  #  theme = "vimix";
-  #  footer = true;
-  #};
 
   # Desktop environment
   services = {

@@ -98,7 +98,7 @@ in
     };
   };
 
-  boot.initrd.postDeviceCommands = ''zfs rollback -r zroot@blank'';
+  boot.initrd.postDeviceCommands = ''zfs rollback -r zroot/system/root@blank'';
   security.sudo.extraConfig = ''
     # Rollback triggers the lecture everytime
     Defaults lecture = never
