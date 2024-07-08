@@ -120,6 +120,10 @@
 
   fonts.fontconfig.enable = true;
 
+  home.activation = lib.mkAfter ''
+    git clone git@github.com:bphenriques/dotfiles.git "$tmp" && mv "$tmp" "$DOTFILES_LOCATION"
+  '';
+
   imports = [
     ./terminal
     ./git

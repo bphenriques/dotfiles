@@ -22,7 +22,6 @@
     nvidiaSettings = true;
     powerManagement.enable = true;
     powerManagement.finegrained = true;
-    #package = config.boot.kernelPackages.nvidiaPackages.beta;
     open = false;
     prime = {
       offload.enable = true;
@@ -33,7 +32,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    lenovo-legion
+    lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
     # (nvtopPackages.nvidia.override { amd = true; })
     # amdgpu_top
   ];
@@ -41,8 +40,11 @@
   # Avoid issues with modesetting causing blank screen
   services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true; # Power up the bluetooth controller on boot
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true; # Power up the bluetooth controller on boot
+  };
   services.blueman.enable = true;
 
   # SSD

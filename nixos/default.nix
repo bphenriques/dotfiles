@@ -28,6 +28,7 @@
   ];
 
   # Programs
+  programs.fish.enable = true;                          # System level: source vendor's completions or functions.
   programs.partition-manager.enable = true;
   environment.systemPackages = with pkgs; [
     p7zip     # Zip/Unzip that supports all the formats I need
@@ -63,6 +64,12 @@
     };
   };
 
+  services.journald.extraConfig = ''
+    MaxRetentionSec=1month
+    SystemMaxUse=1G
+  '';
+
+  # TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
   # Disabling some defaults
   programs.command-not-found.enable = false;
   programs.nano.enable = false;

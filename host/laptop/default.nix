@@ -14,6 +14,7 @@
     ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
     ./disko.nix                           # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos                           # My default nixos settings
+    ../../nixos/profiles/development.nix
     ./bphenriques.nix                     # Home
     ./impermanence.nix
     ./zfs.nix                             # Service
@@ -50,6 +51,17 @@
 
   # Update firmware. Use fwupdmgr
   services.fwupd.enable = true;
+
+  custom.profiles = {
+    gaming = {
+      enable = true;
+      defaultProtonDir = "/mnt/data/GlobalProton";
+    };
+  };
+
+  # TODO: Laptop related stuff? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/laptop/default.nix
+
+  # Power profile? https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/hardware/upower/default.nix
 
   # The release version of the first install of this system. Leave as it is!
   system.stateVersion = "24.05";

@@ -159,4 +159,25 @@
     "/persist/bphenriques".neededForBoot = true;
     "/persist/bphenriques/cache".neededForBoot = true;
   };
+
+  sytemd.tmpfiles.settings = {
+    "grant-bphenriques-permissions" = {
+      "/home/bphenriques/documents" = {
+        e = {
+          user = "bphenriques";
+          group = "users";
+          mode = "0700";    # Only accessible by the user
+        };
+      };
+      "grant-users-permissions-data" = {
+        "/mnt/data" = {
+          e = {
+            user = "bphenriques";
+            group = "users";
+            mode = "775";     # Accessible by everyone.
+          };
+        };
+      };
+    };
+  };
 }
