@@ -18,7 +18,7 @@ in
   programs.direnv = {
     enable                  = true; # Automatically load .envrc or .env.
     nix-direnv.enable       = true; # Faster direnv for nix environments.
-    extra.disableLogging    = true; # Disable verbose messages when entering a directory.
+    silent                  = true; # Disable verbose messages when entering a directory.
   };
 
   programs.fish = {

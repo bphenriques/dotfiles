@@ -1,5 +1,7 @@
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
+# TODO: https://github.com/jordanisaacs/dotfiles/blob/master/scripts/default.nix#L47
+
 .PHONY=s,sync
 s sync:
 	"$(ROOT_DIR)"/bin/sync.sh

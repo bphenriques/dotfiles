@@ -1,18 +1,24 @@
-{ ... }:
+{ lib, ... }:
 
 # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
 # https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
 let
+  zfsdiff = ''
+    zfs diff zroot/system/root@blank -F | ${pkgs.ripgrep}/bin/rg -e "\+\s+/\s+" | cut -f3- | ${pkgs.skim}/bin/sk --query "/home/bphenriques/"
+  '';
   system = {
     config = {
       source = "/persist/system";
       directories = [
         "/var/log"
 
+        # Docker
+        "/var/lib/docker"
+
         # Connectivity
         "/var/lib/bluetooth"
         "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
-        "/etc/NetworkManager/system-connections"
+        "/etc/NetworkManager"
       ];
       files = [
         "/etc/machine-id"
@@ -31,10 +37,15 @@ let
       source = "/persist/bphenriques";
       directories = [
         "Downloads"
+        "Music"
+        "Pictures"
+        "Videos"
         ".config/systemd" # git maintenance systemd timers
         ".config/vlc"
         ".mozilla"        # Firefox
         ".config/sops"
+
+        ".dotfiles"
 
         # SSH
         { directory = ".ssh"; mode = "0700"; }
@@ -58,8 +69,11 @@ let
 
         ".local/share/lutris"
 
+        ".config/sunshine"
+        ".config/sunshine"
+
         # Shell
-        "local/share/fish"
+        ".local/share/fish"
         ".local/share/zoxide"
         ".bash_history"
       ];
@@ -98,7 +112,12 @@ in
     };
   };
 
-  boot.initrd.postDeviceCommands = ''zfs rollback -r zroot/system/root@blank'';
+  environment.packages = [ zfsdiff ];
+
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    zfs rollback -r zroot/system/root@blank
+  '';
+
   security.sudo.extraConfig = ''
     # Rollback triggers the lecture everytime
     Defaults lecture = never

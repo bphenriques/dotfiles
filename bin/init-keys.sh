@@ -59,6 +59,18 @@ initialize_github_ssh_key() {
   fi
 }
 
+upload_ssh_key_github() {
+  local title="$1"
+  local target="$2"
+  curl -L \
+    -X POST \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/user/keys \
+    -d "{\"title\":\"title\", \"key\":\"$(cat "${target}.pub")\"}"
+}
+
 initialize_age_key() {
   local target="$1"
   if [ -f "${target}" ]; then

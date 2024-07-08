@@ -50,7 +50,8 @@
           "libretro-fbneo"
         ];
         config.permittedInsecurePackages = [
-          "electron-24.8.6" # FIXME: Unsure who uses it.
+          "electron-24.8.6"
+          "electron-27.3.11"
           "electron-28.3.3"
         ];
         overlays = (import ./overlays { inherit inputs; });
@@ -62,6 +63,10 @@
           automatic = true;
           dates = "weekly";
           options = "--delete-older-than 7d";
+        };
+        settings = {
+          auto-optimise-store = true;
+          # TODO: Consider this for wayland: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/core/default.nix#L92
         };
       };
 

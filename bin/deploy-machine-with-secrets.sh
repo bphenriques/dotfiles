@@ -9,7 +9,12 @@ usage() {
   echo "deploy-machine-with-secrets.sh <flake-target> <host> <home-directory>
 
 Example:
-  nix-shell --packages bitwarden-cli jq --command ./bin/deploy-machine-with-secrets.sh .#laptop nixos@192.168.68.62 /home/bphenriques
+
+  1. Start by installing the dependencies: nix-shell --packages bitwarden-cli jq
+  2. Then login using: bw login && bw unlock
+  3. Then:
+    1. From the NixOS installer: ./bin/deploy-machine-with-secrets.sh .#laptop nixos@192.168.68.62 /persist/bphenriques/home/bphenriques
+    2. From an already running machine: ./bin/deploy-machine-with-secrets.sh .#laptop bphenriques@192.168.68.62 /persist/bphenriques/home/bphenriques
 "
 }
 
@@ -23,7 +28,7 @@ HOST="$2"
 HOME_DIRECTORY="$3"
 
 temp="$(mktemp -d)"
-if ! "$SCRIPT_PATH"/init-secrets.sh "$temp/$HOME_DIRECTORY"; then
-  fail "Failed to initialize secrets. Aborting"
+if ! "$SCRIPT_PATH"/init-keys.sh "$temp/$HOME_DIRECTORY"; then
+  fail "Failed to initialize keys. Aborting"
 fi
 nix run github:nix-community/nixos-anywhere -- --extra-files "$temp" --flake "${TARGET}" "${HOST}"

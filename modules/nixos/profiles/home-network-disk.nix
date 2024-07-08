@@ -24,7 +24,7 @@ let
   };
 in
 {
-  options.dotfiles.profiles.home-network-disk = with types; {
+  options.dotfiles.profiles.home-network-disk = with lib.types; {
     enable = mkOption {
       type = bool;
       default = false;
