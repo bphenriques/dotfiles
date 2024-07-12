@@ -4,6 +4,8 @@
 # TODO: https://codeberg.org/adamcstephens/dotfiles
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
+
+  custom.dotfiles.enable = true;
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils
@@ -33,6 +35,7 @@
     gnupg       # To manage GNUPG keys.
     openssl     # Generate keys with openssl rand -hex 32
     sops
+    bitwarden-cli
 
     # Web
     wget        # Download stuff.
@@ -117,12 +120,7 @@
       } else { }
     );
   };
-
   fonts.fontconfig.enable = true;
-
-  home.activation = lib.mkAfter ''
-    git clone git@github.com:bphenriques/dotfiles.git "$tmp" && mv "$tmp" "$DOTFILES_LOCATION"
-  '';
 
   imports = [
     ./terminal

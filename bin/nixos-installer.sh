@@ -13,8 +13,8 @@ Example:
   1. Start by installing the dependencies: nix-shell --packages bitwarden-cli jq
   2. Then login using: bw login && bw unlock
   3. Then:
-    1. From the NixOS installer: ./bin/deploy-machine-with-secrets.sh .#laptop nixos@192.168.68.62 /persist/bphenriques/home/bphenriques
-    2. From an already running machine: ./bin/deploy-machine-with-secrets.sh .#laptop bphenriques@192.168.68.62 /persist/bphenriques/home/bphenriques
+    1. From the NixOS installer: ./bin/nixos-installer.sh .#laptop nixos@192.168.68.62 /persist/config/bphenriques/home/bphenriques
+    2. From an already running machine: ./bin/nixos-installer.sh .#laptop bphenriques@192.168.68.62 /persist/config/bphenriques/home/bphenriques
 "
 }
 

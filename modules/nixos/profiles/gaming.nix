@@ -4,8 +4,7 @@
 # https://github.com/Emiller88/dotfiles/blob/master/modules/desktop/gaming/steam.nix
 # https://github.com/the-argus/nixsys/blob/main/modules/home-manager/gaming/default.nix#LL25C9-L25C22
 # https://github.com/danderson/homelab
-
-# TODO: Consider cleaning up Steam folder: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/programs/steam/default.nix
+# https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/programs/steam/default.nix
 
 with lib;
 let

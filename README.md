@@ -4,6 +4,8 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 
 ----
 
+# FIXME: quick idea of hte README: https://github.com/Prometheus7435/nix-config/blob/main/README.org
+
 # Quick start
 
 > [!IMPORTANT]
@@ -21,7 +23,7 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
 
    ```
    $ sudo fdisk -l
-   $ sudo dd bs=4M if=<ISO> of=<TARGET_PEN_DRIVE> status=progress oflag=sync
+   $ sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
 2. On the target machine, set `nixos`'s password using `passwd`.
@@ -40,27 +42,28 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    3. Set the `hardware-configuration.nix`.
    4. Review the disk layout under `disk-config.nix` (see [disko](https://github.com/nix-community/disko)).
    5. (opt): Set secrets:
-      1. Add public keys in `.sops.yaml` and the private key under `$HOME/.config/sops/age/keys.txt`
-      2. Create secret file using `sops host/<HOST>/secrets/sops.yaml`.
+      1. Add the shared public key `age160xsly2d84lz89vzhkussw3pth2fhkstx03cd7uc5df6zdpsfvnsktf7hs` in `.sops.yaml`.
+      2. Add if missing the corresponding private key under `$HOME/.config/sops/age/keys.txt`
+      3. Initialize a secret file using `sops host/<HOST>/secrets/sops.yaml`.
    6. Fine-tune the configuration.
-   7. Commit the changes (optionally push)
+   7. Commit the changes (optionally push).
 
-5. In the source machine run the following (replace `<HOST>` and `<IP>`):
+5. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
 
-   ```
-   $ nix run github:nix-community/nixos-anywhere -- --flake ".#<HOST>" root@<IP>
-   ```
-   # TODO: --extra-files likely copy a key? TODO: Get machine id head -c 8 /etc/machine-id
+    When using impermanence:
+    ```
+    $ ./bin/deploy-machine-with-secrets.sh .#<HOST> root@<IP> /persist/config/bphenriques/home/bphenriques
+    ```
 
-6. Once the initial installation succeeds, feel free to proceed to bootstrapping.
+    When not using impermanence:
+    ```
+    $ ./bin/deploy-machine-with-secrets.sh .#<HOST> root@<IP> /home/bphenriques
+    ```
 
-TODO:
-1. Import the private key using Bitwarden cli: `bw get item "NAME" | jq --raw-output '.notes' >> $HOME/.config/sops/age/keys.txt`
-2. Clone the repository and set call `./bin/git-secret-filter.sh init`
+6. Once the initial installation succeeds, the `.dotfiles` repository should be available.
 
-`--experimental-features "nix-command flakes"`
-
-At this stage, all secrets are setup and you can continue by using the dotfiles as you would normally.
+TODO: Run the `./bin/git-secret-filter.sh init`
+TODO: Add this command by default on all scripts: `--experimental-features "nix-command flakes"`
 
 # Non NixOS machines
 

@@ -48,7 +48,11 @@
           "libretro-genesis-plus-gx"
           "libretro-snes9x"
           "libretro-fbneo"
-        ];
+
+          # Cuda
+          "libnvjitlink"
+          "libnpp"
+        ] || (nixpkgs.lib.strings.hasPrefix "cuda" (nixpkgs.lib.getName pkg)) || (nixpkgs.lib.strings.hasPrefix "libcu" (nixpkgs.lib.getName pkg)); # Cuda
         config.permittedInsecurePackages = [
           "electron-24.8.6"
           "electron-27.3.11"

@@ -20,6 +20,8 @@
     xkb.layout = "us";
     xkb.variant = "";
     xkb.options = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+
+    excludePackages = [ pkgs.xterm ];
   };
 
   # Fonts (system-wide)
@@ -37,15 +39,13 @@
     museeks   # Audio
     amberol   # Another Audio music player. Yet another alternative: https://github.com/jeffvli/sonixd
     vlc       # Video
+    qbittorrent
 
     # Filesystems (will I ever need this?)
     exfat     # Windows drives
     ntfs3g    # Windows drives
     hfsprogs  # MacOS drives
   ];
-
-  # Services
-  services.qbittorrent.enable = true;
 
   # Localization
   time.timeZone = "Europe/Lisbon";
@@ -68,6 +68,8 @@
     MaxRetentionSec=1month
     SystemMaxUse=1G
   '';
+
+  # Security: https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/default.nix#L79
 
   # TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
   # Disabling some defaults

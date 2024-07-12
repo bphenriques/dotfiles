@@ -1,22 +1,6 @@
 { lib, ... }:
 {
-  # https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
-
-
-  # https://github.com/Prometheus7435/nix-config/blob/main/nixos/phoenix/disks.nix
-  # https://github.com/Prometheus7435/nix-config/blob/main/nixos/odyssey/disks.nix
-  # https://grahamc.com/blog/nixos-on-zfs/
-  # https://www.reddit.com/r/NixOS/comments/lvegkr/nixos_zfs_dataset_layout_questions/
-  # https://github.com/bhougland18/nixos_config
-  # https://jrs-s.net/2018/08/17/zfs-tuning-cheat-sheet/
-  # https://grahamc.com/blog/nixos-on-zfs/
-  # https://nixos.wiki/wiki/ZFS
-  # https://grahamc.com/blog/erase-your-darlings/
-  # https://www.reddit.com/r/NixOS/comments/11o5vgp/manage_zfs_pools_in_nixos/
-  # https://www.reddit.com/r/NixOS/comments/1ad0m5n/impermanence_disko_setup/
   # https://github.com/iynaix/dotfiles/blob/main/recover.sh
-  # https://github.com/iynaix/dotfiles/blob/main/nixos/zfs.nix
-
   disko.devices = {
     disk = {
       vda = {
@@ -59,6 +43,7 @@
        };
      };
    };
+
    zpool = {
      zroot = {
         type = "zpool";
@@ -73,23 +58,22 @@
         options = {
           # SSD supports 512/512 (physical/logical):
           #   $ lsblk -t /dev/nvme0n1
-          #
           # But.. it actually supports 4096/4096:
           #   $ nvme id-ns -H /dev/nvme0n1
-          #
-          # 512/512 is mostly for compatability reasons and, in our case, we can set it by setting it up accordingly:
+          # 512/512 is mostly for compatibility reasons and, in our case, we can set it by setting it up accordingly:
           # $ nvme format --lbaf=1 /dev/nvme0n1
           #
           # https://wiki.archlinux.org/title/Advanced_Format
           # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
           ashift = "12";
         };
-        #mountpoint = "/";
-        #postCreateHook = "zfs snapshot zroot@blank";
 
         # https://github.com/KornelJahn/nixos-disko-zfs-test/blob/main/hosts/testhost-disko.nix
         datasets =
           let
+            persistConfigLocation = "/persist/config";
+            persistCacheLocation = "/persist/cache";
+
             systemDatasets = {
               system = {
                 type = "zfs_fs";
@@ -107,11 +91,11 @@
               };
               "system/persist" = {
                 type = "zfs_fs";
-                mountpoint = "/persist/system";
+                mountpoint = "${persistConfigLocation}/system";
               };
               "system/cache" = {
                 type = "zfs_fs";
-                mountpoint = "/persist/system/cache";
+                mountpoint = "${persistCacheLocation}/system";
               };
             };
 
@@ -124,17 +108,19 @@
                 type = "zfs_fs";
                 options.mountpoint = "none";
               };
+/*
               "home/bphenriques/documents" = {
                 type = "zfs_fs";
                 mountpoint = "/home/bphenriques/documents";
               };
+*/
               "home/bphenriques/persist" = {
                 type = "zfs_fs";
-                mountpoint = "/persist/bphenriques";
+                mountpoint = "${persistConfigLocation}/bphenriques";
               };
               "home/bphenriques/cache" = {
                 type = "zfs_fs";
-                mountpoint = "/persist/bphenriques/cache";
+                mountpoint = "${persistCacheLocation}/bphenriques";
               };
             };
 
@@ -154,28 +140,26 @@
     "/".neededForBoot = true;
     "/nix".neededForBoot = true;
     "/boot".neededForBoot = true;
-    "/persist/system".neededForBoot = true;
-    "/persist/system/cache".neededForBoot = true;
-    "/persist/bphenriques".neededForBoot = true;
-    "/persist/bphenriques/cache".neededForBoot = true;
   };
 
-  sytemd.tmpfiles.settings = {
-    "grant-bphenriques-permissions" = {
+  systemd.tmpfiles.settings = {
+    # Only accessible by the bphenriques
+/*    "grant-bphenriques-permissions" = {
       "/home/bphenriques/documents" = {
         e = {
           user = "bphenriques";
           group = "users";
-          mode = "0700";    # Only accessible by the user
+          mode = "0700";
         };
       };
-      "grant-users-permissions-data" = {
-        "/mnt/data" = {
-          e = {
-            user = "bphenriques";
-            group = "users";
-            mode = "775";     # Accessible by everyone.
-          };
+    };*/
+    # Accessible by everyone
+    "grant-users-permissions-data" = {
+      "/mnt/data" = {
+        e = {
+          user = "bphenriques";
+          group = "users";
+          mode = "775";     # Accessible by everyone.
         };
       };
     };
