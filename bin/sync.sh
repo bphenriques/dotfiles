@@ -27,3 +27,5 @@ HOST_FILE_LOCATION="$HOME/.dotfiles/.nix-host"
 [ ! -f "$HOST_FILE_LOCATION" ] && fail "$HOST_FILE_LOCATION not found"
 
 sync_flake
+
+# TODO: Build commands for nixos: nix build ".#nixosConfigurations.laptop.config.system.build.toplevel" --show-trace

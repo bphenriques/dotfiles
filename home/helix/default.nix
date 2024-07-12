@@ -4,10 +4,17 @@
 
 let
   # The path needs to be absolute: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
-  helixCfg = "${config.home.homeDirectory}/.dotfiles/home/config/helix/config.toml";
-  helixLanguages = "${config.home.homeDirectory}/.dotfiles/home/config/helix/languages.toml";
+  helixCfg = "${config.custom.dotfiles.directory}/home/helix/config.toml";
+  helixLanguages = "${config.custom.dotfiles.directory}/home/helix/languages.toml";
 in
 {
+  assertions = [
+    {
+      assertion = config.custom.dotfiles.enable;
+      message = "dotfiles module is not enabled. It is required to access helix configuration files (just to make it easier to modify the files outside a nix generation).";
+    }
+  ];
+
   programs.helix = {
     enable = true;
 
@@ -24,7 +31,6 @@ in
     ];
   };
 
-  # Out of Nix Store file which allows me to try things out without having to recompile the project.
   xdg.configFile = {
     "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${helixCfg}";
     "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${helixLanguages}";

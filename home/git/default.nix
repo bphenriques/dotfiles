@@ -15,4 +15,8 @@
     "git/ignore".source      = ./ignore;
     "git/gitmessage".source  = ./gitmessage;
   };
+
+  custom.impermanence.config.directories = [
+    ".config/systemd" # git maintenance systemd timers
+  ];
 }

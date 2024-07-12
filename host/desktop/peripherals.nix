@@ -1,7 +1,4 @@
 { config, ... }:
-let
-  hostDir = "/home/${config.user.name}/.dotfiles/host/desktop";
-in
 {
   ## Mouse - Using solaar and input-remapper to control my mouse's side buttons.
   modules.services = {
@@ -12,7 +9,10 @@ in
   # Terrible Hack as workaround to readonly FS: https://github.com/sezanzeb/input-remapper/issues/663
   # mkOutOfStoreSymlink allows me to create a file outside of the store. I.e., to the actual file in the repo.
   # The path actually needs to be full due to: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
-  home = { config, ... }: { # ensure config is within home-manager's context
+  home = { config, ... }: let
+    hostDir = "/home/${config.custom.dotfiles.directory}/.dotfiles/host/desktop";
+  in
+  { # ensure config is within home-manager's context
     xdg.configFile = {
       "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/config.json";
       "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${hostDir}/input-remapper/Media.json";

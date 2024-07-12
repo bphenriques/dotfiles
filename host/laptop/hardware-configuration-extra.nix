@@ -33,8 +33,8 @@
 
   environment.systemPackages = with pkgs; [
     lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
-    # (nvtopPackages.nvidia.override { amd = true; })
-    # amdgpu_top
+    (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
+    #amdgpu_top
   ];
 
   # Avoid issues with modesetting causing blank screen
@@ -60,5 +60,3 @@
     touchpad.tapping = true;
   };
 }
-
-# This one is nice: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L35

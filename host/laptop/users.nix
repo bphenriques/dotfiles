@@ -1,11 +1,16 @@
 { config, pkgs, lib, ... }:
 {
   # TODO: check https://github.com/iynaix/dotfiles/blob/main/nixos/users.nix
-  users.users.bphenriques = {
-    isNormalUser = true;
-    initialPassword = "password";
-    description = "bphenriques";
-    extraGroups = [ "wheel" "networkmanager" "docker" ];
+  users = {
+    mutableUsers = false;
+    users = {
+      bphenriques = {
+        isNormalUser = true;
+        hashedPasswordFile = config.sops.secrets.bphenriques_password.path;
+        description = "bphenriques";
+        extraGroups = [ "wheel" "networkmanager" "docker" ];
+      };
+    };
   };
   users.users.bphenriques.shell = pkgs.fish;  # Fish is managed in Home-Manager. Keeping the default shell for root.
 
@@ -31,6 +36,8 @@
     xdg.userDirs.enable = true;
     xdg.userDirs.createDirectories = false;
     xdg.mimeApps.enable = true; # TODO: Create associations?
+
+    custom.dotfiles.host = "laptop";
 
     # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
     # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?

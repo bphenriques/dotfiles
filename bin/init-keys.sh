@@ -27,6 +27,12 @@ fail() {
   exit 1
 }
 
+press_to_continue() {
+  info 'Press any key to continue'
+  # shellcheck disable=SC2162
+  read _
+}
+
 usage() {
   echo "init-secrets.sh <home-directory>
 
@@ -55,20 +61,11 @@ initialize_github_ssh_key() {
     info 'Github SSH Key - Initializing a new one for the host!'
     mkdir -p "$(dirname "$target")"
     ssh-keygen -t "$SSH_TYPE" -C "$SSH_KEY_EMAIL_ADDRESS" -f "$target"
+    info "SSH Key - Copy the following public key to https://github.com/settings/ssh/new"
+    cat "$target.pub"
+    press_to_continue
     success 'Github SSH Key - Installed!'
   fi
-}
-
-upload_ssh_key_github() {
-  local title="$1"
-  local target="$2"
-  curl -L \
-    -X POST \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    https://api.github.com/user/keys \
-    -d "{\"title\":\"title\", \"key\":\"$(cat "${target}.pub")\"}"
 }
 
 initialize_age_key() {
@@ -96,6 +93,6 @@ HOME_LOCATION="$1"
 
 info "Bootstrapping secrets under $HOME_LOCATION"
 temp="$(mktemp -d)"
-initialize_github_ssh_key "$HOME_LOCATION/.ssh/id_$SSH_TYPE"
 initialize_age_key "$HOME_LOCATION/.config/sops/age/keys.txt"
+initialize_github_ssh_key "$HOME_LOCATION/.ssh/id_$SSH_TYPE"
 success "Complete!"

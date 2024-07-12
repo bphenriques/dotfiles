@@ -1,2 +1,0 @@
-sudo chown bphenriques:users /home/bphenriques/documents
-sudo chown bphenriques:root /mnt/data

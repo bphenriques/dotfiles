@@ -30,6 +30,11 @@
     configurationLimit = 5;
   };
 
+  sops = {
+    age.keyFile = "/home/${config.user.name}/.config/sops/age/keys.txt";
+    defaultSopsFile = ./secrets/desktop.yaml;
+  };
+
   # Latest kernel (aka the one pinned under flake.lock)
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
