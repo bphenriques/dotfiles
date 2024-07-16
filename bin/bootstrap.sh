@@ -116,8 +116,14 @@ clone_default_repos() {
   if [ ! -d "$DOTFILES_LOCATION" ]; then
     info 'Cloning Repos - dotfiles...'
     git clone -b main git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+    success 'Cloning Repos - finished!'
+  elif ! git status "${cfg.directory}"; then
+    info 'Cloning Repos - dotfiles...'
+    git clone -b main git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+    success 'Cloning Repos - finished!'
+  else
+    success 'Cloning Repos - Already present!'
   fi
-  success 'Cloning Repos - finished!'
 }
 
 setup_ssh() {
@@ -130,8 +136,10 @@ setup_ssh() {
     cat "$SSH_KEY_LOCATION"
     info "---------------"
     press_to_continue
+    success 'SSH Key - Done!'
+  else
+    success 'SSH Key - Already set-up!'
   fi
-  success 'SSH Key - Done!'
 }
 
 select_host() {
