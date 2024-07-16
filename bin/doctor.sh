@@ -23,6 +23,15 @@ check_shell() {
   esac
 }
 
+verify_sops_secrets() {
+  info 'Sops secrets - Checking...'
+  if [ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]; then
+    fail "Missing Sops secrets file: $XDG_CONFIG_HOME/sops/age/keys.txt"
+  else
+    success "Sops secrets present in $XDG_CONFIG_HOME/sops/age/keys.txt"
+  fi
+}
+
 assert_installed() {
   if command -v "$1" >/dev/null; then
     success "$1 - Installed!"
@@ -43,7 +52,8 @@ case "$(uname -s)" in
   Darwin)
     assert_installed brew
     ;;
-  *) ;;
+  *)
+    ;;
 esac
 
 check_shell
@@ -54,11 +64,7 @@ else
   fail "Nix Host - Invalid host! It is $(cat "$HOST_FILE_LOCATION")"
 fi
 
-if test -f "$XDG_CONFIG_HOME/sops/age/keys.txt"; then
-  success "Sops Secrets - Keys present!"
-else
-  fail "Sops Secrets - Keys file missing: $XDG_CONFIG_HOME/sops/age/keys.txt"
-fi
+verify_sops_secrets
 
 if test -f "$HOME/.ssh/id_ed25519"; then
   success "SSH Key: id_ed25519 set"

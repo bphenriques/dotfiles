@@ -37,6 +37,7 @@
     xdg.userDirs.createDirectories = false;
     xdg.mimeApps.enable = true; # TODO: Create associations?
 
+    custom.dotfiles.privateSSHPath = "/persist/config/bphenriques/home/bphenriques/.ssh/id_ed25519";
     custom.dotfiles.host = "laptop";
 
     # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
@@ -45,3 +46,5 @@
     home.stateVersion = "24.05";
   };
 }
+
+# TODO: https://search.nixos.org/options?channel=unstable&show=networking.networkmanager.ensureProfiles.profiles&from=0&size=200&sort=relevance&type=packages&query=networking.networkmanager.ensureProfiles

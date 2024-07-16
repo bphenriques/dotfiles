@@ -1,5 +1,7 @@
 { pkgs, lib, config, ... }:
 
+# NOT BEING USED. Iterating...
+
 # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
 # https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
   # For when I use tmpfs: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L34
@@ -16,24 +18,6 @@
 let
   cfg = config.custom.impermanence;
   hmUsersCfg = config.home-manager.users;
-  persistStorageConfig = lib.types.submodule {
-    options = {
-      location = lib.mkOption {
-        type = with lib.types; str;
-        description = "Location of the persist directory";
-      };
-      directories = lib.mkOption {
-        type = with lib.types; listOf str;
-        default = [ ];
-        description = "Home directories to persist";
-      };
-      files = lib.mkOption {
-        type = with lib.types; listOf str;
-        default = [ ];
-        description = "Home files to persist";
-      };
-    };
-  };
 in
 {
   options.custom.impermanence = {
@@ -44,18 +28,14 @@ in
       example = "zroot/system/root@blank";
     };
 
-    root = {
-      config = lib.mkOption {
-        type = persistStorageConfig;
-        default = {};
-        description = "Persist options for configuration files not managed through Nix.";
-      };
+    configLocation = lib.mkOption {
+      type = with lib.types; str;
+      description = "Location of the system's configuration persist directory";
+    };
 
-      cache = lib.mkOption {
-        type = persistStorageConfig;
-        default = {};
-        description = "Persist options for cache files that are safe to delete but it is preferable to persist";
-      };
+    cacheLocation = lib.mkOption {
+      type = with lib.types; str;
+      description = "Location of the system's configuration persist directory";
     };
   };
 
@@ -71,31 +51,17 @@ in
     security.sudo.extraConfig = "Defaults lecture=never";  # Rollback triggers the lecture everytime
 
     fileSystems = {
-      "${cfg.root.config.location}".neededForBoot = true;
-      "${cfg.root.cache.location}".neededForBoot = true;
-      "${hmUsersCfg.bphenriques.custom.impermanence.config.location}".neededForBoot = true;
-      "${hmUsersCfg.bphenriques.custom.impermanence.cache.location}".neededForBoot = true;
+      "${cfg.configLocation}".neededForBoot = true;
+      "${cfg.cacheLocation}".neededForBoot = true;
+      "${hmUsersCfg.bphenriques.custom.impermanence.configLocation}".neededForBoot = true;
+      "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
     };
 
-    environment.persistence = let
-      merge = lib.foldr (a: b: a // b) { };
-      mkPersistDir = { location, directories, files }: {
-        "${location}" = {
-          inherit files directories;
-          hideMounts = true;
-        };
-      };
-      mkHomePersistDir = username: { location, directories, files }: {
-        "${location}" = {
-          users.${username} = { inherit files directories; };
-          hideMounts = true;
-        };
-      };
-    in merge [
-      (mkPersistDir cfg.root.config)
-      (mkPersistDir cfg.root.cache)
-      (mkHomePersistDir "bphenriques" hmUsersCfg.bphenriques.custom.impermanence.config)
-      (mkHomePersistDir "bphenriques" hmUsersCfg.bphenriques.custom.impermanence.cache)
-    ];
+
+    #hideMounts = true;
+
+    #environment.persistence.${config.custom.impermanence.configLocation} = {
+
+    #};
   };
 }

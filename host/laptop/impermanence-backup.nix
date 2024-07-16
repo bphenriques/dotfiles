@@ -48,55 +48,55 @@ in
       files = [ ];
       directories = [ ];
     };
+  };
 
-    "/persist/config/bphenriques" = {
-      hideMounts = true;
-      users.bphenriques = {
-        directories = [
-          "Downloads"
-          "Music"
-          "Pictures"
-          "Videos"
-          ".config/systemd" # git maintenance systemd timers
-          ".config/vlc"
-          ".mozilla"        # Firefox
-          ".config/sops"
+  programs.fuse.userAllowOther = true;
+  home-manager.users.bphenriques = {
+    home.persistence."/persist/config/bphenriques" = {
+      allowOther = true;
+      directories = [
+        "Downloads"
+        "Music"
+        "Pictures"
+        "Videos"
+        ".config/systemd" # git maintenance systemd timers
+        ".config/vlc"
+        ".mozilla"        # Firefox
+        ".config/sops"
 
-          ".dotfiles"
+        ".dotfiles"
 
-          # SSH
-          { directory = ".ssh"; mode = "0700"; }
+        # SSH
+        ".ssh"
+        #{ directory = ; user = "bphenriques"; group = "users"; mode = "0700"; }
 
-          # Steam
-          ".local/share/Steam"
-          ".config/lutris"
+        # Steam
+        ".local/share/Steam"
+        ".config/lutris"
 
-          ".local/share/nix" # trusted settings and repl history
-        ];
-        files = [ ];
-      };
+        ".local/share/nix" # trusted settings and repl history
+      ];
+      files = [ ];
     };
 
-    "/persist/cache/bphenriques" = {
-      hideMounts = true;
-      users.bphenriques = {
-        directories = [
-          ".cache/dconf"
-          ".config/dconf"
-          ".cache/nix"
-          ".cache/mozilla"  # Firefox
+    home.persistence."/persist/cache/bphenriques" = {
+      allowOther = true;
+      directories = [
+        ".cache/dconf"
+        ".config/dconf"
+        ".cache/nix"
+        ".cache/mozilla"  # Firefox
 
-          ".local/share/lutris"
+        ".local/share/lutris"
 
-          ".config/sunshine"
+        ".config/sunshine"
 
-          # Shell
-          ".local/share/fish"
-          ".local/share/zoxide"
-          ".bash_history"
-        ];
-        files = [ ];
-      };
+        # Shell
+        ".local/share/fish"
+        ".local/share/zoxide"
+        ".bash_history"
+      ];
+      files = [ ];
     };
   };
 
