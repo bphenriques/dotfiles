@@ -79,6 +79,6 @@ in
     };
   };
 
-  custom.impermanence.config.directories = [ ".mozilla" ];
-  custom.impermanence.cache.directories = [ ".cache/mozilla" ];
+  #custom.impermanence.config.directories = [ ".mozilla" ];
+  #custom.impermanence.cache.directories = [ ".cache/mozilla" ];
 }

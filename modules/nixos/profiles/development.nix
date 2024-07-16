@@ -18,7 +18,7 @@ in
     ];
 
     virtualisation.docker.enable = true;
-    custom.impermanence.root.config.directories = [ "/var/lib/docker" ];
+    #custom.impermanence.root.config.directories = [ "/var/lib/docker" ];
   };
 }
 

@@ -10,6 +10,9 @@
           "/var/log"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
 
+          # Docker
+          "/var/lib/docker"
+
           # Connectivity
           "/var/lib/bluetooth"
           "/etc/NetworkManager"

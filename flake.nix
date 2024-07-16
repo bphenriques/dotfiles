@@ -90,6 +90,7 @@
       homeManagerModules = [
         sops-nix.homeManagerModules.sops
         plasma-manager.homeManagerModules.plasma-manager
+        impermanence.nixosModules.home-manager.impermanence
       ] ++ attrValues self.homeManagerModules;
 
       nixosModules = [

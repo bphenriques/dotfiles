@@ -115,9 +115,7 @@ clone_default_repos() {
   info 'Cloning Repos - Checking...'
   if [ ! -d "$DOTFILES_LOCATION" ]; then
     info 'Cloning Repos - dotfiles...'
-    # Unfortunately, can't create the hidden folder directly.
-    tmp=$(mktemp -d)
-    git clone git@github.com:bphenriques/dotfiles.git "$tmp" && mv "$tmp" "$DOTFILES_LOCATION"
+    git clone -b main git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
   fi
   success 'Cloning Repos - finished!'
 }
@@ -127,21 +125,11 @@ setup_ssh() {
   if [ ! -f "$SSH_KEY_LOCATION" ]; then
     info 'SSH Key - Setting it up!'
     ssh-keygen -t $SSH_TYPE -C "$SSH_KEY_EMAIL_ADDRESS"
-
-    case "$(uname -s)" in
-        Darwin)
-            cat "$SSH_KEY_LOCATION" | pbcopy
-            open https://github.com/settings/ssh/new
-            press_to_continue
-            ;;
-        *)
-            info "SSH Key - Copy the following public key to https://github.com/settings/ssh/new"
-            info "---------------"
-            cat "$SSH_KEY_LOCATION"
-            info "---------------"
-            press_to_continue
-            ;;
-    esac
+    info "SSH Key - Copy the following public key to https://github.com/settings/ssh/new"
+    info "---------------"
+    cat "$SSH_KEY_LOCATION"
+    info "---------------"
+    press_to_continue
   fi
   success 'SSH Key - Done!'
 }
@@ -166,15 +154,6 @@ select_host() {
   success "Nix Host Type - Set to '$(cat "$HOST_FILE_LOCATION")'!"
 }
 
-verify_sops_secrets() {
-  info 'Sops secrets - Checking...'
-  if [ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]; then
-    fail "Missing Sops secrets file: $XDG_CONFIG_HOME/sops/age/keys.txt"
-  else
-    success "Sops secrets present in $XDG_CONFIG_HOME/sops/age/keys.txt"
-  fi
-}
-
 setup_git_filter() {
   info 'Nix Evaluation Secrets - Checking...'
   if ! "$DOTFILES_LOCATION"/bin/git-secret-filter.sh doctor; then
@@ -190,11 +169,12 @@ check_requirements
 setup_ssh
 install_nix_flakes
 case "$(uname -s)" in
-    Darwin)
-      install_nix_darwin
-      install_homebrew
-      ;;
-    *)  ;;
+  Darwin)
+    install_nix_darwin
+    install_homebrew
+    ;;
+  *)
+    ;;
 esac
 clone_default_repos
 select_host
