@@ -41,6 +41,7 @@
   services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
 
   # Bluetooth
+  # TODO: https://github.com/bbigras/nix-config/blob/master/hardware/bluetooth.nix
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true; # Power up the bluetooth controller on boot
@@ -52,6 +53,14 @@
 
   # Run zramctl to check how good memory is compressed
   zramSwap.enable = true;
+
+  # FIXME:
+  #  systemd.network.wait-online.enable = false;
+  #  boot.initrd.systemd.network.wait-online.enable = false;
+  #  networking.wireless.dbusControlled = false;
+
+  # FIXME: Battery stuff: https://github.com/bbigras/nix-config/blob/master/hosts/laptop/default.nix#L173
+
 
   # Touchpad
   services.libinput = {

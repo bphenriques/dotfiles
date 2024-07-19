@@ -5,7 +5,7 @@
 # https://github.com/the-argus/nixsys/blob/main/modules/home-manager/gaming/default.nix#LL25C9-L25C22
 # https://github.com/danderson/homelab
 # https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/programs/steam/default.nix
-
+# https://github.com/bbigras/nix-config/blob/master/core/steam.nix
 with lib;
 let
   cfg = config.custom.profiles.gaming;

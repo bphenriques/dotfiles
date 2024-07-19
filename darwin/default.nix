@@ -92,12 +92,9 @@
   };
 
   # Fonts (system-wide)
-  fonts = {
-    fontDir.enable = true;
-    fonts = with pkgs; [
-      (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
-    ];
-  };
+  fonts.packages = with pkgs; [
+    (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
+  ];
 
   homebrew = {
     enable = true;

@@ -1,13 +1,15 @@
 #!/usr/bin/env sh
-# shellcheck disable=SC1091,SC2181
 set -uf
-SCRIPT_PATH="$(dirname "$0")"
-# shellcheck source=util.sh
-. "$SCRIPT_PATH"/util.sh
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME"/.config} # Set if absent.
 DOTFILES_LOCATION="$HOME/.dotfiles"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION"/.nix-host
+
+info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
+warn() { printf '[ \033[01;33mWARN\033[0m ] %s\n' "$1"; }
+error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
+fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
 check_shell() {
   case $SHELL in
@@ -39,14 +41,6 @@ assert_installed() {
     fail "$1 - Not installed!"
   fi
 }
-
-assert_installed nix
-
-if command -v nix flake show templates >/dev/null; then
-  success 'Nix flake - Installed!'
-else
-  fail 'Nix flake - Not installed!'
-fi
 
 case "$(uname -s)" in
   Darwin)
