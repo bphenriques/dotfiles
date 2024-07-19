@@ -13,6 +13,15 @@ Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) config
 > I hope that this helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
 > If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
 
+What you will find here:
+- Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation.
+- Two types of secret management:
+  - [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
+  - Combination of `age` and `git-filter` for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
+
+The public keys are under `.sops.yaml` and the private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
+
+
 # NixOS
 
 Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation. Requires two machines:
@@ -26,9 +35,10 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    $ sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
-2. On the target machine, set `nixos`'s password using `passwd`.
-
-3. On the target machine, setup networking and note down the hardware/network information:
+2. On the target machine:
+   1. Set `nixos`'s password using `passwd`. 
+   2. Setup network connection (relevant if on wifi)
+   3. Note down the hardware/network information:
 
    ```
    $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
@@ -36,7 +46,7 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    $ ip route get 1.2.3.4 | awk '{print $7}'
    ```
 
-4. On the source machine:
+3. On the source machine:
    1. Clone this repository.
    2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
    3. Set the `hardware-configuration.nix`.
@@ -65,17 +75,23 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
 TODO: Run the `./bin/git-secret-filter.sh init`
 TODO: Add this command by default on all scripts: `--experimental-features "nix-command flakes"`
 
-# Non NixOS machines
+# Darwin
 
 1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.
 
-2. Bootstrap:
+2. Boostrap:
 
    ```sh
-   $ nix-shell --packages git --command "$(curl -fsSL https://raw.githubusercontent.com/bphenriques/dotfiles/master/bin/bootstrap.sh)"
+   $ nix run --extra-experimental-features 'nix-command flakes' ".#darwin-install"
+   ```
+   
+3. Install the dotfiles repository:
+
+   ```sh
+   $ nix run --extra-experimental-features 'nix-command flakes' ".#dotfiles-install" -- --host work-macos
    ```
 
-3. Apply:
+4. Apply:
    ```sh
    $ "$HOME"/.dotfiles/bin/sync.sh
    ```

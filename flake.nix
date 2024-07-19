@@ -115,6 +115,8 @@
         nixpkgs = nixpkgs-unstable;
       };
     in {
+      apps = (import ./apps { inherit nixpkgs; });
+
       # No alias is required: nixos-rebuild looks for the right configuration under nixosConfigurations by default.
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./host/desktop; };

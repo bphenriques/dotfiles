@@ -18,6 +18,9 @@ d doctor:
 r repair:
 	sudo nix-store --repair --verify --check-contents
 
+fmt format:
+	nix-shell -p fd nixpkgs-fmt --command "fd -e nix -E '/nix/sources.nix' -E 'hardware-configuration*' -x nixpkgs-fmt \"{}\" \;"
+
 # Improvements blocked by https://github.com/NixOS/nix/issues/6129
 .PHONY=changelog
 changelog:

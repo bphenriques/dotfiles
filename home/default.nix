@@ -122,6 +122,8 @@
   };
   fonts.fontconfig.enable = true;
 
+  # FIXME: xdg: https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
+
   imports = [
     ./terminal
     ./git
