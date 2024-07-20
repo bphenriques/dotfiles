@@ -35,6 +35,10 @@ clone_dotfiles() {
 
 setup_ssh() {
   local comment="$1"
+  if test -z "$comment"; then
+    fail "SSH comment is empty"
+  fi
+
   if [ ! -f "$SSH_KEY_LOCATION" ]; then
     info 'SSH Key - Creating new key'
     ssh-keygen -t ed25519 -C "$comment"
