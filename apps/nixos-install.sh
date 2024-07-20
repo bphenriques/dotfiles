@@ -21,7 +21,7 @@ nixos_remote_install() {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    build)               mode=build;                    shift 1 ;;
+    build)              mode=build;                  shift 1 ;;
     remote-install)     mode=remote-install;          shift 1 ;;
     format-disk)        mode=format-disk;             shift 1 ;;
     *)                  usage;                        exit 1  ;;
