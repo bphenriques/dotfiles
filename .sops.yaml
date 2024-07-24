@@ -1,12 +1,23 @@
 keys:
-  - &desktop age16wwdta66lx3tzsk9f56arlmf8gx9e5zktxl3vs50dawyg9ctr9ws2c85ng
   - &bphenriques age160xsly2d84lz89vzhkussw3pth2fhkstx03cd7uc5df6zdpsfvnsktf7hs
 creation_rules:
-  - path_regex: host/desktop/secrets/[^/]+\.(yaml|json|env|ini)$
-    key_groups:
-      - age:
-          - *desktop
-  - path_regex: host/laptop/secrets/[^/]+\.(yaml|json|env|ini)$
+  - path_regex: hosts/laptop/secrets/[^/]+\.(yaml|json)$
     key_groups:
       - age:
           - *bphenriques
+  - path_regex: hosts/laptop/secrets/[^/]+\.sops.nix$
+    key_groups:
+      - age:
+          - *bphenriques
+
+# https://github.com/getsops/sops/issues/1137
+#  nix-env -f channel:nixpkgs-unstable -iA sops
+
+#  cat hosts/laptop/secrets/bananas.sops.nix | /nix/store/m88s4gxpwkgd8h41lhlp5cvfnypvfxlw-sops-3.9.0/bin/sops encrypt --input-type binary --encrypt /dev/stdin --filename-override hosts/laptop/secrets/bananas.sops.nix
+  
+#  cat hosts/laptop/secrets/bananas.sops.nix | /nix/store/m88s4gxpwkgd8h41lhlp5cvfnypvfxlw-sops-3.9.0/bin/sops encrypt --input-type binary --filename-override hosts/laptop/secrets/bananas.sops.nix hosts/laptop/secrets/bananas.sops.nix
+
+
+#/nix/store/m88s4gxpwkgd8h41lhlp5cvfnypvfxlw-sops-3.9.0/bin/sops encrypt --input-type binary --filename-override hosts/laptop/secrets/bananas.sops.nix hosts/laptop/secrets/bananas.sops.nix \
+#  sops decrypt --filename-override hosts/laptop/secrets/bananas.sops.nix hosts/laptop/secrets/bananas.sops.nix
+

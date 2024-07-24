@@ -2,14 +2,12 @@
 
 #### Fail to find `nix` nor any home-manager binary.
 
-Add the following in your default shell you have the following:
+Ensure your shell has the following:
 ```sh
 # Update PATH with Nix and Home-Manager packages
 test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
-
-Once done, you run the existing commands.
 
 ### Nix Darwin warning regarding `/etc/nix/nix.conf`
 

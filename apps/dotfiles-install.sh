@@ -10,7 +10,7 @@ usage() {
 
 Usage: dotfiles-installer.sh --host <host>
 
-  --host            matching directory name under  match on of the directories under $DOTFILES_LOCATION/hosts/
+  --host            name of the host under $DOTFILES_LOCATION/hosts/
 
 Options:
   --ssh-key-comment defaults to git user.email
@@ -50,6 +50,16 @@ setup_ssh() {
   success 'SSH Key - Created!'
 }
 
+setup_git_filter() {
+  info 'Nix Evaluation Secrets - Checking...'
+  if ! "$DOTFILES_LOCATION"/bin/git-secret-filter.sh doctor; then
+    info "Nix Evaluation Secrets - Initialing and checking out to to smudge the secrets"
+    "$DOTFILES_LOCATION"/bin/git-secret-filter.sh init
+    git checkout master
+  fi
+  success "Nix Evaluation Secrets - Done!"
+}
+
 validate_host() {
   host="$1"
   if test -z "${host}"; then
@@ -60,16 +70,6 @@ validate_host() {
     fatal "There is already a host set that is not identical. Delete ${HOST_FILE_LOCATION} and try again."
   fi
   success 'Host - Valid!'
-}
-
-setup_git_filter() {
-  info 'Nix Evaluation Secrets - Checking...'
-  if ! "$DOTFILES_LOCATION"/bin/git-secret-filter.sh doctor; then
-    info "Nix Evaluation Secrets - Initialing and checking out to to smudge the secrets"
-    "$DOTFILES_LOCATION"/bin/git-secret-filter.sh init
-    git checkout master
-  fi
-  success "Nix Evaluation Secrets - Done!"
 }
 
 ssh_key_comment="$(git config user.email)"
@@ -86,3 +86,5 @@ done
 setup_ssh "${ssh_key_comment}"
 clone_dotfiles
 validate_host "${host}"
+
+# TODO: run setup_git_filter iff there is a .age. file somewhere AND we have keys to decrypt
