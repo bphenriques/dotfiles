@@ -1,10 +1,7 @@
 #!/usr/bin/env sh
 
 usage() {
-  echo "Setups the nix darwin
-
-Usage: darwin-install.sh
-"
+  echo "Installs nix-darwin and homebrew. No arguments required."
 }
 
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
