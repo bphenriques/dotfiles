@@ -1,1 +1,1 @@
-hosts/laptop/secrets/*.sops.nix filter=sopsGitFilterLaptop
+hosts/laptop/secrets/*.sops.nix filter=sopsGitFilterlaptop
