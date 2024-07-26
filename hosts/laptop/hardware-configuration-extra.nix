@@ -61,8 +61,8 @@
 
   # FIXME: Battery stuff: https://github.com/bbigras/nix-config/blob/master/hosts/laptop/default.nix#L173
 
-
-  # Touchpad
+  # Peripherals
+  hardware.keyboard.zsa.enable = true;  # Required to flash or use live training online
   services.libinput = {
     enable = true;
     touchpad.naturalScrolling = true;
