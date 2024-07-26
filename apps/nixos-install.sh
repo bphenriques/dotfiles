@@ -11,6 +11,8 @@ Options:
 "
 }
 
+append_if_absent() { touch "$2" && grep --quiet --fixed-strings -- "$1" "$2" || echo "$2" >> "$2"; }
+
 nixos_build() {
   nix build ".#nixosConfigurations.$1.config.system.build.toplevel" --show-trace
 }
@@ -18,8 +20,6 @@ nixos_build() {
 nixos_remote_install() {
   local home_directory="$1"
   local file_tree_to_copy="$(mktemp -d)"
-
-
 
   if ! "$SCRIPT_PATH"/init-keys.sh "$file_tree_to_copy/$home_directory"; then
     fatal "Failed to initialize keys."
@@ -54,23 +54,46 @@ check_bw_login() {
   fi
 }
 
+build() {
+
+}
+
 while [ $# -gt 0 ]; do
   case "$1" in
-    build)              mode=build;                  shift 1 ;;
-    remote-install)     mode=remote-install;          shift 1 ;;
-    format-disk)        mode=format-disk;             shift 1 ;;
+    build)
+      shift 1
+      nixos_build "$1"
+      ;;
+    remote-install)
+      shift 1
+      host=
+      sops_age_bitwarden_from=
+      sops_age_destination=
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --help)                     usage;                          exit  0 ;;
+          --host)                     host="$2";                      shift 2 ;;
+          --sops-age-bitwarden-from)  sops_age_bitwarden_from="$1";   shift 2 ;;
+          --sops-age-destination)     sops_age_destination="$1";      shift 2 ;;
+          *) break ;;
+        esac
+      done
+
+      test -z "${host}"     && error "host is not set!"     && usage && exit 1
+      if ! test -z "${sops_age_bitwarden_from}"; then
+        test -z "${sops_age_destination}" && error "sops-age-destination is not set!" && usage && exit 1
+
+        
+
+      fi
+
+
+
     *)                  usage;                        exit 1  ;;
   esac
 done
 
-host=
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --help)             usage;                  exit  0 ;;
-    --host)             host="$2";              shift 2 ;;
-    *) break ;;
-  esac
-done
+
 
 test -z "${host}"     && error "host is not set!"     && usage && exit 1
 
@@ -90,3 +113,4 @@ exit 0
 
 
 
+sops-age-key-laptop
