@@ -58,6 +58,18 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
    6. Fine-tune the configuration.
    7. Commit the changes (optionally push).
 
+
+```shell
+bw login
+bw unlock
+nix run --extra-experimental-features 'nix-command flakes' ".#nixos-install" -- \
+  remote-install \
+  --flake-target #.laptop \
+  --ssh-host nixos@192.168.68.62 \
+  --sops-age-private_key "$(bw get item sops-age-key-laptop | jq --raw-output '.fields[] | select(.name=="private-key") | .value')" \
+  --sops-age-private_key /persist/config/bphenriques/home/bphenriques/.config/sops/age/keys.tx
+```
+
 5. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
 
     When using impermanence:

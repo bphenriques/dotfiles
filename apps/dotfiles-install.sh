@@ -34,7 +34,7 @@ clone_dotfiles() {
 }
 
 setup_ssh() {
-  local comment="$1"
+  comment="$1"
   if test -z "$comment"; then
     fail "SSH comment is empty"
   fi

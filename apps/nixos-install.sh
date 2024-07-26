@@ -18,44 +18,11 @@ nixos_build() {
 }
 
 nixos_remote_install() {
-  local home_directory="$1"
-  local file_tree_to_copy="$(mktemp -d)"
+  flake_target="$1"
+  host_target="$2"
+  file_tree_to_copy="$3"
 
-  if ! "$SCRIPT_PATH"/init-keys.sh "$file_tree_to_copy/$home_directory"; then
-    fatal "Failed to initialize keys."
-  fi
-
-
-  nix run github:nix-community/nixos-anywhere -- --extra-files "$temp" --flake "${TARGET}" "${HOST}"
-}
-
-initialize_age_key() {
-  local target="$1"
-  if [ -f "${target}" ]; then
-    success 'Shared Age Key - Already present!'
-  else
-    info 'Shared Age Key - Adding shared key by getting it from Bitwarden!'
-    check_bw_login
-    mkdir -p "$(dirname "$target")"
-    bw get item "$BITWARDEN_SHARED_KEY_ID" | jq --raw-output '.fields[] | select(.name=="private-key") | .value' >> "${target}"
-    success 'SSH Key - Installed!'
-  fi
-}
-
-
-check_bw_login() {
-  if ! bw login --check >/dev/null; then
-    echo "You are not logged in: bw login"
-    return 1
-  fi
-  if ! bw unlock --check >/dev/null; then
-    echo "The vault is locked: bw unlock"
-    return 1
-  fi
-}
-
-build() {
-
+  nix run github:nix-community/nixos-anywhere -- --extra-files "$file_tree_to_copy" --flake "${flake_target}" "${host_target}"
 }
 
 while [ $# -gt 0 ]; do
@@ -67,50 +34,34 @@ while [ $# -gt 0 ]; do
     remote-install)
       shift 1
       host=
-      sops_age_bitwarden_from=
+      sops_age_private_key=
       sops_age_destination=
       while [ $# -gt 0 ]; do
         case "$1" in
           --help)                     usage;                          exit  0 ;;
-          --host)                     host="$2";                      shift 2 ;;
-          --sops-age-bitwarden-from)  sops_age_bitwarden_from="$1";   shift 2 ;;
-          --sops-age-destination)     sops_age_destination="$1";      shift 2 ;;
+          --flake-target)             flake_target="$2";              shift 2 ;;
+          --ssh-host)                 ssh_host="$2";                  shift 2 ;;
+          --sops-age-private_key)     sops_age_private_key="$2";      shift 2 ;;
+          --sops-age-destination)     sops_age_destination="$2";      shift 2 ;;
           *) break ;;
         esac
       done
+      test -z "${host}" && error "host is not set!"     && usage && exit 1
+      test -z "${sops_age_private_key}" && test -z "${sops_age_destination}" && error "sops-age-* have to be both set!" && usage && exit 1
 
-      test -z "${host}"     && error "host is not set!"     && usage && exit 1
-      if ! test -z "${sops_age_bitwarden_from}"; then
-        test -z "${sops_age_destination}" && error "sops-age-destination is not set!" && usage && exit 1
-
-        
-
+      file_tree_to_copy="$(mktemp)"
+      if ! test -z "${sops_age_destination}"; then
+        mkdir -p "$(dirname "${file_tree_to_copy}/${sops_age_destination}")"
+        echo "$sops_age_private_key" >> "${file_tree_to_copy}/${sops_age_destination}"
       fi
 
-
-
-    *)                  usage;                        exit 1  ;;
+      nixos_remote_install "$flake_target" "${ssh_host}" "${file_tree_to_copy}"
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
   esac
 done
 
 
-
-test -z "${host}"     && error "host is not set!"     && usage && exit 1
-
-case "$mode" in)
-  build) nixos_build "$host"  ;;
-  remote-install) ;;
-  format-disk)    ;;
-  *)  ;;
-esac
-test -z "${ssh_host}" && error "ssh_host is not set!" && usage && exit 1
-
-exit 0
-
-# TODO: Arguments: --secret {id}
-# /persist/config/bphenriques/home/bphenriques
-
-
-
-
-sops-age-key-laptop
