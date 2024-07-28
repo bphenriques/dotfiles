@@ -1,5 +1,5 @@
 keys:
-  - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
+  - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7  # bw-key: sops-age-key-laptop
 creation_rules:
   - path_regex: hosts/laptop/secrets/.+$
     key_groups:

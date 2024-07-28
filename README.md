@@ -1,17 +1,29 @@
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
-Hi! 👋 Welcome to my repository containing my [Nix](https://nixos.org/) configurations to manage my machines. A declarative and _more_ reproducible way to set working environments.
+Hi! 👋 Welcome to my repository containing my [nix-managed](https://nixos.org/) machines. A declarative and _more_ reproducible way to set working environments.
 
 ----
 
+> [!IMPORTANT]
+> **Disclaimer:** This is my personal configuration that works _for me_. I hope this helps you as nix has steep learning curve!
+> For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
+> If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
+
 # FIXME: quick idea of hte README: https://github.com/Prometheus7435/nix-config/blob/main/README.org
 
-# Quick start
+|   Hostname  |               CPU              |  RAM  |         Primary GPU         |      Secondary GPU      | Role | OS  |
+| :---------: | :----------------------------: | :---: | :-------------------------: | :---------------------: | :--: | :-: |
 
-> [!IMPORTANT]
-> **Disclaimer:** This is a personal configuration. I am no expert, however 
-> I hope that this helps you! For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
-> If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
+| `sidious`   | [Intel Xeon E-2176M]           | 64GB  | [NVIDIA Quadro P2000 Max-Q] | Intel UHD Graphics P630 | 💻️🎭️ | ❄️  |
+| `tanis`     | [AMD Ryzen 5 PRO 6650U]        | 32GB  | AMD Radeon 660M             |                         | 💻️   | ❄️  |
+| `dooku`     | Apple M2 8-core CPU            | 24GB  | Apple M2 10-core GPU        |                         | 💻️🎭️ | 🍏  | 
+| `steamdeck` | Zen 2 4c/8t                    | 16GB  | 8 RDNA 2 CUs                |                         | 🎮️   | 🐧  | 
+| `minimech`  | -                              | -     | [VirGL]                     |                         | 🐄   | ❄️  | 
+| `scrubber`  | -                              | -     | [VirGL]                     |                         | 🐄   | ❄️  | 
+
+# Quick start
+ 
+
 
 What you will find here:
 - Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation.
@@ -62,12 +74,9 @@ Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to autom
 ```shell
 bw login
 bw unlock
-nix run --extra-experimental-features 'nix-command flakes' ".#nixos-install" -- \
-  remote-install \
-  --flake-target #.laptop \
-  --ssh-host nixos@192.168.68.62 \
+nix run --extra-experimental-features 'nix-command flakes' ".#nixos-install" -- remote-install #.laptop nixos@192.168.68.62 \
   --sops-age-private_key "$(bw get item sops-age-key-laptop | jq --raw-output '.fields[] | select(.name=="private-key") | .value')" \
-  --sops-age-private_key /persist/config/bphenriques/home/bphenriques/.config/sops/age/keys.tx
+  --sops-age-private_key /persist/config/bphenriques/home/bphenriques/.config/sops/age/keys.txt
 ```
 
 5. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
