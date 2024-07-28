@@ -1,44 +1,34 @@
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
-Hi! 👋 Welcome to my repository containing my [nix-managed](https://nixos.org/) machines. A declarative and _more_ reproducible way to set working environments.
+Hi! 👋 
+
+This repository contains the definition of my [nix-managed](https://nixos.org/) machines.
+
+> [!IMPORTANT]
+> **Disclaimer:** This is my personal configuration that works _for me_. I hope this helps you!
+> 
+> If you are new to dotfiles in general, I suggest a bare git solution to start with.
 
 ----
 
-> [!IMPORTANT]
-> **Disclaimer:** This is my personal configuration that works _for me_. I hope this helps you as nix has steep learning curve!
-> For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
-> If you are new to dotfiles in general, use a bare git solution to start with and built it from there. Make the tools work for you rather than the other way around.
-
-# FIXME: quick idea of hte README: https://github.com/Prometheus7435/nix-config/blob/main/README.org
+What you will find here:
+- Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation remotely.
+- Using disko.
+- [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
+- Combination of `git-filter` and [sops](https://github.com/getsops/sops) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
 
 |   Hostname  |               CPU              |  RAM  |         Primary GPU         |      Secondary GPU      | Role | OS  |
 | :---------: | :----------------------------: | :---: | :-------------------------: | :---------------------: | :--: | :-: |
+| `laptop`   | AMD Ryzen™ 7 7840HS           | 32GB  | AMD Ryzen™ 7 7840HS | NVIDIA® GeForce RTX™ 4060 8GB | Personal | ❄️  |
+| `work-macos`     | Apple M2 8-core CPU            | 16GB  | Apple M2 10-core GPU        |                         | Work | 🍏  |
 
-| `sidious`   | [Intel Xeon E-2176M]           | 64GB  | [NVIDIA Quadro P2000 Max-Q] | Intel UHD Graphics P630 | 💻️🎭️ | ❄️  |
-| `tanis`     | [AMD Ryzen 5 PRO 6650U]        | 32GB  | AMD Radeon 660M             |                         | 💻️   | ❄️  |
-| `dooku`     | Apple M2 8-core CPU            | 24GB  | Apple M2 10-core GPU        |                         | 💻️🎭️ | 🍏  | 
-| `steamdeck` | Zen 2 4c/8t                    | 16GB  | 8 RDNA 2 CUs                |                         | 🎮️   | 🐧  | 
-| `minimech`  | -                              | -     | [VirGL]                     |                         | 🐄   | ❄️  | 
-| `scrubber`  | -                              | -     | [VirGL]                     |                         | 🐄   | ❄️  | 
+# Installing NixOS
 
-# Quick start
- 
+## From another machine
 
-
-What you will find here:
-- Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation.
-- Two types of secret management:
-  - [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
-  - Combination of `age` and `git-filter` for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
-
-The public keys are under `.sops.yaml` and the private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
-
-
-# NixOS
-
-Using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation. Requires two machines:
-- **Target**: the new machine that we will be installing NixOS.
-- **Source**: the current machine where we will create a bootable USB and remotely install the operating system.
+Requirements:
+- **Source machine**: the machine used to create a bootable USB and remotely trigger the NixOS installation.
+- **Target machine**: the new machine where we will install NixOS.
 
 1. On the source machine, create a bootable USB [installer](https://nixos.org/download/):
 
@@ -96,7 +86,7 @@ nix run --extra-experimental-features 'nix-command flakes' ".#nixos-install" -- 
 TODO: Run the `./bin/git-secret-filter.sh init`
 TODO: Add this command by default on all scripts: `--experimental-features "nix-command flakes"`
 
-# Darwin
+# Installing on Darwin
 
 1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.
 
@@ -106,10 +96,10 @@ TODO: Add this command by default on all scripts: `--experimental-features "nix-
    $ nix run --extra-experimental-features 'nix-command flakes' ".#darwin-install"
    ```
    
-3. Install the dotfiles repository:
+3. Setup this dotfiles repository. Replace `{host}` with the intended darwin host listed under `hosts`:
 
    ```sh
-   $ nix run --extra-experimental-features 'nix-command flakes' ".#dotfiles-install" -- --host work-macos
+   $ nix run --extra-experimental-features 'nix-command flakes' ".#dotfiles-install" -- --host {host}
    ```
 
 4. Apply:
@@ -120,14 +110,6 @@ TODO: Add this command by default on all scripts: `--experimental-features "nix-
 4. Import the GPG Key using `gpg --import`. You may need to restart.
    
 5. Reboot!
-
-# Secrets
-
-- [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix-store
-- `age`+`git-filter` (`smudge` `clean`) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text.
-  As detailed in `.gitattributes`, only `*.age.nix` are affected.
-
-The public keys are under `.sops.yaml` and the private keys under `"$XDG_CONFIG_HOME/sops/age/keys.txt"`.
 
 To setup `git-filter`:
 ```shell
@@ -150,5 +132,8 @@ $ ./bin/git-secret-filter.sh init
     - [`sei40kr`](https://github.com/sei40kr/dotfiles)
     - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
     - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
+
+For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
+
 
 Disclaimer: I do not claim ownership of the wallpapers appearing in this repository. If you find images in this repository owned by you and are of limited use, please let me know and I will remove them.
