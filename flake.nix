@@ -124,7 +124,7 @@
       };
 
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost { hostModule = ./host/work-macos; };
+        work-macos = mkMacOSHost ./host/work-macos;
       };
 
       # Custom modules
