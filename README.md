@@ -69,7 +69,8 @@ Requirements:
     ```
     $ nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- work-macos
     $ nix run --extra-experimental-features 'nix-command flakes' ".#dotfiles-install" -- \
-        work-macos --dotfiles-location /tmp/test4/.dotfiles --ssh-directory /tmp/test4/.ssh --ssh-key-comment "hello"
+        work-macos --dotfiles-location /tmp/test4/.dotfiles --ssh-directory /tmp/test4/.ssh --ssh-key-comment "hello" \
+        --age-keys-file ...
     ```
 
 # Installing on Darwin
