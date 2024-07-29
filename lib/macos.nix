@@ -1,13 +1,10 @@
 { darwin, home-manager, nixConfig, darwinModules, homeManagerModules, nixpkgsConfig, ... }:
 {
-  mkMacOSHost = {
-    system ? "aarch64-darwin",
-    hostModule,
-  }:
+  mkMacOSHost = hostModule:
     let
       common = {
         nixpkgs = nixpkgsConfig // {
-          hostPlatform = system;
+          hostPlatform = "aarch64-darwin";
         };
         nix = nixConfig;
 
