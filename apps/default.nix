@@ -22,7 +22,7 @@ let
 
   mkDotfilesInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "dotfiles-install";
-    runtimeInputs = with pkgs; [ git ];
+    runtimeInputs = with pkgs; [ git yq-go age ];
     text = lib.fileContents ./dotfiles-install.sh;
   });
 
