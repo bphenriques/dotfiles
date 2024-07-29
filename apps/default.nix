@@ -10,7 +10,7 @@ let
 
   mkDarwinInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "darwin-install";
-    runtimeInputs = with pkgs; [ cowsay ];
+    runtimeInputs = with pkgs; [ ];
     text = lib.fileContents ./darwin-install.sh;
   });
 
