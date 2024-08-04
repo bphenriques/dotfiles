@@ -2,6 +2,7 @@
 
 # https://github.com/edmundmiller/dotfiles/blob/main/modules/desktop/browsers/firefox.nix
 # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/firefox.nix
+# https://github.com/yokoffing/Betterfox
 let
   merge = lib.foldr (a: b: a // b) { };
 in

@@ -18,11 +18,13 @@
     imports = [
       ../../home
       ../../home/plasma
+      ../../home/firefox
     ];
     programs.plasma.workspace.wallpaper = ./wallpaper.png;
     programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.age.nix;
     # programs.beets.settings.directory = config.user.musicDir;
 
+    #     signal-desktop
 
     # Gpg
     programs.gpg.enable = true;

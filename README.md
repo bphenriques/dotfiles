@@ -16,18 +16,26 @@ What you will find here:
 - [disko](https://github.com/nix-community/disko) to declaratively format my machines.
 - [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
 - Combination of `git-filter` and [sops](https://github.com/getsops/sops) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
-| Hostname     | CPU                     | RAM  | Primary GPU              | Secondary GPU                 | OS |
+
+- | Hostname     | CPU                     | RAM  | Primary GPU              | Secondary GPU                 | OS |
 |--------------|-------------------------|------|--------------------------|-------------------------------|----|
-| `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Ryzen™ 7 7840HS      | NVIDIA® GeForce RTX™ 4060 8GB | ❄️  |
+| `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB | ❄️  |
 | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
 
 # Installing NixOS
 
-## From another machine
+## Locally
 
-Requirements:
-- **Source machine**: the machine used to create a bootable USB and remotely trigger the NixOS installation.
-- **Target machine**: the new machine where we will install NixOS.
+1. Create a bootable USB [installer](https://nixos.org/download/):
+
+   ```
+   $ sudo fdisk -l
+   $ sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
+   ```
+   
+2. TODO
+
+## Remotely
 
 1. On the source machine, create a bootable USB [installer](https://nixos.org/download/):
 
@@ -37,23 +45,23 @@ Requirements:
    ```
 
 2. On the target machine:
-   1. Set `nixos`'s password using `passwd`. 
-   2. Set up network connection
-   3. Note down the hardware/network information:
-
-   ```
-   $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
-   $ lsblk -p
-   $ ip route get 1.2.3.4 | awk '{print $7}'
-   ```
+   1. Set `nixos`'s password using `passwd`.
+   2. Set up network connection note down its address:`ip route get 1.2.3.4 | awk '{print $7}'`
 
 3. On the source machine:
    1. Clone this repository.
    2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
-   3. Add `hardware-configuration.nix` as displayed in the target machine.
-   4. Set the disk layout under `disk-config.nix` using [disko](https://github.com/nix-community/disko).
+   3. Export `hardware-configuration.nix` as follows:
+   ```
+   ssh <host> -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
+   ```
+   
+   4. Update `disk-config.nix` ([disko](https://github.com/nix-community/disko)) considering the disks available:
+   ```
+   ssh <host> -- lsblk -p
+   ```
 
-5. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
+4. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
 
     ```
     bw login

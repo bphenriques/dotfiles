@@ -11,7 +11,7 @@
   ];
   
   xdg.configFile = {
-    "git/config".source      = ./gitconfig;
+    "git/config".source      = ./gaitconfig;
     "git/ignore".source      = ./ignore;
     "git/gitmessage".source  = ./gitmessage;
   };

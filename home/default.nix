@@ -4,8 +4,6 @@
 # TODO: https://codeberg.org/adamcstephens/dotfiles
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
-
-  custom.dotfiles.enable = true;
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils
@@ -128,7 +126,6 @@
     ./terminal
     ./git
     ./helix
-    ./firefox
     ./scala
     ./logseq
   ];

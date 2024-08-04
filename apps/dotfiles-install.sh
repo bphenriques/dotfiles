@@ -72,18 +72,24 @@ set_host() {
   success "Host - Set to ${host}!"
 }
 
+does_host_require_secrets() {
+  host="$1"
+  dotfiles_location="$2"
+
+  yq '.keys[] | anchor' < "${dotfiles_location}"/.sops.yaml | grep -E "^${host}$" > /dev/null 2>&1;
+}
+
 init_sops_git_filter() {
   dotfiles_location="$1"
   age_keys_file="$2"
   host="$3"
   skip="$4"
 
-  if yq '.keys[] | anchor' < "${dotfiles_location}"/.sops.yaml | grep -E "^${host}$" > /dev/null 2>&1; then
+  if does_host_require_secrets "${host}" "${dotfiles_location}"; then
     if ! "${dotfiles_location}"/bin/sops-git-filter.sh check "${host}"; then
       if [ "${skip}" != "0" ]; then
-        info "Sops Git Filter - Setting up for '${host}'."
+        info "Sops Git Filter - Setting up for '${host}'"
         host_public_key="$(host="${host}" yq '.keys[] | select((. | anchor) == env(host))' < "${dotfiles_location}"/.sops.yaml)"
-
         if age-keygen -y "${age_keys_file}" | grep "${host_public_key}" > /dev/null 2>&1; then
           info "Sops Git Filter - Found matching private-key for ${host} with public key ${host_public_key}"
           "${dotfiles_location}"/bin/sops-git-filter.sh init "${host}"
@@ -92,7 +98,7 @@ init_sops_git_filter() {
           warn "Sops Git Filter - No matching age private key for ${host_public_key} under ${age_keys_file}"
         fi
       else
-        warn "Sops Git Filter - '$host' has secrets set, therefore it is advised to initialize sops-git-filter.sh."
+        warn "Sops Git Filter - '$host' has secrets. Will be encrypted until you initialize sops-git-filter.sh"
       fi
     else
       success "Sops Git Filter - Already set for '${host}'"

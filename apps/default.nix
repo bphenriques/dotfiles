@@ -14,12 +14,6 @@ let
     text = lib.fileContents ./darwin-install.sh;
   });
 
-  mkNixosInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "nixos-install";
-    runtimeInputs = with pkgs; [ ];
-    text = lib.fileContents ./nixos-install.sh;
-  });
-
   mkDotfilesInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "dotfiles-install";
     runtimeInputs = with pkgs; [ git yq-go age ];
@@ -38,7 +32,6 @@ let
 
   mkLinuxApps = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
     merge [
-     (mkApp mkNixosInstall system)
      (mkApp mkDotfilesInstall system)
     ]
   );

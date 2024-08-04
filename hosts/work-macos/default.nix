@@ -51,20 +51,6 @@ in
       terraform
     ];
 
-    # Extra Firefox profiles
-    programs.firefox.profiles.default.containers = {
-      "OVO Energy" = {
-        id = 8;
-        color = "green";
-        icon = "briefcase";
-      };
-      "Kaluza" = {
-        id = 9;
-        color = "blue";
-        icon = "briefcase";
-      };
-    };
-
     home.stateVersion = "22.11";
   };
 
