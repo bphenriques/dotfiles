@@ -117,14 +117,13 @@
     in {
       apps = (import ./apps { inherit nixpkgs; });
 
-      # No alias is required: nixos-rebuild looks for the right configuration under nixosConfigurations by default.
+      # Hosts
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./host/desktop; };
         laptop = mkNixOSHost { hostModule = ./host/laptop; };
       };
-
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost ./host/work-macos;
+        work-macos = mkMacOSHost { hostModule = ./host/work-macos; };
       };
 
       # Custom modules

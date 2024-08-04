@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 {
   environment.systemPackages = [ pkgs.fish ]; # Install the shell
   environment.shells = [ pkgs.fish ];         # Register the shell that was installed (2 step process)

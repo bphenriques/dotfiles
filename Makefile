@@ -1,6 +1,5 @@
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-# TODO: https://github.com/jordanisaacs/dotfiles/blob/master/scripts/default.nix#L47
 
 .PHONY=s,sync
 s sync:
@@ -9,10 +8,6 @@ s sync:
 .PHONY=u,update
 u update:
 	"$(ROOT_DIR)"/bin/update.sh
-
-.PHONY=d,doctor
-d doctor:
-	"$(ROOT_DIR)"/bin/doctor.sh
 
 .PHONY=r,repair
 r repair:
