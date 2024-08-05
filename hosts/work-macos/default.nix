@@ -3,7 +3,7 @@
 let username = "brunohenriques";
 in
 {
-  imports = [../../darwin];
+  imports = [ ../../darwin ];
   users.users."${username}".home  = "/Users/${username}";
   system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
   system.desktop.picture = ./wallpaper.png; # From simpledesktops

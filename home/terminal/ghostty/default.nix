@@ -49,6 +49,8 @@ let
   };
 in
 {
+  # On MacOS you install it by hand: https://github.com/ghostty-org/ghostty/releases/tag/tip
+  home.packages = if pkgs.stdenv.isLinux then [ pkgs.ghostty ] else [];
   programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
     fish_add_path --append --move ${config.home.homeDirectory}/Applications/Ghostty.app/Contents/MacOS
   '';

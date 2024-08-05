@@ -51,7 +51,7 @@ in
     extraConfig = ''
       return {
         set_environment_variables = {
-          ZELLIJ_AUTO_START = "true",
+          ZELLIJ_AUTO_START = "false",
           ZELLIJ_AUTO_ATTACH = "true",
           ZELLIJ_AUTO_EXIT = "true"
         },

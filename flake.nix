@@ -20,10 +20,11 @@
     disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Other community flakes
-    nur.url = "github:nix-community/nur";     # Firefox extensions
-    zjstatus.url = "github:dj95/zjstatus";    # ZelliJ plugin
-    impermanence.url = "github:nix-community/impermanence";
-    plasma-manager = {                        # Manage desktop environment
+    nur.url = "github:nix-community/nur";                         # Firefox extensions
+    zjstatus.url = "github:dj95/zjstatus";                        # Terminal's multiplexer plugin
+    impermanence.url = "github:nix-community/impermanence";       # Automatically clean-up unneded files on boot
+    ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
+    plasma-manager = {                                            # Desktop environment
       url = "github:pjones/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
@@ -119,11 +120,11 @@
 
       # Hosts
       nixosConfigurations = with nixosLib; {
-        desktop = mkNixOSHost { hostModule = ./host/desktop; };
-        laptop = mkNixOSHost { hostModule = ./host/laptop; };
+        desktop = mkNixOSHost { hostModule = ./hosts/desktop; };
+        laptop = mkNixOSHost { hostModule = ./hosts/laptop; };
       };
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost { hostModule = ./host/work-macos; };
+        work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
       };
 
       # Custom modules

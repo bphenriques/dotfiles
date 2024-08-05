@@ -1,6 +1,6 @@
 { home-manager, homeManagerModules, nixpkgs, nixpkgsConfig, ... }:
 {
-  mkHomeManagerHost = { system, username, hostModule }:
+  mkHomeManagerHost = { system, username, hostModule, extraSpecialArgs ? [] }:
     let
       common = {
         home = {
@@ -14,6 +14,7 @@
           inherit system;
           inherit (nixpkgsConfig) config;
         };
+        inherit extraSpecialArgs;
         modules = [common hostModule] ++ homeManagerModules;
       };
 }

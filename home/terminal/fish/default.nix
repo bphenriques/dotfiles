@@ -5,9 +5,10 @@ let
   inherit (builtins) readFile readDir attrNames;
   inherit (lib) filterAttrs foldl' optionalString concatStringsSep removeSuffix;
   listFiles = from: attrNames (filterAttrs (_ : type: type == "regular") (readDir from));
+  listFishFiles = from: (builtins.filter (fileName: lib.hasSuffix ".fish" fileName) (listFiles from));
 in
 {
-  home.packages = with pkgs; [ fish ];
+  home.packages = with pkgs; [ fish dotfiles ];
 
   programs.zoxide = {
     enable = true;
@@ -48,11 +49,12 @@ in
       { name = "frg"; src = pkgs.fishPlugins.frg.src; }
       { name = "proj"; src = pkgs.fishPlugins.proj.src; }
       { name = "ffd"; src = pkgs.fishPlugins.ffd.src; }
+      { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
     ];
 
     functions = (foldl' (acc: f: acc // {
       "${removeSuffix ".fish" f}" = (readFile (./functions + "/${f}"));
-    }) { } (listFiles ./functions));
+    }) { } (listFishFiles ./functions));
 
     interactiveShellInit = let
       nixIntegration = ''

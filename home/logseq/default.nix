@@ -5,13 +5,6 @@ let
   configPath = "${logseqDotfiles}/config.edn";
 in
 {
-  assertions = [
-    {
-      assertion = config.custom.dotfiles.enable;
-      message = "dotfiles module is not enabled. It is required to access logseq mutable configuration files";
-    }
-  ];
-
   # TODO: Create logseq configurations for .logseq/settings/
   home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.logseq ];
   home.file = {

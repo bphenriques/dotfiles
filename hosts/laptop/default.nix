@@ -12,8 +12,7 @@
     ./disko.nix                           # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos                           # My default nixos settings
     ./users.nix
-    ./impermanence-backup.nix
-    #./impermanence.nix
+    ./impermanence.nix
   ];
 
   networking.hostName = "bphenriques-laptop";
