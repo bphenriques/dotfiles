@@ -8,13 +8,6 @@ let
   helixLanguages = "${config.custom.dotfiles.directory}/home/helix/languages.toml";
 in
 {
-  assertions = [
-    {
-      assertion = config.custom.dotfiles.enable;
-      message = "dotfiles module is not enabled. It is required to access helix configuration files (just to make it easier to modify the files outside a nix generation).";
-    }
-  ];
-
   programs.helix = {
     enable = true;
 

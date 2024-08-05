@@ -21,7 +21,7 @@ press_to_continue() { info 'Press any key to continue' && read -r _; }
 _darwin_sync() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
   _darwin_build "$@"
-  #./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST" --show-trace --no-eval-cache
+  ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
   popd
 }
 
@@ -77,7 +77,7 @@ while [ $# -gt 0 ]; do
       ;;
     update | u)
       info "Dotfiles Update - '$CURRENT_HOST' .."
-
+      # Relevant docs: https://nix.dev/manual/nix/2.18/installation/upgrading#upgrading-nix
       _flake_update
       case "$(uname -s)" in
         Darwin)  _darwin_update "$@" ;;
@@ -109,10 +109,11 @@ while [ $# -gt 0 ]; do
       shift 1
       nix-shell -p fd nixpkgs-fmt --command "fd -e nix -E '/nix/sources.nix' -E 'hardware-configuration*' -x nixpkgs-fmt \"{}\" \;"
       ;;
-    current-system)
+    describe-current-system)
       nix-store -qR /run/current-system | sed -n -e 's/\/nix\/store\/[0-9a-z]\{32\}-//p' | sort | uniq
       ;;
     changelog)
+      # nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
       # Improvements are blocked by https://github.com/NixOS/nix/issues/6129
       # nix profile diff-closures --profile /nix/var/nix/profiles/system
       ;;

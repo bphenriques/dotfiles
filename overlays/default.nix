@@ -1,4 +1,6 @@
 { inputs, ... }:
+# TODO: https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos?ref_type=heads
+
 let
   inherit (builtins) readDir attrNames;
   inherit (inputs.nixpkgs.lib) filterAttrs genAttrs foldl';
@@ -8,8 +10,9 @@ let
 
   # The different types of overlays
   add-custom-packages = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
-  add-external-flakes = with inputs; [
-    (final: prev: { zjstatus = zjstatus.packages.${prev.system}.default; })
+  add-external-flakes = [
+    (final: prev: { zjstatus = inputs.zjstatus.packages.${prev.system}.default; })
+    (final: prev: { ghostty = inputs.ghostty.packages.${prev.system}.default; })
     inputs.nur.overlay
   ];
 
@@ -36,5 +39,3 @@ let
   };
 
 in [add-custom-packages inputs.nur.overlay add-fish-plugins] ++ add-external-flakes
-
-# TODO: https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos?ref_type=heads

@@ -1,4 +1,4 @@
 {
-  home-manager-impermanence = import ./misc/impermanence.nix;
-  home-manager-dotfiles = import ./misc/dotfiles.nix;
+  home-manager-impermanence = import ./misc/impermanence;
+  home-manager-dotfiles = import ./misc/dotfiles;
 }
