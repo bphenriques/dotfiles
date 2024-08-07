@@ -2,7 +2,7 @@
 
 # https://github.com/edmundmiller/dotfiles/blob/main/modules/desktop/browsers/firefox.nix
 # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/firefox.nix
-# https://github.com/yokoffing/Betterfox
+# https://github.com/oddlama/nix-config/blob/main/users/myuser/graphical/firefox.nix
 let
   merge = lib.foldr (a: b: a // b) { };
 in
@@ -49,6 +49,17 @@ in
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@nw" "@nixwiki" ];
             };
+            "YouTube" = {
+              iconUpdateURL = "https://youtube.com/favicon.ico";
+              updateInterval = 24 * 60 * 60 * 1000;
+              definedAliases = ["@yt"];
+              urls = [{
+                template = "https://www.youtube.com/results";
+                params = [
+                  { name = "search_query"; value = "{searchTerms}"; }
+                ];
+              }];
+            };
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
           };
         };
@@ -61,7 +72,7 @@ in
             color = "turquoise";
             icon = "chill";
           };
-          "Banking" = {
+          "Sensitive" = {
             id = 2;
             color = "red";
             icon = "fingerprint";
@@ -81,6 +92,15 @@ in
     };
   };
 
-  custom.impermanence.config.directories = [ ".mozilla" ];
-  custom.impermanence.cache.directories = [ ".cache/mozilla" ];
+  xdg.mimeApps.defaultApplications = {
+    "text/html" = ["firefox.desktop"];
+    "text/xml" = ["firefox.desktop"];
+    "x-scheme-handler/http" = ["firefox.desktop"];
+    "x-scheme-handler/https" = ["firefox.desktop"];
+  };
+
+  custom.impermanence = {
+    cache.directories = [ ".cache/mozilla" ];
+    config.directories = [ ".mozilla" ];
+  };
 }

@@ -2,12 +2,8 @@
   # Basic
   "browser.startup.homepage" = "about:blank";                   # Peaceful.
   "browser.warnOnQuit" = false;                                 # Yes, I am aware of my 100 tabs.
-  "browser.shell.checkDefaultBrowser" = false;                  # Let me handle the default.
-  "browser.aboutConfig.showWarning" = false;                    # I know what I am doing, erm, most of the times...
-  "services.sync.engine.passwords" = false;                     # I manage my passwords separately.
-  "signon.rememberSignons" = false;                             # Do not ask me to remember any password...
-  "browser.urlbar.trimURLs" = false;                            # Always show http/https
-  "browser.tabs.firefox-view" = false;                          # I rarely have the need to sync tabs across devices. Plus, won't use a firefox account.
+
+  "intl.accept_languages" = "en-US,en";                         # English
   "services.sync.prefs.sync.layout.spellcheckDefault" = false;  # Do not spell-check
   "layout.spellcheckDefault" = 0;                               # Do not spell-check
   "browser.translations.neverTranslateLanguages" = "pt";        # Do not prompt me for languages I do know.

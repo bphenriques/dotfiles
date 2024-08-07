@@ -1,17 +1,43 @@
 { config, pkgs, ... }:
-
-# TODO: Desktop entry? https://github.com/balsoft/nixos-config/blob/73cc2c3a8bb62a9c3980a16ae70b2e97af6e1abd/profiles/applications/helix.nix#L8
-
-let
-  # The path needs to be absolute: https://github.com/nix-community/home-manager/pull/1455#issuecomment-681041818
-  helixCfg = "${config.custom.dotfiles.directory}/home/helix/config.toml";
-  helixLanguages = "${config.custom.dotfiles.directory}/home/helix/languages.toml";
-in
 {
+  /*
+  home.packages = [
+    (pkgs.makeDesktopItem {
+      name = "helix";
+      desktopName = "Helix editor";
+      terminal = true;
+      categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+      mimeTypes = [
+        "inode/directory"
+        "text/english"
+        "text/plain"
+        "text/x-makefile"
+        "text/x-c++hdr"
+        "text/x-c++src"
+        "text/x-chdr"
+        "text/x-csrc"
+        "text/x-java"
+        "text/x-moc"
+        "text/x-pascal"
+        "text/x-tcl"
+        "text/x-tex"
+        "application/x-shellscript"
+        "application/json"
+        "application/xml"
+        "text/xml"
+        "text/x-c"
+        "text/x-c++"
+      ];
+      exec = "${pkgs.helix}/bin/hx %F";
+      icon = "helix";
+    })
+  ];
+  */
+
   programs.helix = {
     enable = true;
 
-    # All the LSP. Check with hx --health
+    # Language Server Protocols. Check with hx --health
     extraPackages = with pkgs; [
       marksman                                # LSP for Markdown
       nodePackages.bash-language-server       # LSP for Bash
@@ -24,8 +50,9 @@ in
     ];
   };
 
+  # TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/helix/default.nix
   xdg.configFile = {
-    "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${helixCfg}";
-    "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${helixLanguages}";
+    "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/config.toml";
+    "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/languages.toml";
   };
 }

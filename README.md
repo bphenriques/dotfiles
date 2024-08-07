@@ -17,10 +17,10 @@ What you will find here:
 - [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
 - Combination of `git-filter` and [sops](https://github.com/getsops/sops) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
 
-- | Hostname     | CPU                     | RAM  | Primary GPU              | Secondary GPU                 | OS |
-|--------------|-------------------------|------|--------------------------|-------------------------------|----|
-| `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB | ❄️  |
-| `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
+  - | Hostname     | CPU                     | RAM  | Primary GPU              | Secondary GPU                 | OS |
+  |--------------|-------------------------|------|--------------------------|-------------------------------|----|
+  | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB | ❄️  |
+  | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
 
 # Installing NixOS
 

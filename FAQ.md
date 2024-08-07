@@ -9,15 +9,6 @@ test -f "$HOME"/.nix-profile/etc/profile.d/nix.sh && . "$HOME"/.nix-profile/etc/
 export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
 ```
 
-### Nix Darwin warning regarding `/etc/nix/nix.conf`
-
-This file already exists after first install. Back it up and re-apply nix-darwin:
-```shell
-sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.bkup
-```
-
-See https://github.com/LnL7/nix-darwin/issues/458
-
 ### No pinentry program when committing
 
 Run the following:

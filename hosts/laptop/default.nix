@@ -5,6 +5,9 @@
 # File browser: https://github.com/iynaix/dotfiles/blob/e441ab4ff7a775b57b6c79a2fa6be99e3ab2d58b/home-manager/programs/nemo.nix#L79
 # TODO: check boot: https://github.com/adi1090x/plymouth-themes?tab=readme-ov-file. Like 70, 71, 62 63 5
 
+let
+  homeNasIp = "192.168.68.53";
+in
 {
   imports = [
     ./hardware-configuration.nix          # Output of nixos-generate-config --root /mnt
@@ -13,19 +16,12 @@
     ../../nixos                           # My default nixos settings
     ./users.nix
     ./impermanence.nix
+    ./secrets.nix
   ];
 
   networking.hostName = "bphenriques-laptop";
-
-  # Secrets
-  sops = {
-    age.keyFile = "/persist/config/bphenriques/home/bphenriques/.config/sops/age/keys.txt"; # age-keygen
-    defaultSopsFile = ./secrets/sops.yaml;
-    secrets = {
-      bphenriques_password.neededForUsers = true;  # echo "password" | mkpasswd -s
-      samba_server_username = { };
-      samba_server_password = { };
-    };
+  networking.hosts = {
+    homeNasIp = [ "home-nas" ];
   };
 
   # Bootloader
@@ -53,6 +49,19 @@
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = true;
+  };
+
+  # Home
+  custom.home-remote-disks = {
+    enable = true;
+    smbCredentialsOwnerUsername = "bphenriques";
+    uid = 1000;
+    guid = 100;
+    locations = [
+      { mountPoint = "/home/bphenriques/bphenriques"; device = "//${homeNasIp}/bphenriques"; }
+      { mountPoint = "/mnt/home-media";               device = "//${homeNasIp}/media"; }
+      { mountPoint = "/mnt/home-shared";              device = "//${homeNasIp}/shared"; }
+    ];
   };
 
   # Update firmware. Use fwupdmgr

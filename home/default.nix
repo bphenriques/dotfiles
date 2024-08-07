@@ -1,9 +1,10 @@
 { pkgs, lib, ... }:
 
-# TODO: https://github.com/mitchellh/nixos-config/blob/main/users/mitchellh/home-manager.nix
 # TODO: https://codeberg.org/adamcstephens/dotfiles
 {
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.
+  home.preferXdgDirectories = true;
+
   home.packages = with pkgs; [
     # Consistent UNIX command line tools regardless of the OS
     coreutils
@@ -26,7 +27,7 @@
     jq          # Query JSON.
     fx          # Interactively navigate through JSON.
     yq-go       # Query YAML.
-    bat         # Preview with code highlight.
+    bat         # Preview with code highlight. FIXME: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/bat/default.nix
     vim         # Basic editor
 
     # Security
@@ -120,8 +121,10 @@
   };
   fonts.fontconfig.enable = true;
 
-  # FIXME: xdg: https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
+  # Check: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/core.nix#L89
 
+  # FIXME: xdg: https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
+  # https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/mimeapps
   imports = [
     ./terminal
     ./git

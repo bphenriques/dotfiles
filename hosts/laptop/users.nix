@@ -51,4 +51,15 @@
   };
 }
 
+#  home = {
+#    xdg.userDirs = {
+#      enable = true;
+#      createDirectories = false;  # Do not create any of the folders as they are being mounted.
+#      documents = "${homeSambaServer.sharedFolder.personal.destination}/paperwork";
+#      music = "${homeSambaServer.sharedFolder.media.destination}/music";
+#      pictures = "${homeSambaServer.sharedFolder.personal.destination}/photos";
+#      videos = "${homeSambaServer.sharedFolder.personal.destination}/videos";
+#    };
+#  };
+
 # TODO: https://search.nixos.org/options?channel=unstable&show=networking.networkmanager.ensureProfiles.profiles&from=0&size=200&sort=relevance&type=packages&query=networking.networkmanager.ensureProfiles
