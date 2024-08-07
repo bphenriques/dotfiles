@@ -1,6 +1,4 @@
 { config, lib, pkgs, ... }:
-
-# TODO: add this to default sbt: addSbtPlugin("com.github.cb372" % "sbt-explicit-dependencies" % "0.3.1")
 {
   home.packages = with pkgs; [
     sbt         # Build tool.

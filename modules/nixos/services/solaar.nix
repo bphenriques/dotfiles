@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 # Start solaar as service: https://github.com/pwr-Solaar/Solaar/issues/2024
-
 with lib;
 let
   cfg = config.modules.services.solaar;
@@ -28,6 +27,6 @@ in
       after = ["graphical-session.target"];
       script = "${pkgs.solaar}/bin/solaar --restart-on-wake-up --window=hide";
     };
-    environment.systemPackages = with pkgs; [ at-spi2-core ]; # Fixes solaar starting-up: https://gist.github.com/jeffcogswell/62395900725acef1c0a5a608f7eb7a05
+    environment.systemPackages = with pkgs; [ at-spi2-core ]; # Fixes solaar start-up: https://gist.github.com/jeffcogswell/62395900725acef1c0a5a608f7eb7a05
   };
 }

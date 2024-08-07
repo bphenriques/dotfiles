@@ -22,13 +22,13 @@ _darwin_sync() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
   _darwin_build "$@"
   ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
-  popd
+  popd > /dev/null
 }
 
 _darwin_build() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
   nix build --extra-experimental-features 'nix-command flakes' ".#darwinConfigurations.$CURRENT_HOST.system" --show-trace
-  popd
+  popd > /dev/null
 }
 
 _darwin_update() {
@@ -48,13 +48,13 @@ _nixos_sync() {
       *)        sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"   ;;
     esac
   fi
-  popd
+  popd > /dev/null
 }
 
 _flake_update() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
   nix flake update
-  popd
+  popd > /dev/null
 }
 
 while [ $# -gt 0 ]; do

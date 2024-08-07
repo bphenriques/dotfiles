@@ -8,6 +8,8 @@
 
 [alias]
     co        = checkout
+    a         = add
+    aa        = add --all
     s         = status -s
     cp        = cherry-pick
     rb        = rebase
