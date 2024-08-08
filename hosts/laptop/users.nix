@@ -14,7 +14,7 @@
   };
   users.users.bphenriques.shell = pkgs.fish;  # Fish is managed in Home-Manager. Keeping the default shell for root.
 
-  home-manager.users.bphenriques = { pkgs, config }: {
+  home-manager.users.bphenriques = { pkgs, config, ... }: {
     imports = [
       ../../home
       ../../home/plasma
