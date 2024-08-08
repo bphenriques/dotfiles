@@ -72,7 +72,7 @@ in
       "${cfg.cacheLocation}" = {
         hideMounts = true;
         directories = [ ];
-        files = [ "/etc/machine-id" ];
+        files = [ ];
       };
     };
   };

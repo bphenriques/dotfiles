@@ -49,6 +49,7 @@
           "libretro-genesis-plus-gx"
           "libretro-snes9x"
           "libretro-fbneo"
+          "onetab"
 
           # Cuda
           "libnvjitlink"

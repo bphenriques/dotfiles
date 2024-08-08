@@ -52,7 +52,7 @@ in
 
   # Home
   custom.home-remote-disks = {
-    enable = true;
+    enable = false;
     smbCredentialsOwnerUsername = "bphenriques";
     uid = 1000;
     guid = 100;
@@ -68,7 +68,7 @@ in
 
   # Development
   custom.profiles.development.enable = true;
-  virtualisation.docker.enableNvidia = true;
+  hardware.nvidia-container-toolkit.enable = true;
 
   # Gaming
   custom.profiles.gaming.enable = true;
