@@ -3,7 +3,7 @@
 {
   # Audio - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
   # FIXME: https://github.com/bbigras/nix-config/blob/master/hardware/sound.nix
-  sound.enable = false;                # Disable ALSA (it is used as a low-level API for pipewire): https://nixos.wiki/wiki/ALSA
+  # https://github.com/NixOS/nixpkgs/blob/a1521bc2d16d34067ee45aac75387eaa63f638c0/nixos/doc/manual/release-notes/rl-2411.section.md?plain=1#L369C10-L369C16
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire
   services.pipewire = {
