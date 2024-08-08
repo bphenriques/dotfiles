@@ -1,7 +1,7 @@
 keys:
-  - &desktop age16wwdta66lx3tzsk9f56arlmf8gx9e5zktxl3vs50dawyg9ctr9ws2c85ng
+  - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
 creation_rules:
-  - path_regex: host/desktop/secrets/[^/]+\.(yaml|json|env|ini)$
+  - path_regex: hosts/laptop/secrets/.+$
     key_groups:
       - age:
-          - *desktop
+          - *laptop

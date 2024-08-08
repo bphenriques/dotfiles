@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 {
   environment.systemPackages = [ pkgs.fish ]; # Install the shell
   environment.shells = [ pkgs.fish ];         # Register the shell that was installed (2 step process)
@@ -92,12 +91,9 @@
   };
 
   # Fonts (system-wide)
-  fonts = {
-    fontDir.enable = true;
-    fonts = with pkgs; [
-      (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
-    ];
-  };
+  fonts.packages = with pkgs; [
+    (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
+  ];
 
   homebrew = {
     enable = true;
@@ -118,7 +114,6 @@
     ];
 
     casks = [
-      "firefox"           # Browser
       "rectangle"         # Window Manager
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
