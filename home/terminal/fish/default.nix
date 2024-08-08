@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 
 # TODO: Explore keybindings: https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_default_key_bindings.fish
 let
