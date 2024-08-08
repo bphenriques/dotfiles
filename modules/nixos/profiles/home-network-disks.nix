@@ -60,7 +60,7 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && cfg.folders != []) {
+  config = mkIf (cfg.enable && cfg.locations != []) {
     environment.systemPackages = [ pkgs.cifs-utils ];
     sops = {
       secrets = {
