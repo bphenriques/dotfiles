@@ -3,7 +3,7 @@
 usage() {
   echo "Setups the dotfiles.
 
-Usage: dotfiles-installer.sh <host> [--dotfiles-location <path>] [-ssh-directory <path>] [--ssh-key-comment <comment>] [--skip-sops-init] [--age-keys-file <path>]
+Usage: dotfiles-install.sh <host> [--dotfiles-location <path>] [-ssh-directory <path>] [--ssh-key-comment <comment>] [--skip-sops-init] [--age-keys-file <path>]
 
 Arguments:
   host                name of the host under the hosts folder
@@ -20,7 +20,6 @@ Options:
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
 warn() { printf '[ \033[01;33mWARN\033[0m ] %s\n' "$1"; }
-error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 press_to_continue() { info 'Press any key to continue'; read -r _; }
 
