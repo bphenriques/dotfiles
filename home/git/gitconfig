@@ -11,6 +11,7 @@
     a         = add
     aa        = add --all
     s         = status -s
+    p         = pull --rebase
     cp        = cherry-pick
     rb        = rebase
     pushf     = push --force-with-lease

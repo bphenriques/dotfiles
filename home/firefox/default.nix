@@ -109,8 +109,8 @@ in
     "x-scheme-handler/https" = ["firefox.desktop"];
   };
 
-  custom.impermanence = {
-    cache.directories = [ ".cache/mozilla" ];
-    config.directories = [ ".mozilla" ];
+  home.persistence = {
+    "${config.custom.impermanence.configLocation}".directories = [ ".mozilla" ];
+    "${config.custom.impermanence.cacheLocation}".directories = [ ".cache/mozilla" ];
   };
 }

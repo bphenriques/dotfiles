@@ -14,12 +14,13 @@
   };
   users.users.bphenriques.shell = pkgs.fish;  # Fish is managed in Home-Manager. Keeping the default shell for root.
 
-  home-manager.users.bphenriques = { pkgs, ... }: {
+  home-manager.users.bphenriques = { pkgs, config }: {
     imports = [
       ../../home
       ../../home/plasma
       ../../home/firefox
     ];
+
     programs.plasma.workspace.wallpaper = ./wallpaper.png;
     programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.age.nix;
     # programs.beets.settings.directory = config.user.musicDir;
@@ -43,6 +44,25 @@
 
     # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
     # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
+
+    # impermanence
+    custom.impermanence = {
+      enable = true;
+      configLocation = "/persist/config/bphenriques";
+      cacheLocation = "/persist/cache/bphenriques";
+    };
+    home.persistence = {
+      "${config.custom.impermanence.configLocation}".directories = [
+        ".config/vlc"
+        ".config/sops"
+
+        # Gaming
+        ".local/share/Steam"
+        ".config/lutris"
+        ".config/sunshine"
+        ".local/share/lutris"
+     ];
+   };
 
     home.stateVersion = "24.05";
   };

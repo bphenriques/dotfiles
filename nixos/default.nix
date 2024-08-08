@@ -71,6 +71,7 @@
   '';
 
   # Security: https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/default.nix#L79
+  security.sudo.extraConfig = "Defaults lecture=never";
 
   # TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
   # Disabling some defaults

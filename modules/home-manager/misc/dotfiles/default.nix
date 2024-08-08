@@ -16,4 +16,8 @@ in
       default = "${config.home.homeDirectory}/.dotfiles";
     };
   };
+
+  config = {
+    home.persistence."${config.custom.impermanence.configLocation}".directories = [ ".dotfiles" ];
+  };
 }
