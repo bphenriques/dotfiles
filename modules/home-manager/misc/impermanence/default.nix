@@ -25,5 +25,20 @@ in
          message = "custom.impermanence is only available in NixOS.";
       }
     ];
+
+    home.persistence."${cfg.configLocation}".directories = [
+      "Downloads"
+      "Music"
+      "Pictures"
+      "Videos"
+
+      ".ssh"
+      ".config/systemd" # git maintenance systemd timers
+      ".local/share/nix" # trusted settings and repl history
+    ];
+
+    home.persistence."${cfg.cacheLocation}".directories = [
+      ".cache/nix"
+    ];
   };
 }

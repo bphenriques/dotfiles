@@ -47,9 +47,6 @@ in
       '')
     ];
 
-    boot.initrd.postDeviceCommands = ''zfs rollback -r ${cfg.rootBlankSnapshot}'';
-    security.sudo.extraConfig = "Defaults lecture=never";  # Rollback triggers the lecture everytime
-
     fileSystems = {
       "${cfg.configLocation}".neededForBoot = true;
       "${cfg.cacheLocation}".neededForBoot = true;
@@ -57,11 +54,26 @@ in
       "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
     };
 
+    boot.initrd.postDeviceCommands = ''zfs rollback -r ${cfg.rootBlankSnapshot};'';
+    environment.persistence = {
+      "${cfg.configLocation}" = {
+        hideMounts = true;
+        directories = [
+          "/var/log"
+          "/var/lib/bluetooth"
+          "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
+          "/etc/NetworkManager"
+        ];
+        files = [
+          "/etc/machine-id"
+        ];
+      };
 
-    #hideMounts = true;
-
-    #environment.persistence.${config.custom.impermanence.configLocation} = {
-
-    #};
+      "${cfg.cacheLocation}" = {
+        hideMounts = true;
+        directories = [ ];
+        files = [ "/etc/machine-id" ];
+      };
+    };
   };
 }

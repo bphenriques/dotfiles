@@ -15,7 +15,6 @@ in
     ./disko.nix                           # Disk layout. Disko sets the boot.loader.grub.devices automatically.
     ../../nixos                           # My default nixos settings
     ./users.nix
-    ./impermanence.nix
     ./secrets.nix
   ];
 
@@ -84,6 +83,25 @@ in
   services.zfs = {
     autoScrub.enable = true;
     trim.enable = true;
+  };
+
+  # https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
+  # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
+  # https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
+    # For when I use tmpfs: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L34
+
+  # https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos/hardware?ref_type=heads
+  # https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
+  # https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/zfs/default.nix#L60
+  # Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
+  # This one is nice: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L35
+  # https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
+  # https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
+  custom.impermanence = {
+    enable = true;
+    rootBlankSnapshot = "zroot/system/root@blank";
+    configLocation = "/persist/config/system";
+    cacheLocation = "/persist/cache/system";
   };
   #  services.sanoid = lib.mkIf cfg.snapshots {
   #    enable = true;
