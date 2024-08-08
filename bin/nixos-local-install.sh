@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 
-
-
 # https://github.com/wimpysworld/nix-config/blob/main/nixos/_mixins/scripts/install-system/install-system.sh
 # https://github.com/wimpysworld/nix-config/blob/c44a1bd13868e759bb215f54ca1f3fe49eba6dae/scripts/install.sh
 # https://github.com/wimpysworld/nix-config/blob/main/nixos/_mixins/scripts/install-system/install-system.sh

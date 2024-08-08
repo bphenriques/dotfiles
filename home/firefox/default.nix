@@ -9,6 +9,12 @@ in
 {
   programs.firefox = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
+    #package = pkgs.floorp.override {
+    #  nativeMessagingHosts = [
+    #    pkgs.tridactyl-native
+    #    pkgs.gnome-browser-connector
+    #  ];
+    #};
     profiles = {
       default = {
         id = 0;
@@ -22,9 +28,13 @@ in
           keepa
           multi-account-containers
           linkding-extension
-          tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
+          # tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
           consent-o-matic
-          # One day, check auto-redirects
+          no-pdf-download
+
+          onetab
+          # libredirect# One day, check auto-redirects
+
         ];
 
         search = {

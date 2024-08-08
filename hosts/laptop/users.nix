@@ -41,9 +41,6 @@
     xdg.userDirs.createDirectories = false;
     xdg.mimeApps.enable = true; # TODO: Create associations?
 
-    custom.dotfiles.privateSSHPath = "/persist/config/bphenriques/home/bphenriques/.ssh/id_ed25519";
-    custom.dotfiles.host = "laptop";
-
     # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
     # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
 
