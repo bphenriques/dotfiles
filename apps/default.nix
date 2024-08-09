@@ -1,4 +1,4 @@
-  { nixpkgs }:
+{ nixpkgs }:
 let
   lib = nixpkgs.lib;
   merge = lib.foldr (a: b: a // b) { };

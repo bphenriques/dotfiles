@@ -2,6 +2,6 @@ function dotfiles -d 'Interactive dotfiles'
   if test (count $argv) -eq 0
     cd $DOTFILES_LOCATION
   else
-    dotfiles $argv
+    $DOTFILES_LOCATION/overlays/dotfiles/dotfiles.sh $argv
   end
 end

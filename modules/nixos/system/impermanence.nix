@@ -1,20 +1,5 @@
 { pkgs, lib, config, ... }:
 
-# NOT BEING USED. Iterating...
-
-# Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
-# https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
-  # For when I use tmpfs: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L34
-
-# https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos/hardware?ref_type=heads
-# https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
-# https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/zfs/default.nix#L60
-# Imper bla bla : https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L59
-# This one is nice: https://github.com/iynaix/dotfiles/blob/main/nixos/impermanence.nix#L35
-# https://github.com/search?q=repo%3Athexyno%2Fnixos-config%20ragon.persist&type=code
-# https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/impermanence/default.nix
-
-# TODO: Consider using custom options: https://github.com/nix-community/impermanence/blob/master/nixos.nix#L128. Annoying but might need
 let
   cfg = config.custom.impermanence;
   hmUsersCfg = config.home-manager.users;
@@ -43,7 +28,7 @@ in
     # List directories that will be removed on next boot
     environment.systemPackages = [
       (pkgs.writeScriptBin "zfsdiff" ''
-        ${pkgs.doas}/bin/doas zfs diff ${cfg.rootBlankSnapshot} -F | ${pkgs.ripgrep}/bin/rg -e "\+\s+/\s+" | cut -f3- | ${pkgs.skim}/bin/sk --query "/home/bphenriques/"
+        sudo zfs diff ${cfg.rootBlankSnapshot} -F | ${pkgs.ripgrep}/bin/rg -e "\+\s+/\s+" | cut -f3- | ${pkgs.skim}/bin/sk --query "/home/bphenriques/"
       '')
     ];
 
@@ -54,7 +39,7 @@ in
       "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
     };
 
-    boot.initrd.postDeviceCommands = ''zfs rollback -r ${cfg.rootBlankSnapshot};'';
+    boot.initrd.postDeviceCommands = lib.mkAfter ''zfs rollback -r ${cfg.rootBlankSnapshot};'';
     environment.persistence = {
       "${cfg.configLocation}" = {
         hideMounts = true;

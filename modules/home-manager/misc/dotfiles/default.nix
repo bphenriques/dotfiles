@@ -1,6 +1,5 @@
 { lib, pkgs, config, ... }:
 
-# TODO: https://github.com/malob/nixpkgs/blob/master/home/gh-aliases.nix#L2
 # TODO: https://github.com/Misterio77/nix-config/blob/cdc35ca281891268c6e9772cca1e66fb39de04ab/home/misterio/features/cli/git.nix
 # TODO: https://github.com/jordanisaacs/dotfiles/blob/master/scripts/default.nix#L130
 # https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
@@ -18,6 +17,8 @@ in
   };
 
   config = {
-    home.persistence."${config.custom.impermanence.configLocation}".directories = [ ".dotfiles" ];
+    home.persistence = lib.mkIf config.custom.impermanence.enable {
+      "${config.custom.impermanence.configLocation}".directories = [ ".dotfiles" ];
+    };
   };
 }

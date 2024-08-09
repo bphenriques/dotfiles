@@ -142,6 +142,11 @@
     "/boot".neededForBoot = true;
   };
 
+  services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
+
+  # Run zramctl to check how good memory is compressed
+  zramSwap.enable = true;
+
   systemd.tmpfiles.settings = {
     # Only accessible by the bphenriques
 /*    "grant-bphenriques-permissions" = {

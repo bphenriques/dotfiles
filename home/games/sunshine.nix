@@ -13,4 +13,6 @@
         }
       ];
     };
+
+  home.persistence."${config.custom.impermanence.configLocation}".directories = [ ".config/sunshine" ];
 }
