@@ -10,12 +10,15 @@ let
 in
 {
   imports = [
-    ./hardware-configuration.nix          # Output of nixos-generate-config --root /mnt
-    ./hardware-configuration-extra.nix    # Extra configurations considering the hardware of the laptop
-    ./disko.nix                           # Disk layout. Disko sets the boot.loader.grub.devices automatically.
-    ../../nixos                           # My default nixos settings
+    ./hardware/hardware-configuration.nix          # Output of nixos-generate-config --root /mnt
+    ./hardware/graphics.nix
+    ./hardware/connectivity.nix
+    ./hardware/peripherals.nix
+
+    ./filesystem.nix                     # Disk layout. Disko sets the boot.loader.grub.devices automatically.
+    ../../nixos                                    # Default nixos settings
     ./users.nix
-    ./secrets.nix
+    ./secrets
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -72,7 +75,6 @@ in
 
   # Gaming
   custom.profiles.gaming.enable = true;
-  custom.profiles.gaming.defaultProtonDir = "/mnt/data/GlobalProton";
 
   # ZFS
   networking.hostId = "5b318853";

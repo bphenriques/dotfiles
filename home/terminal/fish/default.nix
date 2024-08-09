@@ -84,8 +84,10 @@ in
     in concatStringsSep "\n" ([ nixIntegration purePrompt zellij ] ++ extra);
   };
 
-  home.persistence."${config.custom.impermanence.cacheLocation}" = {
-    directories = [ ".local/share/fish" ".local/share/zoxide" ];
-    files = [ ".bash_history" ];
+  home.persistence = lib.mkIf config.custom.impermanence.enable {
+    "${config.custom.impermanence.cacheLocation}" = {
+      directories = [ ".local/share/fish" ".local/share/zoxide" ];
+      files = [ ".bash_history" ];
+    };
   };
 }
