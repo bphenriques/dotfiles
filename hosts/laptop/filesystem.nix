@@ -24,7 +24,7 @@
   custom.impermanence = {
     enable = true;
     rootBlankSnapshot = "zroot/system/root@blank";
-    configLocation = "/persist/dataConfig/system";
+    dataLocation = "/persist/data/system";
     cacheLocation = "/persist/cache/system";
   };
 
@@ -37,7 +37,7 @@
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.tmpfiles.rules = [
-    "z /mnt/games 0775 root users"                              # Owned by root but can be used by anyone
+    "z /mnt/games 0775 root users"                              # Owned by root but can be used by any regular user
     "z /home/bphenriques/workdir 0700 bphenriques users 0700"   # Only accessible by bphenriques
   ];
 }
