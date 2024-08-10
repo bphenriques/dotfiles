@@ -2,13 +2,15 @@
 {
   imports = [
     ../../home
-    ../../home/plasma
-    ../../home/firefox
-    ../../home/games/lutris.nix
-    ../../home/games/sunshine.nix
+    ../../home/desktop/plasma.nix
+    ../../home/media/firefox
+    ../../home/media/logseq
+    ../../home/gaming/lutris.nix
+    ../../home/gaming/sunshine.nix
+    ../../home/dev/scala
   ];
 
-  programs.plasma.workspace.wallpaper = ./wallpaper.png;
+  programs.plasma.workspace.wallpaper = ./secrets/wallpaper.sops.jpg;
   programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.sops.nix;
   # programs.beets.settings.directory = config.user.musicDir;
 

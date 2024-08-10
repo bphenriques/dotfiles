@@ -1,3 +1,3 @@
 {
-  imports = [ ./fish ./fzf ./wezterm ./zellij ./broot ./ghostty ];
+  imports = [ ./fish ./fzf.nix ./zellij ./broot.nix ./ghostty.nix ];
 }

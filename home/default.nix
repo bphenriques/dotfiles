@@ -25,8 +25,8 @@
 
     # Text Processors
     jq          # Query JSON.
-    fx          # Interactively navigate through JSON.
     yq-go       # Query YAML.
+    fx          # Interactively navigate through JSON.
     bat         # Preview with code highlight. FIXME: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/bat/default.nix
     vim         # Basic editor
 
@@ -76,7 +76,7 @@
       LC_ALL  = "en_US.UTF-8";
 
       # Default editors and settings
-      EDITOR  = "hx";
+      EDITOR  = "${pkgs.helix}/bin/hx";
       VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 
@@ -125,11 +125,7 @@
 
   # FIXME: xdg: https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
   # https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/mimeapps
-  imports = [
-    ./terminal
-    ./git
-    ./helix
-    ./scala
-    ./logseq
-  ];
+
+  # Default imports across all systems
+  imports = [ ./dev ./terminal ];
 }

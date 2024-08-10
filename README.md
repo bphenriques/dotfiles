@@ -129,6 +129,3 @@ $ ./bin/git-secret-filter.sh init
     - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
 
 For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
-
-
-Disclaimer: I do not claim ownership of the wallpapers appearing in this repository. If you find images in this repository owned by you and are of limited use, please let me know and I will remove them.

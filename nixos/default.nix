@@ -42,6 +42,9 @@
     vlc       # Video
     qbittorrent
 
+    # File Management
+    filezilla
+
     # Filesystems (will I ever need this?)
     exfat     # Windows drives
     ntfs3g    # Windows drives

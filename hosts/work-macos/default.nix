@@ -5,17 +5,20 @@ in
 {
   imports = [ ../../darwin ];
   users.users."${username}".home  = "/Users/${username}";
+  home-manager.users."${username}" = ./brunohenriques.nix;
+
+  # TODO: Make this parametrized per user
   system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
-  system.desktop.picture = ./wallpaper.png; # From simpledesktops
+  system.desktop.picture = ./secrets/wallpaper.sops.png;
 
   homebrew = {
     taps = [
-      "common-fate/granted"
-      "snyk/tap"
+      "scalacenter/bloop" # Scala
+      "coursier/formulas" # Scala
     ];
-
     brews = [
-      "snyk"      # Security. The NixOS package is broken in MacOS.
+      "scalacenter/bloop/bloop"     # Scala
+      "coursier/formulas/coursier"  # Scala
       "python3"   # Implicit dependency of Aiven client
       "kubeseal"  # K8s stuff
     ];
@@ -26,32 +29,6 @@ in
       "1password-cli" # Team's 1password
       "postman"       # Because it is more practical than curl
     ];
-  };
-
-  home-manager.users."${username}" = {
-    imports = [ ../../home ];
-
-    # Consider moving some of these packages to project's shell.nix if team's okay with that.
-    home.packages = with pkgs; [
-      # Cloud Providers
-      (google-cloud-sdk.withExtraComponents [
-        google-cloud-sdk.components.core
-        google-cloud-sdk.components.bq
-        google-cloud-sdk.components.gsutil
-        google-cloud-sdk.components.gke-gcloud-auth-plugin
-      ])
-      awscli2
-      granted # Follow https://docs.commonfate.io/granted/getting-started/ to set it up
-
-      # Kubernetes
-      kubectl
-      kubelogin-oidc
-
-      # Infra
-      terraform
-    ];
-
-    home.stateVersion = "22.11";
   };
 
   system.stateVersion = 4;

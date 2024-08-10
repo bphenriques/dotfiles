@@ -1,1 +1,4 @@
-hosts/laptop/secrets/*.sops.nix filter=sopsGitFilterlaptop
+hosts/laptop/secrets/*.sops.nix       filter=sopsGitFilterlaptop
+hosts/laptop/secrets/*.sops.jpg       filter=sopsGitFilterlaptop
+
+hosts/work-macos/secrets/*.sops.png   filter=sopsGitFilterwork-macos

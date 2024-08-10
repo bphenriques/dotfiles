@@ -97,27 +97,16 @@
 
   homebrew = {
     enable = true;
-
     onActivation = {
       cleanup = "zap";
       upgrade = true;
     };
-
-    taps = [
-      "scalacenter/bloop" # Scala
-      "coursier/formulas" # Scala
-    ];
-
-    brews = [
-      "scalacenter/bloop/bloop"     # Scala
-      "coursier/formulas/coursier"  # Scala
-    ];
-
+    taps = [ ];
+    brews = [ ];
     casks = [
       "rectangle"         # Window Manager
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
-      "keka"              # Compression
       "ngrok"             # Useful
     ];
   };
