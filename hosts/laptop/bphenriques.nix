@@ -45,7 +45,7 @@
     cacheLocation = "/persist/cache/bphenriques";
   };
   home.persistence = {
-    "${config.custom.impermanence.configLocation}".directories = [
+    "${config.custom.impermanence.dataLocation}".directories = [
       ".config/vlc" # TODO: https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/vlc.nix#L10
       ".config/sops"
 

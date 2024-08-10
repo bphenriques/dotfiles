@@ -7,7 +7,7 @@ in
 {
   options.custom.impermanence = {
     enable = lib.mkEnableOption "Whether to enable home-manager impermanence. Only usable in Nixos";
-    configLocation = lib.mkOption {
+    dataLocation = lib.mkOption {
       type = with lib.types; str;
       description = "Location of the users's configuration persist directory";
     };
@@ -26,7 +26,7 @@ in
       }
     ];
 
-    home.persistence."${cfg.configLocation}".directories = [
+    home.persistence."${cfg.dataLocation}".directories = [
       "Downloads"
       "Music"
       "Pictures"

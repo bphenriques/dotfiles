@@ -110,7 +110,7 @@ in
   };
 
   home.persistence = {
-    "${config.custom.impermanence.configLocation}".directories = [ ".mozilla" ];
+    "${config.custom.impermanence.dataLocation}".directories = [ ".mozilla" ];
     "${config.custom.impermanence.cacheLocation}".directories = [ ".cache/mozilla" ];
   };
 }
