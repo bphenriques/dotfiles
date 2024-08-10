@@ -35,12 +35,7 @@ let
     });
 in {
   options.custom.proton-run = with types; {
-    enable = mkOption {
-      type = bool;
-      default = false;
-      description = mdDoc ''proton-run.'';
-    };
-
+    enable = mkEnableOption ''proton-run'';
     defaultProtonDir = mkOption {
       type = str;
       default = null;

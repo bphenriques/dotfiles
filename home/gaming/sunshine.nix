@@ -1,5 +1,4 @@
 { config, lib, pkgs, ... }:
-
 {
   xdg.configFile."sunshine/apps.json".text = builtins.toJSON
     {

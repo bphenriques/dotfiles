@@ -7,11 +7,7 @@ let
 in
 {
   options.modules.services.input-remapper = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = mdDoc ''Whether to enable input-remapper one-shot service to reload the profiles.'';
-    };
+    enable = mkEnableOption ''input-remapper one-shot service to reload the profiles.'';
   };
 
   config = mkIf cfg.enable {

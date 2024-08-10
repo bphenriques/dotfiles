@@ -1,7 +1,8 @@
 { pkgs, config, ... }:
 
-# Mirrored from https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
-# Based on Nix-Hardware (see https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
+# Based on:
+# - https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
+# - https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
 # TODO: Check AMDVLK https://github.com/NixOS/nixpkgs/pull/318175
 {
   boot.kernelParams = [

@@ -7,11 +7,7 @@ let
 in
 {
   options.modules.services.solaar = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = mdDoc ''Whether to enable solaar-gui service.'';
-    };
+    enable = mkEnableOption ''solaar-gui service.'';
   };
 
   config = mkIf cfg.enable {

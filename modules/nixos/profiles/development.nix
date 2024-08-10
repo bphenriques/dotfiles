@@ -11,7 +11,6 @@ in
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       jetbrains.idea-community
-      filezilla
 
       # Raspberry Pi
       rpi-imager
