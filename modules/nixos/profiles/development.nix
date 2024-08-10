@@ -17,7 +17,7 @@ in
     ];
 
     virtualisation.docker.enable = true;
-    environment.persistence."${config.custom.impermanence.configLocation}".directories = [
+    environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
       "/var/lib/docker"
     ];
   };

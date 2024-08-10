@@ -10,6 +10,6 @@
   ];
 
   home.persistence = lib.mkIf config.custom.impermanence.enable {
-    "${config.custom.impermanence.configLocation}".directories = [ ".config/lutris" ".local/share/lutris" ];
+    "${config.custom.impermanence.dataLocation}".directories = [ ".config/lutris" ".local/share/lutris" ];
   };
 }

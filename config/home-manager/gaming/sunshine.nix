@@ -13,5 +13,5 @@
       ];
     };
 
-  home.persistence."${config.custom.impermanence.configLocation}".directories = [ ".config/sunshine" ];
+  home.persistence."${config.custom.impermanence.dataLocation}".directories = [ ".config/sunshine" ];
 }

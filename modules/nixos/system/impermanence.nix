@@ -6,14 +6,14 @@ let
 in
 {
   options.custom.impermanence = {
-    enable = lib.mkEnableOption "Whether to enable impermanence";
+    enable = lib.mkEnableOption "nix-os-impermanence";
     rootBlankSnapshot = lib.mkOption {
       description = "Names of the root snapshot to be rolledback upon boot.";
       type = lib.types.str;
       example = "zroot/system/root@blank";
     };
 
-    configLocation = lib.mkOption {
+    dataLocation = lib.mkOption {
       type = with lib.types; str;
       description = "Location of the system's configuration persist directory";
     };
@@ -33,7 +33,7 @@ in
     ];
 
     fileSystems = {
-      "${cfg.configLocation}".neededForBoot = true;
+      "${cfg.dataLocation}".neededForBoot = true;
       "${cfg.cacheLocation}".neededForBoot = true;
       "${hmUsersCfg.bphenriques.custom.impermanence.configLocation}".neededForBoot = true;
       "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
@@ -41,7 +41,7 @@ in
 
     boot.initrd.postDeviceCommands = lib.mkAfter ''zfs rollback -r ${cfg.rootBlankSnapshot};'';
     environment.persistence = {
-      "${cfg.configLocation}" = {
+      "${cfg.dataLocation}" = {
         hideMounts = true;
         directories = [
           "/var/log"

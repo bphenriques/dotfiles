@@ -18,7 +18,7 @@ in
 
   config = {
     home.persistence = lib.mkIf config.custom.impermanence.enable {
-      "${config.custom.impermanence.configLocation}".directories = [ ".dotfiles" ];
+      "${config.custom.impermanence.dataLocation}".directories = [ ".dotfiles" ];
     };
   };
 }

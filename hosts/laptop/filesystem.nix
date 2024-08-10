@@ -27,6 +27,17 @@
     dataLocation = "/persist/data/system";
     cacheLocation = "/persist/cache/system";
   };
+  custom.home-remote-disks = {
+    enable = false;
+    smbCredentialsOwnerUsername = "bphenriques";
+    uid = 1000;
+    guid = 100;
+    locations = [
+      { mountPoint = "/home/bphenriques/nas"; device = "//home-nas/bphenriques"; }
+      { mountPoint = "/mnt/nas-media";        device = "//home-nas/media"; }
+      { mountPoint = "/mnt/nas-shared";       device = "//home-nas/shared"; }
+    ];
+  };
 
   # Disko sets boot.loader.grub.devices automatically.
   fileSystems = {
