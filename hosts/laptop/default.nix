@@ -16,7 +16,7 @@ in
 
     ./disko.nix                             # Instructions on how to format the disk
     ./filesystem.nix                        # More settings regarding the disk.
-    ../../nixos                             # Default nixos settings
+    ../../config/nixos.nix                  # Default nixos settings
     ./users.nix
     ./secrets
   ];

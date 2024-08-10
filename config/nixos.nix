@@ -1,6 +1,15 @@
 { pkgs, ... }:
 
 {
+  nix = {
+    optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+  };
+
   # Audio - Pipewire over ALSA and PulseAudio: https://nixos.wiki/wiki/PipeWire
   # FIXME: https://github.com/bbigras/nix-config/blob/master/hardware/sound.nix
   # https://github.com/NixOS/nixpkgs/blob/a1521bc2d16d34067ee45aac75387eaa63f638c0/nixos/doc/manual/release-notes/rl-2411.section.md?plain=1#L369C10-L369C16

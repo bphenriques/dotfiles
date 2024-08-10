@@ -1,13 +1,13 @@
 { pkgs, config, ... }:
 {
   imports = [
-    ../../home
-    ../../home/desktop/plasma.nix
-    ../../home/media/firefox
-    ../../home/media/logseq
-    ../../home/gaming/lutris.nix
-    ../../home/gaming/sunshine.nix
-    ../../home/dev/scala
+    ../../config/home-manager
+    ../../config/home-manager/desktop/plasma.nix
+    ../../config/home-manager/media/firefox
+    ../../config/home-manager/media/logseq
+    ../../config/home-manager/gaming/lutris.nix
+    ../../config/home-manager/gaming/sunshine.nix
+    ../../config/home-manager/dev/scala
   ];
 
   programs.plasma.workspace.wallpaper = ./secrets/wallpaper.sops.jpg;
@@ -41,7 +41,7 @@
   # impermanence
   custom.impermanence = {
     enable = true;
-    configLocation = "/persist/config/bphenriques";
+    configLocation = "/persist/data/bphenriques";
     cacheLocation = "/persist/cache/bphenriques";
   };
   home.persistence = {

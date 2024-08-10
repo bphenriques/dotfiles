@@ -63,24 +63,20 @@
         overlays = (import ./overlays { inherit inputs; });
       };
 
-      nixConfigNixOS = {
-        optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them
-        gc = {
-          automatic = true;
-          dates = "weekly";
-          options = "--delete-older-than 7d";
-        };
-        settings = {
-          auto-optimise-store = true;
-          # TODO: Consider this for wayland: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/core/default.nix#L92
-        };
-      };
-
       nixConfig = {
         settings = {
           experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
           auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
           use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
+
+          extra-substituters = [
+            "https://nix-community.cachix.org"
+            "https://nixpkgs-wayland.cachix.org"
+          ];
+          extra-trusted-public-keys = [
+            "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+            "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+          ];
         };
 
         # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
@@ -95,16 +91,14 @@
         impermanence.nixosModules.home-manager.impermanence
       ] ++ attrValues self.homeManagerModules;
 
-      nixosModules = [
-        sops-nix.nixosModules.sops
-        disko.nixosModules.disko
-        impermanence.nixosModules.impermanence
-      ] ++ attrValues self.nixosModules;
-
       nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig homeManagerModules nixosModules;
-        nixConfig = nixConfig // nixConfigNixOS;
+        inherit home-manager nixpkgsConfig homeManagerModules nixConfig;
         nixpkgs = nixpkgs-unstable;
+        nixosModules = [
+          sops-nix.nixosModules.sops
+          disko.nixosModules.disko
+          impermanence.nixosModules.impermanence
+        ] ++ attrValues self.nixosModules;
       };
 
       macosLib = import ./lib/macos.nix {

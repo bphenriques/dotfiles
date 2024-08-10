@@ -68,7 +68,7 @@
 
         datasets =
           let
-            persistDataConfigLocation = "/persist/dataConfig";
+            persistDataLocation = "/persist/data";
             persistCacheLocation = "/persist/cache";
 
             systemDatasets = {
@@ -87,7 +87,7 @@
               };
               "system/persist" = {
                 type = "zfs_fs";
-                mountpoint = "${persistDataConfigLocation}/system";
+                mountpoint = "${persistDataLocation}/system";
               };
               "system/cache" = {
                 type = "zfs_fs";
@@ -112,7 +112,7 @@
 
               "home/bphenriques/persist" = {
                 type = "zfs_fs";
-                mountpoint = "${persistDataConfigLocation}/bphenriques";
+                mountpoint = "${persistDataLocation}/bphenriques";
               };
               "home/bphenriques/cache" = {
                 type = "zfs_fs";
