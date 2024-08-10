@@ -19,7 +19,7 @@ case $1 in
       echo "No matching host for: '$host'"
       exit 2
     fi
-    git config --local "filter.${BASE_NAME}${host}.required" true
+    git config --local "filter.${BASE_NAME}${host}.required" false
     git config --local "filter.${BASE_NAME}${host}.smudge" './bin/sops-git-filter.sh smudge "%f"'
     git config --local "filter.${BASE_NAME}${host}.clean" './bin/sops-git-filter.sh clean "%f"'
     ;;

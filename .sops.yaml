@@ -1,6 +1,6 @@
 keys:
   - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
-  - &work-macos age12t30vw9dvqv037wrycnwqc77gu2zpwqcxm0z5mqht7zyl0lyq42sv5asw2
+  - &work-macos age1u3mlmjlfsaa589qqzxjwk5e3ej04eqqlfyhumvfuude70aj9945svms6ha
 creation_rules:
   - path_regex: hosts/laptop/secrets/.+$
     key_groups:
