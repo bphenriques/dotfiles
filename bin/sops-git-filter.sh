@@ -3,6 +3,7 @@
 #! nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/6a8a86ede2e8ce496648f2a8ae79d2c24464ca2a.tar.gz
 # shellcheck shell=sh disable=SC2046,SC3028
 SCRIPT_PATH="$(dirname "$0")"
+cd "$SCRIPT_PATH"/.. || exit 1
 
 BASE_NAME=sopsGitFilter
 
@@ -22,6 +23,8 @@ case $1 in
     git config --local "filter.${BASE_NAME}${host}.required" false
     git config --local "filter.${BASE_NAME}${host}.smudge" './bin/sops-git-filter.sh smudge "%f"'
     git config --local "filter.${BASE_NAME}${host}.clean" './bin/sops-git-filter.sh clean "%f"'
+    git rm "hosts/${host}/secrets"/*
+    git checkout HEAD "hosts/${host}/secrets"
     ;;
   check)
     shift 1
