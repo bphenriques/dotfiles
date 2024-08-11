@@ -92,7 +92,6 @@ init_sops_git_filter() {
         if age-keygen -y "${age_keys_file}" | grep "${host_public_key}" > /dev/null 2>&1; then
           info "Sops Git Filter - Found matching private-key for ${host} with public key ${host_public_key}"
           "${dotfiles_location}"/bin/sops-git-filter.sh init "${host}"
-          git -C "${dotfiles_location}" checkout $BRANCH_NAME
         else
           warn "Sops Git Filter - No matching age private key for ${host_public_key} under ${age_keys_file}"
         fi
