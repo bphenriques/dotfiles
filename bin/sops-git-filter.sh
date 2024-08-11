@@ -23,7 +23,7 @@ case $1 in
     git config --local "filter.${BASE_NAME}${host}.required" false
     git config --local "filter.${BASE_NAME}${host}.smudge" './bin/sops-git-filter.sh smudge "%f"'
     git config --local "filter.${BASE_NAME}${host}.clean" './bin/sops-git-filter.sh clean "%f"'
-    git rm "hosts/${host}/secrets"/*
+    git rm -f "hosts/${host}/secrets"/*
     git checkout HEAD "hosts/${host}/secrets"
     ;;
   check)
