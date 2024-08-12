@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, config, lib, ... }:
 {
   home.packages = [
     (pkgs.lutris.override {

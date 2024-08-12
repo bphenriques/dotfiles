@@ -1,4 +1,5 @@
 { config, pkgs, ... }:
+# TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/helix/default.nix
 {
   /*
   home.packages = [
@@ -50,7 +51,6 @@
     ];
   };
 
-  # TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/helix/default.nix
   xdg.configFile = {
     "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/config.toml";
     "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/languages.toml";

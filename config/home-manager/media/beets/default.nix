@@ -11,7 +11,9 @@
      enable = true;
      package = pkgs.beets-unstable; # Github version
      settings = {
-       library = "${config.xdg.dataHome}/beets.db"; # FIXME: Can't live in the NAS due to intermetient DB lock issues. TODO: Backup to NAS. Perhaps https://serverfault.com/questions/146961/automatically-run-a-command-every-time-a-file-is-changed ?
+
+     # FIXME: Can't live in the NAS due to intermetient DB lock issues. TODO: Backup to NAS. Perhaps https://serverfault.com/questions/146961/automatically-run-a-command-every-time-a-file-is-changed ?
+       library = "${config.xdg.dataHome}/beets.db";
        paths = {
          default = "$albumartist/$album%aunique{}/$track $title";
          singleton = "$artist/Non-Album/$title";
