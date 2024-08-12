@@ -85,7 +85,7 @@
                 type = "zfs_fs";
                 mountpoint = "/nix";
               };
-              "system/persist" = {
+              "system/data" = {
                 type = "zfs_fs";
                 mountpoint = "${persistDataLocation}/system";
               };
@@ -110,7 +110,7 @@
                 mountpoint = "/home/bphenriques/workdir";
               };
 
-              "home/bphenriques/persist" = {
+              "home/bphenriques/data" = {
                 type = "zfs_fs";
                 mountpoint = "${persistDataLocation}/bphenriques";
               };

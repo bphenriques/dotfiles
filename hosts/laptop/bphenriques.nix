@@ -21,10 +21,6 @@
     pinentryPackage = pkgs.pinentry-gnome3;
   };
 
-  home.packages = with pkgs; [
-    killall     # Useful
-  ];
-
   # Gaming
   custom.proton-run.enable = true;
   custom.proton-run.defaultProtonDir = "/mnt/data/GlobalProton";
@@ -36,7 +32,6 @@
   # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
   # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
 
-  # impermanence
   custom.impermanence = {
     enable = true;
     dataLocation = "/persist/data/bphenriques";
@@ -53,11 +48,9 @@
         ".config/lutris"
         ".local/share/lutris"
      ];
-     allowOther = true;
+     allowOther = false;
    };
-   "${config.custom.impermanence.cacheLocation}" = {
-     allowOther = true;
-   };
+   "${config.custom.impermanence.cacheLocation}".allowOther = false;
  };
 
   home.stateVersion = "24.05";

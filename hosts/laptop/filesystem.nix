@@ -71,7 +71,10 @@ in
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.tmpfiles.rules = [
-    "z /mnt/games 0775 root users"                              # Owned by root but can be used by any regular user
-    "z /home/bphenriques/workdir 0700 bphenriques users 0700"   # Only accessible by bphenriques
+    "z /mnt/games 0775 root users"                          # Owned by root but can be used by any regular user
+
+    "z /persist/data/bphenriques 0700 bphenriques users"    # Private to bphenriques
+    "z /persist/cache/bphenriques 0700 bphenriques users"   # Private to bphenriques
+    "z /home/bphenriques/workdir 0700 bphenriques users"    # Private to bphenriques
   ];
 }

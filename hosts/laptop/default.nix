@@ -4,9 +4,6 @@
 # Power profile? https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/hardware/upower/default.nix
 # File browser: https://github.com/iynaix/dotfiles/blob/e441ab4ff7a775b57b6c79a2fa6be99e3ab2d58b/home-manager/programs/nemo.nix#L79
 # TODO: check boot: https://github.com/adi1090x/plymouth-themes?tab=readme-ov-file. Like 70, 71, 62 63 5
-let
-  homeNasIp = "192.168.68.53";
-in
 {
   imports = [
     ./hardware/hardware-configuration.nix   # Output of nixos-generate-config --root /mnt
@@ -22,9 +19,6 @@ in
   ];
 
   networking.hostName = "bphenriques-laptop";
-  networking.hosts = {
-    homeNasIp = [ "home-nas" ];
-  };
 
   # Boot
   boot = {
