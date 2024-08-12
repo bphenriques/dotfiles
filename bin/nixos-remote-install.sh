@@ -4,7 +4,7 @@
 # shellcheck shell=sh disable=SC2046,SC3028
 SCRIPT_PATH="$(dirname "$0")"
 
-# ./bin/nixos-remote-install.sh laptop ip --sops-age-destination /persist/data/home/bphenriques/.config/sops/age/keys.txt
+# ./bin/nixos-remote-install.sh laptop nixos@192.168.68.59 --sops-age-destination /persist/data/home/bphenriques/.config/sops/age/keys.txt
 
 set -e
 
@@ -59,7 +59,8 @@ file_tree_to_copy="$(mktemp -d)"
 if host_require_secrets "$host" "${dotfiles_location}"; then
   test -z "${sops_age_destination}" && error "sops-age-destination argument is required as '${host}' requires secrets!" && usage && exit 1
 
-  info "${host} requires secret. Fetching from Bitwarden"
+  info "'${host}' contains secrets. Setting private keys from Bitwarden"
+  bw unlock --check > /dev/null || fatal "Vault must be unlocked"
   mkdir -p "$(dirname "${file_tree_to_copy}/${sops_age_destination}")"
   fetch_age_private_key "${host}" > "${file_tree_to_copy}/${sops_age_destination}"
   # TODO: should I run this only after the file is copied?
@@ -68,5 +69,4 @@ else
   info "${host} does not require secrets."
 fi
 
-tree -a ${file_tree_to_copy}
-nix run github:nix-community/nixos-anywhere -- --extra-files "$file_tree_to_copy" --flake "#.${host}" "${ssh_host}"
+nix run github:nix-community/nixos-anywhere -- --extra-files "$file_tree_to_copy" --flake ".#${host}" "${ssh_host}"
