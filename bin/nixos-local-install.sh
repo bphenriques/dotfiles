@@ -12,8 +12,13 @@ press_to_continue() { info 'Press any key to continue'; read -r _; }
 
 info "\nWelcome to bphenriques\'s nixos-installer"
 
-echo -e '\nGreetings, human with ID: "${userDesc} (${userName}) <${userEmail}>", GitHub account: "${githubUser}".'
-echo -e "\nYou have requested the priming of the box designated as '${hostName}', on device: '${diskDevice}'."
+is_nixos() {
+  test -f /etc/os-release && grep -q ID=nixos /etc/os-release
+}
+
+is_nixos_installer() {
+  is_nixos && grep -q VARIANT_ID=installer /etc/os-release
+}
 
 
 format() {

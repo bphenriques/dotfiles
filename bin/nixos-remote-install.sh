@@ -69,4 +69,4 @@ else
 fi
 
 tree -a ${file_tree_to_copy}
-#nix run github:nix-community/nixos-anywhere -- --extra-files "$file_tree_to_copy" --flake "#.${host}" "${ssh_host}"
+nix run github:nix-community/nixos-anywhere -- --extra-files "$file_tree_to_copy" --flake "#.${host}" "${ssh_host}"
