@@ -1,4 +1,21 @@
-{ lib, ... }:
+{ lib, pkgs, config, ... }:
+let
+  mkHomeServerCifsFs = remoteFolder: let
+    networkSplitProtectionOpts = [
+      "x-systemd.automount"
+      "noauto"
+      "x-systemd.idle-timeout=15"
+      "x-systemd.device-timeout=5s"
+      "x-systemd.mount-timeout=5s"
+    ];
+    userOpts = [ "uid=${toString 1000}" "gid=${toString 100}" ];
+    credsOpts = [ "credentials=${config.sops.templates."smb-credentials".path}" ];
+  in {
+    device = remoteFolder;
+    fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
+    options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
+  };
+in
 {
   # ZFS
   networking.hostId = "5b318853";
@@ -27,23 +44,29 @@
     dataLocation = "/persist/data/system";
     cacheLocation = "/persist/cache/system";
   };
-  custom.home-remote-disks = {
-    enable = false;
-    smbCredentialsOwnerUsername = "bphenriques";
-    uid = 1000;
-    guid = 100;
-    locations = [
-      { mountPoint = "/home/bphenriques/nas"; device = "//home-nas/bphenriques"; }
-      { mountPoint = "/mnt/nas-media";        device = "//home-nas/media"; }
-      { mountPoint = "/mnt/nas-shared";       device = "//home-nas/shared"; }
-    ];
+
+  sops = {
+    secrets.samba_server_username = { };
+    secrets.samba_server_password = { };
+    templates."smb-credentials" = {
+      owner = "bphenriques";
+      content = ''
+        username=${config.sops.placeholder.samba_server_username}
+        password=${config.sops.placeholder.samba_server_password}
+      '';
+    };
   };
 
-  # Disko sets boot.loader.grub.devices automatically.
+  environment.systemPackages = [ pkgs.cifs-utils ]; # Samba Server
   fileSystems = {
+    # Disko sets boot.loader.grub.devices automatically.
     "/".neededForBoot = true;
     "/nix".neededForBoot = true;
     "/boot".neededForBoot = true;
+
+    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "//192.168.68.53/bphenriques";
+    "/mnt/nas-media"        = mkHomeServerCifsFs "//192.168.68.53/media";
+    "/mnt/nas-shared"       = mkHomeServerCifsFs "//192.168.68.53/shared";
   };
 
   # https://www.mankier.com/5/tmpfiles.d

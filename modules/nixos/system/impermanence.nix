@@ -35,7 +35,7 @@ in
     fileSystems = {
       "${cfg.dataLocation}".neededForBoot = true;
       "${cfg.cacheLocation}".neededForBoot = true;
-      "${hmUsersCfg.bphenriques.custom.impermanence.configLocation}".neededForBoot = true;
+      "${hmUsersCfg.bphenriques.custom.impermanence.dataLocation}".neededForBoot = true;
       "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
     };
 
