@@ -62,6 +62,7 @@
     (nerdfonts.override { fonts = [ "Hack" ]; }) # User fonts. Darwin's fonts need to setup differently.
     unrar
     xclip
+    killall
   ];
 
   programs.man = {

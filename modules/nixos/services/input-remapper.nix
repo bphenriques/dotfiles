@@ -1,18 +1,15 @@
 { config, lib, pkgs, ... }:
-
-# Fix for https://github.com/sezanzeb/input-remapper/issues/653
-with lib;
 let
   cfg = config.modules.services.input-remapper;
 in
 {
   options.modules.services.input-remapper = {
-    enable = mkEnableOption ''input-remapper one-shot service to reload the profiles.'';
+    enable = lib.mkEnableOption ''input-remapper one-shot service to reload the profiles.'';
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     services.input-remapper.enable = true;
-    systemd.user.services.input-remapper-reload-v3 = {
+    systemd.user.services.input-remapper-reload = { # Fix for https://github.com/sezanzeb/input-remapper/issues/653
       enable = true;
       description = "Loadss input-remapper profiles";
       wantedBy = ["graphical-session.target"];
