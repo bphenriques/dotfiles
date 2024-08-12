@@ -63,6 +63,7 @@
         overlays = (import ./overlays { inherit inputs; });
       };
 
+      # TODO: Should this moved to the top-level flakes.nix
       nixConfig = {
         settings = {
           experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
