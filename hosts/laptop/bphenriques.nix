@@ -14,8 +14,6 @@
   programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.sops.nix;
   # programs.beets.settings.directory = config.user.musicDir;
 
-  #     signal-desktop
-
   # Gpg
   programs.gpg.enable = true;
   services.gpg-agent = {
@@ -41,19 +39,25 @@
   # impermanence
   custom.impermanence = {
     enable = true;
-    configLocation = "/persist/data/bphenriques";
+    dataLocation = "/persist/data/bphenriques";
     cacheLocation = "/persist/cache/bphenriques";
   };
   home.persistence = {
-    "${config.custom.impermanence.dataLocation}".directories = [
-      ".config/vlc" # TODO: https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/vlc.nix#L10
-      ".config/sops"
+    "${config.custom.impermanence.dataLocation}" = {
+      directories = [
+        ".config/vlc"
+        ".config/sops"
 
-      # Gaming
-      ".local/share/Steam"
-      ".config/lutris"
-      ".local/share/lutris"
-   ];
+        # Gaming
+        ".local/share/Steam"
+        ".config/lutris"
+        ".local/share/lutris"
+     ];
+     allowOther = true;
+   };
+   "${config.custom.impermanence.cacheLocation}" = {
+     allowOther = true;
+   };
  };
 
   home.stateVersion = "24.05";
