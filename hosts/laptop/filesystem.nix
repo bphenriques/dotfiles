@@ -70,11 +70,14 @@ in
   };
 
   # https://www.mankier.com/5/tmpfiles.d
-  systemd.tmpfiles.rules = [
-    "z /mnt/games 0775 root users"                          # Owned by root but can be used by any regular user
-
-    "z /persist/data/bphenriques 0700 bphenriques users"    # Private to bphenriques
-    "z /persist/cache/bphenriques 0700 bphenriques users"   # Private to bphenriques
-    "z /home/bphenriques/workdir 0700 bphenriques users"    # Private to bphenriques
+  systemd.tmpfiles.rules = let
+    bphenriquesData = config.home-manager.users.bphenriques.custom.impermanence.dataLocation;
+    bphenriquesCache = config.home-manager.users.bphenriques.custom.impermanence.cacheLocation;
+  in [
+    "z /mnt/games 0775 root users"                                               # Owned by root but usable by any user
+    "z ${bphenriquesData}                             0700 bphenriques users"    # Private to bphenriques
+    "z ${bphenriquesData}/.config/sops/age/keys.txt   0700 bphenriques users"    # Secret private to bphenriques
+    "z ${bphenriquesCache}                            0700 bphenriques users"    # Private to bphenriques
+    "z /home/bphenriques/workdir                      0700 bphenriques users"    # Private to bphenriques
   ];
 }
