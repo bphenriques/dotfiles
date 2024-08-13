@@ -1,12 +1,7 @@
 #!/usr/bin/env sh
 
 usage() {
-  echo "Setups the dotfiles.
-
-Usage: dotfiles-install.sh <host> [--dotfiles-location <path>] [-ssh-directory <path>] [--ssh-key-comment <comment>] [--skip-sops-init] [--age-keys-file <path>]
-
-Arguments:
-  host                name of the host under the hosts folder
+  echo "dotfiles-install.sh <host> [--dotfiles-location <path>] [-ssh-directory <path>] [--ssh-key-comment <comment>] [--skip-sops-init] [--age-keys-file <path>]
 
 Options:
   --dotfiles-location Sets the dotfiles repository location. Defaults to \$HOME/.dotfiles

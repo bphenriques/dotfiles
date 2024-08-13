@@ -11,63 +11,42 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 ----
 
-What you will find here:
-- [nixos-anywhere](https://github.com/nix-community/nixos-anywhere) to automate the installation remotely.
-- [disko](https://github.com/nix-community/disko) to declaratively format my machines.
-- [sops-nix](https://github.com/Mic92/sops-nix) for critical secrets that I do not want in the nix store.
-- Combination of `git-filter` and [sops](https://github.com/getsops/sops) for non-critical sensitive information required in Nix evaluation time that I do not mind being in plain-text in the nix store.
-
-  | Hostname     | CPU                   | RAM  | Primary GPU              | Secondary GPU               | OS |
-  |--------------|-------------------------|------|--------------------------|-------------------------------|----|
-  | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB         | ❄️  |
-  | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
+| Hostname     | CPU                   | RAM  | Primary GPU              | Secondary GPU               | OS |
+|--------------|-------------------------|------|--------------------------|-------------------------------|----|
+| `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB         | ❄️  |
+| `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
 
 # Installing NixOS
 
-## Locally
+## Create new host
 
 1. Create a bootable USB [installer](https://nixos.org/download/):
 
    ```
-   $ sudo fdisk -l
-   $ sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
-   ```
-   
-2. TODO
-
-## Remotely
-
-1. On the source machine, create a bootable USB [installer](https://nixos.org/download/):
-
-   ```
-   $ sudo fdisk -l
-   $ sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
+   sudo fdisk -l
+   sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
-2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and gets its local ip using `ifconfig`.
-
-3. (skip if done): On the source machine, generate a new configuration:
-
-   1. Generate the host specific settings:
+2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and fetch its ip.
+3. On the source machine, seed the host settings:
    ```
    HOST=new-host
-   mkdir $HOST
+   mkdir hosts/$HOST
    ssh nixos@<ip> -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
 
-   2. Duplicate one of the NixOS hosts configuration folder and add an entry in `flake.nix`.
-   
-   3. Update `disk-config.nix` ([disko](https://github.com/nix-community/disko)) considering the disks available:
-   ```
-   ssh nixos@<ip> -- lsblk -p
-   ```
+4. Set its disk's layout using [disko](https://github.com/nix-community/disko), base configuration and add it to the `nixosConfigurations` block under `flake.nix`.
 
-4. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
+## Install remotely
+
+1. Boot onto the NixOS installer (see previous section).
+2. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
 
     ```
     bw login
     bw unlock
-    $ ./bin/nixos-remote-install.sh laptop nixos@192.168.68.59 --sops-age-destination /persist/data/bphenriques/home/bphenriques/.config/sops/age/keys.txt
+    $ ./bin/nixos-remote-install.sh laptop nixos@192.168.68.59 --sops-age-destination /persist/data/bphenriques/.config/sops/age/keys.txt
+   
     ```
 
 5. Once the initial installation succeeds, run the dotfiles installer as follows:
@@ -77,20 +56,20 @@ What you will find here:
 
 # Installing on Darwin
 
-1. Ensure [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html) is installed.
+1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
 2. Boostrap:
    ```sh
-   $ nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
+   nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
    
 3. Setup this dotfiles repository. Replace `{host}` with the intended darwin host listed under `hosts`:
    ```sh
-   $ nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#dotfiles-install -- $HOST
+   nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#dotfiles-install -- $HOST
    ```
 
 4. Apply:
    ```sh
-   $ "$HOME"/.dotfiles/bin/sync.sh
+   "$HOME"/.dotfiles/overlays/dotfiles/dotfiles.sh sync
    ```
 
 5. Import the GPG Key using `gpg --import`. You may need to restart.
@@ -98,28 +77,25 @@ What you will find here:
 
 # Secrets
 
-3. Enable git-filter:
-```shell
-$ ./bin/git-secret-filter.sh init
+Initialize:
+1. Generate key pair: `nix-shell -p age --command 'age-keygen'`.
+2. Export the public key to `.sops.yaml` and the private key to `$HOME/.config/sops/age/keys.txt`.
+3. Set the `path_regex` of the files in `.sops.yaml` and update `.gitattributes` accordingly.
+4. Create an empty `secrets` folder under the target `host`:
+5. Initialize the `git-filter`: `./bin/sops-git-filter.sh init {host}`
+6. Add the secrets you intend to add:
+   1. `sops-nix` uses `sops.yaml` and `default.nix` as detailed in their [docs](https://github.com/Mic92/sops-nix).
+   2. `git-filter` uses filter(s) added to `.gitattributes`.
+7. Test the setup using non-sensitive information.
+
+Import:
+1. Add bitwarden-cli to `$PATH`: `nix-shell -p bitwarden-cli`.
+2. Login, unlock and set `BW_SESSION`: `bw login && bw unlock`
+3. Run the following to export the private key:
 ```
+HOST=HELLO
+bw get item "sops-age-key-${HOST}" | jq --raw-output '.fields[] | select(.name=="private") | .value' >> "$HOME/.config/sops/age/keys.txt"
+```
+4. Actually apply the `git-filter`: `git rm hosts/$HOST/secrets && git checkout HEAD hosts/$HOST/secrets`
+5. Test by trying to read the existing secrets.
 
-4. Test using:
-
-# Docs & Acknowledgments
-
-[Nix](https://nixos.org/) can be overwhelming with its steep learning curve. I found it easier reading documentation and ~some~ several dotfiles:
-- [Nix Docs](https://nixos.org/guides/nix-pills/)
-- [Home Manager Docs](https://nix-community.github.io/home-manager)
-- [Nix Darwin Docs](https://daiderd.com/nix-darwin/manual/index.html)
-- [Flakes Docs](https://nixos.wiki/wiki/Flakes)
-- Several dotfiles (thank you!):
-    - [`Misterio77`](https://github.com/Misterio77/nix-config) 
-    - [`bbigras`](https://github.com/bbigras/nix-config)
-    - [`malob`](https://github.com/malob/nixpkgs)
-    - [`kclejeune`](https://github.com/kclejeune/system)
-    - [`mitchellh`](https://github.com/mitchellh/nixos-config)
-    - [`sei40kr`](https://github.com/sei40kr/dotfiles)
-    - [`dustinlyons`](https://github.com/dustinlyons/nixos-config)
-    - [`ambroisie`](https://git.belanyi.fr/ambroisie/nix-config/)
-
-For more help on Nix(OS) seek out [the NixOS discourse](https://discourse.nixos.org).
