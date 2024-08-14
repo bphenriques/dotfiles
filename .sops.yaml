@@ -1,11 +1,15 @@
 keys:
-  - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
+  - &laptop-system age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
+  - &laptop-bphenriques age1w4jdnenatsxcsrssnpdxp2m9vpjx4fqdtpwstgzgjeru5pdakslqd06szx
   - &work-macos age1u3mlmjlfsaa589qqzxjwk5e3ej04eqqlfyhumvfuude70aj9945svms6ha
 creation_rules:
-  - path_regex: hosts/laptop/secrets/.+$
+  - path_regex: hosts/laptop/secrets.yaml
     key_groups:
-      - age:
-          - *laptop
+      - age: [ *laptop-system ]
+  - path_regex: hosts/laptop/bphenriques/secrets/.+$
+    key_groups:
+      - age: [ *laptop-bphenriques ]
+
   - path_regex: hosts/work-macos/secrets/.+$
     key_groups:
       - age:
