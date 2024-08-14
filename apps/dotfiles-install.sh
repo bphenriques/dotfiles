@@ -129,3 +129,9 @@ setup_ssh "${ssh_directory}" "${ssh_key_comment}"
 clone_dotfiles "${dotfiles_location}" "${ssh_directory}"
 set_host "${dotfiles_location}" "${host}"
 init_sops_git_filter "${dotfiles_location}" "${age_keys_file}" "${host}" "${skip_sops_init}"
+
+#TODO import gpg key
+# cat cenas | gpg --import
+
+# gpg --output private.pgp --armor --export-secret-key 4727729+bphenriques@users.noreply.github.com
+# gpg --output public.pgp --armor --export username@email
