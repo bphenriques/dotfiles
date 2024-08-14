@@ -39,16 +39,12 @@ _darwin_update() {
 
 _nixos_sync() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
-  if [ -z "$1" ]; then
-    sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"
-  else
-    case "$1" in
-      --boot)   sudo nixos-rebuild boot --flake ".#$CURRENT_HOST"     ;;
-      --test)   sudo nixos-rebuild test --flake ".#$CURRENT_HOST"     ;;
-      --check)  nixos-rebuild dry-activate --flake ".#$CURRENT_HOST"  ;;
-      *)        sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"   ;;
-    esac
-  fi
+  case "$1" in
+    --boot)   sudo nixos-rebuild boot --flake ".#$CURRENT_HOST"     ;;
+    --test)   sudo nixos-rebuild test --flake ".#$CURRENT_HOST"     ;;
+    --check)  nixos-rebuild dry-activate --flake ".#$CURRENT_HOST"  ;;
+    "")        sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"  ;;
+  esac
   popd > /dev/null
 }
 
