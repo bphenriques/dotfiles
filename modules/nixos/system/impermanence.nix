@@ -35,8 +35,6 @@ in
     fileSystems = {
       "${cfg.dataLocation}".neededForBoot = true;
       "${cfg.cacheLocation}".neededForBoot = true;
-      "${hmUsersCfg.bphenriques.custom.impermanence.dataLocation}".neededForBoot = true;
-      "${hmUsersCfg.bphenriques.custom.impermanence.cacheLocation}".neededForBoot = true;
     };
 
     boot.initrd.postDeviceCommands = lib.mkAfter ''zfs rollback -r ${cfg.rootBlankSnapshot};'';

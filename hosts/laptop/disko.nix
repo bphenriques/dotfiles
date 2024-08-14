@@ -107,7 +107,7 @@
 
               "home/bphenriques/workdir" = {
                 type = "zfs_fs";
-                mountpoint = "/home/bphenriques/workdir";
+                mountpoint = "/mnt/bphenriques";
               };
 
               "home/bphenriques/data" = {
