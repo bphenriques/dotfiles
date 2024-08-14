@@ -70,7 +70,7 @@ does_host_require_secrets() {
   host="$1"
   dotfiles_location="$2"
 
-  yq '.keys[] | anchor' < "${dotfiles_location}"/.sops.yaml | grep -E "^${host}$" > /dev/null 2>&1;
+  yq '.keys[] | anchor' < "${dotfiles_location}"/.sops.yaml | grep -E "^${host}" > /dev/null 2>&1;
 }
 
 init_sops_git_filter() {
