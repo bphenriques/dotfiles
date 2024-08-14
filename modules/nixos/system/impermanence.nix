@@ -46,6 +46,7 @@ in
           "/var/lib/bluetooth"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
           "/etc/NetworkManager"
+          "/etc/shadow"
         ];
         files = [
           "/etc/machine-id"
