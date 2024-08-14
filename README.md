@@ -45,8 +45,7 @@ This repository contains the definition of my machines using [nix](https://nixos
     ```
     bw login
     bw unlock
-    $ ./bin/nixos-remote-install.sh laptop nixos@192.168.68.59 --sops-age-destination /persist/data/bphenriques/.config/sops/age/keys.txt
-   
+    ./bin/nixos-remote-install.sh <HOST> nixos@<IP>
     ```
 
 5. Once the initial installation succeeds, run the dotfiles installer as follows:
@@ -78,24 +77,38 @@ This repository contains the definition of my machines using [nix](https://nixos
 # Secrets
 
 Initialize:
-1. Generate key pair: `nix-shell -p age --command 'age-keygen'`.
+1. Generate key pair:
+   ```sh
+   nix-shell -p age --command 'age-keygen'
+   ```
 2. Export the public key to `.sops.yaml` and the private key to `$HOME/.config/sops/age/keys.txt`.
 3. Set the `path_regex` of the files in `.sops.yaml` and update `.gitattributes` accordingly.
 4. Create an empty `secrets` folder under the target `host`:
-5. Initialize the `git-filter`: `./bin/sops-git-filter.sh init {host}`
-6. Add the secrets you intend to add:
+5. Initialize the `git-filter`:
+   ```sh
+   ./bin/sops-git-filter.sh init {host}
+   ```
+6. Add non-sensitive secrets to test the setup:
    1. `sops-nix` uses `sops.yaml` and `default.nix` as detailed in their [docs](https://github.com/Mic92/sops-nix).
    2. `git-filter` uses filter(s) added to `.gitattributes`.
-7. Test the setup using non-sensitive information.
 
 Import:
-1. Add bitwarden-cli to `$PATH`: `nix-shell -p bitwarden-cli`.
-2. Login, unlock and set `BW_SESSION`: `bw login && bw unlock`
+1. Add bitwarden-cli to `$PATH`: 
+   ```sh
+   nix-shell -p bitwarden-cli
+   ```
+2. Login, unlock and set `BW_SESSION`: 
+   ```sh
+   bw login && bw unlock
+   ```
 3. Run the following to export the private key:
-```
-HOST=HELLO
-bw get item "sops-age-key-${HOST}" | jq --raw-output '.fields[] | select(.name=="private") | .value' >> "$HOME/.config/sops/age/keys.txt"
-```
-4. Actually apply the `git-filter`: `git rm hosts/$HOST/secrets && git checkout HEAD hosts/$HOST/secrets`
+   ```su
+   HOST=HELLO
+   bw get item "sops-age-key-${HOST}" | jq --raw-output '.fields[] | select(.name=="private") | .value' >> "$HOME/.config/sops/age/keys.txt"
+   ```
+4. Actually apply the `git-filter`: 
+   ```su
+   git rm hosts/$HOST/secrets && git checkout HEAD hosts/$HOST/secrets
+   ```
 5. Test by trying to read the existing secrets.
 

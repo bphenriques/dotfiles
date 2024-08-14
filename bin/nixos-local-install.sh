@@ -2,6 +2,9 @@
 
 # https://github.com/wimpysworld/nix-config/blob/main/nixos/_mixins/scripts/install-system/install-system.sh
 # Like this one a lot: https://github.com/panchoh/nixos
+# https://github.com/chewblacka/nixos/blob/main/scripts/nix-setup.sh
+
+# Idea? build ISO script with a private key that can clone the repo.
 
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }

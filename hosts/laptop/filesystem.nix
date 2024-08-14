@@ -1,5 +1,6 @@
 { lib, pkgs, config, ... }:
 let
+  homeServerIp = "192.168.68.53";
   mkHomeServerCifsFs = remoteFolder: let
     networkSplitProtectionOpts = [
       "x-systemd.automount"
@@ -11,10 +12,12 @@ let
     userOpts = [ "uid=${toString 1000}" "gid=${toString 100}" ];
     credsOpts = [ "credentials=${config.sops.templates."smb-credentials".path}" ];
   in {
-    device = remoteFolder;
+    device = "//${homeServerIp}/${remoteFolder}";
     fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
     options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
   };
+  bphenriquesData = config.home-manager.users.bphenriques.custom.impermanence.dataLocation;
+  bphenriquesCache = config.home-manager.users.bphenriques.custom.impermanence.cacheLocation;
 in
 {
   # ZFS
@@ -35,7 +38,7 @@ in
     #    };
     #  };
 
-  services.fstrim.enable = true;  # Trim SSD because for some reason is not a default :shrug:
+  services.fstrim.enable = true;  # Trim SSD because it is not set by default :shrug:
   zramSwap.enable = true;         # Run zramctl to check how good memory is compressed
 
   custom.impermanence = {
@@ -64,20 +67,29 @@ in
     "/nix".neededForBoot = true;
     "/boot".neededForBoot = true;
 
-    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "//192.168.68.53/bphenriques";
-    "/mnt/nas-media"        = mkHomeServerCifsFs "//192.168.68.53/media";
-    "/mnt/nas-shared"       = mkHomeServerCifsFs "//192.168.68.53/shared";
+    # ZFS Mounts
+    "${bphenriquesData}".neededForBoot = true;
+    "${bphenriquesCache}".neededForBoot = true;
+
+    # NFS
+    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "bphenriques";
+    "/mnt/nas-media"        = mkHomeServerCifsFs "media";
+    "/mnt/nas-shared"       = mkHomeServerCifsFs "shared";
   };
 
   # https://www.mankier.com/5/tmpfiles.d
-  systemd.tmpfiles.rules = let
-    bphenriquesData = config.home-manager.users.bphenriques.custom.impermanence.dataLocation;
-    bphenriquesCache = config.home-manager.users.bphenriques.custom.impermanence.cacheLocation;
-  in [
-    "z /mnt/games 0775 root users"                                               # Owned by root but usable by any user
-    "z ${bphenriquesData}                             0700 bphenriques users"    # Private to bphenriques
-    "z ${bphenriquesData}/.config/sops/age/keys.txt   0700 bphenriques users"    # Secret private to bphenriques
-    "z ${bphenriquesCache}                            0700 bphenriques users"    # Private to bphenriques
-    "z /home/bphenriques/workdir                      0700 bphenriques users"    # Private to bphenriques
+  systemd.tmpfiles.rules = [
+    # Owned by root but usable by any user
+    "z /mnt/games 0775 root users"
+
+    # Private to bphenriques
+    "z /mnt/bphenriques                                             0700 bphenriques users"
+    "z ${bphenriquesData}                                           0700 bphenriques users"
+    "z ${bphenriquesCache}                                          0700 bphenriques users"
+    "z /persist/data/system/var/lib/sops-nix/bphenriques-keys.txt   0700 bphenriques users"
+    "z /persist/data/system/var/lib/sops-nix/system-keys.txt        0700 root        root"
+
+    # Now that the ZFS dataset is owned by the user, we can now symlink to the home directory.
+    "L /home/bphenriques/workdir  - - - - /mnt/bphenriques"
   ];
 }

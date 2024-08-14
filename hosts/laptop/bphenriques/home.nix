@@ -1,13 +1,13 @@
 { pkgs, config, ... }:
 {
   imports = [
-    ../../config/home-manager
-    ../../config/home-manager/desktop/plasma.nix
-    ../../config/home-manager/media/firefox
-    ../../config/home-manager/media/logseq
-    ../../config/home-manager/gaming/lutris.nix
-    ../../config/home-manager/gaming/sunshine.nix
-    ../../config/home-manager/dev/scala
+    ../../../config/home-manager
+    ../../../config/home-manager/desktop/plasma.nix
+    ../../../config/home-manager/media/firefox
+    ../../../config/home-manager/media/logseq
+    ../../../config/home-manager/gaming/lutris.nix
+    ../../../config/home-manager/gaming/sunshine.nix
+    ../../../config/home-manager/dev/scala
   ];
 
   programs.plasma.workspace.wallpaper = ./secrets/wallpaper.sops.jpg;
@@ -41,7 +41,6 @@
     "${config.custom.impermanence.dataLocation}" = {
       directories = [
         ".config/vlc"
-        ".config/sops"
 
         # Gaming
         ".local/share/Steam"
@@ -52,6 +51,7 @@
    };
    "${config.custom.impermanence.cacheLocation}".allowOther = false;
  };
+  home.sessionVariables.SOPS_AGE_KEY_FILE = "/persist/data/system/var/lib/sops-nix/bphenriques-keys.txt";
 
   home.stateVersion = "24.05";
 }

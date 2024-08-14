@@ -6,47 +6,44 @@ SCRIPT_PATH="$(dirname "$0")"
 set -e
 
 DOTFILES_LOCATION="${SCRIPT_PATH}/.."
-
+IMPERMANENCE_DIR="/persist/data/system"
+SOPS_AGE_VAR_LIB_DIR="${IMPERMANENCE_DIR}/var/lib/sops-nix"
 
 usage() {
-  echo "nixos-remote-install.sh {host} {ssh_host} [--sops-age-file file]
-
-  --sops-age-file            target location of the age files containing the private keys.
-"
+  echo "nixos-remote-install.sh {host} {ssh_host}"
 }
 
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
-host_require_secrets() {
-  yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^$1$" > /dev/null 2>&1;
+add_host_secrets() {
+  host="$1"
+  directory="$2"
+  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^$1" > /dev/null; then
+    info "'${host}' contains secrets. Getting private keys from Bitwarden"
+    bw unlock --check > /dev/null || fatal "Vault must be unlocked"
+
+    mkdir -p "${directory}"
+    for secret_type in $(yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}" | sed "s/${host}-//g"); do
+      info "Fetching secrets of type '${secret_type}'"
+      bw get item "sops-age-key-${host}-${secret_type}" \
+        | jq --raw-output '.fields[] | select(.name=="private") | .value' \
+        > "${directory}/${secret_type}-keys.txt"
+    done
+  fi
 }
 
-if [ $# -lt 3 ] || [ "$1" == "--help" ]; then
+if [ "$1" == "--help" ]; then
   usage
   exit 1
 fi
 
 host="$1"
 ssh_host="$2"
+shift 2
 
-sops_age_file=
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --sops-age-file)     sops_age_file="$2";      shift 2 ;;
-    *) break ;;
-  esac
-done
 ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
-
 EXTRA_FILES="$(mktemp -d)"
-if host_require_secrets "$host"; then
-  test -z "${sops_age_file}" && error "sops-age-file argument is required as '${host}' requires secrets!" && usage && exit 1
-
-  info "'${host}' contains secrets. Setting private keys from Bitwarden"
-  bw unlock --check > /dev/null || fatal "Vault must be unlocked"
-  mkdir -p "$(dirname "${EXTRA_FILES}/${sops_age_file}")"
-  bw get item "sops-age-key-${host}" | jq --raw-output '.fields[] | select(.name=="private") | .value' > "${EXTRA_FILES}/${sops_age_file}"
-fi
+add_host_secrets "$host" "${EXTRA_FILES}/${SOPS_AGE_VAR_LIB_DIR}"
 
 nix run github:nix-community/nixos-anywhere -- --extra-files "$EXTRA_FILES" --flake ".#${host}" "${ssh_host}"

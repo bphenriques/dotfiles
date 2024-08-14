@@ -14,8 +14,7 @@
     ./disko.nix                             # Instructions on how to format the disk
     ./filesystem.nix                        # More settings regarding the disk.
     ../../config/nixos.nix                  # Default nixos settings
-    ./users.nix
-    ./secrets
+    ./bphenriques                           # User
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -55,6 +54,20 @@
 
   # Gaming
   custom.profiles.gaming.enable = true;
+
+  # System-wide secrets
+  sops.age.keyFile = "/persist/data/system/var/lib/sops-nix/system-keys.txt";
+  sops.defaultSopsFile = ./secrets.yaml;
+  environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
+    "/var/lib/sops-nix"
+  ];
+
+  # Users
+  users.users.bphenriques = {
+    isNormalUser = true;
+    initialPassword = "password"; # To be changed right after. I could manage using sops-nix but too much overhead.
+    description = "bphenriques";
+  };
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }
