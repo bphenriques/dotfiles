@@ -108,9 +108,4 @@ in
     "x-scheme-handler/http" = ["firefox.desktop"];
     "x-scheme-handler/https" = ["firefox.desktop"];
   };
-
-  home.persistence = {
-    "${config.custom.impermanence.dataLocation}".directories = [ ".mozilla" ];
-    "${config.custom.impermanence.cacheLocation}".directories = [ ".cache/mozilla" ];
-  };
 }

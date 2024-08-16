@@ -5,8 +5,6 @@
     ../../../config/home-manager/desktop/plasma.nix
     ../../../config/home-manager/media/firefox
     ../../../config/home-manager/media/logseq
-    ../../../config/home-manager/gaming/lutris.nix
-    ../../../config/home-manager/gaming/sunshine.nix
     ../../../config/home-manager/dev/scala
   ];
 
@@ -21,10 +19,6 @@
     pinentryPackage = pkgs.pinentry-gnome3;
   };
 
-  # Gaming
-  custom.proton-run.enable = true;
-  custom.proton-run.defaultProtonDir = "/mnt/data/GlobalProton";
-
   xdg.userDirs.enable = true;
   xdg.userDirs.createDirectories = false;
   xdg.mimeApps.enable = true; # TODO: Create associations?
@@ -32,27 +26,30 @@
   # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
   # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
 
-  custom.impermanence = {
-    enable = true;
-    dataLocation = "/persist/data/bphenriques";
-    cacheLocation = "/persist/cache/bphenriques";
+  custom = {
+    lutris.enable = true;
+    sunshine = {
+      enable = true;
+      steamBigPicture = true;
+    };
+    proton-run = {
+      enable = true;
+      defaultProtonDir = "/mnt/games/GlobalProton";
+    };
+    impermanence = {
+      enable = true;
+      dataLocation = "/persist/data/bphenriques";
+      cacheLocation = "/persist/cache/bphenriques";
+
+      # Custom
+      heroic = true;
+      steam = true;
+      vlc = true;
+      discord = true;
+    };
   };
-  home.persistence = {
-    "${config.custom.impermanence.dataLocation}" = {
-      directories = [
-        ".config/vlc"
 
-        # Gaming
-        ".local/share/Steam"
-        ".config/lutris"
-        ".local/share/lutris"
-     ];
-     allowOther = false;
-   };
-   "${config.custom.impermanence.cacheLocation}".allowOther = false;
- };
   home.sessionVariables.SOPS_AGE_KEY_FILE = "/persist/data/system/var/lib/sops-nix/bphenriques-keys.txt";
-
   home.stateVersion = "24.05";
 }
 
