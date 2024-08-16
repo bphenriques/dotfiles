@@ -9,7 +9,7 @@
   ];
 
   programs.plasma.workspace.wallpaper = ./secrets/wallpaper.sops.jpg;
-  programs.firefox.profiles.default.bookmarks = import ./secrets/bookmarks.sops.nix;
+  programs.firefox.profiles.default.bookmarks = import ./secrets/firefox-bookmarks.sops.nix;
   # programs.beets.settings.directory = config.user.musicDir;
 
   # Gpg
