@@ -102,9 +102,8 @@ init_sops_git_filter() {
 }
 
 import_gpg() {
-  bw get item "sops-age-key-${host}-${secret_type}" \
-          | jq --raw-output '.fields[] | select(.name=="private") | .value' \
-          > "${directory}/${secret_type}-keys.txt"
+  bw get item "github-gpg-private" | jq --raw-output '.notes' | gpg --import
+  bw get item "github-gpg-public" | jq --raw-output '.notes' | gpg --import
 }
 
 if [ "$1" = "--help" ]; then
