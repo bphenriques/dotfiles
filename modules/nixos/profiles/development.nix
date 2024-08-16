@@ -5,7 +5,7 @@ let
 in
 {
   options.custom.profiles.development = with types; {
-    enable = mkEnableOption "Whether to set-up a development environment.";
+    enable = mkEnableOption "development profile";
   };
 
   config = lib.mkIf cfg.enable {

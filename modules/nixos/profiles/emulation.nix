@@ -6,11 +6,7 @@ let
 in
 {
   options.custom.profiles.emulation = with types; {
-    enable = mkOption {
-      type = bool;
-      default = false;
-      description = mdDoc ''Whether to set-up emulation profile.'';
-    };
+    enable = mkEnableOption "emulation profile";
   };
 
   config = lib.mkIf cfg.enable {

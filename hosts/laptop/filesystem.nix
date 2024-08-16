@@ -26,6 +26,7 @@ in
     autoScrub.enable = true;
     trim.enable = true;
   };
+    # https://github.com/prescientmoon/everything-nix/blob/5247160b4367f37a775d7278a52412f3cb0886ac/hosts/nixos/lapetus/services/zfs.nix#L10
     #  services.sanoid = lib.mkIf cfg.snapshots {
     #    enable = true;
     #    datasets = {
