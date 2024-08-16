@@ -21,13 +21,8 @@ let
   });*/
 in
 {
-
   options.custom.profiles.gaming = with types; {
-    enable = mkOption {
-      type = bool;
-      default = false;
-      description = mdDoc ''Whether to set-up gaming profile.'';
-    };
+    enable = mkEnableOption "gaming profile";
   };
 
   config = mkIf cfg.enable {

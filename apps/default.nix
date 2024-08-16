@@ -16,7 +16,7 @@ let
 
   mkDotfilesInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "dotfiles-install";
-    runtimeInputs = with pkgs; [ git yq-go age sops ];
+    runtimeInputs = with pkgs; [ git yq-go age sops gnupg bitwarden-cli ];
     text = lib.fileContents ./dotfiles-install.sh;
   });
 

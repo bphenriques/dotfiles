@@ -38,6 +38,7 @@ in
     };
 
     boot.initrd.postDeviceCommands = lib.mkAfter ''zfs rollback -r ${cfg.rootBlankSnapshot};'';
+    programs.fuse.userAllowOther = true; # Allows users to specify the "allowOther" option.
     environment.persistence = {
       "${cfg.dataLocation}" = {
         hideMounts = true;
@@ -45,17 +46,22 @@ in
           "/var/log"
           "/var/lib/bluetooth"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
-          "/etc/NetworkManager"
+          "/etc/NetworkManager/system-connections"
           "/etc/shadow"
         ];
         files = [
+          # https://www.networkmanager.dev/docs/api/1.40/NetworkManager.html
           "/etc/machine-id"
+          "/var/lib/NetworkManager/secret_key"
         ];
       };
 
       "${cfg.cacheLocation}" = {
         hideMounts = true;
-        directories = [ ];
+        directories = [
+          "/var/lib/systemd/coredump" # Systemd core-dumbs that I might want to store if requested but won't really look at them
+          "/var/lib/upower"           # Tracks power since beginning of timec
+        ];
         files = [ ];
       };
     };

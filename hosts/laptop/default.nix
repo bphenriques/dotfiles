@@ -59,6 +59,7 @@
   sops.age.keyFile = "/persist/data/system/var/lib/sops-nix/system-keys.txt";
   sops.defaultSopsFile = ./secrets.yaml;
   environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
+    "/var/lib/fprint"   # Fingerprint device
     "/var/lib/sops-nix"
   ];
 
@@ -66,6 +67,7 @@
   users.users.bphenriques = {
     isNormalUser = true;
     initialPassword = "password"; # To be changed right after. I could manage using sops-nix but too much overhead.
+    uid = 1000;
     description = "bphenriques";
   };
 
