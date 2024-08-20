@@ -16,20 +16,17 @@ usage() {
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
-add_host_secrets() {
+import_age_system_private_key() {
   host="$1"
   directory="$2"
-  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^$1" > /dev/null; then
-    info "'${host}' contains secrets. Getting private keys from Bitwarden"
+  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^$1-system" > /dev/null; then
+    info "'${host}' contains system wide private keys. Getting private keys from Bitwarden"
     bw unlock --check > /dev/null || fatal "Vault must be unlocked"
 
     mkdir -p "${directory}"
-    for secret_type in $(yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}" | sed "s/${host}-//g"); do
-      info "Fetching secrets of type '${secret_type}'"
-      bw get item "sops-age-key-${host}-${secret_type}" \
-        | jq --raw-output '.fields[] | select(.name=="private") | .value' \
-        > "${directory}/${secret_type}-keys.txt"
-    done
+    bw get item "sops-age-key-${host}-system" \
+      | jq --raw-output '.fields[] | select(.name=="private") | .value' \
+      > "${directory}/${secret_type}-keys.txt"
   fi
 }
 
@@ -44,6 +41,6 @@ shift 2
 
 ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 EXTRA_FILES="$(mktemp -d)"
-add_host_secrets "$host" "${EXTRA_FILES}/${SOPS_AGE_VAR_LIB_DIR}"
+import_age_system_private_key "$host" "${EXTRA_FILES}/${SOPS_AGE_VAR_LIB_DIR}"
 
 nix run github:nix-community/nixos-anywhere -- --extra-files "$EXTRA_FILES" --flake ".#${host}" "${ssh_host}"

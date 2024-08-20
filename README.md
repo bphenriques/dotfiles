@@ -11,6 +11,8 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 ----
 
+## Hosts
+
 | Hostname     | CPU                   | RAM  | Primary GPU              | Secondary GPU               | OS |
 |--------------|-------------------------|------|--------------------------|-------------------------------|----|
 | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB         | ❄️  |
@@ -18,7 +20,7 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 # Installing NixOS
 
-## Create new host
+## Specify a new host
 
 1. Create a bootable USB [installer](https://nixos.org/download/):
 
@@ -27,30 +29,38 @@ This repository contains the definition of my machines using [nix](https://nixos
    sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
-2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and fetch its ip.
-3. On the source machine, seed the host settings:
+2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its ip.
+3. On the source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
    ```
    HOST=new-host
-   mkdir hosts/$HOST
    ssh nixos@<ip> -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
-
-4. Set its disk's layout using [disko](https://github.com/nix-community/disko), base configuration and add it to the `nixosConfigurations` block under `flake.nix`.
 
 ## Install remotely
 
 1. Boot onto the NixOS installer (see previous section).
-2. In the source machine run the following (replace `<HOST>` and `<IP>`). The script automatically generates a SSH key and retrieves credentials from my secret vault:
+2. In the source machine:
+   1. Unlock a Bitwarden session:
 
-    ```
-    bw login
-    bw unlock
-    ./bin/nixos-remote-install.sh <HOST> nixos@<IP>
-    ```
+       ```
+       nix--shell -p bitwarden-cli
+       bw login
+       bw unlock
+       export BW_SESSION="..."
+       ```
 
-5. Once the initial installation succeeds, run the dotfiles installer as follows:
+   3. Run the following to install nixos remotely:
+
+       ```
+       ./bin/nixos-remote-install.sh <HOST> nixos@<IP>
+       ```
+
+5. On the target machine, once the initial installation succeeds:
+ 
     ```
-    $ nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop
+    HOST=laptop
+    BITWARDEN_EMAIL=...
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop $BITWARDEN_EMAIL
     ```
 
 # Installing on Darwin
@@ -61,9 +71,11 @@ This repository contains the definition of my machines using [nix](https://nixos
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
    
-3. Setup this dotfiles repository. Replace `{host}` with the intended darwin host listed under `hosts`:
+3. Setup this dotfiles repository:
    ```sh
-   nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#dotfiles-install -- $HOST
+   HOST=work-macos
+   BITWARDEN_EMAIL=...
+   nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop $BITWARDEN_EMAIL
    ```
 
 4. Apply:
@@ -71,19 +83,15 @@ This repository contains the definition of my machines using [nix](https://nixos
    "$HOME"/.dotfiles/overlays/dotfiles/dotfiles.sh sync
    ```
 
-5. Import the GPG Key using `gpg --import`. You may need to restart.
 6. Reboot!
 
 # Secrets
 
 Initialize:
-1. Generate key pair:
-   ```sh
-   nix-shell -p age --command 'age-keygen'
-   ```
+1. Generate key pair using `age-keygen`.
 2. Export the public key to `.sops.yaml` and the private key to `$HOME/.config/sops/age/keys.txt`.
 3. Set the `path_regex` of the files in `.sops.yaml` and update `.gitattributes` accordingly.
-4. Create an empty `secrets` folder under the target `host`:
+4. Create an empty `git-secrets` folder under the target `host`:
 5. Initialize the `git-filter`:
    ```sh
    ./bin/sops-git-filter.sh init {host}

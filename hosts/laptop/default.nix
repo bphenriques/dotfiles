@@ -49,18 +49,21 @@
   services.fwupd.enable = true;
 
   # Development
-  custom.profiles.development.enable = true;
-  hardware.nvidia-container-toolkit.enable = true;
 
   # Gaming
   custom.profiles.gaming.enable = true;
+
+  # Development
+  virtualisation.docker.enable = true;
+  hardware.nvidia-container-toolkit.enable = true;
 
   # System-wide secrets
   sops.age.keyFile = "/persist/data/system/var/lib/sops-nix/system-keys.txt";
   sops.defaultSopsFile = ./secrets.yaml;
   environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
     "/var/lib/fprint"   # Fingerprint device
-    "/var/lib/sops-nix"
+    "/var/lib/sops-nix" # Secrets
+    "/var/lib/docker"   # Docker
   ];
 
   # Users

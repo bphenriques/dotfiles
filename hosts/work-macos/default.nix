@@ -11,7 +11,7 @@ in
 
   # TODO: Make this parametrized per user
   system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
-  system.desktop.picture = ./secrets/wallpaper.sops.jpg;
+  system.desktop.picture = ./git-secrets/wallpaper.sops.jpg;
 
   homebrew = {
     taps = [
