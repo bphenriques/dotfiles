@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 {
   home.packages = with pkgs; [
+    jetbrains.idea-community # TODO Add plugins: GraphQL, "Makefile Language" , Scala, Terraform and HCL,
     sbt         # Build tool.
     metals      # If Helix doesn't pick up, call: sbt bloopInstall
     scalafmt    # Linter formatter.

@@ -3,13 +3,14 @@
   imports = [
     ../../../config/home-manager
     ../../../config/home-manager/desktop/plasma.nix
-    ../../../config/home-manager/media/firefox
-    ../../../config/home-manager/media/logseq
+    ../../../config/home-manager/desktop/firefox
+    ../../../config/home-manager/desktop/logseq
+    ../../../config/home-manager/desktop/discord.nix
     ../../../config/home-manager/dev/scala
   ];
 
-  programs.plasma.workspace.wallpaper = ./secrets/wallpaper.sops.jpg;
-  programs.firefox.profiles.default.bookmarks = import ./secrets/firefox-bookmarks.sops.nix;
+  programs.plasma.workspace.wallpaper = ./git-secrets/desktop.sops.jpg;
+  programs.firefox.profiles.default.bookmarks = import ./git-secrets/bookmarks.sops.nix;
   # programs.beets.settings.directory = config.user.musicDir;
 
   # Gpg
@@ -41,15 +42,31 @@
       dataLocation = "/persist/data/bphenriques";
       cacheLocation = "/persist/cache/bphenriques";
 
-      # Custom
+      # Enable for those who don't have a programs.<prog>.enable
       heroic = true;
       steam = true;
+      gog = true;
+      nvidia = true;
+      protontricks = true;
       vlc = true;
+      qbittorrent = true;
       discord = true;
+      bitwarden = true;
+      jetbrains = true;
+      g4music = true;
+      mesa = true;
+      wine = true;
+      winetricks = true;
+      solaar = true;
+      filezilla = true;
+
+      # Scala
+      scalacli = true;
+      metals = true;
+      coursier = true;
     };
   };
 
-  home.sessionVariables.SOPS_AGE_KEY_FILE = "/persist/data/system/var/lib/sops-nix/bphenriques-keys.txt";
   home.stateVersion = "24.05";
 }
 

@@ -47,12 +47,13 @@ in
           "/var/lib/bluetooth"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
           "/etc/NetworkManager/system-connections"
-          "/etc/shadow"
         ];
         files = [
           # https://www.networkmanager.dev/docs/api/1.40/NetworkManager.html
           "/etc/machine-id"
           "/var/lib/NetworkManager/secret_key"
+
+          "/etc/shadow" # Passwords
         ];
       };
 
