@@ -1,7 +1,4 @@
-hosts/laptop/bphenriques/secrets/*.sops.nix      filter=sopsGitFilterlaptop
-hosts/laptop/bphenriques/secrets/*.sops.jpg       filter=sopsGitFilterlaptop
-hosts/laptop/bphenriques/secrets/*.sops.png       filter=sopsGitFilterlaptop
+hosts/laptop/bphenriques/git-secrets/*.sops.*      filter=sopsGitFilterlaptop
+hosts/laptop/git-secrets/*.sops.*                  filter=sopsGitFilterlaptop
 
-hosts/work-macos/secrets/*.sops.nix              filter=sopsGitFilterwork-macos
-hosts/work-macos/secrets/*.sops.jpg              filter=sopsGitFilterwork-macos
-hosts/work-macos/secrets/*.sops.png              filter=sopsGitFilterwork-macos
+hosts/work-macos/git-secrets/*.sops.*              filter=sopsGitFilterwork-macos

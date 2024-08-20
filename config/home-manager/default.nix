@@ -63,6 +63,7 @@
     unrar
     xclip
     killall
+    rpi-imager # I can likely move this a temporary shell
   ];
 
   programs.man = {

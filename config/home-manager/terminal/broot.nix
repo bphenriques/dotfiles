@@ -1,5 +1,6 @@
 { pkgs, ... }:
 {
+  # https://github.com/sxyazi/yazi ?
   # FIXME: Explore broot as a proper file navigation
   # TODO Explore: https://github.com/nix-community/home-manager/blob/master/modules/programs/broot.nix
   programs.broot = {

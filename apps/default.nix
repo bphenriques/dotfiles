@@ -16,14 +16,18 @@ let
 
   mkDotfilesInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "dotfiles-install";
-    runtimeInputs = with pkgs; [ git yq-go age sops gnupg bitwarden-cli ];
+    runtimeInputs = with pkgs; [ git yq-go age sops gnupg (mkBitwardenSession pkgs) ];
     text = lib.fileContents ./dotfiles-install.sh;
   });
 
+  mkBitwardenSession = pkgs: patchShebangs (pkgs.writeShellApplication {
+    name = "bw-session";
+    runtimeInputs = with pkgs; [ bitwarden-cli ];
+    text = lib.fileContents ./bw-session.sh;
+  });
+
   mkApp = mkPackage: system:
-    let pkg = mkPackage nixpkgs.legacyPackages.${system};
-    in
-    {
+    let pkg = mkPackage nixpkgs.legacyPackages.${system}; in {
       "${pkg.name}" = {
         type = "app";
         program = "${pkg}/bin/${pkg.name}";
@@ -33,6 +37,7 @@ let
   mkLinuxApps = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
     merge [
      (mkApp mkDotfilesInstall system)
+     (mkApp mkBitwardenSession system)
     ]
   );
 
@@ -40,6 +45,7 @@ let
     merge [
      (mkApp mkDarwinInstall system)
      (mkApp mkDotfilesInstall system)
+     (mkApp mkBitwardenSession system)
     ]
   );
 in mkLinuxApps // mkDarwinApps
