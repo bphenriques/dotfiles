@@ -7,6 +7,8 @@
 # Usage (fish): set -x BW_SESSION (bw-session <EMAIL>)
 set -e
 
+BW_PASSWORD=${BW_PASSWORD:-}
+
 test -z "$1" && echo "EMAIL not provided" && exit 1
 
 if ! bw login --check > /dev/null; then
