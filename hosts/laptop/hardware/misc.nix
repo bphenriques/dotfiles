@@ -11,6 +11,9 @@
   };
   services.blueman.enable = true;
 
+  # Fingerprint - run fprintd-enroll afterwards
+  services.fprintd.enable = true;
+
   # FIXME:
   #  systemd.network.wait-online.enable = false;
   #  boot.initrd.systemd.network.wait-online.enable = false;

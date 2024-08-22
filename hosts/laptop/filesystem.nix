@@ -80,17 +80,15 @@ in
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.tmpfiles.rules = [
-    # Owned by root but usable by any user
+    # Fix permissions regarding root user
+    "z ${config.sops.age.keyFile} 0700 root  root" # nixos-anywhere sets the wrong permissions
+
+    # Move permissions from root to the users group
     "z /mnt/games 0775 root users"
 
-    # Private to bphenriques
-    "z /mnt/bphenriques                                             0700 bphenriques users"
-    "z ${bphenriquesData}                                           0700 bphenriques users"
-    "z ${bphenriquesCache}                                          0700 bphenriques users"
-    "z /persist/data/system/var/lib/sops-nix/bphenriques-keys.txt   0700 bphenriques users"
-    "z /persist/data/system/var/lib/sops-nix/system-keys.txt        0700 root        root"
-
-    # Now that the ZFS dataset is owned by the user, we can now symlink to the home directory.
-    "L /home/bphenriques/workdir  - - - - /mnt/bphenriques"
+    # Move permissions from root to solely bphenriques
+    "z /mnt/bphenriques     0700 bphenriques users"
+    "z ${bphenriquesData}   0700 bphenriques users"
+    "z ${bphenriquesCache}  0700 bphenriques users"
   ];
 }

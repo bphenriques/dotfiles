@@ -47,6 +47,9 @@ in
     winetricks = mkImpermanenceOption   false;
     solaar = mkImpermanenceOption       false;
 
+    # Security
+    gpg = mkImpermanenceOption          config.programs.gpg.enable;
+
     # CLI Apps
     helix = mkImpermanenceOption        config.programs.helix.enable;
     fish = mkImpermanenceOption         config.programs.fish.enable;
@@ -76,18 +79,12 @@ in
     home.persistence."${cfg.dataLocation}" = {
       allowOther = true;
       directories = [
-        ".dotfiles"
-
-        "Downloads"
-        "Music"
-        "Pictures"
-        "Videos"
+        "${config.xdg.dataHome}/nix"        # trusted settings and repl history
+        "${config.xdg.configHome}/systemd"  # systemd timers
 
         ".ssh"
-        ".gnupg"
-        ".config/systemd" # git maintenance systemd timers
-        ".local/share/nix" # trusted settings and repl history
-      ] ++ lib.optionals cfg.lutris [ "${config.xdg.configHome}/lutris" "${config.xdg.dataHome}/lutris" ]
+      ] ++ lib.optionals cfg.gpg    [ ".gnupg" ]
+        ++ lib.optionals cfg.lutris [ "${config.xdg.configHome}/lutris" "${config.xdg.dataHome}/lutris" ]
         ++ lib.optionals cfg.heroic [ "${config.xdg.configHome}/heroic" ]
         ++ lib.optionals cfg.steam [
           ".steam"
@@ -140,7 +137,7 @@ in
         ++ lib.optionals cfg.filezilla    [ "${config.xdg.cacheHome}/filezilla" ]
         ++ lib.optionals cfg.scalacli     [ "${config.xdg.cacheHome}/bloop" ] # TODO: or metals?
         ++ lib.optionals cfg.coursier     [ "${config.xdg.cacheHome}/coursier" ]
-        ++ lib.optionals cfg.mesa     [ "${config.xdg.cacheHome}/mesa_shader_cache" ];
+        ++ lib.optionals cfg.mesa         [ "${config.xdg.cacheHome}/mesa_shader_cache" ];
 
       files = [ ".bash_history" ];
     };
