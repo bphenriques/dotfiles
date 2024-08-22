@@ -4,6 +4,7 @@
 # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/firefox.nix
 # https://github.com/oddlama/nix-config/blob/main/users/myuser/graphical/firefox.nix
 # https://github.com/prescientmoon/everything-nix/blob/develop/home/features/desktop/firefox/default.nix
+# FIXME: it still asks me to safe passwords
 let
   merge = lib.foldr (a: b: a // b) { };
 in
