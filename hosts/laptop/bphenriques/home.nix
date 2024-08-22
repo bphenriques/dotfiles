@@ -40,19 +40,26 @@
     };
   };
 
+  # https://www.mankier.com/5/tmpfiles.d
+  systemd.user.tmpfiles.rules = [
+    # Set up working directory that is a ZFS dataset and move relevant data there
+    "L /home/bphenriques/workdir  - - - - /mnt/bphenriques"
+
+    # Set up relevant media directories and set in a way that XDG USER DIRECTORIES capture both local and the NAS files
+    "L /home/bphenriques/pictures/    - - - -   /mnt/nas-bphenriques/photos"
+    "L /home/bphenriques/paperwork/   - - - -   /mnt/nas-bphenriques/paperwork"
+    "L /home/bphenriques/music/       - - - -   /mnt/nas-media/music"
+
+    # Fix permissions to security
+    "z ${config.custom.impermanence.dataLocation}/.ssh    0700 bphenriques users"
+    "z ${config.custom.impermanence.dataLocation}/.gnupg  0700 bphenriques users"
+  ];
+
+  xdg.userDirs = {
+    documents = "/home/bphenriques/workdir";
+    music = "/home/bphenriques/music/";
+    pictures = "/home/bphenriques/pictures";
+  };
+
   home.stateVersion = "24.05";
 }
-
-#  home = {
-#    xdg.userDirs = {
-#      enable = true;
-#      createDirectories = false;  # Do not create any of the folders as they are being mounted.
-#      documents = "${homeSambaServer.sharedFolder.personal.destination}/paperwork";
-#      music = "${homeSambaServer.sharedFolder.media.destination}/music";
-#      pictures = "${homeSambaServer.sharedFolder.personal.destination}/photos";
-#      videos = "${homeSambaServer.sharedFolder.personal.destination}/videos";
-#    };
-#  };
-
-# TODO: https://search.nixos.org/options?channel=unstable&show=networking.networkmanager.ensureProfiles.profiles&from=0&size=200&sort=relevance&type=packages&query=networking.networkmanager.ensureProfiles
-

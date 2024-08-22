@@ -30,9 +30,9 @@
   };
 
   home.persistence."${config.custom.impermanence.dataLocation}".directories = [
-    ".dotfiles"
-    "Downloads"
-    "Pictures"
-    "Videos"
+    { directory = ".dotfiles"; method = "symlink"; } # Testing something...
+    "downloads"
+    "pictures"
+    "videos"
   ];
 }
