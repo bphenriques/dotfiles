@@ -26,9 +26,6 @@ in
       description = "Location of the system's configuration persist directory";
     };
 
-    # Core
-    userPasswords = mkImpermanenceOption config.users.mutableUsers;
-
     # Security
     fprintd = mkImpermanenceOption config.services.fprintd.enable;
 
@@ -41,6 +38,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+         assertion = !config.users.mutableUsers;
+         message = "users.mutableUsers must be false, otherwise issues appear. See https://github.com/nix-community/impermanence/issues/120.";
+      }
+    ];
+
     # List directories that will be removed on next boot
     environment.systemPackages = [
       (pkgs.writeScriptBin "zfsdiff" ''
@@ -68,15 +72,14 @@ in
           ++ lib.optionals cfg.fprintd        [ "/var/lib/fprint" ];
 
         files = [ ]
-          ++ lib.optionals cfg.networkmanager [ "/etc/machine-id" "/var/lib/NetworkManager/secret_key" ]
-          ++ lib.optionals cfg.userPasswords  [ "/etc/shadow" ];
+          ++ lib.optionals cfg.networkmanager [ "/etc/machine-id" "/var/lib/NetworkManager/secret_key" ];
       };
 
       "${cfg.cacheLocation}" = {
         hideMounts = true;
         directories = [
           "/var/lib/systemd/coredump" # Systemd core-dumps that I might want to store if requested but won't really look at them
-          "/var/lib/upower"           # Tracks power since beginning of timec
+          "/var/lib/upower"           # Tracks power since beginning of time
         ];
         files = [ ];
       };
