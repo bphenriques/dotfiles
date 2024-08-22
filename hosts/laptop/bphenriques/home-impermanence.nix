@@ -29,10 +29,9 @@
     coursier = true;
   };
 
-  home.persistence."${custom.impermanence.dataLocation}".directories = [
+  home.persistence."${config.custom.impermanence.dataLocation}".directories = [
     ".dotfiles"
     "Downloads"
-    "Music"
     "Pictures"
     "Videos"
   ];

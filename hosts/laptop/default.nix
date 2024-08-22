@@ -56,16 +56,16 @@
   hardware.nvidia-container-toolkit.enable = true;
 
   # System-wide secrets
-  sops.age.keyFile = "/persist/data/system/var/lib/sops-nix/system-keys.txt";
   sops.defaultSopsFile = ./secrets.yaml;
-  environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
-    "/var/lib/sops-nix" # Secrets
-  ];
+  environment.persistence."${config.custom.impermanence.dataLocation}".directories = [ "/var/lib/sops-nix" ];
+  sops.age.keyFile = "${config.custom.impermanence.dataLocation}/var/lib/sops-nix/system-keys.txt";
 
   # Users
+  sops.secrets.user_bphenriques_password.neededForUsers = true;
+  users.mutableUsers = false;
   users.users.bphenriques = {
     isNormalUser = true;
-    initialPassword = "password"; # To be changed right after. I could manage using sops-nix but too much overhead.
+    hashedPasswordFile = config.sops.secrets.user_bphenriques_password.path;
     uid = 1000;
     description = "bphenriques";
   };

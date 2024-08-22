@@ -6,11 +6,14 @@ SCRIPT_PATH="$(dirname "$0")"
 set -e
 
 DOTFILES_LOCATION="${SCRIPT_PATH}/.."
-IMPERMANENCE_DIR="/persist/data/system"
-SOPS_AGE_VAR_LIB_DIR="${IMPERMANENCE_DIR}/var/lib/sops-nix"
+IMPERMANENCE_DIR="${IMPERMANENCE_DIR:-/persist/data/system}"
+SOPS_AGE_SYSTEM_FILE="${IMPERMANENCE_DIR}/var/lib/sops-nix/system-keys.txt"
 
 usage() {
-  echo "nixos-remote-install.sh {host} {ssh_host}"
+  echo "nixos-remote-install.sh {host} {ssh_host} {bitwarden-email}
+
+By default IMPERMANENCE_DIR is set to /persist/data/system but you can set to empty string if not used.
+"
 }
 
 info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
@@ -18,15 +21,15 @@ fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
 import_age_system_private_key() {
   host="$1"
-  directory="$2"
-  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^$1-system" > /dev/null; then
+  target="$2"
+  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}-system$" > /dev/null; then
     info "'${host}' contains system wide private keys. Getting private keys from Bitwarden"
     bw unlock --check > /dev/null || fatal "Vault must be unlocked"
 
-    mkdir -p "${directory}"
+    mkdir -p "$(dirname "${target}")"
     bw get item "sops-age-key-${host}-system" \
       | jq --raw-output '.fields[] | select(.name=="private") | .value' \
-      > "${directory}/${secret_type}-keys.txt"
+      > "${target}"
   fi
 }
 
@@ -37,10 +40,13 @@ fi
 
 host="$1"
 ssh_host="$2"
-shift 2
+bw_email="$3"
+
+BW_SESSION="$("${SCRIPT_PATH}"/../apps/bw-session.sh "${bw_email}")"
+export BW_SESSION
 
 ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 EXTRA_FILES="$(mktemp -d)"
-import_age_system_private_key "$host" "${EXTRA_FILES}/${SOPS_AGE_VAR_LIB_DIR}"
+import_age_system_private_key "$host" "${EXTRA_FILES}/${SOPS_AGE_SYSTEM_FILE}"
 
 nix run github:nix-community/nixos-anywhere -- --extra-files "$EXTRA_FILES" --flake ".#${host}" "${ssh_host}"
