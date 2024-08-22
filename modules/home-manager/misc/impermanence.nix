@@ -81,7 +81,6 @@ in
       directories = [
         "${config.xdg.dataHome}/nix"        # trusted settings and repl history
         "${config.xdg.configHome}/systemd"  # systemd timers
-
         ".ssh"
       ] ++ lib.optionals cfg.gpg    [ ".gnupg" ]
         ++ lib.optionals cfg.lutris [ "${config.xdg.configHome}/lutris" "${config.xdg.dataHome}/lutris" ]

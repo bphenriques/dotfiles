@@ -86,8 +86,18 @@ init_sops_git_filter() {
 }
 
 import_gpg() {
+  info "GPG - Importing!"
   bw get item "github-gpg-private" | jq --raw-output '.notes' | gpg --import
   bw get item "github-gpg-public" | jq --raw-output '.notes' | gpg --import
+  success "GPG - Imported!"
+}
+
+# https://github.com/NixOS/nix/issues/2982
+set_root_nixpkgs_channel() {
+  info "Nix Channels - Setting.."
+  sudo -i nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+  sudo -i nix-channel --update nixpkgs
+  success "Nix Channels - Set"
 }
 
 if [ "$1" = "--help" ] || [ $# -lt 2 ]; then
@@ -107,4 +117,5 @@ set_host "${host}"
 import_age_private_keys "${host}"
 import_gpg
 init_sops_git_filter "${host}"
+set_root_nixpkgs_channel
 
