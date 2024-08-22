@@ -48,8 +48,6 @@
   # Update firmware. Use fwupdmgr
   services.fwupd.enable = true;
 
-  # Development
-
   # Gaming
   custom.profiles.gaming.enable = true;
 
@@ -61,9 +59,7 @@
   sops.age.keyFile = "/persist/data/system/var/lib/sops-nix/system-keys.txt";
   sops.defaultSopsFile = ./secrets.yaml;
   environment.persistence."${config.custom.impermanence.dataLocation}".directories = [
-    "/var/lib/fprint"   # Fingerprint device
     "/var/lib/sops-nix" # Secrets
-    "/var/lib/docker"   # Docker
   ];
 
   # Users

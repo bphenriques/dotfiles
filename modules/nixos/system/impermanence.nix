@@ -2,7 +2,10 @@
 
 let
   cfg = config.custom.impermanence;
-  hmUsersCfg = config.home-manager.users;
+  mkImpermanenceOption = default: lib.mkOption {
+    inherit default;
+    type = lib.types.bool;
+  };
 in
 {
   options.custom.impermanence = {
@@ -22,6 +25,19 @@ in
       type = with lib.types; str;
       description = "Location of the system's configuration persist directory";
     };
+
+    # Core
+    userPasswords = mkImpermanenceOption config.users.mutableUsers;
+
+    # Security
+    fprintd = mkImpermanenceOption config.services.fprintd.enable;
+
+    # Networking
+    networkmanager = mkImpermanenceOption config.networking.networkmanager.enable;
+    bluetooth = mkImpermanenceOption config.hardware.bluetooth.enable;
+
+    # Other
+    docker = mkImpermanenceOption config.virtualisation.docker.enable;
   };
 
   config = lib.mkIf cfg.enable {
@@ -44,23 +60,22 @@ in
         hideMounts = true;
         directories = [
           "/var/log"
-          "/var/lib/bluetooth"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
-          "/etc/NetworkManager/system-connections"
-        ];
-        files = [
-          # https://www.networkmanager.dev/docs/api/1.40/NetworkManager.html
-          "/etc/machine-id"
-          "/var/lib/NetworkManager/secret_key"
+        ]
+          ++ lib.optionals cfg.networkmanager [ "/etc/NetworkManager/system-connections" ]
+          ++ lib.optionals cfg.bluetooth      [ "/var/lib/bluetooth" ]
+          ++ lib.optionals cfg.docker         [ "/var/lib/docker" ]
+          ++ lib.optionals cfg.fprintd        [ "/var/lib/fprint" ];
 
-          "/etc/shadow" # Passwords
-        ];
+        files = [ ]
+          ++ lib.optionals cfg.networkmanager [ "/etc/machine-id" "/var/lib/NetworkManager/secret_key" ]
+          ++ lib.optionals cfg.userPasswords  [ "/etc/shadow" ];
       };
 
       "${cfg.cacheLocation}" = {
         hideMounts = true;
         directories = [
-          "/var/lib/systemd/coredump" # Systemd core-dumbs that I might want to store if requested but won't really look at them
+          "/var/lib/systemd/coredump" # Systemd core-dumps that I might want to store if requested but won't really look at them
           "/var/lib/upower"           # Tracks power since beginning of timec
         ];
         files = [ ];
