@@ -79,9 +79,7 @@ while [ $# -gt 0 ]; do
       case "$(uname -s)" in
         Darwin)  _darwin_update "$@" ;;
         Linux)
-          if [ -d /etc/nixos ]; then
-            _nixos_update "$@"
-          else
+          if [ ! -d /etc/nixos ]; then
             nix-channel --update
             nix-env --install --attr nixpkgs.nix nixpkgs.cacert
             systemctl daemon-reload
