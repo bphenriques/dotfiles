@@ -1,7 +1,10 @@
 { lib, pkgs, config, ... }:
 let
   homeServerIp = "192.168.68.53";
-  mkHomeServerCifsFs = remoteFolder: let
+
+  # Single-user mount for now. This should be reviewed to support multi-user as some folders are private.. but only when I have a new user.
+  # See: https://4sysops.com/archives/linux-smb-mount-for-multiple-users/ and https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/mounting_an_smb_share#performing_a_multi-user_smb_mount
+  mkHomeServerCifsFs = remoteFolder: user: group: let
     networkSplitProtectionOpts = [
       "x-systemd.automount"
       "noauto"
@@ -9,15 +12,19 @@ let
       "x-systemd.device-timeout=5s"
       "x-systemd.mount-timeout=5s"
     ];
-    userOpts = [ "uid=${toString 1000}" "gid=${toString 100}" ];
+    userOpts = [ "uid=${toString user.uid}" "gid=${toString group.gid}" ];
     credsOpts = [ "credentials=${config.sops.templates."smb-credentials".path}" ];
   in {
     device = "//${homeServerIp}/${remoteFolder}";
     fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
     options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
   };
-  bphenriquesData = config.home-manager.users.bphenriques.custom.impermanence.dataLocation;
-  bphenriquesCache = config.home-manager.users.bphenriques.custom.impermanence.cacheLocation;
+
+  rootsGroup = config.users.groups.root;
+  usersGroup = config.users.groups.users;
+  bphenriquesPersistData = config.home-manager.users.bphenriques.custom.impermanence.dataLocation;
+  bphenriquesPersistCache = config.home-manager.users.bphenriques.custom.impermanence.cacheLocation;
+  bphenriquesUser = config.users.users.bphenriques;
 in
 {
   # ZFS
@@ -53,7 +60,7 @@ in
     secrets.samba_server_username = { };
     secrets.samba_server_password = { };
     templates."smb-credentials" = {
-      owner = "bphenriques";
+      #owner = bphenriquesUser.name;
       content = ''
         username=${config.sops.placeholder.samba_server_username}
         password=${config.sops.placeholder.samba_server_password}
@@ -69,26 +76,29 @@ in
     "/boot".neededForBoot = true;
 
     # ZFS Mounts
-    "${bphenriquesData}".neededForBoot = true;
-    "${bphenriquesCache}".neededForBoot = true;
+    "${bphenriquesPersistData}".neededForBoot = true;
+    "${bphenriquesPersistCache}".neededForBoot = true;
 
     # NFS
-    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "bphenriques";
-    "/mnt/nas-media"        = mkHomeServerCifsFs "media";
-    "/mnt/nas-shared"       = mkHomeServerCifsFs "shared";
+    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "bphenriques" bphenriquesUser rootsGroup;  # Private
+    "/mnt/nas-media"        = mkHomeServerCifsFs "media"       bphenriquesUser usersGroup;  # Shared with others
+    "/mnt/nas-shared"       = mkHomeServerCifsFs "shared"      bphenriquesUser usersGroup;  # Shared with others
   };
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.tmpfiles.rules = [
     # Fix permissions regarding root user
-    "z ${config.sops.age.keyFile} 0700 root  root" # nixos-anywhere sets the wrong permissions
+    "z ${config.sops.age.keyFile} 0700 root root" # nixos-anywhere sets the wrong permissions
 
-    # Move permissions from root to the users group
-    "z /mnt/games 0775 root users"
+    # Review CIFS permissions
+    "z /mnt/nas-bphenriques   0700 ${bphenriquesUser.name}  ${usersGroup.name}"
+    "z /mnt/nas-media         0775 root                     ${usersGroup.name}"
+    "z /mnt/nas-shared        0775 root                     ${usersGroup.name}"
 
-    # Move permissions from root to solely bphenriques
-    "z /mnt/bphenriques     0700 bphenriques users"
-    "z ${bphenriquesData}   0700 bphenriques users"
-    "z ${bphenriquesCache}  0700 bphenriques users"
+    # Review ZFS datasets permissions
+    "z /mnt/games                   0775 root                     ${usersGroup.name}"
+    "z /mnt/bphenriques             0700 ${bphenriquesUser.name}  ${usersGroup.name}"
+    "z ${bphenriquesPersistData}    0700 ${bphenriquesUser.name}  ${usersGroup.name}"
+    "z ${bphenriquesPersistCache}   0700 ${bphenriquesUser.name}  ${usersGroup.name}"
   ];
 }
