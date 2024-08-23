@@ -29,7 +29,8 @@ clone_dotfiles() {
     tmp=$(mktemp -d)
     GIT_SSH_COMMAND="ssh -i "$SSH_DIR/id_ed25519" -o IdentitiesOnly=yes" \
       git clone -b "${BRANCH_NAME}" git@github.com:bphenriques/dotfiles.git "$tmp"
-    mv "$tmp" "$DOTFILES_LOCATION"
+    mv "$tmp"/* "$DOTFILES_LOCATION"
+    mv "$tmp"/.* "$DOTFILES_LOCATION"
   fi
   success "dotfiles - available in ${DOTFILES_LOCATION}"
 }
