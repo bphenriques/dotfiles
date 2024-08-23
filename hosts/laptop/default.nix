@@ -6,15 +6,18 @@
 # TODO: check boot: https://github.com/adi1090x/plymouth-themes?tab=readme-ov-file. Like 70, 71, 62 63 5
 {
   imports = [
+    # Hardware
     ./hardware/hardware-configuration.nix   # Output of nixos-generate-config --root /mnt
-    ./hardware/graphics.nix                 # AMD + Nvidia
-    ./hardware/misc.nix                     # Other hardware settings without a especific category
-    ./hardware/peripherals.nix              # Mouse / Keyboard etc
+    ./hardware/graphics.nix                 # AMD iGPU + Nvidia dGPU
+    ./hardware/misc.nix                     # Other hardware
+    ./hardware/peripherals.nix              # Mouse / Keyboard / etc
 
     ./disko.nix                             # Instructions on how to format the disk
     ./filesystem.nix                        # More settings regarding the disk.
     ../../config/nixos.nix                  # Default nixos settings
-    ./bphenriques                           # User
+
+    # Users
+    ./bphenriques
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -60,15 +63,8 @@
   environment.persistence."${config.custom.impermanence.dataLocation}".directories = [ "/var/lib/sops-nix" ];
   sops.age.keyFile = "${config.custom.impermanence.dataLocation}/var/lib/sops-nix/system-keys.txt";
 
-  # Users
-  sops.secrets.user_bphenriques_password.neededForUsers = true;
+  # Users and groups
   users.mutableUsers = false;
-  users.users.bphenriques = {
-    isNormalUser = true;
-    hashedPasswordFile = config.sops.secrets.user_bphenriques_password.path;
-    uid = 1000;
-    description = "bphenriques";
-  };
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }

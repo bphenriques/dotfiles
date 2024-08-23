@@ -5,9 +5,6 @@
 # https://github.com/oddlama/nix-config/blob/main/users/myuser/graphical/firefox.nix
 # https://github.com/prescientmoon/everything-nix/blob/develop/home/features/desktop/firefox/default.nix
 # FIXME: it still asks me to safe passwords
-let
-  merge = lib.foldr (a: b: a // b) { };
-in
 {
   programs.firefox = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
@@ -21,7 +18,7 @@ in
       default = {
         id = 0;
         name = "Bruno Henriques";
-        settings = merge [ (import ./basic.nix) (import ./telemetry.nix) ];
+        settings = lib.attrsets.mergeAttrsList [ (import ./basic.nix) (import ./telemetry.nix) ];
 
         # Require manual activation once installed
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [

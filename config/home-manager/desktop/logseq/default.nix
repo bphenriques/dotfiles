@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  logseqDotfiles = "${config.custom.dotfiles.directory}/home/logseq";
+  logseqDotfiles = "${config.custom.dotfiles.directory}/home-manager/desktop/logseq";
   pluginsPath = "${logseqDotfiles}/plugins.edn";
   configPath = "${logseqDotfiles}/config.edn";
 in

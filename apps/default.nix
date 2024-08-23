@@ -1,7 +1,6 @@
 { nixpkgs }:
 let
   lib = nixpkgs.lib;
-  merge = lib.foldr (a: b: a // b) { };
 
   # Replace the interpreter's location to be one under the nix store.
   patchShebangs = pkg: pkg.overrideAttrs(old: {
@@ -35,14 +34,14 @@ let
     };
 
   mkLinuxApps = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
-    merge [
+    lib.attrsets.mergeAttrsList [
      (mkApp mkDotfilesInstall system)
      (mkApp mkBitwardenSession system)
     ]
   );
 
   mkDarwinApps = lib.genAttrs [ "aarch64-darwin" ] (system:
-    merge [
+    lib.attrsets.mergeAttrsList [
      (mkApp mkDarwinInstall system)
      (mkApp mkDotfilesInstall system)
      (mkApp mkBitwardenSession system)

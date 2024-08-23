@@ -18,11 +18,4 @@
   ## Mouse - Using solaar and input-remapper to control my mouse's side buttons.
   modules.services.solaar.enable = true;
   modules.services.input-remapper.enable = true;
-  home-manager.users.bphenriques = { config, ... }:
-  {
-    xdg.configFile = {
-      "input-remapper/config.json".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/input-remapper/config.json";
-      "input-remapper/presets/Logitech G305/Media.json".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/input-remapper/Media.json";
-    };
-  };
 }

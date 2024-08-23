@@ -52,7 +52,7 @@
   };
 
   xdg.configFile = {
-    "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/config.toml";
-    "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home/helix/languages.toml";
+    "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/config.toml";
+    "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/languages.toml";
   };
 }
