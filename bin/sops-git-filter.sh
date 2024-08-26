@@ -9,7 +9,7 @@ BASE_NAME=sopsGitFilter
 
 if [ "$EUID" -eq 0 ]; then
   echo "Skipping sops git filter as it is running as root likely as part of nixos build. This is only meant to run by users."
-  exit 1
+  exit 0
 fi
 
 case $1 in
