@@ -1,19 +1,12 @@
 { config, pkgs, ... }:
-# # https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos/tools?ref_type=heads
 # TODO: Laptop related stuff? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/laptop/default.nix
 # Power profile? https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/hardware/upower/default.nix
-# File browser: https://github.com/iynaix/dotfiles/blob/e441ab4ff7a775b57b6c79a2fa6be99e3ab2d58b/home-manager/programs/nemo.nix#L79
 # TODO: check boot: https://github.com/adi1090x/plymouth-themes?tab=readme-ov-file. Like 70, 71, 62 63 5
+# TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
 {
   imports = [
-    # Hardware
-    ./hardware/hardware-configuration.nix   # Output of nixos-generate-config --root /mnt
-    ./hardware/graphics.nix                 # AMD iGPU + Nvidia dGPU
-    ./hardware/misc.nix                     # Other hardware
-    ./hardware/peripherals.nix              # Mouse / Keyboard / etc
-
-    ./disko.nix                             # Instructions on how to format the disk
-    ./filesystem.nix                        # More settings regarding the disk.
+    ./hardware                              # CPU, graphics, peripherals, etc
+    ./filesystem                            # Partitioning, impermanence, etc
     ../../config/nixos.nix                  # Default nixos settings
 
     # Users

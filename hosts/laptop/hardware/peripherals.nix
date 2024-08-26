@@ -15,7 +15,10 @@
     touchpad.tapping = true;
   };
 
-  ## Mouse - Using solaar and input-remapper to control my mouse's side buttons.
+  # Fingerprint - run fprintd-enroll afterwards
+  services.fprintd.enable = true;
+
+  # Mouse - Using solaar and input-remapper to control my mouse's side buttons.
   modules.services.solaar.enable = true;
   modules.services.input-remapper.enable = true;
 }

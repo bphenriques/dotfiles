@@ -1,6 +1,4 @@
 { inputs, ... }:
-# TODO: https://gitlab.com/usmcamp0811/dotfiles/-/tree/nixos/modules/nixos?ref_type=heads
-
 let
   inherit (builtins) readDir attrNames;
   inherit (inputs.nixpkgs.lib) filterAttrs genAttrs foldl';

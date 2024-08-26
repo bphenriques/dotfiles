@@ -1,19 +1,8 @@
 { lib, pkgs, config, ... }:
 
-# https://github.com/edmundmiller/dotfiles/blob/main/modules/desktop/browsers/firefox.nix
-# https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/firefox.nix
-# https://github.com/oddlama/nix-config/blob/main/users/myuser/graphical/firefox.nix
-# https://github.com/prescientmoon/everything-nix/blob/develop/home/features/desktop/firefox/default.nix
-# FIXME: it still asks me to safe passwords
 {
   programs.firefox = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
-    #package = pkgs.floorp.override {
-    #  nativeMessagingHosts = [
-    #    pkgs.tridactyl-native
-    #    pkgs.gnome-browser-connector
-    #  ];
-    #};
     profiles = {
       default = {
         id = 0;
@@ -33,7 +22,6 @@
 
           onetab
           # libredirect# One day, check auto-redirects
-
         ];
 
         search = {
@@ -69,7 +57,15 @@
                 ];
               }];
             };
-            # TODO Wikipedia
+            "Wikipedia" = {
+              definedAliases = [ "@wk" "@wikipedia" ];
+              urls = [{
+                template = "https://en.wikipedia.org/wiki/Special:Search";
+                params = [
+                  { name = "search"; value = "{searchTerms}"; }
+                ];
+              }];
+            };
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
           };
         };
@@ -77,23 +73,13 @@
         # Default containers for all profiles
         containersForce = true;
         containers = {
-          "Personal" = {
-            id = 1;
-            color = "turquoise";
-            icon = "chill";
-          };
-          "Sensitive" = {
-            id = 2;
-            color = "red";
-            icon = "fingerprint";
-          };
           "Shopping" = {
-            id = 3;
+            id = 1;
             color = "orange";
             icon = "cart";
           };
           "Social" = {
-            id = 4;
+            id = 2;
             color = "yellow";
             icon = "tree";
           };
@@ -103,9 +89,16 @@
   };
 
   xdg.mimeApps.defaultApplications = {
-    "text/html" = ["firefox.desktop"];
+    "application/x-extension-htm" = "firefox.desktop";
+    "application/x-extension-html" = "firefox.desktop";
+    "application/x-extension-shtml" = "firefox.desktop";
+    "application/x-extension-xht" = "firefox.desktop";
+    "application/x-extension-xhtml" = "firefox.desktop";
+    "application/xhtml+xml" = "firefox.desktop";
+    "text/html" = "firefox.desktop";
     "text/xml" = ["firefox.desktop"];
-    "x-scheme-handler/http" = ["firefox.desktop"];
-    "x-scheme-handler/https" = ["firefox.desktop"];
+    "x-scheme-handler/chrome" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
   };
 }
