@@ -39,6 +39,7 @@ in
     vlc = mkImpermanenceOption          false;
     signal = mkImpermanenceOption       false;
     filezilla = mkImpermanenceOption    false;
+    museeks = mkImpermanenceOption      false;
 
     # Drivers
     nvidia = mkImpermanenceOption       false;
@@ -49,6 +50,7 @@ in
 
     # Security
     gpg = mkImpermanenceOption          config.programs.gpg.enable;
+    sops = mkImpermanenceOption         false;
 
     # CLI Apps
     helix = mkImpermanenceOption        config.programs.helix.enable;
@@ -99,7 +101,9 @@ in
         ++ lib.optionals cfg.bitwarden [ "${config.xdg.configHome}/Bitwarden CLI" ]
         ++ lib.optionals cfg.solaar [ "${config.xdg.configHome}/solaar" ]
         ++ lib.optionals cfg.gog  [ "${config.xdg.dataHome}/GOG.com" ] # cache?
-        ++ lib.optionals cfg.scalacli [ "${config.xdg.dataHome}/scalacli" ];
+        ++ lib.optionals cfg.scalacli [ "${config.xdg.dataHome}/scalacli" ]
+        ++ lib.optionals cfg.sops [ "${config.xdg.configHome}/sops" ]
+        ++ lib.optionals cfg.museeks [ "${config.xdg.configHome}/Museeks" ]; # A Electron mess of config+cache.
 
       files = [ ]
         ++ lib.optionals cfg.sunshine [

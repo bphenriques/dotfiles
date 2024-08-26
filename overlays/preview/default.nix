@@ -1,6 +1,5 @@
 { lib, pkgs, ... }:
 
-# TODO: More ideas here: https://github.com/NikitaIvanovV/ctpv
 with lib;
 pkgs.writeShellApplication {
   name = "preview";

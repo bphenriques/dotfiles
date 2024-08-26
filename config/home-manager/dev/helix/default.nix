@@ -1,40 +1,5 @@
 { config, pkgs, ... }:
-# TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/helix/default.nix
 {
-  /*
-  home.packages = [
-    (pkgs.makeDesktopItem {
-      name = "helix";
-      desktopName = "Helix editor";
-      terminal = true;
-      categories = [ "Utility" "TextEditor" "Development" "IDE" ];
-      mimeTypes = [
-        "inode/directory"
-        "text/english"
-        "text/plain"
-        "text/x-makefile"
-        "text/x-c++hdr"
-        "text/x-c++src"
-        "text/x-chdr"
-        "text/x-csrc"
-        "text/x-java"
-        "text/x-moc"
-        "text/x-pascal"
-        "text/x-tcl"
-        "text/x-tex"
-        "application/x-shellscript"
-        "application/json"
-        "application/xml"
-        "text/xml"
-        "text/x-c"
-        "text/x-c++"
-      ];
-      exec = "${pkgs.helix}/bin/hx %F";
-      icon = "helix";
-    })
-  ];
-  */
-
   programs.helix = {
     enable = true;
 
@@ -55,4 +20,30 @@
     "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/config.toml";
     "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/languages.toml";
   };
+
+  home.packages = [
+    (pkgs.makeDesktopItem {
+      name = "helix";
+      desktopName = "Helix editor";
+      terminal = true;
+      categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+      mimeTypes = [
+        "text/plain"
+        "application/json"
+        "application/xml"
+
+        "application/x-shellscript"
+        "text/x-makefile"
+        "text/x-tex"
+        "text/x-java"
+        "text/x-chdr"
+        "text/x-csrc"
+        "text/x-c++hdr"
+        "text/x-c++src"
+        "text/xml"
+      ];
+      exec = "${pkgs.helix}/bin/hx %F";
+      icon = "helix";
+    })
+  ];
 }

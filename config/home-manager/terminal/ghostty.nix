@@ -50,7 +50,14 @@ let
 in
 {
   # MacOS requires installation by hand for now: https://github.com/ghostty-org/ghostty/releases/tag/tip
-  home.packages = if pkgs.stdenv.isLinux then [ pkgs.ghostty ] else [];
+  home.packages = lib.optionals pkgs.stdenv.isLinux [
+    # Fixes issues with GTK, need to sort this out separately
+    (pkgs.writeScriptBin "ghostty" ''
+      #!${pkgs.stdenv.shell}
+      GDK_BACKEND=x11 exec ${pkgs.ghostty}/bin/ghostty "$@"
+    '')
+  ];
+
   programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
     fish_add_path --append --move ${config.home.homeDirectory}/Applications/Ghostty.app/Contents/MacOS
   '';

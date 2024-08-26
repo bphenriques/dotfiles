@@ -1,9 +1,8 @@
 #!/usr/bin/env sh
 
 BRANCH_NAME=add-laptop #FIXME: Remove after we sort-out everything
-DOTFILES_LOCATION="$HOME"/.dotfiles
+DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
-SSH_DIR="${HOME}/.ssh"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 
 usage() {
@@ -27,8 +26,7 @@ clone_dotfiles() {
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
     tmp=$(mktemp -d)
-    GIT_SSH_COMMAND="ssh -i "$SSH_DIR/id_ed25519" -o IdentitiesOnly=yes" \
-      git clone -b "${BRANCH_NAME}" git@github.com:bphenriques/dotfiles.git "$tmp"
+    git clone -b "${BRANCH_NAME}" git@github.com:bphenriques/dotfiles.git "$tmp"
     mv "$tmp"/* "$DOTFILES_LOCATION"
     mv "$tmp"/.* "$DOTFILES_LOCATION"
   fi
@@ -80,9 +78,11 @@ import_age_private_keys() {
 init_sops_git_filter() {
   host="$1"
 
+  info "Sops Git Filter - Checking.."
   if ! "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh check "${host}"; then
     info "Sops Git Filter - Setting up for '${host}'"
     "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh init "${host}"
+    success "Sops Git Filter - Set for '${host}'"
   else
     success "Sops Git Filter - Already set for '${host}'"
   fi
@@ -121,4 +121,3 @@ import_age_private_keys "${host}"
 import_gpg
 init_sops_git_filter "${host}"
 set_root_nixpkgs_channel
-

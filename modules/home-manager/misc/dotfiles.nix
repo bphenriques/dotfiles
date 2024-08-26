@@ -1,7 +1,5 @@
 { lib, pkgs, config, ... }:
 
-# TODO: https://github.com/Misterio77/nix-config/blob/cdc35ca281891268c6e9772cca1e66fb39de04ab/home/misterio/features/cli/git.nix
-# TODO: https://github.com/jordanisaacs/dotfiles/blob/master/scripts/default.nix#L130
 # https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
 with lib;
 let
@@ -14,5 +12,24 @@ in
       description = "Location of the dotfiles repository";
       default = "${config.home.homeDirectory}/.dotfiles";
     };
+
+    graphicalEnvironment = mkOption {
+      type = with lib.types; bool;
+      description = "If the host contains a graphical environment";
+      default = true;
+    };
+  };
+
+  config = {
+    home.packages = with pkgs; [
+      dotfiles
+      sops
+    ];
+
+    programs.fish.plugins = [
+      { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
+    ];
+    
+    home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
   };
 }

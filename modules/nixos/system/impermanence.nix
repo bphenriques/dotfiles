@@ -45,13 +45,6 @@ in
       }
     ];
 
-    # List directories that will be removed on next boot
-    environment.systemPackages = [
-      (pkgs.writeScriptBin "zfsdiff" ''
-        sudo zfs diff ${cfg.rootBlankSnapshot} -F | ${pkgs.ripgrep}/bin/rg -e "\+\s+/\s+" | cut -f3- | ${pkgs.skim}/bin/sk --query "/home/bphenriques/"
-      '')
-    ];
-
     fileSystems = {
       "${cfg.dataLocation}".neededForBoot = true;
       "${cfg.cacheLocation}".neededForBoot = true;
