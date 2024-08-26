@@ -58,6 +58,7 @@ in
         directories = [
           "/var/log"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
+          "/var/lib/NetworkManager"
         ]
           ++ lib.optionals cfg.networkmanager [ "/etc/NetworkManager/system-connections" ]
           ++ lib.optionals cfg.bluetooth      [ "/var/lib/bluetooth" ]
@@ -65,7 +66,7 @@ in
           ++ lib.optionals cfg.fprintd        [ "/var/lib/fprint" ];
 
         files = [ ]
-          ++ lib.optionals cfg.networkmanager [ "/etc/machine-id" "/var/lib/NetworkManager/secret_key" ];
+          ++ lib.optionals cfg.networkmanager [ "/etc/machine-id" ];
       };
 
       "${cfg.cacheLocation}" = {
