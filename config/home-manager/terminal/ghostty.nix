@@ -56,6 +56,13 @@ in
       #!${pkgs.stdenv.shell}
       GDK_BACKEND=x11 exec ${pkgs.ghostty}/bin/ghostty "$@"
     '')
+
+    (pkgs.makeDesktopItem {
+      name = "Ghostty";
+      desktopName = "Ghostty";
+      categories = [ "Utility" "Development" ];
+      exec = "GDK_BACKEND=x11 exec ${pkgs.ghostty}/bin/ghostty";
+    })
   ];
 
   programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
@@ -102,7 +109,7 @@ in
 
   ''+ lib.optionalString pkgs.stdenv.isLinux ''
     gtk-single-instance = true
-    window-decoration = false
+    window-decoration = trueg
   ''
   + lib.optionalString pkgs.stdenv.isDarwin ''
     window-colorspace = "display-p3"
