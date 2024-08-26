@@ -1,6 +1,5 @@
 { lib, pkgs, config, ... }:
 
-# TODO: Explore keybindings: https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_default_key_bindings.fish
 let
   inherit (builtins) readFile readDir attrNames;
   inherit (lib) filterAttrs foldl' optionalString concatStringsSep removeSuffix;
@@ -8,8 +7,7 @@ let
   listFishFiles = from: (builtins.filter (fileName: lib.hasSuffix ".fish" fileName) (listFiles from));
 in
 {
-  home.packages = with pkgs; [ fish dotfiles ];
-
+  home.packages = with pkgs; [ fish ];
   programs.zoxide = {
     enable = true;
     options = [ "--cmd j" ];
@@ -47,9 +45,7 @@ in
       }
       # Defined under overlays
       { name = "frg"; src = pkgs.fishPlugins.frg.src; }
-      { name = "proj"; src = pkgs.fishPlugins.proj.src; }
       { name = "ffd"; src = pkgs.fishPlugins.ffd.src; }
-      { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
     ];
 
     functions = (foldl' (acc: f: acc // {
@@ -57,6 +53,7 @@ in
     }) { } (listFishFiles ./functions));
 
     interactiveShellInit = let
+      # Do I still need this?
       nixIntegration = ''
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish

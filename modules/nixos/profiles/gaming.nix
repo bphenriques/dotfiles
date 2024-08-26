@@ -1,24 +1,8 @@
 { pkgs, config, lib, ... }:
 
-# TODO explore...
-# https://github.com/Emiller88/dotfiles/blob/master/modules/desktop/gaming/steam.nix
-# https://github.com/the-argus/nixsys/blob/main/modules/home-manager/gaming/default.nix#LL25C9-L25C22
-# https://github.com/danderson/homelab
-# https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/programs/steam/default.nix
-# https://github.com/bbigras/nix-config/blob/master/core/steam.nix
 with lib;
 let
   cfg = config.custom.profiles.gaming;
-
-/*  steam-desktop-item = (makeDesktopItem {
-    name = "steam";
-    desktopName = "Steam";
-    icon = "steam";
-    exec = "steam";
-    terminal = false;
-    mimeTypes = ["x-scheme-handler/steam"];
-    categories = [ "Network" "FileTransfer" "Game" ];
-  });*/
 in
 {
   options.custom.profiles.gaming = with types; {
@@ -49,8 +33,8 @@ in
     programs = {
       steam = {
         enable = true;
-        remotePlay.openFirewall = true;       # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true;  # Open ports in the firewall for Source Dedicated Server
+        remotePlay.openFirewall = true;
+        dedicatedServer.openFirewall = true;
         localNetworkGameTransfers.openFirewall = true;
       };
 

@@ -43,7 +43,6 @@
           "steam"
           "steam-original"
           "steam-run"
-          "unrar"
           "terraform"
           "keepa"
           "libretro-genesis-plus-gx"

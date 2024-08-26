@@ -60,7 +60,7 @@ This repository contains the definition of my machines using [nix](https://nixos
     ```
     HOST=laptop
     BITWARDEN_EMAIL=...
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop $BITWARDEN_EMAIL
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/add-laptop#dotfiles-install" -- laptop $BITWARDEN_EMAIL
     ```
 
 # Installing on Darwin

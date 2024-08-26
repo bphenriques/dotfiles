@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 {
   nix = {
     optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them. Can't enable it on darwin: https://github.com/NixOS/nix/issues/7273
@@ -21,7 +20,14 @@
   };
 
   # Network
-  networking.networkmanager.enable = true;
+  networking = {
+    networkmanager.enable = true;
+    extraHosts = ''
+      192.168.1.1     router
+      192.168.68.68   pi-zero
+      192.168.68.53   home-nas
+    '';
+  };
 
   # Input
   services.xserver = {
@@ -32,30 +38,14 @@
     excludePackages = [ pkgs.xterm ];
   };
 
-  # Fonts (system-wide)
-  fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "Hack" ]; })
-  ];
-
   # Programs
-  programs.fish.enable = true;                          # System level: source vendor's completions or functions.
+  programs.fish.enable = true;  # System level: source vendor's completions or functions.
   programs.partition-manager.enable = true;
+
+  # Suport exFAT and NTFS formatted drives (pendisks + external disks)
   environment.systemPackages = with pkgs; [
-    p7zip     # Zip/Unzip that supports all the formats I need
-    baobab    # Disk Space Analyser
-
-    museeks   # Audio
-    amberol   # Another Audio music player. Yet another alternative: https://github.com/jeffvli/sonixd
-    vlc       # Video
-    qbittorrent
-
-    # File Management
-    filezilla
-
-    # Filesystems (will I ever need this?)
-    exfat     # Windows drives
-    ntfs3g    # Windows drives
-    hfsprogs  # MacOS drives
+    exfat
+    ntfs3g
   ];
 
   # Localization
@@ -83,7 +73,6 @@
   # Security: https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/default.nix#L79
   security.sudo.extraConfig = "Defaults lecture=never";
 
-  # TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
   # Disabling some defaults
   programs.command-not-found.enable = false;
   programs.nano.enable = false;
