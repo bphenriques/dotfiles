@@ -6,7 +6,6 @@
     ./zellij
     ./broot.nix ./yazi.nix          # TODO: Decide one or another
     ./ghostty.nix
-    ./wezterm.nix
   ];
 
   programs.man = {
