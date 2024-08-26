@@ -1,13 +1,18 @@
 { lib, config, inputs, pkgs, ... }:
 # TODO: Consider using a pattern that applies for all users for some bits and bobs. See https://github.com/prescientmoon/everything-nix/blob/develop/hosts/nixos/common/global/persistence.nix#L20
-# I could define each state/
 # https://github.com/prescientmoon/everything-nix/blob/develop/home/features/persistence.nix
 let
+  inherit (lib.strings) removePrefix;
   cfg = config.custom.impermanence;
   mkImpermanenceOption = default: lib.mkOption {
     inherit default;
     type = lib.types.bool;
   };
+
+  # Must be relative to the user directory
+  xdgConfigHomeRel = removePrefix config.home.homeDirectory config.xdg.configHome;
+  xdgDataHomeRel = removePrefix config.home.homeDirectory config.xdg.dataHome;
+  xdgCacheHomeRel = removePrefix config.home.homeDirectory config.xdg.cacheHome;
 in
 {
   options.custom.impermanence = {
@@ -81,66 +86,66 @@ in
     home.persistence."${cfg.dataLocation}" = {
       allowOther = true;
       directories = [
-        "${config.xdg.dataHome}/nix"        # trusted settings and repl history
-        "${config.xdg.configHome}/systemd"  # systemd timers
+        "${xdgDataHomeRel}/nix"        # trusted settings and repl history
+        "${xdgConfigHomeRel}/systemd"  # systemd timers
         ".ssh"
       ] ++ lib.optionals cfg.gpg    [ ".gnupg" ]
-        ++ lib.optionals cfg.lutris [ "${config.xdg.configHome}/lutris" "${config.xdg.dataHome}/lutris" ]
-        ++ lib.optionals cfg.heroic [ "${config.xdg.configHome}/heroic" ]
+        ++ lib.optionals cfg.lutris [ "${xdgConfigHomeRel}/lutris" "${xdgDataHomeRel}/lutris" ]
+        ++ lib.optionals cfg.heroic [ "${xdgConfigHomeRel}/heroic" ]
         ++ lib.optionals cfg.steam [
           ".steam"
-          { directory = "${config.xdg.dataHome}/Steam"; method = "symlink"; } # Some games don't play well with bindfs
+          { directory = "${xdgDataHomeRel}/Steam"; method = "symlink"; } # Some games don't play well with bindfs
         ]
-        ++ lib.optionals cfg.filezilla    [ "${config.xdg.configHome}/filezilla" ]
-        ++ lib.optionals cfg.sunshine [ "${config.xdg.configHome}/sunshine/credentials" ]
+        ++ lib.optionals cfg.filezilla    [ "${xdgConfigHomeRel}/filezilla" ]
+        ++ lib.optionals cfg.sunshine [ "${xdgConfigHomeRel}/sunshine/credentials" ]
         ++ lib.optionals cfg.firefox [ ".mozilla" ]
-        ++ lib.optionals cfg.vlc [ "${config.xdg.configHome}/vlc" ]
-        ++ lib.optionals cfg.discord [ "${config.xdg.configHome}/discord" ]
-        ++ lib.optionals cfg.qbittorrent [ "${config.xdg.configHome}/qBittorrent" ]
-        ++ lib.optionals cfg.signal [ "${config.xdg.configHome}/Signal" ]
-        ++ lib.optionals cfg.bitwarden [ "${config.xdg.configHome}/Bitwarden CLI" ]
-        ++ lib.optionals cfg.solaar [ "${config.xdg.configHome}/solaar" ]
-        ++ lib.optionals cfg.gog  [ "${config.xdg.dataHome}/GOG.com" ] # cache?
-        ++ lib.optionals cfg.scalacli [ "${config.xdg.dataHome}/scalacli" ]
-        ++ lib.optionals cfg.sops [ "${config.xdg.configHome}/sops" ]
-        ++ lib.optionals cfg.museeks [ "${config.xdg.configHome}/Museeks" ]; # A Electron mess of config+cache.
+        ++ lib.optionals cfg.vlc [ "${xdgConfigHomeRel}/vlc" ]
+        ++ lib.optionals cfg.discord [ "${xdgConfigHomeRel}/discord" ]
+        ++ lib.optionals cfg.qbittorrent [ "${xdgConfigHomeRel}/qBittorrent" ]
+        ++ lib.optionals cfg.signal [ "${xdgConfigHomeRel}/Signal" ]
+        ++ lib.optionals cfg.bitwarden [ "${xdgConfigHomeRel}/Bitwarden CLI" ]
+        ++ lib.optionals cfg.solaar [ "${xdgConfigHomeRel}/solaar" ]
+        ++ lib.optionals cfg.gog  [ "${xdgDataHomeRel}/GOG.com" ] # cache?
+        ++ lib.optionals cfg.scalacli [ "${xdgDataHomeRel}/scalacli" ]
+        ++ lib.optionals cfg.sops [ "${xdgConfigHomeRel}/sops" ]
+        ++ lib.optionals cfg.museeks [ "${xdgConfigHomeRel}/Museeks" ]; # A Electron mess of config+cache.
 
       files = [ ]
         ++ lib.optionals cfg.sunshine [
-          "${config.xdg.configHome}/sunshine/sunshine.conf"
-          "${config.xdg.configHome}/sunshine/sunshine_state.json"
+          "${xdgConfigHomeRel}/sunshine/sunshine.conf"
+          "${xdgConfigHomeRel}/sunshine/sunshine_state.json"
         ]
-        ++ lib.optionals cfg.beets  [ "${config.xdg.dataHome}/beets/beets.db" ]; # my personal setup
+        ++ lib.optionals cfg.beets  [ "${xdgDataHomeRel}/beets/beets.db" ]; # my personal setup
     };
 
     home.persistence."${cfg.cacheLocation}" = {
       allowOther = true;
 
       directories = [
-        "${config.xdg.cacheHome}/nix"
-      ] ++ lib.optionals cfg.firefox      [ "${config.xdg.cacheHome}/mozilla" ]
-        ++ lib.optionals cfg.fish         [ "${config.xdg.dataHome}/fish" ]
-        ++ lib.optionals cfg.zoxide       [ "${config.xdg.dataHome}/zoxide" ]
-        ++ lib.optionals cfg.direnv       [ "${config.xdg.dataHome}/direnv" ]
-        ++ lib.optionals cfg.zellij       [ "${config.xdg.cacheHome}/zellij" ]
-        ++ lib.optionals cfg.helix        [ "${config.xdg.cacheHome}/helix" ]
-        ++ lib.optionals cfg.wine         [ "${config.xdg.cacheHome}/wine" ]
-        ++ lib.optionals cfg.winetricks   [ "${config.xdg.cacheHome}/winetricks" ]
-        ++ lib.optionals cfg.qbittorrent  [ "${config.xdg.dataHome}/qBittorrent" ] # TODO: I can likely drill down this better
+        "${xdgCacheHomeRel}/nix"
+      ] ++ lib.optionals cfg.firefox      [ "${xdgCacheHomeRel}/mozilla" ]
+        ++ lib.optionals cfg.fish         [ "${xdgDataHomeRel}/fish" ]
+        ++ lib.optionals cfg.zoxide       [ "${xdgDataHomeRel}/zoxide" ]
+        ++ lib.optionals cfg.direnv       [ "${xdgDataHomeRel}/direnv" ]
+        ++ lib.optionals cfg.zellij       [ "${xdgCacheHomeRel}/zellij" ]
+        ++ lib.optionals cfg.helix        [ "${xdgCacheHomeRel}/helix" ]
+        ++ lib.optionals cfg.wine         [ "${xdgCacheHomeRel}/wine" ]
+        ++ lib.optionals cfg.winetricks   [ "${xdgCacheHomeRel}/winetricks" ]
+        ++ lib.optionals cfg.qbittorrent  [ "${xdgDataHomeRel}/qBittorrent" ] # TODO: I can likely drill down this better
         ++ lib.optionals cfg.lutris       [
-          "${config.xdg.cacheHome}/lutris/banners"  # Game banners
-          "${config.xdg.cacheHome}/lutris/coverart" # Game cover art
+          "${xdgCacheHomeRel}/lutris/banners"  # Game banners
+          "${xdgCacheHomeRel}/lutris/coverart" # Game cover art
         ]
-        ++ lib.optionals cfg.protontricks [ "${config.xdg.cacheHome}/protontricks" ]
-        ++ lib.optionals cfg.nvidia       [ "${config.xdg.cacheHome}/nvidia" ]
-        ++ lib.optionals cfg.jetbrains    [ "${config.xdg.cacheHome}/JetBrains" ]
-        ++ lib.optionals cfg.g4music      [ "${config.xdg.cacheHome}/com.github.neithern.g4music" ]
-        ++ lib.optionals cfg.scalacli     [ "${config.xdg.cacheHome}/scalacli" ]
-        ++ lib.optionals cfg.metals       [ "${config.xdg.cacheHome}/metals" ]
-        ++ lib.optionals cfg.filezilla    [ "${config.xdg.cacheHome}/filezilla" ]
-        ++ lib.optionals cfg.scalacli     [ "${config.xdg.cacheHome}/bloop" ] # TODO: or metals?
-        ++ lib.optionals cfg.coursier     [ "${config.xdg.cacheHome}/coursier" ]
-        ++ lib.optionals cfg.mesa         [ "${config.xdg.cacheHome}/mesa_shader_cache" ];
+        ++ lib.optionals cfg.protontricks [ "${xdgCacheHomeRel}/protontricks" ]
+        ++ lib.optionals cfg.nvidia       [ "${xdgCacheHomeRel}/nvidia" ]
+        ++ lib.optionals cfg.jetbrains    [ "${xdgCacheHomeRel}/JetBrains" ]
+        ++ lib.optionals cfg.g4music      [ "${xdgCacheHomeRel}/com.github.neithern.g4music" ]
+        ++ lib.optionals cfg.scalacli     [ "${xdgCacheHomeRel}/scalacli" ]
+        ++ lib.optionals cfg.metals       [ "${xdgCacheHomeRel}/metals" ]
+        ++ lib.optionals cfg.filezilla    [ "${xdgCacheHomeRel}/filezilla" ]
+        ++ lib.optionals cfg.scalacli     [ "${xdgCacheHomeRel}/bloop" ] # TODO: or metals?
+        ++ lib.optionals cfg.coursier     [ "${xdgCacheHomeRel}/coursier" ]
+        ++ lib.optionals cfg.mesa         [ "${xdgCacheHomeRel}/mesa_shader_cache" ];
 
       files = [ ".bash_history" ];
     };

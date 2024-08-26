@@ -5,8 +5,7 @@
     enable = pkgs.stdenv.hostPlatform.isLinux;
     profiles = {
       default = {
-        id = 0;
-        name = "Bruno Henriques";
+        name = "Bruno";
         settings = lib.attrsets.mergeAttrsList [ (import ./basic.nix) (import ./telemetry.nix) ];
 
         # Require manual activation once installed

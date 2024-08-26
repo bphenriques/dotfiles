@@ -25,7 +25,6 @@ clone_dotfiles() {
   # Works for impermanence where the directory is mounted but empty
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
-    tmp=$(mktemp -d)
     git clone -b "${BRANCH_NAME}" git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
   fi
   success "dotfiles - available in ${DOTFILES_LOCATION}"
