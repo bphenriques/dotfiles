@@ -1,10 +1,5 @@
 { lib, ... }:
-let
-  persistDataLocation = "/persist/data";
-  persistCacheLocation = "/persist/cache";
-in
 {
-  # https://github.com/iynaix/dotfiles/blob/main/recover.sh
   disko.devices = {
     disk = {
       vda = {
@@ -84,14 +79,6 @@ in
             type = "zfs_fs";
             mountpoint = "/nix";
           };
-          "system/data" = {
-            type = "zfs_fs";
-            mountpoint = "${persistDataLocation}/system";
-          };
-          "system/cache" = {
-            type = "zfs_fs";
-            mountpoint = "${persistCacheLocation}/system";
-          };
 
           home = {
             type = "zfs_fs";
@@ -99,24 +86,13 @@ in
           };
           "home/bphenriques" = {
             type = "zfs_fs";
-            options.mountpoint = "none";
+            mountpoint = "/home/bphenriques";
           };
-
           "home/bphenriques/workdir" = {
             type = "zfs_fs";
             mountpoint = "/mnt/bphenriques";
           };
-
-          "home/bphenriques/data" = {
-            type = "zfs_fs";
-            mountpoint = "${persistDataLocation}/bphenriques";
-          };
-          "home/bphenriques/cache" = {
-            type = "zfs_fs";
-            mountpoint = "${persistCacheLocation}/bphenriques";
-          };
-
-          "games" = {
+          games = {
             type = "zfs_fs";
             mountpoint = "/mnt/games";
           };

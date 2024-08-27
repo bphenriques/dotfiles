@@ -7,7 +7,8 @@ set -e
 
 DOTFILES_LOCATION="${SCRIPT_PATH}/.."
 IMPERMANENCE_DIR="${IMPERMANENCE_DIR:-/persist/data/system}"
-SOPS_AGE_SYSTEM_FILE="${IMPERMANENCE_DIR}/var/lib/sops-nix/system-keys.txt"
+# SOPS_AGE_SYSTEM_FILE="${IMPERMANENCE_DIR}/var/lib/sops-nix/system-keys.txt"
+SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
 usage() {
   echo "nixos-remote-install.sh {host} {ssh_host} {bitwarden-email}

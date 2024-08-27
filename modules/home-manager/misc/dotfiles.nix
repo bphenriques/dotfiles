@@ -31,9 +31,9 @@ in
     ];
 
     custom.impermanence.sops = true;
-    home.persistence."${config.custom.impermanence.dataLocation}".directories = [
-      ".dotfiles"
-    ];
+    home.persistence = lib.mkIf config.custom.impermanence.enable {
+      "${config.custom.impermanence.dataLocation}".directories = [ ".dotfiles" ];
+    };
 
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
   };
