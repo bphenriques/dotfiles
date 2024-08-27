@@ -83,16 +83,18 @@
   ];
 
   home-manager.users.bphenriques = {
+    imports = [ ../../config/home-manager/dev/helix ];
+
     programs.gpg.enable = true;
     services.gpg-agent = {
       enable = true;
       pinentryPackage = pkgs.pinentry-gnome3;
     };
 
-    systemd.user.tmpfiles.rules = [
-      "z /home/bphenriques/.ssh          0700 bphenriques users"
-      "z /home/bphenriques/.gnupg        0700 bphenriques users"
-    ];
+    #systemd.user.tmpfiles.rules = [
+    #  "z /home/bphenriques/.ssh          0700 bphenriques users"
+    #  "z /home/bphenriques/.gnupg        0700 bphenriques users"
+    #];
 
     home.persistence."/persist/data/bphenriques" = {
       allowOther = true;
@@ -107,7 +109,8 @@
         # only nix one: works
         # only systemd: breaks
         #".local/share/nix" # trusted settings and repl history
-        ".config/systemd"  # systemd timers
+        #".config/systemd"  # systemd timers
+        ".config/helix"
         ".ssh"
         ".gnupg"
       ];

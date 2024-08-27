@@ -6,4 +6,10 @@
     museeks   # Audio
     vlc       # Video
   ];
+
+  custom.impermanence = {
+    g4music = false;
+    museeks = true;
+    vlc = true;
+  };
 }

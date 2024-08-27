@@ -2,6 +2,7 @@
 # TODO: Consider using a pattern that applies for all users for some bits and bobs. See https://github.com/prescientmoon/everything-nix/blob/develop/hosts/nixos/common/global/persistence.nix#L20
 # https://github.com/prescientmoon/everything-nix/blob/develop/home/features/persistence.nix
 # TODO: Consider reading the configDir if set by home-manager
+# TODO: ensure we are not trying to persist .config/systemd
 let
   inherit (lib.strings) removePrefix;
   cfg = config.custom.impermanence;
@@ -90,7 +91,6 @@ in
       allowOther = true;
       directories = [
         "${xdgDataHomeRel}/nix"        # trusted settings and repl history
-        "${xdgConfigHomeRel}/systemd"  # systemd timers
         ".ssh"
       ] ++ lib.optionals cfg.gpg    [ ".gnupg" ]
         ++ lib.optionals cfg.lutris [ "${xdgConfigHomeRel}/lutris" "${xdgDataHomeRel}/lutris" ]
