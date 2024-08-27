@@ -39,13 +39,15 @@
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
     # Tighten permissions to private keys
-    "z ${config.home.homeDirectory}/.ssh          0700 ${config.home.username} users"
-    "z ${config.home.homeDirectory}/.gnupg        0700 ${config.home.username} users"
+    "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"
+    "z ${config.home.homeDirectory}/.gnupg  0700 ${config.home.username} users"
 
     # Tidy up most things under $HOME for easier access
     "L ${config.xdg.userDirs.documents}                       - - - - /mnt/bphenriques"
     "L ${config.xdg.userDirs.pictures}                        - - - - /mnt/nas-bphenriques/photos"
     "L ${config.xdg.userDirs.music}                           - - - - /mnt/nas-media/music"
+    "d ${config.xdg.userDirs.desktop}                         - - - -"
+    "d ${config.xdg.userDirs.download}                        - - - -"
     "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
   ];
 
@@ -65,34 +67,6 @@
     download  = "${config.home.homeDirectory}/downloads";
 
     extraConfig.XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
-  };
-
-  home.persistence."${config.custom.impermanence.dataLocation}".directories = [
-    "desktop"
-    "downloads"
-    "screenshots"
-  ];
-
-  # Impermanence
-  custom.impermanence = {
-    enable = true;
-    dataLocation = "/persist/data/bphenriques";
-    cacheLocation = "/persist/cache/bphenriques";
-
-    # Enable for those who don't have a programs.<prog>.enable
-    heroic = true;
-    steam = true;
-    gog = true;
-    nvidia = true;
-    protontricks = true;
-
-    qbittorrent = true;
-    bitwarden = true;
-
-    mesa = true;
-    wine = true;
-    winetricks = true;
-    solaar = true;
   };
 
   home.stateVersion = "24.05";
