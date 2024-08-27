@@ -16,7 +16,7 @@ By default IMPERMANENCE_DIR is set to /persist/data/system but you can set to em
 "
 }
 
-info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
 import_age_system_private_key() {

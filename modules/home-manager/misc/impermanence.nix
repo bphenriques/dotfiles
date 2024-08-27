@@ -97,7 +97,8 @@ in
         ++ lib.optionals cfg.heroic [ "${xdgConfigHomeRel}/heroic" ]
         ++ lib.optionals cfg.steam [
           ".steam"
-          { directory = "${xdgDataHomeRel}/Steam"; method = "symlink"; } # Some games don't play well with bindfs
+          "${xdgDataHomeRel}/Steam"
+          #{ directory = "${xdgDataHomeRel}/Steam"; method = "symlink"; } # Some games don't play well with bindfs
         ]
         ++ lib.optionals cfg.filezilla    [ "${xdgConfigHomeRel}/filezilla" ]
         ++ lib.optionals cfg.sunshine [ "${xdgConfigHomeRel}/sunshine/credentials" ]
