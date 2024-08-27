@@ -4,7 +4,7 @@ usage() {
   echo "Installs nix-darwin and homebrew. No arguments required."
 }
 
-info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
 
 install_nix_darwin() {

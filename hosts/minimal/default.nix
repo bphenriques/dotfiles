@@ -94,13 +94,30 @@
       "z /home/bphenriques/.gnupg        0700 bphenriques users"
     ];
 
-    home.persistence."/persist/data/bphenriques".directories = [
-      ".dotfiles"
-      ".gnupg"
-      ".ssh"
-      "Desktop"
-      "Downloads"
-    ];
+    home.persistence."/persist/data/bphenriques" = {
+      allowOther = true;
+      directories = [
+        ".local/share/nix" # trusted settings and repl history
+        ".config/systemd"  # systemd timers
+        ".ssh"
+        ".gnupg"
+
+        # Move up the list? That is the last test
+        ".dotfiles"
+        "Desktop"
+        "Downloads"
+      ];
+    };
+
+    home.persistence."/persist/cache/bphenriques" = {
+      allowOther = true;
+      directories = [
+        ".cache/nix"
+      ];
+      files = [
+        ".bash_history"
+      ];
+    };
 
     home.stateVersion = "24.05";
   };

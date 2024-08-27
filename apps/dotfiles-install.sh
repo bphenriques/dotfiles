@@ -9,7 +9,7 @@ usage() {
   echo "dotfiles-install.sh <host> <bitwarden-email>"
 }
 
-info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 press_to_continue() { info 'Press any key to continue'; read -r _; }
