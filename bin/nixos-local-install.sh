@@ -6,7 +6,7 @@
 
 # Idea? build ISO script with a private key that can clone the repo.
 
-info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
 warn() { printf '[ \033[01;33mWARN\033[0m ] %s\n' "$1"; }
 error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
