@@ -58,9 +58,8 @@ in
         directories = [
           "/var/log"
           "/var/lib/nixos" # https://github.com/nix-community/impermanence/issues/178
-          "/var/lib/NetworkManager"
         ]
-          ++ lib.optionals cfg.networkmanager [ "/etc/NetworkManager/system-connections" ]
+          ++ lib.optionals cfg.networkmanager [ "/etc/NetworkManager" ]
           ++ lib.optionals cfg.bluetooth      [ "/var/lib/bluetooth" ]
           ++ lib.optionals cfg.docker         [ "/var/lib/docker" ]
           ++ lib.optionals cfg.fprintd        [ "/var/lib/fprint" ];

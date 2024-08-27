@@ -1,6 +1,7 @@
 { lib, config, inputs, pkgs, ... }:
 # TODO: Consider using a pattern that applies for all users for some bits and bobs. See https://github.com/prescientmoon/everything-nix/blob/develop/hosts/nixos/common/global/persistence.nix#L20
 # https://github.com/prescientmoon/everything-nix/blob/develop/home/features/persistence.nix
+# TODO: Consider reading the configDir if set by home-manager
 let
   inherit (lib.strings) removePrefix;
   cfg = config.custom.impermanence;
@@ -9,10 +10,12 @@ let
     type = lib.types.bool;
   };
 
+  relToHome = path: removePrefix "${config.home.homeDirectory}/" path;
+
   # Must be relative to the user directory
-  xdgConfigHomeRel = removePrefix config.home.homeDirectory config.xdg.configHome;
-  xdgDataHomeRel = removePrefix config.home.homeDirectory config.xdg.dataHome;
-  xdgCacheHomeRel = removePrefix config.home.homeDirectory config.xdg.cacheHome;
+  xdgConfigHomeRel = relToHome config.xdg.configHome;
+  xdgDataHomeRel = relToHome config.xdg.dataHome;
+  xdgCacheHomeRel = relToHome config.xdg.cacheHome;
 in
 {
   options.custom.impermanence = {
@@ -110,11 +113,10 @@ in
         ++ lib.optionals cfg.sops [ "${xdgConfigHomeRel}/sops" ]
         ++ lib.optionals cfg.museeks [ "${xdgConfigHomeRel}/Museeks" ]; # A Electron mess of config+cache.
 
-      files = [ ]
-        ++ lib.optionals cfg.sunshine [
-          "${xdgConfigHomeRel}/sunshine/sunshine.conf"
-          "${xdgConfigHomeRel}/sunshine/sunshine_state.json"
-        ]
+      files = lib.optionals cfg.sunshine [
+        "${xdgConfigHomeRel}/sunshine/sunshine.conf"
+        "${xdgConfigHomeRel}/sunshine/sunshine_state.json"
+      ]
         ++ lib.optionals cfg.beets  [ "${xdgDataHomeRel}/beets/beets.db" ]; # my personal setup
     };
 
