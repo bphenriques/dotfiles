@@ -120,6 +120,7 @@
         desktop = mkNixOSHost { hostModule = ./hosts/desktop; };
         laptop = mkNixOSHost { hostModule = ./hosts/laptop; };
         minimal = mkNixOSHost { hostModule = ./hosts/minimal; };
+        minimal2 = mkNixOSHost { hostModule = ./hosts/minimal2; };
       };
       darwinConfigurations = with macosLib; {
         work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
