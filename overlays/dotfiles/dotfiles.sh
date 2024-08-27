@@ -43,7 +43,7 @@ _nixos_sync() {
     --boot)   sudo nixos-rebuild boot --flake ".#$CURRENT_HOST"     ;;
     --test)   sudo nixos-rebuild test --flake ".#$CURRENT_HOST"     ;;
     --check)  nixos-rebuild dry-activate --flake ".#$CURRENT_HOST"  ;;
-    "")        sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"  ;;
+    "")       nixos-rebuild switch --flake ".#$CURRENT_HOST"  ;;
   esac
   popd > /dev/null
 }
