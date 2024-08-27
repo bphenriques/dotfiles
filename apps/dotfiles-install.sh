@@ -111,10 +111,11 @@ bw_email="$2"
 BW_SESSION="$(bw-session "${bw_email}")"
 export BW_SESSION
 
+set_root_nixpkgs_channel
+
 setup_ssh
 clone_dotfiles
 set_host "${host}"
 import_age_private_keys "${host}"
 import_gpg
 init_sops_git_filter "${host}"
-set_root_nixpkgs_channel
