@@ -104,8 +104,8 @@ set_root_nixpkgs_channel() {
 # https://discourse.nixos.org/t/nixos-rebuild-switch-fails-under-flakes-and-doas-with-git-warning-about-dubious-ownership/46069
 build_once_fix_git_permissions() {
   info ".dotfiles - building once.."
-  cd $DOTFILES_LOCATION
-  nix build \".#nixosConfigurations.$host.config.system.build.toplevel\" --show-trace
+  cd "$DOTFILES_LOCATION"
+  nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --show-trace
   success ".dotfiles - done"
 }
 
