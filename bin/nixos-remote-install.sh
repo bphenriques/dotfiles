@@ -42,11 +42,11 @@ host="$1"
 ssh_host="$2"
 bw_email="$3"
 
-BW_SESSION="$("${SCRIPT_PATH}"/../apps/bw-session.sh "${bw_email}")"
-export BW_SESSION
+#BW_SESSION="$("${SCRIPT_PATH}"/../apps/bw-session.sh "${bw_email}")"
+#export BW_SESSION
 
 ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 EXTRA_FILES="$(mktemp -d)"
-import_age_system_private_key "$host" "${EXTRA_FILES}/${SOPS_AGE_SYSTEM_FILE}"
+#import_age_system_private_key "$host" "${EXTRA_FILES}/${SOPS_AGE_SYSTEM_FILE}"
 
 nix run github:nix-community/nixos-anywhere -- --extra-files "$EXTRA_FILES" --flake ".#${host}" "${ssh_host}"

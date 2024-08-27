@@ -50,6 +50,7 @@
   # Development
   virtualisation.docker.enable = true;
   hardware.nvidia-container-toolkit.enable = true;
+  # services.dbus.packages = [ pkgs.gcr ];  # pinentry-gnome3
 
   # System-wide secrets
   sops.defaultSopsFile = ./secrets.yaml;

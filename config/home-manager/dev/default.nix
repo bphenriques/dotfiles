@@ -4,7 +4,8 @@
 
   # Some of these packages should likely move to shell environment
   home.packages = with pkgs; [
-    jetbrains.idea-community # TODO Add plugins: GraphQL, "Makefile Language" , Scala, Terraform and HCL,
+    # Need to get familiar with working with it....
+    # jetbrains.idea-community # TODO Add plugins: GraphQL, "Makefile Language" , Scala, Terraform and HCL,
 
     # Linters
     shellcheck        # Linter for shell scripts.

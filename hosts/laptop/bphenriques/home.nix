@@ -23,13 +23,6 @@
     pinentryPackage = pkgs.pinentry-gnome3;
   };
 
-  xdg.userDirs.enable = true;
-  xdg.userDirs.createDirectories = false;
-  # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
-  # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
-  # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
-  xdg.mimeApps.enable = true;
-
   custom = {
     lutris.enable = true;
     sunshine = {
@@ -56,7 +49,15 @@
     "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
   ];
 
+  # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
+  # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
+  # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
+  xdg.mimeApps.enable = true;
+
   xdg.userDirs = {
+    enable = true;
+    createDirectories = false;
+
     documents = "${config.home.homeDirectory}/workdir";
     pictures  = "${config.home.homeDirectory}/pictures";
     music     = "${config.home.homeDirectory}/music/";
