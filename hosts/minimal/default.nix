@@ -91,10 +91,10 @@
       pinentryPackage = pkgs.pinentry-gnome3;
     };
 
-    #systemd.user.tmpfiles.rules = [
-    #  "z /home/bphenriques/.ssh          0700 bphenriques users"
-    #  "z /home/bphenriques/.gnupg        0700 bphenriques users"
-    #];
+    systemd.user.tmpfiles.rules = [
+      "z /home/bphenriques/.ssh          0700 bphenriques users"
+      "z /home/bphenriques/.gnupg        0700 bphenriques users"
+    ];
 
     home.persistence."/persist/data/bphenriques" = {
       allowOther = true;
@@ -128,6 +128,43 @@
 
     home.stateVersion = "24.05";
   };
+
+#  custom.impermanence = {
+#    enable = true;
+#    rootBlankSnapshot = "zroot/system/root@blank";
+#    dataLocation = "/persist/data/system";
+#    cacheLocation = "/persist/cache/system";
+#  };
+
+# For HOME
+#  home.persistence."${config.custom.impermanence.dataLocation}".directories = [
+#    "desktop"
+#    "downloads"
+#    "screenshots"
+#  ];
+
+  # Impermanence
+#  custom.impermanence = {
+#    enable = true;
+#    dataLocation = "/persist/data/bphenriques";
+#    cacheLocation = "/persist/cache/bphenriques";
+#
+#    # Enable for those who don't have a programs.<prog>.enable
+#    heroic = true;
+#    steam = true;
+#    gog = true;
+#    nvidia = true;
+#    protontricks = true;
+#
+#    qbittorrent = true;
+#    bitwarden = true;
+#
+#    mesa = true;
+#    wine = true;
+#    winetricks = true;
+#    solaar = true;
+#  };
+
 
   system.stateVersion = "24.05";
 }
