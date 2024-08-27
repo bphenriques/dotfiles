@@ -22,6 +22,8 @@
     # Other community flakes
     nur.url = "github:nix-community/nur";                         # Firefox extensions
     zjstatus.url = "github:dj95/zjstatus";                        # Terminal's multiplexer plugin
+
+    #     impermanence.url = "github:nix-community/impermanence/d3523715d7cf654cda66176ea71413db159f5b71";       # Automatically clean-up unneded files on boot
     impermanence.url = "github:nix-community/impermanence";       # Automatically clean-up unneded files on boot
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
     plasma-manager = {                                            # Desktop environment
@@ -117,6 +119,7 @@
       nixosConfigurations = with nixosLib; {
         desktop = mkNixOSHost { hostModule = ./hosts/desktop; };
         laptop = mkNixOSHost { hostModule = ./hosts/laptop; };
+        minimal = mkNixOSHost { hostModule = ./hosts/minimal; };
       };
       darwinConfigurations = with macosLib; {
         work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
