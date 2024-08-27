@@ -29,7 +29,12 @@ in
     programs.fish.plugins = [
       { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
     ];
-    
+
+    custom.impermanence.sops = true;
+    home.persistence."${config.custom.impermanence.dataLocation}".directories = [
+      ".dotfiles"
+    ];
+
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
   };
 }

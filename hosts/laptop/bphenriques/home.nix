@@ -68,7 +68,6 @@
   };
 
   home.persistence."${config.custom.impermanence.dataLocation}".directories = [
-    ".dotfiles" # Symlinks do not work: https://github.com/nix-community/impermanence/issues/177
     "desktop"
     "downloads"
     "screenshots"
@@ -86,25 +85,14 @@
     gog = true;
     nvidia = true;
     protontricks = true;
-    vlc = true;
+
     qbittorrent = true;
     bitwarden = true;
-    jetbrains = true;
-    g4music = true;
-    museeks = true;
+
     mesa = true;
     wine = true;
     winetricks = true;
     solaar = true;
-    filezilla = true;
-    
-    # Security
-    sops = true;
-
-    # Scala
-    scalacli = true;
-    metals = true;
-    coursier = true;
   };
 
   home.stateVersion = "24.05";
