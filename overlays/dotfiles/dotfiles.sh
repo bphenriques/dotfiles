@@ -11,7 +11,7 @@ usage() {
   echo "something"
 }
 
-info() { printf '[ \033[00;34m..\033[0m ] %s\n' "$1"; }
+info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
 warn() { printf '[ \033[01;33mWARN\033[0m ] %s\n' "$1"; }
 error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
@@ -53,6 +53,8 @@ _flake_update() {
   nix --extra-experimental-features 'nix-command flakes' flake update
   popd > /dev/null
 }
+
+cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
 
 while [ $# -gt 0 ]; do
   case "$1" in

@@ -1,4 +1,8 @@
 { lib, ... }:
+let
+  persistDataLocation = "/persist/data";
+  persistCacheLocation = "/persist/cache";
+in
 {
   # https://github.com/iynaix/dotfiles/blob/main/recover.sh
   disko.devices = {
@@ -66,68 +70,57 @@
           ashift = "12";
         };
 
-        datasets =
-          let
-            persistDataLocation = "/persist/data";
-            persistCacheLocation = "/persist/cache";
+        datasets = {
+          system = {
+            type = "zfs_fs";
+            options.mountpoint = "none";
+          };
+          "system/root" = {
+            type = "zfs_fs";
+            mountpoint = "/";
+            postCreateHook = ''zfs snapshot zroot/system/root@blank'';
+          };
+          "system/nix" = {
+            type = "zfs_fs";
+            mountpoint = "/nix";
+          };
+          "system/data" = {
+            type = "zfs_fs";
+            mountpoint = "${persistDataLocation}/system";
+          };
+          "system/cache" = {
+            type = "zfs_fs";
+            mountpoint = "${persistCacheLocation}/system";
+          };
 
-            systemDatasets = {
-              system = {
-                type = "zfs_fs";
-                options.mountpoint = "none";
-              };
-              "system/root" = {
-                type = "zfs_fs";
-                mountpoint = "/";
-                postCreateHook = ''zfs snapshot zroot/system/root@blank'';
-              };
-              "system/nix" = {
-                type = "zfs_fs";
-                mountpoint = "/nix";
-              };
-              "system/data" = {
-                type = "zfs_fs";
-                mountpoint = "${persistDataLocation}/system";
-              };
-              "system/cache" = {
-                type = "zfs_fs";
-                mountpoint = "${persistCacheLocation}/system";
-              };
-            };
+          home = {
+            type = "zfs_fs";
+            options.mountpoint = "none";
+          };
+          "home/bphenriques" = {
+            type = "zfs_fs";
+            options.mountpoint = "none";
+          };
 
-            homeDatasets = {
-              home = {
-                type = "zfs_fs";
-                options.mountpoint = "none";
-              };
-              "home/bphenriques" = {
-                type = "zfs_fs";
-                options.mountpoint = "none";
-              };
+          "home/bphenriques/workdir" = {
+            type = "zfs_fs";
+            mountpoint = "/mnt/bphenriques";
+          };
 
-              "home/bphenriques/workdir" = {
-                type = "zfs_fs";
-                mountpoint = "/mnt/bphenriques";
-              };
+          "home/bphenriques/data" = {
+            type = "zfs_fs";
+            mountpoint = "${persistDataLocation}/bphenriques";
+          };
+          "home/bphenriques/cache" = {
+            type = "zfs_fs";
+            mountpoint = "${persistCacheLocation}/bphenriques";
+          };
 
-              "home/bphenriques/data" = {
-                type = "zfs_fs";
-                mountpoint = "${persistDataLocation}/bphenriques";
-              };
-              "home/bphenriques/cache" = {
-                type = "zfs_fs";
-                mountpoint = "${persistCacheLocation}/bphenriques";
-              };
-            };
-
-            dataDatasets = {
-              "games" = {
-                type = "zfs_fs";
-                mountpoint = "/mnt/games";
-              };
-            };
-
-          in systemDatasets // homeDatasets // dataDatasets;
+          "games" = {
+            type = "zfs_fs";
+            mountpoint = "/mnt/games";
+          };
+        };
       };
     };
   };
