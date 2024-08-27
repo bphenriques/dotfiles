@@ -100,6 +100,15 @@ set_root_nixpkgs_channel() {
   success "Nix Channels - Set"
 }
 
+# e.g. that does not work out of the box which leads to Permission denied (despite being pulled already): sudo nixos-rebuild switch --flake \".#$host\"
+# https://discourse.nixos.org/t/nixos-rebuild-switch-fails-under-flakes-and-doas-with-git-warning-about-dubious-ownership/46069
+build_once_fix_git_permissions() {
+  info ".dotfiles - building once.."
+  cd $DOTFILES_LOCATION
+  nix build \".#nixosConfigurations.$host.config.system.build.toplevel\" --show-trace
+  success ".dotfiles - done"
+}
+
 if [ "$1" = "--help" ] || [ $# -lt 2 ]; then
   usage
   exit
@@ -119,3 +128,5 @@ set_host "${host}"
 import_age_private_keys "${host}"
 import_gpg
 init_sops_git_filter "${host}"
+
+build_once_fix_git_permissions
