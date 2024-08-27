@@ -97,15 +97,19 @@
     home.persistence."/persist/data/bphenriques" = {
       allowOther = true;
       directories = [
-        ".local/share/nix" # trusted settings and repl history
-        ".config/systemd"  # systemd timers
-        ".ssh"
-        ".gnupg"
-
-        # Move up the list? That is the last test
         ".dotfiles"
         "Desktop"
         "Downloads"
+
+        # ONCE I ADD THESE LINES, everything breaks
+        # Both absent: work
+        # Both present: break
+        # only nix one: works
+        # only systemd: breaks
+        #".local/share/nix" # trusted settings and repl history
+        ".config/systemd"  # systemd timers
+        ".ssh"
+        ".gnupg"
       ];
     };
 
