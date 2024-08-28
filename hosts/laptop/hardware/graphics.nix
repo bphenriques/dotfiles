@@ -5,17 +5,12 @@
 # - https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
 # TODO: Check AMDVLK https://github.com/NixOS/nixpkgs/pull/318175
 {
+  hardware.amdgpu.initrd.enable = true;
+  hardware.amdgpu.opencl.enable = true;
+
   boot.kernelParams = [
     "amd_pstate=active"   # Enables the amd cpu scaling https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html. On recent AMD CPUs this can be more energy efficient.
     "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
-  ];
-  boot.initrd.kernelModules = [ "amdgpu" ];
-  hardware.graphics.extraPackages = with pkgs; [
-    vaapiVdpau  # Nvidia
-  ];
-
-  hardware.graphics.extraPackages32 = with pkgs; [
-    driversi686Linux.amdvlk
   ];
 
   # https://discord.com/channels/568306982717751326/1275410775271538809/1275501245079093362
@@ -25,7 +20,7 @@
     dynamicBoost.enable = true;
     nvidiaSettings = true;
     powerManagement.enable = true;
-   open = false;
+    open = false;
     prime = {
       # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
       amdgpuBusId = "PCI:5:0:0";
@@ -42,6 +37,18 @@
     (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
   ];
 
-  # Avoid issues with modesetting causing blank screen
-  services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
+  specialisation = {
+    force-igpu.configuration = {
+      system.nixos.tags = [ "force-igpu" ];
+      hardware.nvidia = {
+        powerManagement.finegrained = true;
+        prime.offload.enable = lib.mkForce true;
+        prime.offload.enableOffloadCmd = lib.mkForce true;
+        prime.sync.enable = lib.mkForce false;
+      };
+    };
+  };
+
+
+  services.xserver.videoDrivers = [ "nvidia" ];
 }
