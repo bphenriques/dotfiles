@@ -25,8 +25,7 @@
     dynamicBoost.enable = true;
     nvidiaSettings = true;
     powerManagement.enable = true;
-    #powerManagement.finegrained = true;
-    open = false;
+   open = false;
     prime = {
       # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
       amdgpuBusId = "PCI:5:0:0";
@@ -38,21 +37,9 @@
     };
   };
 
-  specialisation = {
-    nvidia-offload.configuration = {
-      system.nixos.tags = [ "nvidia-offload" ];
-      hardware.nvidia = {
-        prime.offload.enable = lib.mkForce true;
-        prime.offload.enableOffloadCmd = lib.mkForce true;
-        prime.sync.enable = lib.mkForce false;
-      };
-    };
-  };
-
   environment.systemPackages = with pkgs; [
-    # lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
+    lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
     (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
-    #amdgpu_top
   ];
 
   # Avoid issues with modesetting causing blank screen
