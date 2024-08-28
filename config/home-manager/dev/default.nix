@@ -21,9 +21,4 @@
   ] ++ lib.optionals (pkgs.stdenv.isLinux && config.custom.dotfiles.graphicalEnvironment) [
     filezilla   # Access remote files
   ];
-
-  custom.impermanence = {
-    filezilla = true;
-    jetbrains = false;
-  };
 }

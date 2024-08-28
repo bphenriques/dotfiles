@@ -27,6 +27,8 @@
     prime = {
       offload.enable = true;
       offload.enableOffloadCmd = true;
+
+      # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
       amdgpuBusId = "PCI:5:0:0";
       nvidiaBusId = "PCI:1:0:0";
     };
@@ -34,7 +36,7 @@
 
   environment.systemPackages = with pkgs; [
     lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
-    (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
+    (nvtopPackages.nvidia.override { amd = true; })  # `top` but for GPUs. Very very useful to see which GPU is being used
     #amdgpu_top
   ];
 

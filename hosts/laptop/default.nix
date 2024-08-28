@@ -6,7 +6,7 @@
 {
   imports = [
     ./hardware                              # CPU, graphics, peripherals, etc
-    ./filesystem                            # Partitioning, impermanence, etc
+    ./filesystem                            # Partitioning, etc
     ../../config/nixos.nix                  # Default nixos settings
 
     # Users
@@ -53,8 +53,6 @@
 
   # System-wide secrets
   sops.defaultSopsFile = ./secrets.yaml;
-  #environment.persistence."${config.custom.impermanence.dataLocation}".directories = [ "/var/lib/sops-nix" ];
-  #sops.age.keyFile = "${config.custom.impermanence.dataLocation}/var/lib/sops-nix/system-keys.txt";
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
 
   # Users and groups
