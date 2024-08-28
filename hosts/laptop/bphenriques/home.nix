@@ -2,15 +2,12 @@
 {
   imports = [
     ../../../config/home-manager
-    ../../../config/home-manager/desktop/plasma.nix
     ../../../config/home-manager/desktop/firefox
     ../../../config/home-manager/desktop/logseq
     ../../../config/home-manager/desktop/discord.nix
     ../../../config/home-manager/dev/scala
     ../../../config/home-manager/misc/input-remapper
   ];
-
-  programs.plasma.workspace.wallpaper = ./git-secrets/desktop.sops.jpg;
 
   home.sessionVariables.BROWSER = "firefox";
   programs.firefox.profiles.default.bookmarks = import ./git-secrets/bookmarks.sops.nix;

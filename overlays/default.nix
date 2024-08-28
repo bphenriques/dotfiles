@@ -9,7 +9,6 @@ let
   # The different types of overlays
   add-custom-packages = final: prev: genAttrs (getDirs ./.) (pkgName: final.callPackage (./. + "/${pkgName}") {} );
   add-external-flakes = [
-    (final: prev: { zjstatus = inputs.zjstatus.packages.${prev.system}.default; })
     (final: prev: { ghostty = inputs.ghostty.packages.${prev.system}.default; })
     inputs.nur.overlay
   ];
