@@ -25,7 +25,7 @@
     dynamicBoost.enable = true;
     nvidiaSettings = true;
     powerManagement.enable = true;
-    powerManagement.finegrained = true;
+    #powerManagement.finegrained = true;
     open = false;
     prime = {
       # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
