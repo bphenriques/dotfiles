@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 
 # Based on:
 # - https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
@@ -28,18 +28,30 @@
     powerManagement.finegrained = true;
     open = false;
     prime = {
-      offload.enable = true;
-      offload.enableOffloadCmd = true;
-
       # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
       amdgpuBusId = "PCI:5:0:0";
       nvidiaBusId = "PCI:1:0:0";
+
+      sync.enable = true;
+      offload.enable = false;
+      offload.enableOffloadCmd = false;
+    };
+  };
+
+  specialisation = {
+    nvidia-offload.configuration = {
+      system.nixos.tags = [ "nvidia-offload" ];
+      hardware.nvidia = {
+        prime.offload.enable = lib.mkForce true;
+        prime.offload.enableOffloadCmd = lib.mkForce true;
+        prime.sync.enable = lib.mkForce false;
+      };
     };
   };
 
   environment.systemPackages = with pkgs; [
-   # lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
-    (nvtopPackages.nvidia.override { amd = true; })  # `top` but for GPUs. Very very useful to see which GPU is being used
+    # lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
+    (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
     #amdgpu_top
   ];
 
