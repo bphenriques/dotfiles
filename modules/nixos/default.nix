@@ -4,7 +4,4 @@
 
   bphenriques-services-input-remapper-profiles  = ./services/input-remapper.nix;
   bphenriques-services-solaar                   = ./services/solaar.nix;
-
-  bphenriques-system-impermanence               = ./system/impermanence.nix;
-
 }

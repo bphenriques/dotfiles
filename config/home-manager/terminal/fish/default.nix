@@ -67,17 +67,12 @@ in
         set -U pure_enable_nixdevshell true
         set -g async_prompt_functions _pure_prompt_git
       '';
-      zellij = ''
-        if test "$ZELLIJ_AUTO_START" = "true"
-          eval (zellij setup --generate-auto-start fish | string collect)
-        end
-      '';
       extra = [
         ''set fish_greeting''
         (optionalString (pkgs.stdenv.system == "aarch64-darwin") ''eval "$(/opt/homebrew/bin/brew shellenv)"'')
         ''test -f "$XDG_CONFIG_HOME"/fish/local.fish && source "$XDG_CONFIG_HOME"/fish/local.fish''
       ];
 
-    in concatStringsSep "\n" ([ nixIntegration purePrompt zellij ] ++ extra);
+    in concatStringsSep "\n" ([ nixIntegration purePrompt ] ++ extra);
   };
 }

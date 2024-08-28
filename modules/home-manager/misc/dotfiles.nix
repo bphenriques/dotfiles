@@ -30,11 +30,6 @@ in
       { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
     ];
 
-    custom.impermanence.sops = true;
-    home.persistence = lib.mkIf config.custom.impermanence.enable {
-      "${config.custom.impermanence.dataLocation}".directories = [ ".dotfiles" ];
-    };
-
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
   };
 }
