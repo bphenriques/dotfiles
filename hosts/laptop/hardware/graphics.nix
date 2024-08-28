@@ -25,8 +25,7 @@
     dynamicBoost.enable = true;
     nvidiaSettings = true;
     powerManagement.enable = true;
-    #powerManagement.finegrained = true;
-    open = false;
+   open = false;
     prime = {
       # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
       amdgpuBusId = "PCI:5:0:0";
@@ -35,17 +34,6 @@
       sync.enable = true;
       offload.enable = false;
       offload.enableOffloadCmd = false;
-    };
-  };
-
-  specialisation = {
-    nvidia-offload.configuration = {
-      system.nixos.tags = [ "nvidia-offload" ];
-      hardware.nvidia = {
-        prime.offload.enable = lib.mkForce true;
-        prime.offload.enableOffloadCmd = lib.mkForce true;
-        prime.sync.enable = lib.mkForce false;
-      };
     };
   };
 

@@ -62,7 +62,7 @@ in
 #        '';
 
     environment.systemPackages = with pkgs; [
-      heroic-unwrapped  # Epic games / GoG
+      heroic  # Epic games / GoG
     ];
   };
 }
