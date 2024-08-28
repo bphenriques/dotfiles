@@ -29,38 +29,31 @@ This repository contains the definition of my machines using [nix](https://nixos
    sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
-2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its ip.
+2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its IP.
 3. On the source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
    ```
    HOST=new-host
-   ssh nixos@<ip> -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
+   TARGET_IP=192.168.68.58
+   ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
 
 ## Install remotely
 
 1. Boot onto the NixOS installer (see previous section).
-2. In the source machine:
-   1. Unlock a Bitwarden session:
+2. In the source machine run:
 
-       ```
-       nix--shell -p bitwarden-cli
-       bw login
-       bw unlock
-       export BW_SESSION="..."
-       ```
-
-   3. Run the following to install nixos remotely:
-
-       ```
-       ./bin/nixos-remote-install.sh <HOST> nixos@<IP>
-       ```
+    ```
+    HOST=new-host
+    TARGET_IP=192.168.68.58
+    ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
+    ```
 
 5. On the target machine, once the initial installation succeeds:
  
     ```
     HOST=laptop
     BITWARDEN_EMAIL=...
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/add-laptop#dotfiles-install" -- laptop $BITWARDEN_EMAIL
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- $HOST $BITWARDEN_EMAIL
     ```
 
 # Installing on Darwin
@@ -94,29 +87,10 @@ Initialize:
 4. Create an empty `git-secrets` folder under the target `host`:
 5. Initialize the `git-filter`:
    ```sh
-   ./bin/sops-git-filter.sh init {host}
+   ./bin/sops-git-filter.sh init $HOST
    ```
-6. Add non-sensitive secrets to test the setup:
-   1. `sops-nix` uses `sops.yaml` and `default.nix` as detailed in their [docs](https://github.com/Mic92/sops-nix).
-   2. `git-filter` uses filter(s) added to `.gitattributes`.
+6. Test adding secrets to `sops.yaml`.
+7. Test adding secrets to `git-secrets`. Use non-secrets to avoid leaking important information.
 
-Import:
-1. Add bitwarden-cli to `$PATH`: 
-   ```sh
-   nix-shell -p bitwarden-cli
-   ```
-2. Login, unlock and set `BW_SESSION`: 
-   ```sh
-   bw login && bw unlock
-   ```
-3. Run the following to export the private key:
-   ```su
-   HOST=HELLO
-   bw get item "sops-age-key-${HOST}" | jq --raw-output '.fields[] | select(.name=="private") | .value' >> "$HOME/.config/sops/age/keys.txt"
-   ```
-4. Actually apply the `git-filter`: 
-   ```su
-   git rm hosts/$HOST/secrets && git checkout HEAD hosts/$HOST/secrets
-   ```
-5. Test by trying to read the existing secrets.
-
+**Attention**: in my case, ensure you export the private keys to Bitwarden using the format `sops-age-key-$HOST-$USER` with
+a `private` field inside.
