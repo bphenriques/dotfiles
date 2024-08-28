@@ -50,11 +50,7 @@ in
     enable = true;
     extraConfig = ''
       return {
-        set_environment_variables = {
-          ZELLIJ_AUTO_START = "false",
-          ZELLIJ_AUTO_ATTACH = "true",
-          ZELLIJ_AUTO_EXIT = "true"
-        },
+        set_environment_variables = { },
         term = '${term}',
         font = wezterm.font('${font}'),
         font_size = ${toString fontSize},

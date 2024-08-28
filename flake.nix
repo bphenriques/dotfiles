@@ -21,18 +21,10 @@
 
     # Other community flakes
     nur.url = "github:nix-community/nur";                         # Firefox extensions
-    zjstatus.url = "github:dj95/zjstatus";                        # Terminal's multiplexer plugin
-
-    impermanence.url = "github:nix-community/impermanence";       # Automatically clean-up unneded files on boot
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
-    plasma-manager = {                                            # Desktop environment
-      url = "github:pjones/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, plasma-manager, impermanence, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
@@ -88,8 +80,6 @@
 
       homeManagerModules = [
         sops-nix.homeManagerModules.sops
-        plasma-manager.homeManagerModules.plasma-manager
-        impermanence.nixosModules.home-manager.impermanence
       ] ++ attrValues self.homeManagerModules;
 
       nixosLib = import ./lib/nixos.nix {
@@ -98,7 +88,6 @@
         nixosModules = [
           sops-nix.nixosModules.sops
           disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
         ] ++ attrValues self.nixosModules;
       };
 
@@ -116,9 +105,7 @@
 
       # Hosts
       nixosConfigurations = with nixosLib; {
-        desktop = mkNixOSHost { hostModule = ./hosts/desktop; };
         laptop = mkNixOSHost { hostModule = ./hosts/laptop; };
-        minimal = mkNixOSHost { hostModule = ./hosts/minimal; };
       };
       darwinConfigurations = with macosLib; {
         work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
