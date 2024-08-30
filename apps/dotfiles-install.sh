@@ -73,15 +73,9 @@ import_age_private_keys() {
 
 init_sops_git_filter() {
   host="$1"
-
-  info "Sops Git Filter - Checking.."
-  if ! "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh check "${host}"; then
-    info "Sops Git Filter - Setting up for '${host}'"
-    "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh init "${host}"
-    success "Sops Git Filter - Set for '${host}'"
-  else
-    success "Sops Git Filter - Already set for '${host}'"
-  fi
+  info "Sops Git Filter - Setting up for '${host}'"
+  "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh init "${host}"
+  success "Sops Git Filter - Set for '${host}'"
 }
 
 import_gpg() {
