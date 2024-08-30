@@ -15,8 +15,13 @@
     touchpad.tapping = true;
   };
 
-  # Fingerprint - run fprintd-enroll afterwards
-  services.fprintd.enable = true;
+  # Fingerprint - run fprintd-enroll afterwards. usbutils the lsusb to find device
+  # FIXME: slow login after this. Related with the order of pam.d/login which is not configurable.
+  #services.fprintd = {
+  #  enable = true;
+  #  tod.enable = true;
+  #  tod.driver = pkgs.libfprint-2-tod1-goodix-550a; #libfprint-2-tod1-goodix-550a ?
+  #};
 
   # Mouse - Using solaar and input-remapper to control my mouse's side buttons.
   modules.services.solaar.enable = true;

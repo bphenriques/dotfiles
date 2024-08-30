@@ -7,6 +7,12 @@ let
     buildCommand = "${old.buildCommand}\n patchShebangs $out";
   });
 
+  mkNixOSInstaller = pkgs: patchShebangs (pkgs.writeShellApplication {
+    name = "nixos-install";
+    runtimeInputs = with pkgs; [ (mkBitwardenSession pkgs) yq-go jq ];
+    text = lib.fileContents ./nixos-install.sh;
+  });
+
   mkDarwinInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
     name = "darwin-install";
     runtimeInputs = with pkgs; [ ];
@@ -37,6 +43,7 @@ let
     lib.attrsets.mergeAttrsList [
      (mkApp mkDotfilesInstall system)
      (mkApp mkBitwardenSession system)
+     (mkApp mkNixOSInstaller system)
     ]
   );
 

@@ -73,7 +73,6 @@
           "system/root" = {
             type = "zfs_fs";
             mountpoint = "/";
-            postCreateHook = ''zfs snapshot zroot/system/root@blank'';
           };
           "system/nix" = {
             type = "zfs_fs";

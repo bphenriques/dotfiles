@@ -3,7 +3,6 @@
 # Based on:
 # - https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
 # - https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
-# TODO: Check AMDVLK https://github.com/NixOS/nixpkgs/pull/318175
 {
   hardware.amdgpu.initrd.enable = true;
   hardware.amdgpu.opencl.enable = true;
@@ -37,6 +36,13 @@
     (nvtopPackages.nvidia.override { amd = true; })  # Top but for GPUs
   ];
 
+  # Enabled by default on plasma6. Might need to enable it by hand outside of it. See https://github.com/NixOS/nixpkgs/blob/8843893c9b842fcac17263a5700ee496e2cbee7f/nixos/modules/services/desktop-managers/plasma6.nix#L224
+  # AMD has better battery life with PPD over TLP:
+  # https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
+  services.power-profiles-daemon.enable = true;
+
+  # TODO: build from git main branch, for better support
+
   specialisation = {
     force-igpu.configuration = {
       system.nixos.tags = [ "force-igpu" ];
@@ -48,7 +54,6 @@
       };
     };
   };
-
 
   services.xserver.videoDrivers = [ "nvidia" ];
 }
