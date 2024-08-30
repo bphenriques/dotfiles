@@ -28,7 +28,6 @@ in
     secrets.samba_server_username = { };
     secrets.samba_server_password = { };
     templates."smb-credentials" = {
-      #owner = bphenriquesUser.name;
       content = ''
         username=${config.sops.placeholder.samba_server_username}
         password=${config.sops.placeholder.samba_server_password}
