@@ -50,6 +50,7 @@ let
      (mkApp mkDotfilesInstall system)
      (mkApp mkBitwardenSession system)
      (mkApp mkNixOSInstaller system)
+     (mkApp mkSopsGitFilter system)
     ]
   );
 
@@ -58,6 +59,7 @@ let
      (mkApp mkDarwinInstall system)
      (mkApp mkDotfilesInstall system)
      (mkApp mkBitwardenSession system)
+     (mkApp mkSopsGitFilter system)
     ]
   );
 in mkLinuxApps // mkDarwinApps
