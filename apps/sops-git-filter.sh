@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
-# shellcheck shell=sh disable=SC2046,SC3028
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 BASE_NAME=sopsGitFilter
+
+# cat hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix | nix run .#sops-git-filter -- clean hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix
+# cat hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix | bin/sops-git-filter.sh clean hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix
 
 init() {
   host="$1"
@@ -22,15 +24,10 @@ init() {
   git checkout HEAD "hosts/${host}"
 }
 
-smudge() {
-  sops decrypt --input-type json --output-type binary --filename-override "$1" /dev/stdin
-}
+smudge() { sops decrypt --input-type json --output-type binary --filename-override "$1" /dev/stdin ; }
+clean() { sops encrypt --input-type binary --output-type json --filename-override "$1" /dev/stdin ; }
 
-clean() {
-  sops encrypt --input-type binary --output-type json --filename-override "$1" /dev/stdin
-}
-
-
+# shellcheck disable=SC3028
 if [ "$EUID" -eq 0 ]; then
   echo "Skipping sops git filter as it is running as root likely as part of nixos build. This is only meant to run by users."
   exit 0
