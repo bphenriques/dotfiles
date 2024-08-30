@@ -18,9 +18,11 @@ This repository contains the definition of my machines using [nix](https://nixos
 | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M | NVIDIA® GeForce RTX™ 4060 8GB         | ❄️  |
 | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏  |
 
-# Installing NixOS
+## Install
 
-## Specify a new host
+### NixOS
+
+#### Create new host
 
 1. Create a bootable USB [installer](https://nixos.org/download/):
 
@@ -37,7 +39,7 @@ This repository contains the definition of my machines using [nix](https://nixos
    ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
 
-## Install remotely
+#### Install remotely
 
 1. Boot onto the NixOS installer (see previous section).
 2. In the source machine run:
@@ -48,7 +50,7 @@ This repository contains the definition of my machines using [nix](https://nixos
     ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
     ```
 
-5. On the target machine, once the initial installation succeeds:
+3. On the target machine, once the initial installation succeeds:
  
     ```
     HOST=laptop
@@ -56,7 +58,7 @@ This repository contains the definition of my machines using [nix](https://nixos
     nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- $HOST $BITWARDEN_EMAIL
     ```
 
-# Installing on Darwin
+### Darwin
 
 1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
 2. Boostrap:
@@ -76,7 +78,7 @@ This repository contains the definition of my machines using [nix](https://nixos
    "$HOME"/.dotfiles/overlays/dotfiles/dotfiles.sh sync
    ```
 
-6. Reboot!
+5. Reboot!
 
 # Secrets
 

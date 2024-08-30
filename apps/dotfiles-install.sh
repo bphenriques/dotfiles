@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-BRANCH_NAME=add-laptop #FIXME: Remove after we sort-out everything
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
@@ -25,7 +24,7 @@ clone_dotfiles() {
   # Works for impermanence where the directory is mounted but empty
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
-    git clone -b "${BRANCH_NAME}" git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+    git clone git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
   fi
   success "dotfiles - available in ${DOTFILES_LOCATION}"
 }
@@ -104,7 +103,7 @@ set_root_nixpkgs_channel() {
 # https://discourse.nixos.org/t/nixos-rebuild-switch-fails-under-flakes-and-doas-with-git-warning-about-dubious-ownership/46069
 build_once_fix_git_permissions() {
   info ".dotfiles - building once.."
-  cd "$DOTFILES_LOCATION"
+  cd "$DOTFILES_LOCATION" || fatal "Failed to go to dotfiles directory"
   nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --show-trace
   success ".dotfiles - done"
 }

@@ -12,6 +12,7 @@
 
         home-manager.useGlobalPkgs    = true;               # Use pkgs set within nixpkgs.
         home-manager.useUserPackages  = true;               # Install packages defined in home-manager.
+
         home-manager.sharedModules    = homeManagerModules; # My custom modules.
       };
     in nixpkgs.lib.nixosSystem {
