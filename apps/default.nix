@@ -31,6 +31,12 @@ let
     text = lib.fileContents ./bw-session.sh;
   });
 
+  mkSopsGitFilter = pkgs: patchShebangs (pkgs.writeShellApplication {
+    name = "sops-git-filter";
+    runtimeInputs = with pkgs; [ git sops ];
+    text = lib.fileContents ./sops-git-filter.sh;
+  });
+
   mkApp = mkPackage: system:
     let pkg = mkPackage nixpkgs.legacyPackages.${system}; in {
       "${pkg.name}" = {
