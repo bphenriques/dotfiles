@@ -18,7 +18,7 @@
   # Boot
   boot = {
     supportedFilesystems.zfs = true;
-    kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+    kernelPackages = pkgs.linuxPackages_6_6;
     loader.grub = {
       enable = true;
       efiSupport = true;

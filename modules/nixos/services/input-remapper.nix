@@ -8,7 +8,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    services.input-remapper.enable = true;
+    services.input-remapper = {
+      enable = true;
+      #enableUdevRules = true; # Enable built-in udev rules for when Xbox Controller is plugged in/connected through sunshine
+    };
     systemd.user.services.input-remapper-reload = { # Fix for https://github.com/sezanzeb/input-remapper/issues/653
       enable = true;
       description = "Loadss input-remapper profiles";

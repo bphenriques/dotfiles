@@ -73,6 +73,10 @@
   # Security: https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/default.nix#L79
   security.sudo.extraConfig = "Defaults lecture=never";
 
+  # To install or run some programs, it is easier to this way. The exception.
+  # Follow with: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  services.flatpak.enable = true;
+
   # Disabling some defaults
   programs.command-not-found.enable = false;
   programs.nano.enable = false;

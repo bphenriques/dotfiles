@@ -104,7 +104,7 @@
         nixpkgs = nixpkgs-unstable;
       };
     in {
-      apps = (import ./apps { inherit nixpkgs; });
+      apps = (import ./apps { inherit nixpkgs nixpkgs-unstable; });
 
       # Hosts
       nixosConfigurations = with nixosLib; {

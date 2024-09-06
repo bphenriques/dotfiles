@@ -2,12 +2,11 @@
 with lib;
 let
   cfg = config.custom.proton-run;
-  # Script to run proton on a static prefix (because doesn't really matter for ad-hoc runs)
-  # TODO: Avoid using steam-run. Alternative is to use buildFHSEnv by-hand (if I understood correctly...)
+
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
-    runtimeInputs = with pkgs; [ nur.repos.ataraxiasjel.proton-ge steam-run ];
     text = ''
+      mkdir -p ${cfg.defaultProtonDir}
       if [ "$#" -gt 0 ]; then
         STEAM_COMPAT_DATA_PATH="${cfg.defaultProtonDir}" \
           STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
@@ -31,7 +30,6 @@ in {
     enable = mkEnableOption ''proton-run'';
     defaultProtonDir = mkOption {
       type = str;
-      default = null;
       description = mdDoc ''Default location of ad-hoc proton'';
     };
   };
@@ -40,7 +38,7 @@ in {
     home.packages = with pkgs; [
       protonup-qt       # Manage Proton versions
       protontricks      # Install utility within proton
-      proton-run        # Run .exe from termional
+      proton-run        # Run .exe from terminal
       proton-run-desktop-item
     ];
   };

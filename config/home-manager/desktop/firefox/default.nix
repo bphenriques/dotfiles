@@ -16,7 +16,6 @@
           multi-account-containers
           linkding-extension
           # tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
-          consent-o-matic
           no-pdf-download
 
           onetab
