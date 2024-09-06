@@ -1,9 +1,5 @@
 #!/usr/bin/env sh
-DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 BASE_NAME=sopsGitFilter
-
-# cat hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix | nix run .#sops-git-filter -- clean hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix
-# cat hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix | bin/sops-git-filter.sh clean hosts/laptop/bphenriques/git-secrets/bookmarks.sops.nix
 
 init() {
   host="$1"
@@ -18,8 +14,8 @@ init() {
     exit 2
   fi
   git config --local "filter.${BASE_NAME}${host}.required" false
-  git config --local "filter.${BASE_NAME}${host}.smudge" './bin/sops-git-filter.sh smudge "%f"'
-  git config --local "filter.${BASE_NAME}${host}.clean" './bin/sops-git-filter.sh clean "%f"'
+  git config --local "filter.${BASE_NAME}${host}.smudge" 'nix run .#sops-git-filter -- smudge "%f"'
+  git config --local "filter.${BASE_NAME}${host}.clean"  'nix run .#sops-git-filter -- clean  "%f"'
   git rm -rf "hosts/${host}"/*
   git checkout HEAD "hosts/${host}"
 }

@@ -1,4 +1,4 @@
-{ nixpkgs }:
+{ nixpkgs, nixpkgs-unstable }:
 let
   lib = nixpkgs.lib;
 
@@ -37,8 +37,8 @@ let
     text = lib.fileContents ./sops-git-filter.sh;
   });
 
-  mkApp = mkPackage: system:
-    let pkg = mkPackage nixpkgs.legacyPackages.${system}; in {
+  mkApp = mkPackage: pkgs:
+    let pkg = mkPackage pkgs; in {
       "${pkg.name}" = {
         type = "app";
         program = "${pkg}/bin/${pkg.name}";
@@ -47,19 +47,23 @@ let
 
   mkLinuxApps = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
     lib.attrsets.mergeAttrsList [
-     (mkApp mkDotfilesInstall system)
-     (mkApp mkBitwardenSession system)
-     (mkApp mkNixOSInstaller system)
-     (mkApp mkSopsGitFilter system)
+     (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
+     (mkApp mkBitwardenSession nixpkgs.legacyPackages.${system})
+     (mkApp mkNixOSInstaller nixpkgs.legacyPackages.${system})
+
+     # TODO: move to stable one sops reaches 3.9.0 in stable
+     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})
     ]
   );
 
   mkDarwinApps = lib.genAttrs [ "aarch64-darwin" ] (system:
     lib.attrsets.mergeAttrsList [
-     (mkApp mkDarwinInstall system)
-     (mkApp mkDotfilesInstall system)
-     (mkApp mkBitwardenSession system)
-     (mkApp mkSopsGitFilter system)
+     (mkApp mkDarwinInstall nixpkgs.legacyPackages.${system})
+     (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
+     (mkApp mkBitwardenSession nixpkgs.legacyPackages.${system})
+
+     # TODO: move to stable one sops reaches 3.9.0 in stable
+     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})
     ]
   );
 in mkLinuxApps // mkDarwinApps

@@ -22,10 +22,6 @@
 
   custom = {
     lutris.enable = true;
-    sunshine = {
-      enable = true;
-      steamBigPicture = true;
-    };
     proton-run = {
       enable = true;
       defaultProtonDir = "/mnt/games/GlobalProton";
