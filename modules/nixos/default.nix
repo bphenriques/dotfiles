@@ -4,4 +4,5 @@
 
   bphenriques-services-input-remapper-profiles  = ./services/input-remapper.nix;
   bphenriques-services-solaar                   = ./services/solaar.nix;
+  bphenriques-graphical-boot                    = ./system/graphical-boot.nix;
 }

@@ -42,19 +42,5 @@
   # https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
   services.power-profiles-daemon.enable = true;
 
-  # TODO: build from git main branch, for better support
-
-  specialisation = {
-    force-igpu.configuration = {
-      system.nixos.tags = [ "force-igpu" ];
-      hardware.nvidia = {
-        powerManagement.finegrained = true;
-        prime.offload.enable = lib.mkForce true;
-        prime.offload.enableOffloadCmd = lib.mkForce true;
-        prime.sync.enable = lib.mkForce false;
-      };
-    };
-  };
-
   services.xserver.videoDrivers = [ "nvidia" ];
 }

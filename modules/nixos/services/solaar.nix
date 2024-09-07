@@ -3,10 +3,10 @@
 # Start solaar as service: https://github.com/pwr-Solaar/Solaar/issues/2024
 with lib;
 let
-  cfg = config.modules.services.solaar;
+  cfg = config.custom.services.solaar;
 in
 {
-  options.modules.services.solaar = {
+  options.custom.services.solaar = {
     enable = mkEnableOption ''solaar-gui service.'';
   };
 
