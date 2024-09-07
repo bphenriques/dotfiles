@@ -1,8 +1,4 @@
-{ config, pkgs, ... }:
-# TODO: Laptop related stuff? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/laptop/default.nix
-# Power profile? https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/nixos/hardware/upower/default.nix
-# TODO: check boot: https://github.com/adi1090x/plymouth-themes?tab=readme-ov-file. Like 70, 71, 62 63 5
-# TODO: Nice boot themes: https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/initrd/default.nix#L63C12-L63C20. Is this related? https://github.com/jordanisaacs/dotfiles/blob/master/modules/system/kernel/default.nix
+{ config, pkgs, lib, ... }:
 {
   imports = [
     ./hardware                              # CPU, graphics, peripherals, etc
@@ -23,10 +19,28 @@
       enable = true;
       efiSupport = true;
       efiInstallAsRemovable = true;
-      gfxmodeEfi = "1440x900,auto";
-      gfxmodeBios = "1440x900,auto";
       configurationLimit = 5;
+
+      # Windows To Go on a external drive. I usually turn-off physically when not in use.
+      # 1. `sudo fdisk -l` to get the device where EFI System is.
+      # 2. `sudo blkid {device}` to get the UUID field.
+      extraEntries = ''
+        menuentry "Windows 11" {
+          search --fs-uuid --no-floppy --set=root 171F-2B1D
+          chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
+        }
+      '';
     };
+
+    loader.grub2-theme = {
+      enable = true;
+      theme = "stylish";
+      footer = true;
+    };
+  };
+  custom.system.graphical-boot = {
+    enable = true;
+    theme = "sphere";
   };
 
   # Desktop environment

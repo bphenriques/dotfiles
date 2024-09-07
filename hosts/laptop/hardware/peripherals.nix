@@ -24,6 +24,6 @@
   #};
 
   # Mouse - Using solaar and input-remapper to control my mouse's side buttons.
-  modules.services.solaar.enable = true;
-  modules.services.input-remapper.enable = true;
+  custom.services.solaar.enable = true;
+  custom.services.input-remapper.enable = true;
 }

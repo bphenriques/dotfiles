@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.modules.services.input-remapper;
+  cfg = config.custom.services.input-remapper;
 in
 {
-  options.modules.services.input-remapper = {
+  options.custom.services.input-remapper = {
     enable = lib.mkEnableOption ''input-remapper one-shot service to reload the profiles.'';
   };
 

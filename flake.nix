@@ -20,11 +20,12 @@
     disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Other community flakes
+    grub2-themes.url = "github:vinceliuice/grub2-themes";
     nur.url = "github:nix-community/nur";                         # Firefox extensions
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, grub2-themes, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
       nixpkgsConfig = {
@@ -91,6 +92,7 @@
         nixosModules = [
           sops-nix.nixosModules.sops
           disko.nixosModules.disko
+          grub2-themes.nixosModules.default
         ] ++ attrValues self.nixosModules;
       };
 
