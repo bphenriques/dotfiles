@@ -93,7 +93,7 @@ case "$1" in
     case "$(uname -s)" in
       Darwin) ;;
       Linux)
-        if [ ! -d /etc/nixos ]; then
+        if [ -d /etc/nixos ]; then
           nix build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel" --show-trace
         fi
         ;;

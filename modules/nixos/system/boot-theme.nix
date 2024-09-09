@@ -1,15 +1,15 @@
 { pkgs, lib, config, ... }:
 
 let
-  cfg = config.custom.system.graphical-boot;
+  cfg = config.custom.system.boot-theme;
 in
 {
-  options.custom.system.graphical-boot = {
-    enable = lib.mkEnableOption "graphical-boot";
+  options.custom.system.boot-theme = {
+    enable = lib.mkEnableOption "boot-theme";
     theme = lib.mkOption {
-      type = lib.types.enum [ "sphere" "angular" ];
+      type = lib.types.enum [ "angular" ];
       description = "One of the boot animations available in https://github.com/adi1090x/plymouth-themes";
-      default = "sphere";
+      default = "angular";
     };
   };
 
@@ -38,11 +38,17 @@ in
         "udev.log_priority=3"
       ];
 
-      # Hide OS choice unless ESC is held down during that time.
+      # Theme:
+      # - Pure black to take advantage of the OLED screen.
+      # - Font big enough to read without squinting the eyes.
+      # - Hide GRUB unless I keep ESC pressed. This allows a smoother transition to the plymouth animation.
       loader.timeout = 0;
       loader.grub = lib.mkIf config.boot.loader.grub.enable {
-        timeoutStyle = "hidden";  # Hide menu
-        #splashImage = null;       # Force full-text mode. A image appears otherwise, breaking the immersion.
+        timeoutStyle = "hidden";
+        font = "${pkgs.nerdfonts}/share/fonts/truetype/NerdFonts/HackNerdFontMono-Regular.ttf";
+        fontSize = 48;
+        backgroundColor = "#000000";
+        splashImage = null;
       };
     };
   };

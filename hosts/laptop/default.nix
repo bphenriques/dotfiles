@@ -21,7 +21,7 @@
       efiInstallAsRemovable = true;
       configurationLimit = 5;
 
-      # Windows To Go on a external drive. I usually turn-off physically when not in use.
+      # I have Windows To Go on a external drive. I turn it off when not in use to reduce wear-and-tear.
       # 1. `sudo fdisk -l` to get the device where EFI System is.
       # 2. `sudo blkid {device}` to get the UUID field.
       extraEntries = ''
@@ -29,18 +29,22 @@
           search --fs-uuid --no-floppy --set=root 171F-2B1D
           chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
         }
+
+        menuentry "Firmware settings" --class efi {
+          fwsetup
+        }
+        menuentry "Reboot" --class restart {
+          reboot
+        }
+        menuentry "Shutdown" --class shutdown {
+          halt
+        }
       '';
     };
-
-    loader.grub2-theme = {
-      enable = true;
-      theme = "stylish";
-      footer = true;
-    };
   };
-  custom.system.graphical-boot = {
+  custom.system.boot-theme = {
     enable = true;
-    theme = "sphere";
+    theme = "angular";
   };
 
   # Desktop environment
