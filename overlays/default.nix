@@ -11,13 +11,13 @@ in [
     ffd = final.callPackage ./ffd {};
     preview = final.callPackage ./preview {};
 
-    ghostty = inputs.ghostty.packages.${prev.system}.default;
-
     fishPlugins = prev.fishPlugins.overrideScope (finalx: prevx: {
       dotfiles = mkFishPlugin prevx "dotfiles" ./dotfiles/fish-plugin;
       ffd = mkFishPlugin prevx "ffd" ./ffd/fish-plugin;
       frg = mkFishPlugin prevx "frg" ./frg/fish-plugin;
     });
+
+    ghostty = inputs.ghostty.packages.${prev.system}.default;
   })
   (final: prev: {
     ghostty = inputs.ghostty.packages.${prev.system}.default;
