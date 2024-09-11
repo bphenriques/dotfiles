@@ -32,6 +32,6 @@
       };
     in inputs.darwin.lib.darwinSystem {
       inherit system;
-      modules = darwinModule ++ [commonConfig hostConfig];
+      modules = darwinModules ++ [commonConfig hostConfig];
     };
 }
