@@ -1,6 +1,17 @@
 {
   description = "bphenriques's Nix configuration for his machines";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://nixpkgs-wayland.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -29,6 +40,18 @@
       inherit (nixpkgs.lib) attrValues;
       forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
+      nixConfig = {
+        settings = {
+          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
+          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
+          use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
+        };
+
+        # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
+        extraOptions = ''
+          min-free = ${toString (5 * 1024 * 1024 * 1024)}
+        '';
+      };
       nixpkgsConfig = {
         overlays = (import ./overlays { inherit inputs; });
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
@@ -60,51 +83,9 @@
         ];
       };
 
-      # TODO: Should this moved to the top-level flakes.nix
-      nixConfig = {
-        settings = {
-          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
-          use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
-
-          extra-substituters = [
-            "https://nix-community.cachix.org"
-            "https://nixpkgs-wayland.cachix.org"
-          ];
-          extra-trusted-public-keys = [
-            "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-            "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
-          ];
-        };
-
-        # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
-        extraOptions = ''
-          min-free = ${toString (5 * 1024 * 1024 * 1024)}
-        '';
-      };
-
-      homeManagerModules = [
-        sops-nix.homeManagerModules.sops
-      ] ++ attrValues self.homeManagerModules;
-
-      nixosLib = import ./lib/nixos.nix {
-        inherit home-manager nixpkgsConfig homeManagerModules nixConfig;
-        nixpkgs = nixpkgs-unstable;
-        nixosModules = [
-          sops-nix.nixosModules.sops
-          disko.nixosModules.disko
-        ] ++ attrValues self.nixosModules;
-      };
-
-      macosLib = import ./lib/macos.nix {
-        inherit darwin home-manager nixConfig nixpkgsConfig homeManagerModules;
-        darwinModules = attrValues self.darwinModules;
-      };
-
-      homeManagerLib = import ./lib/home-manager.nix {
-        inherit home-manager nixpkgsConfig homeManagerModules;
-        nixpkgs = nixpkgs-unstable;
-      };
+      nixosLib = import ./lib/nixos.nix { inherit inputs nixpkgsConfig nixConfig; };
+      macosLib = import ./lib/macos.nix { inherit inputs nixpkgsConfig nixConfig; };
+      homeManagerLib = import ./lib/home-manager.nix { inherit inputs nixpkgsConfig nixConfig; };
     in {
       apps = (import ./apps { inherit nixpkgs nixpkgs-unstable; });
       packages = import ./packages { inherit nixpkgs; };
@@ -115,7 +96,7 @@
 
       # Hosts
       nixosConfigurations = with nixosLib; {
-        laptop = mkNixOSHost { hostModule = ./hosts/laptop; };
+        laptop = mkNixOSHost { hostConfig = ./hosts/laptop; };
       };
       darwinConfigurations = with macosLib; {
         work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
