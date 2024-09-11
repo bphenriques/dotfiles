@@ -27,9 +27,10 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
-      overlays = (import ./overlays { inherit inputs; });
+      forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
+
       nixpkgsConfig = {
-        inherit overlays;
+        overlays = (import ./overlays { inherit inputs; });
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
           "discord"
           "nvidia-x11"
@@ -107,6 +108,10 @@
     in {
       apps = (import ./apps { inherit nixpkgs nixpkgs-unstable; });
       packages = import ./packages { inherit nixpkgs; };
+      formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      devShells = forAllSystems (system: {
+        default = (import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; });
+      });
 
       # Hosts
       nixosConfigurations = with nixosLib; {

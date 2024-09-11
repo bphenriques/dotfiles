@@ -21,11 +21,7 @@ in
   };
 
   config = {
-    home.packages = with pkgs; [
-      dotfiles
-      sops
-    ];
-
+    home.packages = with pkgs; [ dotfiles ];
     programs.fish.plugins = [
       { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
     ];
