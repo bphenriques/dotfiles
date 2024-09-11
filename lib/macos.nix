@@ -30,7 +30,7 @@
         home-manager.useUserPackages  = true;               # Install packages defined in home-manager.
         home-manager.sharedModules    = homeManagerModules; # Custom modules.
       };
-    in darwin.lib.darwinSystem {
+    in inputs.darwin.lib.darwinSystem {
       inherit system;
       modules = darwinModule ++ [commonConfig hostConfig];
     };
