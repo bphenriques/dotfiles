@@ -11,7 +11,7 @@
     userEmail = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obsfuscation to prevent webscrappers
 
     signing = {
-      key = "792C2768AD3A4930BCCFA467075389B5C3ADA85";
+      key = "792C2768AD3A4930BCCFA467075389B5C3ADA858";
       signByDefault = true;
     };
 
