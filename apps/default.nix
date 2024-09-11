@@ -52,13 +52,6 @@ let
       text = pkgs.lib.fileContents ./bw-session.sh;
     };
 
-  mkSopsGitFilter = pkgs:
-    writeLocalCompatibleScriptBin pkgs {
-      name = "sops-git-filter";
-      runtimeInputs = with pkgs; [ git sops ];
-      text = pkgs.lib.fileContents ./sops-git-filter.sh;
-    };
-
   mkApp = mkPackage: pkgs:
     let pkg = mkPackage pkgs; in {
       "${pkg.name}" = {
@@ -70,7 +63,6 @@ let
   crossPlatformApps = forAllSystems (system:
     lib.attrsets.mergeAttrsList [
      (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
-     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})  # TODO: move to stable once it reaches 3.9.0
     ]
   );
 

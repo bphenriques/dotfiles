@@ -32,7 +32,7 @@ in
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       { name = "pure"; src = pkgs.fishPlugins.pure.src; }
       { name = "fish-async-prompt"; src = pkgs.fishPlugins.async-prompt.src; }
-      #{ name = "frg"; src = pkgs.fishPlugins.frg.src; }
+      { name = "frg"; src = pkgs.fishPlugins.frg.src; }
       { name = "ffd"; src = pkgs.fishPlugins.ffd.src; }
     ];
 

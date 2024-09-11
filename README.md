@@ -80,6 +80,10 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 5. Reboot!
 
+# Development
+
+Requires direnv allow
+
 # Secrets
 
 Initialize:
