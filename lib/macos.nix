@@ -9,11 +9,11 @@
       lib = nixpkgs.lib;
 
       homeManagerModules = [
-        sops-nix.homeManagerModules.sops
+        inputs.sops-nix.homeManagerModules.sops
       ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
 
       darwinModules = [
-        home-manager.darwinModules.home-manager
+        inputs.home-manager.darwinModules.home-manager
       ] ++ (lib.attrsets.attrValues inputs.self.darwinModules);
 
       commonConfig = {
