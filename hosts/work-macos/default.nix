@@ -23,6 +23,7 @@ in
       "coursier/formulas/coursier"  # Scala
       "python3"   # Implicit dependency of Aiven client
       "kubeseal"  # K8s stuff
+      "go-task"
     ];
 
     casks = [
