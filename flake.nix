@@ -99,7 +99,7 @@
         laptop = mkNixOSHost { hostConfig = ./hosts/laptop; };
       };
       darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost { hostModule = ./hosts/work-macos; };
+        work-macos = mkMacOSHost { hostConfig = ./hosts/work-macos; };
       };
 
       # Custom modules
