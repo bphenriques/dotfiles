@@ -1,11 +1,22 @@
-{ darwin, home-manager, nixConfig, darwinModules, homeManagerModules, nixpkgsConfig, ... }:
+{ inputs, nixConfig, nixpkgsConfig, ... }:
 {
   mkMacOSHost = {
     system ? "aarch64-darwin",
-    hostModule,
+    hostConfig,
   }:
     let
-      common = {
+      nixpkgs = inputs.nixpkgs-unstable;
+      lib = nixpkgs.lib;
+
+      homeManagerModules = [
+        sops-nix.homeManagerModules.sops
+      ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
+
+      darwinModules = [
+        home-manager.darwinModules.home-manager
+      ] ++ (lib.attrsets.attrValues inputs.self.darwinModules);
+
+      commonConfig = {
         nixpkgs = nixpkgsConfig // {
           hostPlatform = system;
         };
@@ -17,10 +28,10 @@
         # Home-Manager
         home-manager.useGlobalPkgs    = true;               # Use pkgs set within nixpkgs.
         home-manager.useUserPackages  = true;               # Install packages defined in home-manager.
-        home-manager.sharedModules    = homeManagerModules; # My custom modules.
+        home-manager.sharedModules    = homeManagerModules; # Custom modules.
       };
     in darwin.lib.darwinSystem {
       inherit system;
-      modules = [common home-manager.darwinModules.home-manager hostModule] ++ darwinModules;
+      modules = darwinModule ++ [commonConfig hostConfig];
     };
 }
