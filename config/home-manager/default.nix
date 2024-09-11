@@ -1,7 +1,10 @@
 { pkgs, lib, config, ... }:
 {
   imports = [
-    ./dev
+    ./coding
+    ./internet
+    ./media
+    ./writing
     ./terminal
   ];
 

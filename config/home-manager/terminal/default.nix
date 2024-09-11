@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
-    ./fish
+    ./fish.nix
     ./fzf.nix
     ./broot.nix ./yazi.nix          # TODO: Decide one or another
     ./ghostty.nix
@@ -12,6 +12,28 @@
     generateCaches = true;          # Required for man completions. They are built during the build.
   };
 
+  programs.ripgrep = {
+    enable = true;
+    arguments = [
+      "--max-columns=150"
+      "--max-columns-preview"
+      "--glob=!.git/*"
+      "--smart-case"
+    ];
+  };
+
+  programs.tealdeer = {
+    enable = true;
+    settings = {
+      display = {
+        compact = false;
+        use_pager = true;
+      };
+
+      updates.auto_update = false;
+    };
+  };
+
   home = {
     packages = with pkgs; [
       # Security
@@ -20,8 +42,6 @@
 
       # Search
       fd          # A better `find`.
-      tealdeer    # Faster `tldr`.
-      ripgrep     # Faster grep.
 
       # Text Processors
       jq          # Query JSON.
@@ -41,7 +61,7 @@
       ffd         # FD + FZF to search nested directories
     ];
     sessionVariables = {
-    # Default editors and settings
+    #  Default editors and settings
       EDITOR  = "${pkgs.helix}/bin/hx";
       VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
@@ -77,8 +97,8 @@
       whatsmyip = "curl ifconfig.me";
     } // (
       if pkgs.stdenv.isLinux then {
-        pbcopy = "xclip";
-        pbpaste = "xclip -o";
+        pbcopy = lib.getExe pkgs.xclip;
+        pbpaste = "${lib.getExe pkgs.xclip} -o";
       } else { }
     );
   };

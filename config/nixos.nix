@@ -39,7 +39,8 @@
   };
 
   # Programs
-  programs.fish.enable = true;  # System level: source vendor's completions or functions.
+  programs.fish.enable = true;  # System level/
+  programs.fish.vendor.functions.enable = true; # Ensure completions/functions are automatically set.
   programs.partition-manager.enable = true;
 
   # Suport exFAT and NTFS formatted drives (pendisks + external disks)

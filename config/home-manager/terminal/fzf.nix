@@ -5,7 +5,7 @@ with lib;
   home.packages = with pkgs; [ preview frg ];
   programs.fzf = {
     enable = true;
-    defaultCommand = "${pkgs.fd}/bin/fd --type file --hidden";
+    defaultCommand = "${getExe pkgs.fd} --type file --hidden --exclude=.git";
     enableFishIntegration = true;
 
     defaultOptions = [

@@ -1,6 +1,8 @@
 { lib, pkgs, config, ... }:
 {
-  imports = [ ./git ./helix ];
+  imports = [ ./git ];
+
+  # https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f51c7/users/delay/home.nix#L99 ?
 
   # Some of these packages should likely move to shell environment
   home.packages = with pkgs; [
@@ -11,10 +13,6 @@
     shellcheck        # Linter for shell scripts.
     shfmt             # Format shell scripts
     nixfmt-rfc-style  # Format nix files.
-
-    # Tools
-    gnumake
-    rpi-imager
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     (pkgs.writeShellScriptBin "docker" ''${lima}/bin/lima nerdctl $@'')

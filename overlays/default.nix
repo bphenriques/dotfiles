@@ -1,23 +1,16 @@
 { inputs, ... }:
-let
-  mkFishPlugin = pkgs: pname: src: pkgs.buildFishPlugin {
-    inherit pname src;
-    version = "latest";
-  };
-in [
+[
   (final: prev: {
-    dotfiles = final.callPackage ./dotfiles {};
-    frg = final.callPackage ./frg {};
-    ffd = final.callPackage ./ffd {};
-    preview = final.callPackage ./preview {};
+    dotfiles = inputs.self.packages.${prev.system}.dotfiles;
+    frg = inputs.self.packages.${prev.system}.frg;
+    ffd = inputs.self.packages.${prev.system}.ffd;
+    preview = inputs.self.packages.${prev.system}.preview;
 
     fishPlugins = prev.fishPlugins.overrideScope (finalx: prevx: {
-      dotfiles = mkFishPlugin prevx "dotfiles" ./dotfiles/fish-plugin;
-      ffd = mkFishPlugin prevx "ffd" ./ffd/fish-plugin;
-      frg = mkFishPlugin prevx "frg" ./frg/fish-plugin;
+      dotfiles  = inputs.self.packages.${prev.system}.dotfilesFishPlugin;
+      ffd       = inputs.self.packages.${prev.system}.ffdFishPlugin;
+      frg       = inputs.self.packages.${prev.system}.frgFishPlugin;
     });
-
-    ghostty = inputs.ghostty.packages.${prev.system}.default;
   })
   (final: prev: {
     ghostty = inputs.ghostty.packages.${prev.system}.default;

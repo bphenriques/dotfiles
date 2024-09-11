@@ -109,7 +109,7 @@ in
 
   ''+ lib.optionalString pkgs.stdenv.isLinux ''
     gtk-single-instance = true
-    window-decoration = trueg
+    window-decoration = true
   ''
   + lib.optionalString pkgs.stdenv.isDarwin ''
     window-colorspace = "display-p3"

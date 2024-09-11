@@ -27,7 +27,9 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
+      overlays = (import ./overlays { inherit inputs; });
       nixpkgsConfig = {
+        inherit overlays;
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
           "discord"
           "nvidia-x11"
@@ -55,7 +57,6 @@
           "electron-27.3.11"
           "electron-28.3.3"
         ];
-        overlays = (import ./overlays { inherit inputs; });
       };
 
       # TODO: Should this moved to the top-level flakes.nix
@@ -105,6 +106,7 @@
       };
     in {
       apps = (import ./apps { inherit nixpkgs nixpkgs-unstable; });
+      packages = import ./packages { inherit nixpkgs; };
 
       # Hosts
       nixosConfigurations = with nixosLib; {
