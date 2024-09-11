@@ -20,37 +20,21 @@ in
     silent                  = true; # Disable verbose messages when entering a directory.
   };
 
+  home.shellAliases = {
+    nixsh = "nix-shell --run ${lib.getExe pkgs.fish}";
+    devsh = "nix develop --command ${lib.getExe pkgs.fish}";
+  };
+
   programs.fish = {
     enable = true;
 
     plugins = [
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
-      {
-        name = "pure";
-        src = pkgs.fetchFromGitHub {
-          owner = "pure-fish";
-          repo = "pure";
-          rev = "v4.11.0";
-          sha256 = "sha256-8zxqPU9N5XGbKc0b3bZYkQ3yH64qcbakMsHIpHZSne4=";
-        };
-      }
-      {
-        name = "fish-async-prompt";
-        src = pkgs.fetchFromGitHub {
-          owner = "acomagu";
-          repo = "fish-async-prompt";
-          rev = "v1.2.0";
-          sha256 = "sha256-B7Ze0a5Zp+5JVsQUOv97mKHh5wiv3ejsDhJMrK7YOx4=";
-        };
-      }
-      # Defined under overlays
-      { name = "frg"; src = pkgs.fishPlugins.frg.src; }
+      { name = "pure"; src = pkgs.fishPlugins.pure.src; }
+      { name = "fish-async-prompt"; src = pkgs.fishPlugins.async-prompt.src; }
+      #{ name = "frg"; src = pkgs.fishPlugins.frg.src; }
       { name = "ffd"; src = pkgs.fishPlugins.ffd.src; }
     ];
-
-    functions = (foldl' (acc: f: acc // {
-      "${removeSuffix ".fish" f}" = (readFile (./functions + "/${f}"));
-    }) { } (listFishFiles ./functions));
 
     interactiveShellInit = let
       # Do I still need this?

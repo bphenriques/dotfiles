@@ -2,11 +2,11 @@
 {
   imports = [
     ../../../config/home-manager
-    ../../../config/home-manager/desktop/firefox
-    ../../../config/home-manager/desktop/logseq
-    ../../../config/home-manager/desktop/discord.nix
-    ../../../config/home-manager/dev/scala
-    ../../../config/home-manager/misc/input-remapper
+    ../../../config/home-manager/internet/firefox
+    ../../../config/home-manager/internet/discord.nix
+    ../../../config/home-manager/writing/logseq
+    ../../../config/home-manager/coding/scala
+    ./input-remapper
   ];
 
   home.sessionVariables.BROWSER = "firefox";

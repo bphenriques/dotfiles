@@ -75,7 +75,7 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 4. Apply:
    ```sh
-   "$HOME"/.dotfiles/overlays/dotfiles/dotfiles.sh sync
+   "$HOME"/.dotfiles/packages/dotfiles/dotfiles.sh sync
    ```
 
 5. Reboot!

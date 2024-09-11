@@ -2,40 +2,62 @@
 let
   lib = nixpkgs.lib;
 
+  forAllSystems = lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
+  forDarwinSystems = lib.genAttrs [ "aarch64-darwin" ];
+  forLinuxSystems = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
+
   # Replace the interpreter's location to be one under the nix store.
-  patchShebangs = pkg: pkg.overrideAttrs(old: {
-    buildCommand = "${old.buildCommand}\n patchShebangs $out";
-  });
+  # - writeShellApplication does not support that.
+  # - we now have to pass the dependencies by-hand
+  # - we now lose shellchecks at build time. It is fine in this case as I usually run by hand.
+  #
+  # Why: I like the option of running the scripts locally.
+  writeLocalCompatibleScriptBin = pkgs: { name, text, runtimeInputs }:
+    let
+      patchShebangs = pkg: pkg.overrideAttrs(old: {
+        buildCommand = "${old.buildCommand}\n patchShebangs $out";
+      });
+    in pkgs.symlinkJoin {
+      inherit name;
+      paths = [ (patchShebangs (pkgs.writeScriptBin name text)) ] ++ runtimeInputs;
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = "wrapProgram $out/bin/${name} --prefix PATH : $out/bin";
+    };
 
-  mkNixOSInstaller = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "nixos-install";
-    runtimeInputs = with pkgs; [ (mkBitwardenSession pkgs) yq-go jq ];
-    text = lib.fileContents ./nixos-install.sh;
-  });
+  mkNixOSInstaller = pkgs:
+    writeLocalCompatibleScriptBin pkgs {
+      name = "nixos-install";
+      runtimeInputs = with pkgs; [ (mkBitwardenSession pkgs) yq-go jq ];
+      text = pkgs.lib.fileContents ./nixos-install.sh;
+    };
 
-  mkDarwinInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "darwin-install";
-    runtimeInputs = with pkgs; [ ];
-    text = lib.fileContents ./darwin-install.sh;
-  });
+  mkDarwinInstall = pkgs:
+    writeLocalCompatibleScriptBin pkgs {
+      name = "darwin-install";
+      runtimeInputs = with pkgs; [ ];
+      text = pkgs.lib.fileContents ./darwin-install.sh;
+    };
 
-  mkDotfilesInstall = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "dotfiles-install";
-    runtimeInputs = with pkgs; [ git yq-go age sops gnupg (mkBitwardenSession pkgs) ];
-    text = lib.fileContents ./dotfiles-install.sh;
-  });
+  mkDotfilesInstall = pkgs:
+    writeLocalCompatibleScriptBin pkgs {
+      name = "dotfiles-install";
+      runtimeInputs = with pkgs; [ git yq-go age sops gnupg (mkBitwardenSession pkgs) ];
+      text = pkgs.lib.fileContents ./dotfiles-install.sh;
+    };
 
-  mkBitwardenSession = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "bw-session";
-    runtimeInputs = with pkgs; [ bitwarden-cli ];
-    text = lib.fileContents ./bw-session.sh;
-  });
+  mkBitwardenSession = pkgs:
+    writeLocalCompatibleScriptBin pkgs {
+      name = "bw-session";
+      runtimeInputs = with pkgs; [ bitwarden-cli ];
+      text = pkgs.lib.fileContents ./bw-session.sh;
+    };
 
-  mkSopsGitFilter = pkgs: patchShebangs (pkgs.writeShellApplication {
-    name = "sops-git-filter";
-    runtimeInputs = with pkgs; [ git sops ];
-    text = lib.fileContents ./sops-git-filter.sh;
-  });
+  mkSopsGitFilter = pkgs:
+    writeLocalCompatibleScriptBin pkgs {
+      name = "sops-git-filter";
+      runtimeInputs = with pkgs; [ git sops ];
+      text = pkgs.lib.fileContents ./sops-git-filter.sh;
+    };
 
   mkApp = mkPackage: pkgs:
     let pkg = mkPackage pkgs; in {
@@ -45,25 +67,28 @@ let
       };
     };
 
-  mkLinuxApps = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
+  crossPlatformApps = forAllSystems (system:
     lib.attrsets.mergeAttrsList [
      (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
-     (mkApp mkBitwardenSession nixpkgs.legacyPackages.${system})
-     (mkApp mkNixOSInstaller nixpkgs.legacyPackages.${system})
-
-     # TODO: move to stable one sops reaches 3.9.0 in stable
-     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})
+     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})  # TODO: move to stable once it reaches 3.9.0
     ]
   );
 
-  mkDarwinApps = lib.genAttrs [ "aarch64-darwin" ] (system:
+  linuxApps = forLinuxSystems (system:
+    lib.attrsets.mergeAttrsList [
+     (mkApp mkNixOSInstaller nixpkgs.legacyPackages.${system})
+    ]
+  );
+
+  darwinApps = forDarwinSystems (system:
     lib.attrsets.mergeAttrsList [
      (mkApp mkDarwinInstall nixpkgs.legacyPackages.${system})
-     (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
-     (mkApp mkBitwardenSession nixpkgs.legacyPackages.${system})
-
-     # TODO: move to stable one sops reaches 3.9.0 in stable
-     (mkApp mkSopsGitFilter nixpkgs-unstable.legacyPackages.${system})
     ]
   );
-in mkLinuxApps // mkDarwinApps
+in forAllSystems (system:
+  lib.attrsets.mergeAttrsList [
+    crossPlatformApps.${system}
+    (linuxApps.${system} or { })
+    (darwinApps.${system} or { })
+  ]
+)

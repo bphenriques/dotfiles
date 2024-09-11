@@ -46,7 +46,7 @@ in
       loader.grub = lib.mkIf config.boot.loader.grub.enable {
         timeoutStyle = "hidden";
         font = "${pkgs.nerdfonts}/share/fonts/truetype/NerdFonts/HackNerdFontMono-Regular.ttf";
-        fontSize = 48;
+        fontSize = 36;
         backgroundColor = "#000000";
         splashImage = null;
       };
