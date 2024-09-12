@@ -8,7 +8,7 @@
         name = "Bruno";
         settings = lib.attrsets.mergeAttrsList [ (import ./basic.nix) (import ./telemetry.nix) ];
 
-        # Require manual activation once installed
+        # Require manual activation once installed: compute list with  nix flake show "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons"
         extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           bitwarden

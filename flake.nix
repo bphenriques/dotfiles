@@ -38,20 +38,11 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
+
+      lib = import ./lib { inherit inputs; };
+
       forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
-      nixConfig = {
-        settings = {
-          experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-          auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
-          use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
-        };
-
-        # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
-        extraOptions = ''
-          min-free = ${toString (5 * 1024 * 1024 * 1024)}
-        '';
-      };
       nixpkgsConfig = {
         overlays = (import ./overlays { inherit inputs; });
         config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
@@ -82,12 +73,9 @@
           "electron-28.3.3"
         ];
       };
-
-      nixosLib = import ./lib/nixos.nix { inherit inputs nixpkgsConfig nixConfig; };
-      macosLib = import ./lib/macos.nix { inherit inputs nixpkgsConfig nixConfig; };
-      homeManagerLib = import ./lib/home-manager.nix { inherit inputs nixpkgsConfig nixConfig; };
     in {
-      apps = (import ./apps { inherit nixpkgs nixpkgs-unstable; });
+      inherit lib;
+      apps = (import ./apps { inherit nixpkgs; });
       packages = import ./packages { inherit nixpkgs; };
       formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
@@ -95,11 +83,11 @@
       });
 
       # Hosts
-      nixosConfigurations = with nixosLib; {
-        laptop = mkNixOSHost { hostConfig = ./hosts/laptop; };
+      nixosConfigurations = with lib.my.hosts; {
+        laptop = mkNixOSHost { inherit nixpkgsConfig; hostConfig = ./hosts/laptop; };
       };
-      darwinConfigurations = with macosLib; {
-        work-macos = mkMacOSHost { hostConfig = ./hosts/work-macos; };
+      darwinConfigurations = with lib.my.hosts; {
+        work-macos = mkMacOSHost { inherit nixpkgsConfig; hostConfig = ./hosts/work-macos; };
       };
 
       # Custom modules

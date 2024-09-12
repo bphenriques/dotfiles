@@ -1,4 +1,4 @@
-{ nixpkgs, nixpkgs-unstable }:
+{ nixpkgs }:
 let
   lib = nixpkgs.lib;
 
