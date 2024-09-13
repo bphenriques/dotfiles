@@ -38,41 +38,11 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
-
       lib = import ./lib { inherit inputs; };
 
       forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
-      nixpkgsConfig = {
-        overlays = (import ./overlays { inherit inputs; });
-        config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
-          "discord"
-          "nvidia-x11"
-          "nvidia-settings"
-          "nvidia-persistenced"
-          "steam"
-          "steam-original"
-          "steam-run"
-          "terraform"
-          "keepa"
-          "libretro-genesis-plus-gx"
-          "libretro-snes9x"
-          "libretro-fbneo"
-          "onetab"
-
-          # Fingerprint
-          "libfprint-2-tod1-goodix-550a"
-
-          # Cuda
-          "libnvjitlink"
-          "libnpp"
-        ] || (nixpkgs.lib.strings.hasPrefix "cuda" (nixpkgs.lib.getName pkg)) || (nixpkgs.lib.strings.hasPrefix "libcu" (nixpkgs.lib.getName pkg)); # Cuda
-        config.permittedInsecurePackages = [
-          "electron-24.8.6"
-          "electron-27.3.11"
-          "electron-28.3.3"
-        ];
-      };
+      overlays = (import ./overlays { inherit inputs; });
     in {
       inherit lib;
       apps = (import ./apps { inherit nixpkgs; });
@@ -84,10 +54,10 @@
 
       # Hosts
       nixosConfigurations = with lib.my.hosts; {
-        laptop = mkNixOSHost { inherit nixpkgsConfig; hostConfig = ./hosts/laptop; };
+        laptop = mkNixOSHost { inherit overlays; hostConfig = ./hosts/laptop; };
       };
       darwinConfigurations = with lib.my.hosts; {
-        work-macos = mkMacOSHost { inherit nixpkgsConfig; hostConfig = ./hosts/work-macos; };
+        work-macos = mkMacOSHost { inherit overlays; hostConfig = ./hosts/work-macos; };
       };
 
       # Custom modules

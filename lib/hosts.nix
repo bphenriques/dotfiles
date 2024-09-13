@@ -12,9 +12,40 @@ let
       min-free = ${toString (5 * 1024 * 1024 * 1024)}
     '';
   };
+
+  sharedNixpkgsConfig = pkgs: {
+    allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
+      "discord"
+      "nvidia-x11"
+      "nvidia-settings"
+      "nvidia-persistenced"
+      "steam"
+      "steam-original"
+      "steam-run"
+      "terraform"
+      "keepa"
+      "libretro-genesis-plus-gx"
+      "libretro-snes9x"
+      "libretro-fbneo"
+      "onetab"
+
+      # Fingerprint
+      "libfprint-2-tod1-goodix-550a"
+
+      # Cuda
+      "libnvjitlink"
+      "libnpp"
+    ] || (pkgs.lib.strings.hasPrefix "cuda" (pkgs.lib.getName pkg)) || (pkgs.lib.strings.hasPrefix "libcu" (pkgs.lib.getName pkg)); # Cuda
+
+    permittedInsecurePackages = [
+      "electron-24.8.6"
+      "electron-27.3.11"
+      "electron-28.3.3"
+    ];
+  };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", hostConfig, nixpkgsConfig, specialArgs ? {} }:
+  mkNixOSHost = { system ? "x86_64-linux", hostConfig, overlays, specialArgs ? {} }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
@@ -24,7 +55,10 @@ in
       ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
 
       commonConfig = {
-        nixpkgs = nixpkgsConfig;
+        nixpkgs = {
+          inherit overlays;
+          config = sharedNixpkgsConfig nixpkgs;
+        };
         nix = sharedNixConfig;
 
         home-manager.useGlobalPkgs    = true;               # Use pkgs set within nixpkgs.
@@ -41,7 +75,7 @@ in
       modules = commonModules ++ [ commonConfig hostConfig ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", hostConfig, nixpkgsConfig }:
+  mkMacOSHost = { system ? "aarch64-darwin", hostConfig, overlays }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
@@ -55,8 +89,10 @@ in
       ] ++ (lib.attrsets.attrValues inputs.self.darwinModules);
 
       commonConfig = {
-        nixpkgs = nixpkgsConfig // {
+        nixpkgs = {
+          inherit overlays;
           hostPlatform = system;
+          config = sharedNixpkgsConfig nixpkgs;
         };
         nix = sharedNixConfig;
 
