@@ -1,5 +1,4 @@
-{ inputs, ... }:
-let
+{ inputs, ... }: {
   channels = _: prev: {
     stable = import inputs.nixpkgs { system = prev.system; }; # Unstable by default but with stable as option
   };
@@ -15,8 +14,7 @@ let
       frg       = inputs.self.packages.${prev.system}.frgFishPlugin;
     });
   };
-  communittyPackages = _: prev: {
+  communityPackages = _: prev: {
     ghostty = inputs.ghostty.packages.${prev.system}.default;
   };
-in
-[ channels customPackages communittyPackages inputs.nur.overlay ]
+}
