@@ -35,28 +35,27 @@
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, darwin, home-manager, sops-nix, disko, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, ... }:
     let
       inherit (nixpkgs.lib) attrValues;
-      lib = import ./lib { inherit inputs; };
+      inherit (mylib.hosts) mkNixOSHost mkMacOSHost;
+      inherit (mylib.builders) forAllSystems;
 
-      forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
-
+      mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
       overlays = (import ./overlays { inherit inputs; });
     in {
-      inherit lib;
-      apps = (import ./apps { inherit nixpkgs; });
-      packages = import ./packages { inherit nixpkgs; };
+      apps = (import ./apps { inherit nixpkgs mylib; });
+      packages = import ./packages { inherit nixpkgs mylib; };
       formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
         default = (import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; });
       });
 
       # Hosts
-      nixosConfigurations = with lib.my.hosts; {
+      nixosConfigurations = {
         laptop = mkNixOSHost { inherit overlays; hostConfig = ./hosts/laptop; };
       };
-      darwinConfigurations = with lib.my.hosts; {
+      darwinConfigurations = {
         work-macos = mkMacOSHost { inherit overlays; hostConfig = ./hosts/work-macos; };
       };
 
