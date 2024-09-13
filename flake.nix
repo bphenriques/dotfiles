@@ -37,26 +37,33 @@
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, ... }:
     let
-      inherit (nixpkgs.lib) attrValues;
+      inherit (nixpkgs.lib.attrsets) attrValues;
       inherit (mylib.hosts) mkNixOSHost mkMacOSHost;
       inherit (mylib.builders) forAllSystems;
 
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
-      overlays = (import ./overlays { inherit inputs; });
+      overlays = import ./overlays { inherit inputs; };
     in {
-      apps = (import ./apps { inherit nixpkgs mylib; });
+      apps = import ./apps { inherit nixpkgs mylib; };
       packages = import ./packages { inherit nixpkgs mylib; };
       formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
-        default = (import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; });
+        default = import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; };
       });
+      overlays.default = overlays.customPackages;
 
       # Hosts
       nixosConfigurations = {
-        laptop = mkNixOSHost { inherit overlays; hostConfig = ./hosts/laptop; };
+        laptop = mkNixOSHost {
+          overlays = (attrValues overlays) ++ [ inputs.nur.overlay ];
+          hostConfig = ./hosts/laptop;
+        };
       };
       darwinConfigurations = {
-        work-macos = mkMacOSHost { inherit overlays; hostConfig = ./hosts/work-macos; };
+        work-macos = mkMacOSHost {
+          overlays = (attrValues overlays) ++ [ inputs.nur.overlay ];
+          hostConfig = ./hosts/work-macos;
+        };
       };
 
       # Custom modules
