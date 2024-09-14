@@ -37,12 +37,10 @@
 
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, ... }:
     let
-      inherit (nixpkgs.lib.attrsets) attrValues;
       inherit (mylib.hosts) mkNixOSHost mkMacOSHost;
       inherit (mylib.builders) forAllSystems;
 
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
-      overlays = import ./overlays { inherit inputs; };
     in {
       apps = import ./apps { inherit nixpkgs mylib; };
       packages = import ./packages { inherit nixpkgs mylib; };
@@ -50,18 +48,16 @@
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; };
       });
-      overlays.default = _: prev: self.packages.${prev.system} or { };
+      overlays = import ./overlays { inherit inputs; };
 
       # Hosts
       nixosConfigurations = {
         laptop = mkNixOSHost {
-          overlays = (attrValues overlays) ++ [ inputs.nur.overlay ];
           hostConfig = ./hosts/laptop;
         };
       };
       darwinConfigurations = {
         work-macos = mkMacOSHost {
-          overlays = (attrValues overlays) ++ [ inputs.nur.overlay ];
           hostConfig = ./hosts/work-macos;
         };
       };
