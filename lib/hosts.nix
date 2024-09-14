@@ -75,10 +75,11 @@ let
   };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", hostConfig, overlays }:
+  mkNixOSHost = { system ? "x86_64-linux", hostConfig }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
+      overlays = (lib.attrsets.attrValues inputs.self.overlays) ++ [ inputs.nur.overlay ];
 
       commonConfig = {
         nixpkgs = {
@@ -99,10 +100,11 @@ in
       modules = commonModules ++ [ commonConfig hostConfig ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", hostConfig, overlays }:
+  mkMacOSHost = { system ? "aarch64-darwin", hostConfig }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
+      overlays = (lib.attrsets.attrValues inputs.self.overlays) ++ [ inputs.nur.overlay ];
 
       darwinModules = [
         inputs.home-manager.darwinModules.home-manager
