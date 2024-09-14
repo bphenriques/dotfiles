@@ -1,5 +1,4 @@
 { lib, pkgs, config, ... }:
-
 {
   programs.firefox = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
@@ -13,13 +12,9 @@
           ublock-origin
           bitwarden
           keepa
-          multi-account-containers
           linkding-extension
           # tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
           no-pdf-download
-
-          onetab
-          # libredirect# One day, check auto-redirects
         ];
 
         search = {
@@ -37,6 +32,27 @@
               }];
               icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               definedAliases = [ "@np" "@nix" ];
+            };
+            "NixOS Options" = {
+              definedAliases = ["@nixopts" "@no"];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              urls = [
+                {
+                  template = "https://search.nixos.org/options";
+                  params = [
+                    { name = "channel"; value = "unstable"; }
+                    { name = "query"; value = "{searchTerms}"; }
+                  ];
+                }
+              ];
+            };
+            "Home Manager Options" = {
+              definedAliases = ["@homemanager" "@hm"];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              urls = [{
+                  template = "https://home-manager-options.extranix.com";
+                  params = [ { name = "query"; value = "{searchTerms}"; } ];
+              }];
             };
             "NixOS Wiki" = {
               urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
@@ -65,21 +81,6 @@
               }];
             };
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
-          };
-        };
-
-        # Default containers for all profiles
-        containersForce = true;
-        containers = {
-          "Shopping" = {
-            id = 1;
-            color = "orange";
-            icon = "cart";
-          };
-          "Social" = {
-            id = 2;
-            color = "yellow";
-            icon = "tree";
           };
         };
       };

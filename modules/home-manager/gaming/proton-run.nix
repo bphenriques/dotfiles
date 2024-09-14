@@ -10,7 +10,7 @@ let
       if [ "$#" -gt 0 ]; then
         STEAM_COMPAT_DATA_PATH="${cfg.defaultProtonDir}" \
           STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
-          ${pkgs.steam-run}/bin/steam-run ${pkgs.nur.repos.ataraxiasjel.proton-ge}/bin/proton run "$@"
+          ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-bin}/bin/proton run "$@"
       fi
     '';
   };
@@ -30,7 +30,7 @@ in {
     enable = mkEnableOption ''proton-run'';
     defaultProtonDir = mkOption {
       type = str;
-      description = mdDoc ''Default location of ad-hoc proton'';
+      description = mdDoc ''Default location of catch-all prefix'';
     };
   };
 

@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, self, ... }:
 
 # https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
 with lib;
@@ -21,9 +21,9 @@ in
   };
 
   config = {
-    home.packages = with pkgs; [ dotfiles ];
+    home.packages = with self.pkgs; [ dotfiles ];
     programs.fish.plugins = [
-      { name = "dotfiles"; src = pkgs.fishPlugins.dotfiles.src; }
+      { name = "dotfiles"; src = self.pkgs.fishPlugins.dotfiles.src; }
     ];
 
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;

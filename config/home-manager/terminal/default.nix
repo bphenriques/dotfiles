@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, self, ... }:
 {
   imports = [
     ./fish.nix
@@ -57,8 +57,8 @@
       htop        # Fancy `top`.
 
       # Custom packages
-      frg         # Ripgrep + FZF
-      ffd         # FD + FZF to search nested directories
+      self.pkgs.frg         # Ripgrep + FZF
+      self.pkgs.ffd         # FD + FZF to search nested directories
     ];
     sessionVariables = {
     #  Default editors and settings

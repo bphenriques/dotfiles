@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, self, ... }:
 
 let 
   font = {
@@ -54,14 +54,14 @@ in
     # Fixes issues with GTK, need to sort this out separately
     (pkgs.writeScriptBin "ghostty" ''
       #!${pkgs.stdenv.shell}
-      GDK_BACKEND=x11 exec ${pkgs.ghostty}/bin/ghostty "$@"
+      GDK_BACKEND=x11 exec ${self.communityPkgs.ghostty}/bin/ghostty "$@"
     '')
 
     (pkgs.makeDesktopItem {
       name = "Ghostty";
       desktopName = "Ghostty";
       categories = [ "Utility" "Development" ];
-      exec = "GDK_BACKEND=x11 exec ${pkgs.ghostty}/bin/ghostty";
+      exec = "GDK_BACKEND=x11 exec ${self.communityPkgs.ghostty}/bin/ghostty";
     })
   ];
 
