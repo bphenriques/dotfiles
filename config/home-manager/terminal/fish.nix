@@ -1,10 +1,6 @@
-{ lib, pkgs, config, ... }:
-
+{ lib, pkgs, config, self, ... }:
 let
-  inherit (builtins) readFile readDir attrNames;
-  inherit (lib) filterAttrs foldl' optionalString concatStringsSep removeSuffix;
-  listFiles = from: attrNames (filterAttrs (_ : type: type == "regular") (readDir from));
-  listFishFiles = from: (builtins.filter (fileName: lib.hasSuffix ".fish" fileName) (listFiles from));
+  inherit (lib) optionalString concatStringsSep;
 in
 {
   home.packages = with pkgs; [ fish ];
@@ -32,8 +28,8 @@ in
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       { name = "pure"; src = pkgs.fishPlugins.pure.src; }
       { name = "fish-async-prompt"; src = pkgs.fishPlugins.async-prompt.src; }
-      { name = "frg"; src = pkgs.fishPlugins.frg.src; }
-      { name = "ffd"; src = pkgs.fishPlugins.ffd.src; }
+      { name = "frg"; src = self.pkgs.fishPlugins.frg.src; }
+      { name = "ffd"; src = self.pkgs.fishPlugins.ffd.src; }
     ];
 
     interactiveShellInit = let

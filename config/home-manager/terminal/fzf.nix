@@ -1,8 +1,8 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, self, ... }:
 
 with lib;
 {
-  home.packages = with pkgs; [ preview frg ];
+  home.packages = with self.pkgs; [ preview frg ];
   programs.fzf = {
     enable = true;
     defaultCommand = "${getExe pkgs.fd} --type file --hidden --exclude=.git";

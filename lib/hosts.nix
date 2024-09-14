@@ -43,16 +43,42 @@ let
       "electron-28.3.3"
     ];
   };
+
+  mkExtraArgs = system: {
+    self = {
+      pkgs = {
+        dotfiles = inputs.self.packages.${system}.dotfiles;
+        frg = inputs.self.packages.${system}.frg;
+        ffd = inputs.self.packages.${system}.ffd;
+        preview = inputs.self.packages.${system}.preview;
+
+        fishPlugins = {
+          dotfiles  = inputs.self.packages.${system}.dotfilesFishPlugin;
+          ffd       = inputs.self.packages.${system}.ffdFishPlugin;
+          frg       = inputs.self.packages.${system}.frgFishPlugin;
+        };
+      };
+      communityPkgs = {
+        ghostty = inputs.ghostty.packages.${system}.default;
+      };
+    };
+  };
+
+  mkHomeManagerCommonModule = system: {
+    useGlobalPkgs   = true;               # Use pkgs set within nixpkgs.
+    useUserPackages = true;               # Install packages defined in home-manager.
+    sharedModules   = [
+      inputs.sops-nix.homeManagerModules.sops
+    ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
+
+    extraSpecialArgs = mkExtraArgs system;
+  };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", hostConfig, overlays, specialArgs ? {} }:
+  mkNixOSHost = { system ? "x86_64-linux", hostConfig, overlays }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
-
-      homeManagerModules = [
-        inputs.sops-nix.homeManagerModules.sops
-      ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
 
       commonConfig = {
         nixpkgs = {
@@ -60,10 +86,7 @@ in
           config = sharedNixpkgsConfig nixpkgs;
         };
         nix = sharedNixConfig;
-
-        home-manager.useGlobalPkgs    = true;               # Use pkgs set within nixpkgs.
-        home-manager.useUserPackages  = true;               # Install packages defined in home-manager.
-        home-manager.sharedModules    = homeManagerModules; # Custom modules.
+        home-manager = mkHomeManagerCommonModule system;
       };
       commonModules = [
         inputs.sops-nix.nixosModules.sops
@@ -71,7 +94,8 @@ in
         inputs.home-manager.nixosModules.home-manager
       ] ++ lib.attrsets.attrValues inputs.self.nixosModules;
     in nixpkgs.lib.nixosSystem {
-      inherit system specialArgs;
+      inherit system;
+      specialArgs = mkExtraArgs system;
       modules = commonModules ++ [ commonConfig hostConfig ];
     };
 
@@ -79,10 +103,6 @@ in
     let
       nixpkgs = inputs.nixpkgs-unstable;
       lib = nixpkgs.lib;
-
-      homeManagerModules = [
-        inputs.sops-nix.homeManagerModules.sops
-      ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
 
       darwinModules = [
         inputs.home-manager.darwinModules.home-manager
@@ -95,17 +115,11 @@ in
           config = sharedNixpkgsConfig nixpkgs;
         };
         nix = sharedNixConfig;
-
-        # Nix Darwin
-        services.nix-daemon.enable   = true;                # Using nix-daemon (the only supported way).
-
-        # Home-Manager
-        home-manager.useGlobalPkgs    = true;               # Use pkgs set within nixpkgs.
-        home-manager.useUserPackages  = true;               # Install packages defined in home-manager.
-        home-manager.sharedModules    = homeManagerModules; # Custom modules.
+        home-manager = mkHomeManagerCommonModule system;
       };
     in inputs.darwin.lib.darwinSystem {
       inherit system;
-      modules = darwinModules ++ [commonConfig hostConfig];
+      specialArgs = mkExtraArgs system;
+      modules = darwinModules ++ [ commonConfig hostConfig ];
     };
 }

@@ -30,7 +30,7 @@
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    # Other community flakes
+    # Community flakes
     nur.url = "github:nix-community/nur";                         # Firefox extensions
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
   };
@@ -50,7 +50,7 @@
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; };
       });
-      overlays.default = overlays.customPackages;
+      overlays.default = _: prev: self.packages.${prev.system} or { };
 
       # Hosts
       nixosConfigurations = {
