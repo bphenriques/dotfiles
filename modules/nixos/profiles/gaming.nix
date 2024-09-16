@@ -36,6 +36,10 @@ in
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;
         localNetworkGameTransfers.openFirewall = true;
+
+        extraCompatPackages = with pkgs; [
+          proton-ge-bin
+        ];
       };
 
       # Steam's microcompositor that gives extra scaling features (https://github.com/ValveSoftware/gamescope).

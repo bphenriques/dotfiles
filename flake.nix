@@ -1,5 +1,5 @@
 {
-  description = "bphenriques's Nix configuration for his machines";
+  description = "bphenriques's machines expressed using nix";
 
   nixConfig = {
     extra-substituters = [
@@ -22,29 +22,34 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    # Secret Manager
-    sops-nix.url = "github:Mic92/sops-nix";
-    sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
-
-    # Automatically format disks using a declaractive specification
-    disko.url = "github:nix-community/disko";
-    disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
-
     # Community flakes
-    nur.url = "github:nix-community/nur";                         # Firefox extensions
+    sops-nix.url = "github:Mic92/sops-nix";                       # Manage secrets using sops
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    disko.url = "github:nix-community/disko";                     # Declaratively describe my disks layout
+    disko.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nur.url = "github:nix-community/nur";                         # Collection of packages. Use it for Firefox extensions
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
   };
 
-  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, ... }:
+  outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, home-manager, sops-nix, disko, nur, ... }:
     let
       inherit (mylib.hosts) mkNixOSHost mkMacOSHost;
       inherit (mylib.builders) forAllSystems;
-
+      inherit (nixpkgs.lib.attrsets) attrValues;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
+
+      overlays = attrValues self.overlays ++ [ nur.overlay ];
+      nixosModules = attrValues self.nixosModules ++ [
+        sops-nix.nixosModules.sops
+        disko.nixosModules.disko
+        home-manager.nixosModules.home-manager
+      ];
+      darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
+      hmModules     = attrValues self.homeManagerModules ++ [ sops-nix.homeManagerModules.sops ];
     in {
       apps = import ./apps { inherit nixpkgs mylib; };
       packages = import ./packages { inherit nixpkgs mylib; };
-      formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs-unstable.legacyPackages.${system}; };
       });
@@ -53,16 +58,18 @@
       # Hosts
       nixosConfigurations = {
         laptop = mkNixOSHost {
-          hostConfig = ./hosts/laptop;
+          inherit nixosModules hmModules overlays;
+          hostModule = ./hosts/laptop;
         };
       };
       darwinConfigurations = {
         work-macos = mkMacOSHost {
-          hostConfig = ./hosts/work-macos;
+          inherit darwinModules hmModules overlays;
+          hostModule = ./hosts/work-macos;
         };
       };
 
-      # Custom modules
+      # Exposed modules
       nixosModules        = import ./modules/nixos;
       homeManagerModules  = import ./modules/home-manager;
       darwinModules       = import ./modules/darwin;

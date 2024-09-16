@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, self, community, ... }:
 {
   programs.firefox = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
