@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
   services.nix-daemon.enable = true;
+  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
+  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
+
   environment.systemPackages = [ pkgs.fish ]; # Install the shell
   environment.shells = [ pkgs.fish ];         # Register the shell that was installed (2 step process)
 

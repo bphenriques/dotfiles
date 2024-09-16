@@ -8,6 +8,8 @@
       options = "--delete-older-than 7d";
     };
   };
+  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
+  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
 
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire

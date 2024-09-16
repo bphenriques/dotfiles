@@ -1,6 +1,6 @@
 { lib, inputs, ... }:
 let
-  sharedNixConfig = {
+  nixConfig = {
     settings = {
       experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
       auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
@@ -13,115 +13,68 @@ let
     '';
   };
 
-  sharedNixpkgsConfig = pkgs: {
-    allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
-      "discord"
-      "nvidia-x11"
-      "nvidia-settings"
-      "nvidia-persistenced"
-      "steam"
-      "steam-original"
-      "steam-run"
-      "terraform"
-      "keepa"
-      "libretro-genesis-plus-gx"
-      "libretro-snes9x"
-      "libretro-fbneo"
-      "onetab"
-
-      # Fingerprint
-      "libfprint-2-tod1-goodix-550a"
-
-      # Cuda
-      "libnvjitlink"
-      "libnpp"
-    ] || (pkgs.lib.strings.hasPrefix "cuda" (pkgs.lib.getName pkg)) || (pkgs.lib.strings.hasPrefix "libcu" (pkgs.lib.getName pkg)); # Cuda
-
-    permittedInsecurePackages = [
-      "electron-24.8.6"
-      "electron-27.3.11"
-      "electron-28.3.3"
-    ];
+  nixpkgsConfig = {
+    allowUnfree = true; # I was maintaining a list.. because it was _nicer_ and _explicit_ but.. I am lazy.
+    permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" ];
   };
 
   mkExtraArgs = system: {
-    self = {
-      pkgs = {
-        dotfiles = inputs.self.packages.${system}.dotfiles;
-        frg = inputs.self.packages.${system}.frg;
-        ffd = inputs.self.packages.${system}.ffd;
-        preview = inputs.self.packages.${system}.preview;
+    self.pkgs = {
+      dotfiles = inputs.self.packages.${system}.dotfiles;
+      frg = inputs.self.packages.${system}.frg;
+      ffd = inputs.self.packages.${system}.ffd;
+      preview = inputs.self.packages.${system}.preview;
 
-        fishPlugins = {
-          dotfiles  = inputs.self.packages.${system}.dotfilesFishPlugin;
-          ffd       = inputs.self.packages.${system}.ffdFishPlugin;
-          frg       = inputs.self.packages.${system}.frgFishPlugin;
-        };
-      };
-      communityPkgs = {
-        ghostty = inputs.ghostty.packages.${system}.default;
+      fishPlugins = {
+        dotfiles  = inputs.self.packages.${system}.dotfilesFishPlugin;
+        ffd       = inputs.self.packages.${system}.ffdFishPlugin;
+        frg       = inputs.self.packages.${system}.frgFishPlugin;
       };
     };
-  };
-
-  mkHomeManagerCommonModule = system: {
-    useGlobalPkgs   = true;               # Use pkgs set within nixpkgs.
-    useUserPackages = true;               # Install packages defined in home-manager.
-    sharedModules   = [
-      inputs.sops-nix.homeManagerModules.sops
-    ] ++ (lib.attrsets.attrValues inputs.self.homeManagerModules);
-
-    extraSpecialArgs = mkExtraArgs system;
+    community.pkgs = {
+      ghostty = inputs.ghostty.packages.${system}.default;
+    };
   };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", hostConfig }:
+  mkNixOSHost = { system ? "x86_64-linux", overlays, nixosModules, hmModules, hostModule }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
-      lib = nixpkgs.lib;
-      overlays = (lib.attrsets.attrValues inputs.self.overlays) ++ [ inputs.nur.overlay ];
-
       commonConfig = {
+        nix = nixConfig;
         nixpkgs = {
           inherit overlays;
-          config = sharedNixpkgsConfig nixpkgs;
+          config = nixpkgsConfig;
         };
-        nix = sharedNixConfig;
-        home-manager = mkHomeManagerCommonModule system;
+        home-manager = {
+          sharedModules = hmModules;
+          extraSpecialArgs = mkExtraArgs system;
+        };
       };
-      commonModules = [
-        inputs.sops-nix.nixosModules.sops
-        inputs.disko.nixosModules.disko
-        inputs.home-manager.nixosModules.home-manager
-      ] ++ lib.attrsets.attrValues inputs.self.nixosModules;
     in nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = mkExtraArgs system;
-      modules = commonModules ++ [ commonConfig hostConfig ];
+      modules = nixosModules ++ [ commonConfig hostModule ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", hostConfig }:
+  mkMacOSHost = { system ? "aarch64-darwin", overlays, darwinModules, hmModules, hostModule }:
     let
       nixpkgs = inputs.nixpkgs-unstable;
-      lib = nixpkgs.lib;
-      overlays = (lib.attrsets.attrValues inputs.self.overlays) ++ [ inputs.nur.overlay ];
-
-      darwinModules = [
-        inputs.home-manager.darwinModules.home-manager
-      ] ++ (lib.attrsets.attrValues inputs.self.darwinModules);
-
       commonConfig = {
+        nix = nixConfig;
         nixpkgs = {
           inherit overlays;
           hostPlatform = system;
-          config = sharedNixpkgsConfig nixpkgs;
+          config = nixpkgsConfig;
         };
-        nix = sharedNixConfig;
-        home-manager = mkHomeManagerCommonModule system;
+        home-manager = {
+          sharedModules = hmModules;
+          extraSpecialArgs = mkExtraArgs system;
+        };
       };
     in inputs.darwin.lib.darwinSystem {
       inherit system;
       specialArgs = mkExtraArgs system;
-      modules = darwinModules ++ [ commonConfig hostConfig ];
+      modules = darwinModules ++ [ commonConfig hostModule ];
     };
 }
