@@ -2,16 +2,15 @@
 with lib;
 let
   cfg = config.custom.proton-run;
-
-  # FIMXE: Also enable gamemode
+  # proton-ge-bin is a different thing.
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
     text = ''
       mkdir -p ${cfg.defaultProtonDir}
       if [ "$#" -gt 0 ]; then
         STEAM_COMPAT_DATA_PATH="${cfg.defaultProtonDir}" \
-            STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
-          ${pkgs.steam-run}/bin/steam-run ${pkgs.proton-ge-bin}/bin/proton run "$@"
+          STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
+          ${pkgs.steam-run}/bin/steam-run ${pkgs.nur.repos.ataraxiasjel.proton-ge}/bin/proton run "$@"
       fi
     '';
   };

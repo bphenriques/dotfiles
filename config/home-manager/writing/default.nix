@@ -1,10 +1,10 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, headless, ... }:
 {
   imports = [
     ./helix
   ];
 
-  home.packages = with pkgs; lib.optionals (pkgs.stdenv.isLinux && config.custom.dotfiles.graphicalEnvironment) [
+  home.packages = with pkgs; lib.optionals (pkgs.stdenv.isLinux && !headless) [
     qbittorrent
     filezilla
   ];
