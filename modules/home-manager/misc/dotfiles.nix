@@ -12,12 +12,6 @@ in
       description = "Location of the dotfiles repository";
       default = "${config.home.homeDirectory}/.dotfiles";
     };
-
-    graphicalEnvironment = mkOption {
-      type = with lib.types; bool;
-      description = "If the host contains a graphical environment";
-      default = true;
-    };
   };
 
   config = {

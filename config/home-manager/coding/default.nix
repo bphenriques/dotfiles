@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, headless, ... }:
 {
   imports = [ ./git ];
 
@@ -16,7 +16,7 @@
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     lima    # Virtual Machine -  limactl start --set='.cpus = 4 | .memory = "10GiB"'
     (pkgs.writeShellScriptBin "docker" ''${lima}/bin/lima nerdctl $@'')
-  ] ++ lib.optionals (pkgs.stdenv.isLinux && config.custom.dotfiles.graphicalEnvironment) [
+  ] ++ lib.optionals (pkgs.stdenv.isLinux && !headless) [
     filezilla   # Access remote files
   ];
 }

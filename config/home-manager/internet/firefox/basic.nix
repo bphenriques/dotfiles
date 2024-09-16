@@ -17,6 +17,7 @@
   "extensions.autoDisableScopes" = "0";                         # Automatically enable extensions
   "signon.rememberSignons" = false;                             # No thank you.
 
+
   # Extra Security
   "privacy.globalprivacycontrol.functionality.enabled" = true;  # Private as much as possible.
   "dom.security.https_only_mode" = true;                        # Use HTTPS where possibe.

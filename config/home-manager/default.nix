@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, headless, ... }:
 {
   imports = [
     ./coding
@@ -28,7 +28,7 @@
     p7zip     # 7zip for linux
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
-  ] ++ lib.optionals (pkgs.stdenv.isLinux && config.custom.dotfiles.graphicalEnvironment) [
+  ] ++ lib.optionals (pkgs.stdenv.isLinux && !headless) [
     baobab   # Visual disk space analyzer
   ];
   fonts.fontconfig.enable = true;

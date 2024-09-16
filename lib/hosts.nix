@@ -7,10 +7,8 @@ let
       use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
     };
 
-    # Ensure we have at least 5GiB always available in the drive. Less than that and my system gets unstable (need a new drive..).
-    extraOptions = ''
-      min-free = ${toString (5 * 1024 * 1024 * 1024)}
-    '';
+    # Ensure we have at least 5GiB always available. Less than that and my system gets unstable.
+    extraOptions = "min-free = ${toString (5 * 1024 * 1024 * 1024)}";
   };
 
   nixpkgsConfig = {
@@ -18,7 +16,7 @@ let
     permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" ];
   };
 
-  mkExtraArgs = system: {
+  mkExtraArgs = system: extraSpecialArgs: {
     self.pkgs = {
       dotfiles = inputs.self.packages.${system}.dotfiles;
       frg = inputs.self.packages.${system}.frg;
@@ -33,13 +31,16 @@ let
     };
     community.pkgs = {
       ghostty = inputs.ghostty.packages.${system}.default;
+      firefox-addons = inputs.firefox-addons.packages.${system};
     };
+  } // {
+    headless = extraSpecialArgs.headless or false;
   };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", overlays, nixosModules, hmModules, hostModule }:
+  mkNixOSHost = { system ? "x86_64-linux", overlays, nixosModules, hmModules, hostModule, extraSpecialArgs ? { } }:
     let
-      nixpkgs = inputs.nixpkgs-unstable;
+      specialArgs = (mkExtraArgs system extraSpecialArgs);
       commonConfig = {
         nix = nixConfig;
         nixpkgs = {
@@ -48,18 +49,17 @@ in
         };
         home-manager = {
           sharedModules = hmModules;
-          extraSpecialArgs = mkExtraArgs system;
+          extraSpecialArgs = specialArgs;
         };
       };
-    in nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = mkExtraArgs system;
+    in inputs.nixpkgs.lib.nixosSystem {
+      inherit system specialArgs;
       modules = nixosModules ++ [ commonConfig hostModule ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", overlays, darwinModules, hmModules, hostModule }:
+  mkMacOSHost = { system ? "aarch64-darwin", overlays, darwinModules, hmModules, hostModule, extraSpecialArgs ?  { } }:
     let
-      nixpkgs = inputs.nixpkgs-unstable;
+      specialArgs = (mkExtraArgs system extraSpecialArgs);
       commonConfig = {
         nix = nixConfig;
         nixpkgs = {
@@ -69,12 +69,11 @@ in
         };
         home-manager = {
           sharedModules = hmModules;
-          extraSpecialArgs = mkExtraArgs system;
+          extraSpecialArgs = specialArgs;
         };
       };
     in inputs.darwin.lib.darwinSystem {
-      inherit system;
-      specialArgs = mkExtraArgs system;
+      inherit system specialArgs;
       modules = darwinModules ++ [ commonConfig hostModule ];
     };
 }

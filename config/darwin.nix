@@ -8,6 +8,7 @@
   environment.shells = [ pkgs.fish ];         # Register the shell that was installed (2 step process)
 
   # System settings.
+  # TODO: Check https://github.com/jwiegley/nix-config/blob/857ed3470073c34575e24ea37aba07760436ae30/config/darwin.nix#L300
   system = {
     screencapture.ensureLocation = true;
     defaults = {

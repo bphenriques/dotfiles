@@ -1,8 +1,8 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, headless, ... }:
 {
   home.packages = with pkgs; [
     exiftool
-  ] ++ lib.optionals (pkgs.stdenv.isLinux && config.custom.dotfiles.graphicalEnvironment) [
+  ] ++ lib.optionals (pkgs.stdenv.isLinux && !headless) [
     museeks   # Audio
     vlc       # Video
   ];
