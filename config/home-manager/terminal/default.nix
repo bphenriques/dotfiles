@@ -38,7 +38,6 @@
     packages = with pkgs; [
       # Security
       openssl     # Generate keys with openssl rand -hex 32
-      bitwarden-cli
 
       # Search
       fd          # A better `find`.

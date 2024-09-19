@@ -15,18 +15,17 @@ in
 
   homebrew = {
     taps = [
-      "scalacenter/bloop" # Scala
       "coursier/formulas" # Scala
     ];
     brews = [
-      "scalacenter/bloop/bloop"     # Scala
-      "coursier/formulas/coursier"  # Scala
+      "coursier"  # Scala
       "python3"   # Implicit dependency of Aiven client
       "kubeseal"  # K8s stuff
       "go-task"
     ];
 
     casks = [
+      "bloop"         # Scala
       "google-chrome" # Google Meet.
       "slack"         # The usual rabbit-hole of channels.
       "1password-cli" # Team's 1password
