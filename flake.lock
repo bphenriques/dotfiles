@@ -41,6 +41,26 @@
         "type": "github"
       }
     },
+    "dotfiles-private": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1726754639,
+        "narHash": "sha256-q+I6aKPkVbLBrCGom+ekv+vjv2O8r4F7leaeIaAljHA=",
+        "ref": "refs/heads/main",
+        "rev": "aeca6281eaf4c531e527dae1b5a7e242a70b99eb",
+        "revCount": 10,
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/dotfiles-private"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/dotfiles-private"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -198,6 +218,7 @@
       "inputs": {
         "darwin": "darwin",
         "disko": "disko",
+        "dotfiles-private": "dotfiles-private",
         "ghostty": "ghostty",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
