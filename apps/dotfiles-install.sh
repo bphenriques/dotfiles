@@ -77,13 +77,6 @@ import_age_private_keys() {
   done
 }
 
-init_sops_git_filter() {
-  host="$1"
-  info "Sops Git Filter - Setting up for '${host}'"
-  "${DOTFILES_LOCATION}"/bin/sops-git-filter.sh init "${host}"
-  success "Sops Git Filter - Set for '${host}'"
-}
-
 import_gpg() {
   info "GPG - Importing!"
   bw get item "github-gpg-private" | jq --raw-output '.notes' | gpg --import
@@ -126,6 +119,5 @@ clone_dotfiles
 set_host "${host}"
 import_age_private_keys "${host}"
 import_gpg
-init_sops_git_filter "${host}"
 
 build_once_fix_git_permissions
