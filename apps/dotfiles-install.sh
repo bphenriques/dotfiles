@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
+DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 
@@ -26,6 +27,11 @@ clone_dotfiles() {
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
     git clone git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
   fi
+  if ! test -d "${DOTFILES_PRIVATE_LOCATION}" || (find "${DOTFILES_PRIVATE_LOCATION}" -maxdepth 0 -empty | read -r _); then
+    info "dotfiles-private - Cloning to ${DOTFILES_PRIVATE_LOCATION}"
+    git clone git@github.com:bphenriques/dotfiles-private.git "$DOTFILES_PRIVATE_LOCATION"
+  fi
+
   success "dotfiles - available in ${DOTFILES_LOCATION}"
 }
 

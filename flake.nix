@@ -22,6 +22,10 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Private dotfiles for confidential information that can't be covered by sops or want exposed
+    dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private";
+    dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
+
     # Community flakes
     sops-nix.url = "github:Mic92/sops-nix";                       # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
@@ -45,7 +49,7 @@
         home-manager.nixosModules.home-manager
       ];
       darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
-      hmModules     = attrValues self.homeManagerModules ++ [ sops-nix.homeManagerModules.sops ];
+      hmModules = attrValues self.homeManagerModules;
     in {
       apps = import ./apps { inherit nixpkgs mylib; };
       packages = import ./packages { inherit nixpkgs mylib; };
@@ -54,24 +58,20 @@
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
       overlays = import ./overlays { inherit inputs; };
+      nixosModules        = import ./modules/nixos;
+      homeManagerModules  = import ./modules/home-manager;
+      darwinModules       = import ./modules/darwin;
 
       # Hosts
       nixosConfigurations = {
-        laptop = mkNixOSHost {
-          inherit nixosModules hmModules overlays;
+        laptop = mkNixOSHost { inherit nixosModules hmModules overlays;
           hostModule = ./hosts/laptop;
         };
       };
       darwinConfigurations = {
-        work-macos = mkMacOSHost {
-          inherit darwinModules hmModules overlays;
+        work-macos = mkMacOSHost { inherit darwinModules hmModules overlays;
           hostModule = ./hosts/work-macos;
         };
       };
-
-      # Exposed modules
-      nixosModules        = import ./modules/nixos;
-      homeManagerModules  = import ./modules/home-manager;
-      darwinModules       = import ./modules/darwin;
     };
 }

@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, self, ... }:
 {
   imports = [
     ../../../config/home-manager
@@ -10,7 +10,7 @@
   ];
 
   home.sessionVariables.BROWSER = "firefox";
-  programs.firefox.profiles.default.bookmarks = import ./git-secrets/bookmarks.sops.nix;
+  programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
   # programs.beets.settings.directory = config.user.musicDir;
 
   # Gpg

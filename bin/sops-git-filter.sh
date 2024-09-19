@@ -31,7 +31,7 @@ init() {
 smudge() { sops decrypt --input-type json --output-type binary --filename-override "$1" /dev/stdin ; }
 clean() { sops encrypt --input-type binary --output-type json --filename-override "$1" /dev/stdin ; }
 
-if ! command -v sops &> /dev/null; then
+if ! command -v sops > /dev/null 2>&1; then
   echo "'sops' command is not present in the current \$PATH."
   exit 1
 fi
