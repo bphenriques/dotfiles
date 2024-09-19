@@ -3,19 +3,6 @@ keys:
   - &laptop-bphenriques age1w4jdnenatsxcsrssnpdxp2m9vpjx4fqdtpwstgzgjeru5pdakslqd06szx
   - &work-macos age1u3mlmjlfsaa589qqzxjwk5e3ej04eqqlfyhumvfuude70aj9945svms6ha
 creation_rules:
-  # laptop
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
       - age: [ *laptop-system ]
-  - path_regex: hosts/laptop/git-secrets/.+$
-    key_groups:
-      - age: [ *laptop-system ]
-  - path_regex: hosts/laptop/bphenriques/git-secrets/.+$
-    key_groups:
-      - age: [ *laptop-bphenriques ]
-
-  # work-macos
-  - path_regex: hosts/work-macos/git-secrets/.+$
-    key_groups:
-      - age:
-          - *work-macos
