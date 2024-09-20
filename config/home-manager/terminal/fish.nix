@@ -34,11 +34,12 @@ in
 
     interactiveShellInit = let
       # Do I still need this?
-      nixIntegration = ''
+      nixDarwinIntegration = ''
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish
         fish_add_path "/etc/profiles/per-user/$USER/bin"
       '';
+      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv'';
       purePrompt = ''
         set -U pure_enable_single_line_prompt true
         set -U pure_enable_virtualenv false
@@ -47,12 +48,15 @@ in
         set -U pure_enable_nixdevshell true
         set -g async_prompt_functions _pure_prompt_git
       '';
-      extra = [
-        ''set fish_greeting''
-        (optionalString (pkgs.stdenv.system == "aarch64-darwin") ''eval "$(/opt/homebrew/bin/brew shellenv)"'')
-        ''test -f "$XDG_CONFIG_HOME"/fish/local.fish && source "$XDG_CONFIG_HOME"/fish/local.fish''
-      ];
-
-    in concatStringsSep "\n" ([ nixIntegration purePrompt ] ++ extra);
+      extra = ''
+        set fish_greeting
+        test -f "$XDG_CONFIG_HOME"/fish/local.fish && source "$XDG_CONFIG_HOME"/fish/local.fish
+      '';
+    in concatStringsSep "\n" [
+      (optionalString (pkgs.stdenv.system == "aarch64-darwin") nixDarwinIntegration)
+      purePrompt
+      (optionalString (pkgs.stdenv.system == "aarch64-darwin") darwinHomebrew)
+      extra
+    ];
   };
 }
