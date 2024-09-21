@@ -33,13 +33,12 @@ in
     ];
 
     interactiveShellInit = let
-      # Do I still need this?
       nixDarwinIntegration = ''
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish
         fish_add_path "/etc/profiles/per-user/$USER/bin"
       '';
-      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv'';
+      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv)'';
       purePrompt = ''
         set -U pure_enable_single_line_prompt true
         set -U pure_enable_virtualenv false

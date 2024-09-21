@@ -11,5 +11,10 @@ mylib.builders.forAllSystems (system:
     dotfilesFishPlugin = pkgs.callPackage ./dotfiles/fish.nix { };
     ffdFishPlugin = pkgs.callPackage ./ffd/fish.nix { };
     frgFishPlugin = pkgs.callPackage ./frg/fish.nix { };
+
+    # Packaging other people's software
+
+    # Based on https://github.com/Zhaith-Izaliel/sddm-sugar-candy-nix/blob/master/nix/overlays.nix
+    sddm-eucalyptus-drop = pkgs.libsForQt5.callPackage ./sddm-eucalyptus-drop { };
   }
 )
