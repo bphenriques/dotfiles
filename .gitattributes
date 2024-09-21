@@ -1,4 +1,0 @@
-hosts/laptop/bphenriques/git-secrets/*.sops.*      filter=sopsGitFilterlaptop
-hosts/laptop/git-secrets/*.sops.*                  filter=sopsGitFilterlaptop
-
-hosts/work-macos/git-secrets/*.sops.*              filter=sopsGitFilterwork-macos
