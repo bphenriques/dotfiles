@@ -32,10 +32,8 @@ let
         };
 
         dotfiles-wallpapers = inputs.dotfiles-private.packages.${system}.wallpapers.override {
-          selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" ];
+          selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
         };
-
-        sddm-eucalyptus-drop = inputs.self.packages.${system}.sddm-eucalyptus-drop;
       };
     };
     community.pkgs = {

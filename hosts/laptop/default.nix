@@ -11,23 +11,6 @@
 
   networking.hostName = "bphenriques-laptop";
 
-
-  #TODO SDDM: https://github.com/stepanzubkov/where-is-my-sddm-theme
-  # https://github.com/surajmandalcell/elegant-sddm
-  # https://github.com/HeitorAugustoLN/catppuccin-where-is-my-sddm-theme
-
-  environment.systemPackages = [
-    self.pkgs.sddm-eucalyptus-drop
-    (pkgs.writeTextDir "share/sddm/themes/sddm-eucalyptus-drop/theme.conf.user" ''
-      [General]
-      background=${self.pkgs.dotfiles-wallpapers}/share/wallpapers/whale-sunset.jpg
-      FullBlur="true"
-      PartialBlur="false"
-      FormPosition="center"
-    '')
-  ];
-  # https://gitlab.com/Matt.Jolly/sddm-eucalyptus-drop/-/blob/master/theme.conf?ref_type=heads
-
   # Boot
   boot = {
     supportedFilesystems.zfs = true;
@@ -65,19 +48,29 @@
   };
 
   # Desktop environment
-  services = {
-    xserver.enable = true;
-    desktopManager.plasma6.enable = true;
-    displayManager = {
-      sddm.enable = true;
-      sddm.theme = "sddm-eucalyptus-drop";
-      sddm.wayland.enable = true;
-      defaultSession = "plasma";
-    };
-  };
+  services.xserver.enable = true;
+  services.desktopManager.plasma6.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
+  services.displayManager.defaultSession = "plasma";
   environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
 
-
+  # Login Screen
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.theme = "sddm-astronaut-theme";
+  environment.systemPackages = [
+   # https://github.com/Keyitdev/sddm-astronaut-theme/blob/master/theme.conf
+   # It is possible to override the package and set themeConfig. For now, I will iterate like this.
+   pkgs.sddm-astronaut
+   (pkgs.writeTextDir "share/sddm/themes/sddm-astronaut-theme/theme.conf.user" ''
+     [General]
+     background=${self.pkgs.dotfiles-wallpapers}/share/wallpapers/watch-tower.png
+     FullBlur="true"
+     PartialBlur="false"
+     BlurMax="64"
+     Blur="1.0"
+     FormPosition="center"
+   '')
+ ];
 
   # Update firmware. Use fwupdmgr
   services.fwupd.enable = true;
