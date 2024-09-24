@@ -64,10 +64,8 @@
    (pkgs.writeTextDir "share/sddm/themes/sddm-astronaut-theme/theme.conf.user" ''
      [General]
      background=${self.pkgs.dotfiles-wallpapers}/share/wallpapers/watch-tower.png
-     FullBlur="true"
+     FullBlur="false"
      PartialBlur="false"
-     BlurMax="64"
-     Blur="1.0"
      FormPosition="center"
    '')
  ];

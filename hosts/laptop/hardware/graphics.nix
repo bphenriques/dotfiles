@@ -32,9 +32,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # lenovo-legion # TODO: Probabilly can need to set fn-lock, battery
     (nvtopPackages.nvidia.override { amd = true; })  # `top` but for GPUs. Very very useful to see which GPU is being used
-    #amdgpu_top
   ];
 
   # Enabled by default on plasma6. Might need to enable it by hand outside of it. See https://github.com/NixOS/nixpkgs/blob/8843893c9b842fcac17263a5700ee496e2cbee7f/nixos/modules/services/desktop-managers/plasma6.nix#L224

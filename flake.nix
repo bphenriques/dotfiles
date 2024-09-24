@@ -66,6 +66,9 @@
       nixosConfigurations = {
         laptop = mkNixOSHost { inherit nixosModules hmModules overlays;
           hostModule = ./hosts/laptop;
+          extraSpecialArgs = {
+            hdr = true;
+          };
         };
       };
       darwinConfigurations = {

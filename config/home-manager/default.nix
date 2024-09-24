@@ -6,6 +6,7 @@
     ./media
     ./writing
     ./terminal
+    ./desktop
   ];
 
   xdg.enable = true;  # XDG Compliance to tidy up $HOME.

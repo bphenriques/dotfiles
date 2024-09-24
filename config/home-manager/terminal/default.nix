@@ -45,7 +45,6 @@
       # Text Processors
       jq          # Query JSON.
       yq-go       # Query YAML.
-      bat         # Preview with code highlight. FIXME: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/bat/default.nix
       vim         # Basic editor
 
       # Web

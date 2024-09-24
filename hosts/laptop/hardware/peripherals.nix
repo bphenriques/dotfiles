@@ -11,7 +11,7 @@
   # Touch Pad
   services.libinput = {
     enable = true;
-    touchpad.naturalScrolling = true;
+    touchpad.naturalScrolling = false;
     touchpad.tapping = true;
   };
 
@@ -26,4 +26,7 @@
   # Mouse - Using solaar and input-remapper to control my mouse's side buttons.
   custom.services.solaar.enable = true;
   custom.services.input-remapper.enable = true;
+
+  # Xbox(ish) gamepads
+  hardware.xone.enable = true;
 }

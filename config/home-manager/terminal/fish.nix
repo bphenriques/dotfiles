@@ -15,6 +15,7 @@ in
     nix-direnv.enable       = true; # Faster direnv for nix environments.
     silent                  = true; # Disable verbose messages when entering a directory.
   };
+  programs.bat.enable = true;
 
   home.shellAliases = {
     nixsh = "nix-shell --run ${lib.getExe pkgs.fish}";
@@ -33,12 +34,13 @@ in
     ];
 
     interactiveShellInit = let
+      # Am I missing? https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/fish/init.fish#L3
       nixDarwinIntegration = ''
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish
         fish_add_path "/etc/profiles/per-user/$USER/bin"
       '';
-      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv)'';
+      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv)"'';
       purePrompt = ''
         set -U pure_enable_single_line_prompt true
         set -U pure_enable_virtualenv false

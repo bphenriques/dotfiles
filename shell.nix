@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs ? (import ./nixpkgs.nix) { } }:
 with pkgs;
 mkShellNoCC {
   name = "dotfiles";
@@ -10,11 +10,13 @@ mkShellNoCC {
   DIRENV_LOG_FORMAT = "";
 
   packages = [
-    pkgs.git    # Required by flakes
-    pkgs.sops   # Required to manage secrets
+    pkgs.git          # The usual
+    pkgs.sops         # Manage secrets
+    pkgs.shellcheck   # Scripting sanity checks
+    shfmt             # Format shell scripts
+    nixfmt-rfc-style  # Format nix files.
+
     #self.formatter # nix formatter
-    # inputs'.agenix.packages.agenix # secrets
-    # inputs'.deploy-rs.packages.deploy-rs # remote deployment
   ];
 
   # inputsFrom = [ config.treefmt.build.devShell ];

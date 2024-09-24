@@ -13,3 +13,7 @@ https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/wofi
 https://codeberg.org/adamcstephens/dotfiles/src/branch/main/bin
 # File browser: https://github.com/iynaix/dotfiles/blob/e441ab4ff7a775b57b6c79a2fa6be99e3ab2d58b/home-manager/programs/nemo.nix#L79
 https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f51c7/users/delay/wayland.nix
+
+
+
+https://github.com/namishh/crystal/blob/main/home/namish/conf/ui/hyprland/default.nix
