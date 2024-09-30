@@ -5,6 +5,7 @@ let
       experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
       auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
       use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
+      warn-dirty = false;                                 # I know...
     };
 
     # Ensure we have at least 5GiB always available. Less than that and my system gets unstable.

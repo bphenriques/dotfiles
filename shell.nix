@@ -25,7 +25,5 @@ mkShellNoCC {
   #  nixpkgs-fmt
   #];
 
-  shellHook = ''
-    echo "> .dotfiles development shell"
-  '';
+  # shellHook = '''';
 }
