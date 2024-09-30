@@ -17,7 +17,7 @@
     arguments = [
       "--max-columns=150"
       "--max-columns-preview"
-      "--glob=!.git/*"
+      "--glob=!.git"
       "--smart-case"
     ];
   };

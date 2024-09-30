@@ -51,16 +51,14 @@
       darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
       hmModules = attrValues self.homeManagerModules;
     in {
-      apps = import ./apps { inherit nixpkgs mylib; };
-      packages = import ./packages { inherit nixpkgs mylib; };
+      apps      = import ./apps { inherit nixpkgs mylib; };
+      packages  = import ./packages { inherit nixpkgs mylib; };
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
-      overlays = import ./overlays { inherit inputs; };
-      nixosModules        = import ./modules/nixos;
-      homeManagerModules  = import ./modules/home-manager;
-      darwinModules       = import ./modules/darwin;
+      overlays      = import ./overlays { inherit inputs; };
+      nixosModules  = import ./modules/nixos;
 
       # Hosts
       nixosConfigurations = {
@@ -76,5 +74,9 @@
           hostModule = ./hosts/work-macos;
         };
       };
+
+      # Non standard flake outputs
+      homeManagerModules  = import ./modules/home-manager;
+      darwinModules       = import ./modules/darwin;
     };
 }
