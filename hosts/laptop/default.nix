@@ -16,6 +16,3 @@ in mylib.hosts.mkNixOSHost {
     hdr = true;
   };
 }
-
-
-

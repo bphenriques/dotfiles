@@ -35,16 +35,10 @@
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager, sops-nix, disko, nur, ... }:
+  outputs = inputs @ { nixpkgs, ... }:
     let
-      inherit (mylib.hosts) mkNixOSHost mkMacOSHost;
       inherit (mylib.builders) forAllSystems;
-      inherit (nixpkgs.lib.attrsets) attrValues;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
-
-      overlays = attrValues self.overlays ++ [ nur.overlay ];
-      darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
-      hmModules = attrValues self.homeManagerModules;
     in {
       apps      = import ./apps { inherit nixpkgs mylib; };
       packages  = import ./packages { inherit nixpkgs mylib; };
@@ -55,15 +49,9 @@
       overlays      = import ./overlays { inherit inputs; };
       nixosModules  = import ./modules/nixos;
 
-      # Hosts
-      nixosConfigurations = {
-        laptop = import ./hosts/laptop inputs // { inherit mylib; };
-      };
-      darwinConfigurations = {
-        work-macos = mkMacOSHost { inherit darwinModules hmModules overlays;
-          hostModule = ./hosts/work-macos;
-        };
-      };
+      # Hosts - Each host defines what it needs from the inputs.
+      nixosConfigurations.laptop = import ./hosts/laptop (inputs // { inherit mylib; });
+      darwinConfigurations.work-macos = import ./hosts/work-macos (inputs // { inherit mylib; });
 
       # Non standard flake outputs
       homeManagerModules  = import ./modules/home-manager;
