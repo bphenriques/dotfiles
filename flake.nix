@@ -43,11 +43,6 @@
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
 
       overlays = attrValues self.overlays ++ [ nur.overlay ];
-      nixosModules = attrValues self.nixosModules ++ [
-        sops-nix.nixosModules.sops
-        disko.nixosModules.disko
-        home-manager.nixosModules.home-manager
-      ];
       darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
       hmModules = attrValues self.homeManagerModules;
     in {
@@ -62,12 +57,7 @@
 
       # Hosts
       nixosConfigurations = {
-        laptop = mkNixOSHost { inherit nixosModules hmModules overlays;
-          hostModule = ./hosts/laptop;
-          extraSpecialArgs = {
-            hdr = true;
-          };
-        };
+        laptop = import ./hosts/laptop inputs // { inherit mylib; };
       };
       darwinConfigurations = {
         work-macos = mkMacOSHost { inherit darwinModules hmModules overlays;
