@@ -12,7 +12,4 @@ let
 in mylib.hosts.mkNixOSHost {
   inherit nixosModules hmModules overlays;
   hostModule = ./config.nix;
-  extraSpecialArgs = {
-    hdr = true;
-  };
 }

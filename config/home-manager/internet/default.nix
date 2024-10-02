@@ -1,7 +1,14 @@
-{ config, pkgs, lib, headless, ... }:
+{ config, pkgs, lib, ... }:
 {
-  home.packages = with pkgs; lib.optionals (pkgs.stdenv.isLinux && !headless) [
-    qbittorrent
-    filezilla
+  imports = [
+    ./firefox
+    ./discord.nix
+  ];
+
+  home.packages = with pkgs; lib.optionals (pkgs.stdenv.isLinux) [
+    qbittorrent   # Torrent client
+    filezilla     # Access files remotely
+    newsflash     # RSS Reader
+    vesktop       # Lightweight discord
   ];
 }

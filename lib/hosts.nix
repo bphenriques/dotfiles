@@ -41,9 +41,7 @@ let
       ghostty = inputs.ghostty.packages.${system}.default;
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
-  } // extraSpecialArgs // {
-    headless = extraSpecialArgs.headless or false;
-  };
+  } // extraSpecialArgs;
 in
 {
   mkNixOSHost = { system ? "x86_64-linux", overlays ? [ ], nixosModules, hmModules, hostModule, extraSpecialArgs ? { } }:

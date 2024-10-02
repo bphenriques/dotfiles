@@ -5,11 +5,13 @@
     git-absorb                      # Trying https://github.com/tummychow/git-absorb
   ];
 
+  # TODO: Explore jujutsu: https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f51c7/users/delay/home.nix#L99
   programs.git = {
     enable = true;
     userName = "Bruno Henriques";
     userEmail = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obsfuscation to prevent webscrappers
 
+    diff-so-fancy.enable = true;
     signing = {
       key = "792C2768AD3A4930BCCFA467075389B5C3ADA858";
       signByDefault = true;
@@ -70,7 +72,6 @@
       "bphenriques-tools/"
     ];
 
-    diff-so-fancy.enable = true;
 
     extraConfig = {
       commit.template =  builtins.toPath ./git-message;
@@ -81,13 +82,28 @@
 
       pull.rebase = false; # Not enabled by default as I usually collaborate with others on the same branch.
       push.autoSetupRemote = true;
-      rebase.autosquash = true; # Automatic fixup! and/or squash!
+      rebase = {
+        autosquash = true;  # Automatic fixup! and/or squash!
+        autoStash = true;   # Automatically stash my changes and apply after rebase finishes.
+      };
 
+      # Improve readability
+      blame = {
+        coloring = "repeatedLines";
+        markIgnoredLines = true;
+        markUnblamables = true;
+      };
+
+      branch.sort = "-committerdate"; # Sane sort
+
+      # Cleanup
       fetch = {
         prune = true;
         pruneTags = true;
       };
-      branch.sort = "-committerdate";
+
+      merge.conflictStyle = "zdiff3"; # Improve diff output
+      rerere.enabled = true;          # Record how I solved some conflicts. Cache is under .git/rr-cache
 
       # Automatically translate HTTPS to SSH when cloning repos
       url."ssh://git@github.com/".insteadOf = "https://github.com/";

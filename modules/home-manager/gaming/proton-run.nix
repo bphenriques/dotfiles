@@ -2,7 +2,6 @@
 with lib;
 let
   cfg = config.custom.proton-run;
-  # proton-ge-bin is a different thing.
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
     text = ''
@@ -27,7 +26,7 @@ let
     });
 in {
   options.custom.proton-run = with types; {
-    enable = mkEnableOption ''proton-run'';
+    enable = mkEnableOption "proton-run";
     defaultProtonDir = mkOption {
       type = str;
       description = mdDoc ''Default location of catch-all prefix'';

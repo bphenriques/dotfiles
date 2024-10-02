@@ -14,7 +14,7 @@ let
   });
 in {
   options.custom.steam = with types; {
-    enable = mkEnableOption ''steam'';
+    enable = mkEnableOption "steam";
   };
 
   config = lib.mkIf cfg.enable {
