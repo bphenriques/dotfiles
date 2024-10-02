@@ -6,7 +6,7 @@ let
 in
 {
   options.custom.lutris = with types; {
-    enable = mkEnableOption ''lutris'';
+    enable = mkEnableOption "lutris";
   };
 
   config = mkIf cfg.enable {

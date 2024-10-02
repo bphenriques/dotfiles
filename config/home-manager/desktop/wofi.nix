@@ -1,4 +1,4 @@
-{ config, lib, pkgs, headless, ... }:
+{ config, lib, pkgs, ... }:
 let
   font = {
     variable = "Hack Nerd Font Mono";
@@ -26,7 +26,7 @@ let
 in
 {
   programs.wofi = {
-    enable = pkgs.stdenv.isLinux && !headless;
+    enable = pkgs.stdenv.isLinux;
     settings = {
       width = 800;
       height = 400;

@@ -2,39 +2,12 @@
 {
   imports = [
     ../../../config/home-manager
-    ../../../config/home-manager/internet/firefox
-    ../../../config/home-manager/internet/discord.nix
-    ../../../config/home-manager/writing/logseq
-    ../../../config/home-manager/coding/scala
+    ../../../config/home-manager/gaming
     ./input-remapper
   ];
 
-  home.sessionVariables.BROWSER = "firefox";
   programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
-
-  # Gpg
-  programs.gpg.enable = true;
-  services.gpg-agent = {
-    enable = true;
-    pinentryPackage = pkgs.pinentry-gnome3;
-  };
-
-  custom = {
-    lutris.enable = true;
-    steam.enable = true;
-    proton-run = {
-      enable = true;
-      defaultProtonDir = "/mnt/games/GlobalProton";
-    };
-  };
-
-  # TODO: should I enable https://github.com/NixOS/nixpkgs/issues/160923 ?
-  # xdg.portal.enable = true;   # TODO: https://github.com/flatpak/xdg-desktop-portal. Should I set xdgOpenUsePortal?
-  # https://github.com/bbigras/nix-config/blob/master/users/bbigras/graphical/mime.nix
-  # https://github.com/ckiee/nixfiles/blob/3bcfddb139262222cd0e43a2a7fa08853a9e8697/modules/home/mimeapps.nix
-  # https://github.com/Dragyx/nichts/blob/c2e0f26def0fd1ffe1e34b2491bc5f68393bc974/modules/other/xdg.nix#L94
-  # xdg portal is enabled by default in plasma6: https://github.com/NixOS/nixpkgs/blob/8843893c9b842fcac17263a5700ee496e2cbee7f/nixos/modules/services/desktop-managers/plasma6.nix#L243
-  xdg.mimeApps.enable = true;
+  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
   xdg.userDirs = {
     enable = true;
@@ -51,10 +24,6 @@
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
-    # Tighten permissions to private keys
-    "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"
-    "z ${config.home.homeDirectory}/.gnupg  0700 ${config.home.username} users"
-
     # Tidy up most things under $HOME
     "L ${config.home.homeDirectory}/games                     - - - - /mnt/games"
     "L ${config.xdg.userDirs.documents}                       - - - - /mnt/bphenriques"

@@ -1,4 +1,4 @@
-{ pkgs, lib, config, headless, ... }:
+{ pkgs, lib, config, ... }:
 let
   inherit (lib) foldl';
 
@@ -51,12 +51,13 @@ let
   };
 in
 {
-  home.packages = lib.optionals (pkgs.stdenv.isLinux && !headless) [
-    pkgs.feishin   # Music Player
+  home.packages = lib.optionals (pkgs.stdenv.isLinux) [
+    pkgs.feishin    # Jellyfin player
+    pkgs.cmus       # TUI based music player
   ];
 
   programs.beets = {
-    enable = pkgs.stdenv.isLinux && !headless;
+    enable = pkgs.stdenv.isLinux;
     package = beets.finalPackage;
     settings = {
       library = beets.database;

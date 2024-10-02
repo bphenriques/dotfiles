@@ -1,10 +1,6 @@
 { config, pkgs, lib, ... }:
 {
-  imports = [
-    ../../config/home-manager
-    ../../config/home-manager/coding/scala
-    ../../config/home-manager/writing/logseq
-  ];
+  imports = [ ../../config/home-manager ];
 
   # Consider moving some of these packages to project's shell.nix if team's okay with that.
   home.packages = with pkgs; [

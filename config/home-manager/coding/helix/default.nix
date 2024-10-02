@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 # TODO: https://github.com/maximbaz/dotfiles/blob/8e487136d8eab0568b8ee3d44d9973e694f332ed/modules/common/helix.nix
 {
@@ -21,8 +21,8 @@
   };
 
   xdg.configFile = {
-    "helix/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/config.toml";
-    "helix/languages.toml".source = config.lib.file.mkOutOfStoreSymlink "${config.custom.dotfiles.directory}/home-manager/dev/helix/languages.toml";
+    "helix/config.toml".source = ./config.toml;
+    "helix/languages.toml".source = ./languages.toml;
   };
 
   home.packages = [
@@ -35,7 +35,6 @@
         "text/plain"
         "application/json"
         "application/xml"
-
         "application/x-shellscript"
         "text/x-makefile"
         "text/x-tex"
@@ -50,4 +49,6 @@
       icon = "helix";
     })
   ];
+
+  custom.xdgDefaultApps.text = lib.mkBefore [ "helix.desktop" ];
 }

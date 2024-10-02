@@ -1,4 +1,4 @@
-{ pkgs, lib, config, headless, hdr, ... }:
+{ pkgs, lib, config, ... }:
 let
   # Interesting guides:
   # - https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/
@@ -11,7 +11,7 @@ in
 {
   # Video Player: https://mpv.io/manual/master/
   programs.mpv = {
-    enable = pkgs.stdenv.isLinux && !headless;
+    enable = pkgs.stdenv.isLinux;
     config = {
       # UI
       fullscreen = true;
@@ -93,9 +93,10 @@ in
     };
   };
 
-  home.shellAliases = lib.mkIf (pkgs.stdenv.isLinux && !headless) {
-    "video" = "${lib.getExe pkgs.mpv}";
-    "video360" = "${lib.getExe pkgs.mpv} --script-opts=360plugin-enabled=yes";
+  home.shellAliases = lib.mkIf (pkgs.stdenv.isLinux) {
     "mpv360" = "${lib.getExe pkgs.mpv} --script-opts=360plugin-enabled=yes";
   };
+
+  custom.xdgDefaultApps.video = lib.mkBefore [ "mpv.desktop" ];
+  custom.xdgDefaultApps.audio = lib.mkBefore [ "mpv.desktop" ];
 }
