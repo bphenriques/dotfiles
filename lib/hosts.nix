@@ -46,7 +46,7 @@ let
   };
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", overlays, nixosModules, hmModules, hostModule, extraSpecialArgs ? { } }:
+  mkNixOSHost = { system ? "x86_64-linux", overlays ? [ ], nixosModules, hmModules, hostModule, extraSpecialArgs ? { } }:
     let
       specialArgs = (mkExtraArgs system extraSpecialArgs);
       commonConfig = {
@@ -65,7 +65,7 @@ in
       modules = nixosModules ++ [ commonConfig hostModule ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", overlays, darwinModules, hmModules, hostModule, extraSpecialArgs ? { } }:
+  mkMacOSHost = { system ? "aarch64-darwin", overlays ? [ ], darwinModules, hmModules, hostModule, extraSpecialArgs ? { } }:
     let
       specialArgs = (mkExtraArgs system extraSpecialArgs);
       commonConfig = {
