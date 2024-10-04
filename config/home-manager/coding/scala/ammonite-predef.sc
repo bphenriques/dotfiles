@@ -15,5 +15,5 @@ object load {
     """)
   }
 
-  def fs2: Unit = fs2Version("3.9.3")
+  def fs2: Unit = fs2Version("3.11.0")
 }

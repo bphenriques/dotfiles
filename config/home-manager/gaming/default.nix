@@ -8,6 +8,8 @@
       defaultProtonDir = "/mnt/games/GlobalProton";
     };
   };
+
+  xdg.mimeApps.defaultApplications."x-scheme-handler/heroic" = [ "heroic.desktop" ];
 }
 
 

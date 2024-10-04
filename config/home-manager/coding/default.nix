@@ -1,9 +1,9 @@
 { lib, pkgs, config, ... }:
 {
   imports = [
-    ./git
+    ./git.nix
     ./scala
-    ./helix
+    ./helix.nix
   ];
 
   home.packages = with pkgs; [

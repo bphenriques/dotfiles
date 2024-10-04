@@ -2,7 +2,6 @@
 {
   imports = [
     ./firefox
-    ./discord.nix
   ];
 
   home.packages = with pkgs; lib.optionals (pkgs.stdenv.isLinux) [
@@ -11,4 +10,6 @@
     newsflash     # RSS Reader
     vesktop       # Lightweight discord
   ];
+
+  xdg.mimeApps.defaultApplications."x-scheme-handler/discord" = [ "vesktop.desktop" ];
 }

@@ -1,4 +1,18 @@
 { config, lib, pkgs, ... }:
+let
+  commitTemplate = pkgs.writeText "git-message" ''
+   # <type>(<scope>): Max. 50 characters    ------->
+   # type: feat fix doc perf refactor style test infra ci chore
+   #
+   # Problem:
+   #
+   # Solution:
+   #
+   # Test Plan:
+   #
+   # Body: Max. 72 characters per line                               ---->
+   '';
+in
 {
   home.packages = with pkgs; [
     lazygit                         # Cross-platform GUI to interact with Git
@@ -74,7 +88,8 @@
 
 
     extraConfig = {
-      commit.template =  builtins.toPath ./git-message;
+      commit.template = "${commitTemplate}";
+
       tag = {
         gpgSign = true;
         sort = "version:refname";     # Natural order of commits
