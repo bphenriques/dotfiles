@@ -2,6 +2,9 @@
 let
   homeServerIp = "192.168.68.53";
 
+  groups = config.users.groups;
+  users = config.users.users;
+
   # Single-user mount for now. This should be reviewed to support multi-user as some folders are private.. but only when I have a new user.
   # See: https://4sysops.com/archives/linux-smb-mount-for-multiple-users/ and https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/mounting_an_smb_share#performing_a_multi-user_smb_mount
   mkHomeServerCifsFs = remoteFolder: user: group: let
@@ -19,9 +22,6 @@ let
     fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
     options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
   };
-
-  groups = config.users.groups;
-  users = config.users.users;
 in
 {
   sops = {

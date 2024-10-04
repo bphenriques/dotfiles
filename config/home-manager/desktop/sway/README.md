@@ -18,3 +18,4 @@ https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f
 
 https://github.com/namishh/crystal/blob/main/home/namish/conf/ui/hyprland/default.nix
 https://github.com/yusdacra/ark/blob/e49b560d6b1f2612ed27070b49d8a43d038532c4/users/modules/dunst/default.nix
+https://github.com/Mbhon1/Osama-Flake/blob/0b58a55a38d186b13cddfdda7f73ad23a48214d8/hyprland/default.nix

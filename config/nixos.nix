@@ -31,11 +31,15 @@
     '';
   };
 
-  # Input
+  # Input - More on https://wiki.archlinux.org/title/Xorg/Keyboard_configuration
   services.xserver = {
-    xkb.layout = "us";
-    xkb.variant = "";
-    xkb.options = "caps:ctrl_modifier";   # Replace caps-lock for Ctrl
+    #exportConfiguration = true;  # Do I need this?
+    xkb.layout = "us,pt";   # localectl list-x11-keymap-layouts and
+    xkb.variant = "euro,";  # localectl list-x11-keymap-variants us
+    xkb.options = builtins.concatStringsSep " " [
+      "caps:ctrl_modifier"    # Replace caps-lock for Ctrl
+      "grp:win_space_toggle"  # Switch keyboard layouts
+    ];
 
     excludePackages = [ pkgs.xterm ];
   };

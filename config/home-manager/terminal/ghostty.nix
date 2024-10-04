@@ -65,6 +65,9 @@ in
     })
   ];
 
+  xdg.mimeApps.defaultApplications."x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
+  xdg.mimeApps.defaultApplications."x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
+
   programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
     fish_add_path --append --move ${config.home.homeDirectory}/Applications/Ghostty.app/Contents/MacOS
   '';
