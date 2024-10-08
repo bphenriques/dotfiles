@@ -13,7 +13,7 @@
           bitwarden
           keepa
           linkding-extension
-          # tridactyl # TODO: Consider theme: https://git.belanyi.fr/ambroisie/nix-config/src/branch/main/modules/home/firefox/tridactyl/tridactylrc
+          tridactyl
           no-pdf-download
         ];
 

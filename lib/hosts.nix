@@ -3,7 +3,7 @@ let
   nixConfig = {
     settings = {
       experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-      auto-optimise-store   = true;                       # Optimise the store after each and every build (for the built path).
+      auto-optimise-store   = true;                       # Optimise the store when building.
       use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
       warn-dirty = false;                                 # I know...
     };
@@ -41,6 +41,8 @@ let
       ghostty = inputs.ghostty.packages.${system}.default;
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
+
+    host = { }; # Intentionally empty, each host sets as required. This just ensures the root config 'host' is available.
   } // extraSpecialArgs;
 in
 {

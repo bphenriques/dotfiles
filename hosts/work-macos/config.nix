@@ -3,7 +3,7 @@
 let username = "brunohenriques";
 in
 {
-  imports = [ ../../config/darwin.nix ];
+  imports = [ ../../config/darwin ];
 
   nix.settings.trusted-users = [ username ];
   users.users."${username}".home  = "/Users/${username}";

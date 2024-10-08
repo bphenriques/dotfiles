@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, host, ... }:
 let
   # Interesting guides:
   # - https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/
@@ -94,8 +94,10 @@ in
   };
 
   home.shellAliases = lib.mkIf (pkgs.stdenv.isLinux) {
-    "mpv360" = "${lib.getExe pkgs.mpv} --script-opts=360plugin-enabled=yes";
-  };
+    "mpv360" = "${lib.getExe config.programs.mpv.package} --script-opts=360plugin-enabled=yes";
+  } // (lib.mkIf (host.hardware ? webcam) {
+    "webcam" = "${lib.getExe config.programs.mpv.package} --profile=low-latency --untimed -vf=hflip ${host.hardware.webcam}";
+  });
 
   custom.xdgDefaultApps.video = lib.mkBefore [ "mpv.desktop" ];
   custom.xdgDefaultApps.audio = lib.mkBefore [ "mpv.desktop" ];

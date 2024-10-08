@@ -49,6 +49,9 @@
     LC_ALL  = "en_US.UTF-8";
   };
 
+  # Do not need the whole home-manager configuration reference.
+  manual.manpages.enable = false;
+
   # Tighten permissions to private keys
   systemd.user.tmpfiles.rules = [
     "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"

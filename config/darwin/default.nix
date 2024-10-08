@@ -13,7 +13,7 @@
     screencapture.ensureLocation = true;
     defaults = {
       trackpad = {
-        Clicking = true;                # Because tapping is zappier.
+        Clicking = true;                # Prefer tapping.
         TrackpadThreeFingerDrag = true; # Much more practical.
       };
 

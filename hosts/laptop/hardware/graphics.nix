@@ -40,5 +40,8 @@
   # https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
   services.power-profiles-daemon.enable = true;
 
+  # TODO: Misc:
+  # https://github.com/sioodmy/dotfiles/blob/main/modules/laptop/default.nix
+
   services.xserver.videoDrivers = [ "nvidia" ];
 }

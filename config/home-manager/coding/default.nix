@@ -4,6 +4,7 @@
     ./git.nix
     ./scala
     ./helix.nix
+    ./ssh.nix
   ];
 
   home.packages = with pkgs; [

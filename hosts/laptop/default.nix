@@ -11,5 +11,9 @@ let
   hmModules = attrValues self.homeManagerModules;
 in mylib.hosts.mkNixOSHost {
   inherit nixosModules hmModules overlays;
+  extraSpecialArgs = {
+    host.hardware.webcam = "/dev/video0";
+    servers = import ../servers.nix;
+  };
   hostModule = ./config.nix;
 }
