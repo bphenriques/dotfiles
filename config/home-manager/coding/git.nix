@@ -20,6 +20,7 @@ in
   ];
 
   # TODO: Explore jujutsu: https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f51c7/users/delay/home.nix#L99
+  # https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/cli/jujutsu.nix
   programs.git = {
     enable = true;
     userName = "Bruno Henriques";

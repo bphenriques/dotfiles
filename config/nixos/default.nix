@@ -1,15 +1,18 @@
-{ pkgs, ... }:
+{ pkgs, lib, servers, ... }:
 {
   nix = {
-    optimise.automatic = true; # Sets up a systemd timer that regularly goes over all paths and optimises them. Can't enable it on darwin: https://github.com/NixOS/nix/issues/7273
     gc = {
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 7d";
     };
   };
+
   home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
   home-manager.useUserPackages = true;   # Install packages defined in home-manager.
+
+  # Not enabling useTmpfs despite having enough RAM. Might consider it.
+  boot.tmp.cleanOnBoot = true;
 
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire
@@ -25,9 +28,8 @@
   networking = {
     networkmanager.enable = true;
     extraHosts = ''
-      192.168.1.1     router
-      192.168.68.68   pi-zero
-      192.168.68.53   home-nas
+      ${servers.home-nas.hostname}  home-nas
+      ${servers.pi-zero.hostname}   pi-zero
     '';
   };
 
@@ -48,12 +50,17 @@
   programs.fish.enable = true;  # System level/
   programs.fish.vendor.functions.enable = true; # Ensure completions/functions are automatically set.
   programs.partition-manager.enable = true;
-
-  # Suport exFAT and NTFS formatted drives (pendisks + external disks)
   environment.systemPackages = with pkgs; [
+    # Suport exFAT and NTFS formatted drives (pendisks + external disks)
     exfat
     ntfs3g
+
+    powertop  # Check what is consuming too much energy
+    usbutils  # USB utilities
   ];
+
+  # Services
+  services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
 
   # Localization
   time.timeZone = "Europe/Lisbon";
@@ -77,7 +84,6 @@
     SystemMaxUse=1G
   '';
 
-  # Security: https://github.com/AntonHakansson/nixos-config/blob/main/modules/core/default.nix#L79
   security.sudo.extraConfig = "Defaults lecture=never";
 
   # To install or run some programs, it is easier to this way. The exception.

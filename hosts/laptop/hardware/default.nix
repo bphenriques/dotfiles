@@ -7,7 +7,15 @@
     ./peripherals.nix     # Mouse / Keyboard / etc
   ];
 
+
+  # Networking
+  networking.networkmanager.wifi = {
+    powersave = true;
+    macAddress = "preserve";  # The default. I am fine as this laptop stays most of the times at home.
+  };
+
   # Bluetooth
+  # TODO: https://github.com/bashfulrobot/nixos/blob/main/modules/hw/bluetooth/default.nix
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true; # Power up the bluetooth controller on boot

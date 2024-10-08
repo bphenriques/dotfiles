@@ -116,5 +116,6 @@
     })
   ];
 
+  home.sessionVariables.EDITOR  = "${pkgs.helix}/bin/hx";
   custom.xdgDefaultApps.text = lib.mkBefore [ "helix.desktop" ];
 }

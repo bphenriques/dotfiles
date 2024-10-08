@@ -4,18 +4,6 @@ let
 in
 {
   home.packages = with pkgs; [ fish ];
-  programs.zoxide = {
-    enable = true;
-    options = [ "--cmd j" ];
-    enableFishIntegration = true;
-  };
-
-  programs.direnv = {
-    enable                  = true; # Automatically load .envrc or .env.
-    nix-direnv.enable       = true; # Faster direnv for nix environments.
-    silent                  = true; # Disable verbose messages when entering a directory.
-  };
-  programs.bat.enable = true;
 
   home.shellAliases = {
     nixsh = "nix-shell --run ${lib.getExe pkgs.fish}";
@@ -32,6 +20,11 @@ in
       { name = "frg"; src = self.pkgs.fishPlugins.frg.src; }
       { name = "ffd"; src = self.pkgs.fishPlugins.ffd.src; }
     ];
+
+    functions = {
+      nix-search = ''nix-env -qaP | grep -i $argv[1]'';
+      nix-run = ''nix run nixpkgs#$argv[1] --impure -- $argv[2..-1]'';
+    };
 
     interactiveShellInit = let
       # Am I missing? https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/fish/init.fish#L3

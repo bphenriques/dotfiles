@@ -16,6 +16,8 @@ mkShellNoCC {
     shfmt             # Format shell scripts
     nixfmt-rfc-style  # Format nix files.
 
+    gnupg
+    age
     #self.formatter # nix formatter
   ];
 

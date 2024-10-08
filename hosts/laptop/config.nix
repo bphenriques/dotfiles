@@ -1,9 +1,9 @@
 { config, pkgs, lib, self, ... }:
 {
   imports = [
-    ./hardware                              # CPU, graphics, peripherals, etc
-    ./filesystem                            # Partitioning, etc
-    ../../config/nixos.nix                  # Default nixos settings
+    ./hardware          # CPU, graphics, peripherals, etc
+    ./filesystem        # Partitioning, etc
+    ../../config/nixos  # Default nixos settings
 
     # Users
     ./bphenriques
@@ -11,7 +11,7 @@
 
   networking.hostName = "bphenriques-laptop";
 
-  # Boot
+  # Boot: See what it is taking most time: `systemd-analyze critical-chain`
   boot = {
     supportedFilesystems.zfs = true;
     kernelPackages = pkgs.linuxPackages_6_10;
@@ -70,15 +70,13 @@
    '')
  ];
 
-  # Update firmware. Use fwupdmgr
-  services.fwupd.enable = true;
-
   # Gaming
   custom.profiles.gaming.enable = true;
 
   # Development
   virtualisation.docker.enable = true;
-  hardware.nvidia-container-toolkit.enable = true;
+  virtualisation.docker.enableOnBoot = false;        # Dont need it all the time: systemctl start docker
+  hardware.nvidia-container-toolkit.enable = true;   # Enable nvidia runtime integration.
 
   # System-wide secrets
   sops.defaultSopsFile = ./secrets.yaml;
