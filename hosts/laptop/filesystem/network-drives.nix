@@ -1,4 +1,4 @@
-{ lib, pkgs, config, servers, ... }:
+{ lib, pkgs, config, network-devices, ... }:
 let
   groups = config.users.groups;
   users = config.users.users;
@@ -16,7 +16,7 @@ let
     userOpts = [ "uid=${toString user.uid}" "gid=${toString group.gid}" ];
     credsOpts = [ "credentials=${config.sops.templates."smb-credentials".path}" ];
   in {
-    device = "//${servers.home-nas.hostname}/${remoteFolder}";
+    device = "//${network-devices.home-nas.hostname}/${remoteFolder}";
     fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
     options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
   };

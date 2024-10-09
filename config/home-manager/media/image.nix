@@ -5,7 +5,7 @@
   ];
 
   programs.imv.enable = pkgs.stdenv.isLinux;
-  home.shellAliases = lib.mkIf (pkgs.stdenv.isLinux) {
+  home.shellAliases = lib.optionalAttrs (pkgs.stdenv.isLinux) {
     "webp_to_png" = ''nix-shell -p libwebp -p parallel --command "parallel dwebp {} -o {.}.png ::: *.webp"'';
   };
 
