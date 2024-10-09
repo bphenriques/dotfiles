@@ -9,11 +9,7 @@
   programs.fd.enable = true;    # Better `find`.
   programs.jq.enable = true;    # JSON query.
   programs.htop.enable = true;  # Fancy `top`.
-
-  programs.man = {
-    enable = true;                  # I want manual pages
-    generateCaches = true;          # Required for man completions. They are built during the build.
-  };
+  programs.man.enable = true;   # RTFM
 
   programs.ripgrep = {
     enable = true;
@@ -106,7 +102,7 @@
       # Colors
       CLICOLOR  = 1;                                           # Enable ls colors in MacOS.
       LS_COLORS ="$(${pkgs.vivid}/bin/vivid generate snazzy)"; # LS_COLORS generator because I refuse to maintain one >.<
-    } // (lib.mkIf pkgs.config.allowUnfree {
+    } // (lib.optionalAttrs pkgs.config.allowUnfree {
       NIXPKGS_ALLOW_UNFREE = 1;
     });
 
@@ -142,8 +138,7 @@
   };
 }
 
-
-
+# TODO: FIXME:
 # Alt+SPC P     ---> List projects (and enter)
 # Alt+SPC SPC   ---> Find file in project
 # Alt+SPC .     ---> Find file in project

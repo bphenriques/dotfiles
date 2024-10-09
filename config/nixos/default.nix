@@ -1,4 +1,4 @@
-{ pkgs, lib, servers, ... }:
+{ pkgs, lib, network-devices, ... }:
 {
   nix = {
     gc = {
@@ -28,8 +28,9 @@
   networking = {
     networkmanager.enable = true;
     extraHosts = ''
-      ${servers.home-nas.hostname}  home-nas
-      ${servers.pi-zero.hostname}   pi-zero
+      ${network-devices.home-nas.hostname}  home-nas
+      ${network-devices.pi-zero.hostname}   pi-zero
+      ${network-devices.rg353m.hostname}    rg353m
     '';
   };
 

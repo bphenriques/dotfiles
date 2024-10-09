@@ -53,7 +53,7 @@
   manual.manpages.enable = false;
 
   # Tighten permissions to private keys
-  systemd.user.tmpfiles.rules = [
+  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
     "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"
     "z ${config.home.homeDirectory}/.gnupg  0700 ${config.home.username} users"
   ];

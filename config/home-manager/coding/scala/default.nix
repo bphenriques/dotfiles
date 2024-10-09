@@ -9,7 +9,7 @@
     jdk21
   ];
 
-  systemd.user.services.bloop = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.bloop = lib.optionalAttrs pkgs.stdenv.isLinux {
     Unit.Description = "Bloop Scala build server";
     Service = {
       Type = "simple";

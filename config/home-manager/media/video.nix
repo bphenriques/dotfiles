@@ -93,10 +93,10 @@ in
     };
   };
 
-  home.shellAliases = lib.mkIf (pkgs.stdenv.isLinux) {
+  home.shellAliases = lib.optionalAttrs (pkgs.stdenv.isLinux) {
     "mpv360" = "${lib.getExe config.programs.mpv.package} --script-opts=360plugin-enabled=yes";
-  } // (lib.mkIf (host.hardware ? webcam) {
-    "webcam" = "${lib.getExe config.programs.mpv.package} --profile=low-latency --untimed -vf=hflip ${host.hardware.webcam}";
+  } // (lib.optionalAttrs (pkgs.stdenv.isLinux && (host ? webcam)) {
+    "webcam" = "${lib.getExe config.programs.mpv.package} --profile=low-latency --untimed -vf=hflip ${host.webcam}";
   });
 
   custom.xdgDefaultApps.video = lib.mkBefore [ "mpv.desktop" ];

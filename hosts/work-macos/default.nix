@@ -8,6 +8,6 @@ in mylib.hosts.mkMacOSHost {
   inherit darwinModules hmModules;
   hostModule = ./config.nix;
   extraSpecialArgs = {
-    servers = import ../servers.nix;
+    network-devices = import ../network-devices.nix;
   };
 }
