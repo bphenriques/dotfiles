@@ -4,7 +4,11 @@
     disk = {
       vda = {
        type = "disk";
-       device = "/dev/nvme0n1";
+       # It is preferable `by-id` as the mount(?) location may change (e.g., `/dev/nvme0n1`).
+       # Using `by-path` b/c I will won't move the SSDs and I do not want to version control serial numbers.
+       #
+       # How to: run `ls /dev/disk/by-path/ -l` and cross-reference with `sudo nix run nixpkgs#nvme-cli -- list`
+       device = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
        content = {
          type = "gpt";
 
@@ -60,9 +64,13 @@
           #
           # List SSDs: `sudo nvme list`
           # SSD supports 512/512 (physical/logical): `lsblk -t /dev/nvme0n1`
-          # But.. it actually supports 4096/4096:    `nvme id-ns -H /dev/nvme0n1` (difference between "in-use" and "Better")
-          # 512/512 is for compatibility and we can increase it: `sudo nvme format --lbaf=1 /dev/nvme0n1`
+          # But.. it can support 4096/4096: `sudo nvme id-ns -H /dev/nvme0n1` (difference between "in-use" and "Better")
+          # 512/512 is for compatibility and we can increase it: `sudo nvme format --lbaf=1 /dev/nvme0n1`.
+          # - Where lbaf corresponds to the number next to "LBA Format"
           #
+          # Now let's check again which LBA Format is in-use: `sudo nvme id-ns -H /dev/nvme0n1`
+          #
+          # Source:
           # https://wiki.archlinux.org/title/Advanced_Format
           # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
           ashift = "12";

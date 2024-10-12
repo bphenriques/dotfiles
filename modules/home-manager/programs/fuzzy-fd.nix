@@ -3,17 +3,17 @@
 with lib;
 
 let
-  cfg = config.custom.programs.fuzzy-ripgrep;
+  cfg = config.custom.programs.fuzzy-fd;
 in {
-  options.custom.programs.fuzzy-ripgrep = {
-    enable = mkEnableOption "fuzzy-ripgrep";
+  options.custom.programs.fuzzy-fd = {
+    enable = mkEnableOption "fuzzy-fd";
 
     # FIXME: this is not portable
     package = mkOption {
       type = types.package;
-      default = self.pkgs.fuzzy-ripgrep;
+      default = self.pkgs.fuzzy-fd;
       description = ''
-        fuzzy-ripgrep package to install.
+        fuzzy-fd package to install.
       '';
     };
 

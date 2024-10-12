@@ -25,7 +25,7 @@ let
         fuzzy-ripgrep = inputs.self.packages.${system}.fuzzy-ripgrep;
         fuzzy-fd = inputs.self.packages.${system}.fuzzy-fd;
         preview = inputs.self.packages.${system}.preview;
-        project = inputs.self.packages.${system}.proj;
+        project = inputs.self.packages.${system}.project;
 
         dotfiles-wallpapers = inputs.dotfiles-private.packages.${system}.wallpapers.override {
           selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];

@@ -12,7 +12,7 @@
   programs.htop.enable = true;        # Fancy `top`.
   programs.man.enable = true;         # RTFM
   custom.programs.project.enable = true; # Easier way to navigate jump through different projects
-  custom.programs.fuzzy-ffd.enable = true;  # Fuzzy fd
+  custom.programs.fuzzy-fd.enable = true;  # Fuzzy fd
   custom.programs.fuzzy-ripgrep.enable = true;  # Fuzzy rip-grep
 
   programs.ripgrep = {
