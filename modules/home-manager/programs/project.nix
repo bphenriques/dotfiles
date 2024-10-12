@@ -19,7 +19,7 @@ in {
 
     directory = mkOption {
       type = types.string;
-      default = config.xdg.userDirs.document;
+      default = config.xdg.userDirs.documents;
       description = ''
         directory where projects live
       '';

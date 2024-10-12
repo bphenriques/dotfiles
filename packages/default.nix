@@ -6,6 +6,6 @@ mylib.builders.forAllSystems (system:
     preview = pkgs.callPackage ./preview { };
     fuzzy-ripgrep = pkgs.callPackage ./fuzzy-ripgrep { };
     fuzzy-fd = pkgs.callPackage ./fuzzy-fd { inherit preview; };
-    project = pkgs.callPackage ./proj { inherit preview; };
+    project = pkgs.callPackage ./project { inherit preview; };
   }
 )
