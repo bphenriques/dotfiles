@@ -1,7 +1,6 @@
 # shellcheck shell=sh
 
 PROJ_ROOT="${PROJ_ROOT:-XDG_DOCUMENTS_DIR}"
-
 __proj_clone_repo() {
   target="$(basename "$1" .git)"
   if [ ! -d "$PROJ_ROOT/$target" ]; then
@@ -20,10 +19,24 @@ __proj_select() {
 
 # shellcheck disable=SC2016
 __proj_fish_shell() {
-  echo 'function proj
-  set -l target (command project $argv)
+  echo '
+function fproj
+  set -l target (project --select)
+  and test -d $target
   and cd $target
-end'
+  and builtin commandline --function cancel-commandline repaint
+end
+
+function proj
+  if test (count $argv) -eq 0
+    cd $PROJ_ROOT
+  else
+    set -l target (project --select)
+    and test -d $target
+    and cd $target
+  end
+end
+'
 }
 
 if [ ! -d "${PROJ_ROOT}" ]; then
@@ -32,15 +45,8 @@ if [ ! -d "${PROJ_ROOT}" ]; then
 fi
 
 case "${1:-}" in
-  "--init-shell")
-    shift 1
-    case "${1:-}" in
-      fish) __proj_fish_shell                     ;;
-      *)    echo "Unsupported shell: $1"; exit 1  ;;
-    esac
-    ;;
-  "") printf %s "${PROJ_ROOT}" ;;
-  *)
+  "--root") printf %s "${PROJ_ROOT}" ;;
+  "--select")
     shift 1
 
     search="${1-}"
@@ -56,5 +62,12 @@ case "${1:-}" in
       printf "Error: no match found for %s" "${search}"
       exit 2
     fi
+    ;;
+  "--init-shell")
+    shift 1
+    case "${1:-}" in
+      fish) __proj_fish_shell                     ;;
+      *)    echo "Unsupported shell: $1"; exit 1  ;;
+    esac
     ;;
 esac

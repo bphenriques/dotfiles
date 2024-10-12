@@ -3,6 +3,15 @@
 with lib;
 let
   cfg = config.custom.profiles.gaming;
+  steam-desktop-item = (pkgs.makeDesktopItem {
+    name = "steam";
+    desktopName = "Steam";
+    icon = "steam";
+    exec = "${pkgs.steam}/bin/steam";
+    terminal = false;
+    mimeTypes = [ "x-scheme-handler/steam" ];
+    categories = [ "Network" "FileTransfer" "Game" ];
+  });
 in
 {
   options.custom.profiles.gaming = with types; {
@@ -85,7 +94,16 @@ in
     '';
 
     environment.systemPackages = with pkgs; [
-      heroic  # Epic games / GoG
+      steam-desktop-item  # Steam desktop item
+      heroic              # Epic games / GoG
+
+      (pkgs.lutris.override {
+        extraPkgs = pkgs: [
+          pkgs.protobuf  # Required for battlenet.
+        ] ++ lib.optionals config.services.desktopManager.plasma6.enable [
+          pkgs.kdialog # Required for kde
+        ];
+      })
     ];
   };
 }

@@ -4,7 +4,7 @@ mylib.builders.forAllSystems (system:
   in rec {
     dotfiles = pkgs.callPackage ./dotfiles { };
     preview = pkgs.callPackage ./preview { };
-    fuzzy-ripgrep = pkgs.callPackage ./fuzzy-ripgrep { };
+    frg = pkgs.callPackage ./frg { };
     fuzzy-fd = pkgs.callPackage ./fuzzy-fd { inherit preview; };
     project = pkgs.callPackage ./project { inherit preview; };
   }

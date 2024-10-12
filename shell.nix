@@ -10,6 +10,8 @@ mkShellNoCC {
     pkgs.sops         # Manage secrets
     pkgs.shellcheck   # Scripting sanity checks
     shfmt             # Format shell scripts
+
+    # TODO: Likely format everything except 'hardware-configuration*'
     nixfmt-rfc-style  # Format nix files.
 
     gnupg

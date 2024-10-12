@@ -16,10 +16,9 @@ in
       # See the exact bind with `fish_key_reader`
       fish_user_key_bindings = concatStringsSep "\n" [
         ''bind \e/ frg''                                          # Alt + /     : Find text
-        ''bind \e. ffd''                                          # Alt + .     : Find file
-        ''bind \e\x20. ${config.programs.yazi.shellWrapperName}'' # Alt + SPC   : Browse files
-        ''bind \ep "proj select"''                                # Alt + p     : Open project
-        ''bind \eP proj''                                         # Alt + p     : Open project directory
+        ''bind \e. ffd''                                          # Alt + .     : Find file (cd or $EDITOR)
+        ''bind \e\x20 ${config.programs.yazi.shellWrapperName}''  # Alt + SPC   : Browse files
+        ''bind \ep "fproj"''                                      # Alt + p     : Open project
       ];
     };
 

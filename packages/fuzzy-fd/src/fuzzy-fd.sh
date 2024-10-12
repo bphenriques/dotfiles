@@ -5,7 +5,11 @@ __fish_shell() {
   echo '
 function ffd
   set -l target (fuzzy-fd $argv[1])
-  and cd $target
+  and if test -f $target
+    $EDITOR $target
+  else if test -d $target
+    cd $target
+  end
 end
 '
 }

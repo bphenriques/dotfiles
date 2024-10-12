@@ -22,15 +22,14 @@
       configurationLimit = 5;
 
       # I have Windows To Go on a external drive. I turn it off when not in use to reduce wear-and-tear.
-      # 1. `sudo fdisk -l` to get the device where EFI System is.
+      # 1. `sudo fdisk -l` to get the device where "EFI System" is.
       # 2. `sudo blkid {device}` to get the UUID field.
       extraEntries = ''
         menuentry "Windows 11" {
-          search --fs-uuid --no-floppy --set=root 171F-2B1D
+          search --fs-uuid --no-floppy --set=root 38CB-E581
           chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
         }
-
-        menuentry "Firmware settings" --class efi {
+        menuentry "BIOS Setup" --class efi {
           fwsetup
         }
         menuentry "Reboot" --class restart {
@@ -72,6 +71,8 @@
 
   # Gaming
   custom.profiles.gaming.enable = true;
+  custom.proton-run.enable = true;
+  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
   # Development
   virtualisation.docker.enable = true;
