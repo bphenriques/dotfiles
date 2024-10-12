@@ -3,31 +3,27 @@ let
   inherit (lib) optionalString concatStringsSep;
 in
 {
-  home.packages = with pkgs; [ fish ];
-
-  home.shellAliases = {
-    nixsh = "nix-shell --run ${lib.getExe pkgs.fish}";
-    devsh = "nix develop --command ${lib.getExe pkgs.fish}";
-  };
-
   programs.fish = {
     enable = true;
-
     plugins = [
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       { name = "pure"; src = pkgs.fishPlugins.pure.src; }
       { name = "fish-async-prompt"; src = pkgs.fishPlugins.async-prompt.src; }
-      { name = "frg"; src = self.pkgs.fishPlugins.frg.src; }
-      { name = "ffd"; src = self.pkgs.fishPlugins.ffd.src; }
     ];
 
     functions = {
-      nix-search = ''nix-env -qaP | grep -i $argv[1]'';
-      nix-run = ''nix run nixpkgs#$argv[1] --impure -- $argv[2..-1]'';
+      # For me to remember: https://fishshell.com/docs/current/interactive.html#shared-bindings
+      # See the exact bind with `fish_key_reader`
+      fish_user_key_bindings = concatStringsSep "\n" [
+        ''bind \e/ frg''                                          # Alt + /     : Find text
+        ''bind \e. ffd''                                          # Alt + .     : Find file
+        ''bind \e\x20. ${config.programs.yazi.shellWrapperName}'' # Alt + SPC   : Browse files
+        ''bind \ep "proj select"''                                # Alt + p     : Open project
+        ''bind \eP proj''                                         # Alt + p     : Open project directory
+      ];
     };
 
     interactiveShellInit = let
-      # Am I missing? https://codeberg.org/adamcstephens/dotfiles/src/branch/main/apps/fish/init.fish#L3
       nixDarwinIntegration = ''
         test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish

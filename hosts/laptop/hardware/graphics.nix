@@ -21,7 +21,7 @@
     powerManagement.enable = true;
     open = false;
     prime = {
-      # Use sudo lshw -c display to check businfo. Convert hexa to decimal, remove leading zeroes, replace the . with ;
+      # `sudo lshw -c` display to check businfo. Convert hexa to decimal, then remove leading zeroes, and replace . with ;
       amdgpuBusId = "PCI:5:0:0";
       nvidiaBusId = "PCI:1:0:0";
 
@@ -34,14 +34,6 @@
   environment.systemPackages = with pkgs; [
     (nvtopPackages.nvidia.override { amd = true; })  # `top` but for GPUs. Very very useful to see which GPU is being used
   ];
-
-  # Enabled by default on plasma6. Might need to enable it by hand outside of it. See https://github.com/NixOS/nixpkgs/blob/8843893c9b842fcac17263a5700ee496e2cbee7f/nixos/modules/services/desktop-managers/plasma6.nix#L224
-  # AMD has better battery life with PPD over TLP:
-  # https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
-  services.power-profiles-daemon.enable = true;
-
-  # TODO: Misc:
-  # https://github.com/sioodmy/dotfiles/blob/main/modules/laptop/default.nix
 
   services.xserver.videoDrivers = [ "nvidia" ];
 }

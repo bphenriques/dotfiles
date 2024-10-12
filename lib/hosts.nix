@@ -22,15 +22,10 @@ let
       private = inputs.dotfiles-private.dotfiles-private; # Not exactly "self" but close enough
       pkgs = {
         dotfiles = inputs.self.packages.${system}.dotfiles;
-        frg = inputs.self.packages.${system}.frg;
-        ffd = inputs.self.packages.${system}.ffd;
+        fuzzy-ripgrep = inputs.self.packages.${system}.fuzzy-ripgrep;
+        fuzzy-fd = inputs.self.packages.${system}.fuzzy-fd;
         preview = inputs.self.packages.${system}.preview;
-
-        fishPlugins = {
-          dotfiles  = inputs.self.packages.${system}.dotfilesFishPlugin;
-          ffd       = inputs.self.packages.${system}.ffdFishPlugin;
-          frg       = inputs.self.packages.${system}.frgFishPlugin;
-        };
+        project = inputs.self.packages.${system}.proj;
 
         dotfiles-wallpapers = inputs.dotfiles-private.packages.${system}.wallpapers.override {
           selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];

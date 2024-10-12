@@ -15,7 +15,6 @@ __preview_zip() {
 }
 
 __preview_pdf() {
-  # TODO: Use imagemagick and ghostscript to convert the first image to png
   __preview_text "$1"
 }
 

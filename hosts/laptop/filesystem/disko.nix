@@ -56,9 +56,12 @@
         };
 
         options = {
+          # Start with a shell: `nix-shell -p nvme-cli`
+          #
+          # List SSDs: `sudo nvme list`
           # SSD supports 512/512 (physical/logical): `lsblk -t /dev/nvme0n1`
-          # But.. it actually supports 4096/4096:    `nvme id-ns -H /dev/nvme0n1`
-          # 512/512 is for compatibility and we can increase it: `nvme format --lbaf=1 /dev/nvme0n1`
+          # But.. it actually supports 4096/4096:    `nvme id-ns -H /dev/nvme0n1` (difference between "in-use" and "Better")
+          # 512/512 is for compatibility and we can increase it: `sudo nvme format --lbaf=1 /dev/nvme0n1`
           #
           # https://wiki.archlinux.org/title/Advanced_Format
           # https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn

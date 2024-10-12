@@ -4,11 +4,7 @@ mkShellNoCC {
   name = "dotfiles";
   meta.description = "Development shell to manage my dotfiles";
 
-  # more ideas: https://github.com/isabelroses/dotfiles/blob/main/parts/programs/shell.nix#L11
-  # shellHook = config.pre-commit.installationScript;
-
-  DIRENV_LOG_FORMAT = "";
-
+  # TODO: more ideas: https://github.com/isabelroses/dotfiles/blob/main/parts/programs/shell.nix#L11
   packages = [
     pkgs.git          # The usual
     pkgs.sops         # Manage secrets
@@ -18,14 +14,5 @@ mkShellNoCC {
 
     gnupg
     age
-    #self.formatter # nix formatter
   ];
-
-  # inputsFrom = [ config.treefmt.build.devShell ];
-
-  #buildInputs = [
-  #  nixpkgs-fmt
-  #];
-
-  # shellHook = '''';
 }

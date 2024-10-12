@@ -1,8 +1,4 @@
 { config, lib, pkgs, ... }:
-# TODO
-# https://github.com/shazow/nixfiles/blob/main/home/bin/volumectl
-# https://github.com/mitchellh/nixos-config/blob/main/users/mitchellh/rofi
-
 let
   font = {
     variable = "Hack Nerd Font Mono";
