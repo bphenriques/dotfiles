@@ -34,16 +34,6 @@ in
   # - https://github.com/yazi-rs/plugins/tree/main/no-status.yazi
   # - https://github.com/yazi-rs/plugins/tree/main/smart-filter.yazi
   xdg.configFile = {
-    # Open directory or open file.
-    "yazi/plugins/smart-enter.yazi/init.lua".text = ''
-        return {
-          entry = function()
-            local h = cx.active.current.hovered
-            ya.manager_emit(h and h.cha.is_dir and "enter" or "open", { hovered = true })
-          end,
-        }
-    '';
-
     # Smart sorting depending on the directory
     "yazi/plugins/folder-rules.yazi/init.lua".text = ''
       local function setup()
