@@ -55,3 +55,11 @@ https://github.com/fufexan/dotfiles/tree/main/home/programs/wayland
 
 Sway
 https://github.com/NickCao/flakes/blob/d99c0a28b9357adce9749ca49364038184a1b95e/nixos/mainframe/home.nix#L22
+
+
+Wofi:
+# https://github.com/shazow/nixfiles/blob/main/home/bin/volumectl
+# https://github.com/mitchellh/nixos-config/blob/main/users/mitchellh/rofi
+
+
+https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware.nix#L65

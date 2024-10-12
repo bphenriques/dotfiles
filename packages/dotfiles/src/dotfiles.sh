@@ -53,9 +53,19 @@ _flake_update() {
   popd > /dev/null
 }
 
+_init_fish() {
+  echo 'function dotfiles
+  if test (count $argv) -eq 0
+    cd $DOTFILES_LOCATION
+  else
+    command dotfiles $argv
+  end
+end'
+}
+
 cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
 
-case "$1" in
+case "${1:-}" in
   sync | s)
     shift 1
 
@@ -113,6 +123,13 @@ case "$1" in
     # nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
     # Improvements are blocked by https://github.com/NixOS/nix/issues/6129
     nix profile diff-closures --profile /nix/var/nix/profiles/system
+    ;;
+  "init-shell")
+    shift 1
+    case "${1:-}" in
+      fish) _init_fish                            ;;
+      *)    echo "Unsupported shell: $1"; exit 1  ;;
+    esac
     ;;
   *) usage && exit 0 ;;
 esac

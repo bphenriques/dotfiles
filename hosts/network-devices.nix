@@ -1,4 +1,4 @@
-# These servers are not built using Nix but I am specifying here as I refer them in my desktop hosts.
+# These servers are not built using Nix but I am specifying here as I refer to them in my desktop hosts.
 {
   # Server: Synology
   home-nas = {

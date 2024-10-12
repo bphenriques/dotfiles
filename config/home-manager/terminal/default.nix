@@ -3,13 +3,17 @@
   imports = [
     ./fish.nix
     ./ghostty.nix
+    ./yazi.nix
   ];
 
-  programs.bat.enable = true;   # Better file previewer
-  programs.fd.enable = true;    # Better `find`.
-  programs.jq.enable = true;    # JSON query.
-  programs.htop.enable = true;  # Fancy `top`.
-  programs.man.enable = true;   # RTFM
+  programs.bat.enable = true;         # Better file previewer
+  programs.fd.enable = true;          # Better `find`.
+  programs.jq.enable = true;          # JSON query.
+  programs.htop.enable = true;        # Fancy `top`.
+  programs.man.enable = true;         # RTFM
+  custom.programs.project.enable = true; # Easier way to navigate jump through different projects
+  custom.programs.fuzzy-ffd.enable = true;  # Fuzzy fd
+  custom.programs.fuzzy-ripgrep.enable = true;  # Fuzzy rip-grep
 
   programs.ripgrep = {
     enable = true;
@@ -46,20 +50,6 @@
     config.whitelist.prefix = [ config.custom.dotfiles.directory ]; # Surpress prompt in my private dotfiles
   };
 
-  # File navigation
-  programs.yazi = {
-    enable = true;
-    enableFishIntegration = true;
-    shellWrapperName = "y";
-
-    settings = {
-      manager = {
-        sort_by = "natural";
-        sort_dir_first = true;
-      };
-    };
-  };
-
   # Fuzzy matching
   programs.fzf = {
     enable = true;
@@ -89,12 +79,8 @@
 
       # Monitoring
       procs       # Fancy `ps`.
-
-      # Custom packages
-      self.pkgs.frg         # Ripgrep + FZF
-      self.pkgs.ffd         # FD + FZF to search nested directories
-      self.pkgs.preview     # Preview files
     ];
+
     sessionVariables = {
       VISUAL  = "$EDITOR";    # Set within the editor config.
       PAGER   = "less -iMR";
@@ -119,49 +105,23 @@
       ll = "ls -l";
 
       # Quality of life
-      mkdir = "mkdir -pv";
-      ".."  = "cd ..";
-      "..."  = "cd ../..";
-      ":q"   = "exit";
-      tmpdir = "cd (mktemp -d)";
+      mkdir   = "mkdir -pv";
+      ".."    = "cd ..";
+      "..."   = "cd ../..";
+      ":q"    = "exit";
+      tmpdir  = "cd (mktemp -d)";
 
       # Text Processor
       e = "$EDITOR";
 
-      # Utility
+      # Nix utility functions to set the SHELL automatically
+      nix-shell = "nix-shell --run $SHELL";
+      devshell  = "nix develop --command $SHELL";
       whatsmyip = "${lib.getExe pkgs.curl} ifconfig.me";
-    } // (lib.mkIf pkgs.stdenv.isLinux {
+    } // (lib.optionalAttrs pkgs.stdenv.isLinux {
         pbcopy = lib.getExe pkgs.xclip;
         pbpaste = "${lib.getExe pkgs.xclip} -o";
       }
     );
   };
 }
-
-# TODO: FIXME:
-# Alt+SPC P     ---> List projects (and enter)
-# Alt+SPC SPC   ---> Find file in project
-# Alt+SPC .     ---> Find file in project
-# SPC . BROWSE FILES
-# SPC : Execute
-# SPC /+ search
-# SPC [+ previous
-# SPC ]+ next
-# SPC c+ next
-# SPC f+ file
-#      . Find File
-#      / Find file in project
-#      ? Find file from here
-#      d Find directory
-# SPC SPC Find file in project
-
-
-# SPC g+ git
-# SPC h+ help
-# SPC p+ project
-#      p open project
-
-# SPC c+ code
-
-# SPC o+ open
-#      REPL (same window)

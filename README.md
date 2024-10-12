@@ -32,7 +32,7 @@ This repository contains the definition of my machines using [nix](https://nixos
    ```
 
 2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its IP.
-3. On an source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
+3. On the source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
    ```
    HOST=new-host
    TARGET_IP=192.168.68.58
@@ -83,7 +83,7 @@ This repository contains the definition of my machines using [nix](https://nixos
 # Secrets
 
 - Secrets: [`sops-nix`](https://github.com/Mic92/sops-nix).
-- Confidential but not secrets: private flake under `bphenriques/dotfiles-private`.
+- Private information: private flake under `bphenriques/dotfiles-private`.
 
 Adding new hosts requires:
 1. Generate key pair using: `nix-shell -p age --command "age-keygen"`.

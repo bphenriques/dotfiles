@@ -6,9 +6,6 @@
     ./input-remapper
   ];
 
-  programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
-  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
-
   xdg.userDirs = {
     enable = true;
     createDirectories = false;
@@ -21,6 +18,9 @@
 
     extraConfig.XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
   };
+
+  programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
+  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [

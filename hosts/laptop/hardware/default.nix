@@ -2,11 +2,10 @@
 
 {
   imports = [
-    ./hardware-configuration.nix   # Output of nixos-generate-config --root /mnt
-    ./graphics.nix                 # AMD iGPU + Nvidia dGPU
-    ./peripherals.nix     # Mouse / Keyboard / etc
+    ./hardware-configuration.nix    # Output of nixos-generate-config --root /mnt
+    ./graphics.nix                  # AMD iGPU + Nvidia dGPU
+    ./peripherals.nix               # Mouse / Keyboard / etc
   ];
-
 
   # Networking
   networking.networkmanager.wifi = {
@@ -15,15 +14,19 @@
   };
 
   # Bluetooth
-  # TODO: https://github.com/bashfulrobot/nixos/blob/main/modules/hw/bluetooth/default.nix
-  hardware.bluetooth = {
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
+  # Power
+  # AMD has better battery life with PPD over TLP:
+  # https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
+  services.power-profiles-daemon.enable = true;
+  services.auto-epp = {
     enable = true;
-    powerOnBoot = true; # Power up the bluetooth controller on boot
-    settings = {
-      General = {
-        Enable = "Source,Sink,Media,Socket"; # Enable A2DP Sink
-      };
+    # Making the default config explicit. See `cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences`
+    settings.Settings = {
+      epp_state_for_AC = "balance_performance";
+      epp_state_for_BAT = "power";
     };
   };
-  services.blueman.enable = true;
 }
