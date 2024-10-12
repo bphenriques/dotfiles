@@ -117,7 +117,6 @@ case "${1:-}" in
     success "Optimizing Nix Store"
     ;;
   repair | r) sudo nix-store --repair --verify --check-contents ;;
-  format | f) nix-shell -p fd nixpkgs-fmt --command "fd -e nix -E '/nix/sources.nix' -E 'hardware-configuration*' -x nixpkgs-fmt \"{}\" \;" ;;
   describe | d) nix-store -qR /run/current-system | sed -n -e 's/\/nix\/store\/[0-9a-z]\{32\}-//p' | sort | uniq ;;
   changelog)
     # nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)

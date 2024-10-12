@@ -22,7 +22,7 @@ let
       private = inputs.dotfiles-private.dotfiles-private; # Not exactly "self" but close enough
       pkgs = {
         dotfiles = inputs.self.packages.${system}.dotfiles;
-        fuzzy-ripgrep = inputs.self.packages.${system}.fuzzy-ripgrep;
+        frg = inputs.self.packages.${system}.frg;
         fuzzy-fd = inputs.self.packages.${system}.fuzzy-fd;
         preview = inputs.self.packages.${system}.preview;
         project = inputs.self.packages.${system}.project;

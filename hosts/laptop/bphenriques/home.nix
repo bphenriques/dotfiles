@@ -20,7 +20,6 @@
   };
 
   programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
-  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [

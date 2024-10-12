@@ -34,7 +34,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       protonup-qt       # Manage Proton versions
       protontricks      # Install utility within proton
       proton-run        # Run .exe from terminal
