@@ -13,12 +13,12 @@ in
 
     functions = {
       # For me to remember: https://fishshell.com/docs/current/interactive.html#shared-bindings
-      # See the exact bind with `fish_key_reader`
+      # Print the binding combo using `fish_key_reader`
       fish_user_key_bindings = concatStringsSep "\n" [
-        ''bind \e/ frg''                                          # Alt + /     : Find text
-        ''bind \e. ffd''                                          # Alt + .     : Find file (cd or $EDITOR)
-        ''bind \e\x20 ${config.programs.yazi.shellWrapperName}''  # Alt + SPC   : Browse files
-        ''bind \ep "fproj"''                                      # Alt + p     : Open project
+        ''bind \e/ frg-widget''                                     # Alt + /     : Find text
+        ''bind \e. ffd-widget''                                     # Alt + .     : Find file (cd or $EDITOR)
+        ''bind \e\x20 ${config.programs.yazi.shellWrapperName}''    # Alt + SPC   : Browse files
+        ''bind \ep p-widget''                                       # Alt + p     : Open project
       ];
     };
 

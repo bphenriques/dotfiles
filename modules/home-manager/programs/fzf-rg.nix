@@ -1,19 +1,18 @@
 { config, lib, pkgs, self, ... }:
 
 with lib;
-
 let
-  cfg = config.custom.programs.fuzzy-fd;
+  cfg = config.custom.programs.fzf-rg;
 in {
-  options.custom.programs.fuzzy-fd = {
-    enable = mkEnableOption "fuzzy-fd";
+  options.custom.programs.fzf-rg = {
+    enable = mkEnableOption "fzf-rg";
 
     # FIXME: this is not portable
     package = mkOption {
       type = types.package;
-      default = self.pkgs.fuzzy-fd;
+      default = self.pkgs.fzf-rg;
       description = ''
-        fuzzy-fd package to install.
+        fzf-rg package to install.
       '';
     };
 
