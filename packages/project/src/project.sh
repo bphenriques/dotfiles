@@ -1,12 +1,17 @@
 # shellcheck shell=sh
 
 PROJ_ROOT="${PROJ_ROOT:-XDG_DOCUMENTS_DIR}"
+
 __proj_clone_repo() {
   target="$(basename "$1" .git)"
   if [ ! -d "$PROJ_ROOT/$target" ]; then
     git clone "$target" "$PROJ_ROOT/$target"
   fi
   printf %s "$PROJ_ROOT/$target"
+}
+
+__proj_root() {
+  printf %s "${PROJ_ROOT}"
 }
 
 __proj_select() {
@@ -20,18 +25,28 @@ __proj_select() {
 # shellcheck disable=SC2016
 __proj_fish_shell() {
   echo '
-function fproj
-  set -l target (project --select)
+function p-widget
+  set --local buffer (commandline --current-buffer)
+  set --local target (project --select $buffer)
+
+  # Ensure prompt does not get broken if I cancel
+  builtin commandline --function cancel-commandline repaint
+
+  not test -z $target
   and test -d $target
   and cd $target
-  and builtin commandline --function cancel-commandline repaint
 end
 
-function proj
+function p
   if test (count $argv) -eq 0
     cd $PROJ_ROOT
   else
-    set -l target (project --select)
+    set -l target (project --select $argv[1])
+
+    # Ensure prompt does not get broken if I cancel
+    builtin commandline --function cancel-commandline repaint
+
+    not test -z $target
     and test -d $target
     and cd $target
   end
@@ -45,7 +60,7 @@ if [ ! -d "${PROJ_ROOT}" ]; then
 fi
 
 case "${1:-}" in
-  "--root") printf %s "${PROJ_ROOT}" ;;
+  "--root") __proj_root ;;
   "--select")
     shift 1
 

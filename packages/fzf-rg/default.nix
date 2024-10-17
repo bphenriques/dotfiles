@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
-  name = "frg";
+  name = "fzf-rg";
   runtimeInputs = with pkgs; [ ripgrep fzf ];
-  text = lib.fileContents ./src/frg.sh;
+  text = lib.fileContents ./src/fzf-rg.sh;
 }

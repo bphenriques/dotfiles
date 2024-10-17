@@ -1,6 +1,6 @@
 { lib, pkgs, preview, ... }:
 pkgs.writeShellApplication {
-  name = "fuzzy-fd";
+  name = "fzf-fd";
   runtimeInputs = with pkgs; [ fzf fd preview ];
-  text = lib.fileContents ./src/fuzzy-fd.sh;
+  text = lib.fileContents ./src/fzf-fd.sh;
 }

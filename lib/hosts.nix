@@ -22,8 +22,8 @@ let
       private = inputs.dotfiles-private.dotfiles-private; # Not exactly "self" but close enough
       pkgs = {
         dotfiles = inputs.self.packages.${system}.dotfiles;
-        frg = inputs.self.packages.${system}.frg;
-        fuzzy-fd = inputs.self.packages.${system}.fuzzy-fd;
+        fzf-rg = inputs.self.packages.${system}.fzf-rg;
+        fzf-fd = inputs.self.packages.${system}.fzf-fd;
         preview = inputs.self.packages.${system}.preview;
         project = inputs.self.packages.${system}.project;
 
