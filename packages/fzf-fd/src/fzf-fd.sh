@@ -7,7 +7,7 @@ function ffd-widget
   set --local buffer (builtin commandline --current-buffer | string trim -l)
 
   if test -z $buffer
-    set -l target (fzf-fd)
+    set --local target (fzf-fd)
 
     not test -z $target
     and if test -f $target
@@ -20,14 +20,14 @@ function ffd-widget
   else
     # if buffer is not empty, replace the current token with the search result
     set --local current_token (builtin commandline --current-token)
-    set -l target (fzf-fd $current_token)
+    set --local target (fzf-fd $current_token)
     builtin commandline -rt $target
     and builtin commandline --function repaint
   end
 end
 
 function ffd
-  set -l target (fzf-fd $argv[1])
+  set --local target (fzf-fd $argv[1])
 
   not -z $target
   and if test -f $target

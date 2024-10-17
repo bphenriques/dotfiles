@@ -7,23 +7,23 @@ function frg-widget
   set --local buffer (builtin commandline --current-buffer | string trim -l)
 
   if test -z $buffer
-    set -l target (fzf-rg)
+    set --local target (fzf-rg)
     not test -z $target
-    and if test -f $target
+    and test -f $target
     and $EDITOR $target
   else
     # if buffer is not empty, replace the current token with the search result
     set --local current_token (builtin commandline --current-token)
-    set -l target (fzf-rg $current_token)
+    set --local target (fzf-rg $current_token)
     builtin commandline -rt $target
     and builtin commandline --function repaint
   end
 end
 
 function frg
-  set -l target (fzf-rg $argv[1])
+  set --local target (fzf-rg $argv[1])
   not test -z $target
-  and if test -f $target
+  and test -f $target
   and $EDITOR $target
 end
 '

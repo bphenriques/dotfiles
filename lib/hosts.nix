@@ -19,18 +19,8 @@ let
 
   mkExtraArgs = system: extraSpecialArgs: {
     self = {
-      private = inputs.dotfiles-private.dotfiles-private; # Not exactly "self" but close enough
-      pkgs = {
-        dotfiles = inputs.self.packages.${system}.dotfiles;
-        fzf-rg = inputs.self.packages.${system}.fzf-rg;
-        fzf-fd = inputs.self.packages.${system}.fzf-fd;
-        preview = inputs.self.packages.${system}.preview;
-        project = inputs.self.packages.${system}.project;
-
-        dotfiles-wallpapers = inputs.dotfiles-private.packages.${system}.wallpapers.override {
-          selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
-        };
-      };
+      pkgs = inputs.self.packages.${system};
+      private = inputs.dotfiles-private.packages.${system} // inputs.dotfiles-private.dotfiles-private;
     };
     community.pkgs = {
       ghostty = inputs.ghostty.packages.${system}.default;
