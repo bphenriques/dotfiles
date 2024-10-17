@@ -30,6 +30,11 @@ Listing only the most relevant outputs. See the source-code for more details.
 - `fzf-fd`: [`fzf`](https://github.com/junegunn/fzf) + [`fd`](https://github.com/sharkdp/fd). Includes `fish` widget.
 - `preview`: Custom _barebones_ terminal file previewer to together with the other widgets. I really like [`yazi`](https://yazi-rs.github.io/) previewer but can't use it in isolation.
 
+Tryout using:
+```shell
+nix run github:bphenriques/dotfiles#{package}
+```
+
 ### [Home Manager](https://github.com/nix-community/home-manager) modules
 
 - `programs-dotfiles`: Accompanies the `dotfiles` package.
@@ -56,14 +61,14 @@ Listing only the most relevant outputs. See the source-code for more details.
 #### Create host
 
 1. Create a bootable USB [installer](https://nixos.org/download/):
-   ```sh
+   ```shell
    sudo fdisk -l
    sudo dd bs=4M if=<ISO> of=<PEN_DRIVE> status=progress oflag=sync
    ```
 
 2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its IP.
 3. On the source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
-   ```sh
+   ```shell
    HOST=new-host
    TARGET_IP=192.168.68.58
    ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
@@ -73,14 +78,14 @@ Listing only the most relevant outputs. See the source-code for more details.
 
 1. Boot onto the NixOS installer (see previous section).
 2. On a NixOS source machine run:
-    ```sh
+    ```shell
     HOST=new-host
     TARGET_IP=192.168.68.58
     ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
     ```
 
 3. On the target machine, run the following after the installation:
-    ```sh
+    ```shell
     HOST=laptop
     BITWARDEN_EMAIL=...
     nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- $HOST $BITWARDEN_EMAIL
@@ -90,19 +95,19 @@ Listing only the most relevant outputs. See the source-code for more details.
 
 1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
 2. Boostrap:
-   ```sh
+   ```shell
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
    
 3. Setup the dotfiles repository:
-   ```sh
+   ```shell
    HOST=work-macos
    BITWARDEN_EMAIL=...
    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop $BITWARDEN_EMAIL
    ```
 
 5. Apply:
-   ```sh
+   ```shell
    "$HOME"/.dotfiles/packages/dotfiles/dotfiles.sh sync
    ```
 

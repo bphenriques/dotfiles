@@ -60,8 +60,8 @@ if [ ! -d "${PROJ_ROOT}" ]; then
 fi
 
 case "${1:-}" in
-  "--root") __proj_root ;;
-  "--select")
+  --root)   __proj_root ;;
+  --select)
     shift 1
 
     search="${1-}"
@@ -78,7 +78,7 @@ case "${1:-}" in
       exit 2
     fi
     ;;
-  "--init-shell")
+  --init-shell)
     shift 1
     case "${1:-}" in
       fish) __proj_fish_shell                     ;;

@@ -123,7 +123,7 @@ case "${1:-}" in
     # Improvements are blocked by https://github.com/NixOS/nix/issues/6129
     nix profile diff-closures --profile /nix/var/nix/profiles/system
     ;;
-  "--init-shell")
+  --init-shell)
     shift 1
     case "${1:-}" in
       fish) _init_fish                            ;;
