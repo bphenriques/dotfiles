@@ -1,4 +1,4 @@
 {
-  darwin-screencapture  = ./system/screencapture.nix;
-  darwin-desktop        = ./system/desktop.nix;
+  system-screencapture  = ./system/screencapture.nix;
+  system-desktop        = ./system/desktop.nix;
 }
