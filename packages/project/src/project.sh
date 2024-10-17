@@ -41,7 +41,7 @@ function p
   if test (count $argv) -eq 0
     cd $PROJ_ROOT
   else
-    set -l target (project --select $argv[1])
+    set --local target (project --select $argv[1])
 
     # Ensure prompt does not get broken if I cancel
     builtin commandline --function cancel-commandline repaint

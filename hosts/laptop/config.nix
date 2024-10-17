@@ -1,4 +1,9 @@
 { config, pkgs, lib, self, ... }:
+let
+  wallpapers = self.private.wallpapers.override {
+    selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
+  };
+in
 {
   imports = [
     ./hardware          # CPU, graphics, peripherals, etc
@@ -62,7 +67,7 @@
    pkgs.sddm-astronaut
    (pkgs.writeTextDir "share/sddm/themes/sddm-astronaut-theme/theme.conf.user" ''
      [General]
-     background=${self.pkgs.dotfiles-wallpapers}/share/wallpapers/watch-tower.png
+     background=${wallpapers}/share/wallpapers/watch-tower.png
      FullBlur="false"
      PartialBlur="false"
      FormPosition="center"
