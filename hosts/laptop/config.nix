@@ -15,6 +15,7 @@ in
   ];
 
   networking.hostName = "bphenriques-laptop";
+  networking.interfaces.lo.wakeOnLan.enable = true;
 
   # Boot: See what it is taking most time: `systemd-analyze critical-chain`
   boot = {
@@ -72,6 +73,15 @@ in
      PartialBlur="false"
      FormPosition="center"
    '')
+
+   (pkgs.writeScriptBin "reboot-to-windows" ''
+     #!${pkgs.stdenv.shell}
+     sudo grub-reboot "Windows 11" && reboot $@
+   '')
+   (pkgs.writeScriptBin "reboot-to-bios" ''
+      #!${pkgs.stdenv.shell}
+      sudo grub-reboot "BIOS Setup" && reboot $@
+    '')
  ];
 
   # Gaming
