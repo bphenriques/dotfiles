@@ -89,10 +89,10 @@ in
   custom.proton-run.enable = true;
   custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
-  # Development
+  # Docker
   virtualisation.docker.enable = true;
   virtualisation.docker.enableOnBoot = false;        # Dont need it all the time: systemctl start docker
-  hardware.nvidia-container-toolkit.enable = true;   # Enable nvidia runtime integration.
+  hardware.nvidia-container-toolkit.enable = true;   # test: docker run --rm --device=nvidia.com/gpu=all ubuntu nvidia-smi
 
   # System-wide secrets
   sops.defaultSopsFile = ./secrets.yaml;
