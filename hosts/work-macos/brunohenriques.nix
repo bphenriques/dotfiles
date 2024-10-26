@@ -14,10 +14,7 @@
     terraform
   ];
 
-  # xdg.userDirs not supported in MacOS
-  home.sessionVariables = {
-    XDG_DOCUMENTS_DIR = "${config.home.homeDirectory}/workspace";
-  };
+  custom.programs.project.directory = "${config.home.homeDirectory}/workspace";
 
   home.stateVersion = "22.11";
 }
