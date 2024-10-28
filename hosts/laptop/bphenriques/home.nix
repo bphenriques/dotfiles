@@ -19,8 +19,6 @@
     extraConfig.XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
   };
 
-  programs.firefox.profiles.default.bookmarks = self.private.firefox-bookmarks;
-
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
     # Tidy up most things under $HOME

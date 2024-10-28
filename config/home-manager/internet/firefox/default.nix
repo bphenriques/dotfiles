@@ -13,7 +13,7 @@
           bitwarden
           keepa
           linkding-extension
-          tridactyl
+          floccus
           no-pdf-download
         ];
 
