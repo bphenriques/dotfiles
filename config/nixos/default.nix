@@ -1,5 +1,10 @@
 { pkgs, lib, network-devices, ... }:
 {
+  imports = [
+    ./wayland.nix
+    ./file-manager.nix
+  ];
+
   nix = {
     gc = {
       automatic = true;

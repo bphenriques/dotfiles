@@ -18,7 +18,7 @@ This repository contains the definition of my machines using [nix](https://nixos
 | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M         | NVIDIA® GeForce RTX™ 4060 8GB | ❄️ |
 | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏 |
 
-# Flake Outputs
+# 📦 Flake Outputs
 
 Listing only the most relevant outputs. See the source-code for more details.
 

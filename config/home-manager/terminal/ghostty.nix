@@ -52,17 +52,25 @@ in
   # MacOS requires installation by hand for now: https://github.com/ghostty-org/ghostty/releases/tag/tip
   home.packages = lib.optionals pkgs.stdenv.isLinux [
     # Fixes issues with GTK, need to sort this out separately
-    (pkgs.writeScriptBin "ghostty" ''
+    (pkgs.writeScriptBin "ghostty-x11" ''
       #!${pkgs.stdenv.shell}
       GDK_BACKEND=x11 exec ${community.pkgs.ghostty}/bin/ghostty "$@"
     '')
 
     (pkgs.makeDesktopItem {
       name = "Ghostty";
+      desktopName = "Ghostty-X11";
+      categories = [ "Utility" "Development" ];
+      exec = "GDK_BACKEND=x11 exec ${community.pkgs.ghostty}/bin/ghostty";
+    })
+
+    (pkgs.makeDesktopItem {
+      name = "Ghostty-Wayland";
       desktopName = "Ghostty";
       categories = [ "Utility" "Development" ];
       exec = "GDK_BACKEND=x11 exec ${community.pkgs.ghostty}/bin/ghostty";
     })
+
   ];
 
   xdg.mimeApps.defaultApplications."x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
