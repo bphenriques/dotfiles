@@ -2,7 +2,7 @@
 {
   imports = [
     ./wayland.nix
-    ./file-manager.nix
+    ./thunar.nix
   ];
 
   nix = {

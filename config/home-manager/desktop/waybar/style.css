@@ -26,6 +26,25 @@
 @define-color mantle #181825;
 @define-color crust #11111b;
 
+
+
+@define-color bg_main rgba(25, 25, 25, 0.65);
+@define-color bg_main_tooltip rgba(0, 0, 0, 0.7);
+
+
+/*base background color of selections */
+@define-color bg_hover rgba(200, 200, 200, 0.3);
+/*base background color of active elements */
+@define-color bg_active rgba(100, 100, 100, 0.5);
+
+/*base border color*/
+@define-color border_main rgba(255, 255, 255, 0.2);
+/*text color for entries, views and content in general */
+@define-color content_main white;
+/*text color for entries that are unselected */
+@define-color content_inactive rgba(255, 255, 255, 0.25);
+
+
 * {
   font-family: "Maple Mono", "CaskaydiaCove NF";
   font-size: 15px;
@@ -33,78 +52,47 @@
 }
 
 #waybar {
-  background: rgba(30, 30, 46, 0.9);
+  background: rgba(30, 30, 46, 0.75);
   color: @text;
-  border-radius: 5px;
 }
 
-#custom-spacer {
-  background: @blue;
-  color: @crust;
-  border-radius: 5px;
-  margin: 2px 2px;
-  padding: 0.1rem 0.7rem;
+#custom-os {
+	font-family: "JetBrainsMono Nerd Font";
+  font-size: 20px;
+	padding-left: 12px;
+	padding-right: 20px;
+	transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+#custom-os_button:hover {
+  background:  @bg_hover;
+	color: @content_main;
 }
 
 #workspaces {
-  font-weight: bold;
-  background: @surface0;
-  color: @text;
-  box-shadow: none;
-  text-shadow: none;
-  border-radius: 10px;
-  transition: 0.2s ease;
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-top: 1px;
-  margin: 5px 5px;
+  color: transparent;
+	margin-right: 1.5px;
+	margin-left: 1.5px;
 }
-
 #workspaces button {
-  color: @overlay2;
-  transition: all 0.3s ease-in-out;
-  padding: 0.2rem 10px;
-  /* animation: ws_normal 20s ease-in-out 1; */
+  padding: 3px;
+  color: @content_inactive;
+	transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-
-#workspaces button.empty {
-  color: @text;
-}
-
-#workspaces button.visible {
-  color: @crust;
-  padding: 0.2rem 2rem;
-  background: @sky;
-  transition: all 0.3s ease-in-out;
-  /* transition: all 0.4s cubic-bezier(0.55, 0.68, 0.48, 1.682); */
-}
-
 #workspaces button.active {
-  color: @crust;
-  background: @mauve;
-  transition: all 0.3s ease-in-out;
-  padding: 0.2rem 2rem;
-  /* transition: all 0.4s cubic-bezier(0.55, 0.68, 0.48, 1.682); */
+	color: @content_main;
+	border-bottom: 3px solid white;
 }
-
+#workspaces button.focused {
+  color: @bg_active;
+}
+#workspaces button.urgent {
+	background:  rgba(255, 200, 0, 0.35);
+	border-bottom: 3px dashed @warning_color;
+	color: @warning_color;
+}
 #workspaces button:hover {
-  padding: 0.2rem 2rem;
-  color: @crust;
-  background: @overlay2;
-  animation: ws_hover 20s ease-in-out 1;
-  transition: all 0.5s cubic-bezier(0.55, -0.68, 0.48, 1.682);
-}
-
-#taskbar,
-#window {
-  background-color: @surface0;
-  border-radius: 5px;
-  padding: 0rem 1rem;
-  margin: 5px 5px;
-}
-
-window#waybar.empty {
-  background-color: @base;
+  background: @bg_hover;
+	color: @content_main;
 }
 
 window#waybar.fullscreen,
@@ -119,9 +107,7 @@ window#waybar.swallowing {
 #backlight,
 #battery,
 #pulseaudio {
-  background: @surface0;
   padding: 0.1rem 0.7rem;
-  border-radius: 5px;
   margin: 5px 5px;
 }
 
@@ -129,7 +115,6 @@ window#waybar.swallowing {
   color: @text;
   margin-left: 0px;
   margin-right: 0px;
-  border-radius: 5px;
 }
 
 #cpu {
@@ -142,14 +127,18 @@ window#waybar.swallowing {
 
 #clock {
   color: @mauve;
-  border-radius: 5px;
-  background: @surface0;
   margin: 5px 5px;
-  padding: 0.1rem 0.7rem;
 }
 
 #battery {
   color: @pink;
+}
+
+#language {
+  margin: 5px 5px;
+  padding: 0.1rem 0.7rem;
+  border-radius: 5px;
+  border: 1px solid white;
 }
 
 #battery.charging {

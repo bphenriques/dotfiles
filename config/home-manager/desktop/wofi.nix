@@ -1,4 +1,7 @@
 { config, lib, pkgs, ... }:
+# TODO alternative: https://github.com/abenz1267/walker
+
+
 let
   font = {
     variable = "Hack Nerd Font Mono";

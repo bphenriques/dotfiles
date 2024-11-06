@@ -1,4 +1,4 @@
-{ self, mylib, nixpkgs, home-manager, sops-nix, disko, nur, ... }:
+{ self, mylib, nixpkgs, home-manager, sops-nix, disko, nur, walker, ... }:
 let
   inherit (nixpkgs.lib.attrsets) attrValues;
 

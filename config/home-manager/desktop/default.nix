@@ -3,10 +3,12 @@
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
     ./hyprland
-    ./wofi.nix    # Application Launcher
     ./waybar      # Bar on top
     ./kanshi.nix  # Display Manager
     ./dunst.nix   # Notifications
+    ./wlogout.nix   # Notifications
+    ./wofi.nix    # Application Launcher
+    ./walker.nix    # Application Launcher
   ];
 
   # Use the following theme: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/gtk.nix#L85

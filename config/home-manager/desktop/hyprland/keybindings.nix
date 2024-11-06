@@ -57,7 +57,6 @@ let
 in
 {
   wayland.windowManager.hyprland.settings = lib.mkMerge [
-
     {
       bind = [ "$mod, W, exec, pkill -SIGUSR1 waybar" ]; # Toggle waybar
     }

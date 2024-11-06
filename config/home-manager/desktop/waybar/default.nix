@@ -1,8 +1,10 @@
 { lib, config, pkgs, ... }:
 # https://codeberg.org/explosion-mental/wallust generates colors autoamtically.
-let
-  alertSpan = s: ''<span color="{{color4}}">${s}</span>'';
-in
+# https://github.com/bitSheriff/dotfiles/blob/master/configuration/.config/waybar/modules/modules.jsonc
+# Notification: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/notifications.jsonc
+
+
+# pkill waybar && hyprctl dispatch exec waybar
 {
   # https://github.com/nix-community/home-manager/issues/3599
   # do not use the systemd service as it is flaky and unreliable
@@ -12,39 +14,71 @@ in
     style = ./style.css;
     settings = {
       "bar" = {
-        output = ["eDP-1" "HDMI-A-1"];
-
+        #output = ["eDP-1" "HDMI-A-1"];
+        reload_style_on_change = true;
         layer = "top";
         position = "top";
-        margin-left = 9;
-        margin-right = 9;
+        margin-left = 0;
+        margin-right = 0;
         margin-top = 0;
         margin-bottom = 0;
-        spacing = 4;
+        spacing = 2;
 
-        reload_style_on_change = true;
 
         modules-left = [
-          "custom/spacer"
+          "custom/os"
           "hyprland/workspaces"
-          "hyprland/window"
-        ]; # [ "custom/nix" "idle_inhibitor" ];
-        modules-center = [
         ];
-
+        modules-center = [
+          "hyprland/window"
+        ];
         modules-right = [
+          "tray"
           "pulseaudio"
+          "battery"
+          "hyprland/language"
           "network"
+
+          # List of unsure widgets
           "memory"
           "cpu"
+          "disk"
           "backlight"
-          "battery"
+          "power-profiles-daemon"
+
           "clock"
-          "tray"
         ];
 
-        "custom/spacer" = {
-          format = "   ";
+        "hyprland/language" = {
+          format-en = "US";
+          format-pt = "PT";
+        };
+
+        "custom/os" = {
+          format = "";
+          on-click = "wofi --show drun";
+          tooltip = false;
+          #menu = "on-click";
+          #menu-file = ./menu/power_menu.xml;
+          #menu-actions = {
+          #  shutdown = "shutdown";
+          #  reboot = "reboot";
+          #  suspend = "systemctl suspend";
+          #  hibernate = "systemctl hibernate";
+          #};
+        };
+
+        "custom/media" = {
+          format = "{icon} {}";
+          escape = true;
+          return-type = "json";
+          max-length = 40;
+          on-click = "playerctl play-pause";
+          on-click-right = "playerctl stop";
+          smooth-scrolling-threshold = 10; # // This value was tested using a trackpad, it should be lowered if using a mouse.
+          on-scroll-up = "playerctl next";
+          on-scroll-down = "playerctl previous";
+          exec = "$HOME/.config/waybar/mediaplayer.py 2> /dev/null"; # // Script in resources/custom_modules folder
         };
 
         "wlr/taskbar" = {
@@ -61,15 +95,27 @@ in
           tooltip = false;
         };
 
+        temperature = {
+          thermal-zone = 2;
+          critical-threshold = 80;
+          format = "{temperatureC}°C ";
+        };
+
+       disk = {
+         interval = 30;
+         format = "󰋊 {percentage_used}%";
+         path = "/";
+         tooltip = true;
+         unit = "GB";
+         tooltip-format = "Available {free} of {total}";
+       };
+
         memory = {
           interval = 30;
-          format = "󰾆  {used}GB";
-          format-m = "󰾅  {used}GB";
-          format-h = "󰓅  {used}GB";
-          format-c = "  {used}GB";
+          format = "  {usage}%";
           max-length = 10;
           tooltip = true;
-          tooltip-format = "󰾆 {percentage}%\n {used:0.1f}GB/{total:0.1f}GB";
+          tooltip-format = " {used:0.1f}GB/{total:0.1f}GB";
         };
 
         backlight = {
@@ -92,71 +138,79 @@ in
           format-alt = "{time} {icon}";
           format-icons = [ "" "" "" "" "" ];
           format-time = "{H}h {M}min";
+          on-click = "${lib.getExe pkgs.wlogout} &";
         };
 
         # TODO: bluetooth
 
         clock = {
-          calendar = {
-            mode = "year";
-            mode-mon-col = 3;
-            on-scroll = 1;
-            actions = {
-              on-click-right = "mode";
-              on-scroll-down = "shift_down";
-              on-scroll-up = "shift_up";
-            };
-            format = {
-              days = "<span color='{{color4}}'><b>{}</b></span>";
-              months = "<span color='{{foreground}}'><b>{}</b></span>";
-              today = "<span color='{{color3}}'><b><u>{}</u></b></span>";
-              weekdays = "<span color='{{color5}}'><b>{}</b></span>";
-            };
-          };
-          format = "<b>  {:%a %d %b     %H:%M}</b>";
-          format-alt = "{:%H:%M %Y-%m-%d}";
+          format = "{:%a %d %b  %H:%M}";
           interval = 10;
           tooltip-format = "<tt><small>{calendar}</small></tt>";
+          calendar = {
+             mode = "year";
+             mode-mon-col = 3;
+             weeks-pos = "right" ;
+             on-scroll = 1;
+             on-click-right = "mode";
+             format = {
+               months = "<span color='#ffead3'><b>{}</b></span>";
+               days = "<span color='#ecc6d9'><b>{}</b></span>";
+               weeks = "<span color='#99ffdd'><b>W{}</b></span>";
+               weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+               today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+             };
+          };
+          actions = {
+            on-click-right = "mode";
+            on-click-forward = "tz_up";
+            on-click-backward = "tz_down";
+            on-scroll-up = "shift_up";
+            on-scroll-down = "shift_down";
+          };
         };
+
 
         tray = {
           icon-size = 18;
           spacing = 10;
         };
 
-        #"custom/nix" = {
-        #  format = "󱄅";
-        #  on-click = "hypr-wallpaper";
-        #  on-click-right = "wallpapers-select";
-        #  tooltip = false;
-        #};
+        "hyprland/workspaces" = {
+           icon-size = 32;
+           spacing = 16;
+           disable-scroll = false;
+           all-outputs = false;
+           active-only = false;
+           on-scroll-up = "hyprctl dispatch workspace e+1";
+           on-scroll-down = "hyprctl dispatch workspace e-1";
+           format = "<span><b>{icon}</b></span>";
+           format-icons = {
+             "1" = "1";
+             "2" = "2";
+             "3" = "3";
+             "4" = "4";
+             "5" = "5";
+             "6" = "6";
+             "7" = "7";
+             "8" = "8";
+             "9" = "9";
+             urgent = " ";
+           };
+        };
 
-        #idle_inhibitor = lib.mkIf cfg.idleInhibitor {
-        #  format = "{icon}";
-        #  format-icons = {
-        #    activated = alertSpan "";
-        #    deactivated = "";
-        #  };
-        #};
-
-         "hyprland/workspaces" = {
-            disable-scroll = false;
-            all-outputs = false;
-            active-only = false;
-            format = "<span><b>{icon}</b></span>";
-            format-icons = {
-              "1" = "1";
-              "2" = "2";
-              "3" = "3";
-              "4" = "4";
-              "5" = "5";
-              "6" = "6";
-              "7" = "7";
-              "8" = "8";
-              "9" = "9";
-              urgent = " ";
-            };
+        power-profiles-daemon = {
+          format = "{icon}";
+          tooltip-format = "Power profile: {profile}\nDriver: {driver}";
+          tooltip = true;
+          format-icons = {
+            default = "";
+            performance = "";
+            balanced = "";
+            power-saver = "";
           };
+          min-length = 6;
+        };
 
         "hyprland/window" = {
           max-length = 50;
@@ -167,28 +221,28 @@ in
         };
 
         network = {
-          format-wifi = "{essid} ({signalStrength}%) ";
-          format-ethernet = "{ipaddr}/{cidr} 󰈀 ";
-          format-linked = "{ifname} (No IP)";
-          format-disconnected = alertSpan "Disconnected ⚠";
-          format-alt = "{ifname}: {ipaddr}";
+          format-wifi = " {icon}";
+          format-ethernet = "  ";
+          format-disconnected = "󰌙";
+          format-icons = [ "󰤯 " "󰤟 " "󰤢 " "󰤢 " "󰤨 " ];
           tooltip = true;
           tooltip-format = ''
-            IP: <b>{ipaddr}/{cidr}</b>
-            Gateway: <b>{gwaddr}</b>'';
+            <b>IP</b>: {ipaddr}/{cidr}
+            <b>Gateway</b>: {gwaddr}'';
 
           on-click = "${config.xdg.configHome}/rofi/rofi-wifi-menu"; # FIXME
           on-click-right = "nmtui"; #FIXME
         };
 
+
         # See more: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/pulseaudio.jsonc
         pulseaudio = {
-          format = "{volume}% {icon} {format_source}";
-          format-bluetooth = "{volume}% {icon} {format_source}";
-          format-bluetooth-muted = " {icon} {format_source}";
-          format-muted = " {format_source}";
-          format-source = "{volume}% ";
-          format-source-muted = "";
+          format = "{icon}";
+          format-bluetooth = "{icon}";
+          format-bluetooth-muted = " {icon}";
+          #format-muted = " {format_source}";
+          format-source = "";
+          format-source-muted = "";
           format-icons = {
             headphone = "";
             hands-free = "";
@@ -201,17 +255,8 @@ in
           on-click = "${lib.getExe pkgs.pavucontrol}";
 
           tooltip = true;
-          tooltip-format = "{icon} {desc} // {volume}%";
+          tooltip-format = ''{icon} {volume}% - {desc}'';
         };
-
-        #"custom/powermenu" = {
-        #  "format" = "";
-        #  "on-click" = "pkill rofi || ~/.config/rofi/powermenu/type-3/powermenu.sh";
-        #  "tooltip" = false;
-        #};
-
-
-        # Notification: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/notifications.jsonc
       };
     };
   };

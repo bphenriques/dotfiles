@@ -1,5 +1,6 @@
 { pkgs, lib, config, host, ... }:
 # TODO: Check https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/mpv.nix
+# TODO: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/home/mpv/anime.nix
 let
   # Interesting guides:
   # - https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/

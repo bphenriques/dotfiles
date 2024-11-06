@@ -57,7 +57,9 @@
         browser = "/usr/bin/env librewolf -new-tab";
       };
 
-      fullscreen_delay_everything = {fullscreen = "delay";};
+      fullscreen_delay_everything = {
+        fullscreen = "delay";
+      };
 
       urgency_critical = {
         background = "#d64e4e";

@@ -21,16 +21,16 @@ in
     ];
 
     general = {
-      gaps_in = 8;
-      gaps_out = 8;
-      border_size = 2;
+      gaps_in = 2;
+      gaps_out = 0;
+      border_size = 1;
       layout = "master";
+      no_border_on_floating = true;
 
       # https://wiki.hyprland.org/Configuring/Variables/#variable-types for info about colors
       "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
       "col.inactive_border" = "rgba(595959aa)";
 
-      # Set to true enable resizing windows by clicking and dragging on borders and gaps
       resize_on_border = true;
 
       # Please see https://wiki.hyprland.org/Configuring/Tearing/ before you turn this on
@@ -40,9 +40,8 @@ in
     decoration = {
       rounding = 2;
 
-      # Change transparency of focused and unfocused windows
-      active_opacity = 1.0;
-      inactive_opacity = 0.9;
+
+      dim_inactive = true;
 
       drop_shadow = true;
       shadow_range = 4;
@@ -56,6 +55,8 @@ in
         passes = 3;
         new_optimizations = true;
       };
+
+      # Disable shadows? I honstly dont care much about blur
     };
 
     # https://wiki.hyprland.org/Configuring/Variables/#animations
@@ -95,10 +96,6 @@ in
     };
 
     exec-once = [
-      "${lib.getExe pkgs.hyprpaper}"
-      #"sleep 1; hypr-wallpaper && launch-waybar"
-      "waybar"
-      # TODO: It seems that the cursor gets broken and this fixes that
       "hyprctl setcursor ${cursorName} ${toString pointer.size}"
     ];
 
@@ -112,9 +109,7 @@ in
     input = {
       kb_layout = "us,pt";
       kb_variant = "euro,";
-      kb_model = "";
-      kb_options = "";
-      kb_rules = "";
+      kb_options = "caps:ctrl_modifier";
 
       follow_mouse = 1;
 
@@ -122,6 +117,7 @@ in
 
       touchpad = {
         natural_scroll = false;
+        tap_button_map = "lmr";
       };
     };
 
@@ -130,20 +126,6 @@ in
       workspace_swipe = true;
       workspace_swipe_forever = true;
     };
-
-    windowrulev2 = [
-      # "dimaround,floating:1"
-      "bordersize 5,fullscreen:1" # monocle mode
-      "float,class:(wlroots)" # hyprland debug session
-      # save dialog
-      "float,class:(xdg-desktop-portal-gtk)"
-      "size <50% <50%,class:(xdg-desktop-portal-gtk)"
-
-
-      # Ignore maximize requests from apps. You'll probably like this.
-      "suppressevent maximize, class:.*"
-      "suppressevent fullscreen, class:.*"
-    ];
   };
 }
 
