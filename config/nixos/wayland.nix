@@ -8,7 +8,6 @@
   programs.nm-applet.enable = true;
 
   # TODO: https://github.com/Aylur/dotfiles/blob/main/nixos/system.nix#L44
-
   environment.systemPackages = with pkgs; [
     morewaita-icon-theme
     adwaita-icon-theme
