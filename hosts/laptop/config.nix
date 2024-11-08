@@ -53,15 +53,17 @@ in
   };
 
   # Desktop environment
-  services.xserver.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.displayManager.defaultSession = "plasma";
-  environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
+  # services.xserver.enable = true;
+  #services.desktopManager.plasma6.enable = true;
+  #services.displayManager.defaultSession = "plasma";
+  #environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
 
   # Login Screen
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.theme = "sddm-astronaut-theme";
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+    theme = "sddm-astronaut-theme";
+  };
   environment.systemPackages = [
    # https://github.com/Keyitdev/sddm-astronaut-theme/blob/master/theme.conf
    # It is possible to override the package and set themeConfig. For now, I will iterate like this.

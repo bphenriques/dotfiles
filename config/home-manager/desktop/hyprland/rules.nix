@@ -3,13 +3,14 @@
   wayland.windowManager.hyprland.settings = lib.mkMerge [
     {
       windowrulev2 = [
-        # "dimaround,floating:1"
+        "dimaround,floating:1"
         "bordersize 5,fullscreen:1" # monocle mode
         "float,class:(wlroots)" # hyprland debug session
 
+
         # Ignore maximize requests from apps. You'll probably like this.
         "suppressevent maximize, class:.*"
-        "suppressevent fullscreen, class:.*"
+        # "suppressevent fullscreen, class:.*"
 
         # Save dialog
         "float,class:(xdg-desktop-portal-gtk)"
@@ -18,6 +19,7 @@
         # Firefox
         "float,title:^(About Mozilla Firefox)$"
         "float,class:^(firefox)$,title:^(Picture-in-Picture)$"
+        "keepaspectratio,class:^(firefox)$,title:^(Picture-in-Picture)$"
 
         # Misc
         "float,class:^(org.pulseaudio.pavucontrol)$"
@@ -27,11 +29,6 @@
     }
     {
       layerrule = [
-        # ROFI
-        "blur, launcher"
-        "blur, waybar"
-        "blurpopups, waybar" # Blur waybar popups too!
-        "ignorealpha 0.2, waybar" # Make it so transparent parts are ignored
       ];
     }
   ];

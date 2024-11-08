@@ -10,16 +10,6 @@ in
 {
   #
   wayland.windowManager.hyprland.settings = {
-    env = [
-      "XDG_SESSION_TYPE,wayland"
-      "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
-
-      # Nvidia
-      "LIBVA_DRIVER_NAME,nvidia"
-      "GBM_BACKEND,nvidia-drm"
-      "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-    ];
-
     general = {
       gaps_in = 2;
       gaps_out = 0;
@@ -41,7 +31,7 @@ in
       rounding = 2;
 
 
-      dim_inactive = true;
+      dim_inactive = false;
 
       drop_shadow = true;
       shadow_range = 4;

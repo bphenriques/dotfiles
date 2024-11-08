@@ -1,14 +1,24 @@
 { config, lib, pkgs, ... }:
+let
+  nerdfonts = pkgs.nerdfonts.override {
+    fonts = [
+      "Ubuntu"
+      "UbuntuMono"
+      "CascadiaCode"
+      "FantasqueSansMono"
+      "FiraCode"
+      "Mononoki"
+    ];
+  };
+in
 {
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
     ./hyprland
-    ./waybar      # Bar on top
     ./kanshi.nix  # Display Manager
-    ./dunst.nix   # Notifications
-    ./wlogout.nix   # Notifications
     ./wofi.nix    # Application Launcher
-    ./walker.nix    # Application Launcher
+    ./fuzzel.nix  # Application Launcher
+    ./ags         # Top bar, widgets, and notifications. The whole kit.
   ];
 
   # Use the following theme: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/gtk.nix#L85
@@ -19,22 +29,24 @@
     size = 16;
   };
 
+  # KDE seems to force the replacemente of this file. TODO: remove once we move away from KDE.
   home.file.${config.gtk.gtk2.configLocation}.force = true;
 
   gtk = {
     enable = true;
     theme = {
-      package = pkgs.flat-remix-gtk;
-      name = "Flat-Remix-GTK-Grey-Darkest";
+      package = pkgs.adw-gtk3;
+      name = "adw-gtk3-dark";
     };
 
     iconTheme = {
-      package = pkgs.adwaita-icon-theme;
-      name = "Adwaita";
+      package = pkgs.morewaita-icon-theme;
+      name = "MoreWaita";
     };
 
     font = {
-      name = "Sans";
+      name = "Ubuntu Nerd Font";
+      package = nerdfonts;
       size = 11;
     };
 
@@ -43,9 +55,28 @@
       gtk-application-prefer-dark-theme = 1;
       gtk-error-bell = 0;
     };
+
+    # TODO: Replace by xdg directories
+    gtk3.bookmarks = [
+      "file://${config.home.homeDirectory}/desktop"
+      "file://${config.home.homeDirectory}/downloads"
+      "file://${config.home.homeDirectory}/games"
+      "file://${config.home.homeDirectory}/music"
+      "file://${config.home.homeDirectory}/pictures"
+      "file://${config.home.homeDirectory}/screenshots"
+      "file://${config.home.homeDirectory}/workdir"
+      "file://${config.home.homeDirectory}/.config Config"
+    ];
+
     gtk4.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
       gtk-error-bell = 0;
     };
+  };
+
+  # Double check what this does exactly
+  qt = {
+    enable = true;
+    platformTheme.name = "kde";
   };
 }

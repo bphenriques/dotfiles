@@ -1,23 +1,26 @@
 { pkgs, ... }:
 {
-  # https://wiki.hyprland.org/Nvidia/
-  #environment.sessionVariables = {
-  #  LIBVA_DRIVER_NAME = "nvidia";
-  #  XDG_SESSION_TYPE = "wayland";
-  #  GBM_BACKEND = "nvidia-drm";
-  #  __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-  #};
 
-  # TODO: Can I run this on demand?
+  programs.hyprland.enable = true;  # Automates several dependencies. Home-Manager sets custom configuration.
+  xdg.portal.enable = true;
+
+  # Other
   programs.nm-applet.enable = true;
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-      xdg-desktop-portal-hyprland
-    ];
-  };
+  # TODO: https://github.com/Aylur/dotfiles/blob/main/nixos/system.nix#L44
 
-  programs.hyprland.enable = true;  # Home-Manager sets the rest
+  environment.systemPackages = with pkgs; [
+    morewaita-icon-theme
+    adwaita-icon-theme
+    qogir-icon-theme
+    gnome-calendar
+    gnome-system-monitor
+    gnome-calculator
+
+    # Review
+    nautilus
+    brightnessctl
+    konsole # Lets ensure this is around
+    ark     # I still like this?
+  ];
 }

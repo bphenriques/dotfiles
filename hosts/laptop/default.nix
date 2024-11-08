@@ -1,14 +1,16 @@
-{ self, mylib, nixpkgs, home-manager, sops-nix, disko, nur, walker, ... }:
+{ inputs, mylib, ... }:
 let
-  inherit (nixpkgs.lib.attrsets) attrValues;
-
-  overlays = attrValues self.overlays ++ [ nur.overlay ];
-  nixosModules = attrValues self.nixosModules ++ [
-    sops-nix.nixosModules.sops
-    disko.nixosModules.disko
-    home-manager.nixosModules.home-manager
+  inherit (inputs.nixpkgs.lib.attrsets) attrValues;
+  # Ideally modules are imported in the file that uses it. However, it leads to a infinite recursion. Aka, a rabbit-hole to debug.
+  overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlay ];
+  nixosModules = attrValues inputs.self.nixosModules ++ [
+    inputs.sops-nix.nixosModules.sops
+    inputs.disko.nixosModules.disko
+    inputs.home-manager.nixosModules.home-manager
   ];
-  hmModules = attrValues self.homeManagerModules;
+  hmModules = attrValues inputs.self.homeManagerModules ++ [
+    inputs.ags.homeManagerModules.default
+  ];
 in mylib.hosts.mkNixOSHost {
   inherit nixosModules hmModules overlays;
   extraSpecialArgs = {

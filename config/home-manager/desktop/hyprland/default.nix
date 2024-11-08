@@ -10,6 +10,7 @@ in
 # TODO: https://github.com/JaKooLit/Ja-ZaneyOS/blob/0bed326404ad90ca6803c0a9096426a36a14a35a/config/hyprland.nix#L83
 # TODO: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/modules/workstation/hyprland.nix
 # https://github.com/JaKooLit/Ja-ZaneyOS/blob/0bed326404ad90ca6803c0a9096426a36a14a35a/config/hyprland.nix
+# https://github.com/Serpentian/AlfheimOS/blob/master/user/wm/hyprland/settings.nix
 {
   imports = [
     ./settings.nix
@@ -33,12 +34,17 @@ in
   # https://wiki.hyprland.org/Nix/Hyprland-on-Home-Manager/
   wayland.windowManager.hyprland = {
     enable = true;
+    systemd = {
+      enable = true;
+      variables = [ "--all" ];
+      enableXdgAutostart = true;
+    };
     settings = {
       "monitor" = [ ",preferred,auto,auto" ];
 
-      "$terminal" = "ghostty";
+      "$terminal" = "konsole";
       "$fileManager" = "thunar";
-      "$menu" = "walker";
+      "$menu" = "fuzzel";
       "$browser" = "firefox";
 
       env = [
@@ -55,8 +61,9 @@ in
       ];
 
       exec-once = [
-        "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP" # Fix long-time to start systemd: https://wiki.hyprland.org/FAQ/#some-of-my-apps-take-a-really-long-time-to-open
-        "waybar"
+        "ags -b hypr"
+        #"dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP" # Fix long-time to start systemd: https://wiki.hyprland.org/FAQ/#some-of-my-apps-take-a-really-long-time-to-open
+        #"waybar"
         "${lib.getExe pkgs.hyprpaper}"
         "${lib.getExe pkgs.udiskie} --tray"
         "walker --gapplication-service"
@@ -64,10 +71,5 @@ in
         #"${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
       ];
     };
-
-    #systemd = {
-    #  enable = true;
-    #  variables = ["--all"];
-    #};
   };
 }

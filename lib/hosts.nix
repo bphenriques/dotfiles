@@ -24,7 +24,6 @@ let
     };
     community.pkgs = {
       ghostty = inputs.ghostty.packages.${system}.default;
-      walker = inputs.walker.packages.${system}.default;
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
 
