@@ -14,6 +14,7 @@ let
 in mylib.hosts.mkNixOSHost {
   inherit nixosModules hmModules overlays;
   extraSpecialArgs = {
+    inherit inputs;
     host.webcam = "/dev/video0";
     network-devices = import ../network-devices.nix;
   };

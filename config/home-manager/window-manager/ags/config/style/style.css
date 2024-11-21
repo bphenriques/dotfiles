@@ -34,20 +34,16 @@ button {
 	color: @content_main;
 }
 
-.workspaces {
-  color: transparent;
-	margin-right: 1.5px;
-	margin-left: 1.5px;
-}
-
 .workspaces button {
   padding: 3px;
+  padding-left: 10px;
+  padding-right: 10px;
   color: @content_inactive;
 }
 
-.workspaces button .focused {
+.workspaces .active {
+  background:  @bg_hover;
   color: @content_main;
-  border-bottom: 3px solid white;
 }
 
 .workspaces button:hover {

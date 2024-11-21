@@ -19,7 +19,7 @@ let
   disable = screen: screen // { status = "disable"; };
 in
 {
-  home.packages = [ pkgs.kanshi ]; # needed to run `kanshictl switch`
+  #home.packages = [ pkgs.kanshi ]; # needed to run `kanshictl switch`
   services.kanshi = {
     enable = true;
     systemdTarget = "hyprland-session.target";

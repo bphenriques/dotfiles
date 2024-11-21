@@ -30,13 +30,7 @@ in
     decoration = {
       rounding = 2;
 
-
       dim_inactive = false;
-
-      drop_shadow = true;
-      shadow_range = 4;
-      shadow_render_power = 3;
-      "col.shadow" = "rgba(1a1a1aee)";
 
       # https://wiki.hyprland.org/Configuring/Variables/#blur
       blur = {
@@ -88,46 +82,5 @@ in
     exec-once = [
       "hyprctl setcursor ${cursorName} ${toString pointer.size}"
     ];
-
-    misc = {
-      disable_autoreload = false; # disable auto polling for config file changes
-      animate_mouse_windowdragging = false; # disable dragging animation
-      force_default_wallpaper = -1; # Set to 0 or 1 to disable the anime mascot wallpapers
-      disable_hyprland_logo = false; # If true disables the random hyprland logo / anime girl background. :(
-    };
-
-    input = {
-      kb_layout = "us,pt";
-      kb_variant = "euro,";
-      kb_options = "caps:ctrl_modifier";
-
-      follow_mouse = 1;
-
-      sensitivity = 0; # -1.0 - 1.0, 0 means no modification.
-
-      touchpad = {
-        natural_scroll = false;
-        tap_button_map = "lmr";
-      };
-    };
-
-    # touchpad gestures
-    gestures = {
-      workspace_swipe = true;
-      workspace_swipe_forever = true;
-    };
   };
 }
-
-#  # Input - More on https://wiki.archlinux.org/title/Xorg/Keyboard_configuration
-#  services.xserver = {
-#    #exportConfiguration = true;  # Do I need this?
-#    xkb.layout = "us,pt";       # localectl list-x11-keymap-layouts and
-#    xkb.variant = "euro,";      # localectl list-x11-keymap-variants us
-#    xkb.options = builtins.concatStringsSep " " [
-#      "caps:ctrl_modifier"      # Replace caps-lock for Ctrl
-#      "grp:ralt_rshift_toggle"  # Right Alt + Right Shift: Switch keyboard layouts. See more using `xkeyboard-config`
-#    ];
-#
-#    excludePackages = [ pkgs.xterm ];
-#  };

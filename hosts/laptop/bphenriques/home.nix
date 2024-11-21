@@ -31,5 +31,18 @@
     "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
   ];
 
+  gtk.gtk3.bookmarks = [
+    "file://${config.xdg.userDirs.documents}"
+    "file://${config.xdg.userDirs.pictures}"
+    "file://${config.xdg.userDirs.music}"
+    "file://${config.xdg.userDirs.desktop}"
+    "file://${config.xdg.userDirs.download}"
+    "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
+
+    # Other
+    "file://${config.home.homeDirectory}/games"
+    "file://${config.home.homeDirectory}/.config Config"
+  ];
+
   home.stateVersion = "24.05";
 }

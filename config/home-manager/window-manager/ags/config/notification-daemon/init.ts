@@ -15,7 +15,7 @@ function exampleNotification() {
 export function setupNotificationDaemon() {
     try {
         battery()
-        exampleNotification()
+        //exampleNotification()
     } catch (error) {
         logError(error)
     }

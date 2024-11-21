@@ -15,7 +15,8 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable
+    # FIXME: pin to when NUR is available but I still have 6.10 kernel available. Replace the ref to nixpkgs-unstable
+    nixpkgs.url = "github:nixos/nixpkgs/942b12cabae1cd4414c7177472d759731de92cb4";        # Stable(ish) enough. Plus home-manager is _always_ on unstable
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";      # I don't really use it, but leaving it here.
 
     darwin.url = "github:lnl7/nix-darwin/master";
@@ -35,6 +36,8 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     nur.url = "github:nix-community/nur";                         # Collection of packages. Use it for Firefox extensions
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
+
+    # Wayland Window Manager
     ags.url = "github:Aylur/ags";                                 # Widgets
   };
 

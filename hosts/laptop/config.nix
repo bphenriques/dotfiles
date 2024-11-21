@@ -25,7 +25,7 @@ in
       enable = true;
       efiSupport = true;
       efiInstallAsRemovable = true;
-      configurationLimit = 5;
+      configurationLimit = 10;
 
       # I have Windows To Go on a external drive. I turn it off when not in use to reduce wear-and-tear.
       # 1. `sudo fdisk -l` to get the device where "EFI System" is.

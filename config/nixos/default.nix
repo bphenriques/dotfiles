@@ -39,19 +39,6 @@
     '';
   };
 
-  # Input - More on https://wiki.archlinux.org/title/Xorg/Keyboard_configuration
-  services.xserver = {
-    #exportConfiguration = true;  # Do I need this?
-    xkb.layout = "us,pt";       # localectl list-x11-keymap-layouts and
-    xkb.variant = "euro,";      # localectl list-x11-keymap-variants us
-    xkb.options = builtins.concatStringsSep " " [
-      "caps:ctrl_modifier"      # Replace caps-lock for Ctrl
-      "grp:ralt_rshift_toggle"  # Right Alt + Right Shift: Switch keyboard layouts. See more using `xkeyboard-config`
-    ];
-
-    excludePackages = [ pkgs.xterm ];
-  };
-
   # Programs
   programs.fish.enable = true;  # System level/
   programs.fish.vendor.functions.enable = true; # Ensure completions/functions are automatically set.

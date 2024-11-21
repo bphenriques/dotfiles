@@ -56,18 +56,6 @@ in
       gtk-error-bell = 0;
     };
 
-    # TODO: Replace by xdg directories
-    gtk3.bookmarks = [
-      "file://${config.home.homeDirectory}/desktop"
-      "file://${config.home.homeDirectory}/downloads"
-      "file://${config.home.homeDirectory}/games"
-      "file://${config.home.homeDirectory}/music"
-      "file://${config.home.homeDirectory}/pictures"
-      "file://${config.home.homeDirectory}/screenshots"
-      "file://${config.home.homeDirectory}/workdir"
-      "file://${config.home.homeDirectory}/.config Config"
-    ];
-
     gtk4.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
       gtk-error-bell = 0;
@@ -79,4 +67,7 @@ in
     enable = true;
     platformTheme.name = "kde";
   };
+
+  # TODO: MOVE TO NIRI
+  services.gnome-keyring.enable = true;
 }

@@ -1,11 +1,16 @@
 { lib, config, ... }:
 
+
+# Check custom scripts: https://github.com/iynaix/dotfiles/blob/fa261818c04e6b1aa7d928a10abd66e2c31c0ed9/packages/dotfiles-rs/dotfiles/src/bin/hypr-pip.rs
+# https://github.com/dileep-kishore/nixos-hyprland/blob/main/home/common/optional/desktops/hyprland/config.nix
+# https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
+
+# Force Quit active: https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
+
+# TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
 let
   shortcuts = [
-    "$mod, Q, exec, $terminal"
-    "$mod, E, exec, $fileManager"
-    "$mod, R, exec, $menu"
-    "$mod, F, exec, $browser"
+    "$mod, SPACE, exec, $menu"
   ];
 
   focus = [
@@ -48,18 +53,15 @@ let
     # Scroll through existing workspaces with mod + scroll
     "$mod, mouse_down, workspace, e+1"
     "$mod, mouse_up, workspace, e-1"
-  ];
 
-  toggle_waybar = {
-    bind = [ "$mod, W, exec, pkill -SIGUSR1 waybar" ];
-    bindr = [ "$mod, W, exec, pkill -SIGUSR1 waybar" ];
-  };
+    # focus the previous / next desktop in the current monitor (DE style)
+    "CTRL_ALT, Left, workspace, m-1"
+    "CTRL_ALT, Right, workspace, m+1"
+  ];
 in
 {
   wayland.windowManager.hyprland.settings = lib.mkMerge [
-    {
-      bind = [ "$mod, W, exec, pkill -SIGUSR1 waybar" ]; # Toggle waybar
-    }
+    #{ bind = [ "$mod, W, exec, pkill -SIGUSR1 waybar" ]; } # Toggle waybar
     {
       # See https://wiki.hyprland.org/Configuring/Keywords/
       "$mod" = "SUPER"; # Sets "Windows" key as main modifier
@@ -74,14 +76,18 @@ in
 
       bind = [
         # Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
-        "$mod, C, killactive,"
-        "$mod, F, fullscreen,"
-        "$mod, M, exit,"
-        "$mod, V, togglefloating,"
+        "$mod, Q, killactive,"
+        "$mod, F, fullscreen, 0" # Fullscreen entire screen
+        "$mod SHIFT, F, fullscreen, 0" # Fullscreen entire screen but with top bar
+        "$mod CTRL, F, fullscreen, 0 2" # Instruct app to go fullscreen
+        "$mod, P, pin" # Pin screen
+        #"$mod, F, togglefloating,"
+        "$mod_ALT, F4, exit,"   # Exit Hyprland # FIXME: Do I need it?
         "$mod, P, pseudo," # dwindle
         "$mod, J, togglesplit," # dwindle
 
-        "Ctrl+Alt, W, exec, killall waybar || waybar" # toggle waybar
+        "ALT, Tab, cyclenext"
+        "ALT_SHIFT, Tab, cyclenext, prev"
       ] ++ shortcuts ++ focus ++ workspace;
 
       bindel = [

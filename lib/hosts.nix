@@ -17,10 +17,11 @@ let
     permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" ];
   };
 
+  # TODO: This should not be abstracted the way it is (likely).
   mkExtraArgs = system: extraSpecialArgs: {
     self = {
       pkgs = inputs.self.packages.${system};
-      private = inputs.dotfiles-private.packages.${system} // inputs.dotfiles-private.dotfiles-private;
+      private = inputs.dotfiles-private.packages.${system};
     };
     community.pkgs = {
       ghostty = inputs.ghostty.packages.${system}.default;
