@@ -101,7 +101,7 @@ in
 
     environment {
       DISPLAY ":0"
-      XDG_CURRENT_DESKTOP = "niri";
+      XDG_CURRENT_DESKTOP "niri"
       QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
       QT_QPA_PLATFORM "wayland"
       NIXOS_OZONE_WL "1"
@@ -114,8 +114,8 @@ in
         keyboard {
             xkb {
               layout "us,pt";
-              variant = "euro,";
-              options = "caps:ctrl_modifier"
+              variant "euro,";
+              options "caps:ctrl_modifier"
             }
         }
 
@@ -133,8 +133,8 @@ in
     }
 
     output "eDP-1" {
-        mode "2880x1800@143.91Hz"
-        scale 1.5
+        mode "2880x1800@120.001"
+        scale 1.75
     }
 
     layout {
