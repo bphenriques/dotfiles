@@ -43,7 +43,7 @@ let
   };
 
   set-terminal = ''
-    ${pkgs.swww}/bin/swww img "${wallpapersPkg}/share/wallpapers/mountains.png" --transition-type random
+    ${pkgs.swww}/bin/swww img "${wallpapersPkg}/share/wallpapers/mountains.png"
   '';
 
   # If Share picker doesn’t use the system theme
@@ -108,7 +108,7 @@ in
       MOZ_ENABLE_WAYLAND "1"
     }
 
-    spawn-at-startup "${pkgs.swww}/bin/swww" "img" "${wallpapersPkg}/share/wallpapers/mountains.png" "--transition-type" "random"
+    spawn-at-startup "${pkgs.swww}/bin/swww" "img" "${wallpapersPkg}/share/wallpapers/mountains.png"
     spawn-at-startup "xwayland-satellite" ":21"
 
     input {

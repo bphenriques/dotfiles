@@ -14,7 +14,6 @@ in
 {
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
-    ./hyprland    # Window Manager
     ./niri.nix    # Window Manager
 
     ./kanshi.nix  # Manage external monitors

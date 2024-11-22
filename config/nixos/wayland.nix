@@ -13,9 +13,6 @@
     ];
   };
   programs.nm-applet.enable = true; # Network manager applet
-  programs.xwayland.enable = true;
-
-  programs.hyprland.enable = true;  # Automates several dependencies. Home-Manager sets custom configuration.
 
   # Other
   # TODO: https://github.com/Aylur/dotfiles/blob/main/nixos/system.nix#L44

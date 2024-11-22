@@ -20,5 +20,9 @@
 
     powertop  # Check what is consuming too much energy
     usbutils  # USB utilities
+
+    # Other
+    cheese # Webcam
+    # amberol? blanket?
   ];
 }
