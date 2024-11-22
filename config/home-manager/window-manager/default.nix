@@ -14,11 +14,12 @@ in
 {
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
-    ./hyprland
-    ./kanshi.nix  # Display Manager
-    ./wofi.nix    # Application Launcher
+    ./hyprland    # Window Manager
+    ./niri.nix    # Window Manager
+
+    ./kanshi.nix  # Manage external monitors
     ./fuzzel.nix  # Application Launcher
-    ./ags         # Top bar, widgets, and notifications. The whole kit.
+    #./ags         # Top bar, widgets, and notifications. The whole kit.
   ];
 
   # Use the following theme: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/gtk.nix#L85
@@ -65,9 +66,7 @@ in
   # Double check what this does exactly
   qt = {
     enable = true;
-    platformTheme.name = "kde";
+    platformTheme = "gnome";
+    style = "adw-gtk3-dark";
   };
-
-  # TODO: MOVE TO NIRI
-  services.gnome-keyring.enable = true;
 }

@@ -22,7 +22,7 @@ in
   #home.packages = [ pkgs.kanshi ]; # needed to run `kanshictl switch`
   services.kanshi = {
     enable = true;
-    systemdTarget = "hyprland-session.target";
+    systemdTarget = "graphical-session.target"; #"hyprland-session.target";
     settings = [
        {
          profile.name = "laptop";

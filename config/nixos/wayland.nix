@@ -6,28 +6,27 @@
   programs.niri.enable = true;
   security.pam.services.swaylock = {};
   services.gnome.gnome-keyring.enable = true;
-  programs.xwayland.enable = true;
   xdg.portal = {
     enable = true;
     extraPortals = [
-      pkgs.xdg-desktop-portal-gnome
-    ]; # Required for screencasting/*/
+      pkgs.xdg-desktop-portal-gnome # Required for screencasting
+    ];
   };
+  programs.nm-applet.enable = true; # Network manager applet
 
   programs.hyprland.enable = true;  # Automates several dependencies. Home-Manager sets custom configuration.
 
   # Other
-  programs.nm-applet.enable = true;
-
   # TODO: https://github.com/Aylur/dotfiles/blob/main/nixos/system.nix#L44
   environment.systemPackages = with pkgs; [
-    # Core - Hardware
-    brightnessctl   # Manage Brightness
-
-    # Core - Software
+    # Core - Dependencies
     qt5.qtwayland
     qt6.qtwayland
-    qt6ct
+    inotify-tools
+    libnotify
+
+    # Hardware
+    brightnessctl   # Manage Brightness
 
     xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
     nautilus  # File Browser

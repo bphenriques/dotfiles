@@ -1,6 +1,9 @@
 { pkgs, lib, network-devices, ... }:
 {
   imports = [
+    ./programs.nix
+    ./services.nix
+    ./display-manager.nix
     ./wayland.nix
     ./thunar.nix
   ];
@@ -19,6 +22,7 @@
   # Not enabling useTmpfs despite having enough RAM. Might consider it.
   boot.tmp.cleanOnBoot = true;
 
+  # Audio
   hardware.pulseaudio.enable = false;  # Disable PulseAudio: https://nixos.wiki/wiki/PulseAudio
   security.rtkit.enable = true;        # Recommended for pipewire
   services.pipewire = {
@@ -39,22 +43,6 @@
     '';
   };
 
-  # Programs
-  programs.fish.enable = true;  # System level/
-  programs.fish.vendor.functions.enable = true; # Ensure completions/functions are automatically set.
-  programs.partition-manager.enable = true;
-  environment.systemPackages = with pkgs; [
-    # Suport exFAT and NTFS formatted drives (pendisks + external disks)
-    exfat
-    ntfs3g
-
-    powertop  # Check what is consuming too much energy
-    usbutils  # USB utilities
-  ];
-
-  # Services
-  services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
-
   # Localization
   time.timeZone = "Europe/Lisbon";
   i18n = {
@@ -72,18 +60,5 @@
     };
   };
 
-  services.journald.extraConfig = ''
-    MaxRetentionSec=1month
-    SystemMaxUse=1G
-  '';
-
   security.sudo.extraConfig = "Defaults lecture=never";
-
-  # To install or run some programs, it is easier to this way. The exception.
-  # Follow with: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  services.flatpak.enable = true;
-
-  # Disabling some defaults
-  programs.command-not-found.enable = false;
-  programs.nano.enable = false;
 }

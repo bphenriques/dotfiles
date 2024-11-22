@@ -28,6 +28,9 @@
     unzip
     xclip
 
+    # Other core
+    xdg-user-dirs
+
     # Archive
     p7zip     # 7zip for linux
     unrar     # Still need it

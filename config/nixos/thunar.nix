@@ -10,7 +10,7 @@
     ];
   };
 
-  programs.xfconf.enable = true;       # Required to persist Thunar settings as we're not running on XFCE
+  programs.xfconf.enable = true;        # Required to persist Thunar settings as we're not running on XFCE
   services.gvfs.enable = true;          # Mount, trash, and other functionalities
   services.tumbler.enable = true;       # Thumbnail support for images
   programs.file-roller.enable = true;   # For thunar-archive-plugin

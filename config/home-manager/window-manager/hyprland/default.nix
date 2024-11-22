@@ -107,12 +107,11 @@ in
       };
 
       exec-once = [
-        "ags -b hypr"
+        #"ags -b hypr"
         #"dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP" # Fix long-time to start systemd: https://wiki.hyprland.org/FAQ/#some-of-my-apps-take-a-really-long-time-to-open
         #"waybar"
         "${lib.getExe pkgs.hyprpaper}"
         "${lib.getExe pkgs.udiskie} --tray"
-        "walker --gapplication-service"
         "${pkgs.blueman}/bin/blueman-applet"
         #"${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
       ];
