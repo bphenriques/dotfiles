@@ -68,6 +68,6 @@ in
     enable = true;
     style.name = "adwaita-dark";
     style.package = pkgs.adwaita-qt;
-    # platformTheme.name = "adwaita";
+    platformTheme.name = "adwaita-dark";
   };
 }
