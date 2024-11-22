@@ -25,6 +25,7 @@
 
     # Hardware
     brightnessctl   # Manage Brightness
+    pavucontrol     # Manage audio
 
     xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
     konsole   # Backup terminal in case something goes wrong
