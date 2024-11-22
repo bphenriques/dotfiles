@@ -67,7 +67,9 @@ in
   qt = {
     enable = true;
     package = pkgs.adwaita-qt;
-    style.name = "adwaita-dark";
+    style = {
+      name = "adwaita-dark";
+    };
     platformTheme.name = "adwaita";
   };
 }
