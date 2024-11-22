@@ -30,7 +30,6 @@
     brightnessctl   # Manage Brightness
 
     xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
-    nautilus  # File Browser
     konsole   # Backup terminal in case something goes wrong
     ark       # KDE package: Manage compressed files
 

@@ -96,11 +96,11 @@ in
 
   xdg.configFile."niri/config.kdl".text = ''
     hotkey-overlay {
-        skip-at-startup
+      skip-at-startup
     }
 
     environment {
-      DISPLAY ":0"
+      DISPLAY ":21"
       XDG_CURRENT_DESKTOP "niri"
       QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
       QT_QPA_PLATFORM "wayland"
@@ -108,7 +108,8 @@ in
       MOZ_ENABLE_WAYLAND "1"
     }
 
-    spawn-at-startup "xwayland-satellite" ":0"
+    spawn-at-startup "${pkgs.swww}/bin/swww" "img" "${wallpapersPkg}/share/wallpapers/mountains.png" "--transition-type" "random"
+    spawn-at-startup "xwayland-satellite" ":21"
 
     input {
         keyboard {
@@ -172,7 +173,7 @@ in
         // You can change how the focus ring looks.
         focus-ring {
             // How many logical pixels the ring extends out from the windows.
-            width 4
+            width 2
             active-color "#7fc8ff"
             inactive-color "#505050"
         }
@@ -200,13 +201,11 @@ in
         Mod+Shift+F { fullscreen-window; }
         Mod+C { center-column; }
 
-
-
         // Suggested binds for running programs: terminal, app launcher, screen locker.
+        Mod+Return { spawn "konsole"; }
         Mod+T { spawn "konsole"; }
         Mod+Space { spawn "fuzzel"; }
         Super+Alt+L { spawn "swaylock"; }
-
 
         // Audio
         XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }

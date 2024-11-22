@@ -5,7 +5,10 @@
     ./services.nix
     ./display-manager.nix
     ./wayland.nix
+
+    # Choose one file browser
     ./thunar.nix
+    ./nautilus.nix
   ];
 
   nix = {
