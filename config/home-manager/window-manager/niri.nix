@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, self, ... }:
 # Check custom scripts: https://github.com/iynaix/dotfiles/blob/fa261818c04e6b1aa7d928a10abd66e2c31c0ed9/packages/dotfiles-rs/dotfiles/src/bin/hypr-pip.rs
 # https://github.com/dileep-kishore/nixos-hyprland/blob/main/home/common/optional/desktops/hyprland/config.nix
 # https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
