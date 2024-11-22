@@ -13,6 +13,7 @@
     ];
   };
   programs.nm-applet.enable = true; # Network manager applet
+  programs.xwayland.enable = true;
 
   programs.hyprland.enable = true;  # Automates several dependencies. Home-Manager sets custom configuration.
 
