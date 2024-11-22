@@ -66,10 +66,8 @@ in
   # Double check what this does exactly
   qt = {
     enable = true;
-    package = pkgs.adwaita-qt;
-    style = {
-      name = "adwaita-dark";
-    };
-    platformTheme.name = "adwaita";
+    style.name = "adwaita-dark";
+    style.package = pkgs.adwaita-qt;
+    # platformTheme.name = "adwaita";
   };
 }
