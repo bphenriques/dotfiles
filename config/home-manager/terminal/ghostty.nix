@@ -1,5 +1,4 @@
 { config, pkgs, lib, community, ... }:
-
 let 
   font = {
     name = "Hack Nerd Font Mono";
@@ -21,7 +20,7 @@ let
 
     # Red
     color1 = "#ff6c6b";
-    color9 = "#ff6655";
+    color9 = "#ff6655";#
 
     # Green
     color2  = "#98be65";
@@ -51,23 +50,13 @@ in
 {
   # MacOS requires installation by hand for now: https://github.com/ghostty-org/ghostty/releases/tag/tip
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    # Fixes issues with GTK, need to sort this out separately
     community.pkgs.ghostty
-    (pkgs.writeScriptBin "ghostty-x11" ''
-      #!${pkgs.stdenv.shell}
-      GDK_BACKEND=x11 exec ${community.pkgs.ghostty}/bin/ghostty "$@"
-    '')
-
-    (pkgs.makeDesktopItem {
-      name = "Ghostty-X11";
-      desktopName = "Ghostty-X11";
-      categories = [ "Utility" "Development" ];
-      exec = "GDK_BACKEND=x11 exec ${community.pkgs.ghostty}/bin/ghostty";
-    })
   ];
 
-  xdg.mimeApps.defaultApplications."x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
-  xdg.mimeApps.defaultApplications."x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
+  xdg.mimeApps.defaultApplications = {
+    "x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
+    "x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
+  };
 
   programs.fish.interactiveShellInit = lib.optionalString pkgs.stdenv.isDarwin ''
     fish_add_path --append --move ${config.home.homeDirectory}/Applications/Ghostty.app/Contents/MacOS
@@ -110,7 +99,6 @@ in
     palette = 15=${colors.color15}
 
     copy-on-select = clipboard
-
   ''+ lib.optionalString pkgs.stdenv.isLinux ''
     gtk-single-instance = true
     window-decoration = true

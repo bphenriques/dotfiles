@@ -79,11 +79,9 @@
 	transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 #workspaces button.active {
-	color: @content_main;
-	border-bottom: 3px solid white;
+  color: @bg_active;
 }
 #workspaces button.focused {
-  color: @bg_active;
 }
 #workspaces button.urgent {
 	background:  rgba(255, 200, 0, 0.35);

@@ -108,8 +108,9 @@ in
       MOZ_ENABLE_WAYLAND "1"
     }
 
-    spawn-at-startup "${pkgs.swww}/bin/swww" "img" "${wallpapersPkg}/share/wallpapers/mountains.png"
+    spawn-at-startup "${lib.getExe pkgs.swww}" "img" "${wallpapersPkg}/share/wallpapers/mountains.png"
     spawn-at-startup "xwayland-satellite" ":21"
+    spawn-at-startup "${lib.getExe pkgs.waybar}"
 
     input {
         keyboard {
@@ -200,6 +201,7 @@ in
         Mod+F { maximize-column; }
         Mod+Shift+F { fullscreen-window; }
         Mod+C { center-column; }
+        Mod+W { spawn "pkill -SIGUSR1 waybar"; }
 
         // Suggested binds for running programs: terminal, app launcher, screen locker.
         Mod+Return { spawn "konsole"; }

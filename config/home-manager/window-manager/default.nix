@@ -15,10 +15,10 @@ in
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
     ./niri.nix    # Window Manager
-
+    ./waybar      # Top-bar. There are fancier solutions out-there.
+    ./dunst.nix   # Notifications
     ./kanshi.nix  # Manage external monitors
     ./fuzzel.nix  # Application Launcher
-    #./ags         # Top bar, widgets, and notifications. The whole kit.
   ];
 
   # Use the following theme: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/gtk.nix#L85
@@ -28,9 +28,6 @@ in
     name = "Bibata-Modern-Classic";
     size = 16;
   };
-
-  # KDE seems to force the replacemente of this file. TODO: remove once we move away from KDE.
-  home.file.${config.gtk.gtk2.configLocation}.force = true;
 
   gtk = {
     enable = true;
@@ -62,7 +59,6 @@ in
     };
   };
 
-  # Double check what this does exactly
   qt = {
     enable = true;
     style.name = "adwaita-dark";

@@ -19,13 +19,12 @@ let
   disable = screen: screen // { status = "disable"; };
 in
 {
-  #home.packages = [ pkgs.kanshi ]; # needed to run `kanshictl switch`
   services.kanshi = {
     enable = true;
     systemdTarget = "graphical-session.target"; #"hyprland-session.target";
     settings = [
        {
-         profile.name = "laptop";
+         profile.name = "internal";
          profile.outputs = [
            (enable laptopScreen)
            (disable dellScreen)
@@ -38,7 +37,6 @@ in
            (enable dellScreen)
          ];
        }
-
        # FIXME
        {
          profile.name = "docked-extend";

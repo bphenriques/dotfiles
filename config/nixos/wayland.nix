@@ -22,6 +22,7 @@
     qt6.qtwayland
     inotify-tools
     libnotify
+    # egl-wayland     # E.g., Ghostty on Wayland
 
     # Hardware
     brightnessctl   # Manage Brightness

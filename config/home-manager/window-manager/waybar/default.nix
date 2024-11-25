@@ -27,16 +27,15 @@
 
         modules-left = [
           "custom/os"
-          "hyprland/workspaces"
+          "niri/workspaces"
         ];
         modules-center = [
-          "hyprland/window"
         ];
         modules-right = [
           "tray"
           "pulseaudio"
           "battery"
-          "hyprland/language"
+          #"hyprland/language" # FIXME: for niri
           "network"
 
           # List of unsure widgets
@@ -56,7 +55,7 @@
 
         "custom/os" = {
           format = "";
-          on-click = "wofi --show drun";
+          on-click = "fuzzel";
           tooltip = false;
           #menu = "on-click";
           #menu-file = ./menu/power_menu.xml;
@@ -81,14 +80,14 @@
           exec = "$HOME/.config/waybar/mediaplayer.py 2> /dev/null"; # // Script in resources/custom_modules folder
         };
 
-        "wlr/taskbar" = {
-          all-outputs = false;
-          format = "{icon}";
-          icon-size = 13;
-          tooltip = true;
-          tooltip-format = "{title}";
-          active-first = false;
-        };
+        #"wlr/taskbar" = {
+        #  all-outputs = false;
+        #  format = "{icon}";
+        #  icon-size = 13;
+        #  tooltip = true;
+        #  tooltip-format = "{title}";
+        #  active-first = false;
+        #};
 
         cpu = {
           format = "{usage}%  ";
@@ -170,33 +169,30 @@
           };
         };
 
-
         tray = {
           icon-size = 18;
           spacing = 10;
         };
 
-        "hyprland/workspaces" = {
-           icon-size = 32;
-           spacing = 16;
-           disable-scroll = false;
-           all-outputs = false;
-           active-only = false;
-           on-scroll-up = "hyprctl dispatch workspace e+1";
-           on-scroll-down = "hyprctl dispatch workspace e-1";
-           format = "<span><b>{icon}</b></span>";
-           format-icons = {
-             "1" = "1";
-             "2" = "2";
-             "3" = "3";
-             "4" = "4";
-             "5" = "5";
-             "6" = "6";
-             "7" = "7";
-             "8" = "8";
-             "9" = "9";
-             urgent = " ";
-           };
+        "niri/workspaces" = {
+          icon-size = 32;
+          spacing = 16;
+          all-outputs = false;
+          on-scroll-up = "hyprctl dispatch workspace e+1";
+          on-scroll-down = "hyprctl dispatch workspace e-1";
+          format = "<span><b>{icon}</b></span>";
+          format-icons = {
+            "1" = "1";
+            "2" = "2";
+            "3" = "3";
+            "4" = "4";
+            "5" = "5";
+            "6" = "6";
+            "7" = "7";
+            "8" = "8";
+            "9" = "9";
+            urgent = " ";
+          };
         };
 
         power-profiles-daemon = {
@@ -210,14 +206,6 @@
             power-saver = "";
           };
           min-length = 6;
-        };
-
-        "hyprland/window" = {
-          max-length = 50;
-          format = "<i>{title}</i>";
-          separate-outputs = true;
-          icon = true;
-          icon-size = 13;
         };
 
         network = {
