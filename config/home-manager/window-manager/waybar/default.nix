@@ -24,12 +24,10 @@
         margin-bottom = 0;
         spacing = 2;
 
-
         modules-left = [
-          "custom/os"
-          "niri/workspaces"
         ];
         modules-center = [
+          "custom/media"
         ];
         modules-right = [
           "tray"
@@ -47,25 +45,6 @@
 
           "clock"
         ];
-
-        "hyprland/language" = {
-          format-en = "US";
-          format-pt = "PT";
-        };
-
-        "custom/os" = {
-          format = "";
-          on-click = "fuzzel";
-          tooltip = false;
-          #menu = "on-click";
-          #menu-file = ./menu/power_menu.xml;
-          #menu-actions = {
-          #  shutdown = "shutdown";
-          #  reboot = "reboot";
-          #  suspend = "systemctl suspend";
-          #  hibernate = "systemctl hibernate";
-          #};
-        };
 
         "custom/media" = {
           format = "{icon} {}";
@@ -174,27 +153,6 @@
           spacing = 10;
         };
 
-        "niri/workspaces" = {
-          icon-size = 32;
-          spacing = 16;
-          all-outputs = false;
-          on-scroll-up = "hyprctl dispatch workspace e+1";
-          on-scroll-down = "hyprctl dispatch workspace e-1";
-          format = "<span><b>{icon}</b></span>";
-          format-icons = {
-            "1" = "1";
-            "2" = "2";
-            "3" = "3";
-            "4" = "4";
-            "5" = "5";
-            "6" = "6";
-            "7" = "7";
-            "8" = "8";
-            "9" = "9";
-            urgent = " ";
-          };
-        };
-
         power-profiles-daemon = {
           format = "{icon}";
           tooltip-format = "Power profile: {profile}\nDriver: {driver}";
@@ -221,7 +179,6 @@
           on-click = "${config.xdg.configHome}/rofi/rofi-wifi-menu"; # FIXME
           on-click-right = "nmtui"; #FIXME
         };
-
 
         # See more: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/pulseaudio.jsonc
         pulseaudio = {

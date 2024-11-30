@@ -72,7 +72,6 @@ let
 in
 {
   home.packages = with pkgs; [
-    swww
     # pamixer ?
   ];
 
@@ -95,6 +94,27 @@ in
   };
 
   xdg.configFile."niri/config.kdl".text = ''
+    workspace "coding"
+    workspace "browsing"
+    workspace "gaming"
+
+    window-rule {
+      match at-startup=true app-id="com.mitchellh.ghostty"
+      match at-startup=true app-id="jetbrains-idea-ce"
+      open-on-workspace "coding"
+    }
+
+    window-rule {
+      match at-startup=true app-id="firefox"
+      open-on-workspace "browsing"
+    }
+
+    window-rule {
+      match at-startup=true app-id="steam$"
+      match at-startup=true app-id=r#"^steam_app_[0-9]+$"#
+      open-on-workspace "gaming"
+    }
+
     hotkey-overlay {
       skip-at-startup
     }
@@ -140,41 +160,17 @@ in
     }
 
     layout {
-        gaps 8
-
-        // When to center a column when changing focus, options are:
-        // - "never", default behavior, focusing an off-screen column will keep at the left
-        //   or right edge of the screen.
-        // - "always", the focused column will always be centered.
-        // - "on-overflow", focusing a column will center it if it doesn't fit
-        //   together with the previously focused column.
-        center-focused-column "never"
-
+        gaps 6
+        center-focused-column "on-overflow"
         preset-column-widths {
             proportion 0.33333
             proportion 0.5
             proportion 0.66667
+            proportion 1.0
         }
-        // preset-window-heights { }
-
-        default-column-width { proportion 0.5; }
-        // default-column-width {}
-
-        // By default focus ring and border are rendered as a solid background rectangle
-        // behind windows. That is, they will show up through semitransparent windows.
-        // This is because windows using client-side decorations can have an arbitrary shape.
-        //
-        // If you don't like that, you should uncomment `prefer-no-csd` below.
-        // Niri will draw focus ring and border *around* windows that agree to omit their
-        // client-side decorations.
-        //
-        // Alternatively, you can override it with a window rule called
-        // `draw-border-with-background`.
-
-        // You can change how the focus ring looks.
+        default-column-width { proportion 0.75; }
         focus-ring {
-            // How many logical pixels the ring extends out from the windows.
-            width 2
+            width 3
             active-color "#7fc8ff"
             inactive-color "#505050"
         }
@@ -186,10 +182,7 @@ in
 
     prefer-no-csd
 
-    // You can change the path where screenshots are saved.
-    // A ~ at the front will be expanded to the home directory.
-    // The path is formatted with strftime(3) to give you the screenshot date and time.
-    screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+    screenshot-path "${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}/%Y-%m-%d %H-%M-%S.png"
 
     animations {
     }
@@ -201,11 +194,16 @@ in
         Mod+F { maximize-column; }
         Mod+Shift+F { fullscreen-window; }
         Mod+C { center-column; }
-        Mod+W { spawn "pkill -SIGUSR1 waybar"; }
+        Mod+W { spawn "pkill" "-SIGUSR1" "waybar"; }
+
+        Print { screenshot; }
+        Ctrl+Print { screenshot-screen; }
+        Alt+Print { screenshot-window; }
+
+        Mod+Shift+E { quit; }
 
         // Suggested binds for running programs: terminal, app launcher, screen locker.
         Mod+Return { spawn "konsole"; }
-        Mod+T { spawn "konsole"; }
         Mod+Space { spawn "fuzzel"; }
         Super+Alt+L { spawn "swaylock"; }
 
@@ -223,85 +221,18 @@ in
         XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "s" "10%+"; }
         XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
 
-
         Mod+Left  { focus-column-left; }
         Mod+Down  { focus-window-down; }
         Mod+Up    { focus-window-up; }
         Mod+Right { focus-column-right; }
-        Mod+H     { focus-column-left; }
-        Mod+J     { focus-window-down; }
-        Mod+K     { focus-window-up; }
-        Mod+L     { focus-column-right; }
 
         Mod+Ctrl+Left  { move-column-left; }
         Mod+Ctrl+Down  { move-window-down; }
         Mod+Ctrl+Up    { move-window-up; }
         Mod+Ctrl+Right { move-column-right; }
-        Mod+Ctrl+H     { move-column-left; }
-        Mod+Ctrl+J     { move-window-down; }
-        Mod+Ctrl+K     { move-window-up; }
-        Mod+Ctrl+L     { move-column-right; }
 
-        // Alternative commands that move across workspaces when reaching
-        // the first or last window in a column.
-        // Mod+J     { focus-window-or-workspace-down; }
-        // Mod+K     { focus-window-or-workspace-up; }
-        // Mod+Ctrl+J     { move-window-down-or-to-workspace-down; }
-        // Mod+Ctrl+K     { move-window-up-or-to-workspace-up; }
-
-        Mod+Home { focus-column-first; }
-        Mod+End  { focus-column-last; }
-        Mod+Ctrl+Home { move-column-to-first; }
-        Mod+Ctrl+End  { move-column-to-last; }
-
-        Mod+Shift+Left  { focus-monitor-left; }
-        Mod+Shift+Down  { focus-monitor-down; }
-        Mod+Shift+Up    { focus-monitor-up; }
-        Mod+Shift+Right { focus-monitor-right; }
-        Mod+Shift+H     { focus-monitor-left; }
-        Mod+Shift+J     { focus-monitor-down; }
-        Mod+Shift+K     { focus-monitor-up; }
-        Mod+Shift+L     { focus-monitor-right; }
-
-        Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
-        Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
-        Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
-        Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
-        Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
-        Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
-        Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
-        Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
-
-        Mod+Page_Down      { focus-workspace-down; }
-        Mod+Page_Up        { focus-workspace-up; }
-        Mod+U              { focus-workspace-down; }
-        Mod+I              { focus-workspace-up; }
-        Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
-        Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-        Mod+Ctrl+U         { move-column-to-workspace-down; }
-        Mod+Ctrl+I         { move-column-to-workspace-up; }
-
-        Mod+Shift+Page_Down { move-workspace-down; }
-        Mod+Shift+Page_Up   { move-workspace-up; }
-        Mod+Shift+U         { move-workspace-down; }
-        Mod+Shift+I         { move-workspace-up; }
-
-        Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
-        Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
-        Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
-        Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
-
-        Mod+WheelScrollRight      { focus-column-right; }
-        Mod+WheelScrollLeft       { focus-column-left; }
-        Mod+Ctrl+WheelScrollRight { move-column-right; }
-        Mod+Ctrl+WheelScrollLeft  { move-column-left; }
-
-        // Usually scrolling up and down with Shift in applications results in
-        // horizontal scrolling; these binds replicate that.
-        Mod+Shift+WheelScrollDown      { focus-column-right; }
-        Mod+Shift+WheelScrollUp        { focus-column-left; }
-        Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
-        Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+        Mod+Shift+Down      { focus-workspace-down; }
+        Mod+Shift+Up        { focus-workspace-up; }
 
         Mod+1 { focus-workspace 1; }
         Mod+2 { focus-workspace 2; }
@@ -322,9 +253,6 @@ in
         Mod+Ctrl+8 { move-column-to-workspace 8; }
         Mod+Ctrl+9 { move-column-to-workspace 9; }
 
-        // Alternatively, there are commands to move just a single window:
-        // Mod+Ctrl+1 { move-window-to-workspace 1; }
-
         // Switches focus between the current and the previous workspace.
         Mod+Tab { focus-workspace-previous; }
 
@@ -339,21 +267,6 @@ in
         Mod+Shift+R { switch-preset-window-height; }
         Mod+Ctrl+R { reset-window-height; }
 
-        // Finer width adjustments.
-        // This command can also:
-        // * set width in pixels: "1000"
-        // * adjust width in pixels: "-5" or "+5"
-        // * set width as a percentage of screen width: "25%"
-        // * adjust width as a percentage of screen width: "-10%" or "+10%"
-        // Pixel sizes use logical, or scaled, pixels. I.e. on an output with scale 2.0,
-        // set-column-width "100" will make the column occupy 200 physical screen pixels.
-        Mod+Minus { set-column-width "-10%"; }
-        Mod+Equal { set-column-width "+10%"; }
-
-        // Finer height adjustments when in column with other windows.
-        Mod+Shift+Minus { set-window-height "-10%"; }
-        Mod+Shift+Equal { set-window-height "+10%"; }
-
         // Actions to switch layouts.
         // Note: if you uncomment these, make sure you do NOT have
         // a matching layout switch hotkey configured in xkb options above.
@@ -361,13 +274,6 @@ in
         // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
         // Mod+Space       { switch-layout "next"; }
         // Mod+Shift+Space { switch-layout "prev"; }
-
-        Print { screenshot; }
-        Ctrl+Print { screenshot-screen; }
-        Alt+Print { screenshot-window; }
-
-        // The quit action will show a confirmation dialog to avoid accidental exits.
-        Mod+Shift+E { quit; }
 
         // Powers off the monitors. To turn them back on, do any input like
         // moving the mouse or pressing any other key.
