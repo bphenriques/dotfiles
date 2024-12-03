@@ -5,7 +5,7 @@
     ./internet
     ./media
     ./terminal
-    ./desktop
+    ./window-manager
   ];
 
   # XDG Compliance to tidy up $HOME.
@@ -27,6 +27,9 @@
     dateutils
     unzip
     xclip
+
+    # Other core
+    xdg-user-dirs
 
     # Archive
     p7zip     # 7zip for linux

@@ -51,7 +51,7 @@ https://github.com/NickCao/flakes/blob/d99c0a28b9357adce9749ca49364038184a1b95e/
 
 
 
-https://github.com/fufexan/dotfiles/tree/main/home/programs/wayland
+
 
 Sway
 https://github.com/NickCao/flakes/blob/d99c0a28b9357adce9749ca49364038184a1b95e/nixos/mainframe/home.nix#L22

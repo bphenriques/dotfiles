@@ -1,9 +1,4 @@
 { config, pkgs, lib, self, ... }:
-let
-  wallpapers = self.private.wallpapers.override {
-    selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
-  };
-in
 {
   imports = [
     ./hardware          # CPU, graphics, peripherals, etc
@@ -15,7 +10,6 @@ in
   ];
 
   networking.hostName = "bphenriques-laptop";
-  networking.interfaces.lo.wakeOnLan.enable = true;
 
   # Boot: See what it is taking most time: `systemd-analyze critical-chain`
   boot = {
@@ -25,7 +19,7 @@ in
       enable = true;
       efiSupport = true;
       efiInstallAsRemovable = true;
-      configurationLimit = 5;
+      configurationLimit = 10;
 
       # I have Windows To Go on a external drive. I turn it off when not in use to reduce wear-and-tear.
       # 1. `sudo fdisk -l` to get the device where "EFI System" is.
@@ -52,28 +46,8 @@ in
     theme = "angular";
   };
 
-  # Desktop environment
-  services.xserver.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.displayManager.defaultSession = "plasma";
-  environment.plasma6.excludePackages = with pkgs.kdePackages; [ elisa plasma-browser-integration ];
-
   # Login Screen
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.theme = "sddm-astronaut-theme";
   environment.systemPackages = [
-   # https://github.com/Keyitdev/sddm-astronaut-theme/blob/master/theme.conf
-   # It is possible to override the package and set themeConfig. For now, I will iterate like this.
-   pkgs.sddm-astronaut
-   (pkgs.writeTextDir "share/sddm/themes/sddm-astronaut-theme/theme.conf.user" ''
-     [General]
-     background=${wallpapers}/share/wallpapers/watch-tower.png
-     FullBlur="false"
-     PartialBlur="false"
-     FormPosition="center"
-   '')
-
    (pkgs.writeScriptBin "reboot-to-windows" ''
      #!${pkgs.stdenv.shell}
      sudo grub-reboot "Windows 11" && reboot $@
