@@ -1,4 +1,4 @@
-{ config, lib, pkgs, self, ... }:
+{ config, lib, pkgs, self, community, ... }:
 # Check custom scripts: https://github.com/iynaix/dotfiles/blob/fa261818c04e6b1aa7d928a10abd66e2c31c0ed9/packages/dotfiles-rs/dotfiles/src/bin/hypr-pip.rs
 # https://github.com/dileep-kishore/nixos-hyprland/blob/main/home/common/optional/desktops/hyprland/config.nix
 # https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
@@ -24,8 +24,16 @@
 
 # Idle effect: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/swayidle.nix#L24
 
+# Screencast? https://github.com/maximbaz/dotfiles/blob/98ff8b69370e86879faf57b29d07cfcb6aff4306/modules/linux/xdg.nix#L2
+
 # TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
 let
+
+  # nix repl
+  # then :lf .
+  # then inputs.nixpkgs.lib.strings.concatMapStringsSep " " (x: ''"${x}"'') inputs.nixpkgs.lib.strings.splitString " " "please run this command"
+  # run-cmd = cmd: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') lib.strings.splitString " " cmd;
+
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
@@ -76,22 +84,6 @@ in
   ];
 
   services.gnome-keyring.enable = true;
-  systemd.user.services = {
-    swww = {
-      Unit = {
-        Description = "Efficient animated wallpaper daemon for wayland";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session.target" ];
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-      Service = {
-        Type = "simple";
-        ExecStart = ''${pkgs.swww}/bin/swww-daemon'';
-        ExecStop = "${pkgs.swww}/bin/swww kill";
-        Restart = "on-failure";
-      };
-    };
-  };
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "coding"
@@ -128,7 +120,7 @@ in
       MOZ_ENABLE_WAYLAND "1"
     }
 
-    spawn-at-startup "${lib.getExe pkgs.swww}" "img" "${wallpapersPkg}/share/wallpapers/mountains.png"
+    spawn-at-startup "${lib.getExe pkgs.swww}" "img" "--transition-type" "none" "${wallpapersPkg}/share/wallpapers/mountains.png"
     spawn-at-startup "xwayland-satellite" ":21"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
 
@@ -148,10 +140,6 @@ in
 
         mouse {
         }
-
-        // Focus windows and outputs automatically when moving the mouse into them.
-        // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-        // focus-follows-mouse max-scroll-amount="0%"
     }
 
     output "eDP-1" {
@@ -168,7 +156,7 @@ in
             proportion 0.66667
             proportion 1.0
         }
-        default-column-width { proportion 0.75; }
+        default-column-width { proportion 1.00; }
         focus-ring {
             width 3
             active-color "#7fc8ff"
@@ -203,14 +191,14 @@ in
         Mod+Shift+E { quit; }
 
         // Suggested binds for running programs: terminal, app launcher, screen locker.
-        Mod+Return { spawn "konsole"; }
-        Mod+Space { spawn "fuzzel"; }
+        Mod+Return { spawn "${lib.getExe community.pkgs.ghostty}"; }
+        Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
         Super+Alt+L { spawn "swaylock"; }
 
         // Audio
-        XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
-        XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
-        XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+        XF86AudioRaiseVolume allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "increase"; }
+        XF86AudioLowerVolume allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "decrease"; }
+        XF86AudioMute        allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "toggle-mute"; }
         XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
         XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
         XF86AudioPause       allow-when-locked=true { spawn "playerctl" "play-pause"; }
@@ -218,8 +206,8 @@ in
         XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
 
         // Brightness
-        XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "s" "10%+"; }
-        XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
+        XF86MonBrightnessUp   allow-when-locked=true { spawn "${self.pkgs.dunst-brightness}" "increase"; }
+        XF86MonBrightnessDown allow-when-locked=true { spawn "${self.pkgs.dunst-brightness}" "decrease"; }
 
         Mod+Left  { focus-column-left; }
         Mod+Down  { focus-window-down; }

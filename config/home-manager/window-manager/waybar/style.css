@@ -1,165 +1,43 @@
-/* Catppuccin Mocha color scheme */
-@define-color rosewater #f5e0dc;
-@define-color flamingo #f2cdcd;
-@define-color pink #f5c2e7;
-@define-color mauve #cba6f7;
-@define-color red #f38ba8;
-@define-color maroon #eba0ac;
-@define-color peach #fab387;
-@define-color yellow #f9e2af;
-@define-color green #a6e3a1;
-@define-color teal #94e2d5;
-@define-color sky #89dceb;
-@define-color sapphire #74c7ec;
-@define-color blue #89b4fa;
-@define-color lavender #b4befe;
-@define-color text #cdd6f4;
-@define-color subtext1 #bac2de;
-@define-color subtext0 #a6adc8;
-@define-color overlay2 #9399b2;
-@define-color overlay1 #7f849c;
-@define-color overlay0 #6c7086;
-@define-color surface2 #585b70;
-@define-color surface1 #45475a;
-@define-color surface0 #313244;
-@define-color base #1e1e2e;
-@define-color mantle #181825;
-@define-color crust #11111b;
-
-
-
-@define-color bg_main rgba(25, 25, 25, 0.65);
-@define-color bg_main_tooltip rgba(0, 0, 0, 0.7);
-
-
-/*base background color of selections */
-@define-color bg_hover rgba(200, 200, 200, 0.3);
-/*base background color of active elements */
-@define-color bg_active rgba(100, 100, 100, 0.5);
-
-/*base border color*/
-@define-color border_main rgba(255, 255, 255, 0.2);
-/*text color for entries, views and content in general */
-@define-color content_main white;
-/*text color for entries that are unselected */
-@define-color content_inactive rgba(255, 255, 255, 0.25);
-
+@define-color text white;
 
 * {
-  font-family: "Maple Mono", "CaskaydiaCove NF";
-  font-size: 15px;
-  min-height: 0;
+    border: none;
+    border-radius: 0;
+    font-family: "Ubuntu Nerd Font";
+    font-size: 15px;
+    min-height: 0;
 }
 
 #waybar {
-  background: rgba(30, 30, 46, 0.75);
+  background: transparent;
   color: @text;
 }
 
+#toggles,
+#clock,
 #custom-os {
-	font-family: "JetBrainsMono Nerd Font";
-  font-size: 20px;
-	padding-left: 12px;
-	padding-right: 20px;
-	transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-#custom-os_button:hover {
-  background:  @bg_hover;
-	color: @content_main;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  background: rgba(30, 30, 46, 0.75);
 }
 
-#workspaces {
-  color: transparent;
-	margin-right: 1.5px;
-	margin-left: 1.5px;
-}
-#workspaces button {
-  padding: 3px;
-  color: @content_inactive;
-	transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-#workspaces button.active {
-  color: @bg_active;
-}
-#workspaces button.focused {
-}
-#workspaces button.urgent {
-	background:  rgba(255, 200, 0, 0.35);
-	border-bottom: 3px dashed @warning_color;
-	color: @warning_color;
-}
-#workspaces button:hover {
-  background: @bg_hover;
-	color: @content_main;
-}
-
-window#waybar.fullscreen,
-window#waybar.swallowing {
-  color: @red;
-}
-
+#power-profiles-daemon,
+#pulseaudio,
 #network,
-#idle_inhibitor,
-#cpu,
-#memory,
-#backlight,
-#battery,
-#pulseaudio {
-  padding: 0.1rem 0.7rem;
-  margin: 5px 5px;
+#keyboard,
+#battery
+{
+  margin-left: 0.7rem;
+  margin-right: 0.7rem;
 }
 
-#network {
-  color: @text;
+#keyboard {
   margin-left: 0px;
+}
+#battery {
   margin-right: 0px;
 }
-
-#cpu {
-  color: @pink;
-}
-
-#memory {
-  color: @yellow;
-}
-
-#clock {
-  color: @mauve;
-  margin: 5px 5px;
-}
-
-#battery {
-  color: @pink;
-}
-
-#language {
-  margin: 5px 5px;
-  padding: 0.1rem 0.7rem;
-  border-radius: 5px;
-  border: 1px solid white;
-}
-
-#battery.charging {
-  color: @pink;
-}
-
-#battery.warning:not(.charging) {
-  color: @mauve;
-}
-
-#backlight {
-  color: @yellow;
-}
-
-#backlight,
-#battery {
-  color: @pink;
-}
-
-#pulseaudio {
-  color: @green;
-}
-
-#tray {
-  padding: 0.1rem 0.7rem;
+#power-profiles-daemon {
+  margin-left: -5px;
+  margin-right: -5px;
 }

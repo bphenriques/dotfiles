@@ -1,5 +1,4 @@
 { config, lib, pkgs, ... }:
-
 {
   services.dunst = {
     enable = true;
@@ -9,18 +8,13 @@
     };
     settings = {
       global = {
-        rounded = "yes";
-        origin = "top-right";
-        monitor = "0";
-        alignment = "left";
-        vertical_alignment = "center";
+        enable_recursive_icon_lookup = true;
+        rounded = true;
         width = "400";
         height = "400";
-        scale = 0;
-        gap_size = 0;
-        progress_bar = true;
-        transparency = 0;
-        text_icon_padding = 0;
+        gap_size = 2;
+        progress_bar_corner_radius = 2;
+
         separator_color = "frame";
         sort = "yes";
         idle_threshold = 120;
@@ -43,7 +37,7 @@
         horizontal_padding = 10;
         icon_position = "left";
         indicate_hidden = "yes";
-        min_icon_size = 0;
+        min_icon_size = 22;
         max_icon_size = 64;
         mouse_left_click = "do_action, close_current";
         mouse_middle_click = "close_current";
@@ -54,10 +48,11 @@
         show_indicators = "yes";
         shrink = "no";
         word_wrap = "yes";
-        browser = "/usr/bin/env librewolf -new-tab";
       };
 
-      fullscreen_delay_everything = {fullscreen = "delay";};
+      fullscreen_delay_everything = {
+        fullscreen = "delay";
+      };
 
       urgency_critical = {
         background = "#d64e4e";

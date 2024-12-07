@@ -29,10 +29,11 @@ Listing only the most relevant outputs. See the source-code for more details.
 - `fzf-rg`: [`fzf`](https://github.com/junegunn/fzf) + [`ripgrep`](https://github.com/BurntSushi/ripgrep). Includes `fish` widget.
 - `fzf-fd`: [`fzf`](https://github.com/junegunn/fzf) + [`fd`](https://github.com/sharkdp/fd). Includes `fish` widget.
 - `preview`: Custom _barebones_ terminal file previewer to together with the other widgets. I really like [`yazi`](https://yazi-rs.github.io/) previewer but can't use it in isolation.
+- `dunst-volume`: Custom wrapper to send notifications whenever I set the volume.
 
 Tryout using:
 ```shell
-nix run github:bphenriques/dotfiles#{package}
+nix run github:bphenriques/dotfiles#{package} -- {args}
 ```
 
 ### [Home Manager](https://github.com/nix-community/home-manager) modules

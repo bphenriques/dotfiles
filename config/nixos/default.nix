@@ -3,8 +3,7 @@
   imports = [
     ./programs.nix
     ./services.nix
-    ./display-manager.nix
-    ./wayland.nix
+    ./wayland
 
     # Choose one file browser
     ./thunar.nix
