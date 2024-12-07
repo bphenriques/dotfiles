@@ -196,9 +196,9 @@ in
         Super+Alt+L { spawn "swaylock"; }
 
         // Audio
-        XF86AudioRaiseVolume allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "increase"; }
-        XF86AudioLowerVolume allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "decrease"; }
-        XF86AudioMute        allow-when-locked=true { spawn "${self.pkgs.dunst-volume}" "toggle-mute"; }
+        XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "increase"; }
+        XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "decrease"; }
+        XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "toggle-mute"; }
         XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
         XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
         XF86AudioPause       allow-when-locked=true { spawn "playerctl" "play-pause"; }
@@ -206,8 +206,8 @@ in
         XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
 
         // Brightness
-        XF86MonBrightnessUp   allow-when-locked=true { spawn "${self.pkgs.dunst-brightness}" "increase"; }
-        XF86MonBrightnessDown allow-when-locked=true { spawn "${self.pkgs.dunst-brightness}" "decrease"; }
+        XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-brightness}" "increase"; }
+        XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-brightness}" "decrease"; }
 
         Mod+Left  { focus-column-left; }
         Mod+Down  { focus-window-down; }
