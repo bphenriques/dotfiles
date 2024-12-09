@@ -11,6 +11,8 @@
       nodePackages.bash-language-server       # LSP for Bash
       nodePackages.yaml-language-server       # LSP for YAML
       nodePackages.vscode-json-languageserver # LSP for JSON
+      vscode-langservers-extracted            # LSP for HTML/CSS/JSON/ESLint
+      typescript-language-server              # LSP for Typescript
       docker-compose-language-service         # LSP for docker-compose
       dockerfile-language-server-nodejs       # LSP for docker
       texlab                                  # LSP for LaTeX
