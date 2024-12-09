@@ -1,18 +1,9 @@
 #shellcheck shell=sh
 
-# From Adwaita
-MUTED_ICON="${DUNST_VOLUME_MUTED_ICON:-audio-volume-muted-symbolic}"
-LOW_ICON="${DUNST_VOLUME_LOW_ICON:-audio-volume-low-symbolic}"
-MEDIUM_ICON="${DUNST_VOLUME_MEDIUM_ICON:-audio-volume-medium-symbolic}"
-HIGH_ICON="${DUNST_VOLUME_HIGH_ICON:-audio-volume-high-symbolic}"
-
-
-
-#        XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
-#        XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
-#        XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-#        XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-
+DUNST_VOLUME_MUTED_ICON="${DUNST_VOLUME_MUTED_ICON:-}"
+DUNST_VOLUME_LOW_ICON="${DUNST_VOLUME_LOW_ICON:-}"
+DUNST_VOLUME_MEDIUM_ICON="${DUNST_VOLUME_MEDIUM_ICON:-}"
+DUNST_VOLUME_HIGH_ICON="${DUNST_VOLUME_HIGH_ICON:-}"
 
 get_percentage() { ponymix get-volume; }
 is_muted() { ponymix is-muted; }
@@ -21,21 +12,24 @@ decrease() { ponymix decrease "$1"; }
 mute() { ponymix mute; }
 unmute() { ponymix unmute; }
 toggle_mute() { ponymix toggle; }
+list() { ponymix list; }
+set_default() { ponymix set-default -d "$1"; }
+get_default_sink_name() { ponymix default | grep sink | awk '{print $3; }'; }
 
 notify() {
   percentage="$(get_percentage)"
   icon=
   if is_muted || [ "$percentage" -eq 0 ]; then
-    icon="$MUTED_ICON"
+    icon="$DUNST_VOLUME_MUTED_ICON"
     progress=0
   elif [ "$percentage" -lt 30 ]; then
-    icon="$LOW_ICON"
+    icon="$DUNST_VOLUME_LOW_ICON"
     progress="$percentage"
   elif [ "$percentage" -lt 70 ]; then
-    icon="$MEDIUM_ICON"
+    icon="$DUNST_VOLUME_MEDIUM_ICON"
     progress="$percentage"
   else
-    icon="$HIGH_ICON"
+    icon="$DUNST_VOLUME_HIGH_ICON"
     progress="$percentage"
   fi
 
@@ -55,5 +49,6 @@ case "${1:-}" in
   toggle-mute)  toggle_mute && notify                     ;;
   increase)     shift 1 && increase "${1:-10}" && notify  ;;
   decrease)     shift 1 && decrease "${1:-10}" && notify  ;;
-  switch) ;;
+  list)         shift 1 && list "$1"                      ;;
+  set)          shift 1 && set_default "$1"               ;;
 esac

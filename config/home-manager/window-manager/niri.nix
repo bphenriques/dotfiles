@@ -16,7 +16,6 @@
 # https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/gdm.nix
 # https://github.com/SergioRibera/dotfiles/blob/8e03a755e4e03b26722e6971effa4161c3efd0b6/hosts/common/services.nix#L45
 
-# Setting up auto start: https://github.com/kiike/dotfiles/blob/ff788bae02ba6d15c73632d99654269d2b5fba49/home/features/desktop/tiling/ags.nix
 
 # Battery? https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/power.nix
 
@@ -26,7 +25,25 @@
 
 # Screencast? https://github.com/maximbaz/dotfiles/blob/98ff8b69370e86879faf57b29d07cfcb6aff4306/modules/linux/xdg.nix#L2
 
+# https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
+
+  # If Share picker doesn’t use the system theme
+  # dbus-update-activation-environment --systemd --all
+      #systemctl --user import-environment QT_QPA_PLATFORMTHEME
+
+  # Ideas
+  # "Mod+Return".action = spawn "${config.profile.terminal}";
+  # "Mod+E".action = spawn "nautilus";
+  # "Mod+Escape".action = spawn "wlogout";
+/*
+*/
+# Window rules: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L143
+# Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
+
+# Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
+
 # TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
+# TODO: Script at startup that figures out the right layout
 let
 
   # nix repl
@@ -50,33 +67,70 @@ let
     # XDG_BACKEND=wayland
   };
 
+  on-startup = ''
+    spawn-at-startup "${lib.getExe pkgs.swww}" "img" "--transition-type" "none" "${wallpapersPkg}/share/wallpapers/mountains.png"
+    spawn-at-startup "xwayland-satellite" ":21"
+    spawn-at-startup "${lib.getExe pkgs.waybar}"
+  '';
+
+  input = ''
+    input {
+      keyboard {
+        xkb {
+          layout "us,pt";
+          variant "euro,";
+          options "caps:ctrl_modifier"
+        }
+      }
+
+      touchpad {
+        tap
+        natural-scroll
+      }
+
+      mouse {
+      }
+    }
+  '';
+  outputs = ''
+    output "Samsung Display Corp. 0x4188 Unknown" {
+      mode "2880x1800@120.001"
+      scale 1.75
+    }
+
+    output "Dell Inc. DELL S2721DGF 4P11R83" {
+      off
+      mode "2560x1440@143.912"
+      scale 1.0
+    }
+  '';
+
+  layout = ''
+    layout {
+      gaps 6
+      center-focused-column "on-overflow"
+      preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+      }
+      default-column-width { proportion 1.00; }
+      focus-ring {
+        width 3
+        active-color "#7fc8ff"
+        inactive-color "#505050"
+      }
+
+      border {
+        off
+      }
+    }
+  '';
+
   set-terminal = ''
     ${pkgs.swww}/bin/swww img "${wallpapersPkg}/share/wallpapers/mountains.png"
   '';
-
-  # If Share picker doesn’t use the system theme
-  # dbus-update-activation-environment --systemd --all
-      #systemctl --user import-environment QT_QPA_PLATFORMTHEME
-
-  # Ideas
-  # "Mod+Return".action = spawn "${config.profile.terminal}";
-  # "Mod+E".action = spawn "nautilus";
-  # "Mod+Escape".action = spawn "wlogout";
-/*
-   touchpad = {
-            tap = true;
-            dwt = true;
-            accel-profile = "adaptive";
-            accel-speed = 0.0;
-            click-method = "clickfinger";
-            natural-scroll = true;
-            scroll-method = "two-finger";
-          };
-*/
-# Window rules: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L143
-# Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
-
-# Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 in
 {
   home.packages = with pkgs; [
@@ -120,53 +174,11 @@ in
       MOZ_ENABLE_WAYLAND "1"
     }
 
-    spawn-at-startup "${lib.getExe pkgs.swww}" "img" "--transition-type" "none" "${wallpapersPkg}/share/wallpapers/mountains.png"
-    spawn-at-startup "xwayland-satellite" ":21"
-    spawn-at-startup "${lib.getExe pkgs.waybar}"
+    ${on-startup}
+    ${input}
+    ${outputs}
+    ${layout}
 
-    input {
-        keyboard {
-            xkb {
-              layout "us,pt";
-              variant "euro,";
-              options "caps:ctrl_modifier"
-            }
-        }
-
-        touchpad {
-            tap
-            natural-scroll
-        }
-
-        mouse {
-        }
-    }
-
-    output "eDP-1" {
-        mode "2880x1800@120.001"
-        scale 1.75
-    }
-
-    layout {
-        gaps 6
-        center-focused-column "on-overflow"
-        preset-column-widths {
-            proportion 0.33333
-            proportion 0.5
-            proportion 0.66667
-            proportion 1.0
-        }
-        default-column-width { proportion 1.00; }
-        focus-ring {
-            width 3
-            active-color "#7fc8ff"
-            inactive-color "#505050"
-        }
-
-        border {
-            off
-        }
-    }
 
     prefer-no-csd
 

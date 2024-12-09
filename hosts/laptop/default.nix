@@ -18,14 +18,16 @@ in mylib.hosts.mkNixOSHost {
     host.webcam = "/dev/video0";  # FIXME: This only needed once, let's move mvp to a module and make this a parameter.
     network-devices = import ../network-devices.nix;
     monitors = {
-      "eDP-1" = {
+      "Samsung Display Corp. 0x4188 Unknown" = {
+        connector = "eDP-1";
         description = "built-in";
-        mode = "2880x1800@143.91Hz";
+        mode = "2880x1800@120.001Hz";
         scale = 1.5;
       };
       "Dell Inc. DELL S2721DGF 4P11R83" = {
+        name = "Dell Inc. DELL S2721DGF 4P11R83";
         description = "Office Monitor";
-        mode = "2560x1440@120.00Hz";
+        mode = "2560x1440@143.912Hz";
         scale = 1.0;
       };
     };

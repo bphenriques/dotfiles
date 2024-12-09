@@ -1,7 +1,34 @@
 { lib, config, pkgs, ... }:
 # https://github.com/bitSheriff/dotfiles/blob/master/configuration/.config/waybar/modules/modules.jsonc
+# https://github.com/nix-community/nur-combined/blob/4d8b064e3cff836ee8c17c48c592874b0209e167/repos/slaier/modules/waybar/mediaplayer.nix
 # TODO: Notification: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/notifications.jsonc
 let
+  audio = {
+    headset = {
+      name = "alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
+      icon = "";
+      icon-muted = "󰋐";
+    };
+
+    external-speaker = {
+      name = "alsa_output.pci-0000_01_00.1.hdmi-stereo";
+      icon = "󰓃";
+      icon-muted = "󰓄";
+    };
+
+    internal-speaker = {
+      name = "alsa_output.pci-0000_06_00.6.analog-stereo";
+      icon = "󰽟";
+      icon-muted = "󰽠";
+    };
+  };
+
+  display = {
+    external-only = "";
+    internal-aptop = "";
+    extended = "󱂬";
+  };
+
   modules = {
     cpu = {
       format = "{usage}%  ";
@@ -143,11 +170,11 @@ let
 
     # See more: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/pulseaudio.jsonc
     pulseaudio = {
-      format = "{icon}";
+      format = "{icon} {volume}%";
       format-bluetooth = "{icon}";
       format-bluetooth-muted = " {icon}";
       format-source = " {volume}%";
-      format-source-muted = "  {desc}";
+      format-source-muted = " ";
       format-icons = {
         headphone = "";
         hands-free = "";
@@ -156,14 +183,19 @@ let
         portable = "";
         car = "";
         default = ["" "" ""];
+
+        "${audio.headset.name}" = audio.headset.icon;
+        "${audio.headset.name}-muted" = audio.headset.icon-muted;
+        "${audio.external-speaker.name}" = audio.external-speaker.icon;
+        "${audio.external-speaker.name}-muted" = audio.external-speaker.icon-muted;
+        "${audio.internal-speaker.name}" = audio.internal-speaker.icon;
+        "${audio.internal-speaker.name}-muted" = audio.internal-speaker.icon-muted;
       };
       on-click = "${lib.getExe pkgs.pavucontrol}";
+      #on-right-click = "${lib.getExe self.pkgs.dunst-volume} set alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
 
       tooltip = true;
-      tooltip-format = ''
-        Audio: {desc}
-        Mic: {format_source}
-      '';
+      tooltip-format = "{desc}";
     };
   };
 
