@@ -5,7 +5,6 @@
     ./internet
     ./media
     ./terminal
-    ./window-manager
   ];
 
   # XDG Compliance to tidy up $HOME.

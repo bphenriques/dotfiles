@@ -1,9 +1,9 @@
-{ self, mylib, nixpkgs, home-manager, ... }:
+{ inputs, mylib, ... }:
 let
-  inherit (nixpkgs.lib.attrsets) attrValues;
+  inherit (inputs.nixpkgs.lib.attrsets) attrValues;
 
-  darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
-  hmModules = attrValues self.homeManagerModules;
+  darwinModules = attrValues inputs.self.darwinModules ++ [ inputs.home-manager.darwinModules.home-manager ];
+  hmModules = attrValues inputs.self.homeManagerModules;
 in mylib.hosts.mkMacOSHost {
   inherit darwinModules hmModules;
   hostModule = ./config.nix;

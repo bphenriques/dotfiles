@@ -11,6 +11,7 @@
   ];
 
   nix = {
+    settings.auto-optimise-store   = true;                       # Optimise the store when building.
     gc = {
       automatic = true;
       dates = "weekly";

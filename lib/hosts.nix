@@ -1,9 +1,9 @@
 { lib, inputs, ... }:
 let
   nixConfig = {
+    optimise.automatic = true;
     settings = {
       experimental-features = [ "nix-command" "flakes" ]; # Enable nix flakes.
-      auto-optimise-store   = true;                       # Optimise the store when building.
       use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
       warn-dirty = false;                                 # I know...
     };

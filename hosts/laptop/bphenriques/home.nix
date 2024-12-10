@@ -3,6 +3,7 @@
   imports = [
     ../../../config/home-manager
     ../../../config/home-manager/gaming
+    ../../../config/home-manager/window-manageqqr
     ./input-remapper
   ];
 
