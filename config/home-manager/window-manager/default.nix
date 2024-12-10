@@ -19,7 +19,6 @@ in
     ./niri.nix    # Window Manager
     ./waybar      # Top-bar. There are fancier solutions out-there.
     ./dunst.nix   # Notification Daemon
-    ./kanshi.nix  # Manage external monitors
     ./fuzzel.nix  # Application Launcher
   ];
 
