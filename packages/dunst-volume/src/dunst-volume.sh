@@ -1,5 +1,7 @@
 #shellcheck shell=sh
 
+# TODO review: https://askubuntu.com/questions/1267949/how-do-i-automatically-switch-pulseaudio-input-to-headset-upon-connection
+
 DUNST_VOLUME_MUTED_ICON="${DUNST_VOLUME_MUTED_ICON:-}"
 DUNST_VOLUME_LOW_ICON="${DUNST_VOLUME_LOW_ICON:-}"
 DUNST_VOLUME_MEDIUM_ICON="${DUNST_VOLUME_MEDIUM_ICON:-}"

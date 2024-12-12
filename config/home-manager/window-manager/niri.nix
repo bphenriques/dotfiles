@@ -71,6 +71,7 @@ let
     spawn-at-startup "${lib.getExe pkgs.swww}" "img" "--transition-type" "none" "${wallpapersPkg}/share/wallpapers/mountains.png"
     spawn-at-startup "xwayland-satellite" ":21"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
+    spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "default"
   '';
 
   input = ''
@@ -102,6 +103,7 @@ let
       off
       mode "2560x1440@143.912"
       scale 1.0
+      variable-refresh-rate on-demand=true
     }
   '';
 
