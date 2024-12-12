@@ -18,6 +18,7 @@ let
     in {
       dunst-volume = pkgs.callPackage ./dunst-volume { };
       dunst-brightness = pkgs.callPackage ./dunst-brightness { };
+      niri-output-configuration = pkgs.callPackage ./dunst-brightness { };
     }
   );
 in forAllSystems (system:
