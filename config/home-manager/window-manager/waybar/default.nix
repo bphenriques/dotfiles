@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, self, ... }:
 # https://github.com/bitSheriff/dotfiles/blob/master/configuration/.config/waybar/modules/modules.jsonc
 # https://github.com/nix-community/nur-combined/blob/4d8b064e3cff836ee8c17c48c592874b0209e167/repos/slaier/modules/waybar/mediaplayer.nix
 # TODO: Notification: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/notifications.jsonc
@@ -79,8 +79,8 @@ let
     backlight = {
       format = "{icon} {percent}%";
       format-icons =  ["" "" "" "" "" "" "" "" ""];
-      on-scroll-up = "${lib.getExe pkgs.brightnessctl} s +1%";
-      on-scroll-down = "${lib.getExe pkgs.brightnessctl} s 1%-";
+      on-scroll-up = "${lib.getExe self.pkgs.osd-brightness} increase";
+      on-scroll-down ="${lib.getExe self.pkgs.osd-brightness} decrease";
       min-length = 6;
       # "on-click": "wdisplays"
     };
@@ -193,6 +193,9 @@ let
       };
       on-click = "${lib.getExe pkgs.pavucontrol}";
       #on-right-click = "${lib.getExe self.pkgs.dunst-volume} set alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
+
+      on-scroll-up = "${lib.getExe self.pkgs.osd-volume} increase";
+      on-scroll-down ="${lib.getExe self.pkgs.osd-volume} decrease";
 
       tooltip = true;
       tooltip-format = "{desc}";

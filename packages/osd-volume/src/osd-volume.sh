@@ -2,10 +2,10 @@
 
 # TODO review: https://askubuntu.com/questions/1267949/how-do-i-automatically-switch-pulseaudio-input-to-headset-upon-connection
 
-DUNST_VOLUME_MUTED_ICON="${DUNST_VOLUME_MUTED_ICON:-}"
-DUNST_VOLUME_LOW_ICON="${DUNST_VOLUME_LOW_ICON:-}"
-DUNST_VOLUME_MEDIUM_ICON="${DUNST_VOLUME_MEDIUM_ICON:-}"
-DUNST_VOLUME_HIGH_ICON="${DUNST_VOLUME_HIGH_ICON:-}"
+OSD_VOLUME_MUTED_ICON="${OSD_VOLUME_MUTED_ICON:-}"
+OSD_VOLUME_LOW_ICON="${OSD_VOLUME_LOW_ICON:-}"
+OSD_VOLUME_MEDIUM_ICON="${OSD_VOLUME_MEDIUM_ICON:-}"
+OSD_VOLUME_HIGH_ICON="${OSD_VOLUME_HIGH_ICON:-}"
 
 get_percentage() { ponymix get-volume; }
 is_muted() { ponymix is-muted; }
@@ -22,26 +22,26 @@ notify() {
   percentage="$(get_percentage)"
   icon=
   if is_muted || [ "$percentage" -eq 0 ]; then
-    icon="$DUNST_VOLUME_MUTED_ICON"
+    icon="$OSD_VOLUME_MUTED_ICON"
     progress=0
   elif [ "$percentage" -lt 30 ]; then
-    icon="$DUNST_VOLUME_LOW_ICON"
+    icon="$OSD_VOLUME_LOW_ICON"
     progress="$percentage"
   elif [ "$percentage" -lt 70 ]; then
-    icon="$DUNST_VOLUME_MEDIUM_ICON"
+    icon="$OSD_VOLUME_MEDIUM_ICON"
     progress="$percentage"
   else
-    icon="$DUNST_VOLUME_HIGH_ICON"
+    icon="$OSD_VOLUME_HIGH_ICON"
     progress="$percentage"
   fi
 
-  dunstify \
-    --timeout 1500 \
-    --appname "volume-osd" \
-    --hints string:x-canonical-private-synchronous:volume \
-    --hints string:x-dunst-stack-tag:volume \
-    --hints int:value:"$progress" \
+  notify-send \
+    --expire-time 1500 \
     --icon "$icon" \
+    --category "volume-osd" \
+    --hint string:x-canonical-private-synchronous:volume \
+    --hint string:x-dunst-stack-tag:volume \
+    --hint int:value:"$progress" \
     "Volume: $progress%"
 }
 
