@@ -1,7 +1,8 @@
 { config, lib, pkgs, ... }:
 {
+  services.mako.enable = true;
   services.dunst = {
-    enable = true;
+    enable = false;
     iconTheme = {
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;

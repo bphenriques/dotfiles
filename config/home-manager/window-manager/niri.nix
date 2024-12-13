@@ -1,15 +1,6 @@
 { config, lib, pkgs, self, community, ... }:
-# Check custom scripts: https://github.com/iynaix/dotfiles/blob/fa261818c04e6b1aa7d928a10abd66e2c31c0ed9/packages/dotfiles-rs/dotfiles/src/bin/hypr-pip.rs
-# https://github.com/dileep-kishore/nixos-hyprland/blob/main/home/common/optional/desktops/hyprland/config.nix
-# https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
-
-# Force Quit active: https://github.com/JaKooLit/Hyprland-Dots/blob/main/config/hypr/configs/Keybinds.conf
-
 # Logout: https://github.com/wuliuqii/nixos-config/blob/69606b2e0cccb6a135522fc5df188e4da0595e73/home/wm/wlogout.nix
-
-# Consider going back to waybar: https://github.com/nix-community/nur-combined/blob/4d8b064e3cff836ee8c17c48c592874b0209e167/repos/slaier/modules/waybar/mediaplayer.nix
-
-# Sway idle: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/swayidle.nix
+# TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
 
 # Login
 # Greetd: https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/greetd.nix#L5
@@ -27,13 +18,8 @@
 
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 
-  # If Share picker doesn’t use the system theme
-  # dbus-update-activation-environment --systemd --all
-      #systemctl --user import-environment QT_QPA_PLATFORMTHEME
 
   # Ideas
-  # "Mod+Return".action = spawn "${config.profile.terminal}";
-  # "Mod+E".action = spawn "nautilus";
   # "Mod+Escape".action = spawn "wlogout";
 /*
 */
@@ -43,9 +29,6 @@
 # Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 
 # https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
-
-# TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
-# TODO: Script at startup that figures out the right layout
 
 let
 
@@ -62,9 +45,7 @@ let
     QT_QPA_PLATFORM = "wayland";
     DISPLAY = ":1";
     NIXOS_OZONE_WL = "1";
-    XDG_CURRENT_DESKTOP = "niri";
-    XDG_SESSION_TYPE = "wayland";
-    MOZ_ENABLE_WAYLAND = "1";
+    # MOZ_ENABLE_WAYLAND = "1";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
     # GBM_BACKEND=nvidia-drm
     # XDG_BACKEND=wayland
@@ -72,7 +53,7 @@ let
 
   on-startup = ''
     spawn-at-startup "${lib.getExe pkgs.swww}" "img" "--transition-type" "none" "${wallpapersPkg}/share/wallpapers/mountains.png"
-    spawn-at-startup "xwayland-satellite" ":21"
+    spawn-at-startup "${lib.getExe pkgs.xwayland-satellite}" ":21"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
     spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "default"
   '';
@@ -207,7 +188,8 @@ in
         Mod+Shift+E { quit; }
 
         Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
-        Alt+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
+        Mod+Shift+Tab { focus-workspace-previous; }
+        Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
 
         // Suggested binds for running programs: terminal, app launcher, screen locker.
         Mod+Return { spawn "${lib.getExe community.pkgs.ghostty}"; }
@@ -259,9 +241,6 @@ in
         Mod+Ctrl+7 { move-column-to-workspace 7; }
         Mod+Ctrl+8 { move-column-to-workspace 8; }
         Mod+Ctrl+9 { move-column-to-workspace 9; }
-
-        // Switches focus between the current and the previous workspace.
-        Mod+Tab { focus-workspace-previous; }
 
         // Mod+Comma  { consume-window-into-column; }
         // Mod+Period { expel-window-from-column; }
