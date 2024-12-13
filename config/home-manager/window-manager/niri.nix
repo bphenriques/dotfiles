@@ -42,8 +42,11 @@
 
 # Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 
+# https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
+
 # TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
 # TODO: Script at startup that figures out the right layout
+
 let
 
   # nix repl
@@ -181,7 +184,6 @@ in
     ${outputs}
     ${layout}
 
-
     prefer-no-csd
 
     screenshot-path "${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}/%Y-%m-%d %H-%M-%S.png"
@@ -204,15 +206,18 @@ in
 
         Mod+Shift+E { quit; }
 
+        Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
+        Alt+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
+
         // Suggested binds for running programs: terminal, app launcher, screen locker.
         Mod+Return { spawn "${lib.getExe community.pkgs.ghostty}"; }
         Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
         Super+Alt+L { spawn "swaylock"; }
 
         // Audio
-        XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "increase"; }
-        XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "decrease"; }
-        XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-volume}" "toggle-mute"; }
+        XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "increase"; }
+        XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "decrease"; }
+        XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "toggle-mute"; }
         XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
         XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
         XF86AudioPause       allow-when-locked=true { spawn "playerctl" "play-pause"; }
@@ -220,8 +225,8 @@ in
         XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
 
         // Brightness
-        XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-brightness}" "increase"; }
-        XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.dunst-brightness}" "decrease"; }
+        XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-brightness}" "increase"; }
+        XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-brightness}" "decrease"; }
 
         Mod+Left  { focus-column-left; }
         Mod+Down  { focus-window-down; }
@@ -258,8 +263,8 @@ in
         // Switches focus between the current and the previous workspace.
         Mod+Tab { focus-workspace-previous; }
 
-        Mod+Comma  { consume-window-into-column; }
-        Mod+Period { expel-window-from-column; }
+        // Mod+Comma  { consume-window-into-column; }
+        // Mod+Period { expel-window-from-column; }
 
         // There are also commands that consume or expel a single window to the side.
         Mod+BracketLeft  { consume-or-expel-window-left; }
