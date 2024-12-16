@@ -47,6 +47,6 @@ case "${1:-}" in
       "$(profile_extend_name)")   notify "$(profile_extend_set)"    ;;
     esac
     ;;
-  default)    notify "$(profile_default_set)"   ;;
+  startup)    profile_default_set               ;;
   safemode)   notify "$(profile_internal_set)"  ;;
 esac

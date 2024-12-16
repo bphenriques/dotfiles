@@ -1,13 +1,10 @@
 { pkgs, lib, network-devices, ... }:
 {
   imports = [
+    ./greetd.nix      # X11/Wayland agnostic display manager
+    ./wayland.nix     # Wayland compositor
     ./programs.nix
-    ./services.nix
-    ./wayland
-
-    # Choose one file browser
-    ./thunar.nix
-    ./nautilus.nix
+    ./desktop.nix
   ];
 
   nix = {
@@ -63,5 +60,12 @@
     };
   };
 
+  services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
+
+  # Security related
+  services.journald.extraConfig = ''
+    MaxRetentionSec=1month
+    SystemMaxUse=1G
+  '';
   security.sudo.extraConfig = "Defaults lecture=never";
 }
