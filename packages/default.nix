@@ -20,6 +20,7 @@ let
       osd-brightness = pkgs.callPackage ./osd-brightness { };
       niri-output-configuration = pkgs.callPackage ./niri-output-configuration { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
+      swww-util = pkgs.callPackage ./swww-util { };
     }
   );
 in forAllSystems (system:
