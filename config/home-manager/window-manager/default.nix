@@ -1,18 +1,6 @@
 { config, lib, pkgs, ... }:
 # TODO: pre-script for gaming: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/modules/workstation/gaming.nix#L16
 
-let
-  nerdfonts = pkgs.nerdfonts.override {
-    fonts = [
-      "Ubuntu"
-      "UbuntuMono"
-      "CascadiaCode"
-      "FantasqueSansMono"
-      "FiraCode"
-      "Mononoki"
-    ];
-  };
-in
 {
   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
@@ -46,7 +34,7 @@ in
 
     font = {
       name = "Ubuntu Nerd Font";
-      package = nerdfonts;
+      package = pkgs.nerd-fonts.ubuntu;
       size = 11;
     };
 

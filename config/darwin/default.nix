@@ -96,9 +96,8 @@
 
   # Fonts (system-wide)
   fonts.packages = with pkgs; [
-  #    pkgs.nerd-fonts.hack
-     #    pkgs.nerd-fonts.jetbrains-mono
-    (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
+    pkgs.nerd-fonts.hack
+    pkgs.nerd-fonts.jetbrains-mono
   ];
 
   homebrew = {
