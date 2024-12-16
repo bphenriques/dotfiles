@@ -14,7 +14,7 @@
   # Boot: See what it is taking most time: `systemd-analyze critical-chain`
   boot = {
     supportedFilesystems.zfs = true;
-    kernelPackages = pkgs.linuxPackages_6_10;
+    kernelPackages = pkgs.linuxPackages_6_12;
     loader.grub = {
       enable = true;
       efiSupport = true;
