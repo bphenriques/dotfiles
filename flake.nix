@@ -13,9 +13,8 @@
   };
 
   inputs = {
-    # FIXME: pin to when NUR is available but I still have 6.10 kernel available. Replace the ref with "github:nixos/nixpkgs/nixpkgs-unstable"
-    nixpkgs.url = "github:nixos/nixpkgs/942b12cabae1cd4414c7177472d759731de92cb4";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";      # I don't really use it, but leaving it here.
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";      # I don't really use it, but leaving it here.
 
     darwin.url = "github:lnl7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -36,9 +35,6 @@
     ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
     ghostty.inputs.nixpkgs-stable.follows = "nixpkgs";            # Fix OpenGL
     ghostty.inputs.nixpkgs-unstable.follows = "nixpkgs";          # Fix OpenGL
-
-    # Wayland Window Manager
-    ags.url = "github:Aylur/ags";                                 # Widgets
   };
 
   outputs = inputs @ { nixpkgs, ... }:

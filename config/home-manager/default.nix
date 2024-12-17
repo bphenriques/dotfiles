@@ -34,7 +34,8 @@
     p7zip     # 7zip for linux
     unrar     # Still need it
   ] ++ lib.optionals pkgs.stdenv.isLinux [
-    (nerdfonts.override { fonts = [ "Hack" "JetBrainsMono" ]; })
+    pkgs.nerd-fonts.hack
+    pkgs.nerd-fonts.jetbrains-mono
     baobab   # Visual disk space analyzer
   ];
   fonts.fontconfig.enable = true;

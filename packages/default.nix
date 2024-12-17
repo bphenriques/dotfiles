@@ -16,8 +16,11 @@ let
   linux = forLinuxSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
     in {
-      dunst-volume = pkgs.callPackage ./dunst-volume { };
-      dunst-brightness = pkgs.callPackage ./dunst-brightness { };
+      osd-volume = pkgs.callPackage ./osd-volume { };
+      osd-brightness = pkgs.callPackage ./osd-brightness { };
+      niri-output-configuration = pkgs.callPackage ./niri-output-configuration { };
+      niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
+      swww-util = pkgs.callPackage ./swww-util { };
     }
   );
 in forAllSystems (system:

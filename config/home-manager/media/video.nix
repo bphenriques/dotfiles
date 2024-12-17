@@ -1,6 +1,7 @@
-{ pkgs, lib, config, host, ... }:
+{ pkgs, lib, config, ... }:
 # TODO: Check https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/mpv.nix
 # TODO: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/home/mpv/anime.nix
+# https://github.com/Samillion/ModernZ
 let
   # Interesting guides:
   # - https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/
@@ -97,9 +98,7 @@ in
 
   home.shellAliases = lib.optionalAttrs (pkgs.stdenv.isLinux) {
     "mpv360" = "${lib.getExe config.programs.mpv.package} --script-opts=360plugin-enabled=yes";
-  } // (lib.optionalAttrs (pkgs.stdenv.isLinux && (host ? webcam)) {
-    "webcam" = "${lib.getExe config.programs.mpv.package} --profile=low-latency --untimed -vf=hflip ${host.webcam}";
-  });
+  };
 
   custom.xdgDefaultApps.video = lib.mkBefore [ "mpv.desktop" ];
   custom.xdgDefaultApps.audio = lib.mkBefore [ "mpv.desktop" ];

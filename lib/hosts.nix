@@ -16,25 +16,11 @@ let
     allowUnfree = true; # I was maintaining a list.. because it was _nicer_ and _explicit_ but.. I am lazy.
     permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" ];
   };
-
-  # TODO: This should not be abstracted the way it is (likely).
-  mkExtraArgs = system: extraSpecialArgs: {
-    self = {
-      pkgs = inputs.self.packages.${system};
-      private = inputs.dotfiles-private.packages.${system};
-    };
-    community.pkgs = {
-      ghostty = inputs.ghostty.packages.${system}.default;
-      firefox-addons = inputs.firefox-addons.packages.${system};
-    };
-
-    host = { }; # Intentionally empty, each host sets as required. This just ensures the root config 'host' is available.
-  } // extraSpecialArgs;
 in
 {
-  mkNixOSHost = { system ? "x86_64-linux", overlays ? [ ], nixosModules, hmModules, hostModule, extraSpecialArgs ? { } }:
+  mkNixOSHost = { system, overlays ? [ ], nixosModules, hmModules, hostModule, nixosSpecialArgs ? { }, hmSpecialArgs ? { } }:
     let
-      specialArgs = (mkExtraArgs system extraSpecialArgs);
+      specialArgs = nixosSpecialArgs;
       commonConfig = {
         nix = nixConfig;
         nixpkgs = {
@@ -43,7 +29,7 @@ in
         };
         home-manager = {
           sharedModules = hmModules;
-          extraSpecialArgs = specialArgs;
+          extraSpecialArgs = hmSpecialArgs;
         };
       };
     in inputs.nixpkgs.lib.nixosSystem {
@@ -51,9 +37,9 @@ in
       modules = nixosModules ++ [ commonConfig hostModule ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", overlays ? [ ], darwinModules, hmModules, hostModule, extraSpecialArgs ? { } }:
+  mkMacOSHost = { system ? "aarch64-darwin", overlays ? [ ], darwinModules, hmModules, hostModule, darwinSpecialArgs ? { }, hmSpecialArgs ? { } }:
     let
-      specialArgs = (mkExtraArgs system extraSpecialArgs);
+      specialArgs = darwinSpecialArgs;
       commonConfig = {
         nix = nixConfig;
         nixpkgs = {
@@ -63,7 +49,7 @@ in
         };
         home-manager = {
           sharedModules = hmModules;
-          extraSpecialArgs = specialArgs;
+          extraSpecialArgs = hmSpecialArgs;
         };
       };
     in inputs.darwin.lib.darwinSystem {
