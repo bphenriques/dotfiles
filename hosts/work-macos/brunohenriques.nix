@@ -11,7 +11,7 @@
     kubelogin-oidc
 
     # Infra
-    terraform
+    tfswitch
   ];
 
   custom.programs.project.directory = "${config.home.homeDirectory}/workspace";

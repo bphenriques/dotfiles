@@ -25,14 +25,15 @@ in
       "python3"   # Implicit dependency of Aiven client
       "kubeseal"  # K8s stuff
       "go-task"
+      "snyk-cli"
     ];
 
     casks = [
       "bloop"         # Scala
-      "google-chrome" # Google Meet.
-      "slack"         # The usual rabbit-hole of channels.
-      "1password-cli" # Team's 1password
-      "postman"       # Because it is more practical than curl
+      "google-chrome"
+      "slack"
+      "1password-cli"
+      "postman"
     ];
   };
 
