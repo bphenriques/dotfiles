@@ -49,14 +49,14 @@
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
       overlays      = import ./overlays { inherit inputs; };
-      nixosModules  = import ./modules/nixos;
+      nixosModules  = import ./nixos/modules;
 
       # Hosts - Each host defines what it needs from the inputs.
       nixosConfigurations.laptop = import ./hosts/laptop { inherit mylib inputs; };
       darwinConfigurations.work-macos = import ./hosts/work-macos { inherit mylib inputs; };
 
       # Non standard flake outputs
-      homeManagerModules  = import ./modules/home-manager;
-      darwinModules       = import ./modules/darwin;
+      homeManagerModules  = import ./home-manager/modules;
+      darwinModules       = import ./darwin/modules;
     };
 }

@@ -1,9 +1,11 @@
 { config, pkgs, lib, self, ... }:
 {
   imports = [
-    ./hardware          # CPU, graphics, peripherals, etc
-    ./filesystem        # Partitioning, etc
-    ../../config/nixos  # Default nixos settings
+    ./hardware                        # CPU, graphics, peripherals, etc
+    ./filesystem                      # Partitioning, etc
+    ../../nixos                       # Default nixos settings
+    ../../nixos/desktop-environment   # My desktop environment
+    ../../nixos/desktop               # The usual desktop applications
 
     # Users
     ./bphenriques
