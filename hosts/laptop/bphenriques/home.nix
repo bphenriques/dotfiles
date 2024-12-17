@@ -1,9 +1,9 @@
 { pkgs, config, self, ... }:
 {
   imports = [
-    ../../../config/home-manager
-    ../../../config/home-manager/gaming
-    ../../../config/home-manager/window-manager
+    ../../../home-manager
+    ../../../home-manager/desktop-environment
+    ../../../home-manager/desktop
     ./input-remapper
   ];
 
