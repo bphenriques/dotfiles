@@ -56,6 +56,7 @@
         rootFsOptions = {
           compression = "lz4";
           xattr = "sa";
+          acltype = "posixacl";
           atime = "off";
         };
 

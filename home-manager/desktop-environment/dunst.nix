@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
 {
-  services.mako.enable = true;
   services.dunst = {
     enable = false;
     iconTheme = {

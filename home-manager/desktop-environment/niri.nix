@@ -2,6 +2,9 @@
 # Logout: https://github.com/wuliuqii/nixos-config/blob/69606b2e0cccb6a135522fc5df188e4da0595e73/home/wm/wlogout.nix
 # TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
 # TODO: "Mod+Escape".action = spawn "wlogout";
+#   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
+# https://github.com/linyinfeng/dotfiles/blob/340f913ea7520a3c0034034d4fe870c05145bbcb/home-manager/profiles/niri/default.nix#L796
+# ${lib.getExe pkgs.grim} -g \"$(${lib.getExe pkgs.slurp} -o -r -c '#ff0000ff')\" -t ppm - | ${lib.getExe pkgs.satty} --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
 
 # Battery? https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/power.nix
 # Seems to be more or less what I want? https://github.com/kiike/dotfiles/blob/ff788bae02ba6d15c73632d99654269d2b5fba49/hosts/balrog/default.nix
@@ -13,18 +16,23 @@
 # Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
 # Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 # https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
+
+# TODO shortcut to lock the computer
+
 let
   # nix repl
   # then :lf .
   # then inputs.nixpkgs.lib.strings.concatMapStringsSep " " (x: ''"${x}"'') inputs.nixpkgs.lib.strings.splitString " " "please run this command"
   # run-cmd = cmd: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') lib.strings.splitString " " cmd;
 
+  xwaylandDisplayId = "21";
+
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
 
   env = {
-    DISPLAY = ":21";
+    DISPLAY = ":${xwaylandDisplayId}";
     NIXOS_OZONE_WL = "1";                       # Electron?
     QT_QPA_PLATFORM = "wayland";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";  # Signal QT windows to remove their window decorations
@@ -32,9 +40,10 @@ let
 
   on-startup = ''
     spawn-at-startup "${lib.getExe self.pkgs.swww-util}" "random" "${wallpapersPkg}/share/wallpapers"
-    spawn-at-startup "${lib.getExe pkgs.xwayland-satellite}" ":21"
+    spawn-at-startup "${lib.getExe pkgs.xwayland-satellite}" ":${xwaylandDisplayId}"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
     spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "startup"
+    spawn-at-startup  "${pkgs.wl-clipboard}/bin/wl-paste" "--type" "text" "--watch" "${lib.getExe pkgs.cliphist}" "store" "-max-items" "20"
   '';
 
   input = ''
@@ -97,8 +106,8 @@ in
   #services.gnome-keyring.enable = true;  # Redundant as done in nixos?
 
   xdg.configFile."niri/config.kdl".text = ''
-    workspace "coding"
     workspace "browsing"
+    workspace "coding"
     workspace "gaming"
 
     window-rule {
@@ -159,8 +168,10 @@ in
       Mod+Shift+E { quit; }
 
       Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
+      Mod+Shitft+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
       Mod+Shift+Tab { focus-workspace-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
+      Mod+Shift+V { spawn "${lib.getExe self.pkgs.cliphist-dmenu}" "&&" "${lib.getExe self.pkgs.smart-paste}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe community.pkgs.ghostty}"; }

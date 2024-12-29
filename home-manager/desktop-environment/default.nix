@@ -1,18 +1,21 @@
 { config, lib, pkgs, ... }:
-# TODO: pre-script for gaming: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/modules/workstation/gaming.nix#L16
-
 {
-  # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
   imports = [
-    ./niri.nix    # Window Manager
-    ./waybar      # Status bar
-    ./dunst.nix   # Notification Daemon
-    ./fuzzel.nix  # Application Launcher
+    ./niri.nix      # Window Manager
+    ./waybar        # Status bar
+    ./mako.nix      # Notification Daemon
+    ./fuzzel.nix    # Application Launcher
+    ./rofi.nix      # Application Launcher
+    ./swayidle.nix  # Locks/suspends the computer when idle
   ];
 
-  custom.services.swww.enable = true;
+  custom.services.swww.enable = true; # Wallpaper daemon
+  home.packages = [
+    pkgs.cliphist  # Wayland clipboard history
+    (pkgs.writeScriptBin "pbcopy" (lib.getExe' pkgs.wl-clipboard "wl-copy"))      # I am too hardwired to pbcopy
+    (pkgs.writeScriptBin "pbpaste" (lib.getExe' pkgs.wl-clipboard "wl-paste"))    # I am too hardwired to pbpaste
+  ];
 
-  # TODO: Use the following theme: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/gtk.nix#L85
   home.pointerCursor = {
     gtk.enable = true;
     package = pkgs.bibata-cursors;
