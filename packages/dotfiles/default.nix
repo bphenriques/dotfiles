@@ -5,4 +5,4 @@ let
     buildCommand = "${old.buildCommand}\n patchShebangs $out";
   });
 in
-patchShebangs (pkgs.writeScriptBin "dotfiles" (lib.fileContents ./src/dotfiles.sh))
+patchShebangs (pkgs.writeScriptBin "dotfiles" (lib.fileContents ./dotfiles.sh))

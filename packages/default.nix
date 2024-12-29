@@ -2,6 +2,7 @@
 
 let
   inherit (mylib.builders) forAllSystems forLinuxSystems;
+
   crossPlatform = forAllSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
     in rec {
@@ -21,6 +22,12 @@ let
       niri-output-configuration = pkgs.callPackage ./niri-output-configuration { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
+      cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };
+      smart-paste = pkgs.callPackage ./smart-paste { };
+      session-dmenu = pkgs.callPackage ./session-dmenu { };
+
+      # Move to community namespace
+      proton-ge-custom = pkgs.callPackage ./proton-ge-custom { };
     }
   );
 in forAllSystems (system:

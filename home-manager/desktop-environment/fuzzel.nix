@@ -1,5 +1,8 @@
 { config, pkgs, lib, ... }:
 {
+  fonts.fontconfig.enable = true;
+  home.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+
   programs.fuzzel = {
     enable = true;
     settings = {

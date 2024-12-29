@@ -2,6 +2,7 @@
 {
   imports = [
     ./login-manager.nix
+    ./nautilus.nix      # File Manager
   ];
 
   programs.niri.enable = true;
@@ -22,6 +23,8 @@
     qt6.qtwayland
     libnotify
 
+    wl-clipboard  # Wayland clipboard
+
     xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
     konsole   # Backup terminal in case something goes wrong
     ark       # KDE package: Manage compressed files
@@ -32,6 +35,5 @@
     qogir-icon-theme
     gnome-calendar
     gnome-system-monitor
-    gnome-calculator      # Replace with launcher
   ];
 }

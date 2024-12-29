@@ -61,7 +61,6 @@
  ];
 
   # Gaming
-  custom.profiles.gaming.enable = true;
   custom.proton-run.enable = true;
   custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 

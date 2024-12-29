@@ -41,7 +41,7 @@
   };
 
   home.packages = with pkgs; [
-    # Consistent UNIX command line tools regardless of the OS
+    # Consistency across different operating systems
     coreutils
     findutils
     gnugrep
@@ -110,19 +110,16 @@
       # Text Processor
       e = "$EDITOR";
 
-      # Nix utility functions to set the SHELL automatically
-      nix-shell = "nix-shell --run $SHELL";
-      devshell  = "nix develop --command $SHELL";
+      # Utility
       whatsmyip = "${lib.getExe pkgs.curl} ifconfig.me";
     } // (lib.optionalAttrs pkgs.stdenv.isLinux {
-      pbcopy = lib.getExe pkgs.xclip;
-      pbpaste = "${lib.getExe pkgs.xclip} -o";
       webp_to_png = ''nix-shell -p libwebp -p parallel --command "parallel dwebp {} -o {.}.png ::: *.webp"'';
     });
   };
 
   programs.man.enable = true;     # RTFM
-  manual.manpages.enable = false; # I do not need home-manager configuration reference in the man pages.
+  manual.manpages.enable = false; # Discard home-manager configuration man pages.
+  manual.json.enable = false;     # Discard home-manager configuration JSON docs.
 
   # Tighten permissions to private keys
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [

@@ -1,4 +1,4 @@
-{ pkgs, config, lib, ... }:
+{ pkgs, config, lib, self, ... }:
 with lib;
 let
   cfg = config.custom.proton-run;
@@ -9,7 +9,7 @@ let
       if [ "$#" -gt 0 ]; then
         STEAM_COMPAT_DATA_PATH="${cfg.defaultProtonDir}" \
           STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
-          ${pkgs.steam-run}/bin/steam-run ${pkgs.nur.repos.ataraxiasjel.proton-ge}/bin/proton run "$@"
+          ${pkgs.steam-run}/bin/steam-run ${self.pkgs.proton-ge-custom}/bin/proton run "$@"
       fi
     '';
   };

@@ -42,9 +42,9 @@ in
         test -f "$XDG_CONFIG_HOME"/fish/local.fish && source "$XDG_CONFIG_HOME"/fish/local.fish
       '';
     in concatStringsSep "\n" [
-      (optionalString (pkgs.stdenv.system == "aarch64-darwin") nixDarwinIntegration)
+      (optionalString pkgs.stdenv.isDarwin nixDarwinIntegration)
       purePrompt
-      (optionalString (pkgs.stdenv.system == "aarch64-darwin") darwinHomebrew)
+      (optionalString pkgs.stdenv.isDarwin darwinHomebrew)
       extra
     ];
   };
