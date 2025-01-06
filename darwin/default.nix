@@ -110,9 +110,9 @@
     brews = [ ];
     casks = [
       "rectangle"         # Window Manager
+      "ghostty"           # Terminal
       "vlc"               # Media player
       "intellij-idea-ce"  # JVM IDE
-      "ngrok"             # Useful
     ];
   };
 }

@@ -16,7 +16,6 @@ let
       private = inputs.dotfiles-private.packages.${system};
     };
     community.pkgs = {
-      ghostty = inputs.ghostty.packages.${system}.default;
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
     network-devices = import ../network-devices.nix;

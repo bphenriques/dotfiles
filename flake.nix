@@ -32,9 +32,6 @@
     disko.url = "github:nix-community/disko";                     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
     nur.url = "github:nix-community/nur";                         # Collection of packages. Use it for Firefox extensions
-    ghostty.url = "git+ssh://git@github.com/mitchellh/ghostty";   # Terminal
-    ghostty.inputs.nixpkgs-stable.follows = "nixpkgs";            # Fix OpenGL
-    ghostty.inputs.nixpkgs-unstable.follows = "nixpkgs";          # Fix OpenGL
   };
 
   outputs = inputs @ { nixpkgs, ... }:

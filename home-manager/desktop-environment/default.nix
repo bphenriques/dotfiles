@@ -11,7 +11,8 @@
 
   custom.services.swww.enable = true; # Wallpaper daemon
   home.packages = [
-    pkgs.cliphist  # Wayland clipboard history
+    # TODO: MOVE TO: https://github.com/savedra1/clipse
+    pkgs.cliphist                                                                 # Wayland clipboard history
     (pkgs.writeScriptBin "pbcopy" (lib.getExe' pkgs.wl-clipboard "wl-copy"))      # I am too hardwired to pbcopy
     (pkgs.writeScriptBin "pbpaste" (lib.getExe' pkgs.wl-clipboard "wl-paste"))    # I am too hardwired to pbpaste
   ];
