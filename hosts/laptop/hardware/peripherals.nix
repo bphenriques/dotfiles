@@ -28,4 +28,8 @@
 
   hardware.xone.enable = true;            # Xbox(ish) gamepads
   hardware.steam-hardware.enable = true;  # Steam Hardware. TODO: I likely do not need this.
+
+  environment.systemPackages = [
+    pkgs.cheese     # Webcam
+  ];
 }

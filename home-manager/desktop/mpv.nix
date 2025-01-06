@@ -1,6 +1,7 @@
 { pkgs, lib, config, ... }:
 # TODO: Check https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/mpv.nix
 # TODO: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/home/mpv/anime.nix
+# TODO: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/mpv.nix
 # https://github.com/Samillion/ModernZ
 let
   # Interesting guides:

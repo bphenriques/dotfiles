@@ -48,9 +48,8 @@ let
   };
 in
 {
-  # MacOS requires installation by hand for now: https://github.com/ghostty-org/ghostty/releases/tag/tip
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    community.pkgs.ghostty
+    pkgs.ghostty
   ];
 
   xdg.mimeApps.defaultApplications = {

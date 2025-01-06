@@ -4,6 +4,8 @@
   # https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/desktop/common/wayland-wm/swayidle.nix
   # https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/scripts/locker.nix?ref_type=heads
   # logout: https://github.com/prescientmoon/everything-nix/blob/develop/home/features/wayland/wlogout.nix
+  # https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/scripts/locker.nix?ref_type=heads
+  # https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/locker.nix?ref_type=heads
   services.swayidle = {
     enable = true;
     timeouts = [

@@ -16,6 +16,9 @@
 # Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
 # Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 # https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
+# https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/niri.nix?ref_type=heads
+# https://gitlab.com/usmcamp0811/dotfiles
+# https://github.com/gopi487krishna/niri-waydots/tree/main/rofi
 
 # TODO shortcut to lock the computer
 
@@ -168,13 +171,13 @@ in
       Mod+Shift+E { quit; }
 
       Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
-      Mod+Shitft+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
+      Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
       Mod+Shift+Tab { focus-workspace-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
       Mod+Shift+V { spawn "${lib.getExe self.pkgs.cliphist-dmenu}" "&&" "${lib.getExe self.pkgs.smart-paste}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
-      Mod+Return { spawn "${lib.getExe community.pkgs.ghostty}"; }
+      Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
       Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
       Super+Alt+L { spawn "swaylock"; }
 
