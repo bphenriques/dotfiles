@@ -9,6 +9,7 @@
     };
     "Dell Inc. DELL S2721DGF 4P11R83" = {
       name = "Dell Inc. DELL S2721DGF 4P11R83";
+      model = "S2721DGF";
       description = "Office Monitor";
       resolution = "2560x1440";
       refresh_rate = "143.912";

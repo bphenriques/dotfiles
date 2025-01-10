@@ -11,6 +11,6 @@ pkgs.writeShellApplication {
     OSD_VOLUME_MEDIUM_ICON="${iconBasePath}/audio-volume-medium-symbolic.svg"
     OSD_VOLUME_HIGH_ICON="${iconBasePath}/audio-volume-high-symbolic.svg"
 
-    ${lib.fileContents ./src/osd-volume.sh}
+    ${lib.fileContents ./osd-volume.sh}
   '';
 }

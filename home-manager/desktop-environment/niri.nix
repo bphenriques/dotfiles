@@ -46,7 +46,8 @@ let
     spawn-at-startup "${lib.getExe pkgs.xwayland-satellite}" ":${xwaylandDisplayId}"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
     spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "startup"
-    spawn-at-startup  "${pkgs.wl-clipboard}/bin/wl-paste" "--type" "text" "--watch" "${lib.getExe pkgs.cliphist}" "store" "-max-items" "20"
+    spawn-at-startup "${pkgs.wl-clipboard}/bin/wl-paste" "--type" "text" "--watch" "${lib.getExe pkgs.cliphist}" "store" "-max-items" "20"
+    spawn-at-startup "${self.pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit" "-w"
   '';
 
   input = ''

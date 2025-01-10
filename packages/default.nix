@@ -25,9 +25,11 @@ let
       cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };
       smart-paste = pkgs.callPackage ./smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
+      ddcci-util = pkgs.callPackage ./ddcci-util { };
 
       # Move to community namespace
       proton-ge-custom = pkgs.callPackage ./proton-ge-custom { };
+      sway-audio-idle-inhibit = pkgs.callPackage ./sway-audio-idle-inhibit { };
     }
   );
 in forAllSystems (system:
