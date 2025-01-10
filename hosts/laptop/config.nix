@@ -49,16 +49,9 @@
     theme = "angular";
   };
 
-  # Login Screen
+  # Login Screen.
   environment.systemPackages = [
-   (pkgs.writeScriptBin "reboot-to-windows" ''
-     #!${pkgs.stdenv.shell}
-     sudo grub-reboot "Windows 11" && reboot $@
-   '')
-   (pkgs.writeScriptBin "reboot-to-bios" ''
-      #!${pkgs.stdenv.shell}
-      sudo grub-reboot "BIOS Setup" && reboot $@
-    '')
+   (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "Windows 11" && reboot $@'')
  ];
 
   # Gaming

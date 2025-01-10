@@ -10,6 +10,8 @@ OSD_BRIGHTNESS_HIGH_ICON="${OSD_BRIGHTNESS_HIGH_ICON:-}"
 
 MIN_BRIGHTNESS=10 # 0 turns off OLED monitor (internals/external)
 
+# TODO: RGB keyboard if applicable
+
 # ignore 'kbd_backlight'
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
 list_backlight_devices() { brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }'; }
@@ -76,6 +78,3 @@ case "${1:-}" in
   restore)      shift 1 && restore "${@:-}"       ;;
   list)         shift 1 && list_backlight_devices ;;
 esac
-
-# 1. Find the correct device using:  ddcutil detect | grep -A1 'Display [0-9]' | grep -oP '/dev/.*$'
-# 2.  echo ddcci 0x37 | sudo tee /sys/bus/i2c/devices/i2c-18/new_device

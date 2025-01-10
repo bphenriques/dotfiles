@@ -29,10 +29,6 @@
   hardware.xone.enable = true;            # Xbox(ish) gamepads
   hardware.steam-hardware.enable = true;  # Steam Hardware. TODO: I likely do not need this.
 
-  # Monitor
-  custom.hardware.ddcci.enable = true;
-  users.users.bphenriques.extraGroups = [ "i2c" ];
-
   # Other
   environment.systemPackages = [
     pkgs.cheese     # Webcam

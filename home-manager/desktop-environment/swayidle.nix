@@ -1,44 +1,34 @@
-{ pkgs, lib, self, ... }:
+{ pkgs, config, lib, self, ... }:
+
+let
+  pidof = lib.getExe' pkgs.procps "pidof";
+  hyprlock = lib.getExe config.programs.hyprlock.package;
+  niri = lib.getExe pkgs.niri;
+  osd-brightness = lib.getExe self.pkgs.osd-brightness;
+  systemctl = lib.getExe' pkgs.systemd "systemctl";
+in
 {
-  # https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/locker.nix?ref_type=heads
-  # https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/desktop/common/wayland-wm/swayidle.nix
-  # logout: https://github.com/prescientmoon/everything-nix/blob/develop/home/features/wayland/wlogout.nix
   services.swayidle = {
     enable = true;
     timeouts = [
       {
-        timeout = 60 * 1;
-        command = "${lib.getExe self.pkgs.osd-brightness} dim";
-        resumeCommand = "${lib.getExe self.pkgs.osd-brightness} restore";
+        timeout = 60 * 5;
+        command = "${osd-brightness} dim >/dev/null 2>&1";
+        resumeCommand = "${osd-brightness} restore >/dev/null 2>&1";
       }
       {
-        timeout = 60 * 5;
-        command = "${lib.getExe pkgs.niri} niri msg action power-off-monitors"; # niri restores the active monitors oob
-        # TODO: Lock? loginctl lock-session
+        timeout = 60 * 6;
+        command = "${pidof} hyprlock || ${niri} msg action spawn -- ${hyprlock}";
       }
       {
         timeout = 60 * 10;
-        command = "systemctl suspend";
+        command = "${systemctl} suspend";
       }
+    ];
+
+    events = [
+      { event = "before-sleep"; command = "${niri} msg action power-off-monitors"; }
+      { event = "after-resume"; command = "${niri} msg action power-on-monitors";  }
     ];
   };
 }
-
-# TODO: RGB keyboard if applicable
-
-# https://github.com/swaywm/swayidle/blob/master/swayidle.1.scd
-# https://github.com/nix-community/home-manager/blob/master/modules/services/swayidle.nix
-
-
-/*
-  cst = "${./chisato.jpg}";
-  cst-blurred = pkgs.runCommand "chisato.jpg" {
-    nativeBuildInputs = with pkgs;[ imagemagick ];
-  } ''convert -blur 14x5 ${cst} $out'';
-  programs.swaylock.settings = {
-    show-failed-attempts = true;
-    daemonize = true;
-    image = "${cst-blurred}";
-    scaling = "fill";
-  };
-*/
