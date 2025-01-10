@@ -17,6 +17,7 @@
   boot = {
     supportedFilesystems.zfs = true;
     kernelPackages = pkgs.linuxPackages_6_12;
+
     loader.grub = {
       enable = true;
       efiSupport = true;

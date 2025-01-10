@@ -1,4 +1,5 @@
 {
+  hardware-ddcci                    = ./hardware/ddcci.nix;
   proton-run                        = ./programs/proton-run.nix;
   services-input-remapper-profiles  = ./services/input-remapper.nix;
   services-solaar                   = ./services/solaar.nix;

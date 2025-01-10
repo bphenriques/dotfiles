@@ -2,7 +2,7 @@
 {
   # Server: Synology
   home-nas = {
-    hostname = "192.168.68.53";
+    hostname = "192.168.1.87";
     ssh.user = "Bruno-Admin";
     ssh.port = 6188;
   };

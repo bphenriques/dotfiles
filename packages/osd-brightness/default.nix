@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
   name = "osd-brightness";
-  runtimeInputs = with pkgs; [ libnotify brightnessctl ];
+  runtimeInputs = with pkgs; [ libnotify brightnessctl gnugrep gawk findutils ];
   text = let
     iconBasePath = "${pkgs.pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
   in
@@ -12,6 +12,6 @@ pkgs.writeShellApplication {
     OSD_BRIGHTNESS_MEDIUM_ICON="${iconBasePath}/display-brightness-medium-symbolic.svg"
     OSD_BRIGHTNESS_HIGH_ICON="${iconBasePath}/display-brightness-high-symbolic.svg"
 
-    ${lib.fileContents ./src/osd-brightness.sh}
+    ${lib.fileContents ./osd-brightness.sh}
   '';
 }

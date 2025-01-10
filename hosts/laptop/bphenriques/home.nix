@@ -23,6 +23,8 @@
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
     # Tidy up most things under $HOME
+    "L ${config.home.homeDirectory}/nas-private               - - - - /mnt/nas-bphenriques"
+    "L ${config.home.homeDirectory}/nas-media                 - - - - /mnt/nas-media"
     "L ${config.home.homeDirectory}/games                     - - - - /mnt/games"
     "L ${config.xdg.userDirs.documents}                       - - - - /mnt/bphenriques"
     "L ${config.xdg.userDirs.pictures}                        - - - - /mnt/nas-bphenriques/photos"
@@ -41,6 +43,8 @@
     "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
 
     # Other
+    "file://${config.home.homeDirectory}/nas-private"
+    "file://${config.home.homeDirectory}/nas-media"
     "file://${config.home.homeDirectory}/games"
     "file://${config.home.homeDirectory}/.config Config"
   ];
