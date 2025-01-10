@@ -20,6 +20,7 @@
 # https://gitlab.com/usmcamp0811/dotfiles
 # https://github.com/gopi487krishna/niri-waydots/tree/main/rofi
 
+# https://github.com/LoneWolf4713/seraphic.dotfiles
 # TODO shortcut to lock the computer
 
 let

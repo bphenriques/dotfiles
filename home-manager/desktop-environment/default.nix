@@ -7,6 +7,7 @@
     ./fuzzel.nix    # Application Launcher
     ./rofi.nix      # Application Launcher
     ./swayidle.nix  # Locks/suspends the computer when idle
+    ./hyprlock.nix  # Lock screend
   ];
 
   custom.services.swww.enable = true; # Wallpaper daemon
