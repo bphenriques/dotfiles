@@ -1,7 +1,6 @@
 { config, lib, pkgs, self, community, ... }:
-# Logout: https://github.com/wuliuqii/nixos-config/blob/69606b2e0cccb6a135522fc5df188e4da0595e73/home/wm/wlogout.nix
+# AGS:       Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
 # TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
-# TODO: "Mod+Escape".action = spawn "wlogout";
 #   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
 # https://github.com/linyinfeng/dotfiles/blob/340f913ea7520a3c0034034d4fe870c05145bbcb/home-manager/profiles/niri/default.nix#L796
 # ${lib.getExe pkgs.grim} -g \"$(${lib.getExe pkgs.slurp} -o -r -c '#ff0000ff')\" -t ppm - | ${lib.getExe pkgs.satty} --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
@@ -35,7 +34,7 @@ let
   };
 
   env = {
-    DISPLAY = ":${xwaylandDisplayId}";
+    DISPLAY = "21"; # FIXME: Make configurable
     NIXOS_OZONE_WL = "1";                       # Electron?
     QT_QPA_PLATFORM = "wayland";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";  # Signal QT windows to remove their window decorations
@@ -43,7 +42,6 @@ let
 
   on-startup = ''
     spawn-at-startup "${lib.getExe self.pkgs.swww-util}" "random" "${wallpapersPkg}/share/wallpapers"
-    spawn-at-startup "${lib.getExe pkgs.xwayland-satellite}" ":${xwaylandDisplayId}"
     spawn-at-startup "${lib.getExe pkgs.waybar}"
     spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "startup"
     spawn-at-startup "${pkgs.wl-clipboard}/bin/wl-paste" "--type" "text" "--watch" "${lib.getExe pkgs.cliphist}" "store" "-max-items" "20"
@@ -180,7 +178,9 @@ in
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
       Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
-      Super+Alt+L { spawn "swaylock"; }
+      Mod+Shift+Space { spawn "${lib.getExe pkgs.ghostty}" "-e" "${lib.getExe config.programs.yazi.package}" "~"; }
+      Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
+      Super+Escape { spawn "${lib.getExe config.programs.wlogout.package}"; }
 
       // Audio
       XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "increase"; }

@@ -2,6 +2,7 @@
 {
   imports = [
     ./login-manager.nix
+    ./nautilus.nix        # Ideally I wish it was terminal based but xdg-desktop-portal-termfilechooser seems too old to consider
     ./niri.nix
   ];
 
