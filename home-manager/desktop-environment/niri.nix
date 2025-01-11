@@ -7,8 +7,6 @@
 # ${lib.getExe pkgs.grim} -g \"$(${lib.getExe pkgs.slurp} -o -r -c '#ff0000ff')\" -t ppm - | ${lib.getExe pkgs.satty} --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
 
 # Battery? https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/power.nix
-# Seems to be more or less what I want? https://github.com/kiike/dotfiles/blob/ff788bae02ba6d15c73632d99654269d2b5fba49/hosts/balrog/default.nix
-# Idle effect: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/swayidle.nix#L24
 # Screencast? https://github.com/maximbaz/dotfiles/blob/98ff8b69370e86879faf57b29d07cfcb6aff4306/modules/linux/xdg.nix#L2
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 
@@ -16,12 +14,13 @@
 # Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
 # Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
 # https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
-# https://gitlab.com/scientiac/einstein.nixos/-/blob/main/home/niriwm/niri.nix?ref_type=heads
 # https://gitlab.com/usmcamp0811/dotfiles
 # https://github.com/gopi487krishna/niri-waydots/tree/main/rofi
 
 # https://github.com/LoneWolf4713/seraphic.dotfiles
 # TODO shortcut to lock the computer
+
+# TODO replace with cliphist and use foot as it is quicker to open
 
 let
   # nix repl
