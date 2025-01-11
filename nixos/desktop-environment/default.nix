@@ -2,38 +2,15 @@
 {
   imports = [
     ./login-manager.nix
-    ./nautilus.nix      # File Manager
+    ./niri.nix
   ];
 
-  programs.niri.enable = true;
-  security.pam.services.swaylock = {};
-  services.gnome.gnome-keyring.enable = true;
-  xdg.portal = {
-    enable = true;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-gnome # Required for screencasting
-    ];
-  };
-
-  # Other
-  # TODO: https://github.com/Aylur/dotfiles/blob/main/nixos/system.nix#L44
   environment.systemPackages = with pkgs; [
-    # Core - Dependencies
     qt5.qtwayland
     qt6.qtwayland
-    libnotify
 
-    wl-clipboard  # Wayland clipboard
-
+    libnotify           # Notifications
+    wl-clipboard        # Wayland clipboard
     xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
-    konsole   # Backup terminal in case something goes wrong
-    ark       # KDE package: Manage compressed files
-
-    # Personalization
-    morewaita-icon-theme
-    adwaita-icon-theme
-    qogir-icon-theme
-    gnome-calendar
-    gnome-system-monitor
   ];
 }
