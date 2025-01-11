@@ -8,9 +8,10 @@
     ./rofi.nix      # Application Launcher
     ./swayidle.nix  # Locks/suspends the computer when idle
     ./hyprlock.nix  # Lock screend
+    ./wlogout.nix   # Logout menu
+    ./swww.nix      # Wallpaper manager
   ];
 
-  custom.services.swww.enable = true; # Wallpaper daemon
   home.packages = [
     # TODO: MOVE TO: https://github.com/savedra1/clipse
     pkgs.cliphist                                                                 # Wayland clipboard history

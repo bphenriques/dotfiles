@@ -4,8 +4,8 @@
     theme = "--theme border=magenta;text=cyan;prompt=green;time=red;action=blue;button=yellow;container=black;input=red";
     options = ''--user-menu --asterisks --time --greeting "Hi!" --remember --remember-session'';
     session = {
-      command = ''${lib.getExe pkgs.greetd.tuigreet} --user-menu --time --remember --cmd niri-session''; # FIXME: Hardcoded?
-      user = config.users.users.bphenriques.name; # FIXME: Hardcoded?
+      command = ''${lib.getExe pkgs.greetd.tuigreet} --user-menu --asterisks --time --remember --remember-session''; # FIXME: Hardcoded?
+      user = config.users.users.bphenriques.name; # FIXME: Hardcoded? #--cmd niri-session
     };
   in {
     enable = true;
