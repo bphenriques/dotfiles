@@ -1,4 +1,5 @@
-_: {
+{ lib, pkgs, ...}:
+lib.mkIf pkgs.stdenv.isLinux {
   programs.mangohud = {
     enable = true;
     enableSessionWide = true;

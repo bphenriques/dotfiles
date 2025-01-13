@@ -214,9 +214,14 @@ let
   };
 in
 {
+  systemd.user.services.waybar.Unit.After = [ config.wayland.systemd.target ]; # Fix ordering.
   programs.waybar = {
     enable = true;
-    systemd.enable = false; # Run manually as it seems flaky: https://github.com/nix-community/home-manager/issues/3599
+    systemd = {
+      enable = true;
+      target = config.wayland.systemd.target;
+    };
+    #systemd.enable = false; # Run manually as it seems flaky: https://github.com/nix-community/home-manager/issues/3599
     style = ./style.css;    # Not using pkgs.writeText as having the file is handy to debug: waybar -s style.css
     settings = {
       default = lib.attrsets.mergeAttrsList [

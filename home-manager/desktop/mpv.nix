@@ -12,7 +12,7 @@ let
   # - custom profile for battery-friendly (this laptop is plugged most times, if not all the time).
   # - pkgs.mpvScripts.video-cutter: Requires ffmpeg. https://github.com/familyfriendlymikey/mpv-cut
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   # Video Player: https://mpv.io/manual/master/
   programs.mpv = {
     enable = pkgs.stdenv.isLinux;

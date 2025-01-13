@@ -48,9 +48,9 @@ let
     exit $status
   '');
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.beets = {
-    enable = pkgs.stdenv.isLinux;
+    enable = true;
     package = finalPackage;
     settings = {
       library = database;

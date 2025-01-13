@@ -44,7 +44,5 @@
     morewaita-icon-theme
     adwaita-icon-theme
     qogir-icon-theme
-    gnome-calendar
-    gnome-system-monitor
   ];
 }

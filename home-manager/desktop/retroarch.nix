@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.isLinux {
   # emulationstation  # Does not as it needs additional configuration: perhaps FIXME: https://github.com/juliosueiras-nix/nix-emulationstation/blob/master/modules/emulationstation/default.nix?
   home.packages = [
     # More cores at: https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/emulators/libretro/cores

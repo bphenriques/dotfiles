@@ -6,7 +6,7 @@
     defaultTimeout = 5000;
 
     # Theming
-    backgroundColor = "#151515";
+    backgroundColor = "#151515" + "BF";
     textColor = "#e8e3e3";
     progressColor = "over #2e2e2e";
     width = 300;

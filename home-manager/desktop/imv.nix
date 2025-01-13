@@ -1,5 +1,5 @@
 { pkgs, lib, config, ... }:
-{
-  programs.imv.enable = pkgs.stdenv.isLinux;
+lib.mkIf pkgs.stdenv.isLinux {
+  programs.imv.enable = true;
   custom.xdgDefaultApps.image = lib.mkBefore [ "imv.desktop" ];
 }

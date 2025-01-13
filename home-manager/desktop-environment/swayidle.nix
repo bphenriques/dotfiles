@@ -10,6 +10,7 @@ in
 {
   services.swayidle = {
     enable = true;
+    extraArgs = [ "-w" ]; # Wait for commands to complete
     timeouts = [
       {
         timeout = 60 * 5;
@@ -17,11 +18,11 @@ in
         resumeCommand = "${osd-brightness} restore >/dev/null 2>&1";
       }
       {
-        timeout = 60 * 6;
+        timeout = 60 * 10;
         command = "${pidof} hyprlock || ${niri} msg action spawn -- ${hyprlock}";
       }
       {
-        timeout = 60 * 10;
+        timeout = 60 * 15;
         command = "${systemctl} suspend";
       }
     ];

@@ -1,48 +1,23 @@
 { config, lib, pkgs, self, community, ... }:
-# AGS:       Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
-# TODO: Alt F4 means keep closing active window until there is none. Then, show list of options.
-#   # https://github.com/prasanthrangan/hyprdots?tab=readme-ov-file
-# https://github.com/linyinfeng/dotfiles/blob/340f913ea7520a3c0034034d4fe870c05145bbcb/home-manager/profiles/niri/default.nix#L796
-# ${lib.getExe pkgs.grim} -g \"$(${lib.getExe pkgs.slurp} -o -r -c '#ff0000ff')\" -t ppm - | ${lib.getExe pkgs.satty} --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
-
-# Battery? https://github.com/linuxmobile/kaku/blob/13eb9e8a19823cb2fa2aed29f7b1f49bea51c4a2/system/services/power.nix
-# Screencast? https://github.com/maximbaz/dotfiles/blob/98ff8b69370e86879faf57b29d07cfcb6aff4306/modules/linux/xdg.nix#L2
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
-
-# Window rules: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L143
-# Env variables: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L185
-# Funny login audio: https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix#L201
-# https://gitlab.com/scientiac/einstein.nixos/-/tree/main/home/niriwm?ref_type=heads
-# https://gitlab.com/usmcamp0811/dotfiles
-# https://github.com/gopi487krishna/niri-waydots/tree/main/rofi
-
-# https://github.com/LoneWolf4713/seraphic.dotfiles
-# TODO shortcut to lock the computer
-
-# TODO replace with cliphist and use foot as it is quicker to open
-
 let
-  # nix repl
-  # then :lf .
-  # then inputs.nixpkgs.lib.strings.concatMapStringsSep " " (x: ''"${x}"'') inputs.nixpkgs.lib.strings.splitString " " "please run this command"
-  # run-cmd = cmd: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') lib.strings.splitString " " cmd;
-
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
 
-  env = {
-    DISPLAY = "21"; # FIXME: Make configurable
-    NIXOS_OZONE_WL = "1";                       # Electron?
-    QT_QPA_PLATFORM = "wayland";
-    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";  # Signal QT windows to remove their window decorations
-  };
+  environment = ''
+    environment {
+      DISPLAY ":21"
+      QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
+      QT_QPA_PLATFORM "wayland"
+      NIXOS_OZONE_WL "1"
+    }
+  '';
 
   on-startup = ''
     spawn-at-startup "${lib.getExe self.pkgs.swww-util}" "random" "${wallpapersPkg}/share/wallpapers"
-    spawn-at-startup "${lib.getExe pkgs.waybar}"
+    spawn-at-startup "${lib.getExe pkgs.clipse}" "-listen"
     spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "startup"
-    spawn-at-startup "${pkgs.wl-clipboard}/bin/wl-paste" "--type" "text" "--watch" "${lib.getExe pkgs.cliphist}" "store" "-max-items" "20"
     spawn-at-startup "${self.pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit" "-w"
   '';
 
@@ -103,25 +78,10 @@ let
   '';
 in
 {
-  #services.gnome-keyring.enable = true;  # Redundant as done in nixos?
-
   wayland.systemd.target = "niri.service";
-
+  
   xdg.configFile."niri/config.kdl".text = ''
-    workspace "browsing"
-    workspace "coding"
     workspace "gaming"
-
-    window-rule {
-      match at-startup=true app-id="com.mitchellh.ghostty"
-      match at-startup=true app-id="jetbrains-idea-ce"
-      open-on-workspace "coding"
-    }
-
-    window-rule {
-      match at-startup=true app-id="firefox"
-      open-on-workspace "browsing"
-    }
 
     window-rule {
       match at-startup=true app-id="steam$"
@@ -129,19 +89,23 @@ in
       open-on-workspace "gaming"
     }
 
+    window-rule {
+      match app-id="firefox$" title="^Picture-in-Picture$"
+
+      open-floating true
+      default-floating-position x=32 y=32 relative-to="bottom-left"
+    }
+
+    window-rule {
+      match title=r#"^.* clipse .*$"#
+      open-floating true
+    }
+
     hotkey-overlay {
       skip-at-startup
     }
 
-    environment {
-      DISPLAY ":21"
-      XDG_CURRENT_DESKTOP "niri"
-      QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
-      QT_QPA_PLATFORM "wayland"
-      NIXOS_OZONE_WL "1"
-      MOZ_ENABLE_WAYLAND "1"
-    }
-
+    ${environment}
     ${on-startup}
     ${input}
     ${outputs}
@@ -173,7 +137,7 @@ in
       Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
       Mod+Shift+Tab { focus-workspace-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
-      Mod+Shift+V { spawn "${lib.getExe self.pkgs.cliphist-dmenu}" "&&" "${lib.getExe self.pkgs.smart-paste}"; }
+      Mod+Shift+V { spawn "${lib.getExe pkgs.clipse}" "&&" "${lib.getExe self.pkgs.smart-paste}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
