@@ -2,10 +2,10 @@
 {
   services.greetd = let
     theme = "--theme border=magenta;text=cyan;prompt=green;time=red;action=blue;button=yellow;container=black;input=red";
-    options = ''--user-menu --asterisks --time --greeting "Hi!" --remember --remember-session'';
+    options = ''--asterisks --time --remember'';
     session = {
-      command = ''${lib.getExe pkgs.greetd.tuigreet} --user-menu --asterisks --time --remember --remember-session''; # FIXME: Hardcoded?
-      user = config.users.users.bphenriques.name; # FIXME: Hardcoded? #--cmd niri-session
+      command = ''${lib.getExe pkgs.greetd.tuigreet} ${options}'';
+      user = config.users.users.greeter.name;
     };
   in {
     enable = true;

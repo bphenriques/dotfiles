@@ -2,6 +2,7 @@
 {
   imports = [
     ./niri.nix      # Window Manager
+    ./xwayland.nix  # Bridge with X11 (Steam games and other apps not on Wayland)
     ./waybar        # Status bar
     ./mako.nix      # Notification Daemon
     ./fuzzel.nix    # Application Launcher
