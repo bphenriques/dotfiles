@@ -6,11 +6,11 @@
       After = [ "graphical-session.target" ];
       Requisite = [ "graphical-session.target" ];
       OnFailure = [ "xwayland-satellite-failure-report.service" ];
-    };
-    Install.WantedBy = [ "graphical-session.target" ]; # FIXME: After config.wayland.systemd.target? Check the config...
+    };    
+    Install.WantedBy = [ config.wayland.systemd.target ];
     Service = {
       Type = "simple";
-      ExecStart = "${lib.getExe pkgs.xwayland-satellite} :21"; #wa
+      ExecStart = "${lib.getExe pkgs.xwayland-satellite} :21";
       NotifyAccess = "all";
       StandardOutput = "journal";
       Restart = "on-failure";

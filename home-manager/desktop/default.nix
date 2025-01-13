@@ -23,15 +23,9 @@
     pkgs.newsflash     # RSS Reader
     pkgs.feishin       # Jellyfin player
     pkgs.cmus          # TUI music player
+ ];
 
-    # Development
-    pkgs.jetbrains.idea-community
-
-    # System
-    pkgs.baobab        # Disk space analyzer
-  ];
-
-  # TODO
+  # TODO: Do I really need it?
   custom.xdgDefaultApps = {
     archive = lib.mkBefore [ "org.kde.ark.desktop" ];
     fileBrowser = lib.mkBefore [ "org.gnome.baobab.desktop" ];

@@ -27,8 +27,6 @@ let
   # then inputs.nixpkgs.lib.strings.concatMapStringsSep " " (x: ''"${x}"'') inputs.nixpkgs.lib.strings.splitString " " "please run this command"
   # run-cmd = cmd: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') lib.strings.splitString " " cmd;
 
-  xwaylandDisplayId = "21";
-
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
@@ -106,6 +104,8 @@ let
 in
 {
   #services.gnome-keyring.enable = true;  # Redundant as done in nixos?
+
+  wayland.systemd.target = "niri.service";
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "browsing"
