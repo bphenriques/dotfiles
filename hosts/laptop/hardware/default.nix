@@ -27,6 +27,7 @@
       epp_state_for_BAT = "power";
     };
   };
+
   # TODO: Notifications when it is too low
   services.upower = {
     enable = true;

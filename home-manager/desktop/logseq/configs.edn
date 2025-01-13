@@ -1,7 +1,0 @@
-{
-  :spell-check false,
-  :git/disable-auto-commit? true,
-  :git/commit-on-close? false,
-  :window/native-titlebar? false
- :journal/page-title-format "dd-MM-yyyy"
-}⏎

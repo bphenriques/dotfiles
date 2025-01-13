@@ -5,7 +5,6 @@
     ./zathura.nix   # Documents
     ./mpv.nix       # Videos
     ./imv.nix       # Images
-    ./logseq        # Notes
     ./beets.nix     # Music library manager
     ./discord.nix   # Social
     ./ghostty.nix   # Terminal applicaton
@@ -19,10 +18,18 @@
     pkgs.qbittorrent   # Torrent client
     pkgs.filezilla     # Access files remotely
 
+    # Temporary
+    pkgs.jetbrains.idea-community
+
     # Media
-    pkgs.newsflash     # RSS Reader
-    pkgs.feishin       # Jellyfin player
-    pkgs.cmus          # TUI music player
+    pkgs.newsflash       # RSS Reader
+    pkgs.feishin         # Jellyfin player
+    pkgs.cmus            # TUI music player
+    pkgs.gnome-calendar  # Calendar
+
+    # System
+    pkgs.mission-center
+    pkgs.clipse          # Move to an actual module TODO
  ];
 
   # TODO: Do I really need it?

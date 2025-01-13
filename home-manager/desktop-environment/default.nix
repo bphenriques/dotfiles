@@ -9,8 +9,8 @@
     ./rofi.nix      # Application Launcher
     ./swayidle.nix  # Locks/suspends the computer when idle
     ./hyprlock.nix  # Lock screend
-    ./wlogout.nix   # Logout menu
     ./swww.nix      # Wallpaper manager
+    ./osd.nix       # On Screen Display
   ];
 
   home.packages = [

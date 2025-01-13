@@ -71,7 +71,7 @@ case "${1:-}" in
     shift 1
     delta="${1:-5}-%"
     device="${2:-"$(default_device)"}"
-    set_brightness "$delta" "$device"q
+    set_brightness "$delta" "$device"
     notify "$(get_percentage "$device")"
     ;;
   dim)          shift 1 && dim "${@:-}"           ;;

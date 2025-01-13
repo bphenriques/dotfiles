@@ -1,7 +1,7 @@
 { pkgs, lib, config, ... }:
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.zathura = {
-    enable = pkgs.stdenv.isLinux;
+    enable = true;
     options = {
       guioptions = "v";
       adjust-open = "width";

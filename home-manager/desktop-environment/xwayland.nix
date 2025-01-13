@@ -2,6 +2,9 @@
 {
   systemd.user.services.xwayland-satellite = {
     Unit = {
+      ConditionEnvironment = [
+        "WAYLAND_DISPLAY"
+      ];
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       Requisite = [ "graphical-session.target" ];
@@ -21,7 +24,7 @@
     Service = {
       Type = "oneshot";
       ExecStart = lib.escapeShellArgs [
-        (lib.getExe pkgs.libnotify) "--urgency=critical" "xwayland-satellite" "Crashed and restarting..."
+        (lib.getExe pkgs.libnotify) "--urgency=critical" "xwayland-satellite" "Crashed... restarting..."
       ];
     };
   };
