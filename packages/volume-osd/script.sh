@@ -1,4 +1,4 @@
-#shellcheck shell=sh
+#shellcheck shell=bash
 
 # TODO review: https://askubuntu.com/questions/1267949/how-do-i-automatically-switch-pulseaudio-input-to-headset-upon-connection
 

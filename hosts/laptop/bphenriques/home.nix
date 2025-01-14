@@ -4,12 +4,11 @@
     ../../../home-manager
     ../../../home-manager/desktop-environment
     ../../../home-manager/desktop
-    ./input-remapper
   ];
 
   xdg.userDirs = {
     enable = true;
-    createDirectories = false;
+    createDirectories = false;  # Created separately
 
     documents = "${config.home.homeDirectory}/workdir";
     pictures  = "${config.home.homeDirectory}/pictures";

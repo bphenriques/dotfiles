@@ -2,5 +2,5 @@
 pkgs.writeShellApplication {
   name = "swww-util";
   runtimeInputs = with pkgs; [ swww ];
-  text = lib.fileContents ./swww-util.sh;
+  text = lib.fileContents ./script.sh;
 }

@@ -2,7 +2,6 @@
 {
   imports = [
     ./niri.nix      # Window Manager
-    ./xwayland.nix  # Bridge with X11 (Steam games and other apps not on Wayland)
     ./waybar        # Status bar
     ./mako.nix      # Notification Daemon
     ./fuzzel.nix    # Application Launcher
@@ -19,6 +18,8 @@
     (pkgs.writeScriptBin "pbcopy" (lib.getExe' pkgs.wl-clipboard "wl-copy"))      # I am too hardwired to pbcopy
     (pkgs.writeScriptBin "pbpaste" (lib.getExe' pkgs.wl-clipboard "wl-paste"))    # I am too hardwired to pbpaste
   ];
+
+  custom.services.xwayland-satellite.enable = true;
 
   home.pointerCursor = {
     gtk.enable = true;

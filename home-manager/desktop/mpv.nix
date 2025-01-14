@@ -15,7 +15,7 @@ in
 lib.mkIf pkgs.stdenv.isLinux {
   # Video Player: https://mpv.io/manual/master/
   programs.mpv = {
-    enable = pkgs.stdenv.isLinux;
+    enable = true;
     config = {
       # UI
       fullscreen = true;
@@ -97,7 +97,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
   };
 
-  home.shellAliases = lib.optionalAttrs (pkgs.stdenv.isLinux) {
+  home.shellAliases = {
     "mpv360" = "${lib.getExe config.programs.mpv.package} --script-opts=360plugin-enabled=yes";
   };
 

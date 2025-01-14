@@ -13,7 +13,6 @@
 
   networking.hostName = "bphenriques-laptop";
 
-  # Boot: See what it is taking most time: `systemd-analyze critical-chain`
   boot = {
     supportedFilesystems.zfs = true;
     kernelPackages = pkgs.linuxPackages_6_12;
@@ -23,36 +22,9 @@
       efiSupport = true;
       efiInstallAsRemovable = true;
       configurationLimit = 10;
-
-      # I have Windows To Go on a external drive. I turn it off when not in use to reduce wear-and-tear.
-      # 1. `sudo fdisk -l` to get the device where "EFI System" is.
-      # 2. `sudo blkid {device}` to get the UUID field.
-      extraEntries = ''
-        menuentry "Windows 11" {
-          search --fs-uuid --no-floppy --set=root 38CB-E581
-          chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
-        }
-        menuentry "BIOS Setup" --class efi {
-          fwsetup
-        }
-        menuentry "Reboot" --class restart {
-          reboot
-        }
-        menuentry "Shutdown" --class shutdown {
-          halt
-        }
-      '';
     };
   };
-  custom.system.boot-theme = {
-    enable = true;
-    theme = "angular";
-  };
-
-  # Login Screen.
-  environment.systemPackages = [
-   (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "Windows 11" && reboot $@'')
- ];
+  custom.boot.grub.windowsEfiDevice = "38CB-E581";
 
   # Gaming
   custom.proton-run.enable = true;

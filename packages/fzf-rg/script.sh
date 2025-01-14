@@ -1,4 +1,4 @@
-#shellcheck shell=sh
+#shellcheck shell=bash
 
 #shellcheck disable=SC2016
 __fish_shell() {

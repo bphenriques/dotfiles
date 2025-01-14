@@ -14,5 +14,5 @@ pkgs.writeShellApplication {
     imagemagick # Preview PDFs
     ghostscript # Preview PDFs
   ];
-  text = fileContents ./preview.sh;
+  text = fileContents ./script.sh;
 }

@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
-  name = "osd-volume";
+  name = "volume-osd";
   runtimeInputs = with pkgs; [ libnotify ponymix ];
   text = let
     iconBasePath = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
@@ -11,6 +11,6 @@ pkgs.writeShellApplication {
     OSD_VOLUME_MEDIUM_ICON="${iconBasePath}/audio-volume-medium-symbolic.svg"
     OSD_VOLUME_HIGH_ICON="${iconBasePath}/audio-volume-high-symbolic.svg"
 
-    ${lib.fileContents ./osd-volume.sh}
+    ${lib.fileContents ./script.sh}
   '';
 }

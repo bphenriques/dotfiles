@@ -19,8 +19,8 @@ in
     systemd.user.services.solaar-graphical-user-interface = {
       enable = true;
       description = "Starts Solaar GUI";
-      wantedBy = ["graphical-session.target"];
-      after = ["graphical-session.target"];
+      wantedBy = [ "graphical-session.target" ];
+      after = [ "graphical-session.target" ];
       script = "${pkgs.solaar}/bin/solaar --restart-on-wake-up --window=hide";
     };
     environment.systemPackages = with pkgs; [ at-spi2-core ]; # Fixes solaar start-up: https://gist.github.com/jeffcogswell/62395900725acef1c0a5a608f7eb7a05

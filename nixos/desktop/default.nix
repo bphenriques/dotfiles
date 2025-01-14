@@ -1,8 +1,14 @@
 { pkgs, ... }:
 {
   imports = [
-    ./steam.nix
+    ./steam.nix       # Gaming
     # ./sunshine.nix # TODO: does not work
+  ];
+
+  # Boot
+  custom.boot.plymouth.enable = true;
+  boot.kernelParams = [
+    "boot.shell_on_fail"  # Use shell when booting fails
   ];
 
   # Graphics

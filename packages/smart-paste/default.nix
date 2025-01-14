@@ -1,11 +1,6 @@
 { lib, pkgs, ... }:
-
-with lib;
 pkgs.writeShellApplication {
   name = "smart-paste";
-  runtimeInputs = with pkgs; [
-    wtype
-    niri
-  ];
-  text = fileContents ./smart-paste.sh;
+  runtimeInputs = with pkgs; [ wtype niri ];
+  text = lib.fileContents ./script.sh;
 }
