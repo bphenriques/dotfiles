@@ -17,8 +17,8 @@ let
   linux = forLinuxSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
     in {
-      osd-volume = pkgs.callPackage ./osd-volume { };
-      osd-brightness = pkgs.callPackage ./osd-brightness { };
+      volume-osd = pkgs.callPackage ./volume-osd { };
+      brightness-osd = pkgs.callPackage ./brightness-osd { };
       niri-output-configuration = pkgs.callPackage ./niri-output-configuration { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };

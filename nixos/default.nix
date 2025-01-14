@@ -9,8 +9,10 @@
     };
   };
 
-  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
-  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
+  boot.kernelParams = [
+    "boot.shell_on_fail" # allows for root shell if failure to boot
+  ];
+
 
   # Not enabling useTmpfs despite having enough RAM. Might consider it.
   boot.tmp.cleanOnBoot = true;
@@ -67,4 +69,8 @@
     SystemMaxUse=1G
   '';
   security.sudo.extraConfig = "Defaults lecture=never";
+
+  # Home Settings
+  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
+  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
 }

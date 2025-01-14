@@ -10,8 +10,8 @@ in
 {
 
   home.packages = [
-    self.pkgs.osd-brightness
-    self.pkgs.osd-volume
+    self.pkgs.brightness-osd
+    self.pkgs.volume-osd
   ];
 
   # https://github.com/emersion/mako/blob/master/doc/mako.5.scd

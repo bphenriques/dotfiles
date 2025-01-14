@@ -4,7 +4,7 @@ let
   pidof = lib.getExe' pkgs.procps "pidof";
   hyprlock = lib.getExe config.programs.hyprlock.package;
   niri = lib.getExe pkgs.niri;
-  osd-brightness = lib.getExe self.pkgs.osd-brightness;
+  brightness = lib.getExe self.pkgs.brightness-osd;
   systemctl = lib.getExe' pkgs.systemd "systemctl";
 in
 {
@@ -14,8 +14,8 @@ in
     timeouts = [
       {
         timeout = 60 * 5;
-        command = "${osd-brightness} dim >/dev/null 2>&1";
-        resumeCommand = "${osd-brightness} restore >/dev/null 2>&1";
+        command = "${brightness} dim >/dev/null 2>&1";
+        resumeCommand = "${brightness} restore >/dev/null 2>&1";
       }
       {
         timeout = 60 * 10;

@@ -1,9 +1,9 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
-  name = "osd-brightness";
+  name = "brightness-osd";
   runtimeInputs = with pkgs; [ libnotify brightnessctl gnugrep gawk findutils ];
   text = let
-    iconBasePath = "${pkgs.pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
+    iconBasePath = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
   in
   # FIXME: This is not really configurable. Do something else about this.
   ''
@@ -12,6 +12,6 @@ pkgs.writeShellApplication {
     OSD_BRIGHTNESS_MEDIUM_ICON="${iconBasePath}/display-brightness-medium-symbolic.svg"
     OSD_BRIGHTNESS_HIGH_ICON="${iconBasePath}/display-brightness-high-symbolic.svg"
 
-    ${lib.fileContents ./osd-brightness.sh}
+    ${lib.fileContents ./script.sh}
   '';
 }

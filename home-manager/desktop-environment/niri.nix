@@ -1,5 +1,6 @@
 { config, lib, pkgs, self, community, ... }:
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
+# FIXME: add "&&" "${lib.getExe self.pkgs.smart-paste}
 let
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
@@ -7,7 +8,7 @@ let
 
   environment = ''
     environment {
-      DISPLAY ":21"
+      DISPLAY ":${toString config.custom.services.xwayland-satellite.displayId}"
       QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
       QT_QPA_PLATFORM "wayland"
       NIXOS_OZONE_WL "1"
@@ -97,7 +98,7 @@ in
     }
 
     window-rule {
-      match title=r#"^.* clipse .*$"#
+      match title="clipse-tui"
       open-floating true
     }
 
@@ -137,7 +138,7 @@ in
       Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
       Mod+Shift+Tab { focus-workspace-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
-      Mod+Shift+V { spawn "${lib.getExe pkgs.clipse}" "&&" "${lib.getExe self.pkgs.smart-paste}"; }
+      Mod+Shift+V { spawn "${lib.getExe pkgs.ghostty}" "--title=clise-tui" "-e" "${lib.getExe pkgs.clipse}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
@@ -147,9 +148,9 @@ in
       Super+Escape { spawn "${lib.getExe config.programs.wlogout.package}"; }
 
       // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "increase"; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "decrease"; }
-      XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-volume}" "toggle-mute"; }
+      XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "increase"; }
+      XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "decrease"; }
+      XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "toggle-mute"; }
       XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
       XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
       XF86AudioPause       allow-when-locked=true { spawn "playerctl" "play-pause"; }
@@ -157,8 +158,8 @@ in
       XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
 
       // Brightness
-      XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-brightness}" "increase"; }
-      XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.osd-brightness}" "decrease"; }
+      XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.brightness-osd}" "increase"; }
+      XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.brightness-osd}" "decrease"; }
 
       Mod+Left  { focus-column-left; }
       Mod+Down  { focus-window-down; }
