@@ -13,10 +13,9 @@
   ];
 
   home.packages = [
-    # TODO: MOVE TO: https://github.com/savedra1/clipse
-    pkgs.cliphist                                                                 # Wayland clipboard history
     (pkgs.writeScriptBin "pbcopy" (lib.getExe' pkgs.wl-clipboard "wl-copy"))      # I am too hardwired to pbcopy
     (pkgs.writeScriptBin "pbpaste" (lib.getExe' pkgs.wl-clipboard "wl-paste"))    # I am too hardwired to pbpaste
+    pkgs.clipse
   ];
 
   custom.services.xwayland-satellite.enable = true;

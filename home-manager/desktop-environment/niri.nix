@@ -1,10 +1,14 @@
-{ config, lib, pkgs, self, community, ... }:
+{ config, lib, programs, pkgs, self, community, ... }:
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
-# FIXME: add "&&" "${lib.getExe self.pkgs.smart-paste}
+# FIXME: add "&&" "${lib.getExe self.pkgs.niri-smart-paste}
 let
   wallpapersPkg = self.private.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
+
+  foot = lib.getExe' config.programs.foot.package "footclient";
+  volume = lib.getExe self.pkgs.volume-osd;
+  brightness = lib.getExe self.pkgs.brightness-osd;
 
   environment = ''
     environment {
@@ -77,13 +81,8 @@ let
       }
     }
   '';
-in
-{
-  wayland.systemd.target = "niri.service";
-  
-  xdg.configFile."niri/config.kdl".text = ''
-    workspace "gaming"
 
+  window-rules = ''
     window-rule {
       match at-startup=true app-id="steam$"
       match at-startup=true app-id=r#"^steam_app_[0-9]+$"#
@@ -101,11 +100,20 @@ in
       match title="clipse-tui"
       open-floating true
     }
+  '';
+in
+{
+  wayland.systemd.target = "niri.service";
+  
+  xdg.configFile."niri/config.kdl".text = ''
+    workspace "gaming"
+
 
     hotkey-overlay {
       skip-at-startup
     }
 
+    ${window-rules}
     ${environment}
     ${on-startup}
     ${input}
@@ -122,7 +130,6 @@ in
     binds {
       // Basic
       Mod+Q { close-window; }
-      Mod+Shift+Slash { show-hotkey-overlay; }
       Mod+F { maximize-column; }
       Mod+Shift+F { fullscreen-window; }
       Mod+C { center-column; }
@@ -132,34 +139,32 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+E { quit; }
-
       Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
       Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
       Mod+Shift+Tab { focus-workspace-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
-      Mod+Shift+V { spawn "${lib.getExe pkgs.ghostty}" "--title=clise-tui" "-e" "${lib.getExe pkgs.clipse}"; }
+      Mod+Shift+V { spawn "${foot}" "--title=clise-tui" "${lib.getExe pkgs.clipse}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
       Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
-      Mod+Shift+Space { spawn "${lib.getExe pkgs.ghostty}" "-e" "${lib.getExe config.programs.yazi.package}" "~"; }
+      Mod+Shift+Space { spawn "${foot}" "--title=yazi-tui" "${lib.getExe config.programs.yazi.package}" "~"; }
       Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
       Super+Escape { spawn "${lib.getExe config.programs.wlogout.package}"; }
 
       // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "increase"; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "decrease"; }
-      XF86AudioMute        allow-when-locked=true { spawn "${lib.getExe self.pkgs.volume-osd}" "toggle-mute"; }
+      XF86AudioRaiseVolume allow-when-locked=true { spawn "${volume}" "increase"; }
+      XF86AudioLowerVolume allow-when-locked=true { spawn "${volume}" "decrease"; }
+      XF86AudioMute        allow-when-locked=true { spawn "${volume}" "toggle-mute"; }
       XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-      XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
-      XF86AudioPause       allow-when-locked=true { spawn "playerctl" "play-pause"; }
-      XF86AudioPlay        allow-when-locked=true { spawn "playerctl" "play-pause"; }
-      XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
+      XF86AudioNext        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "next"; }
+      XF86AudioPause       allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "play-pause"; }
+      XF86AudioPlay        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "play-pause"; }
+      XF86AudioPrev        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "previous"; }
 
       // Brightness
-      XF86MonBrightnessUp   allow-when-locked=true { spawn "${lib.getExe self.pkgs.brightness-osd}" "increase"; }
-      XF86MonBrightnessDown allow-when-locked=true { spawn "${lib.getExe self.pkgs.brightness-osd}" "decrease"; }
+      XF86MonBrightnessUp   allow-when-locked=true { spawn "${brightness}" "increase"; }
+      XF86MonBrightnessDown allow-when-locked=true { spawn "${brightness}" "decrease"; }
 
       Mod+Left  { focus-column-left; }
       Mod+Down  { focus-window-down; }
@@ -205,10 +210,6 @@ in
       Mod+Ctrl+R { reset-window-height; }
 
       Alt+Mod+Space       { switch-layout "next"; }
-
-      // Powers off the monitors. To turn them back on, do any input like
-      // moving the mouse or pressing any other key.
-      Mod+Shift+P { power-off-monitors; }
     }
   '';
 }

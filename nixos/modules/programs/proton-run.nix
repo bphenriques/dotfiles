@@ -10,6 +10,8 @@ let
         STEAM_COMPAT_DATA_PATH="${cfg.defaultProtonDir}" \
           STEAM_COMPAT_CLIENT_INSTALL_PATH="${cfg.defaultProtonDir}" \
           ${pkgs.steam-run}/bin/steam-run ${self.pkgs.proton-ge-custom}/bin/proton run "$@"
+      else
+        echo "No argument provided"
       fi
     '';
   };

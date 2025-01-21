@@ -4,7 +4,10 @@ let
   cfg = config.custom.boot.plymouth;
 in {
   options.custom.boot.plymouth = with types; {
-    enable = mkEnableOption "plymouth";
+    enable = mkEnableOption "plymouth" // {
+      description = "Enable it to set a nice graphical boot menu. Set the boot loader to accordingly to have a nicer transition";
+    };
+
     theme = lib.mkOption {
       type = lib.types.enum [ "angular" ];
       description = "One of the boot animations available in https://github.com/adi1090x/plymouth-themes";
@@ -24,8 +27,8 @@ in {
         ];
       };
 
-      # Hide logs during boot (press Escape to show them) and smoothen transition
-      consoleLogLevel = 2;
+      # Silent boot (press Escape to show logs)
+      consoleLogLevel = 0;
       kernelParams = [
         "plymouth.use-simpledrm"
         "quiet"
@@ -33,11 +36,6 @@ in {
         "rd.systemd.show_status=false"
         "rd.udev.log_level=3"
       ];
-      loader.timeout = 0;
-      loader.grub = lib.mkIf config.boot.loader.grub.enable {
-        timeoutStyle = "hidden";
-        splashImage = null;
-      };
     };
   };
 }

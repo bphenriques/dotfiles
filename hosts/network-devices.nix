@@ -22,7 +22,7 @@
   };
 
   # Device: Steam Deck
-  deck = {
+  steam-deck = {
     hostname = "192.168.68.67";
     ssh.user = "deck";
     ssh.port = 22;

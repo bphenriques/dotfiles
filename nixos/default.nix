@@ -13,7 +13,6 @@
     "boot.shell_on_fail" # allows for root shell if failure to boot
   ];
 
-
   # Not enabling useTmpfs despite having enough RAM. Might consider it.
   boot.tmp.cleanOnBoot = true;
 
@@ -69,6 +68,9 @@
     SystemMaxUse=1G
   '';
   security.sudo.extraConfig = "Defaults lecture=never";
+
+  # Disable generating NixOS configuration options
+  documentation.nixos.enable = false;
 
   # Home Settings
   home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.

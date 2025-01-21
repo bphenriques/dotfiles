@@ -8,19 +8,17 @@ let
    #
    # Solution:
    #
-   # Test Plan:
+   # Test:
    #
    # Body: Max. 72 characters per line                               ---->
    '';
 in
 {
   home.packages = with pkgs; [
-    lazygit                         # TODO: do I really need this? Cross-platform GUI to interact with Git
-    git-absorb                      # TODO: try out: https://github.com/tummychow/git-absorb
+    git-absorb
   ];
 
-  # TODO: Explore jujutsu: https://github.com/0xcharly/nix-config/blob/a8e1427a67494ad5de3d639d94ee619ca69f51c7/users/delay/home.nix#L99
-  # https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/cli/jujutsu.nix
+  programs.lazygit.enable = true;
   programs.git = {
     enable = true;
     userName = "Bruno Henriques";
@@ -79,9 +77,6 @@ in
       ".DS_Store?"
       ".Spotlight-V100"
       ".Trashes"
-
-      # direnv temporary directory
-      ".direnv/"
 
       # Personal tools
       "bphenriques-tools/"

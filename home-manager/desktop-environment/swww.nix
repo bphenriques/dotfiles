@@ -3,11 +3,10 @@
   systemd.user.services.swww = {
     Unit = {
       Description = "Efficient animated wallpaper daemon for wayland";
+      ConditionEnvironment = [ "WAYLAND_DISPLAY" ];
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
-
-    # TODO: Ensure WAYLAND_DISPLAY is set
     Install.WantedBy = [ config.wayland.systemd.target ];
     Service = {
       Type = "simple";

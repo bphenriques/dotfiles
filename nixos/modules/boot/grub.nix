@@ -25,36 +25,47 @@ in {
       description = "Font size. Adjust to the screen as it is not DPI aware.";
       default = 36;
     };
+
+    timeout = lib.mkOption {
+      type = int;
+      description = "Grub boot selection timeout. Set to 0 for the impatient (press ESC to enter the screen)";
+      default = 0;
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    boot.loader.grub = {
-      font = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/HackNerdFontMono-Regular.ttf";
-      fontSize = cfg.fontSize;
-      extraEntries = ''
-        ${lib.optionalString (cfg.windowsEfiDevice != null) ''
-          menuentry "${cfg.windowsEntryLabel}" {
-            search --fs-uuid --no-floppy --set=root ${cfg.windowsEfiDevice}
-            chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
+    boot.loader = {
+      timeout = 0;  # Shorten the bootup time. Press ESC to go to the boot menu
+      grub = {
+        font = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/HackNerdFontMono-Regular.ttf";
+        fontSize = cfg.fontSize;
+        splashImage = null;       # Blends nicely in a OLED screen.
+        timeoutStyle = "hidden";  # Ensure nothing shows up regarding grub unless prompted
+        extraEntries = ''
+          ${lib.optionalString (cfg.windowsEfiDevice != null) ''
+            menuentry "${cfg.windowsEntryLabel}" {
+              search --fs-uuid --no-floppy --set=root ${cfg.windowsEfiDevice}
+              chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
+            }
+            ''
           }
-          ''
-        }
 
-        menuentry "BIOS Setup" --class efi {
-          fwsetup
-        }
-        menuentry "Reboot" --class restart {
-          reboot
-        }
-        menuentry "Shutdown" --class shutdown {
-          halt
-        }
-      '';
+          menuentry "BIOS Setup" --class efi {
+            fwsetup
+          }
+          menuentry "Reboot" --class restart {
+            reboot
+          }
+          menuentry "Shutdown" --class shutdown {
+            halt
+          }
+        '';
+      };
     };
 
     environment.systemPackages = lib.optionals (cfg.windowsEfiDevice != null) [
-     (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windowsEntryLabel}" && reboot $@'')
-   ];
+      (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windowsEntryLabel}" && reboot $@'')
+    ];
   };
 }
 

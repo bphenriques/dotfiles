@@ -13,47 +13,12 @@ This repository contains the definition of my machines using [nix](https://nixos
 
 # Hosts
 
-| Hostname     | CPU                     | RAM  | Primary GPU              | Secondary GPU                 | OS |
+| Hostname     | CPU                     | RAM  | Integrated GPU           | Discreet GPU                  | OS |
 |--------------|-------------------------|------|--------------------------|-------------------------------|----|
 | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M         | NVIDIA® GeForce RTX™ 4060 8GB | ❄️ |
 | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏 |
 
-# 📦 Flake Outputs
-
-Listing only the most relevant outputs. See the source-code for more details.
-
-### Packages
-
-- `dotfiles`: Wrapper around `nix`/`nixos-rebuild` operations.
-- `project`: Custom [`fzf`](https://github.com/junegunn/fzf) integration to quickly open projects within `PROJ_DIR` or `XDG_DOCUMENTS_DIR`. Includes `fish` widget.
-- `fzf-rg`: [`fzf`](https://github.com/junegunn/fzf) + [`ripgrep`](https://github.com/BurntSushi/ripgrep). Includes `fish` widget.
-- `fzf-fd`: [`fzf`](https://github.com/junegunn/fzf) + [`fd`](https://github.com/sharkdp/fd). Includes `fish` widget.
-- `preview`: Custom _barebones_ terminal file previewer to together with the other widgets. I really like [`yazi`](https://yazi-rs.github.io/) previewer but can't use it in isolation.
-- `dunst-volume`: Custom wrapper to send notifications whenever I set the volume.
-
-Tryout using:
-```shell
-nix run github:bphenriques/dotfiles#{package} -- {args}
-```
-
-### [Home Manager](https://github.com/nix-community/home-manager) modules
-
-- `programs-dotfiles`: Accompanies the `dotfiles` package.
-- `programs-project`: Accompanies the `project` package.
-- `programs-fzf-fd`: Accompanies the `fzf-fd` package.
-- `programs-fzf-rg`: Accompanies the `fzf-rg` package.
-- `xdg-mime-apps`: Custom `xdg-mime-apps` module to abstract setting the common application for typical common text/images/audio/video mimes.
-
-### NixOS modules
-
-- `proton-run`: [`proton-ge-custom`](https://github.com/GloriousEggroll/proton-ge-custom) runner using a global prefix for ad-hoc executions.
-- `services-input-solaar`: [`Solaar`]([https://github.com/GloriousEggroll/proton-ge-custom](https://github.com/pwr-Solaar/Solaar)) service.
-- `boot-theme`: Custom boot configuration including [plymouth-themes](https://github.com/adi1090x/plymouth-themes), settings to hide logs, and an OLED friendly Grub2 theme.
-
-### [Nix Darwin](https://github.com/LnL7/nix-darwin) modules
-
-- `system-screencapture`: Ensures the the screencapture directory exists.
-- `system-desktop`: Sets a wallpaper on all desktops. Not perfect but good enough for me.
+There is a lot going on... therefore I invite you to take a look and ask me anything!
 
 # Install
 
@@ -123,7 +88,3 @@ Adding new hosts requires:
 1. Generate key pair using: `nix-shell -p age --command "age-keygen"`.
 2. Export the private key to `$HOME/.config/sops/age/keys.txt` and upload to Bitwarden using the format `sops-age-key-$HOST-$USER` with a `private` field inside.
 3. Add new host to `.sops.yaml` using the public key to `.sops.yaml` and the correct `path_regex`.
-
-# Acknowledgement
-
-TODO. Do something
