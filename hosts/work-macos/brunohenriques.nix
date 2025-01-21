@@ -18,3 +18,5 @@
 
   home.stateVersion = "22.11";
 }
+
+# TODO: https://github.com/isabelroses/dotfiles/tree/main/modules/darwin

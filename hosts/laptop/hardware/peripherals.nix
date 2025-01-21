@@ -24,8 +24,7 @@
 
   custom.services.solaar.enable = true;
 
-  hardware.xone.enable = true;            # Xbox(ish) gamepads
-  hardware.steam-hardware.enable = true;  # Steam Hardware. TODO: I likely do not need this.
+  hardware.xone.enable = true;  # Xbox(ish) gamepads. E.g., 8bitdo
 
   # Other
   environment.systemPackages = [

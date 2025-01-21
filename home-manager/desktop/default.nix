@@ -7,7 +7,8 @@
     ./imv.nix       # Images
     ./beets.nix     # Music library manager
     ./discord.nix   # Social
-    ./ghostty.nix   # Terminal applicaton
+    ./ghostty.nix   # Terminal
+    ./foot.nix      # Terminal
     ./mangohud.nix  # Game HUD
     ./retroarch.nix # Emulation
     ./heroic.nix    # Game launcher
@@ -28,11 +29,12 @@
     pkgs.gnome-calendar  # Calendar
 
     # System
-    pkgs.mission-center
-    pkgs.clipse          # Move to an actual module TODO
+    # TODO: cpu has to show cpufreq driver, governor and power pref
+    # TODO: I like the services view
+    pkgs.mission-center  # TODO: This is nice.. but can btop or variants replace it?
  ];
 
-  # TODO: Do I really need it?
+  # FIXME
   custom.xdgDefaultApps = {
     archive = lib.mkBefore [ "org.kde.ark.desktop" ];
     fileBrowser = lib.mkBefore [ "org.gnome.baobab.desktop" ];

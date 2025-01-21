@@ -23,7 +23,7 @@ let
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
       cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };
-      smart-paste = pkgs.callPackage ./smart-paste { };
+      niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
       ddcci-util = pkgs.callPackage ./ddcci-util { };
 

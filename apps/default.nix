@@ -23,10 +23,10 @@ let
     text = pkgs.lib.fileContents ./darwin-install.sh;
   };
 
-  mkDotfilesInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
-    name = "dotfiles-install";
+  mkPostInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
+    name = "post-install";
     runtimeInputs = with pkgs; [ git yq-go age sops gnupg (mkBitwardenSession pkgs) ];
-    text = pkgs.lib.fileContents ./dotfiles-install.sh;
+    text = pkgs.lib.fileContents ./post-install.sh;
   };
 
   mkBitwardenSession = pkgs: writeLocalCompatibleScriptBin pkgs {

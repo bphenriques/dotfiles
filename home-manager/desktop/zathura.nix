@@ -7,11 +7,15 @@ lib.mkIf pkgs.stdenv.isLinux {
       adjust-open = "width";
       selection-clipboard = "clipboard";
       render-loading = false;
-      scroll-step = 120;
-
       statusbar-basename = true;
       statusbar-home-tilde = true;    # Replace $HOME full path with '~'
       window-title-home-tilde = true; # Replace $HOME full path with '~'
+
+      # Scroll
+      scroll-step = 100;
+      smooth-scroll = true;
+      scroll-page-aware = "true";
+      scroll-full-overlap = "0.01";
     };
   };
 

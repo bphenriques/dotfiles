@@ -63,7 +63,8 @@
     unrar     # Still need it
 
     # Monitoring
-    procs       # Fancy `ps`.
+    btop
+    htop
   ];
 
   # Gpg
@@ -75,7 +76,7 @@
 
   home = {
     sessionVariables = {
-      VISUAL  = "$EDITOR";    # Set within the editor config.
+      VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 
       # Colors
@@ -85,7 +86,7 @@
     } // (lib.optionalAttrs pkgs.config.allowUnfree {
        NIXPKGS_ALLOW_UNFREE = 1;
     }) // (lib.optionalAttrs pkgs.stdenv.isDarwin {
-      CLICOLOR  = 1;  # Enable ls colors in MacOS.
+      CLICOLOR  = 1;
     });
 
     shellAliases = {
@@ -118,8 +119,12 @@
   };
 
   programs.man.enable = true;     # RTFM
-  manual.manpages.enable = false; # Discard home-manager configuration man pages.
-  manual.json.enable = false;     # Discard home-manager configuration JSON docs.
+  # Discard home-manager configuration manual.
+  manual = {
+    html.enable = false;
+    manpages.enable = false;
+    json.enable = false;
+  };
 
   # Tighten permissions to private keys
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [

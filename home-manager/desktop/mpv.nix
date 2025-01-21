@@ -1,19 +1,5 @@
 { pkgs, lib, config, ... }:
-# TODO: Check https://github.com/iynaix/dotfiles/blob/f0f8918caed8f4c245fa82fc505ae0de09a32f5c/home-manager/programs/mpv.nix
-# TODO: https://github.com/diniamo/niqs/blob/53288d72902365ee8d3bfdd6aff0ec79eb7c1c36/home/mpv/anime.nix
-# TODO: https://github.com/iynaix/dotfiles/blob/56d2d63b3b5f4c621429d79fb2aef8d44fdc25b9/home-manager/gui/mpv.nix
-# https://github.com/Samillion/ModernZ
-let
-  # Interesting guides:
-  # - https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/
-  # - https://iamscum.wordpress.com/guides/videoplayback-guide/mpv-conf/
-  #
-  # To consider:
-  # - custom profile for battery-friendly (this laptop is plugged most times, if not all the time).
-  # - pkgs.mpvScripts.video-cutter: Requires ffmpeg. https://github.com/familyfriendlymikey/mpv-cut
-in
 lib.mkIf pkgs.stdenv.isLinux {
-  # Video Player: https://mpv.io/manual/master/
   programs.mpv = {
     enable = true;
     config = {
@@ -71,10 +57,12 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
 
     scripts = [
-      pkgs.mpvScripts.uosc          # Custom UI with subtitles downloaded bundled in
-      pkgs.mpvScripts.thumbfast     # Generate thumbnails while seeking
-      pkgs.mpvScripts.dynamic-crop  # Delete hard-coded blackbars on-the-fly. Use SHIFT+C.
-      pkgs.mpvScripts.vr-reversal   # Play 360 video. See https://github.com/dfaker/VR-reversal
+      pkgs.mpvScripts.uosc            # Custom UI with subtitles downloaded bundled in
+      pkgs.mpvScripts.thumbfast       # Generate thumbnails while seeking
+      pkgs.mpvScripts.dynamic-crop    # Delete hard-coded blackbars on-the-fly. Use SHIFT+C.
+      pkgs.mpvScripts.vr-reversal     # Play 360 video. See https://github.com/dfaker/VR-reversal
+      pkgs.mpvScripts.mpris           # Control using media keys
+      pkgs.mpvScripts.mpv-cheatsheet  # Show some mappings by pressing '?'
     ];
 
     scriptOpts = {
