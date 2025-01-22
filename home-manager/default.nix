@@ -7,7 +7,6 @@
     ./helix.nix       # Editor
     ./direnv.nix      # Automate dev environment when we enter directories
     ./fzf.nix         # Fuzzy search
-    ./ripgrep.nix     # Search
     ./yazi.nix        # File browser
     ./lang-scala.nix  # Programming language
   ];
@@ -17,11 +16,20 @@
   xdg.mimeApps.enable = pkgs.stdenv.isLinux; # Default apps and directories
   home.preferXdgDirectories = true;
 
+  custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
   programs.bat.enable = true;             # Better file previewer
   programs.fd.enable = true;              # Better `find`.
   programs.jq.enable = true;              # JSON query.
-  programs.htop.enable = true;            # Fancy `top`.
-  custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
+  programs.btop = {
+    enable = true;
+    settings = {
+      theme_background = true;
+      proc_gradient = false;
+      graph_symbol = "block";
+      shown_boxes = "cpu mem proc";
+      clock_format = "";
+    };
+  };
 
   programs.tealdeer = {
     enable = true;
@@ -33,6 +41,11 @@
 
       updates.auto_update = false;
     };
+  };
+
+  programs.ripgrep = {
+    enable = true;
+    arguments = [ "--max-columns=150" "--max-columns-preview" "--glob=!.git" "--smart-case" ];
   };
 
   programs.zoxide = {
@@ -62,10 +75,6 @@
     # Archive
     p7zip     # 7zip for linux
     unrar     # Still need it
-
-    # Monitoring
-    btop
-    htop
   ];
 
   # Gpg
