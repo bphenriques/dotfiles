@@ -9,6 +9,14 @@
     jdk21
   ];
 
+  # TODO:
+  #programs.sbt = {
+  #  enable = true;
+  #  plugins = [ { org, artifact, version} ]
+  #  pluginsExtra = 'addDependencyTreePlugin' # might not neede it
+  #  credentials = ???
+  #};
+
   systemd.user.services.bloop = lib.optionalAttrs pkgs.stdenv.isLinux {
     Unit.Description = "Bloop Scala build server";
     Service = {

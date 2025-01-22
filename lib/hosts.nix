@@ -14,7 +14,7 @@ let
 
   nixpkgsConfig = {
     allowUnfree = true; # I was maintaining a list.. because it was _nicer_ and _explicit_ but.. I am lazy.
-    permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" ];
+    permittedInsecurePackages = [ "electron-27.3.11" "electron-28.3.3" "electron-31.7.7" ];
   };
 in
 {

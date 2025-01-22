@@ -53,6 +53,7 @@
     unzip
     openssl
     xdg-user-dirs
+    file
 
     # Text Processors
     yq-go       # Query YAML.
