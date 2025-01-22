@@ -1,43 +1,33 @@
 { config, lib, pkgs, self, ... }:
 
-with lib;
-
 let
   cfg = config.custom.programs.project;
 in {
   options.custom.programs.project = {
-    enable = mkEnableOption "project";
-
-    # FIXME: this is not portable
-    package = mkOption {
-      type = types.package;
+    enable = lib.mkEnableOption "project";
+    package = lib.mkOption {
+      type = lib.types.package;
       default = self.pkgs.project;
-      description = ''
-        project package to install.
-      '';
+      description = "package to install.";
     };
 
-    directory = mkOption {
-      type = types.str;
+    directory = lib.mkOption {
+      type = lib.types.str;
       default = config.xdg.userDirs.documents;
-      description = ''
-        directory where projects live
-      '';
+      description = "directory where projects live";
     };
 
-    enableFishIntegration = mkOption {
+    enableFishIntegration = lib.mkOption {
       default = true;
-      type = types.bool;
-      description = ''
-        Whether to enable Fish integration.
-      '';
+      type = lib.types.bool;
+      description = "Whether to enable Fish integration.";
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
     home.sessionVariables.PROJ_ROOT = cfg.directory;
-    programs.fish.interactiveShellInit = mkIf cfg.enableFishIntegration ''
+    programs.fish.interactiveShellInit = lib.mkIf cfg.enableFishIntegration ''
       ${lib.getExe cfg.package} --init-shell fish | source
     '';
   };
