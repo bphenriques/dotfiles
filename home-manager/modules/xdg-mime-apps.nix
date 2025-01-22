@@ -150,6 +150,7 @@ let
   mkDefaultAppOption = type: lib.mkOption {
     type = lib.types.listOf lib.types.str;
     description = lib.mdDoc ''Default app to open ${type} files'';
+    default = [];
   };
 in
 {
@@ -185,5 +186,3 @@ in
     ];
   };
 }
-
-

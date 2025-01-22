@@ -3,6 +3,7 @@ let
   downloadDirName = "downloads";
 in
 {
+  # Default: https://github.com/sxyazi/yazi/blob/shipped/yazi-config/preset/yazi-default.toml
   programs.yazi = {
     enable = true;
     enableFishIntegration = true;
@@ -14,25 +15,20 @@ in
         sort_dir_first = true;
 
         prepend_keymap = [
-          {
-            on   = "l";
-            run  = "plugin --sync smart-enter";
-            desc = "Enter the child directory, or open the file";
-          }
-          {
-            on   = "!";
-            run  = ''shell "$SHELL" --block --confirm'';
-            desc = "Open shell here";
-          }
+          { on   = "!"; run  = ''shell "$SHELL" --block --confirm''; desc = "Open shell here"; }
         ];
+      };
+
+      preview = {
+        cache_dir = "${config.xdg.cacheHome}/yazi";
       };
     };
   };
 
-  # To explore:
-  # - https://github.com/yazi-rs/plugins/tree/main/jump-to-char.yazi
-  # - https://github.com/yazi-rs/plugins/tree/main/no-status.yazi
-  # - https://github.com/yazi-rs/plugins/tree/main/smart-filter.yazi
+  systemd.user.tmpfiles.rules = [
+    "d ${config.xdg.cacheHome}/yazi 600 ${config.home.username} users 10d -"
+  ];
+
   xdg.configFile = {
     # Smart sorting depending on the directory
     "yazi/plugins/folder-rules.yazi/init.lua".text = ''

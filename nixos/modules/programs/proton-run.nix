@@ -16,6 +16,13 @@ let
     '';
   };
 
+  mimeTypes = [
+    "application/x-ms-dos-executable"
+    "application/x-msi"
+    "application/x-ms-shortcut"
+    "application/vnd.microsoft.portable-executable"
+  ];
+
   proton-run-desktop-item =
     (pkgs.makeDesktopItem {
       exec = "proton-run %f";
@@ -24,8 +31,10 @@ let
       desktopName = "Proton Launcher";
       categories = [ "Utility" "Game" ];
       icon = "wine";
-      mimeTypes = ["application/x-ms-dos-executable" "application/x-msi" "application/x-ms-shortcut"];
+      mimeTypes = mimeTypes;
     });
+
+  setDefault = types: target: foldl' (acc: type: acc // { "${type}" = target; }) { } types;
 in {
   options.custom.proton-run = with types; {
     enable = mkEnableOption "proton-run";
@@ -42,5 +51,7 @@ in {
       proton-run        # Run .exe from terminal
       proton-run-desktop-item
     ];
+
+    xdg.mime.defaultApplications = setDefault mimeTypes "Proton Launcher.desktop";
   };
 }
