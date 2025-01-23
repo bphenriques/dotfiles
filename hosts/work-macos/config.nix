@@ -7,7 +7,7 @@ let
   };
 in
 {
-  imports = [ ../../config/darwin ];
+  imports = [ ../../darwin ];
 
   nix.settings.trusted-users = [ username ];
   users.users."${username}".home  = "/Users/${username}";

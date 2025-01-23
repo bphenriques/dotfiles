@@ -37,7 +37,7 @@ in
       modules = nixosModules ++ [ commonConfig hostModule ];
     };
 
-  mkMacOSHost = { system ? "aarch64-darwin", overlays ? [ ], darwinModules, hmModules, hostModule, darwinSpecialArgs ? { }, hmSpecialArgs ? { } }:
+  mkMacOSHost = { system, overlays ? [ ], darwinModules, hmModules, hostModule, darwinSpecialArgs ? { }, hmSpecialArgs ? { } }:
     let
       specialArgs = darwinSpecialArgs;
       commonConfig = {

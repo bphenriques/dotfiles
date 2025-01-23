@@ -2,6 +2,7 @@
 let
   inherit (inputs.nixpkgs.lib.attrsets) attrValues;
 
+  system = "aarch64-darwin";
   darwinModules = attrValues inputs.self.darwinModules ++ [ inputs.home-manager.darwinModules.home-manager ];
   hmModules = attrValues inputs.self.homeManagerModules;
   specialArgs = {
@@ -12,7 +13,7 @@ let
     network-devices = import ../network-devices.nix;
   };
 in mylib.hosts.mkMacOSHost {
-  inherit darwinModules hmModules;
+  inherit system darwinModules hmModules;
   hostModule = ./config.nix;
   darwinSpecialArgs = specialArgs;
   hmSpecialArgs    = specialArgs;
