@@ -66,11 +66,6 @@
 
         statusline = {
           right = [ "diagnostics" "selections" "register" "position" "file-encoding" "version-control" ];
-
-          #right = [ "diagnostics" "selections" "register" "file-type" "file-line-ending" "position" ];
-          #mode.normal = "";
-          #mode.insert = "I";
-          #mode.select = "S";
         };
 
         indent-guides = {
@@ -118,6 +113,6 @@
     })
   ];
 
-  home.sessionVariables.EDITOR  = "${pkgs.helix}/bin/hx";
+  home.sessionVariables.EDITOR  = lib.getExe pkgs.helix;
   custom.xdgDefaultApps.text = lib.mkBefore [ "helix.desktop" ];
 }

@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 {
   home.packages = with pkgs; [
-    sbt         # Build tool.
     metals      # If Helix doesn't pick up, call: sbt bloopInstall
     scalafmt    # Linter formatter.
     scala-cli   # Scala cli
@@ -9,13 +8,12 @@
     jdk21
   ];
 
-  # TODO:
-  #programs.sbt = {
-  #  enable = true;
-  #  plugins = [ { org, artifact, version} ]
-  #  pluginsExtra = 'addDependencyTreePlugin' # might not neede it
-  #  credentials = ???
-  #};
+  programs.sbt = {
+    enable = true;
+    #pluginsExtra = ''
+    #  addDependencyTreePlugin
+    #'';
+  };
 
   systemd.user.services.bloop = lib.optionalAttrs pkgs.stdenv.isLinux {
     Unit.Description = "Bloop Scala build server";

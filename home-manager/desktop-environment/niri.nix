@@ -141,7 +141,7 @@ in
 
       Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
       Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
-      Mod+Shift+Tab { focus-workspace-previous; }
+      Mod+Shift+Tab { focus-windows-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
       Mod+Shift+V { spawn "${foot}" "--title=clise-tui" "${lib.getExe pkgs.clipse}"; }
 
