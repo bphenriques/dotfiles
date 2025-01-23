@@ -27,11 +27,6 @@
     pkgs.feishin         # Jellyfin player
     pkgs.cmus            # TUI music player
     pkgs.gnome-calendar  # Calendar
-
-    # System
-    # TODO: cpu has to show cpufreq driver, governor and power pref
-    # TODO: I like the services view
-    pkgs.mission-center  # TODO: This is nice.. but can btop or variants replace it?
  ];
 
   # FIXME

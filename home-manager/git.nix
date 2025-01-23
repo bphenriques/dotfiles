@@ -35,7 +35,7 @@ in
       a         = "add";
       aa        = "add --all";
       s         = "status -s";
-      p         = "pull --rebase";
+      pr         = "pull --rebase";
       cp        = "cherry-pick";
       rb        = "rebase";
       pushf     = "push --force-with-lease";
