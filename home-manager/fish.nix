@@ -28,7 +28,6 @@ in
         test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish
         fish_add_path "/etc/profiles/per-user/$USER/bin"
       '';
-      darwinHomebrew = ''eval "$(/opt/homebrew/bin/brew shellenv)"'';
       purePrompt = ''
         set -U pure_enable_single_line_prompt true
         set -U pure_enable_virtualenv false
@@ -44,7 +43,6 @@ in
     in concatStringsSep "\n" [
       (optionalString pkgs.stdenv.isDarwin nixDarwinIntegration)
       purePrompt
-      (optionalString pkgs.stdenv.isDarwin darwinHomebrew)
       extra
     ];
   };

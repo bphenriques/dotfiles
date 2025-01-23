@@ -25,7 +25,7 @@ in
     };
   };
 
-  systemd.user.tmpfiles.rules = [
+  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
     "d ${config.xdg.cacheHome}/yazi 600 ${config.home.username} users 10d -"
   ];
 
