@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, community, ... }:
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
-    enable = pkgs.stdenv.hostPlatform.isLinux;
+    enable = true;
     profiles = {
       default = {
         name = "Bruno";

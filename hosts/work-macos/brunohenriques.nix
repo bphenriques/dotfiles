@@ -1,16 +1,15 @@
 { config, pkgs, lib, ... }:
 {
-  imports = [ ../../home-manager ];
+  imports = [
+    ../../home-manager
+    ../../home-manager/desktop
+  ];
 
   # Consider moving some of these packages to project's shell.nix if team's okay with that.
   home.packages = with pkgs; [
     awscli2
-
-    # Kubernetes
     kubectl
     kubelogin-oidc
-
-    # Infra
     tfswitch
   ];
 
@@ -18,5 +17,3 @@
 
   home.stateVersion = "22.11";
 }
-
-# TODO: https://github.com/isabelroses/dotfiles/tree/main/modules/darwin

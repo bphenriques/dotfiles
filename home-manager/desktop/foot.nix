@@ -51,7 +51,7 @@ let
     color15 = "#bbc2cf";
   };
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.foot = {
     enable = true;
     server.enable = true;
