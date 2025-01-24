@@ -27,8 +27,8 @@
   custom.boot.grub.windowsEfiDevice = "38CB-E581";
 
   # Gaming
-  custom.proton-run.enable = true;
-  custom.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
+  custom.programs.proton-run.enable = true;
+  custom.programs.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
 
   # System-wide secrets
   sops.defaultSopsFile = ./secrets.yaml;

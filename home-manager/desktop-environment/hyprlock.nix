@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  wallpapersPkg = self.private.wallpapers.override {
+  wallpapersPkg = self.pkgs.wallpapers.override {
     selected = [ "lake" ];
   };
 in

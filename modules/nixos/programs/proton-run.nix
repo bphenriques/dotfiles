@@ -1,7 +1,7 @@
 { pkgs, config, lib, self, ... }:
 with lib;
 let
-  cfg = config.custom.proton-run;
+  cfg = config.custom.programs.proton-run;
   proton-run = pkgs.writeShellApplication {
     name = "proton-run";
     text = ''
@@ -36,7 +36,7 @@ let
 
   setDefault = types: target: foldl' (acc: type: acc // { "${type}" = target; }) { } types;
 in {
-  options.custom.proton-run = with types; {
+  options.custom.programs.proton-run = with types; {
     enable = mkEnableOption "proton-run";
     defaultProtonDir = mkOption {
       type = str;

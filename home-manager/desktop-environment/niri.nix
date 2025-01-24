@@ -2,7 +2,7 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # FIXME: add "&&" "${lib.getExe self.pkgs.niri-smart-paste}
 let
-  wallpapersPkg = self.private.wallpapers.override {
+  wallpapersPkg = self.pkgs.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
   };
 
