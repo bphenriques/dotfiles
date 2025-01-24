@@ -19,7 +19,6 @@ let
     in {
       volume-osd = pkgs.callPackage ./volume-osd { };
       brightness-osd = pkgs.callPackage ./brightness-osd { };
-      niri-output-configuration = pkgs.callPackage ./niri-output-configuration { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
       cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };

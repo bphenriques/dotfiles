@@ -22,7 +22,6 @@ let
   on-startup = ''
     spawn-at-startup "${lib.getExe self.pkgs.swww-util}" "random" "${wallpapersPkg}/share/wallpapers"
     spawn-at-startup "${lib.getExe pkgs.clipse}" "-listen"
-    spawn-at-startup "${lib.getExe self.pkgs.niri-output-configuration}" "startup"
     spawn-at-startup "${self.pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit" "-w"
   '';
 

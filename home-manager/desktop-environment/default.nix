@@ -10,6 +10,7 @@
     ./hyprlock.nix  # Lock screend
     ./swww.nix      # Wallpaper manager
     ./osd.nix       # On Screen Display
+    ./kanshi.nix    # Screen layout
   ];
 
   home.packages = [
