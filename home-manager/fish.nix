@@ -23,11 +23,6 @@ in
     };
 
     interactiveShellInit = let
-      nixDarwinIntegration = ''
-        test -f "$HOME"/.nix-profile/etc/profile.d/nix.fish && source "$HOME"/.nix-profile/etc/profile.d/nix.fish
-        test -f "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish && source "$HOME"/.nix-profile/etc/profile.d/nix-daemon.fish
-        fish_add_path "/etc/profiles/per-user/$USER/bin"
-      '';
       purePrompt = ''
         set -U pure_enable_single_line_prompt true
         set -U pure_enable_virtualenv false
@@ -41,7 +36,6 @@ in
         test -f "$XDG_CONFIG_HOME"/fish/local.fish && source "$XDG_CONFIG_HOME"/fish/local.fish
       '';
     in concatStringsSep "\n" [
-      (optionalString pkgs.stdenv.isDarwin nixDarwinIntegration)
       purePrompt
       extra
     ];

@@ -1,14 +1,6 @@
 { pkgs, lib, config, ... }:
 {
-  environment = {
-    variables.HOMEBREW_NO_ANALYTICS = "1";        # Avoid analytics
-    systemPath = [ config.homebrew.brewPrefix ];  # Add brew to $PATH
-  };
-
-  environment.extraInit = ''
-    eval "$(${config.homebrew.brewPrefix}/brew shellenv)"
-  '';
-
+  environment.variables.HOMEBREW_NO_ANALYTICS = "1";        # Avoid analytics
   homebrew = {
     enable = true;
     onActivation = {
@@ -23,4 +15,8 @@
       "intellij-idea-ce"  # JVM IDE
     ];
   };
+
+  programs.fish.shellInit = ''
+    eval "$(${config.homebrew.brewPrefix}/brew shellenv)"
+  '';
 }
