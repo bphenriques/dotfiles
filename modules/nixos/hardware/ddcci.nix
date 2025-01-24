@@ -14,8 +14,6 @@ in {
     enable = mkEnableOption "Manage external monitors through `/sys/class/backlight/`. User needs to belong to 'i2c' group";
   };
 
-  # TODO: udev when battery is nearly done
-
   config = lib.mkIf cfg.enable {
     hardware.i2c.enable = true;
     boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];

@@ -50,27 +50,26 @@ Feel free to take a look around and ask me anything!
     ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
     ```
 
-3. On the target machine, run the following after the installation:
+3. On the target machine, run the post-install:
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=...
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- $HOST $BITWARDEN_EMAIL
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- $HOST $BITWARDEN_EMAIL
     ```
 
 ### Darwin
 
-# FIXME Determinate installer
-1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
+1. Install [`nix` (Determinate Systems)](https://determinate.systems/nix-installer/).
 2. Boostrap:
    ```shell
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
    
-3. Setup the dotfiles repository:
+3. On the target machine, run the post-install:
    ```shell
    HOST=work-macos
    BITWARDEN_EMAIL=...
-   nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles-install" -- laptop $BITWARDEN_EMAIL
+   nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- $HOST $BITWARDEN_EMAIL
    ```
 
 5. Apply:
@@ -79,13 +78,3 @@ Feel free to take a look around and ask me anything!
    ```
 
 6. Reboot!
-
-# Secrets
-
-- Secrets: [`sops-nix`](https://github.com/Mic92/sops-nix).
-- Private information: private flake under `bphenriques/dotfiles-private`.
-
-Adding new hosts requires:
-1. Generate key pair using: `nix-shell -p age --command "age-keygen"`.
-2. Export the private key to `$HOME/.config/sops/age/keys.txt` and upload to Bitwarden using the format `sops-age-key-$HOST-$USER` with a `private` field inside.
-3. Add new host to `.sops.yaml` using the public key to `.sops.yaml` and the correct `path_regex`.

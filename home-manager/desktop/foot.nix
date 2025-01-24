@@ -1,6 +1,5 @@
 { config, pkgs, lib, self, ... }:
 
-# TODO: https://github.com/nix-community/home-manager/commit/5f6aa268e419d053c3d5025da740e390b12ac936
 let
   inherit (self.themes.lib) hexToRGB;
   theme = self.themes.doom-one;
@@ -20,6 +19,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       mouse = {
         hide-when-typing = "yes";
       };
+
+      csd.hide-when-maximized = true;
 
       colors = {
         foreground = hexToRGB theme.foreground;
