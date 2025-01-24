@@ -28,7 +28,6 @@
     };
   };
 
-  # TODO: Notifications when it is too low
   services.upower = {
     enable = true;
     percentageLow = 30;

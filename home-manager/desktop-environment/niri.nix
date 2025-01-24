@@ -93,12 +93,32 @@ let
       match app-id="firefox$" title="^Picture-in-Picture$"
 
       open-floating true
-      default-floating-position x=32 y=32 relative-to="bottom-left"
+      default-column-width { fixed 480; }
+      default-window-height { fixed 270; }
+      default-floating-position x=32 y=32 relative-to="bottom-right"
+    }
+
+    window-rule {
+      match title="Steam Settings"
+
+      open-floating true
+    }
+
+    window-rule {
+      match app-id="org.pulseaudio.pavucontrol"
+      default-column-width { fixed 800; }
+      default-window-height { fixed 600; }
+
+      open-floating true
     }
 
     window-rule {
       match title="clipse-tui"
+
       open-floating true
+      default-column-width { fixed 1000; }
+      default-window-height { fixed 500; }
+      default-floating-position x=32 y=32 relative-to="bottom-left"
     }
   '';
 in
@@ -141,9 +161,9 @@ in
 
       Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
       Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
-      Mod+Shift+Tab { focus-window-previous; }
+      // Mod+Shift+Tab { focus-window-previous; }
       Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
-      Mod+Shift+V { spawn "${foot}" "--title=clise-tui" "${lib.getExe pkgs.clipse}"; }
+      Mod+Shift+V { spawn "${foot}" "--title=clipse-tui" "${lib.getExe pkgs.clipse}"; }
 
       // Suggested binds for running programs: terminal, app launcher, screen locker.
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }

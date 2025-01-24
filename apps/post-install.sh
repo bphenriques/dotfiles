@@ -6,7 +6,7 @@ HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 
 usage() {
-  echo "dotfiles-install.sh <host> <bitwarden-email>"
+  echo "post-install.sh <host> <bitwarden-email>"
 }
 
 info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }

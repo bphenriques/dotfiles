@@ -24,7 +24,13 @@
 
   custom.services.solaar.enable = true;
 
-  hardware.xone.enable = true;  # Xbox(ish) gamepads. E.g., 8bitdo
+  # FIXME: only works wired
+  custom.hardware.wireless8bitdo = {
+    enable = true;
+    vendorId = "2dc8";
+    productId = "301c";
+  };
+  hardware.xone.enable = true;  # Xbox(ish) gamepads. E.g., 8bitdo through USB
 
   # Other
   environment.systemPackages = [
