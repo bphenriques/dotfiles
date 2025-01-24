@@ -25,7 +25,6 @@ let
       cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
-      ddcci-util = pkgs.callPackage ./ddcci-util { };
 
       # Move to community namespace
       proton-ge-custom = pkgs.callPackage ./proton-ge-custom { };
