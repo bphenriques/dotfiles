@@ -54,7 +54,6 @@ let
       off
       mode "2560x1440@143.912"
       scale 1.0
-      variable-refresh-rate on-demand=true
     }
   '';
 
