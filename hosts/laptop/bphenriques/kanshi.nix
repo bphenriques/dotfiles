@@ -17,7 +17,6 @@ in
 {
   services.kanshi = {
     enable = true;
-    systemdTarget = config.wayland.systemd.target;
     settings = [
        {
          profile.name = "internal";
