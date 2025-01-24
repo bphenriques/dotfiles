@@ -1,6 +1,13 @@
 #TODO: Do something with this file
 let
   doom-one = {
+    font = {
+      monospace = {
+        name = "Hack Nerd Font Mono";
+        size = 15;
+      };
+    };
+
     foreground            = "#bbc2cf";
     background            = "#282c34";
     selectionForeground   = "#bbc2cf";
@@ -43,7 +50,6 @@ let
   };
 in
 {
-  config.custom.themes = {
-    inherit doom-one;
-  };
+  inherit doom-one;
 }
+

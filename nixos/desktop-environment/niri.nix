@@ -1,4 +1,4 @@
-{ pkgs, lib, network-devices, ... }:
+{ pkgs, lib, ... }:
 {
   programs.niri.enable = true;
   #security.pam.services.swaylock = {};

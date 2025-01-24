@@ -1,4 +1,4 @@
-{ pkgs, lib, network-devices, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     ./login-manager.nix

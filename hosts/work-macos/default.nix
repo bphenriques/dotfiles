@@ -1,4 +1,4 @@
-{ inputs, mylib, ... }:
+{ inputs, mylib }:
 let
   inherit (inputs.nixpkgs.lib.attrsets) attrValues;
 
@@ -7,8 +7,9 @@ let
   hmModules = attrValues inputs.self.homeManagerModules;
   specialArgs = {
     self = {
-      pkgs = inputs.self.packages.${system};
-      private = inputs.dotfiles-private.packages.${system};
+      pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
+      lib = mylib;
+      themes = import ../../themes { lib = inputs.nixpkgs.lib; };
     };
     network-devices = import ../network-devices.nix;
   };

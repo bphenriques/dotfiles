@@ -18,7 +18,7 @@ This repository contains the definition of my machines using [nix](https://nixos
 | `laptop`     | AMD Ryzen™ 7 7840HS     | 32GB | AMD Radeon™ 780M         | NVIDIA® GeForce RTX™ 4060 8GB | ❄️ |
 | `work-macos` | Apple M2 Pro 8-core CPU | 16GB | Apple M2 Pro 10-core GPU |                               | 🍏 |
 
-There is a lot going on... therefore I invite you to take a look and ask me anything!
+Feel free to take a look around and ask me anything!
 
 # Install
 
@@ -59,6 +59,7 @@ There is a lot going on... therefore I invite you to take a look and ask me anyt
 
 ### Darwin
 
+# FIXME Determinate installer
 1. Install [`nix`](https://nixos.org/manual/nix/stable/installation/installing-binary.html).
 2. Boostrap:
    ```shell
