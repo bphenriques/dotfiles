@@ -4,7 +4,6 @@ let
   pidof = lib.getExe' pkgs.procps "pidof";
   hyprlock = lib.getExe config.programs.hyprlock.package;
   niri = lib.getExe pkgs.niri;
-  brightness = lib.getExe self.pkgs.brightness-osd;
   systemctl = lib.getExe' pkgs.systemd "systemctl";
 in
 {

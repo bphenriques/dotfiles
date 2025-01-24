@@ -8,27 +8,11 @@ OSD_BRIGHTNESS_LOW_ICON="${OSD_BRIGHTNESS_LOW_ICON:-}"
 OSD_BRIGHTNESS_MEDIUM_ICON="${OSD_BRIGHTNESS_MEDIUM_ICON:-}"
 OSD_BRIGHTNESS_HIGH_ICON="${OSD_BRIGHTNESS_HIGH_ICON:-}"
 
-MIN_BRIGHTNESS=10 # 0 turns off OLED monitor (internals/external)
-
 # ignore 'kbd_backlight'
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
 list_backlight_devices() { brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }'; }
 get_percentage() { brightnessctl --device="${2:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
 set_brightness() { brightnessctl --device="${2:-"$(default_device)"}" set "$1" ; }
-
-dim() {
-  case ${1:-} in
-    "")   list_backlight_devices | xargs -I{} brightnessctl --save --device={} set "$MIN_BRIGHTNESS"  ;;
-    *)    brightnessctl --save --device="$1" set "$MIN_BRIGHTNESS"                                    ;;
-  esac
-}
-
-restore() {
-  case ${1:-} in
-    "")   list_backlight_devices | xargs -I{} brightnessctl --restore --device={} ;;
-    *)    brightnessctl --restore --device="$1"                                   ;;
-  esac
-}
 
 notify() {
   percentage="$1"
@@ -72,7 +56,5 @@ case "${1:-}" in
     set_brightness "$delta" "$device"
     notify "$(get_percentage "$device")"
     ;;
-  dim)          shift 1 && dim "${@:-}"           ;;
-  restore)      shift 1 && restore "${@:-}"       ;;
-  list)         shift 1 && list_backlight_devices ;;
+  list) list_backlight_devices ;;
 esac
