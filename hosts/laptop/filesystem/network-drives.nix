@@ -1,11 +1,9 @@
-{ lib, pkgs, config, network-devices, ... }:
+{ lib, pkgs, config, ... }:
 let
   groups = config.users.groups;
   users = config.users.users;
-
-  # Single-user mount for now. This should be reviewed to support multi-user as some folders are private.. but only when I have a new user.
-  # See: https://4sysops.com/archives/linux-smb-mount-for-multiple-users/ and https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/mounting_an_smb_share#performing_a_multi-user_smb_mount
-  mkHomeServerCifsFs = remoteFolder: user: group: let
+  
+  mkCifsFs = hostname: remoteFolder: user: group: let
     networkSplitProtectionOpts = [
       "x-systemd.automount"
       "noauto"
@@ -16,8 +14,8 @@ let
     userOpts = [ "uid=${toString user.uid}" "gid=${toString group.gid}" ];
     credsOpts = [ "credentials=${config.sops.templates."smb-credentials".path}" ];
   in {
-    device = "//${network-devices.home-nas.hostname}/${remoteFolder}";
-    fsType = "cifs"; # See https://nixos.wiki/wiki/Samba
+    device = "//${hostname}/${remoteFolder}";
+    fsType = "cifs";
     options = (userOpts ++ credsOpts ++ networkSplitProtectionOpts);
   };
 in
@@ -35,10 +33,9 @@ in
 
   environment.systemPackages = [ pkgs.cifs-utils ]; # Samba Server
   fileSystems = {
-    # NFS
-    "/mnt/nas-bphenriques"  = mkHomeServerCifsFs "bphenriques" users.bphenriques groups.root;   # Private
-    "/mnt/nas-media"        = mkHomeServerCifsFs "media"       users.bphenriques groups.users;  # Shared with others
-    "/mnt/nas-shared"       = mkHomeServerCifsFs "shared"      users.bphenriques groups.users;  # Shared with others
+    "/mnt/nas-bphenriques"  = mkCifsFs "bruno-home-nas" "bphenriques" users.bphenriques groups.root;
+    "/mnt/nas-media"        = mkCifsFs "bruno-home-nas" "media"       users.bphenriques groups.users;
+    "/mnt/nas-shared"       = mkCifsFs "bruno-home-nas" "shared"      users.bphenriques groups.users;
   };
 
   # https://www.mankier.com/5/tmpfiles.d

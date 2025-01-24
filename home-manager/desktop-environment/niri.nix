@@ -44,18 +44,20 @@ let
       }
     }
   '';
+
+  # Niri requires at least one monitor.
   outputs = ''
     output "Samsung Display Corp. 0x4188 Unknown" {
       mode "2880x1800@120.001"
       scale 1.75
     }
-
-    output "Dell Inc. DELL S2721DGF 4P11R83" {
-      off
-      mode "2560x1440@143.912"
-      scale 1.0
-    }
   '';
+
+    #output "Dell Inc. DELL S2721DGF 4P11R83" {
+    #  off
+    #  mode "2560x1440@143.912"
+    #  scale 1.0
+    #}
 
   layout = ''
     layout {
@@ -135,6 +137,7 @@ in
     ${environment}
     ${on-startup}
     ${input}
+
     ${outputs}
     ${layout}
 
