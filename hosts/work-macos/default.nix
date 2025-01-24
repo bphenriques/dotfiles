@@ -11,7 +11,6 @@ let
       lib = mylib;
       themes = import ../../themes { lib = inputs.nixpkgs.lib; };
     };
-    network-devices = import ../network-devices.nix;
   };
 in mylib.hosts.mkMacOSHost {
   inherit system darwinModules hmModules;

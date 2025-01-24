@@ -20,7 +20,6 @@ let
     community.pkgs = {
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
-    network-devices = import ../network-devices.nix;
   };
 in mylib.hosts.mkNixOSHost {
   inherit system nixosModules hmModules overlays;

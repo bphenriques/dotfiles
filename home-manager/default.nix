@@ -128,6 +128,22 @@
     });
   };
 
+  programs.ssh = {
+    enable = true;
+    includes = [ "$HOME/.ssh/local" ];
+    matchBlocks = {
+      "*" = {
+        extraOptions.SetEnv = "TERM=xterm-256color";
+      };
+      "bruno-home-nas" = {
+        user = "Bruno-Admin";
+        port = 6188;
+      };
+      "pi-zero".user = "pi";
+      "rg353m".user = "ark";
+    };
+  };
+
   programs.man.enable = true;     # RTFM
   # Discard home-manager configuration manual.
   manual = {

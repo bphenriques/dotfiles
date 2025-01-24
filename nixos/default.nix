@@ -1,4 +1,4 @@
-{ pkgs, lib, network-devices, ... }:
+{ pkgs, lib, ... }:
 {
   nix = {
     settings.auto-optimise-store   = true;  # Optimise the store when building.
@@ -17,14 +17,7 @@
   boot.tmp.cleanOnBoot = true;
 
   # Network
-  networking = {
-    networkmanager.enable = true;
-    extraHosts = ''
-      ${network-devices.home-nas.hostname}  home-nas
-      ${network-devices.pi-zero.hostname}   pi-zero
-      ${network-devices.rg353m.hostname}    rg353m
-    '';
-  };
+  networking.networkmanager.enable = true;
 
   # Localization
   time.timeZone = "Europe/Lisbon";
