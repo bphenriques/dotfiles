@@ -1,29 +1,13 @@
 { config, lib, pkgs, ... }:
 {
   home.packages = with pkgs; [
-    metals      # If Helix doesn't pick up, call: sbt bloopInstall
-    scalafmt    # Linter formatter.
+    metals      # Build Server
     scala-cli   # Scala cli
-    ammonite    # REPL.
+    ammonite    # REPL
     jdk21
   ];
 
-  programs.sbt = {
-    enable = true;
-    #pluginsExtra = ''
-    #  addDependencyTreePlugin
-    #'';
-  };
-
-  systemd.user.services.bloop = lib.optionalAttrs pkgs.stdenv.isLinux {
-    Unit.Description = "Bloop Scala build server";
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.bloop}/bin/bloop server";
-      Restart = "always";
-      Environment = [ "PATH=${lib.makeBinPath [ pkgs.jdk17 ]}" ];
-    };
-  };
+  programs.sbt.enable = true;
 
   # Ammonite is not XDG_CONFIG_HOME compliant: https://github.com/lihaoyi/Ammonite/issues/696
   home.file.".ammonite/predef.sc".text = ''

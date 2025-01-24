@@ -17,11 +17,7 @@ in
   system.desktop.picture = "${wallpapers}/share/wallpapers/mountains.png";
 
   homebrew = {
-    taps = [
-      "coursier/formulas" # Scala
-    ];
     brews = [
-      "coursier"  # Scala
       "python3"   # Implicit dependency of Aiven client
       "kubeseal"  # K8s stuff
       "go-task"

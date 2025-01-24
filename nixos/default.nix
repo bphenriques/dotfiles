@@ -51,10 +51,7 @@
     ];
   in filesystems ++ hardware;
 
-  programs.fish = {
-    enable = true;                  # System level.
-    vendor.functions.enable = true; # Ensure completions/functions are automatically set.
-  };
+  programs.fish.enable = true;  # System level.
 
   services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
 
@@ -69,10 +66,8 @@
   '';
   security.sudo.extraConfig = "Defaults lecture=never";
 
-  # Disable generating NixOS configuration options
-  documentation.nixos.enable = false;
-
-  # Home Settings
+  # Misc
   home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
   home-manager.useUserPackages = true;   # Install packages defined in home-manager.
+  documentation.nixos.enable = false; # Disable generating NixOS configuration options
 }
