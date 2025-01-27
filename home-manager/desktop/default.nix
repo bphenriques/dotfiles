@@ -27,6 +27,9 @@
     pkgs.feishin         # Jellyfin player
     pkgs.cmus            # TUI music player
     pkgs.gnome-calendar  # Calendar
+
+    # System
+    pkgs.wdisplays
  ];
 
   # FIXME

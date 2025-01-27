@@ -53,12 +53,6 @@ let
     }
   '';
 
-    #output "Dell Inc. DELL S2721DGF 4P11R83" {
-    #  off
-    #  mode "2560x1440@143.912"
-    #  scale 1.0
-    #}
-
   layout = ''
     layout {
       gaps 6
@@ -71,7 +65,7 @@ let
       }
       default-column-width { proportion 1.00; }
       focus-ring {
-        width 3
+        width 2
         active-color "#7fc8ff"
         inactive-color "#505050"
       }
@@ -93,6 +87,7 @@ let
       match app-id="firefox$" title="^Picture-in-Picture$"
 
       open-floating true
+      open-focused false
       default-column-width { fixed 480; }
       default-window-height { fixed 270; }
       default-floating-position x=32 y=32 relative-to="bottom-right"
@@ -127,7 +122,6 @@ in
   
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
-
 
     hotkey-overlay {
       skip-at-startup
@@ -219,9 +213,6 @@ in
       Mod+Ctrl+8 { move-column-to-workspace 8; }
       Mod+Ctrl+9 { move-column-to-workspace 9; }
 
-      // Mod+Comma  { consume-window-into-column; }
-      // Mod+Period { expel-window-from-column; }
-
       // There are also commands that consume or expel a single window to the side.
       Mod+BracketLeft  { consume-or-expel-window-left; }
       Mod+BracketRight { consume-or-expel-window-right; }
@@ -229,8 +220,6 @@ in
       Mod+R { switch-preset-column-width; }
       Mod+Shift+R { switch-preset-window-height; }
       Mod+Ctrl+R { reset-window-height; }
-
-      Alt+Mod+Space       { switch-layout "next"; }
     }
   '';
 }

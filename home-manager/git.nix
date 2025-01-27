@@ -16,6 +16,7 @@ in
 {
   home.packages = with pkgs; [
     git-absorb
+    gitui
   ];
 
   programs.lazygit.enable = true;

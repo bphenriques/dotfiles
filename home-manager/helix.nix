@@ -1,7 +1,8 @@
 { config, pkgs, lib, ... }:
 
 {
-  # Check more ideas in https://github.com/maximbaz/dotfiles/blob/8e487136d8eab0568b8ee3d44d9973e694f332ed/modules/common/helix.nix
+  # TODO: Check more ideas in https://github.com/maximbaz/dotfiles/blob/8e487136d8eab0568b8ee3d44d9973e694f332ed/modules/common/helix.nix
+  # https://github.com/nyawox/arcanum/blob/main/nixos/shell/helix.nix
   programs.helix = {
     enable = true;
 
