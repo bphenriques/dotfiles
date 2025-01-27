@@ -1,12 +1,7 @@
-{ pkgs, config, lib, ... }:
-
-# Based on:
-# - https://github.com/NixOS/nixos-hardware/blob/master/lenovo/legion/16aph8/default.nix
-# - https://github.com/wochap/nix-config/blob/main/hosts/glegion/hardware-configuration.nix)
+{ pkgs, ... }:
 {
   hardware.amdgpu.initrd.enable = true;
   hardware.amdgpu.opencl.enable = true;
-
   boot.kernelParams = [
     "amd_pstate=active"   # Enables the amd cpu scaling https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html. On recent AMD CPUs this can be more energy efficient.
     "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)

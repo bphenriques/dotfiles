@@ -1,14 +1,14 @@
 { pkgs, lib, config, ... }:
 {
   imports = [
-    ./fonts.nix
-    ./git.nix
-    ./fish.nix        # Shell
-    ./helix.nix       # Editor
     ./direnv.nix      # Automate dev environment when we enter directories
+    ./fish.nix        # Shell
+    ./fonts.nix
     ./fzf.nix         # Fuzzy search
-    ./yazi.nix        # File browser
+    ./git.nix
+    ./helix.nix       # Editor
     ./lang-scala.nix  # Programming language
+    ./yazi.nix        # File browser
   ];
 
   # XDG Compliance to tidy up $HOME.

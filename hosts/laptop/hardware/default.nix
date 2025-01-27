@@ -1,24 +1,18 @@
-{ pkgs, config, ... }:
-
+{ pkgs, ... }:
 {
   imports = [
-    ./hardware-configuration.nix    # Output of nixos-generate-config --root /mnt
-    ./graphics.nix                  # AMD iGPU + Nvidia dGPU
-    ./peripherals.nix               # Mouse / Keyboard / etc
+    ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
+    ./video-drivers.nix           # AMD iGPU + Nvidia dGPU
   ];
 
   # Networking
-  networking.networkmanager.wifi = {
-    powersave = true;
-    macAddress = "preserve";  # The default. I am fine as this laptop stays most of the times at home.
-  };
+  networking.networkmanager.wifi.powersave = true;
 
   # Bluetooth
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  # Power
-  # AMD has better battery life with PPD over TLP: https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13
+  # Power (AMD has better battery life with PPD over TLP: https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13)
   services.power-profiles-daemon.enable = true;
   services.auto-epp = {
     enable = true;
@@ -28,6 +22,7 @@
     };
   };
 
+  # Battery
   services.upower = {
     enable = true;
     percentageLow = 30;
@@ -35,4 +30,22 @@
     percentageAction = 10;
     criticalPowerAction = "PowerOff";
   };
+
+  # Touchpad
+  services.libinput = {
+    enable = true;
+    touchpad.naturalScrolling = false;
+    touchpad.tapping = true;
+  };
+
+  # Fingerprint - run fprintd-enroll afterwards. Install `usbutils` and then run  `lsusb` to find the device.
+  services.fprintd = {
+    enable = true;
+    tod.enable = true;
+    tod.driver = pkgs.libfprint-2-tod1-goodix-550a;
+  };
+
+  environment.systemPackages = [
+    pkgs.cheese     # Webcam
+  ];
 }

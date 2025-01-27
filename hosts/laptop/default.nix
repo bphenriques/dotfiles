@@ -2,7 +2,6 @@
 let
   inherit (inputs.nixpkgs.lib.attrsets) attrValues;
   system = "x86_64-linux";
-  # Ideally modules are imported in the file that uses it. However, it leads to a infinite recursion. A rabbit-hole to debug.
   overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlay ];
   nixosModules = attrValues inputs.self.nixosModules ++ [
     inputs.sops-nix.nixosModules.sops
@@ -23,7 +22,7 @@ let
   };
 in mylib.hosts.mkNixOSHost {
   inherit system nixosModules hmModules overlays;
-  nixosSpecialArgs = specialArgs;
-  hmSpecialArgs    = specialArgs;
-  hostModule = ./config.nix;
+  nixosSpecialArgs  = specialArgs;
+  hmSpecialArgs     = specialArgs;
+  hostModule        = ./config.nix;
 }

@@ -18,7 +18,7 @@ options() {
 }
 
 case "$(options | open_dmenu)" in
-  "Lock")       blurlock                            ;;
+  "Lock")       niri msg action do-screen-transition --delay-ms 1000 && hyprlock  ;;
   "Logout")     loginctl terminate-user "$(whoami)" ;;
   "Reboot")     systemctl reboot                    ;;
   "Shutdown")   systemctl poweroff                  ;;

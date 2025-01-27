@@ -27,16 +27,17 @@
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
 
     # Community flakes
-    nur.url = "github:nix-community/nur";                         # Collection of packages. Use it for Firefox extensions
-    sops-nix.url = "github:Mic92/sops-nix";                       # Manage secrets using sops
+    nur.url = "github:nix-community/nur";         # Collection of packages. Use it for Firefox extensions
+    sops-nix.url = "github:Mic92/sops-nix";       # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    disko.url = "github:nix-community/disko";                     # Declaratively describe my disks layout
+    disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { nixpkgs, ... }:
     let
       inherit (mylib.builders) forAllSystems;
+      inherit (mylib.generators) getModulesAttrs;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
     in {
       apps      = import ./apps { inherit nixpkgs mylib; };
@@ -45,15 +46,15 @@
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
-      overlays      = import ./overlays { inherit inputs; };
-      nixosModules  = import ./modules/nixos;
+      overlays  = import ./overlays { inherit inputs; };
 
-      # Hosts - Each host defines what it needs from the inputs.
-      nixosConfigurations.laptop = import ./hosts/laptop { inherit mylib inputs; };
-      darwinConfigurations.work-macos = import ./hosts/work-macos { inherit mylib inputs; };
+      # Modules
+      nixosModules        = getModulesAttrs ./modules/nixos;
+      homeManagerModules  = getModulesAttrs ./modules/home-manager;
+      darwinModules       = getModulesAttrs ./modules/darwin;
 
-      # Non standard flake outputs
-      homeManagerModules  = import ./modules/home-manager;
-      darwinModules       = import ./modules/darwin;
+      # Hosts
+      nixosConfigurations.laptop = import ./hosts/laptop { inherit inputs mylib; };
+      darwinConfigurations.work-macos = import ./hosts/work-macos { inherit inputs mylib; };
     };
 }

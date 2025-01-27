@@ -20,6 +20,8 @@ let
   };
 in
 {
+  environment.systemPackages = [ pkgs.cifs-utils ]; # Samba Server
+
   sops = {
     secrets.samba_server_username = { };
     secrets.samba_server_password = { };
@@ -31,14 +33,12 @@ in
     };
   };
 
-  environment.systemPackages = [ pkgs.cifs-utils ]; # Samba Server
   fileSystems = {
     "/mnt/nas-bphenriques"  = mkCifsFs "bruno-home-nas" "bphenriques" users.bphenriques groups.root;
     "/mnt/nas-media"        = mkCifsFs "bruno-home-nas" "media"       users.bphenriques groups.users;
     "/mnt/nas-shared"       = mkCifsFs "bruno-home-nas" "shared"      users.bphenriques groups.users;
   };
 
-  # https://www.mankier.com/5/tmpfiles.d
   systemd.tmpfiles.rules = [
     "z /mnt/nas-bphenriques   0700 ${users.bphenriques.name} ${groups.users.name}"
     "z /mnt/nas-media         0775 root                      ${groups.users.name}"
