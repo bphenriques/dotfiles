@@ -38,13 +38,6 @@
     touchpad.tapping = true;
   };
 
-  # Fingerprint - run fprintd-enroll afterwards. Install `usbutils` and then run  `lsusb` to find the device.
-  services.fprintd = {
-    enable = true;
-    tod.enable = true;
-    tod.driver = pkgs.libfprint-2-tod1-goodix-550a;
-  };
-
   environment.systemPackages = [
     pkgs.cheese     # Webcam
   ];
