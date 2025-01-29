@@ -4,9 +4,7 @@
     disk = {
       vda = {
        type = "disk";
-       # It is preferable `by-id` as the mount(?) location may change (e.g., `/dev/nvme0n1`).
-       # Using `by-path` b/c I will won't move the SSDs and I do not want to version control serial numbers.
-       #
+       # Using `by-path` as b/c I won't move the SSDs and `by-id` may change (e.g., `/dev/nvme0n1`).
        # How to: run `ls /dev/disk/by-path/ -l` and cross-reference with `sudo nix run nixpkgs#nvme-cli -- list`
        device = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
        content = {
@@ -32,7 +30,7 @@
              size = "6G";
              content = {
                type = "swap";
-               resumeDevice = false; # I really don't care about hibernation.
+               resumeDevice = false; # Not interested in hibernation.
                randomEncryption = true;
              };
            };

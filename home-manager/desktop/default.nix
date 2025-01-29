@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     ./firefox       # Browser
@@ -26,7 +26,6 @@
     pkgs.newsflash       # RSS Reader
     pkgs.feishin         # Jellyfin player
     pkgs.cmus            # TUI music player
-    pkgs.gnome-calendar  # Calendar
 
     # System
     pkgs.wdisplays

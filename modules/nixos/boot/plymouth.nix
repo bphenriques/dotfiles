@@ -1,10 +1,9 @@
 { pkgs, lib, config, ... }:
-with lib;
 let
   cfg = config.custom.boot.plymouth;
 in {
-  options.custom.boot.plymouth = with types; {
-    enable = mkEnableOption "plymouth" // {
+  options.custom.boot.plymouth = with lib.types; {
+    enable = lib.mkEnableOption "plymouth" // {
       description = "Enable it to set a nice graphical boot menu. Set the boot loader to accordingly to have a nicer transition";
     };
 

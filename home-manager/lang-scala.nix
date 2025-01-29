@@ -1,10 +1,10 @@
 { config, lib, pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    metals      # Build Server
-    scala-cli   # Scala cli
-    ammonite    # REPL
-    jdk21
+  home.packages = [
+    pkgs.metals      # Build Server
+    pkgs.scala-cli   # Scala cli
+    pkgs.ammonite    # REPL
+    pkgs.jdk21
   ];
 
   programs.sbt.enable = true;

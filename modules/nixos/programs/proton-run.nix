@@ -1,5 +1,4 @@
 { pkgs, config, lib, self, ... }:
-with lib;
 let
   cfg = config.custom.programs.proton-run;
   proton-run = pkgs.writeShellApplication {
@@ -34,21 +33,21 @@ let
       mimeTypes = mimeTypes;
     });
 
-  setDefault = types: target: foldl' (acc: type: acc // { "${type}" = target; }) { } types;
+  setDefault = types: target: lib.foldl' (acc: type: acc // { "${type}" = target; }) { } types;
 in {
-  options.custom.programs.proton-run = with types; {
-    enable = mkEnableOption "proton-run";
-    defaultProtonDir = mkOption {
+  options.custom.programs.proton-run = with lib.types; {
+    enable = lib.mkEnableOption "proton-run";
+    defaultProtonDir = lib.mkOption {
       type = str;
       description = mdDoc ''Default location of catch-all prefix'';
     };
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      protonup-qt       # Manage Proton versions
-      protontricks      # Install utility within proton
-      proton-run        # Run .exe from terminal
+    environment.systemPackages = [
+      pkgs.protonup-qt        # Manage Proton versions
+      pkgs.protontricks       # Install utility within proton
+      proton-run              # Run .exe from terminal
       proton-run-desktop-item
     ];
 

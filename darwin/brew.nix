@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ config, ... }:
 {
   environment.variables.HOMEBREW_NO_ANALYTICS = "1";        # Avoid analytics
   homebrew = {

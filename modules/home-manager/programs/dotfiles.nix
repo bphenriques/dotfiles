@@ -1,6 +1,6 @@
 { lib, pkgs, config, self, ... }:
 
-# https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
+# TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
 let
   cfg = config.custom.dotfiles;
 in

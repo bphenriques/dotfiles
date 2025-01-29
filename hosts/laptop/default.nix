@@ -1,6 +1,7 @@
 { inputs, mylib }:
 let
   inherit (inputs.nixpkgs.lib.attrsets) attrValues;
+
   system = "x86_64-linux";
   overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlay ];
   nixosModules = attrValues inputs.self.nixosModules ++ [

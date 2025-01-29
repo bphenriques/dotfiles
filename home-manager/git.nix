@@ -14,9 +14,9 @@ let
    '';
 in
 {
-  home.packages = with pkgs; [
-    git-absorb
-    gitui
+  home.packages = [
+    pkgs.git-absorb
+    pkgs.gitui
   ];
 
   programs.lazygit.enable = true;
@@ -41,6 +41,7 @@ in
       rb        = "rebase";
       pushf     = "push --force-with-lease";
       amend     = "commit --amend";
+      redo      = ''!git add --all && git commit --amend'';
       wip       = ''!git add --all && git commit -m "WIP"'';
       wipp      = "!git wip && git push";
 
@@ -73,16 +74,14 @@ in
       "*.pyc"
       "*.pyo"
 
-      # MacOS
+      # Personal tools
+      "bphenriques-tools/"
+    ] ++ lib.optionals pkgs.stdenv.isDarwin [
       ".DS_Store"
       ".DS_Store?"
       ".Spotlight-V100"
       ".Trashes"
-
-      # Personal tools
-      "bphenriques-tools/"
     ];
-
 
     extraConfig = {
       commit.template = "${commitTemplate}";

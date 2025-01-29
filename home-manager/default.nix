@@ -90,7 +90,7 @@
       PAGER   = "less -iMR";
 
       # Colors
-      LS_COLORS ="$(${pkgs.vivid}/bin/vivid generate snazzy)"; # LS_COLORS generator because I refuse to maintain one >.<
+      LS_COLORS ="$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.<
       LANG    = "en_US.UTF-8";
       LC_ALL  = "en_US.UTF-8";
     } // (lib.optionalAttrs pkgs.config.allowUnfree {
@@ -100,7 +100,7 @@
     });
 
     shellAliases = {
-      # Default colorizatio
+      # Default colorization
       diff = "diff --color=auto";
       grep = "grep --color=auto";
       egrep = "egrep --color=auto";
@@ -144,7 +144,7 @@
     };
   };
 
-  programs.man.enable = true;     # RTFM
+  programs.man.enable = true;
   # Discard home-manager configuration manual.
   manual = {
     html.enable = false;

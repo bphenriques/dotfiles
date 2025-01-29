@@ -19,7 +19,7 @@ let
 
   mkDarwinInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
     name = "darwin-install";
-    runtimeInputs = with pkgs; [ ];
+    runtimeInputs = [ ];
     text = pkgs.lib.fileContents ./darwin-install.sh;
   };
 

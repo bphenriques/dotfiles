@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, community, ... }:
+{ lib, pkgs, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
     enable = true;
@@ -23,6 +23,7 @@ lib.mkIf pkgs.stdenv.isLinux {
           order = [ "Google" ];
           engines = {
             "Nix Packages" = {
+              definedAliases = [ "@n" "@nix" ];
               urls = [{
                 template = "https://search.nixos.org/packages";
                 params = [
@@ -31,7 +32,6 @@ lib.mkIf pkgs.stdenv.isLinux {
                 ];
               }];
               icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-              definedAliases = [ "@np" "@nix" ];
             };
             "NixOS Options" = {
               definedAliases = ["@nixopts" "@no"];
@@ -55,15 +55,15 @@ lib.mkIf pkgs.stdenv.isLinux {
               }];
             };
             "NixOS Wiki" = {
+              definedAliases = [ "@nw" "@nixwiki" ];
               urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
               iconUpdateURL = "https://nixos.wiki/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000; # every day
-              definedAliases = [ "@nw" "@nixwiki" ];
             };
             "YouTube" = {
+              definedAliases = ["@yt"];
               iconUpdateURL = "https://youtube.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000;
-              definedAliases = ["@yt"];
               urls = [{
                 template = "https://www.youtube.com/results";
                 params = [

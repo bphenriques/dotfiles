@@ -6,12 +6,12 @@
     ./niri.nix
   ];
 
-  environment.systemPackages = with pkgs; [
-    qt5.qtwayland
-    qt6.qtwayland
+  environment.systemPackages = [
+    pkgs.qt5.qtwayland
+    pkgs.qt6.qtwayland
 
-    libnotify           # Notifications
-    wl-clipboard        # Wayland clipboard
-    xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
+    pkgs.libnotify           # Notifications
+    pkgs.wl-clipboard        # Wayland clipboard
+    pkgs.xwayland-satellite  # X11. See: https://github.com/YaLTeR/niri/wiki/Xwayland
   ];
 }
