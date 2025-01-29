@@ -1,6 +1,5 @@
 { pkgs, config, lib, ... }:
 # TODO: https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/games/steam.nix
-with lib;
 let
   steam-desktop-item = (pkgs.makeDesktopItem {
     name = "steam";
@@ -31,7 +30,7 @@ in
   programs.steam = {
     enable = true;
     extest.enable = true;
-    extraCompatPackages = with pkgs; [ proton-ge-bin ];
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
     protontricks.enable = true;
     gamescopeSession.enable = config.programs.gamescope.enable;
 
@@ -41,7 +40,7 @@ in
     localNetworkGameTransfers.openFirewall = true;
   };
   
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = [
     steam-desktop-item
   ];
 }

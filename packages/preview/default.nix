@@ -1,18 +1,17 @@
 { lib, pkgs, ... }:
 
-with lib;
 pkgs.writeShellApplication {
   name = "preview";
-  runtimeInputs = with pkgs; [
-    file        # See type of file
-    bat         # Preview files
-    tree        # Preview directories
-    chafa       # Preview images
-    jq          # Preview JSON
-    yq          # Preview YAML
-    unzip       # Preview zip contents
-    imagemagick # Preview PDFs
-    ghostscript # Preview PDFs
+  runtimeInputs = [
+    pkgs.file        # See type of file
+    pkgs.bat         # Preview files
+    pkgs.tree        # Preview directories
+    pkgs.chafa       # Preview images
+    pkgs.jq          # Preview JSON
+    pkgs.yq          # Preview YAML
+    pkgs.unzip       # Preview zip contents
+    pkgs.imagemagick # Preview PDFs
+    pkgs.ghostscript # Preview PDFs
   ];
-  text = fileContents ./script.sh;
+  text = lib.fileContents ./script.sh;
 }

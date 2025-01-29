@@ -1,8 +1,5 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-with types;
-
 let
   inherit (builtins) isPath isAttrs match;
 
@@ -14,14 +11,14 @@ let
   '';
 in
 {
-  options.system.desktop = {
+  options.system.desktop = with lib.types; {
     picture = lib.mkOption {
       type = nullOr path;
       default = null;
     };
   };
 
-  config = mkIf (cfg.picture != null) {
+  config = lib.mkIf (cfg.picture != null) {
     system.activationScripts.postUserActivation.text = setPicture "every desktop" cfg.picture;
   };
 }

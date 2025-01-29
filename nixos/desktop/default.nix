@@ -25,12 +25,12 @@
   };
 
   # Other
-  environment.systemPackages = with pkgs; [
-    konsole   # Boring terminal in case something goes wrong
+  environment.systemPackages = [
+    pkgs.konsole   # Boring terminal in case something goes wrong
 
     # Personalization
-    morewaita-icon-theme
-    adwaita-icon-theme
-    qogir-icon-theme
+    pkgs.morewaita-icon-theme
+    pkgs.adwaita-icon-theme
+    pkgs.qogir-icon-theme
   ];
 }

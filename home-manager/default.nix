@@ -53,28 +53,28 @@
     options = [ "--cmd j" ];
   };
 
-  home.packages = with pkgs; [
+  home.packages = [
     # Consistency across different operating systems
-    coreutils
-    findutils
-    gnugrep
-    watch
-    tree
-    parallel
-    gnused
-    dateutils
-    unzip
-    openssl
-    xdg-user-dirs
-    file
+    pkgs.coreutils
+    pkgs.findutils
+    pkgs.gnugrep
+    pkgs.watch
+    pkgs.tree
+    pkgs.parallel
+    pkgs.gnused
+    pkgs.dateutils
+    pkgs.unzip
+    pkgs.openssl
+    pkgs.xdg-user-dirs
+    pkgs.file
 
     # Text Processors
-    yq-go       # Query YAML.
-    vim         # Basic editor
+    pkgs.yq-go       # Query YAML.
+    pkgs.vim         # Basic editor
 
     # Archive
-    p7zip     # 7zip for linux
-    unrar     # Still need it
+    pkgs.p7zip     # 7zip for linux
+    pkgs.unrar     # Still need it
   ];
 
   # Gpg

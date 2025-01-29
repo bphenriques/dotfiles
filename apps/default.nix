@@ -13,7 +13,7 @@ let
 
   mkNixOSInstaller = pkgs: writeLocalCompatibleScriptBin pkgs {
     name = "nixos-install";
-    runtimeInputs = with pkgs; [ (mkBitwardenSession pkgs) yq-go jq ];
+    runtimeInputs = [ (mkBitwardenSession pkgs) pkgs.yq-go pkgs.jq ];
     text = pkgs.lib.fileContents ./nixos-install.sh;
   };
 
@@ -25,13 +25,13 @@ let
 
   mkPostInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
     name = "post-install";
-    runtimeInputs = with pkgs; [ git yq-go age sops gnupg (mkBitwardenSession pkgs) ];
+    runtimeInputs = [ pkgs.git pkgs.yq-go pkgs.age pkgs.sops pkgs.gnupg (mkBitwardenSession pkgs) ];
     text = pkgs.lib.fileContents ./post-install.sh;
   };
 
   mkBitwardenSession = pkgs: writeLocalCompatibleScriptBin pkgs {
     name = "bw-session";
-    runtimeInputs = with pkgs; [ bitwarden-cli ];
+    runtimeInputs = [ pkgs.bitwarden-cli ];
     text = pkgs.lib.fileContents ./bw-session.sh;
   };
 

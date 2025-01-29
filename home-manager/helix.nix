@@ -5,19 +5,19 @@
     enable = true;
 
     # Language Server Protocols. Check with hx --health
-    extraPackages = with pkgs; [
-      marksman                                # LSP for Markdown
-      nodePackages.bash-language-server       # LSP for Bash
-      nodePackages.yaml-language-server       # LSP for YAML
-      nodePackages.vscode-json-languageserver # LSP for JSON
-      vscode-langservers-extracted            # LSP for HTML/CSS/JSON/ESLint
-      typescript-language-server              # LSP for Typescript
-      docker-compose-language-service         # LSP for docker-compose
-      dockerfile-language-server-nodejs       # LSP for docker
-      texlab                                  # LSP for LaTeX
-      nil                                     # LSP for Nix
-      terraform-ls                            # LSP for Terraform
-      ltex-ls                                 # LSP for grammar/spell check
+    extraPackages = [
+      pkgs.marksman                                # LSP for Markdown
+      pkgs.nodePackages.bash-language-server       # LSP for Bash
+      pkgs.nodePackages.yaml-language-server       # LSP for YAML
+      pkgs.nodePackages.vscode-json-languageserver # LSP for JSON
+      pkgs.vscode-langservers-extracted            # LSP for HTML/CSS/JSON/ESLint
+      pkgs.typescript-language-server              # LSP for Typescript
+      pkgs.docker-compose-language-service         # LSP for docker-compose
+      pkgs.dockerfile-language-server-nodejs       # LSP for docker
+      pkgs.texlab                                  # LSP for LaTeX
+      pkgs.nil                                     # LSP for Nix
+      pkgs.terraform-ls                            # LSP for Terraform
+      pkgs.ltex-ls                                 # LSP for grammar/spell check
     ];
 
     languages = {
