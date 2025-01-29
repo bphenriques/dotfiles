@@ -3,11 +3,11 @@
 # Start solaar as service: https://github.com/pwr-Solaar/Solaar/issues/2024
 with lib;
 let
-  cfg = config.custom.services.solaar;
+  cfg = config.custom.hardware.logitech;
 in
 {
-  options.custom.services.solaar = {
-    enable = mkEnableOption ''solaar-gui service.'';
+  options.custom.hardware.logitech = {
+    enable = mkEnableOption ''logitech-gui service.'';
   };
 
   config = mkIf cfg.enable {

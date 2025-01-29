@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+_:
 {
   system = {
     defaults = {

@@ -1,8 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-  # TODO: Check more ideas in https://github.com/maximbaz/dotfiles/blob/8e487136d8eab0568b8ee3d44d9973e694f332ed/modules/common/helix.nix
-  # https://github.com/nyawox/arcanum/blob/main/nixos/shell/helix.nix
   programs.helix = {
     enable = true;
 
@@ -66,24 +64,47 @@
         };
 
         statusline = {
+          left = [ "mode" "file-name" "spinner" "read-only-indicator" "file-modification-indicator" ];
           right = [ "diagnostics" "selections" "register" "position" "file-encoding" "version-control" ];
         };
 
         indent-guides = {
           render = true;
           character = "┊";
+          skip-levels = 1;
         };
+
+        # New recommdended settings
+        end-of-line-diagnostics = "hint";
+        inline-diagnostics.cursor-line = "warning"; # show warnings and errors on the cursorline inline
       };
 
       keys = {
         normal = {
-          C-j = "save_selection";
           C-s = ":w";
           esc = [ "collapse_selection" "keep_primary_selection" ];
 
-          space.q = ":q";
-          space.space = "file_picker";
-          space.w = ":w";
+          space = {
+            q = ":write-quit-all";
+            Q = ":quit!";
+            space = "file_picker";
+            w = ":write";
+          };
+
+          # Smart Indent
+          tab = "move_parent_node_end";
+          S-tab = "move_parent_node_start";
+        };
+
+        insert = {
+          # Smart indent
+          S-tab = "move_parent_node_start";
+        };
+
+        select = {
+          # Smart indent
+          tab = "extend_parent_node_end";
+          S-tab = "extend_parent_node_start";
         };
       };
     };

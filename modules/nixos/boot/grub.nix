@@ -1,10 +1,9 @@
 { pkgs, lib, config, ... }:
-with lib;
 let
   cfg = config.custom.boot.grub;
 in {
-  options.custom.boot.grub = with types; {
-    enable = mkEnableOption "custom-grub" // {
+  options.custom.boot.grub = with lib.types; {
+    enable = lib.mkEnableOption "custom-grub" // {
       default = config.boot.loader.grub.enable;
     };
 

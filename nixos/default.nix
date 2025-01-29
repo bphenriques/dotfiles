@@ -45,7 +45,6 @@
   in filesystems ++ hardware;
 
   programs.fish.enable = true;  # System level.
-
   services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
 
   # Disabling some defaults
@@ -60,7 +59,7 @@
   security.sudo.extraConfig = "Defaults lecture=never";
 
   # Misc
-  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
-  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
-  documentation.nixos.enable = false; # Disable generating NixOS configuration options
+  home-manager.useGlobalPkgs    = true;   # Use pkgs set within nixpkgs.
+  home-manager.useUserPackages  = true;   # Install packages defined in home-manager.
+  documentation.nixos.enable    = false;  # Disable generating NixOS configuration options
 }

@@ -18,14 +18,12 @@ in
 
   homebrew = {
     brews = [
-      "python3"   # Implicit dependency of Aiven client
-      "kubeseal"  # K8s stuff
       "go-task"
+      "kubeseal"  # K8s stuff
       "snyk-cli"
     ];
 
     casks = [
-      "bloop"         # Scala
       "google-chrome"
       "slack"
       "1password-cli"

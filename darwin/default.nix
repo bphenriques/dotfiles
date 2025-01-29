@@ -10,7 +10,7 @@
   environment.shells = [ config.programs.fish.package ];  # Register the shell
 
   # Fonts (system-wide)
-  fonts.packages = with pkgs; [
+  fonts.packages = [
     pkgs.nerd-fonts.hack
     pkgs.nerd-fonts.jetbrains-mono
   ];

@@ -1,12 +1,11 @@
-{ pkgs, ... }:
+_:
 {
   system = {
     screencapture.ensureLocation = true;
     defaults = {
       NSGlobalDomain = {
-        # Style
-        AppleInterfaceStyle = "Dark";               # Personal preference.
-        _HIHideMenuBar      = false;                # Show top-bar.
+        AppleInterfaceStyle = "Dark";         # Personal preference.
+        _HIHideMenuBar      = false;          # Show top-bar.
 
         # Typing
         NSAutomaticSpellingCorrectionEnabled  = false;

@@ -12,6 +12,7 @@
     ];
   };
 
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";      # I don't really use it, but leaving it here.
@@ -37,7 +38,7 @@
   outputs = inputs @ { nixpkgs, ... }:
     let
       inherit (mylib.builders) forAllSystems;
-      inherit (mylib.generators) getModulesAttrs;
+      inherit (mylib.generators) readModulesAttrs;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
     in {
       apps      = import ./apps { inherit nixpkgs mylib; };
@@ -49,9 +50,9 @@
       overlays  = import ./overlays { inherit inputs; };
 
       # Modules
-      nixosModules        = getModulesAttrs ./modules/nixos;
-      homeManagerModules  = getModulesAttrs ./modules/home-manager;
-      darwinModules       = getModulesAttrs ./modules/darwin;
+      nixosModules        = readModulesAttrs ./modules/nixos;
+      homeManagerModules  = readModulesAttrs ./modules/home-manager;
+      darwinModules       = readModulesAttrs ./modules/darwin;
 
       # Hosts
       nixosConfigurations.laptop = import ./hosts/laptop { inherit inputs mylib; };
