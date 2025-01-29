@@ -1,6 +1,6 @@
 { lib, pkgs, preview, ... }:
 pkgs.writeShellApplication {
   name = "project";
-  runtimeInputs = with pkgs; [ fzf fd preview ];
+  runtimeInputs = [ pkgs.fzf pkgs.fd preview ];
   text = lib.fileContents ./script.sh;
 }

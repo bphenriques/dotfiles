@@ -24,12 +24,12 @@ stdenv.mkDerivation rec {
 
   passthru.updateScript = nix-update-script { };
 
-  meta = with lib; {
+  meta = {
     description = "Compatibility tool for Steam Play based on Wine and additional components";
     homepage = "https://github.com/GloriousEggroll/proton-ge-custom";
-    license = licenses.bsd3;
+    license = lib.licenses.bsd3;
     platforms = [ "x86_64-linux" ];
-    maintainers = with maintainers; [ bphenriques ];
+    maintainers = with lib.maintainers; [ bphenriques ];
     preferLocalBuild = true;
   };
 }

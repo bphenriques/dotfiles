@@ -1,7 +1,13 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
   name = "brightness-osd";
-  runtimeInputs = with pkgs; [ libnotify brightnessctl gnugrep gawk findutils ];
+  runtimeInputs = [
+    pkgs.libnotify
+    pkgs.brightnessctl
+    pkgs.gnugrep
+    pkgs.gawk
+    pkgs.findutils
+  ];
   text = let
     iconBasePath = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
   in

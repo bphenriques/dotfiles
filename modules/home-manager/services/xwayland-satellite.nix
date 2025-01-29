@@ -1,20 +1,19 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
   cfg = config.custom.services.xwayland-satellite;
 in
 {
-  options.custom.services.xwayland-satellite = {
-    enable = mkEnableOption ''xwayland-satellite.'';
-    displayId = mkOption {
-      type = types.int;
+  options.custom.services.xwayland-satellite = with lib.types; {
+    enable = lib.mkEnableOption ''xwayland-satellite.'';
+    displayId = lib.mkOption {
+      type = int;
       default = 21;
       description = ''ID of the display. Do not forget to set the environment variable in your Window Manager'';
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     systemd.user.services.xwayland-satellite = {
       Unit = {
         ConditionEnvironment = [ "WAYLAND_DISPLAY" ];

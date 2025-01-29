@@ -3,10 +3,10 @@ pkgs.mkShellNoCC {
   name = "dotfiles";
   meta.description = "Development shell to manage my dotfiles";
 
-  packages = with pkgs; [
-    git          # The usual
-    sops         # Manage secrets
-    shellcheck   # Scripting sanity checks
-    shfmt        # Format shell scripts
+  packages = [
+    pkgs.git          # The usual
+    pkgs.sops         # Manage secrets
+    pkgs.shellcheck   # Scripting sanity checks
+    pkgs.shfmt        # Format shell scripts
   ];
 }

@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
   name = "swww-util";
-  runtimeInputs = with pkgs; [ swww ];
+  runtimeInputs = [ pkgs.swww ];
   text = lib.fileContents ./script.sh;
 }

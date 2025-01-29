@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
   name = "volume-osd";
-  runtimeInputs = with pkgs; [ libnotify ponymix ];
+  runtimeInputs = [ pkgs.libnotify pkgs.ponymix ];
   text = let
     iconBasePath = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
   in

@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
   name = "niri-smart-paste";
-  runtimeInputs = with pkgs; [ wtype niri ];
+  runtimeInputs = [ pkgs.wtype pkgs.niri ];
   text = lib.fileContents ./script.sh;
 }
