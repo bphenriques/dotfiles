@@ -29,5 +29,6 @@ stdenv.mkDerivation rec {
     description = "Prevents swayidle from sleeping while any application is outputting or receiving audio";
     homepage = "https://github.com/ErikReider/SwayAudioIdleInhibit";
     license = lib.licenses.gpl3Only;
+    platforms = lib.platforms.linux;
   };
 }
