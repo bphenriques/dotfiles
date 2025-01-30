@@ -13,4 +13,5 @@ pkgs.writeShellApplication {
 
     ${lib.fileContents ./script.sh}
   '';
+  meta.platforms = lib.platforms.linux;
 }

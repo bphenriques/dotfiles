@@ -1,5 +1,4 @@
 { lib, pkgs, ... }:
-
 pkgs.writeShellApplication {
   name = "preview";
   runtimeInputs = [
@@ -14,4 +13,5 @@ pkgs.writeShellApplication {
     pkgs.ghostscript # Preview PDFs
   ];
   text = lib.fileContents ./script.sh;
+  meta.platforms = lib.platforms.all;
 }
