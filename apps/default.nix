@@ -37,7 +37,7 @@ let
 
   crossPlatformApps = forAllSystems (system:
     lib.attrsets.mergeAttrsList [
-     (mkApp mkDotfilesInstall nixpkgs.legacyPackages.${system})
+     (mkApp mkPostInstall nixpkgs.legacyPackages.${system})
     ]
   );
 
