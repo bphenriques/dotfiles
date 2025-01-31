@@ -7,8 +7,6 @@
     "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
   ];
 
-  # https://discord.com/channels/568306982717751326/1275410775271538809/1275501245079093362
-  # https://github.com/NixOS/nixpkgs/blob/4f9cb71da3ec4f76fd406a0d87a1db491eda6870/nixos/modules/programs/gamescope.nix#L47
   hardware.nvidia = {
     modesetting.enable = true;
     dynamicBoost.enable = true;
