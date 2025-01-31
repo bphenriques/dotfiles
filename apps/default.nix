@@ -1,7 +1,7 @@
 { nixpkgs, mylib }:
 let
-  lib = nixpkgs.lib;
   inherit (mylib.builders) forAllSystems forLinuxSystems forDarwinSystems writeLocalCompatibleScriptBin;
+  lib = nixpkgs.lib;
 
   mkApp = mkPackage: pkgs:
     let pkg = mkPackage pkgs; in {
@@ -36,25 +36,25 @@ let
   };
 
   crossPlatformApps = forAllSystems (system:
-    lib.attrsets.mergeAttrsList [
+    lib.mergeAttrsList [
      (mkApp mkPostInstall nixpkgs.legacyPackages.${system})
     ]
   );
 
   linuxApps = forLinuxSystems (system:
-    lib.attrsets.mergeAttrsList [
+    lib.mergeAttrsList [
      (mkApp mkNixOSInstaller nixpkgs.legacyPackages.${system})
     ]
   );
 
   darwinApps = forDarwinSystems (system:
-    lib.attrsets.mergeAttrsList [
+    lib.mergeAttrsList [
      (mkApp mkDarwinInstall nixpkgs.legacyPackages.${system})
     ]
   );
 in forAllSystems (system:
   lib.attrsets.mergeAttrsList [
-    crossPlatformApps.${system}
+    (crossPlatformApps.${system} or { })
     (linuxApps.${system} or { })
     (darwinApps.${system} or { })
   ]

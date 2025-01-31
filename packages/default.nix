@@ -25,14 +25,14 @@ let
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
 
-      # Move to community namespace
+      # Community
       proton-ge-custom = pkgs.callPackage ./proton-ge-custom { };
       sway-audio-idle-inhibit = pkgs.callPackage ./sway-audio-idle-inhibit { };
     }
   );
 in forAllSystems (system:
   nixpkgs.lib.attrsets.mergeAttrsList [
-    crossPlatform.${system}
+    (crossPlatform.${system} or { })
     (linux.${system} or { })
   ]
 )
