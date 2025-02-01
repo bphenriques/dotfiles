@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#shellcheck shell=bash
+
 # Adapted from https://gist.github.com/seanh/d3d1a6dfa4b7d5d9f135984ae913cf0f
 #
 # Log in to and unlock Bitwarden CLI.

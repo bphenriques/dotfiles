@@ -1,61 +1,30 @@
-{ nixpkgs, mylib }:
+{ nixpkgs, mylib, self }:
 let
-  inherit (mylib.builders) forAllSystems forLinuxSystems forDarwinSystems writeLocalCompatibleScriptBin;
   lib = nixpkgs.lib;
+  pkgsAttrToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
 
-  mkApp = mkPackage: pkgs:
-    let pkg = mkPackage pkgs; in {
-      "${pkg.name}" = {
-        type = "app";
-        program = "${pkg}/bin/${pkg.name}";
-      };
-    };
+  crossPlatform = mylib.builders.forAllSystems (system:
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      selfPkgs = self.packages.${system};
+    in pkgsAttrToApps {
+      post-install = pkgs.callPackage ./post-install { inherit selfPkgs; };
+    });
 
-  mkNixOSInstaller = pkgs: writeLocalCompatibleScriptBin pkgs {
-    name = "nixos-install";
-    runtimeInputs = [ (mkBitwardenSession pkgs) pkgs.yq-go pkgs.jq ];
-    text = pkgs.lib.fileContents ./nixos-install.sh;
-  };
+  linux = mylib.builders.forLinuxSystems (system:
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      selfPkgs = self.packages.${system};
+    in pkgsAttrToApps {
+      nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
+    });
 
-  mkDarwinInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
-    name = "darwin-install";
-    runtimeInputs = [ ];
-    text = pkgs.lib.fileContents ./darwin-install.sh;
-  };
+  darwin = mylib.builders.forDarwinSystems (system:
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      selfPkgs = self.packages.${system};
+    in pkgsAttrToApps {
+      darwin-install = pkgs.callPackage { inherit selfPkgs; };
+    });
 
-  mkPostInstall = pkgs: writeLocalCompatibleScriptBin pkgs {
-    name = "post-install";
-    runtimeInputs = [ pkgs.git pkgs.yq-go pkgs.age pkgs.sops pkgs.gnupg (mkBitwardenSession pkgs) ];
-    text = pkgs.lib.fileContents ./post-install.sh;
-  };
-
-  mkBitwardenSession = pkgs: writeLocalCompatibleScriptBin pkgs {
-    name = "bw-session";
-    runtimeInputs = [ pkgs.bitwarden-cli ];
-    text = pkgs.lib.fileContents ./bw-session.sh;
-  };
-
-  crossPlatformApps = forAllSystems (system:
-    lib.mergeAttrsList [
-     (mkApp mkPostInstall nixpkgs.legacyPackages.${system})
-    ]
-  );
-
-  linuxApps = forLinuxSystems (system:
-    lib.mergeAttrsList [
-     (mkApp mkNixOSInstaller nixpkgs.legacyPackages.${system})
-    ]
-  );
-
-  darwinApps = forDarwinSystems (system:
-    lib.mergeAttrsList [
-     (mkApp mkDarwinInstall nixpkgs.legacyPackages.${system})
-    ]
-  );
-in forAllSystems (system:
-  lib.attrsets.mergeAttrsList [
-    (crossPlatformApps.${system} or { })
-    (linuxApps.${system} or { })
-    (darwinApps.${system} or { })
-  ]
-)
+in mylib.builders.mergeSystems [ crossPlatform linux darwin ]
