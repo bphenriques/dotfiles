@@ -11,6 +11,7 @@ let
       fzf-rg = pkgs.callPackage ./fzf-rg { };
       fzf-fd = pkgs.callPackage ./fzf-fd { inherit preview; };
       project = pkgs.callPackage ./project { inherit preview; };
+      bw-session = pkgs.callPackage ./bw-session { };
     }
   );
 
@@ -21,7 +22,6 @@ let
       brightness-osd = pkgs.callPackage ./brightness-osd { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
-      cliphist-dmenu = pkgs.callPackage ./cliphist-dmenu { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
 
@@ -30,9 +30,4 @@ let
       sway-audio-idle-inhibit = pkgs.callPackage ./sway-audio-idle-inhibit { };
     }
   );
-in forAllSystems (system:
-  nixpkgs.lib.attrsets.mergeAttrsList [
-    (crossPlatform.${system} or { })
-    (linux.${system} or { })
-  ]
-)
+in mylib.builders.mergeSystems [ crossPlatform linux ]

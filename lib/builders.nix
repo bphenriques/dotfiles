@@ -4,6 +4,8 @@ rec {
   forDarwinSystems = lib.genAttrs [ "aarch64-darwin" ];
   forLinuxSystems = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
 
+  mergeSystems = attrs: forAllSystems (system: lib.mergeAttrsList (lib.map (attrs: attrs.${system} or { }) attrs));
+
   # Replace the interpreter's location to be one under the nix store.
   # - writeShellApplication does not support that.
   # - we now have to pass the dependencies by-hand
@@ -20,5 +22,6 @@ rec {
       paths = [ (patchShebangs (pkgs.writeScriptBin name text)) ] ++ runtimeInputs;
       buildInputs = [ pkgs.makeWrapper ];
       postBuild = "wrapProgram $out/bin/${name} --prefix PATH : $out/bin";
+      meta.mainProgram = name;
     };
 }

@@ -35,13 +35,13 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ { nixpkgs, ... }:
+  outputs = inputs @ { self, nixpkgs, ... }:
     let
       inherit (mylib.builders) forAllSystems;
       inherit (mylib.generators) readModulesAttrs;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
     in {
-      apps      = import ./apps { inherit nixpkgs mylib; };
+      apps      = import ./apps { inherit nixpkgs mylib self; };
       packages  = import ./packages { inherit nixpkgs mylib; };
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
