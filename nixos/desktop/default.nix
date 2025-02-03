@@ -6,7 +6,7 @@
     ./gamemode.nix
     ./gamescope.nix
     ./docker.nix
-    # ./sunshine.nix # TODO: does not work
+    # ./sunshine.nix # FIXME: does not work
   ];
 
   # Boot

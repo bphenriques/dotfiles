@@ -4,7 +4,8 @@
     ../../../home-manager
     ../../../home-manager/desktop-environment
     ../../../home-manager/desktop
-    ./kanshi.nix                                  # Automatically set display layout
+    ./kanshi.nix
+    ./waybar.nix
   ];
 
   xdg.userDirs = {

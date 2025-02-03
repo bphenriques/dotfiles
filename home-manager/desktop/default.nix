@@ -30,10 +30,4 @@
     # System
     pkgs.wdisplays
  ];
-
-  # FIXME
-  custom.xdgDefaultApps = {
-    archive = lib.mkBefore [ "org.kde.ark.desktop" ];
-    fileBrowser = lib.mkBefore [ "org.gnome.baobab.desktop" ];
-  };
 }

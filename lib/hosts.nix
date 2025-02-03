@@ -7,9 +7,6 @@ let
       use-xdg-base-directories = true;                    # Hide ~/.nix-profile and ~/.nix-defexpr
       warn-dirty = false;                                 # I know...
     };
-
-    # Ensure we have at least 5GiB always available. Less than that and my system gets unstable.
-    extraOptions = "min-free = ${toString (5 * 1024 * 1024 * 1024)}";
   };
 
   nixpkgsConfig = {

@@ -6,7 +6,6 @@ in {
   options.custom.programs.fzf-fd = {
     enable = lib.mkEnableOption "fzf-fd";
 
-    # FIXME: this is not portable
     package = lib.mkOption {
       type = lib.types.package;
       default = self.pkgs.fzf-fd;

@@ -101,6 +101,8 @@ let
 
     window-rule {
       match app-id="org.pulseaudio.pavucontrol"
+      match title="nmtui-tui"
+
       default-column-width { fixed 800; }
       default-window-height { fixed 600; }
 

@@ -1,13 +1,13 @@
 { nixpkgs, mylib, self }:
 let
   lib = nixpkgs.lib;
-  pkgsAttrToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
+  pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
 
   crossPlatform = mylib.builders.forAllSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
-    in pkgsAttrToApps {
+    in pkgsToApps {
       post-install = pkgs.callPackage ./post-install { inherit selfPkgs; };
     });
 
@@ -15,7 +15,7 @@ let
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
-    in pkgsAttrToApps {
+    in pkgsToApps {
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
     });
 
@@ -23,7 +23,7 @@ let
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
-    in pkgsAttrToApps {
+    in pkgsToApps {
       darwin-install = pkgs.callPackage { inherit selfPkgs; };
     });
 

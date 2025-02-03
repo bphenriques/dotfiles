@@ -109,7 +109,7 @@ fi
 host="$1"
 bw_email="$2"
 
-BW_SESSION="$(bw-session "${bw_email}")"
+BW_SESSION="$(bw-session session "${bw_email}")"
 export BW_SESSION
 
 set_root_nixpkgs_channel

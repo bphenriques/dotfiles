@@ -1,31 +1,5 @@
 { lib, config, pkgs, self, ... }:
 let
-  audio = {
-    headset = {
-      name = "alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
-      icon = "";
-      icon-muted = "󰋐";
-    };
-
-    external-speaker = {
-      name = "alsa_output.pci-0000_01_00.1.hdmi-stereo";
-      icon = "󰓃";
-      icon-muted = "󰓄";
-    };
-
-    internal-speaker = {
-      name = "alsa_output.pci-0000_06_00.6.analog-stereo";
-      icon = "󰽟";
-      icon-muted = "󰽠";
-    };
-  };
-
-  display = {
-    external-only = "";
-    internal-aptop = "";
-    extended = "󱂬";
-  };
-
   modules = {
     cpu = {
       format = "{usage}%  ";
@@ -37,16 +11,6 @@ let
       format = "{icon} {temperatureC}°C";
       format-icons = ["" "" "" "" ""];
     };
-
-    # FIXME: Does not work with ZFS
-    disk = {
-      interval = 30;
-      format = " {percentage_used}%";
-      path = "/";
-      tooltip = true;
-      unit = "GB";
-      tooltip-format = "Available {free} of {total}";
-   };
 
     memory = {
       interval = 30;
@@ -69,20 +33,8 @@ let
       format-alt = "{time} {icon}";
       format-icons = [ "" "" "" "" "" ];
       format-time = "{H}h {M}min";
-      # on-click = "${lib.getExe pkgs.wlogout} &"; FIXME
     };
 
-    # FIXME: mkIf laptop
-    backlight = {
-      format = "{icon} {percent}%";
-      format-icons =  ["" "" "" "" "" "" "" "" ""];
-      on-scroll-up = "${lib.getExe self.pkgs.brightness-osd} increase";
-      on-scroll-down ="${lib.getExe self.pkgs.brightness-osd} decrease";
-      min-length = 6;
-      # "on-click": "wdisplays"
-    };
-
-    # FIXME: mkIf laptop
     power-profiles-daemon = {
       format = "{icon}";
       tooltip-format = "{profile}";
@@ -128,9 +80,7 @@ let
       tooltip-format = ''
         <b>IP</b>: {ipaddr}/{cidr}
         <b>Gateway</b>: {gwaddr}'';
-
-      on-click = "${config.xdg.configHome}/rofi/rofi-wifi-menu"; # FIXME
-      on-click-right = "nmtui"; #FIXME
+      on-click = "${lib.getExe pkgs.foot} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}";
     };
 
     clock = {
@@ -165,7 +115,6 @@ let
       spacing = 10;
     };
 
-    # See more: https://github.com/prasanthrangan/hyprdots/blob/main/Configs/.config/waybar/modules/pulseaudio.jsonc
     pulseaudio = {
       format = "{icon} {volume}%";
       format-bluetooth = "{icon}";
@@ -180,16 +129,8 @@ let
         portable = "";
         car = "";
         default = ["" "" ""];
-
-        "${audio.headset.name}" = audio.headset.icon;
-        "${audio.headset.name}-muted" = audio.headset.icon-muted;
-        "${audio.external-speaker.name}" = audio.external-speaker.icon;
-        "${audio.external-speaker.name}-muted" = audio.external-speaker.icon-muted;
-        "${audio.internal-speaker.name}" = audio.internal-speaker.icon;
-        "${audio.internal-speaker.name}-muted" = audio.internal-speaker.icon-muted;
       };
       on-click = "${lib.getExe pkgs.pavucontrol}";
-      #on-right-click = "${lib.getExe self.pkgs.dunst-volume} set alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
 
       on-scroll-up = "${lib.getExe self.pkgs.volume-osd} increase";
       on-scroll-down ="${lib.getExe self.pkgs.volume-osd} decrease";
@@ -218,10 +159,9 @@ in
       enable = true;
       target = config.wayland.systemd.target;
     };
-    #systemd.enable = false; # Run manually as it seems flaky: https://github.com/nix-community/home-manager/issues/3599
     style = ./style.css;    # Not using pkgs.writeText as having the file is handy to debug: waybar -s style.css
     settings = {
-      default = lib.attrsets.mergeAttrsList [
+      default = lib.mergeAttrsList [
         modules
         groups
         {

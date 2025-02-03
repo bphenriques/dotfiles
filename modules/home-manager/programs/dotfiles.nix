@@ -1,6 +1,5 @@
 { lib, pkgs, config, self, ... }:
 
-# TODO: https://codeberg.org/adamcstephens/dotfiles/src/branch/main/home/module.nix#L8
 let
   cfg = config.custom.dotfiles;
 in
@@ -12,7 +11,6 @@ in
       default = "${config.home.homeDirectory}/.dotfiles";
     };
 
-    # FIXME: this is not portable if anyone tries to import my project
     package = lib.mkOption {
       type = lib.types.package;
       default = self.pkgs.dotfiles;
