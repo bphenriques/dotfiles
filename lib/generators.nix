@@ -1,6 +1,6 @@
 { lib }:
 let
-  inherit (builtins) baseNameOf dirOf replaceStrings listToAttrs;
+  inherit (builtins) baseNameOf listToAttrs;
   inherit (lib) removeSuffix map;
   inherit (lib.filesystem) listFilesRecursive;
 in

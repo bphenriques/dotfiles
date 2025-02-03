@@ -7,6 +7,9 @@
       dates = "weekly";
       options = "--delete-older-than 7d";
     };
+
+    # Ensure we have at least 5GiB always available. Less than that and my system gets unstable.
+    extraOptions = "min-free = ${toString (5 * 1024 * 1024 * 1024)}";
   };
 
   boot.kernelParams = [

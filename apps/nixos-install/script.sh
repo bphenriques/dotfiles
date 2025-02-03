@@ -51,7 +51,7 @@ bw_email="$2"
 
 shift 2
 
-BW_SESSION="$("${DOTFILES_LOCATION}"/apps/bw-session.sh "${bw_email}")"
+BW_SESSION="$(bw-session session "${bw_email}")"
 export BW_SESSION
 case "$1" in
   --remotely) remote_install "$host" "$1"                       ;;
