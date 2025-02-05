@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
 {
+  home.packages = [ pkgs.swww ];
+
   systemd.user.services.swww = {
     Unit = {
       Description = "Efficient animated wallpaper daemon for wayland";
@@ -15,6 +17,4 @@
       Restart = "on-failure";
     };
   };
-
-  home.packages = [ pkgs.swww ];
 }

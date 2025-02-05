@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, config, lib, ... }:
 {
   services.mako = {
     enable = true;
@@ -6,7 +6,7 @@
     defaultTimeout = 5000;
 
     # Theming
-    backgroundColor = "#151515" + "BF";
+    backgroundColor = "#151515";
     textColor = "#e8e3e3";
     progressColor = "over #2e2e2e";
     width = 300;
@@ -19,7 +19,7 @@
 
     extraConfig = ''
     [urgency=critical]
-    border-color=#b66467
+    backgroundColor=${config.custom.theme.palette.error};
     default-timeout=0
     '';
   };

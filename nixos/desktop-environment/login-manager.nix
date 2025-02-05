@@ -1,6 +1,7 @@
 { pkgs, config, lib, ... }:
 {
   services.greetd = let
+    # FIXME: actually set a theme
     theme = "--theme border=magenta;text=cyan;prompt=green;time=red;action=blue;button=yellow;container=black;input=red";
     options = ''--asterisks --time --remember'';
     session = {

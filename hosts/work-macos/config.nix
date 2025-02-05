@@ -10,8 +10,8 @@ in
   imports = [ ../../darwin ];
 
   nix.settings.trusted-users = [ username ];
-  users.users."${username}".home  = "/Users/${username}";
-  home-manager.users."${username}" = ./brunohenriques.nix;
+  users.users.${username}.home  = "/Users/${username}";
+  home-manager.users.${username} = ./brunohenriques.nix;
 
   system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
   system.desktop.picture = "${wallpapers}/share/wallpapers/mountains.png";

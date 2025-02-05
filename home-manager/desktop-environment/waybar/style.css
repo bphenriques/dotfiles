@@ -3,7 +3,7 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: "Ubuntu Nerd Font";
+    font-family: "Ubuntu Nerd Font"; /* FIXME: Replace with variable */
     font-size: 15px;
     min-height: 0;
 }

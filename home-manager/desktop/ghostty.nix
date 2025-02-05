@@ -1,8 +1,6 @@
 { config, pkgs, lib, self, ... }:
-
 let
-  theme = self.themes.doom-one;
-  font = theme.font.monospace;
+  theme = config.custom.theme;
 in
 {
   programs.ghostty = {
@@ -10,40 +8,35 @@ in
     package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
     enableFishIntegration = config.programs.fish.enable;
     themes = {
-      doom-one = {
+      custom = {
+        inherit (theme.terminal) background foreground cursor-color cursor-text selection-background selection-foreground;
         palette = [
-          "0=${theme.color0}"
-          "1=${theme.color1}"
-          "2=${theme.color2}"
-          "3=${theme.color3}"
-          "4=${theme.color4}"
-          "5=${theme.color5}"
-          "6=${theme.color6}"
-          "7=${theme.color7}"
-          "8=${theme.color8}"
-          "9=${theme.color9}"
-          "10=${theme.color10}"
-          "11=${theme.color11}"
-          "12=${theme.color12}"
-          "13=${theme.color13}"
-          "14=${theme.color14}"
-          "15=${theme.color15}"
+          "0=${theme.palette.base0}"
+          "1=${theme.palette.base1}"
+          "2=${theme.palette.base2}"
+          "3=${theme.palette.base3}"
+          "4=${theme.palette.base4}"
+          "5=${theme.palette.base5}"
+          "6=${theme.palette.base6}"
+          "7=${theme.palette.base7}"
+          "8=${theme.palette.base8}"
+          "9=${theme.palette.base9}"
+          "10=${theme.palette.base10}"
+          "11=${theme.palette.base11}"
+          "12=${theme.palette.base12}"
+          "13=${theme.palette.base13}"
+          "14=${theme.palette.base14}"
+          "15=${theme.palette.base15}"
         ];
-        background = theme.background;
-        foreground = theme.foreground;
-        cursor-color = theme.cursor;
-        cursor-text = theme.cursorText;
-        selection-background = theme.selectionForeground;
-        selection-foreground = theme.selectionBackground;
       };
     };
 
     settings = let
       common = {
-        font-family = font.name;
-        font-size = font.size;
+        font-family = theme.fonts.monospace.name;
+        font-size = theme.terminal.font-size;
+        theme = "custom";
         copy-on-select = "clipboard";
-        theme = "doom-one";
       };
 
       linux = lib.optionalAttrs pkgs.stdenv.isLinux {
@@ -57,8 +50,7 @@ in
         macos-option-as-alt = "left";
         mouse-hide-while-typing = true;
       };
-
-    in common // linux // darwin;
+    in lib.mergeAttrsList [ common linux darwin ];
   };
 
   xdg.mimeApps.defaultApplications = {
