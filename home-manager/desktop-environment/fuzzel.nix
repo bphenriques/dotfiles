@@ -1,12 +1,14 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, self, ... }:
+let
+  theme = config.custom.theme;
+  palette = theme.palette;
+  font = theme.fonts.monospace;
+in
 {
-  fonts.fontconfig.enable = true;
-  home.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
-
   programs.fuzzel = {
     enable = true;
     settings = {
-      main.font = "JetBrainsMono Nerd Font";
+      main.font = font.name;
       colors = {
         background = "1e1e2edd";
         text = "cdd6f4ff";

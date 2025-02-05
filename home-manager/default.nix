@@ -3,7 +3,6 @@
   imports = [
     ./direnv.nix      # Automate dev environment when we enter directories
     ./fish.nix        # Shell
-    ./fonts.nix
     ./fzf.nix         # Fuzzy search
     ./git.nix
     ./helix.nix       # Editor
@@ -15,6 +14,9 @@
   xdg.enable = true;
   xdg.mimeApps.enable = pkgs.stdenv.isLinux; # Default apps and directories
   home.preferXdgDirectories = true;
+
+  # Enable easier font management
+  fonts.fontconfig.enable = true;
 
   custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
   programs.bat.enable = true;             # Better file previewer
@@ -90,7 +92,7 @@
       PAGER   = "less -iMR";
 
       # Colors
-      LS_COLORS ="$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.<
+      LS_COLORS = "$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.< FIXME
       LANG    = "en_US.UTF-8";
       LC_ALL  = "en_US.UTF-8";
     } // (lib.optionalAttrs pkgs.config.allowUnfree {

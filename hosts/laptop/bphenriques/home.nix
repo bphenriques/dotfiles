@@ -8,6 +8,7 @@
     ./waybar.nix
   ];
 
+  custom.theme = import ./theme.nix { inherit pkgs; };
   xdg.userDirs = {
     enable = true;
     createDirectories = false;  # Created separately

@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, self, ... }:
 {
   imports = [
     ./brew.nix
@@ -11,12 +11,12 @@
 
   # Fonts (system-wide)
   fonts.packages = [
-    pkgs.nerd-fonts.hack
-    pkgs.nerd-fonts.jetbrains-mono
+    self.theme.fonts.monospace.package
+    self.theme.fonts.sansSeriff.package
   ];
 
   # Misc
-  home-manager.useGlobalPkgs   = true;   # Use pkgs set within nixpkgs.
-  home-manager.useUserPackages = true;   # Install packages defined in home-manager.
-  system.includeUninstaller = false;     # use 'nix run github:LnL7/nix-darwin#darwin-uninstaller'
+  home-manager.useGlobalPkgs    = true;   # Use pkgs set within nixpkgs.
+  home-manager.useUserPackages  = true;   # Install packages defined in home-manager.
+  system.includeUninstaller     = false;  # use 'nix run github:LnL7/nix-darwin#darwin-uninstaller'
 }

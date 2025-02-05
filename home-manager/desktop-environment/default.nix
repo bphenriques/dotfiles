@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, self, ... }:
 {
   imports = [
     ./niri.nix      # Window Manager
@@ -20,47 +20,11 @@
 
   custom.services.xwayland-satellite.enable = true;
 
-  home.pointerCursor = {
-    gtk.enable = true;
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Classic";
-    size = 16;
-  };
-
+  qt.enable = true;
   gtk = {
     enable = true;
-    theme = {
-      package = pkgs.adw-gtk3;
-      name = "adw-gtk3-dark";
-    };
-
-    iconTheme = {
-      package = pkgs.morewaita-icon-theme;
-      name = "MoreWaita";
-    };
-
-    font = {
-      name = "Ubuntu Nerd Font";
-      package = pkgs.nerd-fonts.ubuntu;
-      size = 11;
-    };
-
     gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc"; # Leave my $HOME
-    gtk3.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
-      gtk-error-bell = 0;
-    };
-
-    gtk4.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
-      gtk-error-bell = 0;
-    };
-  };
-
-  qt = {
-    enable = true;
-    style.name = "adwaita-dark";
-    style.package = pkgs.adwaita-qt;
-    platformTheme.name = "adwaita-dark";
+    gtk3.extraConfig.gtk-error-bell = 0;
+    gtk4.extraConfig.gtk-error-bell = 0;
   };
 }

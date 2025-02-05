@@ -9,12 +9,12 @@ let
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
   ];
-  hmModules = attrValues inputs.self.homeManagerModules;
+  hmModules = attrValues inputs.self.homeManagerModules ++ [
+  ];
   specialArgs = {
     self = {
       pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
       lib = mylib;
-      themes = import ../../themes { lib = inputs.nixpkgs.lib; };
     };
 
     community.pkgs = {
