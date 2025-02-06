@@ -101,7 +101,7 @@ case "${1:-}" in
     ;;
   build  | b)
     case "$(uname -s)" in
-      Darwin) ;;
+      Darwin) _darwin_build ;;
       Linux)
         if [ -d /etc/nixos ]; then
           nix build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel" --show-trace
