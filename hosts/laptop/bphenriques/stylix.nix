@@ -37,7 +37,7 @@ in rec {
         terminal = 15;
         applications = 12;
         desktop = 10;
-        popup = 10;
+        popups = 10;
       };
     };
 
