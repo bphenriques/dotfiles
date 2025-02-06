@@ -1,11 +1,12 @@
 { pkgs, lib, config, ... }:
 {
+  stylix.targets.fzf.enable = true;
   custom.programs.fzf-fd.enable = true;   # Fuzzy fd
   custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
   programs.fzf = {
     enable = true;
     defaultCommand = "${lib.getExe pkgs.fd} --type file --hidden --exclude=.git";
-    enableFishIntegration = true;
+    enableFishIntegration = config.programs.fish.enable;
 
     defaultOptions = [
       "--height='80%'"

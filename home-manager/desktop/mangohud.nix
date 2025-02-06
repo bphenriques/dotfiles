@@ -1,5 +1,6 @@
 { lib, pkgs, ...}:
 lib.mkIf pkgs.stdenv.isLinux {
+  stylix.targets.mangohud.enable = true;
   programs.mangohud = {
     enable = true;
     enableSessionWide = true;

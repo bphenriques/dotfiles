@@ -18,10 +18,13 @@
   # Enable easier font management
   fonts.fontconfig.enable = true;
 
-  custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
+  stylix.targets.bat.enable = true;
   programs.bat.enable = true;             # Better file previewer
   programs.fd.enable = true;              # Better `find`.
   programs.jq.enable = true;              # JSON query.
+  custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
+
+  stylix.targets.btop.enable = true;
   programs.btop = {
     enable = true;
     settings = {

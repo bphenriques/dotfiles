@@ -28,7 +28,7 @@
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
 
     # Community flakes
-    # stylix.url = "github:danth/stylix";         # TODO: Styling
+    stylix.url = "github:danth/stylix";           # Consistent coloring across my system. I can still tweak manually.
     nur.url = "github:nix-community/nur";         # Collection of packages. Use it for Firefox extensions
     sops-nix.url = "github:Mic92/sops-nix";       # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";

@@ -6,11 +6,11 @@
     ./mpv.nix       # Videos
     ./imv.nix       # Images
     ./beets.nix     # Music library manager
-    ./discord.nix   # Social
-    ./ghostty.nix   # Terminal
     ./foot.nix      # Terminal
+    ./ghostty.nix   # Terminal
     ./mangohud.nix  # Game HUD
     ./retroarch.nix # Emulation
+    ./discord.nix
     ./heroic.nix    # Game launcher
   ];
 
