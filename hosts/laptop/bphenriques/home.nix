@@ -6,9 +6,9 @@
     ../../../home-manager/desktop
     ./kanshi.nix
     ./waybar.nix
+    ./stylix.nix
   ];
 
-  custom.theme = import ./theme.nix { inherit pkgs; };
   xdg.userDirs = {
     enable = true;
     createDirectories = false;  # Created separately

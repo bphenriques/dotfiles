@@ -38,7 +38,7 @@ in
         text = ''cmd[update:1000] echo "<span font-weight='ultralight' >$(date +'%H:%M')</span>"'';
 
         font_size = 300;
-        font_family = config.custom.theme.fonts.gui.name;
+        font_family = config.stylix.fonts.sansSerif.name;
         color = "rgb(b6c4ff)";
         position = "0%, 2%";
         valign = "center";

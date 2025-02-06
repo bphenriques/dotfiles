@@ -4,6 +4,8 @@ let
 in
 {
   # Default: https://github.com/sxyazi/yazi/blob/shipped/yazi-config/preset/yazi-default.toml
+  # TODO: not a blocker _but_ yazi should respect LS_COLORS to make it consistent with plain terminal
+  stylix.targets.yazi.enable = true;
   programs.yazi = {
     enable = true;
     enableFishIntegration = true;
@@ -23,6 +25,11 @@ in
         cache_dir = "${config.xdg.cacheHome}/yazi";
       };
     };
+
+    # Extra theming flavor. # TODO: Contribute upstream
+    theme.filetype.rules = lib.mkBefore [
+      { mime = "*"; is = "orphan"; bg = "red"; }        # Highlight orphaned files
+    ];
   };
 
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [

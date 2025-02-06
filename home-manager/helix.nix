@@ -1,5 +1,6 @@
 { config, pkgs, lib, self, ... }:
 {
+  stylix.targets.helix.enable = true;
   programs.helix = {
     enable = true;
 
@@ -35,7 +36,6 @@
     };
 
     settings = {
-      theme = "onedark";
       editor = {
         bufferline = "multiple";
         color-modes = true;
