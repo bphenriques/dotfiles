@@ -29,13 +29,6 @@
   };
   custom.boot.grub.windowsEfiDevice = "38CB-E581";
 
-  # Misc
-  zramSwap.enable = true;         # Run zramctl to check how good memory is compressed
-
-  # Gaming
-  custom.programs.proton-run.enable = true;
-  custom.programs.proton-run.defaultProtonDir = "/mnt/games/GlobalProton";
-
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

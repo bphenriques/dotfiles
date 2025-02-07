@@ -22,6 +22,9 @@
     };
   };
 
+  # RAM
+  zramSwap.enable = true;         # Run zramctl to check how good memory is compressed
+
   # Battery
   services.upower = {
     enable = true;

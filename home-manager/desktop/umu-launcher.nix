@@ -1,30 +1,35 @@
-{ lib, pkgs, ... }:
+{ lib, config, pkgs, ... }:
 let
   umu-run0 = pkgs.writeShellApplication {
     name = "umu-run0";
-    text = ''GAMEID=0 ${lib.getExe pkgs.umu-run}'';
+    text = ''GAMEID=0 PROTONPATH=GE-Proton ${lib.getExe' pkgs.umu-launcher "umu-run"} "$@"'';
   };
 
-  mimeType = [
+  umu-run0-desktop-item =
+    (pkgs.makeDesktopItem {
+      name = "umu-launcher0";
+      exec = "${lib.getExe umu-run0} %f";
+      type = "Application";
+      desktopName = "umu-launcher0";
+      categories = [ "Utility" "Game" ];
+      icon = "wine";
+      mimeTypes = mimeTypes;
+    });
+
+  mimeTypes = [
     "application/x-ms-dos-executable"
     "application/x-msi"
     "application/x-ms-shortcut"
     "application/vnd.microsoft.portable-executable"
   ];
 
-  setDefault = types: target: builtins.listToAttrs (mime: { "${mime}" = target; }) types;
+  setDefault = types: target: lib.foldl' (acc: type: acc // { "${type}" = target; }) { } types;
 in lib.mkIf pkgs.stdenv.isLinux {
   home.packages = [
-    umu-run0
     pkgs.umu-launcher
+    umu-run0
+    umu-run0-desktop-item
   ];
 
-  xdg = {
-    desktopEntries."Umu Default Launcher" = {
-      inherit mimeType;
-      exec = "${lib.getExe umu-run0} %f";
-      icon = "wine";
-    };
-    mime.defaultApplications = setDefault mimeTypes "Umu Default Launcher.desktop";
-  };
+  xdg.mimeApps.defaultApplications = setDefault mimeTypes "umu-launcher0.desktop";
 }

@@ -1,6 +1,5 @@
 { pkgs, lib, config, ... }:
 {
-  stylix.targets.fzf.enable = true;
   custom.programs.fzf-fd.enable = true;   # Fuzzy fd
   custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
   programs.fzf = {

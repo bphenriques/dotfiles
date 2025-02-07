@@ -26,7 +26,6 @@ let
       session-dmenu = pkgs.callPackage ./session-dmenu { };
 
       # Community
-      proton-ge-custom = pkgs.callPackage ./proton-ge-custom { };
       sway-audio-idle-inhibit = pkgs.callPackage ./sway-audio-idle-inhibit { };
     }
   );
