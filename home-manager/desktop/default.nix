@@ -1,17 +1,18 @@
 { pkgs, lib, ... }:
 {
   imports = [
-    ./firefox       # Browser
-    ./zathura.nix   # Documents
-    ./mpv.nix       # Videos
-    ./imv.nix       # Images
-    ./beets.nix     # Music library manager
-    ./foot.nix      # Terminal
-    ./ghostty.nix   # Terminal
-    ./mangohud.nix  # Game HUD
-    ./retroarch.nix # Emulation
-    ./discord.nix
-    ./heroic.nix    # Game launcher
+    ./firefox           # Browser
+    ./zathura.nix       # Documents
+    ./mpv.nix           # Videos
+    ./imv.nix           # Images
+    ./beets.nix         # Music library manager
+    ./foot.nix          # Terminal
+    ./ghostty.nix       # Terminal
+    ./mangohud.nix      # Game HUD
+    ./retroarch.nix     # Emulation
+    ./discord.nix       # Social
+    ./heroic.nix        # Unified game client
+    ./umu-launcher.nix  # Ad-hoc game launcher
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [

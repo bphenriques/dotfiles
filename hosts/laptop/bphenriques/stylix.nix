@@ -57,3 +57,7 @@ in rec {
     targets.qt.platform = "gnome"; # It uses adwait or adwait-dark underneath
   };
 }
+
+#--main-color: #38474f;
+#  --accent-color: #ffe57f;
+#  --text-color: #FAFAFA;
