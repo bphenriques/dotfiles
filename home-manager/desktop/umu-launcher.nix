@@ -2,7 +2,7 @@
 let
   umu-run0 = pkgs.writeShellApplication {
     name = "umu-run0";
-    text = ''GAMEID=0 PROTONPATH=GE-Proton ${lib.getExe' pkgs.umu-launcher "umu-run"} "$@"'';
+    text = ''WINEPREFIX=$XDG_DATA_HOME/umu-launcher-games GAMEID=0 PROTONPATH=GE-Proton ${lib.getExe' pkgs.umu-launcher "umu-run"} "$@"'';
   };
 
   umu-run0-desktop-item =
