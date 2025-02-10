@@ -24,9 +24,6 @@ let
       swww-util = pkgs.callPackage ./swww-util { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       session-dmenu = pkgs.callPackage ./session-dmenu { };
-
-      # Community
-      sway-audio-idle-inhibit = pkgs.callPackage ./sway-audio-idle-inhibit { };
     }
   );
 in mylib.builders.mergeSystems [ crossPlatform linux ]

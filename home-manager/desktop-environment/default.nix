@@ -8,14 +8,13 @@
     ./rofi.nix      # Application Launcher
     ./swayidle.nix  # Locks/suspends the computer when idle
     ./hyprlock.nix  # Lock screend
-    ./swww.nix      # Wallpaper manager
     ./osd.nix       # On Screen Display
+    ./swww.nix      # Manage wallpapers
   ];
 
   home.packages = [
     (pkgs.writeScriptBin "pbcopy" (lib.getExe' pkgs.wl-clipboard "wl-copy"))      # I am too hardwired to pbcopy
     (pkgs.writeScriptBin "pbpaste" (lib.getExe' pkgs.wl-clipboard "wl-paste"))    # I am too hardwired to pbpaste
-    pkgs.clipse
   ];
 
   custom.services.xwayland-satellite.enable = true;

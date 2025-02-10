@@ -2,10 +2,6 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # FIXME: add "&&" "${lib.getExe self.pkgs.niri-smart-paste}
 let
-  wallpapersPkg = self.pkgs.wallpapers.override {
-    selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
-  };
-
   foot = lib.getExe' config.programs.foot.package "footclient";
   volume = lib.getExe self.pkgs.volume-osd;
   brightness = lib.getExe self.pkgs.brightness-osd;
@@ -20,9 +16,6 @@ let
   '';
 
   on-startup = ''
-    spawn-at-startup "${lib.getExe self.pkgs.swww-util}" "random" "${wallpapersPkg}/share/wallpapers"
-    spawn-at-startup "${lib.getExe pkgs.clipse}" "-listen"
-    spawn-at-startup "${self.pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit" "-w"
   '';
 
   input = ''
@@ -66,8 +59,8 @@ let
       default-column-width { proportion 1.00; }
       focus-ring {
         width 2
-        active-color "#7fc8ff"
-        inactive-color "#505050"
+        active-color "${config.lib.stylix.colors.withHashtag.base0D}"
+        inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
       }
 
       border {

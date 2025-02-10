@@ -12,7 +12,6 @@
     ];
   };
 
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";      # I don't really use it, but leaving it here.

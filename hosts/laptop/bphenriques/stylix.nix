@@ -1,15 +1,12 @@
 { pkgs, config, self, ... }:
-let
-  wallpapersPkg = self.pkgs.wallpapers.override {
-    selected = [ "sunrise-mountains" "lake-fishing-sunset" ];
-  };
-in rec {
+rec {
   stylix = {
     enable = true;
     autoEnable = false;
 
     base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark.yaml";
     override.base00 = "#282c34"; # Background
+
     polarity = "dark";
 
     fonts = {
@@ -41,9 +38,18 @@ in rec {
       };
     };
 
+    #      serif.package = pkgs.dejavu_fonts;
+         #      serif.name = "DejaVu Serif";
+         #
+         #      sansSerif.package = pkgs.fira;
+         #      sansSerif.name = "Fira Sans";
+         #
+         #      monospace.package = pkgs.jetbrains-mono;
+         #      monospace.name = "JetBrains Mono";
+
     cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
+      package = pkgs.catppuccin-cursors; #pkgs.bibata-cursors;
+      name = "frappeDark";#"Bibata-Modern-Classic";
       size = 16;
     };
 
@@ -58,6 +64,3 @@ in rec {
   };
 }
 
-#--main-color: #38474f;
-#  --accent-color: #ffe57f;
-#  --text-color: #FAFAFA;

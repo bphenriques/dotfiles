@@ -30,4 +30,18 @@ in
       { event = "after-resume"; command = "${niri} msg action power-on-monitors";  }
     ];
   };
+
+  systemd.user.services.sway-audio-idle-inhibit = {
+    Unit = {
+      Description = "Prevents swayidle from sleeping while any application is outputting or receiving audio.";
+      PartOf = [ "swayidle.service" ];
+      After = [ "swayidle.service" ];
+    };
+    Install.WantedBy = [ config.wayland.systemd.target ];
+    Service = {
+      Type = "simple";
+      ExecStart = lib.getExe pkgs.sway-audio-idle-inhibit;
+      Restart = "on-failure";
+    };
+  };
 }
