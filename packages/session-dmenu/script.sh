@@ -17,6 +17,15 @@ options() {
   echo "Suspend"
 }
 
+# FIXME
+options2() {
+  echo " Lock"
+  echo "󰍃 Logout"
+  echo "󰜉 Reboot"
+  echo "⏻ Shutdown"
+  echo "󰤄 Suspend"
+}
+
 case "$(options | open_dmenu)" in
   "Lock")       niri msg action do-screen-transition --delay-ms 1000 && hyprlock  ;;
   "Logout")     loginctl terminate-user "$(whoami)" ;;
@@ -24,3 +33,4 @@ case "$(options | open_dmenu)" in
   "Shutdown")   systemctl poweroff                  ;;
   "Suspend")    systemctl suspend                   ;;
 esac
+
