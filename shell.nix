@@ -1,4 +1,4 @@
-{ pkgs ? (import ./nixpkgs.nix) { } }:
+{ pkgs }:
 pkgs.mkShellNoCC {
   name = "dotfiles";
   meta.description = "Development shell to manage my dotfiles";

@@ -5,7 +5,7 @@
     ./waybar        # Status bar
     ./mako.nix      # Notification Daemon
     ./fuzzel.nix    # Application Launcher
-    ./rofi.nix      # Application Launcher
+    ./rofi          # Application Launcher
     ./swayidle.nix  # Locks/suspends the computer when idle
     ./hyprlock.nix  # Lock screend
     ./osd.nix       # On Screen Display

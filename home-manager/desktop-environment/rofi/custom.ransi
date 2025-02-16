@@ -1,0 +1,147 @@
+* {
+active-background: @background;
+active-foreground: @blue;
+active-text: rgba ( 97, 175, 239, 100 % );
+alternate-active-background: @lightbg;
+alternate-active-foreground: @blue;
+alternate-active-text: rgba ( 97, 175, 239, 100 % );
+alternate-normal-background: @lightbg;
+alternate-normal-foreground: @foreground;
+alternate-normal-text: rgba ( 171, 178, 191, 100 % );
+alternate-urgent-background: @lightbg;
+alternate-urgent-foreground: @red;
+alternate-urgent-text: rgba ( 224, 108, 117, 100 % );
+background: rgba ( 40, 44, 52, 100 % );
+background-color: rgba ( 40, 44, 52, 100 % );
+base-text: rgba ( 171, 178, 191, 100 % );
+blue: rgba ( 97, 175, 239, 100 % );
+border-color: @foreground;
+foreground: rgba ( 171, 178, 191, 100 % );
+lightbg: rgba ( 53, 59, 69, 100 % );
+lightfg: rgba ( 182, 189, 202, 100 % );
+normal-background: @background;
+normal-foreground: @foreground;
+normal-text: rgba ( 171, 178, 191, 100 % );
+red: rgba ( 224, 108, 117, 100 % );
+selected-active-background: @blue;
+selected-active-foreground: @background;
+selected-active-text: rgba ( 40, 44, 52, 100 % );
+selected-normal-background: @lightfg;
+selected-normal-foreground: @lightbg;
+selected-normal-text: rgba ( 53, 59, 69, 100 % );
+selected-urgent-background: @red;
+selected-urgent-foreground: @background;
+selected-urgent-text: rgba ( 40, 44, 52, 100 % );
+separatorcolor: @foreground;
+urgent-background: @background;
+urgent-foreground: @red;
+urgent-text: rgba ( 224, 108, 117, 100 % );
+}
+
+button {
+text-color: @normal-text;
+}
+
+button selected {
+background-color: @selected-normal-background;
+text-color: @selected-normal-text;
+}
+
+case-indicator {
+text-color: @normal-text;
+}
+
+element alternate.active {
+background-color: @alternate-active-background;
+text-color: @alternate-active-text;
+}
+
+element alternate.normal {
+background-color: @alternate-normal-background;
+text-color: @alternate-normal-text;
+}
+
+element alternate.urgent {
+background-color: @alternate-urgent-background;
+text-color: @alternate-urgent-text;
+}
+
+element normal.active {
+background-color: @active-background;
+text-color: @active-text;
+}
+
+element normal.normal {
+background-color: @normal-background;
+text-color: @normal-text;
+}
+
+element normal.urgent {
+background-color: @urgent-background;
+text-color: @urgent-text;
+}
+
+element selected.active {
+background-color: @selected-active-background;
+text-color: @selected-active-text;
+}
+
+element selected.normal {
+background-color: @selected-normal-background;
+text-color: @selected-normal-text;
+}
+
+element selected.urgent {
+background-color: @selected-urgent-background;
+text-color: @selected-urgent-text;
+}
+
+element-icon {
+background-color: inherit;
+text-color: inherit;
+}
+
+element-text {
+background-color: inherit;
+text-color: inherit;
+}
+
+entry {
+text-color: @normal-text;
+}
+
+inputbar {
+text-color: @normal-text;
+}
+
+listview {
+border-color: @separatorcolor;
+}
+
+message {
+border-color: @separatorcolor;
+}
+
+prompt {
+text-color: @normal-text;
+}
+
+scrollbar {
+handle-color: @normal-foreground;
+}
+
+sidebar {
+border-color: @separatorcolor;
+}
+
+textbox {
+text-color: @base-text;
+}
+
+textbox-prompt-colon {
+text-color: inherit;
+}
+
+window {
+background-color: @background;
+}
