@@ -111,10 +111,16 @@ let
       default-floating-position x=32 y=32 relative-to="bottom-left"
     }
   '';
+
+  # TODO: Does not work well with commands with `sh`
+  spawnCmdToNiri = command: lib.strings.concatMapStringsSep
+        " "
+        (x: ''"${x}"'')
+        (lib.strings.splitString " " command);
 in
 {
   wayland.systemd.target = "niri.service";
-  
+
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
 
@@ -149,18 +155,16 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Period { spawn "${lib.getExe pkgs.bemoji}"; }
-      Mod+Shift+Q { spawn "${lib.getExe self.pkgs.session-dmenu}"; }
-      // Mod+Shift+Tab { focus-window-previous; }
-      Mod+Tab { spawn "${lib.getExe self.pkgs.niri-window-dmenu}"; }
-      Mod+Shift+V { spawn "${foot}" "--title=clipse-tui" "${lib.getExe pkgs.clipse}"; }
+      Mod+Period { spawn ${spawnCmdToNiri config.custom.desktop-environment.emoji-picker}; }
 
-      // Suggested binds for running programs: terminal, app launcher, screen locker.
+      Mod+Shift+Q { spawn ${spawnCmdToNiri config.custom.desktop-environment.session-menu}; }
+      // Mod+Shift+Tab { focus-window-previous; }
+      Mod+Tab { spawn ${spawnCmdToNiri config.custom.desktop-environment.window-switcher}; }
+
       Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
-      Mod+Space { spawn "${lib.getExe pkgs.fuzzel}"; }
+      Mod+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.application-launcher}; }
       Mod+Shift+Space { spawn "${foot}" "--title=yazi-tui" "${lib.getExe config.programs.yazi.package}" "~"; }
       Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
-      Super+Escape { spawn "${lib.getExe config.programs.wlogout.package}"; }
 
       // Audio
       XF86AudioRaiseVolume allow-when-locked=true { spawn "${volume}" "increase"; }

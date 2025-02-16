@@ -8,7 +8,6 @@ let
     inputs.sops-nix.nixosModules.sops
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
-    #FIXME: inputs.stylix.nixosModules.stylix
   ];
   hmModules = attrValues inputs.self.homeManagerModules ++ [
     inputs.stylix.homeManagerModules.stylix

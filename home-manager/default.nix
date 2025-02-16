@@ -1,6 +1,7 @@
 { pkgs, lib, config, ... }:
 {
   imports = [
+    ./btop.nix        # System Monitor
     ./direnv.nix      # Automate dev environment when we enter directories
     ./fish.nix        # Shell
     ./fzf.nix         # Fuzzy search
@@ -23,18 +24,6 @@
   programs.fd.enable = true;              # Better `find`.
   programs.jq.enable = true;              # JSON query.
   custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
-
-  stylix.targets.btop.enable = true;
-  programs.btop = {
-    enable = true;
-    settings = {
-      theme_background = true;
-      proc_gradient = false;
-      graph_symbol = "block";
-      shown_boxes = "cpu mem proc";
-      clock_format = "";
-    };
-  };
 
   programs.tealdeer = {
     enable = true;
@@ -80,6 +69,9 @@
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
+
+    # TODO: to assess
+    pkgs.calcure
   ];
 
   # Gpg

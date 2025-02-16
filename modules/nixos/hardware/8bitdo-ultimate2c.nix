@@ -1,9 +1,9 @@
 { pkgs, config, lib, ... }:
 let
-  cfg = config.custom.hardware.wireless8bitdo;
+  cfg = config.custom.hardware.gamepad-8bitdo-ultimate2c;
 in {
-  options.custom.hardware.wireless8bitdo = with lib.types; {
-    enable = lib.mkEnableOption "8bitdo controller support";
+  options.custom.hardware.gamepad-8bitdo-ultimate2c = with lib.types; {
+    enable = lib.mkEnableOption "8bitdo 2.4 Ultimate 2C Controller support";
 
     vendorId = lib.mkOption {
       type = str;

@@ -34,22 +34,13 @@ rec {
         terminal = 15;
         applications = 12;
         desktop = 10;
-        popups = 10;
+        popups = 14;
       };
     };
 
-    #      serif.package = pkgs.dejavu_fonts;
-         #      serif.name = "DejaVu Serif";
-         #
-         #      sansSerif.package = pkgs.fira;
-         #      sansSerif.name = "Fira Sans";
-         #
-         #      monospace.package = pkgs.jetbrains-mono;
-         #      monospace.name = "JetBrains Mono";
-
     cursor = {
-      package = pkgs.catppuccin-cursors; #pkgs.bibata-cursors;
-      name = "frappeDark";#"Bibata-Modern-Classic";
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Classic";
       size = 16;
     };
 

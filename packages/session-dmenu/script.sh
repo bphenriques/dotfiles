@@ -1,36 +1,17 @@
 #shellcheck shell=bash
-exists_cmd() { command -v "$1" >/dev/null; }
-open_dmenu() {
-  if exists_cmd fuzzel; then
-    fuzzel --dmenu
-  else
-    echo "No compatible dmenu runner found" >&2;
-    exit 1
-  fi
-}
+shutdown="    Shutdown"
+reboot="    Reboot"
+lock="    Lock"
+suspend="󰤄    Suspend"
+windows="    Reboot to Windows"
+system_monitor="󰞱    System Monitor"
 
-options() {
-  echo "Lock"
-  echo "Logout"
-  echo "Reboot"
-  echo "Shutdown"
-  echo "Suspend"
-}
-
-# FIXME
-options2() {
-  echo " Lock"
-  echo "󰍃 Logout"
-  echo "󰜉 Reboot"
-  echo "⏻ Shutdown"
-  echo "󰤄 Suspend"
-}
-
-case "$(options | open_dmenu)" in
-  "Lock")       niri msg action do-screen-transition --delay-ms 1000 && hyprlock  ;;
-  "Logout")     loginctl terminate-user "$(whoami)" ;;
-  "Reboot")     systemctl reboot                    ;;
-  "Shutdown")   systemctl poweroff                  ;;
-  "Suspend")    systemctl suspend                   ;;
+chosen="$(echo -e "$lock\n$suspend\n$reboot\n$windows\n$shutdown\n$system_monitor" | fuzzel --dmenu --width 15 --lines 6)"
+case ${chosen} in
+  "$shutdown")        systemctl poweroff                                                ;;
+  "$reboot")          systemctl reboot                                                  ;;
+  "$lock")            niri msg action do-screen-transition --delay-ms 500 && hyprlock   ;;
+  "$windows")         reboot-to-windows                                                 ;;
+  "$suspend")         systemctl suspend                                                 ;;
+  "$system_monitor")  footclient --title=btop-tui btop                                  ;;
 esac
-
