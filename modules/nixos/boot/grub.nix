@@ -19,6 +19,12 @@ in {
       default = "Windows";
     };
 
+    windowsRebootPackage = lib.mkOption {
+      type = package;
+      description = "Package to reboot to windows";
+      default = (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windowsEntryLabel}" && reboot $@'');
+    };
+
     fontSize = lib.mkOption {
       type = int;
       description = "Font size. Adjust to the screen as it is not DPI aware.";
@@ -62,9 +68,7 @@ in {
       };
     };
 
-    environment.systemPackages = lib.optionals (cfg.windowsEfiDevice != null) [
-      (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windowsEntryLabel}" && reboot $@'')
-    ];
+    environment.systemPackages = lib.optionals (cfg.windowsEfiDevice != null) [ cfg.windowsRebootPackage ];
   };
 }
 

@@ -3,7 +3,7 @@ let
   lib = nixpkgs.lib;
   pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
 
-  crossPlatform = mylib.builders.forAllSystems (system:
+  crossPlatform = mylib.generators.forAllSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
@@ -11,7 +11,7 @@ let
       post-install = pkgs.callPackage ./post-install { inherit selfPkgs; };
     });
 
-  linux = mylib.builders.forLinuxSystems (system:
+  linux = mylib.generators.forLinuxSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
@@ -19,7 +19,7 @@ let
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
     });
 
-  darwin = mylib.builders.forDarwinSystems (system:
+  darwin = mylib.generators.forDarwinSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
@@ -27,4 +27,4 @@ let
       darwin-install = pkgs.callPackage { inherit selfPkgs; };
     });
 
-in mylib.builders.mergeSystems [ crossPlatform linux darwin ]
+in mylib.generators.mergeAllSystems [ crossPlatform linux darwin ]

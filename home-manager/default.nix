@@ -19,6 +19,7 @@
   # Enable easier font management
   fonts.fontconfig.enable = true;
 
+  # TODO Make manual entries look nicer and with color
   stylix.targets.bat.enable = true;
   programs.bat.enable = true;             # Better file previewer
   programs.fd.enable = true;              # Better `find`.

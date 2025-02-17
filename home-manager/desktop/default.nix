@@ -30,5 +30,7 @@
 
     # System
     pkgs.wdisplays
- ];
+  ];
+
+  custom.services.xwayland-satellite.enable = pkgs.stdenv.isLinux;
 }
