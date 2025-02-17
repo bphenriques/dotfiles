@@ -1,8 +1,8 @@
 { config, pkgs, lib, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   stylix.targets.foot.enable = true;
-  custom.desktop-environment.terminal = lib.getExe' config.programs.foot.package "footclient";
 
+  # TODO: review: https://github.com/bigbabyboost/dotfiles/blob/hyprnix/home/terminal/emulators/foot.nix
   programs.foot = {
     enable = true;
     server.enable = true;

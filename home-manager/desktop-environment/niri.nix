@@ -78,6 +78,8 @@ let
 
     window-rule {
       match app-id="firefox$" title="^Picture-in-Picture$"
+      match title="^Picture in picture$"
+      match title="^Discord Popout$"
 
       open-floating true
       open-focused false
@@ -88,6 +90,14 @@ let
 
     window-rule {
       match title="Steam Settings"
+      match title="^(pwvucontrol)"
+      match title="^(Volume Control)"
+      match title="^(dialog)"
+      match title="^(file_progress)"
+      match title="^(confirm)"
+      match title="^(download)"
+      match title="^(error)"
+      match title="^(notification)"
 
       open-floating true
     }
@@ -98,6 +108,15 @@ let
 
       default-column-width { fixed 800; }
       default-window-height { fixed 600; }
+
+      open-floating true
+    }
+
+    window-rule {
+      match title="btop-tui"
+
+      default-column-width { fixed 1024; }
+      default-window-height { fixed 768; }
 
       open-floating true
     }
@@ -155,16 +174,16 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Period { spawn ${spawnCmdToNiri config.custom.desktop-environment.emoji-picker}; }
+      Mod+Period { spawn "anyrun"; }
 
       Mod+Shift+Q { spawn ${spawnCmdToNiri config.custom.desktop-environment.session-menu}; }
       // Mod+Shift+Tab { focus-window-previous; }
       Mod+Tab { spawn ${spawnCmdToNiri config.custom.desktop-environment.window-switcher}; }
 
-      Mod+Return { spawn "${lib.getExe pkgs.ghostty}"; }
+      Mod+Return { spawn ${spawnCmdToNiri config.custom.desktop-environment.terminal}; }
       Mod+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.application-launcher}; }
-      Mod+Shift+Space { spawn "${foot}" "--title=yazi-tui" "${lib.getExe config.programs.yazi.package}" "~"; }
-      Super+L { spawn "${lib.getExe config.programs.hyprlock.package}"; }
+      Mod+Shift+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.file-browser}; }
+      Super+L { spawn ${spawnCmdToNiri config.custom.desktop-environment.screen-lock}; }
 
       // Audio
       XF86AudioRaiseVolume allow-when-locked=true { spawn "${volume}" "increase"; }

@@ -58,19 +58,6 @@ let
 in
 {
   stylix.targets.rofi.enable = true;
-  custom.desktop-environment = {
-    # Not promoting as I prefer fuzzel as it opens faster.
-    # application-launcher = ''rofi -show drun -theme ${./themes/launcher.rasi}'';
-
-    # Alternative:  BEMOJI_PICKER_CMD="fuzzel -d" bemoji
-    emoji-picker = lib.getExe (pkgs.writeShellApplication {
-      name = "emoji-picker";
-      text = ''rofi -modi emoji -show emoji -emoji-format "{emoji}" -theme ${./themes/emoji.rasi}''; # FIXME: Hack around niri spawn arguments
-    });
-    window-switcher = lib.getExe self.pkgs.niri-window-dmenu; #''rofi -modi window -show window -theme ${./themes/window.rasi}'';
-    session-menu = lib.getExe self.pkgs.session-dmenu;#(dmenuGen { name = "session-menu"; });
-  };
-
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;

@@ -37,8 +37,7 @@
 
   outputs = inputs @ { self, nixpkgs, ... }:
     let
-      inherit (mylib.builders) forAllSystems;
-      inherit (mylib.generators) readModulesAttrs;
+      inherit (mylib.generators) forAllSystems readModulesAttrs;
       mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
     in {
       apps      = import ./apps { inherit nixpkgs mylib self; };

@@ -1,7 +1,7 @@
 { nixpkgs, mylib }:
 
 let
-  inherit (mylib.builders) forAllSystems forLinuxSystems;
+  inherit (mylib.generators) forAllSystems forLinuxSystems mergeAllSystems;
 
   crossPlatform = forAllSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
@@ -23,7 +23,6 @@ let
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
-      session-dmenu = pkgs.callPackage ./session-dmenu { };
     }
   );
-in mylib.builders.mergeSystems [ crossPlatform linux ]
+in mergeAllSystems [ crossPlatform linux ]

@@ -1,27 +1,19 @@
 { lib }:
-rec {
-  forAllSystems = lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
-  forDarwinSystems = lib.genAttrs [ "aarch64-darwin" ];
-  forLinuxSystems = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
-
-  mergeSystems = attrs: forAllSystems (system: lib.mergeAttrsList (lib.map (attrs: attrs.${system} or { }) attrs));
-
-  # Replace the interpreter's location to be one under the nix store.
-  # - writeShellApplication does not support that.
-  # - we now have to pass the dependencies by-hand
-  # - we now lose shellchecks at build time. It is fine in this case as I usually run by hand.
-  #
-  # Why: I like the option of running the scripts locally.
-  writeLocalCompatibleScriptBin = pkgs: { name, text, runtimeInputs }:
-    let
-      patchShebangs = pkg: pkg.overrideAttrs(old: {
-        buildCommand = "${old.buildCommand}\n patchShebangs $out";
-      });
-    in pkgs.symlinkJoin {
+{
+  writeDmenuScript = pkgs: {
+    name,
+    dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu --width 15'',
+    entries
+  }: pkgs.writeShellApplication {
       inherit name;
-      paths = [ (patchShebangs (pkgs.writeScriptBin name text)) ] ++ runtimeInputs;
-      buildInputs = [ pkgs.makeWrapper ];
-      postBuild = "wrapProgram $out/bin/${name} --prefix PATH : $out/bin";
-      meta.mainProgram = name;
+      text = ''
+        #shellcheck shell=bash
+
+        chosen="$(echo -e "${lib.concatMapStringsSep "\\n" (entry: entry.label) entries}" | ${dmenu} -l ${toString (builtins.length entries)})"
+        case ''${chosen} in
+          ${lib.concatMapStringsSep "\n" (entry: ''"${entry.label}") ${entry.exec} ;;'') entries}
+        esac
+      '';
+      meta.platforms = lib.platforms.linux;
     };
 }
