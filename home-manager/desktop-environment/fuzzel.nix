@@ -7,7 +7,7 @@
       horizontal-pad=30;
       vertical-pad=10;
       inner-pad=10;
-      terminal = config.custom.desktop-environment.terminal;
+      terminal = config.custom.desktop-environment.apps.terminal;
     };
   };
   stylix.targets.fuzzel.enable = true;
