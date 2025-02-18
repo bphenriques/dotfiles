@@ -2,8 +2,9 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
-  volume = lib.getExe self.pkgs.volume-osd;
-  brightness = lib.getExe self.pkgs.brightness-osd;
+  inherit (config.custom.desktop-environment.settings) displayOutput;
+  inherit (config.custom.desktop-environment.apps) volume brightness application-launcher system-monitor screen-lock terminal
+  screenshot-menu window-switcher file-browser session-menu emoji-picker;
 
   environment = ''
     environment {
@@ -39,9 +40,9 @@ let
 
   # Niri requires at least one monitor.
   outputs = ''
-    output "Samsung Display Corp. 0x4188 Unknown" {
-      mode "2880x1800@120.001"
-      scale 1.75
+    output "${displayOutput.identifier}" {
+      mode "${displayOutput.resolution}@${displayOutput.refreshRate}"
+      scale ${displayOutput.scale}
     }
   '';
 
@@ -173,20 +174,19 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+Q { spawn ${spawnCmdToNiri config.custom.desktop-environment.session-menu}; }
-      // Mod+Shift+Tab { focus-window-previous; }
-      Mod+Tab { spawn ${spawnCmdToNiri config.custom.desktop-environment.window-switcher}; }
+      Mod+Shift+Q { spawn ${spawnCmdToNiri session-menu}; }
+      Mod+Tab { spawn ${spawnCmdToNiri window-switcher}; }
 
-      Mod+Return { spawn ${spawnCmdToNiri config.custom.desktop-environment.terminal}; }
-      Mod+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.application-launcher}; }
-      Mod+Period { spawn ${spawnCmdToNiri config.custom.desktop-environment.emoji-picker}; }
-      Mod+Shift+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.file-browser}; }
-      Super+L { spawn ${spawnCmdToNiri config.custom.desktop-environment.screen-lock}; }
+      Mod+Return { spawn ${spawnCmdToNiri terminal}; }
+      Mod+Space { spawn ${spawnCmdToNiri application-launcher}; }
+      Mod+Period { spawn ${spawnCmdToNiri emoji-picker}; }
+      Mod+Shift+Space { spawn ${spawnCmdToNiri file-browser}; }
+      Super+L { spawn ${spawnCmdToNiri screen-lock}; }
 
       // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn "${volume}" "increase"; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn "${volume}" "decrease"; }
-      XF86AudioMute        allow-when-locked=true { spawn "${volume}" "toggle-mute"; }
+      XF86AudioRaiseVolume allow-when-locked=true { spawn ${spawnCmdToNiri volume.increase}; }
+      XF86AudioLowerVolume allow-when-locked=true { spawn ${spawnCmdToNiri volume.decrease}; }
+      XF86AudioMute        allow-when-locked=true { spawn ${spawnCmdToNiri volume.toggle-mute}; }
       XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
       XF86AudioNext        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "next"; }
       XF86AudioPause       allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "play-pause"; }
@@ -194,8 +194,8 @@ in
       XF86AudioPrev        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "previous"; }
 
       // Brightness
-      XF86MonBrightnessUp   allow-when-locked=true { spawn "${brightness}" "increase"; }
-      XF86MonBrightnessDown allow-when-locked=true { spawn "${brightness}" "decrease"; }
+      XF86MonBrightnessUp   allow-when-locked=true { spawn ${spawnCmdToNiri brightness.increase}; }
+      XF86MonBrightnessDown allow-when-locked=true { spawn ${spawnCmdToNiri brightness.decrease}; }
 
       Mod+Left  { focus-column-left; }
       Mod+Down  { focus-window-down; }

@@ -33,4 +33,11 @@ in
        }
     ];
   };
+
+  custom.desktop-environment.settings.displayOutput = {
+    identifier  = "eDP-1";
+    resolution  = "2880x1800";
+    refreshRate = "120.001"; # using float leads to trailing zerosthat I dont want
+    scale       = "1.75";
+  };
 }

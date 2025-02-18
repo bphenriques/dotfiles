@@ -35,7 +35,7 @@ in
     ./swww.nix      # Backend to manage wallpapers
   ];
 
-  custom.desktop-environment = {
+  custom.desktop-environment.apps = {
     inherit application-launcher system-monitor screen-lock terminal screenshot-menu;
 
     window-switcher = self.pkgs.niri-window-dmenu;
@@ -86,7 +86,7 @@ in
           name = builtins.replaceStrings [" "] ["-"] b.name;
           value = { inherit (b) name; exec = "${filebrowser} ${b.path}"; };
         });
-      in builtins.listToAttrs (lib.map bookmarkToAction config.custom.desktop-environment.file-bookmarks);
+      in builtins.listToAttrs (lib.map bookmarkToAction config.custom.desktop-environment.settings.file-bookmarks);
     })
   ];
 }
