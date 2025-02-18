@@ -175,7 +175,7 @@ in
           margin-bottom = 0;
           spacing = 5;
 
-          modules-left    = [ "custom/os" ];
+          modules-left    = [ ];
           modules-center  = [ "custom/media" ];
           modules-right   = [ "group/toggles" "clock" ];
         }
