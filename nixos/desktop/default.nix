@@ -23,14 +23,4 @@
   services = {
     flatpak.enable = true;        # Easier to run some programs. Setup afterwards: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   };
-
-  # Other
-  environment.systemPackages = [
-    pkgs.konsole   # Boring terminal in case something goes wrong
-
-    # Personalization
-    pkgs.morewaita-icon-theme
-    pkgs.adwaita-icon-theme
-    pkgs.qogir-icon-theme
-  ];
 }
