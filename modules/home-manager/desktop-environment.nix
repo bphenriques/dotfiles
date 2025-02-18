@@ -3,34 +3,37 @@
 let
   cfg = config.custom.desktop-environment;
 
-  desktopOption = lib.types.submodule {
-    options = {
-      package = lib.mkOption { type = lib.types.package; }; #
-      exe = lib.mkOption { type = lib.types.package; };     # default to lib.getExe
-      # either one or another must be set
-    };
-  };
-
   mkRunOption = description: lib.mkOption {
     inherit description;
-    type = lib.types.str;
+    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  # TODO: Each entry has optional package and a exec argument. Exec argument defaults to lib.getExe of the package.
-  # TODO: Opt. add a Niri spawn override.
+  fileBookmark = lib.types.submodule {
+    options = {
+      name = lib.mkOption { type = lib.types.str; };
+      path = lib.mkOption { type = lib.types.str; };
+    };
+  };
 in
 {
   options.custom.desktop-environment = {
+    # Core
     application-launcher  = mkRunOption "Application launcher";
-    dmenu                 = mkRunOption "Emoji Picker";
-    emoji-picker          = mkRunOption "Dmenu runner";
+    file-browser          = mkRunOption "File Browser";
     window-switcher       = mkRunOption "Window switcher";
     session-menu          = mkRunOption "Session Menu";
     terminal              = mkRunOption "Terminal launcher";
-    tui                   = mkRunOption "Terminal TUI launcher";
-    system-monitor        = mkRunOption "System Monitor";
     screen-lock           = mkRunOption "Screen Lock";
+    system-monitor        = mkRunOption "System Monitor";
+
+    # Tools
+    emoji-picker          = mkRunOption "Dmenu runner";
     screenshot-menu       = mkRunOption "Screenshot menu";
-    file-browser          = mkRunOption "Screenshot menu";
+
+    # Misc
+    file-bookmarks = lib.mkOption {
+      description = "File bookmarks";
+      type = lib.types.listOf fileBookmark;
+    };
   };
 }

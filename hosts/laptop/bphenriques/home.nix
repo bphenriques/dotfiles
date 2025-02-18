@@ -51,5 +51,15 @@
     "file://${config.home.homeDirectory}/.config Config"
   ];
 
+  custom.desktop-environment.file-bookmarks = [
+    { name = "Documents"; path = config.xdg.userDirs.documents; }
+    { name = "Pictures"; path = config.xdg.userDirs.pictures; }
+    { name = "Music"; path = config.xdg.userDirs.music; }
+    { name = "Downloads"; path = config.xdg.userDirs.download; }
+    { name = "NAS Private"; path = "${config.home.homeDirectory}/nas-private"; }
+    { name = "NAS Media"; path = "${config.home.homeDirectory}/nas-media"; }
+    { name = "Games"; path = "${config.home.homeDirectory}/games"; }
+  ];
+
   home.stateVersion = "24.05";
 }
