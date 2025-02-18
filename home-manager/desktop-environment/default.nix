@@ -28,7 +28,7 @@ in
     ./waybar        # Status bar
     ./mako.nix      # Notification Daemon
     ./fuzzel.nix    # Application Launcher
-    ./rofi          # Application Launcher
+    ./rofi.nix      # Alternative customizable menu
     ./swayidle.nix  # Locks/suspends the computer when idle
     ./hyprlock.nix  # Lock screend
     ./osd.nix       # On Screen Display
@@ -57,7 +57,7 @@ in
 
     emoji-picker = pkgs.writeShellApplication {
       name = "emoji-picker";
-      text = ''BEMOJI_ECHO_NEWLINE=false BEMOJI_PICKER_CMD=${dmenu} ${lib.getExe pkgs.bemoji}'';
+      text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
     };
   };
 
@@ -70,47 +70,23 @@ in
     })
 
     (pkgs.makeDesktopItem {
+      name = "system-monitor";
+      desktopName = "System Monitor";
+      icon = "folder";  # FIXME
+      exec =  system-monitor;
+    })
+
+    (pkgs.makeDesktopItem {
       name = "File Browser";
       desktopName = "Open file browser";
       icon = "folder";  # FIXME
       exec = filebrowser;
-      actions = builtins.listToAttrs
-        (lib.map
-          (b: {
-            name = builtins.replaceStrings [" "] ["-"] b.name;
-            value = { inherit (b) name; exec = "${filebrowser} ${b.path}"; };
-          })
-          config.custom.desktop-environment.file-bookmarks
-        );
+      actions = let
+        bookmarkToAction = (b: {
+          name = builtins.replaceStrings [" "] ["-"] b.name;
+          value = { inherit (b) name; exec = "${filebrowser} ${b.path}"; };
+        });
+      in builtins.listToAttrs (lib.map bookmarkToAction config.custom.desktop-environment.file-bookmarks);
     })
   ];
 }
-
-
-
-
-/*
-{ name = "documents"; path = config.xdg.userDirs.documents; }
-
- {
-        "documents" = { name = "documents"; exec = "${filebrowser} ${config.xdg.userDirs.documents}"; }; # FIXME: Icon
-        "pictures" = { name = "Pictures"; exec = "${filebrowser} ${config.xdg.userDirs.pictures}"; }; # FIXME: Icon
-        "music" = { name = "music"; exec = "${filebrowser} ${config.xdg.userDirs.music}"; }; # FIXME: Icon
-        "downloads" = { name = "Downloads"; exec = "${filebrowser} ${config.xdg.userDirs.download}"; }; # FIXME: Icon
-
-        "nas-private" = { name = "Pictures"; exec = "${filebrowser} ${config.xdg.userDirs.pictures}"; }; # FIXME: Icon
-        "pictures" = { name = "Pictures"; exec = "${filebrowser} ${config.xdg.userDirs.pictures}"; }; # FIXME: Icon
-      };
-  gtk.gtk3.bookmarks = [
-    "file://${config.xdg.userDirs.documents}"
-    "file://${config.xdg.userDirs.pictures}"
-    "file://${config.xdg.userDirs.music}"
-    "file://${config.xdg.userDirs.download}"
-    "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
-
-    # Other
-    "file://${config.home.homeDirectory}/nas-private"
-    "file://${config.home.homeDirectory}/nas-media"
-    "file://${config.home.homeDirectory}/games"
-    "file://${config.home.homeDirectory}/.config Config"
-  ];*/
