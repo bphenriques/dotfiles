@@ -1,5 +1,6 @@
 { config, lib, programs, pkgs, self, community, ... }:
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
+# Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
   volume = lib.getExe self.pkgs.volume-osd;
   brightness = lib.getExe self.pkgs.brightness-osd;
@@ -172,14 +173,13 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Period { spawn "anyrun"; }
-
       Mod+Shift+Q { spawn ${spawnCmdToNiri config.custom.desktop-environment.session-menu}; }
       // Mod+Shift+Tab { focus-window-previous; }
       Mod+Tab { spawn ${spawnCmdToNiri config.custom.desktop-environment.window-switcher}; }
 
       Mod+Return { spawn ${spawnCmdToNiri config.custom.desktop-environment.terminal}; }
       Mod+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.application-launcher}; }
+      Mod+Period { spawn ${spawnCmdToNiri config.custom.desktop-environment.emoji-picker}; }
       Mod+Shift+Space { spawn ${spawnCmdToNiri config.custom.desktop-environment.file-browser}; }
       Super+L { spawn ${spawnCmdToNiri config.custom.desktop-environment.screen-lock}; }
 

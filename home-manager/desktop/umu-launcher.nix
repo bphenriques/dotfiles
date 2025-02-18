@@ -14,8 +14,8 @@ let
       categories = [ "Utility" "Game" ];
       icon = "wine";
       mimeTypes = mimeTypes;
-      extraConfig.NoDisplay = "True";
-      extraConfig.Terminal = "True";
+      extraConfig.NoDisplay = "true";
+      extraConfig.Terminal = "true";
     });
 
   mimeTypes = [

@@ -3,7 +3,7 @@ let
   laptopScreen = {
     criteria = "eDP-1";
     mode = "2880x1800@120.001Hz";
-    scale = 1.5;
+    scale = 1.75;
   };
   dellScreen = {
     criteria = "Dell Inc. DELL S2721DGF 4P11R83";
