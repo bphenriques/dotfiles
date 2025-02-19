@@ -5,52 +5,62 @@ let
 
   volume = lib.getExe self.pkgs.volume-osd;
   brightness = lib.getExe self.pkgs.brightness-osd;
+  playerctl = lib.getExe pkgs.playerctl;
 
-  mkRunOption = description: lib.mkOption {
-    inherit description;
+  mkAppOpt = { description, default ? null }: lib.mkOption {
+    inherit description default;
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
   volumeOpt = lib.types.submodule {
     options = {
-      increase    = mkRunOption "Increase volume";
-      decrease    = mkRunOption "Decrease volume";
-      toggle-mute = mkRunOption "Mute volume";
+      increase    = mkAppOpt { description = "Increase volume"; };
+      decrease    = mkAppOpt { description = "Decrease volume"; };
+      toggle-mute = mkAppOpt { description = "Mute volume"; };
     };
   };
 
   brightnessOpt = lib.types.submodule {
     options = {
-      increase = mkRunOption "Increase brightness";
-      decrease = mkRunOption "Decrease brightness";
+      increase = mkAppOpt { description = "Increase brightness"; };
+      decrease = mkAppOpt { description = "Decrease brightness"; };
+    };
+  };
+  
+  mediaPlayerOpt = lib.types.submodule {
+    options = {
+      previous    = mkAppOpt { description = "Go to previous track"; };
+      next        = mkAppOpt { description = "Go to next next"; };
+      play-pause  = mkAppOpt { description = "Play/pause current track"; };
     };
   };
 
+
   mediaOpt = lib.types.submodule {
     options = {
-      previous      = mkRunOption "Previous track";
-      next          = mkRunOption "Next track";
-      toggle-pause  = mkRunOption "Toggle Pause";
+      previous      = mkAppOpt { description = "Previous track"; };
+      next          = mkAppOpt { description = "Next track"; };
+      toggle-pause  = mkAppOpt { description = "Toggle Pause"; };
     };
   };
 
   coreOpt = lib.types.submodule {
     options = {
-      application-launcher  = mkRunOption "Application launcher";
-      file-browser          = mkRunOption "File Browser";
-      window-switcher       = mkRunOption "Window switcher";
-      session-menu          = mkRunOption "Session Menu";
-      terminal              = mkRunOption "Terminal";
-      screen-lock           = mkRunOption "Screen Lock";
-      system-monitor        = mkRunOption "System Monitor";
+      application-launcher  = mkAppOpt { description = "Application launcher"; };
+      file-browser          = mkAppOpt { description = "File Browser"; };
+      window-switcher       = mkAppOpt { description = "Window switcher"; };
+      session-menu          = mkAppOpt { description = "Session Menu"; };
+      terminal              = mkAppOpt { description = "Terminal"; };
+      screen-lock           = mkAppOpt { description = "Screen Lock"; };
+      system-monitor        = mkAppOpt { description = "System Monitor"; };
     };
   };
 
   toolsOpt = lib.types.submodule {
     options = {
-      system-monitor        = mkRunOption "System Monitor";
-      emoji-picker          = mkRunOption "Dmenu runner";
-      screenshot-menu       = mkRunOption "Screenshot menu";
+      system-monitor        = mkAppOpt { description = "System Monitor"; };
+      emoji-picker          = mkAppOpt { description = "Dmenu runner"; };
+      screenshot-menu       = mkAppOpt { description = "Screenshot menu"; };
     };
   };
 in
@@ -75,17 +85,27 @@ in
       };
     };
 
+    mediaPlayer = lib.mkOption {
+      description = "Manage brightness";
+      type = mediaPlayerOpt;
+      default = {
+        previous    = "${playerctl} previous";
+        next        = "${playerctl} next";
+        play-pause  = "${playerctl} play-pause";
+      };
+    };
+    
     # Core
-    application-launcher  = mkRunOption "Application launcher";
-    file-browser          = mkRunOption "File Browser";
-    window-switcher       = mkRunOption "Window switcher";
-    session-menu          = mkRunOption "Session Menu";
-    terminal              = mkRunOption "Terminal launcher";
-    screen-lock           = mkRunOption "Screen Lock";
-    system-monitor        = mkRunOption "System Monitor";
+    application-launcher  = mkAppOpt { description = "Application launcher"; };
+    file-browser          = mkAppOpt { description = "File Browser"; };
+    window-switcher       = mkAppOpt { description = "Window switcher"; };
+    session-menu          = mkAppOpt { description = "Session Menu"; };
+    terminal              = mkAppOpt { description = "Terminal launcher"; };
+    screen-lock           = mkAppOpt { description = "Screen Lock"; };
+    system-monitor        = mkAppOpt { description = "System Monitor"; };
 
     # Tools
-    emoji-picker          = mkRunOption "Dmenu runner";
-    screenshot-menu       = mkRunOption "Screenshot menu";
+    emoji-picker          = mkAppOpt { description = "Dmenu runner"; };
+    screenshot-menu       = mkAppOpt { description = "Screenshot menu"; };
   };
 }
