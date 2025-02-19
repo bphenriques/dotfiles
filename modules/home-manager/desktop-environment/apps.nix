@@ -11,41 +11,27 @@ let
     inherit description default;
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
-
-  volumeOpt = lib.types.submodule {
-    options = {
-      increase    = mkAppOpt { description = "Increase volume"; };
-      decrease    = mkAppOpt { description = "Decrease volume"; };
-      toggle-mute = mkAppOpt { description = "Mute volume"; };
+in
+{
+  options.custom.desktop-environment.apps = {
+    volume = {
+      increase    = mkAppOpt { description = "Increase volume"; default = "${volume} increase"; };
+      decrease    = mkAppOpt { description = "Decrease volume"; default = "${volume} decrease"; };
+      toggle-mute = mkAppOpt { description = "Mute volume";     default = "${volume} toggle-mute"; };
     };
-  };
 
-  brightnessOpt = lib.types.submodule {
-    options = {
-      increase = mkAppOpt { description = "Increase brightness"; };
-      decrease = mkAppOpt { description = "Decrease brightness"; };
+    brightness = {
+      increase = mkAppOpt { description = "Increase brightness"; default = "${brightness} increase"; };
+      decrease = mkAppOpt { description = "Decrease brightness"; default = "${brightness} decrease"; };
     };
-  };
-  
-  mediaPlayerOpt = lib.types.submodule {
-    options = {
-      previous    = mkAppOpt { description = "Go to previous track"; };
-      next        = mkAppOpt { description = "Go to next next"; };
-      play-pause  = mkAppOpt { description = "Play/pause current track"; };
+
+    mediaPlayer = {
+      previous      = mkAppOpt { description = "Previous track";  default = "${playerctl} previous"; };
+      next          = mkAppOpt { description = "Next track";      default = "${playerctl} next"; };
+      play-pause    = mkAppOpt { description = "Toggle Pause";    default = "${playerctl} toggle-pause"; };
     };
-  };
 
-
-  mediaOpt = lib.types.submodule {
-    options = {
-      previous      = mkAppOpt { description = "Previous track"; };
-      next          = mkAppOpt { description = "Next track"; };
-      toggle-pause  = mkAppOpt { description = "Toggle Pause"; };
-    };
-  };
-
-  coreOpt = lib.types.submodule {
-    options = {
+    core = {
       application-launcher  = mkAppOpt { description = "Application launcher"; };
       file-browser          = mkAppOpt { description = "File Browser"; };
       window-switcher       = mkAppOpt { description = "Window switcher"; };
@@ -53,55 +39,11 @@ let
       terminal              = mkAppOpt { description = "Terminal"; };
       screen-lock           = mkAppOpt { description = "Screen Lock"; };
     };
-  };
 
-  toolsOpt = lib.types.submodule {
-    options = {
+    tools = {
       system-monitor        = mkAppOpt { description = "System Monitor"; };
       emoji-picker          = mkAppOpt { description = "Dmenu runner"; };
       screenshot-menu       = mkAppOpt { description = "Screenshot menu"; };
-    };
-  };
-in
-{
-  options.custom.desktop-environment.apps = {
-    volume = lib.mkOption {
-      description = "Manage volume";
-      type = volumeOpt;
-      default = {
-        increase    = "${volume} increase";
-        decrease    = "${volume} decrease";
-        toggle-mute = "${volume} toggle-mute";
-      };
-    };
-
-    brightness = lib.mkOption {
-      description = "Manage brightness";
-      type = brightnessOpt;
-      default = {
-        increase    = "${brightness} increase";
-        decrease    = "${brightness} decrease";
-      };
-    };
-
-    mediaPlayer = lib.mkOption {
-      description = "Manage media player";
-      type = mediaPlayerOpt;
-      default = {
-        previous    = "${playerctl} previous";
-        next        = "${playerctl} next";
-        play-pause  = "${playerctl} play-pause";
-      };
-    };
-
-    core = lib.mkOption {
-      description = "Manage core apps";
-      type = coreOpt;
-    };
-
-    tools = lib.mkOption {
-      description = "Manage core apps";
-      type = toolsOpt;
     };
   };
 }
