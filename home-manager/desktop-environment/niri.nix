@@ -3,7 +3,8 @@
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
   inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness application-launcher system-monitor screen-lock terminal
+  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer
+  application-launcher system-monitor screen-lock terminal
   screenshot-menu window-switcher file-browser session-menu emoji-picker;
 
   environment = ''
@@ -132,7 +133,7 @@ let
   '';
 
   # TODO: Does not work well with commands with `sh`
-  spawnCmdToNiri = command: lib.strings.concatMapStringsSep
+  toNiriSpawn = command: lib.strings.concatMapStringsSep
         " "
         (x: ''"${x}"'')
         (lib.strings.splitString " " command);
@@ -174,28 +175,28 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+Q { spawn ${spawnCmdToNiri session-menu}; }
-      Mod+Tab { spawn ${spawnCmdToNiri window-switcher}; }
+      Mod+Shift+Q { spawn ${toNiriSpawn session-menu}; }
+      Mod+Tab { spawn ${toNiriSpawn window-switcher}; }
 
-      Mod+Return { spawn ${spawnCmdToNiri terminal}; }
-      Mod+Space { spawn ${spawnCmdToNiri application-launcher}; }
-      Mod+Period { spawn ${spawnCmdToNiri emoji-picker}; }
-      Mod+Shift+Space { spawn ${spawnCmdToNiri file-browser}; }
-      Super+L { spawn ${spawnCmdToNiri screen-lock}; }
+      Mod+Return { spawn ${toNiriSpawn terminal}; }
+      Mod+Space { spawn ${toNiriSpawn application-launcher}; }
+      Mod+Period { spawn ${toNiriSpawn emoji-picker}; }
+      Mod+Shift+Space { spawn ${toNiriSpawn file-browser}; }
+      Super+L { spawn ${toNiriSpawn screen-lock}; }
 
       // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn ${spawnCmdToNiri volume.increase}; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn ${spawnCmdToNiri volume.decrease}; }
-      XF86AudioMute        allow-when-locked=true { spawn ${spawnCmdToNiri volume.toggle-mute}; }
+      XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn volume.increase}; }
+      XF86AudioLowerVolume allow-when-locked=true { spawn ${toNiriSpawn volume.decrease}; }
+      XF86AudioMute        allow-when-locked=true { spawn ${toNiriSpawn volume.toggle-mute}; }
       XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-      XF86AudioNext        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "next"; }
-      XF86AudioPause       allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "play-pause"; }
-      XF86AudioPlay        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "play-pause"; }
-      XF86AudioPrev        allow-when-locked=true { spawn "${lib.getExe pkgs.playerctl}" "previous"; }
+      XF86AudioPrev        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.previous}; }
+      XF86AudioNext        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.next}; }
+      XF86AudioPlay        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.play-pause}; }
+      XF86AudioPause       allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.play-pause}; }
 
       // Brightness
-      XF86MonBrightnessUp   allow-when-locked=true { spawn ${spawnCmdToNiri brightness.increase}; }
-      XF86MonBrightnessDown allow-when-locked=true { spawn ${spawnCmdToNiri brightness.decrease}; }
+      XF86MonBrightnessUp   allow-when-locked=true { spawn ${toNiriSpawn brightness.increase}; }
+      XF86MonBrightnessDown allow-when-locked=true { spawn ${toNiriSpawn brightness.decrease}; }
 
       Mod+Left  { focus-column-left; }
       Mod+Down  { focus-window-down; }
