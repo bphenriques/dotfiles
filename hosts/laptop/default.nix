@@ -18,8 +18,6 @@ let
       lib = mylib;
     };
 
-    anyrun = inputs.anyrun;
-
     community.pkgs = {
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
