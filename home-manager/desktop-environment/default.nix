@@ -3,7 +3,7 @@ let
   niri = lib.getExe pkgs.niri;
   terminal = lib.getExe' config.programs.foot.package "footclient";
   screen-lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${lib.getExe pkgs.hyprlock}'';
-  application-launcher = "${lib.getExe pkgs.fuzzel} --show-actions";
+  application-launcher = pkgs.fuzzel;
   dmenu = "${lib.getExe pkgs.fuzzel} -d";
   system-monitor = ''${terminal} --title=btop-tui ${lib.getExe pkgs.btop}'';
   filebrowser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
@@ -36,28 +36,31 @@ in
   ];
 
   custom.desktop-environment.apps = {
-    inherit application-launcher system-monitor screen-lock terminal screenshot-menu;
+    core = {
+      inherit application-launcher screen-lock terminal;
 
-    window-switcher = self.pkgs.niri-window-dmenu;
-    file-browser = "${filebrowser} ~";
-
-    session-menu = self.lib.builders.writeDmenuScript pkgs {
-      name = "session-dmenu";
-      entries = [
-        { label = "    Shutdown";           exec = "systemctl poweroff"; }
-        { label = "    Reboot";             exec = "systemctl reboot"; }
-        { label = "    Lock";               exec = screen-lock; }
-        { label = "󰤄    Suspend";            exec = "systemctl suspend"; }
-      ] ++ lib.optionals (osConfig.custom.boot.grub.windowsEfiDevice != "") [
-        { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windowsRebootPackage; }
-      ] ++ [
-        { label = "󰞱    System Monitor";     exec = system-monitor; }
-      ];
+      file-browser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
+      window-switcher = self.pkgs.niri-window-dmenu;
+      session-menu = self.lib.builders.writeDmenuScript pkgs {
+        name = "session-dmenu";
+        entries = [
+          { label = "    Shutdown";           exec = "systemctl poweroff"; }
+          { label = "    Reboot";             exec = "systemctl reboot"; }
+          { label = "    Lock";               exec = screen-lock; }
+          { label = "󰤄    Suspend";            exec = "systemctl suspend"; }
+        ] ++ lib.optionals (osConfig.custom.boot.grub.windowsEfiDevice != "") [
+          { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windowsRebootPackage; }
+        ] ++ [
+          { label = "󰞱    System Monitor";     exec = system-monitor; }
+        ];
+      };
     };
-
-    emoji-picker = pkgs.writeShellApplication {
-      name = "emoji-picker";
-      text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
+    tools = {
+      inherit system-monitor screenshot-menu;
+      emoji-picker = pkgs.writeShellApplication {
+        name = "emoji-picker";
+        text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
+      };
     };
   };
 

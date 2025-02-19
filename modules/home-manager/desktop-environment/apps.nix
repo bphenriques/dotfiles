@@ -52,7 +52,6 @@ let
       session-menu          = mkAppOpt { description = "Session Menu"; };
       terminal              = mkAppOpt { description = "Terminal"; };
       screen-lock           = mkAppOpt { description = "Screen Lock"; };
-      system-monitor        = mkAppOpt { description = "System Monitor"; };
     };
   };
 
@@ -86,7 +85,7 @@ in
     };
 
     mediaPlayer = lib.mkOption {
-      description = "Manage brightness";
+      description = "Manage media player";
       type = mediaPlayerOpt;
       default = {
         previous    = "${playerctl} previous";
@@ -94,18 +93,15 @@ in
         play-pause  = "${playerctl} play-pause";
       };
     };
-    
-    # Core
-    application-launcher  = mkAppOpt { description = "Application launcher"; };
-    file-browser          = mkAppOpt { description = "File Browser"; };
-    window-switcher       = mkAppOpt { description = "Window switcher"; };
-    session-menu          = mkAppOpt { description = "Session Menu"; };
-    terminal              = mkAppOpt { description = "Terminal launcher"; };
-    screen-lock           = mkAppOpt { description = "Screen Lock"; };
-    system-monitor        = mkAppOpt { description = "System Monitor"; };
 
-    # Tools
-    emoji-picker          = mkAppOpt { description = "Dmenu runner"; };
-    screenshot-menu       = mkAppOpt { description = "Screenshot menu"; };
+    core = lib.mkOption {
+      description = "Manage core apps";
+      type = coreOpt;
+    };
+
+    tools = lib.mkOption {
+      description = "Manage core apps";
+      type = toolsOpt;
+    };
   };
 }
