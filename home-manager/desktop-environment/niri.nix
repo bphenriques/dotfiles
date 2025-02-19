@@ -3,9 +3,7 @@
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
   inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer
-  application-launcher system-monitor screen-lock terminal
-  screenshot-menu window-switcher file-browser session-menu emoji-picker;
+  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer core tools;
 
   environment = ''
     environment {
@@ -175,14 +173,14 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+Q { spawn ${toNiriSpawn session-menu}; }
-      Mod+Tab { spawn ${toNiriSpawn window-switcher}; }
+      Mod+Shift+Q { spawn ${toNiriSpawn core.session-menu}; }
+      Mod+Tab { spawn ${toNiriSpawn core.window-switcher}; }
 
-      Mod+Return { spawn ${toNiriSpawn terminal}; }
-      Mod+Space { spawn ${toNiriSpawn application-launcher}; }
-      Mod+Period { spawn ${toNiriSpawn emoji-picker}; }
-      Mod+Shift+Space { spawn ${toNiriSpawn file-browser}; }
-      Super+L { spawn ${toNiriSpawn screen-lock}; }
+      Mod+Return { spawn ${toNiriSpawn core.terminal}; }
+      Mod+Space { spawn ${toNiriSpawn core.application-launcher}; }
+      Mod+Period { spawn ${toNiriSpawn tools.emoji-picker}; }
+      Mod+Shift+Space { spawn ${toNiriSpawn core.file-browser}; }
+      Super+L { spawn ${toNiriSpawn core.screen-lock}; }
 
       // Audio
       XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn volume.increase}; }
