@@ -7,23 +7,26 @@ in {
       default = config.boot.loader.grub.enable;
     };
 
-    windowsEfiDevice = lib.mkOption {
-      type = lib.types.nullOr str;
-      description = "Device where the Windows EFY System is. Get using `sudo fdisk -l` followed by `sudo blkid {device}` to get the UUID field.";
-      default = null;
+    windows = {
+      efiDevice = lib.mkOption {
+        type = lib.types.nullOr str;
+        description = "Device where the Windows EFY System is. Get using `sudo fdisk -l` followed by `sudo blkid {device}` to get the UUID field.";
+        default = null;
+      };
+
+      entryLabel = lib.mkOption {
+        type = str;
+        description = "The name of the grub menu entry to boot to Windows";
+        default = "Windows";
+      };
+
+      rebootPackage = lib.mkOption {
+        type = package;
+        description = "Package to reboot to windows";
+        default = (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windows.entryLabel}" && reboot $@'');
+      };
     };
 
-    windowsEntryLabel = lib.mkOption {
-      type = str;
-      description = "The name of the grub menu entry to boot to Windows";
-      default = "Windows";
-    };
-
-    windowsRebootPackage = lib.mkOption {
-      type = package;
-      description = "Package to reboot to windows";
-      default = (pkgs.writeScriptBin "reboot-to-windows" ''sudo grub-reboot "${cfg.windowsEntryLabel}" && reboot $@'');
-    };
 
     fontSize = lib.mkOption {
       type = int;
@@ -47,15 +50,15 @@ in {
         splashImage = null;       # Blends nicely in a OLED screen.
         timeoutStyle = "hidden";  # Ensure nothing shows up regarding grub unless prompted
         extraEntries = ''
-          ${lib.optionalString (cfg.windowsEfiDevice != null) ''
-            menuentry "${cfg.windowsEntryLabel}" {
-              search --fs-uuid --no-floppy --set=root ${cfg.windowsEfiDevice}
+          ${lib.optionalString (cfg.windows.efiDevice != null) ''
+            menuentry "${cfg.windows.entryLabel}" {
+              search --fs-uuid --no-floppy --set=root ${cfg.windows.efiDevice}
               chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
             }
             ''
           }
 
-          menuentry "BIOS Setup" --class efi {
+          menuentry "EFI setup" --class efi {
             fwsetup
           }
           menuentry "Reboot" --class restart {
@@ -68,7 +71,7 @@ in {
       };
     };
 
-    environment.systemPackages = lib.optionals (cfg.windowsEfiDevice != null) [ cfg.windowsRebootPackage ];
+    environment.systemPackages = lib.optionals (cfg.windows.efiDevice != null) [ cfg.windows.rebootPackage ];
   };
 }
 

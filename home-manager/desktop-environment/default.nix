@@ -17,6 +17,13 @@ let
     entries = [
       { label = "󰹑    Screenshot Screen";   exec = ''${grim} -o "$(${niri} msg --json focused-output | jq -r '.name')" - | ${swappy} -f -''; }
       { label = "    Screenshot Area";     exec = ''${grim} -g "${slurp}" - | ${swappy} -f -''; }
+
+      # Saveshot: 	grim -g "$(slurp -d)" "pic-selected-$(date '+%y%m%d-%H%M-%S').png"
+      # Savescreen: grim "pic-full-$(date '+%y%m%d-%H%M-%S').png"
+      # Copy area: grim -g "$(slurp -d)" - | wl-copy
+      # Copy screen: grim - | wl-copy
+      # Edit Area: grim -g "$(slurp -d)" - | swappy -f -
+      # Edit screen: grim - | swappy -f -
     ];
   };
 in
@@ -44,12 +51,13 @@ in
       session-menu = self.lib.builders.writeDmenuScript pkgs {
         name = "session-dmenu";
         entries = [
-          { label = "    Shutdown";           exec = "systemctl poweroff"; }
-          { label = "    Reboot";             exec = "systemctl reboot"; }
           { label = "    Lock";               exec = screen-lock; }
           { label = "󰤄    Suspend";            exec = "systemctl suspend"; }
-        ] ++ lib.optionals (osConfig.custom.boot.grub.windowsEfiDevice != "") [
-          { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windowsRebootPackage; }
+          { label = "    Shutdown";           exec = "systemctl poweroff"; }
+          { label = "    Reboot";             exec = "systemctl reboot"; }
+          { label = "    Reboot to EFI setup";     exec = "systemctl reboot --firmware-setup"; }
+        ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
+          { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windows.rebootPackage; }
         ] ++ [
           { label = "󰞱    System Monitor";     exec = system-monitor; }
         ];

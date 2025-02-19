@@ -27,7 +27,7 @@
       configurationLimit = 10;
     };
   };
-  custom.boot.grub.windowsEfiDevice = "38CB-E581";
+  custom.boot.grub.windows.efiDevice = "38CB-E581";
 
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
