@@ -55,7 +55,7 @@ in
           { label = "󰤄    Suspend";            exec = "systemctl suspend"; }
           { label = "    Shutdown";           exec = "systemctl poweroff"; }
           { label = "    Reboot";             exec = "systemctl reboot"; }
-          { label = "    Reboot to EFI setup";     exec = "systemctl reboot --firmware-setup"; }
+          { label = "    Reboot to EFI setup";     exec = "systemctl reboot --firmware-setup"; }
         ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
           { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windows.rebootPackage; }
         ] ++ [
