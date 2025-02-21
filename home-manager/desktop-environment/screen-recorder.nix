@@ -17,19 +17,17 @@ let
   submenu = desc: submenu: { inherit desc submenu; };
 in
 {
-  custom.desktop-environment.apps = {
-    screen-recorder = { inherit screen-audio screen-no-audio region-audio region-no-audio stop; };
-    menus.screen-recorder = self.lib.builders.writeDmenuScript pkgs {
-      name = "screen-recorder-dmenu";
-      # TODO: Menu start: 󰑋
-      entries = [
-        { label = "󰹑    Record screen (with audio)";  exec = screen-audio; }
-        { label = "󰹑    Record screen (no audio)";    exec = screen-no-audio; }
-        { label = "    Record region (with audio)";  exec = region-audio; }
-        { label = "    Record region (no audio)";    exec = region-no-audio; }
-        { label = "    Stop recording";              exec = stop; }
-      ];
-    };
+  custom.desktop-environment.apps.screen-recorder = { inherit screen-audio screen-no-audio region-audio region-no-audio stop; };
+  custom.desktop-environment.menus.screen-recorder = self.lib.builders.writeDmenuScript pkgs {
+    name = "screen-recorder-dmenu";
+    # TODO: Menu start: 󰑋
+    entries = [
+      { label = "󰹑    Record screen (with audio)";  exec = screen-audio; }
+      { label = "󰹑    Record screen (no audio)";    exec = screen-no-audio; }
+      { label = "    Record region (with audio)";  exec = region-audio; }
+      { label = "    Record region (no audio)";    exec = region-no-audio; }
+      { label = "    Stop recording";              exec = stop; }
+    ];
   };
 
   custom.programs.wlr-which-key.menus.screen-recorder = {
