@@ -1,5 +1,26 @@
 { config, lib, pkgs, self, osConfig, ... }:
+
+
+# Add eza which also avoids using ls color?
+# kooha but doesnt work
+# wl-screenrec: https://github.com/russelltg/wl-screenrec?tab=readme-ov-file
+# https://github.com/MaxVerevkin/wlr-which-key
+# https://gitlab.freedesktop.org/serebit/waycheck
+# https://github.com/feschber/lan-mouse
+# https://github.com/hyprwm/hyprpicker
+# https://github.com/LilleAila/dotfiles/blob/main/home/modules/desktop/programs/misc/espanso/default.nix
+# Recording? https://github.com/LilleAila/dotfiles/blob/main/home/modules/desktop/programs/misc/other.nix#L75C16-L75C26
+# Theming Zathura: https://github.com/LilleAila/dotfiles/blob/main/home/modules/desktop/programs/misc/zathura.nix
+# Idea: https://github.com/LilleAila/dotfiles/blob/main/home/modules/desktop/programs/misc/zathura.nix
+# Translator:? https://github.com/LilleAila/dotfiles/blob/main/home/modules/school/default.nix#L22C18-L22C33
+# Console colors: https://github.com/LilleAila/dotfiles/blob/main/nixosModules/utils/console.nix
+
+# Alternative syntax: https://github.com/LilleAila/dotfiles/blob/main/home/home.nix#L16
 let
+  inherit (builtins) listToAttrs replaceStrings;
+  inherit (lib) map;
+  inherit (lib.attrsets) nameValuePair;
+
   niri = lib.getExe pkgs.niri;
   terminal = lib.getExe' config.programs.foot.package "footclient";
   screen-lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${lib.getExe pkgs.hyprlock}'';
@@ -7,97 +28,39 @@ let
   dmenu = "${lib.getExe pkgs.fuzzel} -d";
   system-monitor = ''${terminal} --title=btop-tui ${lib.getExe pkgs.btop}'';
   filebrowser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-
-  screenshot-menu = let
-    grim = lib.getExe pkgs.grim;
-    slurp = lib.getExe pkgs.slurp;
-    swappy = lib.getExe pkgs.swappy;
-  in self.lib.builders.writeDmenuScript pkgs {
-    name = "screenshot-dmenu";
-    entries = [
-      { label = "󰹑    Screenshot Screen";   exec = ''${grim} -o "$(${niri} msg --json focused-output | jq -r '.name')" - | ${swappy} -f -''; }
-      { label = "    Screenshot Area";     exec = ''${grim} -g "${slurp}" - | ${swappy} -f -''; }
-
-      # Saveshot: 	grim -g "$(slurp -d)" "pic-selected-$(date '+%y%m%d-%H%M-%S').png"
-      # Savescreen: grim "pic-full-$(date '+%y%m%d-%H%M-%S').png"
-      # Copy area: grim -g "$(slurp -d)" - | wl-copy
-      # Copy screen: grim - | wl-copy
-      # Edit Area: grim -g "$(slurp -d)" - | swappy -f -
-      # Edit screen: grim - | swappy -f -
-    ];
-  };
 in
 {
   imports = [
-    ./qt.nix        # Setup theming for some set of apps
-    ./gtk.nix       # Setup theming for some set of apps
-    ./niri.nix      # Window Manager
-    ./waybar        # Status bar
-    ./mako.nix      # Notification Daemon
-    ./fuzzel.nix    # Application Launcher
-    ./rofi.nix      # Alternative customizable menu
-    ./swayidle.nix  # Locks/suspends the computer when idle
-    ./hyprlock.nix  # Lock screend
-    ./osd.nix       # On Screen Display
-    ./swww.nix      # Backend to manage wallpapers
+    ./qt.nix                # Setup theming for some set of apps
+    ./gtk.nix               # Setup theming for some set of apps
+    ./niri.nix              # Window Manager
+    ./waybar                # Status bar
+    ./mako.nix              # Notification Daemon
+    ./menus.nix             # Custom menus
+    ./fuzzel.nix            # Application Launcher
+    ./rofi.nix              # Alternative customizable menu
+    ./swayidle.nix          # Locks/suspends the computer when idle
+    ./hyprlock.nix          # Lock screend
+    ./osd.nix               # On Screen Display
+    ./screenshots.nix       # Screenshot management
+    ./screen-recorder.nix   # Screen recording
+    ./swww.nix              # Backend to manage wallpapers
+    ./wlr-which-key.nix     # Alternative to menus
   ];
 
   custom.desktop-environment.apps = {
+    session.lock = screen-lock;
     core = {
-      inherit application-launcher screen-lock terminal;
-
+      inherit application-launcher terminal;
       file-browser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-      window-switcher = self.pkgs.niri-window-dmenu;
-      session-menu = self.lib.builders.writeDmenuScript pkgs {
-        name = "session-dmenu";
-        entries = [
-          { label = "    Lock";               exec = screen-lock; }
-          { label = "󰤄    Suspend";            exec = "systemctl suspend"; }
-          { label = "    Shutdown";           exec = "systemctl poweroff"; }
-          { label = "    Reboot";             exec = "systemctl reboot"; }
-          { label = "    Reboot to EFI setup";     exec = "systemctl reboot --firmware-setup"; }
-        ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
-          { label = "    Reboot to Windows";  exec = lib.getExe osConfig.custom.boot.grub.windows.rebootPackage; }
-        ] ++ [
-          { label = "󰞱    System Monitor";     exec = system-monitor; }
-        ];
-      };
     };
     tools = {
-      inherit system-monitor screenshot-menu;
+      inherit system-monitor;
       emoji-picker = pkgs.writeShellApplication {
         name = "emoji-picker";
+        runtimeInputs = [ pkgs.wtype ];
         text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
       };
     };
   };
-
-  home.packages = [
-    (pkgs.makeDesktopItem {
-      name = "screenshot-dmenu";
-      desktopName = "Open Screenshot menu";
-      icon = "folder";  # FIXME
-      exec = lib.getExe screenshot-menu;
-    })
-
-    (pkgs.makeDesktopItem {
-      name = "system-monitor";
-      desktopName = "System Monitor";
-      icon = "folder";  # FIXME
-      exec =  system-monitor;
-    })
-
-    (pkgs.makeDesktopItem {
-      name = "File Browser";
-      desktopName = "Open file browser";
-      icon = "folder";  # FIXME
-      exec = filebrowser;
-      actions = let
-        bookmarkToAction = (b: {
-          name = builtins.replaceStrings [" "] ["-"] b.name;
-          value = { inherit (b) name; exec = "${filebrowser} ${b.path}"; };
-        });
-      in builtins.listToAttrs (lib.map bookmarkToAction config.custom.desktop-environment.settings.file-bookmarks);
-    })
-  ];
 }

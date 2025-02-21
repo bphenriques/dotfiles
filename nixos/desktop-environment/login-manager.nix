@@ -2,6 +2,7 @@
 {
   services.greetd = let
     # FIXME: actually set a theme
+    # FIXME: https://github.com/LilleAila/dotfiles/blob/main/nixosModules/desktop/greeter.nix
     theme = "--theme border=magenta;text=cyan;prompt=green;time=red;action=blue;button=yellow;container=black;input=red";
     options = ''--asterisks --time --remember'';
     session = {

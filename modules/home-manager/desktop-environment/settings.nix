@@ -29,5 +29,33 @@ in
       description = "Default display output";
       type = displayOutputOpt;
     };
+
+    screenshots = {
+      directory = lib.mkOption {
+        description = "Location of screenshots";
+        type = lib.types.str;
+        default = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
+      };
+
+      format = lib.mkOption {
+         description = "Filename format of screenshots. Templates must be compatible with the date command";
+         type = lib.types.str;
+         default = "screenshot-%Y%m%d-%H%M%S.png";
+       };
+    };
+
+    screen-recorder = {
+      directory = lib.mkOption {
+        description = "Location of recordings";
+        type = lib.types.str;
+        default = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
+      };
+
+      format = lib.mkOption {
+         description = "Filename format of recordings. Templates must be compatible with the date command";
+         type = lib.types.str;
+         default = "record-%Y%m%d-%H%M%S.mp4";
+       };
+    };
   };
 }
