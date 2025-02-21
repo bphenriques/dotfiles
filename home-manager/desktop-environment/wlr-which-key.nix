@@ -1,7 +1,4 @@
 { config, pkgs, lib, ... }:
-
-# https://github.com/samumoil/homelab/blob/cc08d3f557ef03b4d54457e751d4287e97c5909a/nixos/swayhome/home/config/wlrwhichkey/default.nix#L49
-
 let
   inherit (config.lib.stylix) colors;
   inherit (config.stylix) fonts;

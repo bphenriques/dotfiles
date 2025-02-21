@@ -13,6 +13,8 @@ let
   playerctl = lib.getExe pkgs.playerctl;
   systemctl = lib.getExe' pkgs.systemd "systemctl";
   dmenu = "${lib.getExe pkgs.fuzzel} -d";
+  terminal = lib.getExe' config.programs.foot.package "footclient";
+  date = lib.getExe' pkgs.coreutils "date";
 
   mkAppOpt = { description ? "", default ? null }: lib.mkOption {
     inherit description default;
@@ -73,14 +75,6 @@ in
       region      = mkAppOpt { };
       region-edit = mkAppOpt { };
       region-copy = mkAppOpt { };
-    };
-
-    screen-recorder = {
-      screen-audio     = mkAppOpt { };
-      screen-no-audio  = mkAppOpt { };
-      region-audio         = mkAppOpt { };
-      region-no-audio      = mkAppOpt { };
-      stop                 = mkAppOpt { };
     };
 
     wm = {
