@@ -1,6 +1,8 @@
 { pkgs, lib, ... }:
 {
   imports = [
+    ./qt.nix            # Setup theming for some set of apps
+    ./gtk.nix           # Setup theming for some set of apps
     ./firefox           # Browser
     ./zathura.nix       # Documents
     ./mpv.nix           # Videos

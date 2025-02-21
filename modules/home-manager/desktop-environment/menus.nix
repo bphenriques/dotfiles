@@ -27,32 +27,5 @@ in
       ];
     });
     screenshot      = mkAppOpt { };
-    screen-recorder = mkAppOpt { };
-  };
-
-  config = {
-    home.packages = [
-      (pkgs.makeDesktopItem {
-        name = "screenshot-dmenu";
-        desktopName = "Open Screenshot menu";
-        icon = "folder";  # FIXME
-        exec = cfg.screenshot;
-      })
-
-      (pkgs.makeDesktopItem {
-        name = "screen-recoder-dmenu";
-        desktopName = "Open screen-recorder menu";
-        icon = "folder";  # FIXME
-        exec = cfg.screen-recorder;
-        # FIXME?
-#        actions = {
-#          screen-audio      = { name = "Record screen (with audio)";  exec = shellExec cfg.screen-recorder.fullscreen-audio; };
-#          screen-no-audio   = { name = "Record screen (no audio)";    exec = shellExec cfg.screen-recorder.fullscreen-no-audio; };
-#          region-audio      = { name = "ecord region (with audio)";   exec = shellExec cfg.screen-recorder.region-audio; };
-#          region-no-audio   = { name = "Record region (no audio)";    exec = shellExec cfg.screen-recorder.region-no-audio; };
-#          stop              = { name = "Stop recording";              exec = shellExec cfg.screen-recorder.stop; };
-#        };
-      })
-    ];
   };
 }

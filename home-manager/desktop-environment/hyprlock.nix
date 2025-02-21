@@ -3,8 +3,12 @@ let
   wallpapersPkg = self.pkgs.wallpapers.override {
     selected = [ "lake" ];
   };
+  niri = lib.getExe pkgs.niri;
+  hyprlock = lib.getExe pkgs.hyprlock;
 in
 {
+  custom.desktop-environment.apps.session.lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}'';
+
   programs.hyprlock = {
     enable = true;
     settings = {
