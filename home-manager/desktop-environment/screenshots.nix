@@ -20,6 +20,18 @@ let
 in
 {
   custom.desktop-environment.apps.screenshot = { inherit screen screen-copy screen-edit region region-copy region-edit; };
+  custom.desktop-environment.menus.screenshot = self.lib.builders.writeDmenuScript pkgs {
+    name = "screenshot-dmenu";
+    entries = [
+      { label = "󰹑    Screenshot screen";           exec = screen; }
+      { label = "󰹑    Screenshot screen (edit)";    exec = screen-edit; }
+      { label = "󰹑    Screenshot screen (copy)";    exec = screen-copy; }
+      { label = "    Screenshot region";           exec = region; }
+      { label = "    Screenshot region (edit)";    exec = region-edit; }
+      { label = "    Screenshot region (copy)";    exec = region-copy; }
+    ];
+  };
+
   custom.programs.wlr-which-key.menus.screenshot = {
     s = submenu "[s]creen" {
       s = cmd "[s]ave"  screen;

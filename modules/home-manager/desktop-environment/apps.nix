@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, ... }:
+{ lib, pkgs, config, self, osConfig, ... }:
 
 let
   inherit (builtins) listToAttrs replaceStrings;
@@ -12,6 +12,7 @@ let
   brightness = lib.getExe self.pkgs.brightness-osd;
   playerctl = lib.getExe pkgs.playerctl;
   systemctl = lib.getExe' pkgs.systemd "systemctl";
+  dmenu = "${lib.getExe pkgs.fuzzel} -d";
 
   mkAppOpt = { description ? "", default ? null }: lib.mkOption {
     inherit description default;
@@ -49,7 +50,8 @@ in
     };
 
     core = {
-      application-launcher  = mkAppOpt { description = "Application launcher"; };
+      application-launcher  = mkAppOpt' pkgs.fuzzel;
+      dmenu                 = mkAppOpt' dmenu;
       file-browser          = mkAppOpt { description = "File Browser"; };
       window-switcher       = mkAppOpt { description = "Window switcher"; };
       terminal              = mkAppOpt { description = "Terminal"; };
@@ -57,7 +59,11 @@ in
 
     tools = {
       system-monitor        = mkAppOpt { };
-      emoji-picker          = mkAppOpt { };
+      emoji-picker          = mkAppOpt' (pkgs.writeShellApplication {
+        name = "emoji-picker";
+        runtimeInputs = [ pkgs.wtype ];
+        text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
+      });
     };
 
     screenshot = {
@@ -77,12 +83,6 @@ in
       stop                 = mkAppOpt { };
     };
 
-    menus = {
-      session         = mkAppOpt { };
-      screenshot      = mkAppOpt { };
-      screen-recorder = mkAppOpt { };
-    };
-
     wm = {
       focused-output = mkAppOpt { };
     };
@@ -90,28 +90,6 @@ in
 
   config = {
     home.packages = [
-      (pkgs.makeDesktopItem {
-        name = "screenshot-dmenu";
-        desktopName = "Open Screenshot menu";
-        icon = "folder";  # FIXME
-        exec = cfg.menus.screenshot;
-      })
-
-      (pkgs.makeDesktopItem {
-        name = "screen-recoder-dmenu";
-        desktopName = "Open screen-recorder menu";
-        icon = "folder";  # FIXME
-        exec = cfg.menus.screen-recorder;
-        # FIXME?
-#        actions = {
-#          screen-audio      = { name = "Record screen (with audio)";  exec = shellExec cfg.screen-recorder.fullscreen-audio; };
-#          screen-no-audio   = { name = "Record screen (no audio)";    exec = shellExec cfg.screen-recorder.fullscreen-no-audio; };
-#          region-audio      = { name = "ecord region (with audio)";   exec = shellExec cfg.screen-recorder.region-audio; };
-#          region-no-audio   = { name = "Record region (no audio)";    exec = shellExec cfg.screen-recorder.region-no-audio; };
-#          stop              = { name = "Stop recording";              exec = shellExec cfg.screen-recorder.stop; };
-#        };
-      })
-
       (pkgs.makeDesktopItem {
         name = "system-monitor";
         desktopName = "System Monitor";

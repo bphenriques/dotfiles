@@ -2,8 +2,9 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
+  inherit (config.custom.desktop-environment) menus;
   inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer session core tools menus;
+  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer session core tools;
 
   environment = ''
     environment {
@@ -132,9 +133,9 @@ let
 
   # TODO: Does not work well with commands with `sh`
   toNiriSpawn = command: lib.strings.concatMapStringsSep
-      " "
-      (x: ''"${x}"'')
-      (lib.strings.splitString " " command);
+    " "
+    (x: ''"${x}"'')
+    (lib.strings.splitString " " command);
 in
 {
   wayland.systemd.target = "niri.service";

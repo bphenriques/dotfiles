@@ -17,15 +17,9 @@
 
 # Alternative syntax: https://github.com/LilleAila/dotfiles/blob/main/home/home.nix#L16
 let
-  inherit (builtins) listToAttrs replaceStrings;
-  inherit (lib) map;
-  inherit (lib.attrsets) nameValuePair;
-
   niri = lib.getExe pkgs.niri;
   terminal = lib.getExe' config.programs.foot.package "footclient";
   screen-lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${lib.getExe pkgs.hyprlock}'';
-  application-launcher = pkgs.fuzzel;
-  dmenu = "${lib.getExe pkgs.fuzzel} -d";
   system-monitor = ''${terminal} --title=btop-tui ${lib.getExe pkgs.btop}'';
   filebrowser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
 in
@@ -36,7 +30,6 @@ in
     ./niri.nix              # Window Manager
     ./waybar                # Status bar
     ./mako.nix              # Notification Daemon
-    ./menus.nix             # Custom menus
     ./fuzzel.nix            # Application Launcher
     ./rofi.nix              # Alternative customizable menu
     ./swayidle.nix          # Locks/suspends the computer when idle
@@ -50,17 +43,9 @@ in
 
   custom.desktop-environment.apps = {
     session.lock = screen-lock;
-    core = {
-      inherit application-launcher terminal;
+    core = { inherit terminal;
       file-browser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
     };
-    tools = {
-      inherit system-monitor;
-      emoji-picker = pkgs.writeShellApplication {
-        name = "emoji-picker";
-        runtimeInputs = [ pkgs.wtype ];
-        text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
-      };
-    };
+    tools = { inherit system-monitor; };
   };
 }
