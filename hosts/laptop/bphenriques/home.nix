@@ -20,6 +20,7 @@
     download  = "${config.home.homeDirectory}/downloads";
 
     extraConfig.XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
+    extraConfig.XDG_RECORDINGS_DIR = "${config.home.homeDirectory}/recordings";
   };
 
   # https://www.mankier.com/5/tmpfiles.d
@@ -34,6 +35,7 @@
     "d ${config.xdg.userDirs.desktop}                         - - - -"
     "d ${config.xdg.userDirs.download}                        - - - -"
     "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
+    "d ${config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR}  - - - -"
   ];
 
   gtk.gtk3.bookmarks = [

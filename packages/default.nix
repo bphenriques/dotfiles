@@ -23,6 +23,8 @@ let
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       swww-util = pkgs.callPackage ./swww-util { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
+      screen-recorder = pkgs.callPackage ./screen-recorder { };
+      screenshots = pkgs.callPackage ./screenshots { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

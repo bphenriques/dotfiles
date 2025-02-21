@@ -3,7 +3,7 @@
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
   inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer core tools;
+  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer session core tools menus;
 
   environment = ''
     environment {
@@ -132,12 +132,17 @@ let
 
   # TODO: Does not work well with commands with `sh`
   toNiriSpawn = command: lib.strings.concatMapStringsSep
-        " "
-        (x: ''"${x}"'')
-        (lib.strings.splitString " " command);
+      " "
+      (x: ''"${x}"'')
+      (lib.strings.splitString " " command);
 in
 {
   wayland.systemd.target = "niri.service";
+  custom.desktop-environment.apps = {
+    core.window-switcher = self.pkgs.niri-window-dmenu;
+    session.logout = "${lib.getExe pkgs.niri} msg action quit";
+    wm.focused-output = "${lib.getExe pkgs.niri} msg --json focused-output | jq -r '.name'";
+  };
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
@@ -162,7 +167,6 @@ in
     }
 
     binds {
-      // Basic
       Mod+Q { close-window; }
       Mod+F { maximize-column; }
       Mod+Shift+F { fullscreen-window; }
@@ -173,14 +177,15 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+Q { spawn ${toNiriSpawn core.session-menu}; }
+      Mod+Shift+Q { spawn ${toNiriSpawn menus.session}; }
       Mod+Tab { spawn ${toNiriSpawn core.window-switcher}; }
 
+      Mod+A { spawn "${lib.getExe pkgs.wlr-which-key}"; }
       Mod+Return { spawn ${toNiriSpawn core.terminal}; }
       Mod+Space { spawn ${toNiriSpawn core.application-launcher}; }
       Mod+Period { spawn ${toNiriSpawn tools.emoji-picker}; }
       Mod+Shift+Space { spawn ${toNiriSpawn core.file-browser}; }
-      Super+L { spawn ${toNiriSpawn core.screen-lock}; }
+      Super+L { spawn ${toNiriSpawn session.lock}; }
 
       // Audio
       XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn volume.increase}; }
