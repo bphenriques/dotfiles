@@ -7,7 +7,7 @@ let
   hyprlock = lib.getExe pkgs.hyprlock;
 in
 {
-  custom.desktop-environment.apps.session.lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}'';
+  custom.desktop-environment.session.lock = ''${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}'';
 
   programs.hyprlock = {
     enable = true;

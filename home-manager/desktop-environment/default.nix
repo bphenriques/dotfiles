@@ -33,7 +33,6 @@ in
     ./hyprlock.nix          # Lock screend
     ./osd.nix               # On Screen Display
     ./swappy.nix            # Edit screenshots
-    ./swww.nix              # Backend to manage wallpapers
     ./wlr-which-key.nix     # Alternative to menus
   ];
 

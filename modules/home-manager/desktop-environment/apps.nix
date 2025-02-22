@@ -11,7 +11,6 @@ let
   volume = lib.getExe self.pkgs.volume-osd;
   brightness = lib.getExe self.pkgs.brightness-osd;
   playerctl = lib.getExe pkgs.playerctl;
-  systemctl = lib.getExe' pkgs.systemd "systemctl";
   dmenu = "${lib.getExe pkgs.fuzzel} -d";
   terminal = lib.getExe' config.programs.foot.package "footclient";
   date = lib.getExe' pkgs.coreutils "date";
@@ -42,20 +41,10 @@ in
       play-pause    = mkAppOpt' "${playerctl} toggle-pause";
     };
 
-    session = {
-      shutdown    = mkAppOpt' "${systemctl} poweroff";
-      suspend     = mkAppOpt' "${systemctl} suspend";
-      reboot      = mkAppOpt' "${systemctl} reboot";
-      reboot-efi  = mkAppOpt' "${systemctl} reboot --firmware-setup";
-      lock        = mkAppOpt { };
-      logout      = mkAppOpt { };
-    };
-
     core = {
       application-launcher  = mkAppOpt' pkgs.fuzzel;
       dmenu                 = mkAppOpt' dmenu;
       file-browser          = mkAppOpt { description = "File Browser"; };
-      window-switcher       = mkAppOpt { description = "Window switcher"; };
       terminal              = mkAppOpt { description = "Terminal"; };
     };
 
@@ -66,15 +55,6 @@ in
         runtimeInputs = [ pkgs.wtype ];
         text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
       });
-    };
-
-    screenshot = {
-      screen      = mkAppOpt { };
-      screen-edit = mkAppOpt { };
-      screen-copy = mkAppOpt { };
-      region      = mkAppOpt { };
-      region-edit = mkAppOpt { };
-      region-copy = mkAppOpt { };
     };
 
     wm = {
