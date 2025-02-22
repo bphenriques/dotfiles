@@ -53,6 +53,7 @@
     "file://${config.home.homeDirectory}/.config Config"
   ];
 
+  custom.desktop-environment.wallpaper.directory = "${self.pkgs.wallpapers}/share/wallpapers";
   custom.desktop-environment.settings.file-bookmarks = [
     { name = "Documents"; path = config.xdg.userDirs.documents; }
     { name = "Pictures"; path = config.xdg.userDirs.pictures; }

@@ -2,9 +2,9 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
-  inherit (config.custom.desktop-environment) menus;
+  inherit (config.custom.desktop-environment) session;
   inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer session core tools;
+  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer core tools;
 
   environment = ''
     environment {
@@ -136,14 +136,15 @@ let
     " "
     (x: ''"${x}"'')
     (lib.strings.splitString " " command);
+
+  window-switcher = self.pkgs.niri-window-dmenu;
+  focused-output = "${lib.getExe pkgs.niri} msg --json focused-output | jq -r '.name'";
 in
 {
   wayland.systemd.target = "niri.service";
-  custom.desktop-environment.apps = {
-    core.window-switcher = self.pkgs.niri-window-dmenu;
-    session.logout = "${lib.getExe pkgs.niri} msg action quit";
-    wm.focused-output = "${lib.getExe pkgs.niri} msg --json focused-output | jq -r '.name'";
-  };
+  custom.desktop-environment.session.logout = "${lib.getExe pkgs.niri} msg action quit";
+
+  custom.desktop-environment.compositor = { inherit window-switcher focused-output; };
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
@@ -178,8 +179,8 @@ in
       Ctrl+Print { screenshot-screen; }
       Alt+Print { screenshot-window; }
 
-      Mod+Shift+Q { spawn ${toNiriSpawn menus.session}; }
-      Mod+Tab { spawn ${toNiriSpawn core.window-switcher}; }
+      Mod+Shift+Q { spawn ${toNiriSpawn session.dmenu}; }
+      Mod+Tab { spawn ${toNiriSpawn window-switcher}; }
 
       Mod+A { spawn "${lib.getExe pkgs.wlr-which-key}"; }
       Mod+Return { spawn ${toNiriSpawn core.terminal}; }

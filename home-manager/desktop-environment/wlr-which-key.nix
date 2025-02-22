@@ -23,14 +23,5 @@ in
       margin_left = 0;
       margin_top = 0;
     };
-
-    menus.power = {
-      p = cmd "⏻ Power off" "systemctl poweroff";
-      l = cmd " Lock" "swaylock";
-      e = cmd "󰈆 Logout" "swaymsg exit"; # (exit)
-      s = cmd "󰤄 Suspend" "systemctl suspend";
-      r = cmd "󰜉 Reboot" "systemctl reboot";
-      u = cmd "󰤁 Soft reboot" "systemctl soft-reboot"; # (userspace reboot)
-    };
   };
 }

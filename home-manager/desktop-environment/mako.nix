@@ -6,7 +6,7 @@
     layer = "overlay";
     defaultTimeout = 5000;
 
-    # Theming not covered by stylix
+    # Theming is covered by stylix
     width = 300;
     height = 200;
     margin = "8";
