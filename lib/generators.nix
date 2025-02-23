@@ -11,11 +11,11 @@ rec {
 
   mergeAllSystems = attrs: forAllSystems (system: lib.mergeAttrsList (lib.map (attrs: attrs.${system} or { }) attrs));
 
-  # Generates a attr with { "{filename}" = import {file-path}; }
+  # Generates a attr with { "{dir}-{filename}" = import {file-path}; }
   readModulesAttrs = dir:
     let
       targetFiles = lib.filter (path: (baseNameOf path) != "default.nix") (listFilesRecursive dir);
-      toModuleName = path: removeSuffix ".nix" (baseNameOf path);
+      toModuleName = path: (baseNameOf (dirOf path)) + "-" + (removeSuffix ".nix" (baseNameOf path));
     in
       listToAttrs (map (path: { name = toModuleName path; value = path; }) targetFiles);
 }

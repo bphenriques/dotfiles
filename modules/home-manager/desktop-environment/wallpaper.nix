@@ -11,39 +11,21 @@ in
   };
 
   config = {
-    home.packages = [ pkgs.swww ];
+    home.packages = [ self.pkgs.swww-util ];
 
-    systemd.user.services = {
-      swww = {
-        Unit = {
-          Description = "Efficient animated wallpaper daemon for wayland";
-          ConditionEnvironment = [ "WAYLAND_DISPLAY" ];
-          PartOf = [ "graphical-session.target" ];
-          After = [ "graphical-session.target" ];
-        };
-        Install.WantedBy = [ config.wayland.systemd.target ];
-        Service = {
-          Type = "simple";
-          ExecStart = lib.getExe' pkgs.swww "swww-daemon";
-          ExecStop = "${lib.getExe pkgs.swww} kill";
-          Restart = "on-failure";
-        };
+    systemd.user.services.set-wallpaper = {
+      Unit = {
+        Description = "Sets the wallpaper";
+        PartOf = [ "swww.service" ];
+        After = [ "swww.service" ];
       };
-
-      set-wallpaper = {
-        Unit = {
-          Description = "Sets the wallpaper";
-          PartOf = [ "swww.service" ];
-          After = [ "swww.service" ];
-        };
-        Install.WantedBy = [ config.wayland.systemd.target ];
-        Service = {
-          Type = "oneshot";
-          ExecStart = lib.escapeShellArgs [
-            "${lib.getExe self.pkgs.swww-util}"
-            "random" cfg.directory
-          ];
-        };
+      Install.WantedBy = [ config.wayland.systemd.target ];
+      Service = {
+        Type = "oneshot";
+        ExecStart = lib.escapeShellArgs [
+          "${lib.getExe self.pkgs.swww-util}"
+          "random" cfg.directory
+        ];
       };
     };
   };

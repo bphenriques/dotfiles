@@ -1,5 +1,5 @@
 { config, pkgs, self, lib, ... }:
-{
+lib.mkIf pkgs.stdenv.isLinux {
   stylix.targets.rofi.enable = true;
   programs.rofi = {
     enable = true;

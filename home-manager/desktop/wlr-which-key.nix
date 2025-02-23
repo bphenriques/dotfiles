@@ -5,7 +5,7 @@ let
 
   cmd = desc: cmd: { inherit desc cmd; };
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
     enable = true;
     settings = {
