@@ -1,5 +1,5 @@
 { config, pkgs, lib, self, ... }:
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.fuzzel = {
     enable = true;
     settings.main = {
@@ -8,7 +8,6 @@
       vertical-pad = 10;
       inner-pad = 10;
       show-actions = true;
-      terminal = config.custom.desktop-environment.apps.core.terminal;
     };
   };
   stylix.targets.fuzzel.enable = true;

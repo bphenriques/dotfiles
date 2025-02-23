@@ -67,6 +67,16 @@ in
       })
     ];
 
+    xdg.configFile."swappy/config".text = lib.generators.toINI { } {
+      Default = {
+        save_dir = cfg.directory;
+        save_filename_format = cfg.format;
+        show_panel = true;
+        early_exit = true;
+        auto_save = true;
+      };
+    };
+
     custom.programs.wlr-which-key.menus.screenshot = lib.mkIf config.custom.programs.wlr-which-key.enable {
       s = submenu "[s]creen" {
         s = cmd "[s]ave"  cfg.screen;

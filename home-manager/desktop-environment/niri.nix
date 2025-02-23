@@ -1,10 +1,6 @@
 { config, lib, programs, pkgs, self, community, ... }:
-# https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
-# Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 let
-  inherit (config.custom.desktop-environment) session;
-  inherit (config.custom.desktop-environment.settings) displayOutput;
-  inherit (config.custom.desktop-environment.apps) volume brightness mediaPlayer core tools;
+  inherit (config.custom.desktop-environment) session audio brightness picker files media-player system terminal compositor;
 
   environment = ''
     environment {
@@ -40,9 +36,9 @@ let
 
   # Niri requires at least one monitor.
   outputs = ''
-    output "${displayOutput.identifier}" {
-      mode "${displayOutput.resolution}@${displayOutput.refreshRate}"
-      scale ${displayOutput.scale}
+    output "${compositor.display.default.identifier}" {
+      mode "${compositor.display.default.resolution}@${compositor.display.default.refreshRate}"
+      scale ${compositor.display.default.scale}
     }
   '';
 
@@ -144,7 +140,10 @@ in
   wayland.systemd.target = "niri.service";
   custom.desktop-environment.session.logout = "${lib.getExe pkgs.niri} msg action quit";
 
-  custom.desktop-environment.compositor = { inherit window-switcher focused-output; };
+  custom.desktop-environment.compositor = { inherit window-switcher focused-output;
+    power-off-monitors = "${lib.getExe pkgs.niri} msg action power-off-monitors";
+    power-on-monitors = "${lib.getExe pkgs.niri} msg action power-on-monitors";
+  };
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
@@ -183,21 +182,21 @@ in
       Mod+Tab { spawn ${toNiriSpawn window-switcher}; }
 
       Mod+A { spawn "${lib.getExe pkgs.wlr-which-key}"; }
-      Mod+Return { spawn ${toNiriSpawn core.terminal}; }
-      Mod+Space { spawn ${toNiriSpawn core.application-launcher}; }
-      Mod+Period { spawn ${toNiriSpawn tools.emoji-picker}; }
-      Mod+Shift+Space { spawn ${toNiriSpawn core.file-browser}; }
+      Mod+Return { spawn ${toNiriSpawn terminal.emulator}; }
+      Mod+Space { spawn ${toNiriSpawn picker.application}; }
+      Mod+Period { spawn ${toNiriSpawn picker.emoji}; }
+      Mod+Shift+Space { spawn ${toNiriSpawn files.browser}; }
       Super+L { spawn ${toNiriSpawn session.lock}; }
 
       // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn volume.increase}; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn ${toNiriSpawn volume.decrease}; }
-      XF86AudioMute        allow-when-locked=true { spawn ${toNiriSpawn volume.toggle-mute}; }
+      XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn audio.increase}; }
+      XF86AudioLowerVolume allow-when-locked=true { spawn ${toNiriSpawn audio.decrease}; }
+      XF86AudioMute        allow-when-locked=true { spawn ${toNiriSpawn audio.toggle-mute}; }
       XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-      XF86AudioPrev        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.previous}; }
-      XF86AudioNext        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.next}; }
-      XF86AudioPlay        allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.play-pause}; }
-      XF86AudioPause       allow-when-locked=true { spawn ${toNiriSpawn mediaPlayer.play-pause}; }
+      XF86AudioPrev        allow-when-locked=true { spawn ${toNiriSpawn media-player.previous}; }
+      XF86AudioNext        allow-when-locked=true { spawn ${toNiriSpawn media-player.next}; }
+      XF86AudioPlay        allow-when-locked=true { spawn ${toNiriSpawn media-player.play-pause}; }
+      XF86AudioPause       allow-when-locked=true { spawn ${toNiriSpawn media-player.play-pause}; }
 
       // Brightness
       XF86MonBrightnessUp   allow-when-locked=true { spawn ${toNiriSpawn brightness.increase}; }

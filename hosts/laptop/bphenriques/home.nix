@@ -53,16 +53,22 @@
     "file://${config.home.homeDirectory}/.config Config"
   ];
 
-  custom.desktop-environment.wallpaper.directory = "${self.pkgs.wallpapers}/share/wallpapers";
-  custom.desktop-environment.settings.file-bookmarks = [
-    { name = "Documents"; path = config.xdg.userDirs.documents; }
-    { name = "Pictures"; path = config.xdg.userDirs.pictures; }
-    { name = "Music"; path = config.xdg.userDirs.music; }
-    { name = "Downloads"; path = config.xdg.userDirs.download; }
-    { name = "NAS Private"; path = "${config.home.homeDirectory}/nas-private"; }
-    { name = "NAS Media"; path = "${config.home.homeDirectory}/nas-media"; }
-    { name = "Games"; path = "${config.home.homeDirectory}/games"; }
-  ];
+  custom.desktop-environment = {
+    wallpaper.directory = "${self.pkgs.wallpapers}/share/wallpapers";
+    lock-screen = {
+      background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
+      font-family = config.stylix.fonts.sansSerif.name;
+    };
+    files.bookmarks = [
+      { name = "Documents";   path = config.xdg.userDirs.documents; }
+      { name = "Pictures";    path = config.xdg.userDirs.pictures; }
+      { name = "Music";       path = config.xdg.userDirs.music; }
+      { name = "Downloads";   path = config.xdg.userDirs.download; }
+      { name = "NAS Private"; path = "${config.home.homeDirectory}/nas-private"; }
+      { name = "NAS Media";   path = "${config.home.homeDirectory}/nas-media"; }
+      { name = "Games";       path = "${config.home.homeDirectory}/games"; }
+    ];
+  };
 
   home.stateVersion = "24.05";
 }

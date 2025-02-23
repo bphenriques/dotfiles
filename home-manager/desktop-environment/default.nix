@@ -15,31 +15,14 @@
 # Translator:? https://github.com/LilleAila/dotfiles/blob/main/home/modules/school/default.nix#L22C18-L22C33
 # Console colors: https://github.com/LilleAila/dotfiles/blob/main/nixosModules/utils/console.nix
 # https://github.com/samumoil/homelab/blob/cc08d3f557ef03b4d54457e751d4287e97c5909a/nixos/swayhome/home/config/wlrwhichkey/default.nix#L49
+# https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
+# Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
+
 
 # Alternative syntax: https://github.com/LilleAila/dotfiles/blob/main/home/home.nix#L16
-let
-  terminal = lib.getExe' config.programs.foot.package "footclient";
-  system-monitor = ''${terminal} --title=btop-tui ${lib.getExe pkgs.btop}'';
-  filebrowser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-in
 {
   imports = [
     ./niri.nix              # Window Manager
     ./waybar                # Status bar
-    ./mako.nix              # Notification Daemon
-    ./fuzzel.nix            # Application Launcher
-    ./rofi.nix              # Alternative customizable menu
-    ./swayidle.nix          # Locks/suspends the computer when idle
-    ./hyprlock.nix          # Lock screend
-    ./osd.nix               # On Screen Display
-    ./swappy.nix            # Edit screenshots
-    ./wlr-which-key.nix     # Alternative to menus
   ];
-
-  custom.desktop-environment.apps = {
-    core = { inherit terminal;
-      file-browser = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-    };
-    tools = { inherit system-monitor; };
-  };
 }
