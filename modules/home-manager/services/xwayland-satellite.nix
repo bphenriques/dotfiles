@@ -5,7 +5,7 @@ let
 in
 {
   options.custom.services.xwayland-satellite = with lib.types; {
-    enable = lib.mkEnableOption ''xwayland-satellite.'';
+    enable = lib.mkEnableOption ''xwayland-satellite'';
     displayId = lib.mkOption {
       type = int;
       default = 21;

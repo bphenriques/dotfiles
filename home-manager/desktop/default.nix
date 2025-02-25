@@ -8,7 +8,7 @@
     ./zathura.nix       # Documents
     ./mpv.nix           # Videos
     ./imv.nix           # Images
-    ./beets.nix         # Music library manager
+    #./beets.nix         # FIXME: re-add once it works again Music library manager
     ./foot.nix          # Terminal
     ./ghostty.nix       # Terminal
     ./mangohud.nix      # Game HUD
@@ -32,9 +32,6 @@
     pkgs.newsflash       # RSS Reader
     pkgs.feishin         # Jellyfin player
     pkgs.cmus            # TUI music player
-
-    # System
-    pkgs.wdisplays
   ];
 
   custom.services.xwayland-satellite.enable = pkgs.stdenv.isLinux;

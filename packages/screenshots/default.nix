@@ -7,6 +7,7 @@ pkgs.writeShellApplication {
     pkgs.swappy
     pkgs.slurp
     pkgs.libnotify
+    pkgs.wl-clipboard
   ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.linux;

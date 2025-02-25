@@ -19,7 +19,6 @@
   # Enable easier font management
   fonts.fontconfig.enable = true;
 
-  # TODO Make manual entries look nicer and with color
   stylix.targets.bat.enable = true;
   programs.bat.enable = true;             # Better file previewer
   programs.fd.enable = true;              # Better `find`.
@@ -70,9 +69,6 @@
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
-
-    # TODO: to assess
-    pkgs.calcure
   ];
 
   # Gpg
@@ -142,13 +138,13 @@
     };
   };
 
-  programs.man.enable = true;
   # Discard home-manager configuration manual.
   manual = {
     html.enable = false;
     manpages.enable = false;
     json.enable = false;
   };
+  programs.man.enable = true;
 
   # Tighten permissions to private keys
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [

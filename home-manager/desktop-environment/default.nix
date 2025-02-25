@@ -18,7 +18,6 @@
 # https://github.com/nyawox/nixboxes/blob/ecab4559da256b4f1198ca7d39d6e5b1d4442296/home/desktop/niri/general.nix
 # Reference on how to create desktop itens next to executables: https://discourse.nixos.org/t/generate-and-install-a-desktop-file-along-with-an-executable/42744
 
-
 # Alternative syntax: https://github.com/LilleAila/dotfiles/blob/main/home/home.nix#L16
 {
   imports = [

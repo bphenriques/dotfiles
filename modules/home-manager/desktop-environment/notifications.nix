@@ -20,5 +20,9 @@
         default-timeout=0
       '';
     };
+
+    home.packages = [
+      pkgs.libnotify
+    ];
   };
 }
