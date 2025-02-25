@@ -16,8 +16,6 @@ in
   };
 
   config = {
-    # TODO ideal invariant: sleep > lock > suspend
-
     services.swayidle = {
       enable = true;
       extraArgs = [ "-w" ]; # Wait for commands to complete

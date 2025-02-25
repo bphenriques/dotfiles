@@ -38,8 +38,9 @@ in
   ];
 
   xdg.configFile = {
+    # TODO: Migrate to hm types
     # Smart sorting depending on the directory
-    "yazi/plugins/folder-rules.yazi/init.lua".text = ''
+    "yazi/plugins/folder-rules.yazi/main.lua".text = ''
       local function setup()
         ps.sub("cd", function()
           local cwd = cx.active.current.cwd

@@ -31,8 +31,6 @@ _darwin_build() {
 
 _darwin_update() {
   brew upgrade && brew update
-  # FIXME: No longer works
-  # sudo -i sh -c 'nix-channel --update && nix-env --install --attr nixpkgs.nix && launchctl remove org.nixos.nix-daemon && launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist'
 }
 
 _nixos_sync() {

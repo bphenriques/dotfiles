@@ -127,13 +127,13 @@ let
     }
   '';
 
-  # TODO: Does not work well with commands with `sh`
+  # Good enough
   toNiriSpawn = command: lib.strings.concatMapStringsSep
     " "
     (x: ''"${x}"'')
     (lib.strings.splitString " " command);
 
-  window-switcher = self.pkgs.niri-window-dmenu;
+  window-switcher = lib.getExe self.pkgs.niri-window-dmenu;
   focused-output = "${lib.getExe pkgs.niri} msg --json focused-output | jq -r '.name'";
 in
 {

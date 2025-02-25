@@ -32,4 +32,10 @@ in
     power-off-monitors  = mkAppOpt { };
     power-on-monitors   = mkAppOpt { };
   };
+
+  config = {
+    home.packages = [
+      pkgs.wdisplays  # Ephemeral output manager
+    ];
+  };
 }

@@ -16,7 +16,6 @@ supports_adaptive_sync() {}
 supports_hdr() {}
 
 
-# TODO https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/games/steam.nix
 case ${1:-} in
   start)
      gamescope \

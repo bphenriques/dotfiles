@@ -23,7 +23,6 @@ stop() {
   fi
 }
 
-# TODO Missing: --output
 # TODO: interesting: https://github.com/russelltg/wl-screenrec/issues/66
 case "${1:-}" in
   screen-audio)     shift 1 && record "$1" --audio                              ;;

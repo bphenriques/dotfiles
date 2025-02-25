@@ -1,8 +1,6 @@
 { config, pkgs, lib, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   stylix.targets.foot.enable = true;
-
-  # TODO: review: https://github.com/bigbabyboost/dotfiles/blob/hyprnix/home/terminal/emulators/foot.nix
   programs.foot = {
     enable = true;
     server.enable = true;
@@ -10,6 +8,11 @@ lib.mkIf pkgs.stdenv.isLinux {
       scrollback.lines = 10000;
       mouse.hide-when-typing = "yes";
       csd.hide-when-maximized = true;
+
+      url = {
+        launch = "${lib.getExe' pkgs.xdg-utils "xdg-open"} \${url}";
+        protocols = "http, https, ftp, ftps, file, mailto, ipfs";
+      };
     };
   };
 }

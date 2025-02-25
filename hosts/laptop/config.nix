@@ -7,7 +7,6 @@
     ./peripherals.nix
     ./zfs.nix
     ../../nixos
-    ../../nixos/desktop-environment
     ../../nixos/desktop
 
     # Users
