@@ -69,6 +69,7 @@
       { name = "Games";       path = "${config.home.homeDirectory}/games"; }
     ];
   };
+  custom.programs.swappy.enable = true;
 
   home.stateVersion = "24.05";
 }

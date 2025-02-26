@@ -14,6 +14,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [ (lib.hm.assertions.assertPlatform "custom.services.xwayland-satellite" pkgs lib.platforms.linux) ];
+
     systemd.user.services.xwayland-satellite = {
       Unit = {
         ConditionEnvironment = [ "WAYLAND_DISPLAY" ];

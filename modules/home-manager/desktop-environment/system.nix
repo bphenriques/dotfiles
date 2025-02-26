@@ -14,7 +14,7 @@ let
 in
 {
   options.custom.desktop-environment.system = {
-    monitor        = mkAppOpt' ''${terminal.emulator} --title=btop-tui ${lib.getExe pkgs.btop}'';
+    monitor = mkAppOpt' ''${terminal.emulator} --title=btop-tui ${lib.getExe pkgs.btop}'';
   };
 
   config = {

@@ -5,7 +5,7 @@ let
   inherit (lib) map;
   inherit (lib.attrsets) nameValuePair;
 
-  cfg = config.custom.desktop-environment.screen-recorder;
+  cfg = config.custom.programs.screen-recorder;
 
   screen-recorder = lib.getExe self.pkgs.screen-recorder;
   date = lib.getExe' pkgs.coreutils "date";
@@ -22,7 +22,7 @@ let
   submenu = desc: submenu: { inherit desc submenu; };
 in
 {
-  options.custom.desktop-environment.screen-recorder = {
+  options.custom.programs.screen-recorder = {
     directory = lib.mkOption {
       description = "Location of recordings";
       type = lib.types.str;
@@ -55,6 +55,8 @@ in
   };
 
   config = {
+   assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.screen-recorder" pkgs lib.platforms.linux) ];
+
     home.packages = [
       pkgs.wl-screenrec
       self.pkgs.screen-recorder
@@ -68,14 +70,14 @@ in
     ];
 
     custom.programs.wlr-which-key.menus.screen-recorder = lib.mkIf config.custom.programs.wlr-which-key.enable {
-      S = cmd "[S]top current recording" cfg.stop;
-      s = submenu "Record [s]creen" {
-        a = cmd "with [a]udio"  cfg.screen-audio;
-        n = cmd "[n]o audio"    cfg.screen-no-audio;
+      S = cmd "Stop" cfg.stop;
+      s = submenu "Screen" {
+        a = cmd "with audio"  cfg.screen-audio;
+        n = cmd "no audio"    cfg.screen-no-audio;
       };
-      r = submenu "Record [r]egion" {
-        a = cmd "with [a]udio"  cfg.region-audio;
-        n = cmd "[n]o audio"    cfg.region-no-audio;
+      r = submenu "Region" {
+        a = cmd "with audio"  cfg.region-audio;
+        n = cmd "no audio"    cfg.region-no-audio;
       };
     };
   };

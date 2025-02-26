@@ -2,7 +2,7 @@
 {
   writeDmenuScript = pkgs: {
     name,
-    dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu --width 15'',
+    dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
     entries
   }: pkgs.writeShellApplication {
       inherit name;

@@ -1,6 +1,8 @@
 { config, lib, programs, pkgs, self, community, ... }:
 let
-  inherit (config.custom.desktop-environment) session audio brightness picker files media-player system terminal compositor;
+  inherit (config.custom.desktop-environment) session audio brightness picker files media-player system terminal
+  compositor display;
+  inherit (config.custom.programs) swappy;
 
   environment = ''
     environment {
@@ -36,9 +38,9 @@ let
 
   # Niri requires at least one monitor.
   outputs = ''
-    output "${compositor.display.default.identifier}" {
-      mode "${compositor.display.default.resolution}@${compositor.display.default.refreshRate}"
-      scale ${compositor.display.default.scale}
+    output "${display.default.identifier}" {
+      mode "${display.default.resolution}@${display.default.refreshRate}"
+      scale ${display.default.scale}
     }
   '';
 
@@ -132,18 +134,9 @@ let
     " "
     (x: ''"${x}"'')
     (lib.strings.splitString " " command);
-
-  window-switcher = lib.getExe self.pkgs.niri-window-dmenu;
-  focused-output = "${lib.getExe pkgs.niri} msg --json focused-output | jq -r '.name'";
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   wayland.systemd.target = "niri.service";
-  custom.desktop-environment.session.logout = "${lib.getExe pkgs.niri} msg action quit";
-
-  custom.desktop-environment.compositor = { inherit window-switcher focused-output;
-    power-off-monitors = "${lib.getExe pkgs.niri} msg action power-off-monitors";
-    power-on-monitors = "${lib.getExe pkgs.niri} msg action power-on-monitors";
-  };
 
   xdg.configFile."niri/config.kdl".text = ''
     workspace "gaming"
@@ -162,7 +155,7 @@ in
 
     prefer-no-csd
 
-    screenshot-path "${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}/%Y-%m-%d %H-%M-%S.png"
+    screenshot-path "${swappy.directory}/${swappy.format}"
 
     animations {
     }
@@ -174,12 +167,11 @@ in
       Mod+C { center-column; }
       Mod+W { spawn "pkill" "-SIGUSR1" "waybar"; }
 
-      Print { screenshot; }
-      Ctrl+Print { screenshot-screen; }
-      Alt+Print { screenshot-window; }
+      Print { screenshot-screen; }
+      Ctrl+Print { screenshot; }
 
       Mod+Shift+Q { spawn ${toNiriSpawn session.dmenu}; }
-      Mod+Tab { spawn ${toNiriSpawn window-switcher}; }
+      Mod+Tab { spawn ${toNiriSpawn compositor.window-switcher}; }
 
       Mod+A { spawn "${lib.getExe pkgs.wlr-which-key}"; }
       Mod+Return { spawn ${toNiriSpawn terminal.emulator}; }
