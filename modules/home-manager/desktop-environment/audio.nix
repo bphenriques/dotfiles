@@ -17,11 +17,6 @@ in
     increase    = mkAppOpt "${volume} increase";
     decrease    = mkAppOpt "${volume} decrease";
     toggle-mute = mkAppOpt "${volume} toggle-mute";
-
-    devices = {
-      headsets = deviceOpt;
-      internal = deviceOpt;
-    };
   };
 }
 

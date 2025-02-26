@@ -1,9 +1,9 @@
 { pkgs, self, ... }:
 {
   imports = [
-    ./login-manager.nix # Login screen
+    ./greetd.nix        # Login manager
     ./audio.nix
-    ./compositor.nix    # Sets the compositor globally.
+    ./wayland.nix       # Base wayland settings
     ./docker.nix        # Virtualization
     ./steam.nix         # Gaming: store + library
     ./gamemode.nix      # Gaming: nice to have.

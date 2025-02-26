@@ -151,7 +151,7 @@ let
     };
   };
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   systemd.user.services.waybar.Unit.After = [ config.wayland.systemd.target ]; # Fix ordering.
   programs.waybar = {
     enable = true;

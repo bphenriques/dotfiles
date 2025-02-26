@@ -16,7 +16,7 @@ in {
   services.greetd = let
     options = ''--asterisks --time --remember --theme ${theme}'';
     session = {
-      command = ''${lib.getExe pkgs.greetd.tuigreet} ${options} ${theme}'';
+      command = ''${lib.getExe pkgs.greetd.tuigreet} ${options}'';
       user = config.users.users.greeter.name;
     };
   in {

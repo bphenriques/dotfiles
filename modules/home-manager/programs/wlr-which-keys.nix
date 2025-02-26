@@ -17,6 +17,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.wlr-which-key" pkgs lib.platforms.linux) ];
     home.packages = [ pkgs.wlr-which-key ];
 
     xdg.configFile = lib.attrsets.mapAttrs' (
