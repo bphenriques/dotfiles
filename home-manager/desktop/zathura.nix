@@ -18,6 +18,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       scroll-full-overlap = "0.01";
     };
   };
+  stylix.targets.zathura.enable = true;
 
   custom.xdgDefaultApps.document = lib.mkBefore [ "org.pwmt.zathura-pdf-mupdf.desktop" ];
 }

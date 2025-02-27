@@ -39,37 +39,21 @@
   ];
 
   gtk.gtk3.bookmarks = [
-    "file://${config.xdg.userDirs.documents}"
-    "file://${config.xdg.userDirs.pictures}"
-    "file://${config.xdg.userDirs.music}"
-    "file://${config.xdg.userDirs.desktop}"
-    "file://${config.xdg.userDirs.download}"
     "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
-
-    # Other
     "file://${config.home.homeDirectory}/nas-private"
     "file://${config.home.homeDirectory}/nas-media"
     "file://${config.home.homeDirectory}/games"
-    "file://${config.home.homeDirectory}/.config Config"
   ];
 
-  custom.desktop-environment = {
-    wallpaper.directory = "${self.pkgs.wallpapers}/share/wallpapers";
-    lock-screen = {
-      background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
-      font-family = config.stylix.fonts.sansSerif.name;
-    };
+  custom.programs.swappy.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
+  custom.programs.shortcuts = {
+    enable = true;
     files.bookmarks = [
-      { name = "Documents";   path = config.xdg.userDirs.documents; }
-      { name = "Pictures";    path = config.xdg.userDirs.pictures; }
-      { name = "Music";       path = config.xdg.userDirs.music; }
-      { name = "Downloads";   path = config.xdg.userDirs.download; }
       { name = "NAS Private"; path = "${config.home.homeDirectory}/nas-private"; }
       { name = "NAS Media";   path = "${config.home.homeDirectory}/nas-media"; }
       { name = "Games";       path = "${config.home.homeDirectory}/games"; }
     ];
   };
-  custom.programs.swappy.enable = true;
 
   home.stateVersion = "24.05";
 }
