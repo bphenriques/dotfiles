@@ -59,18 +59,28 @@ lib.mkIf pkgs.stdenv.isLinux {
         options = "caps:ctrl_modifier";
       };
       touchpad = [ "tap" "natural-scroll" ];
+      extraOptions = [ ''focus-follows-mouse max-scroll-amount="10%"'' ];
     };
 
     layout = ''
       gaps 6
-      center-focused-column "on-overflow"
+      center-focused-column "never"
+      always-center-single-column
       preset-column-widths {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
         proportion 1.0
       }
-      default-column-width { proportion 1.00; }
+      default-column-width { proportion 0.33333; }
+
+      preset-window-heights {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+      }
+
       focus-ring {
         width 2
         active-color "${config.lib.stylix.colors.withHashtag.base0D}"
@@ -83,6 +93,18 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       shadow {
         on
+      }
+
+      default-column-display "tabbed"
+      tab-indicator {
+        width 4
+        hide-when-single-tab
+        length total-proportion=0.5
+        place-within-column
+        active-color "${config.lib.stylix.colors.withHashtag.base0A}"
+        inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
+        position "right"
+        gaps-between-tabs 4
       }
     '';
 
@@ -112,23 +134,45 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
 
     bindings = {
+      # Size management
+      "Mod+Minus"   = ''set-column-width "-10%"'';
+      "Mod+Kp_Add"  = ''set-column-width "+10%"'';
+      "Mod+Shift+Minus" = ''set-window-height "-10%"'';
+      "Mod+Shift+Kp_Add" = ''set-window-height "+10%"'';
+
+      # Layout management
       "Mod+T"       = "toggle-column-tabbed-display";
       "Mod+Q"       = "close-window";
+      "Mod+C"       = "center-column";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+C"       = "center-column";
-      "Mod+W"       = ''spawn "pkill" "-SIGUSR1" "waybar"'';
+      "Mod+Comma"   = "consume-window-into-column";
+      "Mod+Shift+Comma" = "expel-window-from-column";
 
+      # Screenshots
       "Print"       = "screenshot-screen";
       "Ctrl+Print"  = "screenshot";
 
-      "Mod+Shift+Q" = ''spawn "${lib.getExe session-dmenu}"'';
-      "Mod+Tab"     = ''spawn "${window-switcher}"'';
-
+      # Shortcuts
       "Mod+Return"      = ''spawn "${terminal}"'';
       "Mod+Space"       = ''spawn "${application-launcher}"'';
       "Mod+Period"      = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
+      "Mod+Shift+Q" = ''spawn "${lib.getExe session-dmenu}"'';
+      "Mod+W"       = ''spawn "pkill" "-SIGUSR1" "waybar"'';
+
+      # Focus management
+      "Mod+Left"  = "focus-column-left";
+      "Mod+Down"  = "focus-window-or-workspace-down";
+      "Mod+Shift+Down" = "focus-workspace-down";
+      "Mod+Up"    = "focus-window-or-workspace-up";
+      "Mod+Shift+Up"   = "focus-workspace-up";
+      "Mod+Right" = "focus-column-right";
+      "Mod+Tab"   = ''spawn "${window-switcher}"'';
+      "Mod+Home"  = "focus-column-first";
+      "Mod+End"   = "focus-column-last";
+      "Alt+Tab"   = "focus-window-previous";
+      "Mod+O"     = "toggle-window-rule-opacity";
 
       # Audio
       "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "increase"'';
@@ -144,18 +188,10 @@ lib.mkIf pkgs.stdenv.isLinux {
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn "${brightness}" "decrease"'';
 
-      "Mod+Left"  = "focus-column-left";
-      "Mod+Down"  = "focus-window-down";
-      "Mod+Up"    = "focus-window-up";
-      "Mod+Right" = "focus-column-right";
-
       "Mod+Ctrl+Left"  = "move-column-left";
-      "Mod+Ctrl+Down"  = "move-window-down";
-      "Mod+Ctrl+Up"    = "move-window-up";
+      "Mod+Ctrl+Down"  = "move-window-down-or-to-workspace-down";
+      "Mod+Ctrl+Up"    = "move-window-up-or-to-workspace-up";
       "Mod+Ctrl+Right" = "move-column-right";
-
-      "Mod+Shift+Down" = "focus-workspace-down";
-      "Mod+Shift+Up"   = "focus-workspace-up";
 
       "Mod+1" = "focus-workspace 1";
       "Mod+2" = "focus-workspace 2";
@@ -181,7 +217,19 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       "Mod+R"       = "switch-preset-column-width";
       "Mod+Shift+R" = "switch-preset-window-height";
-      "Mod+Ctrl+R"  = "reset-window-height";
     };
+
+    # Fix: default-column-display "tabbed" set to some apps
+    extraConfig = ''
+      window-rule {
+        match is-active=falseg
+        opacity 0.95
+      }
+
+      cursor {
+        xcursor-theme "${config.stylix.cursor.name}"
+        xcursor-size ${toString config.stylix.cursor.size}
+      };
+    '';
   };
 }

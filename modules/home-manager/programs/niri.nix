@@ -260,6 +260,8 @@ in
       binds {
         ${lib.strings.concatStringsSep "\n" (lib.mapAttrsToList (binding: action: ''${binding} { ${action}; }'') cfg.bindings)}
       }
+
+      ${cfg.extraConfig}
     '';
   };
 }
