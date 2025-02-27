@@ -4,7 +4,6 @@
     ./qt.nix            # Setup theming for some set of apps
     ./gtk.nix           # Setup theming for some set of apps
     ./firefox           # Browser
-    ./fuzzel.nix        # Application launcher
     ./zathura.nix       # Documents
     ./mpv.nix           # Videos
     ./imv.nix           # Images
@@ -17,7 +16,6 @@
     ./rofi.nix          # Alternative customizable menu
     ./heroic.nix        # Unified game client
     ./umu-launcher.nix  # Ad-hoc game launcher
-    ./wlr-which-key.nix # Which.key as regular overlays
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [

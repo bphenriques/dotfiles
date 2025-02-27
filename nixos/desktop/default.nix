@@ -23,7 +23,9 @@
     enable32Bit = true;
   };
 
-  services = {
-    flatpak.enable = true;        # Easier to run some programs. Setup afterwards: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  };
+  services.flatpak.enable = true; # Easier to run some programs. Setup afterwards: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+  environment.systemPackages = [
+    pkgs.libnotify  # Notifications
+  ];
 }

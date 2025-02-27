@@ -5,7 +5,10 @@
     isNormalUser = true;
     uid = 1000;
     hashedPasswordFile = config.sops.secrets.user_bphenriques_password.path;
-    extraGroups = [ "wheel" ]
+    extraGroups = [
+      "wheel"
+      "input" # For espanso
+    ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ];
     shell = pkgs.fish;

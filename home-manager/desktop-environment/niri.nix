@@ -1,51 +1,67 @@
-{ config, lib, programs, pkgs, self, community, ... }:
+{ config, lib, programs, pkgs, self, osConfig, ... }:
 let
-  inherit (config.custom.desktop-environment) session audio brightness picker files media-player system terminal
-  compositor display;
   inherit (config.custom.programs) swappy;
 
-  environment = ''
-    environment {
-      DISPLAY ":${toString config.custom.services.xwayland-satellite.displayId}"
-      QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
-      QT_QPA_PLATFORM "wayland"
-      NIXOS_OZONE_WL "1"
-    }
-  '';
+  volume                = lib.getExe self.pkgs.volume-osd;
+  brightness            = lib.getExe self.pkgs.brightness-osd;
+  systemctl             = lib.getExe' pkgs.systemd "systemctl";
+  pidof                 = lib.getExe' pkgs.procps "pidof";
+  niri                  = lib.getExe pkgs.niri;
+  hyprlock              = lib.getExe pkgs.hyprlock;
+  terminal              = lib.getExe' pkgs.foot "footclient";
+  playerctl             = lib.getExe pkgs.playerctl;
+  application-launcher  = lib.getExe pkgs.fuzzel;
+  dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
+  window-switcher       = lib.getExe self.pkgs.niri-window-dmenu;
+  files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
 
-  on-startup = ''
-  '';
+  emoji = pkgs.writeShellApplication {
+    name = "emoji-picker";
+    runtimeInputs = [ pkgs.wtype ];
+    text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
+  };
 
-  input = ''
-    input {
-      keyboard {
-        xkb {
-          layout "us,pt";
-          variant "euro,";
-          options "caps:ctrl_modifier"
-        }
-      }
+  session-dmenu = self.lib.builders.writeDmenuScript pkgs {
+    name = "session-dmenu";
+    entries = [
+      { label = "    Lock";                exec = ''${pidof} hyprlock || ${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}''; }
+      { label = "󰤄    Suspend";             exec = "${systemctl} suspend"; }
+      { label = "    Shutdown";            exec = "${systemctl} poweroff"; }
+      { label = "    Reboot";              exec = "${systemctl} reboot"; }
+      { label = "    Reboot to EFI setup"; exec = "${systemctl} reboot --firmware-setup"; }
+    ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
+      { label = "    Reboot to Windows";   exec = osConfig.custom.boot.grub.windows.rebootPackage; }
+    ];
+  };
 
-      touchpad {
-        tap
-        natural-scroll
-      }
+  # Good enough
+  toNiriSpawn = command: lib.strings.concatMapStringsSep
+    " "
+    (x: ''"${x}"'')
+    (lib.strings.splitString " " command);
+in
+lib.mkIf pkgs.stdenv.isLinux {
+  custom.programs.niri = {
+    enable = true;
+    screenshotPath = "${swappy.directory}/${swappy.format}";
 
-      mouse {
-      }
-    }
-  '';
+    environment = {
+      DISPLAY = ":${toString config.custom.services.xwayland-satellite.displayId}";
+      QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+      QT_QPA_PLATFORM = "wayland";
+      NIXOS_OZONE_WL = "1";
+    };
 
-  # Niri requires at least one monitor.
-  outputs = ''
-    output "${display.default.identifier}" {
-      mode "${display.default.resolution}@${display.default.refreshRate}"
-      scale ${display.default.scale}
-    }
-  '';
+    input = {
+      keyboard.xkb = {
+        layout = "us,pt";
+        variant = "euro,";
+        options = "caps:ctrl_modifier";
+      };
+      touchpad = [ "tap" "natural-scroll" ];
+    };
 
-  layout = ''
-    layout {
+    layout = ''
       gaps 6
       center-focused-column "on-overflow"
       preset-column-widths {
@@ -64,175 +80,108 @@ let
       border {
         off
       }
-    }
-  '';
 
-  window-rules = ''
-    window-rule {
-      match at-startup=true app-id="steam$"
-      match at-startup=true app-id=r#"^steam_app_[0-9]+$"#
-      open-on-workspace "gaming"
-    }
+      shadow {
+        on
+      }
+    '';
 
-    window-rule {
-      match app-id="firefox$" title="^Picture-in-Picture$"
-      match title="^Picture in picture$"
-      match title="^Discord Popout$"
+    windowRules = {
+      popups = lib.map (title: ''title="${title}"'') [
+        "Steam Settings"
+        "^(pwvucontrol)"
+        "^(Volume Control)"
+        "^(dialog)"
+        "^(file_progress)"
+        "^(confirm)"
+        "^(download)"
+        "^(error)"
+        "^(notification)"
+      ];
 
-      open-floating true
-      open-focused false
-      default-column-width { fixed 480; }
-      default-window-height { fixed 270; }
-      default-floating-position x=32 y=32 relative-to="bottom-right"
-    }
+      pip = lib.map (title: ''title="${title}"'') [
+        "^Picture in picture$"
+        "^Discord Popout$"
+      ];
 
-    window-rule {
-      match title="Steam Settings"
-      match title="^(pwvucontrol)"
-      match title="^(Volume Control)"
-      match title="^(dialog)"
-      match title="^(file_progress)"
-      match title="^(confirm)"
-      match title="^(download)"
-      match title="^(error)"
-      match title="^(notification)"
+      tui = lib.map (title: ''title="${title}"'') [
+        "Volume Control"
+        "nmtui-tui"
+        "btop-tui"
+      ];
+    };
 
-      open-floating true
-    }
+    bindings = {
+      "Mod+T"       = "toggle-column-tabbed-display";
+      "Mod+Q"       = "close-window";
+      "Mod+F"       = "maximize-column";
+      "Mod+Shift+F" = "fullscreen-window";
+      "Mod+C"       = "center-column";
+      "Mod+W"       = ''spawn "pkill" "-SIGUSR1" "waybar"'';
 
-    window-rule {
-      match app-id="org.pulseaudio.pavucontrol"
-      match title="nmtui-tui"
+      "Print"       = "screenshot-screen";
+      "Ctrl+Print"  = "screenshot";
 
-      default-column-width { fixed 800; }
-      default-window-height { fixed 600; }
+      "Mod+Shift+Q" = ''spawn "${lib.getExe session-dmenu}"'';
+      "Mod+Tab"     = ''spawn "${window-switcher}"'';
 
-      open-floating true
-    }
+      "Mod+Return"      = ''spawn "${terminal}"'';
+      "Mod+Space"       = ''spawn "${application-launcher}"'';
+      "Mod+Period"      = ''spawn "${lib.getExe emoji}"'';
+      "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
 
-    window-rule {
-      match title="btop-tui"
+      # Audio
+      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "increase"'';
+      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "decrease"'';
+      "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "toggle-mute"'';
+      "XF86AudioMicMute     allow-when-locked=true" = ''spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"'';
+      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
+      "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
+      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
+      "XF86AudioPause       allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
 
-      default-column-width { fixed 1024; }
-      default-window-height { fixed 768; }
+      # Brightness
+      "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';
+      "XF86MonBrightnessDown allow-when-locked=true" = ''spawn "${brightness}" "decrease"'';
 
-      open-floating true
-    }
+      "Mod+Left"  = "focus-column-left";
+      "Mod+Down"  = "focus-window-down";
+      "Mod+Up"    = "focus-window-up";
+      "Mod+Right" = "focus-column-right";
 
-    window-rule {
-      match title="clipse-tui"
+      "Mod+Ctrl+Left"  = "move-column-left";
+      "Mod+Ctrl+Down"  = "move-window-down";
+      "Mod+Ctrl+Up"    = "move-window-up";
+      "Mod+Ctrl+Right" = "move-column-right";
 
-      open-floating true
-      default-column-width { fixed 1000; }
-      default-window-height { fixed 500; }
-      default-floating-position x=32 y=32 relative-to="bottom-left"
-    }
-  '';
+      "Mod+Shift+Down" = "focus-workspace-down";
+      "Mod+Shift+Up"   = "focus-workspace-up";
 
-  # Good enough
-  toNiriSpawn = command: lib.strings.concatMapStringsSep
-    " "
-    (x: ''"${x}"'')
-    (lib.strings.splitString " " command);
-in
-lib.mkIf pkgs.stdenv.isLinux {
-  wayland.systemd.target = "niri.service";
+      "Mod+1" = "focus-workspace 1";
+      "Mod+2" = "focus-workspace 2";
+      "Mod+3" = "focus-workspace 3";
+      "Mod+4" = "focus-workspace 4";
+      "Mod+5" = "focus-workspace 5";
+      "Mod+6" = "focus-workspace 6";
+      "Mod+7" = "focus-workspace 7";
+      "Mod+8" = "focus-workspace 8";
+      "Mod+9" = "focus-workspace 9";
+      "Mod+Ctrl+1" = "move-column-to-workspace 1";
+      "Mod+Ctrl+2" = "move-column-to-workspace 2";
+      "Mod+Ctrl+3" = "move-column-to-workspace 3";
+      "Mod+Ctrl+4" = "move-column-to-workspace 4";
+      "Mod+Ctrl+5" = "move-column-to-workspace 5";
+      "Mod+Ctrl+6" = "move-column-to-workspace 6";
+      "Mod+Ctrl+7" = "move-column-to-workspace 7";
+      "Mod+Ctrl+8" = "move-column-to-workspace 8";
+      "Mod+Ctrl+9" = "move-column-to-workspace 9";
 
-  xdg.configFile."niri/config.kdl".text = ''
-    workspace "gaming"
+      "Mod+BracketLeft"   = "consume-or-expel-window-left";
+      "Mod+BracketRight"  = "consume-or-expel-window-right";
 
-    hotkey-overlay {
-      skip-at-startup
-    }
-
-    ${window-rules}
-    ${environment}
-    ${on-startup}
-    ${input}
-
-    ${outputs}
-    ${layout}
-
-    prefer-no-csd
-
-    screenshot-path "${swappy.directory}/${swappy.format}"
-
-    animations {
-    }
-
-    binds {
-      Mod+Q { close-window; }
-      Mod+F { maximize-column; }
-      Mod+Shift+F { fullscreen-window; }
-      Mod+C { center-column; }
-      Mod+W { spawn "pkill" "-SIGUSR1" "waybar"; }
-
-      Print { screenshot-screen; }
-      Ctrl+Print { screenshot; }
-
-      Mod+Shift+Q { spawn ${toNiriSpawn session.dmenu}; }
-      Mod+Tab { spawn ${toNiriSpawn compositor.window-switcher}; }
-
-      Mod+A { spawn "${lib.getExe pkgs.wlr-which-key}"; }
-      Mod+Return { spawn ${toNiriSpawn terminal.emulator}; }
-      Mod+Space { spawn ${toNiriSpawn picker.application}; }
-      Mod+Period { spawn ${toNiriSpawn picker.emoji}; }
-      Mod+Shift+Space { spawn ${toNiriSpawn files.browser}; }
-      Super+L { spawn ${toNiriSpawn session.lock}; }
-
-      // Audio
-      XF86AudioRaiseVolume allow-when-locked=true { spawn ${toNiriSpawn audio.increase}; }
-      XF86AudioLowerVolume allow-when-locked=true { spawn ${toNiriSpawn audio.decrease}; }
-      XF86AudioMute        allow-when-locked=true { spawn ${toNiriSpawn audio.toggle-mute}; }
-      XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-      XF86AudioPrev        allow-when-locked=true { spawn ${toNiriSpawn media-player.previous}; }
-      XF86AudioNext        allow-when-locked=true { spawn ${toNiriSpawn media-player.next}; }
-      XF86AudioPlay        allow-when-locked=true { spawn ${toNiriSpawn media-player.play-pause}; }
-      XF86AudioPause       allow-when-locked=true { spawn ${toNiriSpawn media-player.play-pause}; }
-
-      // Brightness
-      XF86MonBrightnessUp   allow-when-locked=true { spawn ${toNiriSpawn brightness.increase}; }
-      XF86MonBrightnessDown allow-when-locked=true { spawn ${toNiriSpawn brightness.decrease}; }
-
-      Mod+Left  { focus-column-left; }
-      Mod+Down  { focus-window-down; }
-      Mod+Up    { focus-window-up; }
-      Mod+Right { focus-column-right; }
-
-      Mod+Ctrl+Left  { move-column-left; }
-      Mod+Ctrl+Down  { move-window-down; }
-      Mod+Ctrl+Up    { move-window-up; }
-      Mod+Ctrl+Right { move-column-right; }
-
-      Mod+Shift+Down      { focus-workspace-down; }
-      Mod+Shift+Up        { focus-workspace-up; }
-
-      Mod+1 { focus-workspace 1; }
-      Mod+2 { focus-workspace 2; }
-      Mod+3 { focus-workspace 3; }
-      Mod+4 { focus-workspace 4; }
-      Mod+5 { focus-workspace 5; }
-      Mod+6 { focus-workspace 6; }
-      Mod+7 { focus-workspace 7; }
-      Mod+8 { focus-workspace 8; }
-      Mod+9 { focus-workspace 9; }
-      Mod+Ctrl+1 { move-column-to-workspace 1; }
-      Mod+Ctrl+2 { move-column-to-workspace 2; }
-      Mod+Ctrl+3 { move-column-to-workspace 3; }
-      Mod+Ctrl+4 { move-column-to-workspace 4; }
-      Mod+Ctrl+5 { move-column-to-workspace 5; }
-      Mod+Ctrl+6 { move-column-to-workspace 6; }
-      Mod+Ctrl+7 { move-column-to-workspace 7; }
-      Mod+Ctrl+8 { move-column-to-workspace 8; }
-      Mod+Ctrl+9 { move-column-to-workspace 9; }
-
-      // There are also commands that consume or expel a single window to the side.
-      Mod+BracketLeft  { consume-or-expel-window-left; }
-      Mod+BracketRight { consume-or-expel-window-right; }
-
-      Mod+R { switch-preset-column-width; }
-      Mod+Shift+R { switch-preset-window-height; }
-      Mod+Ctrl+R { reset-window-height; }
-    }
-  '';
+      "Mod+R"       = "switch-preset-column-width";
+      "Mod+Shift+R" = "switch-preset-window-height";
+      "Mod+Ctrl+R"  = "reset-window-height";
+    };
+  };
 }

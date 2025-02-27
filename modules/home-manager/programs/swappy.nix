@@ -8,7 +8,6 @@ in
     directory = lib.mkOption {
       description = "Location of screenshots";
       type = lib.types.str;
-      default = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
     };
 
     format = lib.mkOption {

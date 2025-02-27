@@ -34,10 +34,10 @@ in
     ];
   };
 
-  custom.desktop-environment.display.default = {
+  custom.programs.niri.output.default = {
     identifier  = "eDP-1";
     resolution  = "2880x1800";
-    refreshRate = "120.001"; # using float leads to trailing zerosthat I dont want
+    refreshRate = "120.001"; # using float leads to trailing zeros that I dont want
     scale       = "1.75";
   };
 }

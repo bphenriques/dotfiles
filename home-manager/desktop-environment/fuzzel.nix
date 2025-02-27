@@ -11,4 +11,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
   };
   stylix.targets.fuzzel.enable = true;
+
+  custom.programs.niri.layerRules.launchers = [ ''namespace="^launcher$"'' ];
 }
