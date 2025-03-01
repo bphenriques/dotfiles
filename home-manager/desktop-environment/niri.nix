@@ -72,7 +72,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         proportion 0.66667
         proportion 1.0
       }
-      default-column-width { proportion 0.33333; }
+      default-column-width { proportion 0.66667; }
 
       preset-window-heights {
         proportion 0.33333
@@ -95,7 +95,6 @@ lib.mkIf pkgs.stdenv.isLinux {
         on
       }
 
-      default-column-display "tabbed"
       tab-indicator {
         width 4
         hide-when-single-tab
@@ -135,6 +134,8 @@ lib.mkIf pkgs.stdenv.isLinux {
 
     bindings = {
       # Size management
+      "Mod+R"       = "switch-preset-column-width";
+      "Mod+Shift+R" = "switch-preset-window-height";
       "Mod+Minus"   = ''set-column-width "-10%"'';
       "Mod+Kp_Add"  = ''set-column-width "+10%"'';
       "Mod+Shift+Minus" = ''set-window-height "-10%"'';
@@ -144,6 +145,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+T"       = "toggle-column-tabbed-display";
       "Mod+Q"       = "close-window";
       "Mod+C"       = "center-column";
+      "Mod+Shift+C" = "center-window";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
       "Mod+Comma"   = "consume-window-into-column";
@@ -158,21 +160,48 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Space"       = ''spawn "${application-launcher}"'';
       "Mod+Period"      = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
-      "Mod+Shift+Q" = ''spawn "${lib.getExe session-dmenu}"'';
-      "Mod+W"       = ''spawn "pkill" "-SIGUSR1" "waybar"'';
+      "Mod+Shift+Q"     = ''spawn "${lib.getExe session-dmenu}"'';
+      "Mod+W"           = ''spawn "pkill" "-SIGUSR1" "waybar"'';
 
       # Focus management
-      "Mod+Left"  = "focus-column-left";
-      "Mod+Down"  = "focus-window-or-workspace-down";
-      "Mod+Shift+Down" = "focus-workspace-down";
-      "Mod+Up"    = "focus-window-or-workspace-up";
-      "Mod+Shift+Up"   = "focus-workspace-up";
-      "Mod+Right" = "focus-column-right";
-      "Mod+Tab"   = ''spawn "${window-switcher}"'';
-      "Mod+Home"  = "focus-column-first";
-      "Mod+End"   = "focus-column-last";
-      "Alt+Tab"   = "focus-window-previous";
-      "Mod+O"     = "toggle-window-rule-opacity";
+      "Mod+Left"        = "focus-column-left";
+      "Mod+Down"        = "focus-window-or-workspace-down";
+      "Mod+Shift+Down"  = "focus-workspace-down";
+      "Mod+Up"          = "focus-window-or-workspace-up";
+      "Mod+Shift+Up"    = "focus-workspace-up";
+      "Mod+Right"       = "focus-column-right";
+      "Mod+Tab"         = ''spawn "${window-switcher}"'';
+      "Mod+Home"        = "focus-column-first";
+      "Mod+End"         = "focus-column-last";
+      "Alt+Tab"         = "focus-window-previous";
+      "Mod+O"           = "toggle-window-rule-opacity";
+      "Mod+1" = "focus-workspace 1";
+      "Mod+2" = "focus-workspace 2";
+      "Mod+3" = "focus-workspace 3";
+      "Mod+4" = "focus-workspace 4";
+      "Mod+5" = "focus-workspace 5";
+      "Mod+6" = "focus-workspace 6";
+      "Mod+7" = "focus-workspace 7";
+      "Mod+8" = "focus-workspace 8";
+      "Mod+9" = "focus-workspace 9";
+
+      # Moving things around
+      "Mod+Ctrl+Left"  = "move-column-left";
+      "Mod+Ctrl+Down"  = "move-window-down-or-to-workspace-down";
+      "Mod+Ctrl+Up"    = "move-window-up-or-to-workspace-up";
+      "Mod+Ctrl+Right" = "move-column-right";
+      "Mod+BracketLeft"   = "consume-or-expel-window-left";
+      "Mod+BracketRight"  = "consume-or-expel-window-right";
+
+      "Mod+Ctrl+1" = "move-column-to-workspace 1";
+      "Mod+Ctrl+2" = "move-column-to-workspace 2";
+      "Mod+Ctrl+3" = "move-column-to-workspace 3";
+      "Mod+Ctrl+4" = "move-column-to-workspace 4";
+      "Mod+Ctrl+5" = "move-column-to-workspace 5";
+      "Mod+Ctrl+6" = "move-column-to-workspace 6";
+      "Mod+Ctrl+7" = "move-column-to-workspace 7";
+      "Mod+Ctrl+8" = "move-column-to-workspace 8";
+      "Mod+Ctrl+9" = "move-column-to-workspace 9";
 
       # Audio
       "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "increase"'';
@@ -187,43 +216,12 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Brightness
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn "${brightness}" "decrease"'';
-
-      "Mod+Ctrl+Left"  = "move-column-left";
-      "Mod+Ctrl+Down"  = "move-window-down-or-to-workspace-down";
-      "Mod+Ctrl+Up"    = "move-window-up-or-to-workspace-up";
-      "Mod+Ctrl+Right" = "move-column-right";
-
-      "Mod+1" = "focus-workspace 1";
-      "Mod+2" = "focus-workspace 2";
-      "Mod+3" = "focus-workspace 3";
-      "Mod+4" = "focus-workspace 4";
-      "Mod+5" = "focus-workspace 5";
-      "Mod+6" = "focus-workspace 6";
-      "Mod+7" = "focus-workspace 7";
-      "Mod+8" = "focus-workspace 8";
-      "Mod+9" = "focus-workspace 9";
-      "Mod+Ctrl+1" = "move-column-to-workspace 1";
-      "Mod+Ctrl+2" = "move-column-to-workspace 2";
-      "Mod+Ctrl+3" = "move-column-to-workspace 3";
-      "Mod+Ctrl+4" = "move-column-to-workspace 4";
-      "Mod+Ctrl+5" = "move-column-to-workspace 5";
-      "Mod+Ctrl+6" = "move-column-to-workspace 6";
-      "Mod+Ctrl+7" = "move-column-to-workspace 7";
-      "Mod+Ctrl+8" = "move-column-to-workspace 8";
-      "Mod+Ctrl+9" = "move-column-to-workspace 9";
-
-      "Mod+BracketLeft"   = "consume-or-expel-window-left";
-      "Mod+BracketRight"  = "consume-or-expel-window-right";
-
-      "Mod+R"       = "switch-preset-column-width";
-      "Mod+Shift+R" = "switch-preset-window-height";
     };
 
-    # Fix: default-column-display "tabbed" set to some apps
     extraConfig = ''
       window-rule {
-        match is-active=falseg
-        opacity 0.95
+        match is-active=false
+        opacity 0.90
       }
 
       cursor {
