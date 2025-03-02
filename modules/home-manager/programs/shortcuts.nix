@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, self, ... }:
 let
   inherit (builtins) listToAttrs replaceStrings;
   inherit (lib) map nameValuePair;
@@ -9,6 +9,7 @@ let
     options = {
       name = lib.mkOption { type = lib.types.str; };
       path = lib.mkOption { type = lib.types.str; };
+      icon = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
     };
   };
 in
@@ -35,11 +36,11 @@ in
       (pkgs.makeDesktopItem {
         name = "file-bookmarks";
         desktopName = "Open file bookmark";
-        icon = "folder";  # FIXME
+        icon = self.lib.builders.mkNerdFontIcon pkgs "wallpaper" "";
         exec = cfg.files.browser;
         actions = let
           bookmarkToAction = b: nameValuePair (replaceStrings [" "] ["-"] b.name) {
-            inherit (b) name;
+            inherit (b) name icon;
             exec = "${cfg.files.browser} ${b.path}";
           };
         in listToAttrs (lib.map bookmarkToAction cfg.files.bookmarks);
@@ -48,10 +49,26 @@ in
 
     # Set some sane defaults
     custom.programs.shortcuts.files.bookmarks = [
-      { name = "Documents";   path = config.xdg.userDirs.documents; }
-      { name = "Pictures";    path = config.xdg.userDirs.pictures; }
-      { name = "Music";       path = config.xdg.userDirs.music; }
-      { name = "Downloads";   path = config.xdg.userDirs.download; }
+      {
+        name = "Documents";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "documents" "󱧶";
+        path = config.xdg.userDirs.documents;
+      }
+      {
+        name = "Pictures";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "pictures" "󰉏";
+        path = config.xdg.userDirs.pictures;
+      }
+      {
+        name = "Music";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "music" "󱍙";
+        path = config.xdg.userDirs.music;
+      }
+      {
+        name = "Downloads";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "downloads" "󰉍";
+        path = config.xdg.userDirs.download;
+      }
     ];
   };
 }
