@@ -84,7 +84,7 @@
       PAGER   = "less -iMR";
 
       # Colors
-      LS_COLORS = "$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.< FIXME
+      LS_COLORS = "$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.<
       LANG    = "en_US.UTF-8";
       LC_ALL  = "en_US.UTF-8";
     } // (lib.optionalAttrs pkgs.config.allowUnfree {
@@ -101,11 +101,8 @@
       fgrep = "fgrep --color=auto";
       ls = "ls --color=auto";
 
-      # The usual aliases
-      l = "ls -alh";
-      ll = "ls -l";
-
       # Quality of life
+      l = "${lib.getExe pkgs.eza} -alh";
       mkdir   = "mkdir -pv";
       ".."    = "cd ..";
       "..."   = "cd ../..";

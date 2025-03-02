@@ -49,9 +49,21 @@
   custom.programs.shortcuts = {
     enable = true;
     files.bookmarks = [
-      { name = "NAS Private"; path = "${config.home.homeDirectory}/nas-private"; }
-      { name = "NAS Media";   path = "${config.home.homeDirectory}/nas-media"; }
-      { name = "Games";       path = "${config.home.homeDirectory}/games"; }
+      {
+        name = "NAS Private";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-private" "󰉐g";
+        path = "${config.home.homeDirectory}/nas-private";
+      }
+      {
+        name = "NAS Media";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-media" "󰥠";
+        path = "${config.home.homeDirectory}/nas-media";
+      }
+      {
+        name = "Games";
+        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-games" "";
+        path = "${config.home.homeDirectory}/games";
+      }
     ];
   };
 

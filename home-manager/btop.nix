@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, self, ... }:
 {
   programs.btop = {
     enable = true;
@@ -16,7 +16,7 @@
     (pkgs.makeDesktopItem {
       name = "system-monitor";
       desktopName = "System Monitor";
-      icon = "folder";  # FIXME
+      icon = self.lib.builders.mkNerdFontIcon pkgs "system-monitor" "";
       exec = ''${lib.getExe' pkgs.foot "footclient"} --title=btop-tui ${lib.getExe pkgs.btop}'';
     })
   ];

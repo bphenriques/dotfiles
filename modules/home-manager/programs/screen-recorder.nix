@@ -64,7 +64,7 @@ in
       (pkgs.makeDesktopItem {
         name = "screen-recoder-dmenu";
         desktopName = "Open screen-recorder menu";
-        icon = "folder";  # FIXME
+        icon = self.lib.builders.mkNerdFontIcon pkgs "screen-recorder" "󰑋";
         exec = cfg.dmenu;
       })
     ];
