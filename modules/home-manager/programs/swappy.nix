@@ -28,6 +28,7 @@ in
         exec = "${lib.getExe pkgs.swappy} -f %f";
         desktopName = "Annotate image";
         mimeTypes = config.custom.xdgDefaultApps.mimes.image;
+        extraConfig.NoDisplay = "true";
       })
     ];
 

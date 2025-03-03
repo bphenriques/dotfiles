@@ -64,7 +64,7 @@ in
       (pkgs.makeDesktopItem {
         name = "screen-recoder-dmenu";
         desktopName = "Open screen-recorder menu";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "screen-recorder" "󰑋";
+        icon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } "screen-recorder" "󰑋";
         exec = cfg.dmenu;
       })
     ];

@@ -1,4 +1,7 @@
 { pkgs, config, self, ... }:
+let
+  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
+in
 {
   imports = [
     ../../../home-manager
@@ -51,17 +54,17 @@
     files.bookmarks = [
       {
         name = "NAS Private";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-private" "󰉐g";
+        icon = mkIcon "nas-private" "󰉐";
         path = "${config.home.homeDirectory}/nas-private";
       }
       {
         name = "NAS Media";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-media" "󰥠";
+        icon = mkIcon "nas-media" "󰥠";
         path = "${config.home.homeDirectory}/nas-media";
       }
       {
         name = "Games";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "nas-games" "";
+        icon = mkIcon "nas-games" "";
         path = "${config.home.homeDirectory}/games";
       }
     ];
