@@ -10,6 +10,7 @@
   ];
 
   custom.programs.swappy.enable = true;
+  custom.programs.screen-recorder.enable = true;
   custom.programs.shortcuts.files.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
 
   home.packages = [ pkgs.wdisplays ];

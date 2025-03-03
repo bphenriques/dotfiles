@@ -1,57 +1,49 @@
 { lib, pkgs, config, self, osConfig, ... }:
-
 let
   inherit (builtins) listToAttrs replaceStrings;
-  inherit (lib) map;
-  inherit (lib.attrsets) nameValuePair;
+  inherit (lib) map nameValuePair;
 
   cfg = config.custom.programs.screen-recorder;
 
-  screen-recorder = lib.getExe self.pkgs.screen-recorder;
-  date = lib.getExe' pkgs.coreutils "date";
-  destination = "$(${date} +'${cfg.directory}/${cfg.format}')";
-
-  mkAppOpt = { description ? "", default ? null }: lib.mkOption {
-    inherit description default;
+  mkAppOpt = default: lib.mkOption {
+    inherit default;
+    description = "";
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  mkAppOpt' = default: mkAppOpt { inherit default; description = ""; };
-
   cmd = desc: cmd: { inherit desc cmd; };
   submenu = desc: submenu: { inherit desc submenu; };
+  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
+
+  screen-recorder = lib.getExe self.pkgs.screen-recorder;
+  screenRecordingActions = [
+    { id = "recording-screen-audio";    symbol = "󰹑"; label = "Screen (with audio)";  exec = cfg.screen-audio; }
+    { id = "recording-screen-no-audio"; symbol = "󰹑"; label = "Screen (no audio)";    exec = cfg.screen-no-audio; }
+    { id = "recording-region-audio";    symbol = ""; label = "Region (with audio)";  exec = cfg.region-audio; }
+    { id = "recording-region-no-audio"; symbol = ""; label = "Region (no audio)";    exec = cfg.region-no-audio; }
+    { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.stop; }
+  ];
 in
 {
   options.custom.programs.screen-recorder = {
+    enable = lib.mkEnableOption "customn-screen-recorder";
     directory = lib.mkOption {
       description = "Location of recordings";
       type = lib.types.str;
       default = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
     };
 
-    format = lib.mkOption {
-       description = "Filename format of recordings. Templates must be compatible with the date command";
-       type = lib.types.str;
-       default = "record-%Y%m%d-%H%M%S.mp4";
+    wlr-which-key-menu = lib.mkOption {
+      description = "Name of the wlr-which-key menu";
+      type = lib.types.str;
+      default = "screen-recorder";
     };
 
-    screen-audio     = mkAppOpt' ''${screen-recorder} screen-audio "${destination}"'';
-    screen-no-audio  = mkAppOpt' ''${screen-recorder} screen-no-audio "${destination}"'';
-    region-audio     = mkAppOpt' ''${screen-recorder} region-audio "${destination}"'';
-    region-no-audio  = mkAppOpt' ''${screen-recorder} region-no-audio "${destination}"'';
-    stop             = mkAppOpt' ''${screen-recorder} stop'';
-
-    dmenu = mkAppOpt' (self.lib.builders.writeDmenuScript pkgs {
-      name = "screen-recorder-dmenu";
-      # TODO: Menu start: 󰑋
-      entries = [
-        { label = "󰹑    Record screen (with audio)";  exec = cfg.screen-audio; }
-        { label = "󰹑    Record screen (no audio)";    exec = cfg.screen-no-audio; }
-        { label = "    Record region (with audio)";  exec = cfg.region-audio; }
-        { label = "    Record region (no audio)";    exec = cfg.region-no-audio; }
-        { label = "    Stop recording";              exec = cfg.stop; }
-      ];
-    });
+    screen-audio     = mkAppOpt ''${screen-recorder} screen-audio "${cfg.directory}"'';
+    screen-no-audio  = mkAppOpt ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
+    region-audio     = mkAppOpt ''${screen-recorder} region-audio "${cfg.directory}"'';
+    region-no-audio  = mkAppOpt ''${screen-recorder} region-no-audio "${cfg.directory}"'';
+    stop             = mkAppOpt ''${screen-recorder} stop'';
   };
 
   config = {
@@ -60,16 +52,25 @@ in
     home.packages = [
       pkgs.wl-screenrec
       self.pkgs.screen-recorder
-
       (pkgs.makeDesktopItem {
-        name = "screen-recoder-dmenu";
-        desktopName = "Open screen-recorder menu";
-        icon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } "screen-recorder" "󰑋";
-        exec = cfg.dmenu;
+        name = "screen-recoder-menu";
+        desktopName = "Screen Recording";
+        icon = mkIcon "screen-recorder" "󰑋";
+        exec = lib.getExe (self.lib.builders.writeDmenuApplication pkgs {
+          name = "screen-recorder-menu";
+          entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
+        });
+        actions = let
+          toAction = b: nameValuePair b.id {
+            name = b.label;
+            icon = mkIcon b.id b.symbol;
+            exec = b.exec;
+          };
+        in listToAttrs (lib.map toAction screenRecordingActions);
       })
     ];
 
-    custom.programs.wlr-which-key.menus.screen-recorder = lib.mkIf config.custom.programs.wlr-which-key.enable {
+    custom.programs.wlr-which-key.menus."${cfg.wlr-which-key-menu}" = lib.mkIf config.custom.programs.wlr-which-key.enable {
       S = cmd "Stop" cfg.stop;
       s = submenu "Screen" {
         a = cmd "with audio"  cfg.screen-audio;
