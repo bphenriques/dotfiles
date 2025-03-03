@@ -12,6 +12,8 @@ let
       icon = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
     };
   };
+
+  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 in
 {
   options.custom.programs.shortcuts = {
@@ -36,7 +38,7 @@ in
       (pkgs.makeDesktopItem {
         name = "file-bookmarks";
         desktopName = "Open file bookmark";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "wallpaper" "";
+        icon = mkIcon "wallpaper" "";
         exec = cfg.files.browser;
         actions = let
           bookmarkToAction = b: nameValuePair (replaceStrings [" "] ["-"] b.name) {
@@ -51,22 +53,22 @@ in
     custom.programs.shortcuts.files.bookmarks = [
       {
         name = "Documents";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "documents" "󱧶";
+        icon = mkIcon "documents" "󱧶";
         path = config.xdg.userDirs.documents;
       }
       {
         name = "Pictures";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "pictures" "󰉏";
+        icon = mkIcon "pictures" "󰉏";
         path = config.xdg.userDirs.pictures;
       }
       {
         name = "Music";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "music" "󱍙";
+        icon = mkIcon "music" "󱍙";
         path = config.xdg.userDirs.music;
       }
       {
         name = "Downloads";
-        icon = self.lib.builders.mkNerdFontIcon pkgs "downloads" "󰉍";
+        icon = mkIcon "downloads" "󰉍";
         path = config.xdg.userDirs.download;
       }
     ];
