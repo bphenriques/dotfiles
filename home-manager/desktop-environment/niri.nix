@@ -21,7 +21,7 @@ let
     text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
   };
 
-  session-dmenu = self.lib.builders.writeDmenuScript pkgs {
+  session-dmenu = self.lib.builders.writeDmenuApplication pkgs {
     name = "session-dmenu";
     entries = [
       { label = "    Lock";                exec = ''${pidof} hyprlock || ${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}''; }
@@ -162,7 +162,9 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
       "Mod+Shift+Q"     = ''spawn "${lib.getExe session-dmenu}"'';
       "Mod+W"           = ''spawn "pkill" "-SIGUSR1" "waybar"'';
-
+      "Mod+G"           =
+        lib.mkIf (config.custom.programs.screen-recorder.enable && config.custom.programs.wlr-which-key.enable)
+          ''spawn "${lib.getExe pkgs.wlr-which-key}" "${config.custom.programs.screen-recorder.wlr-which-key-menu}"'';
       # Focus management
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";

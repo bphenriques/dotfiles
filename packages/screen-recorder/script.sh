@@ -2,7 +2,7 @@
 
 is_recording() { pidof wl-screenrec > /dev/null; }
 record() {
-  destination="$1"
+  destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
   shift 1
   if is_recording; then
     notify-send "Video record" "There is already a recording in progress"

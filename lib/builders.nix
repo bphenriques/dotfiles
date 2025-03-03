@@ -1,6 +1,6 @@
 { lib }:
 {
-  writeDmenuScript = pkgs: {
+  writeDmenuApplication = pkgs: {
     name,
     dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
     entries
@@ -17,14 +17,15 @@
       meta.platforms = lib.platforms.linux;
     };
 
-  # Good enough for ad-hoc icons that need to be in PNG
-  mkNerdFontIcon = pkgs: { textColor ? "black" }: name: symbol:
+  # Good enough: this could be svg to be resisable. But then it would have to be installed following a dir convention.
+  # As it is, I can point directly to the generated file.
+  mkNerdFontIcon = pkgs: { textColor ? "black", size ? "128x128", fontSize ? 160 }: name: symbol:
     let
       fontFile = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/Hack/HackNerdFontMono-Regular.ttf";
       derivation = pkgs.runCommand "${name}-custom-icon.png" { } ''
         export XDG_CACHE_HOME="$(mktemp -d)"
-        ${lib.getExe pkgs.imagemagick} -size 128x128 xc:none \
-          -font "${fontFile}" -pointsize 160 -fill "${textColor}" -gravity center \
+        ${lib.getExe pkgs.imagemagick} -size ${size} xc:none \
+          -font "${fontFile}" -pointsize ${toString fontSize} -fill "${textColor}" -gravity center \
           -draw "text 0,0 '${symbol}'" \
           png32:$out;
       '';
