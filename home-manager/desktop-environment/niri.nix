@@ -160,8 +160,10 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Space"       = ''spawn "${application-launcher}"'';
       "Mod+Period"      = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
+      "Mod+K"           = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
       "Mod+Shift+Q"     = ''spawn "${lib.getExe session-dmenu}"'';
       "Mod+W"           = ''spawn "pkill" "-SIGUSR1" "waybar"'';
+
       "Mod+G"           =
         lib.mkIf (config.custom.programs.screen-recorder.enable && config.custom.programs.wlr-which-key.enable)
           ''spawn "${lib.getExe pkgs.wlr-which-key}" "${config.custom.programs.screen-recorder.wlr-which-key-menu}"'';

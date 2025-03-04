@@ -70,15 +70,16 @@ in
       })
     ];
 
+    # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
     custom.programs.wlr-which-key.menus."${cfg.wlr-which-key-menu}" = lib.mkIf config.custom.programs.wlr-which-key.enable {
-      S = cmd "Stop" cfg.stop;
+      "Ctrl+s" = cmd "Save current recording" cfg.stop;
       s = submenu "Screen" {
-        a = cmd "with audio"  cfg.screen-audio;
-        n = cmd "no audio"    cfg.screen-no-audio;
+        a = cmd "with audio"  ''screen-recorder screen-audio "${cfg.directory}"'';
+        m = cmd "no audio"    ''screen-recorder screen-no-audio "${cfg.directory}"'';
       };
       r = submenu "Region" {
-        a = cmd "with audio"  cfg.region-audio;
-        n = cmd "no audio"    cfg.region-no-audio;
+        a = cmd "with audio"  ''screen-recorder region-audio "${cfg.directory}"'';
+        m = cmd "no audio"    ''screen-recorder region-no-audio "${cfg.directory}"'';
       };
     };
   };

@@ -65,5 +65,15 @@ in
     '';
   };
 
-  custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "yazi.desktop" ];
+  home.packages = lib.optionals pkgs.stdenv.isLinux [
+    (pkgs.makeDesktopItem {
+      name = "yazi-tui";
+      desktopName = "Yazi File Manager";
+      icon = "yazi"; # FIXME
+      exec = "${lib.getExe' config.programs.foot.package "footclient"} --title=yazi-tui ${lib.getExe config.programs.yazi.package} %f";
+      mimeTypes = config.custom.xdgDefaultApps.mimes.inode;
+    })
+  ];
+
+  custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "yazi-tui.desktop" ];
 }

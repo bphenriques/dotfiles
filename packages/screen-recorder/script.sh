@@ -5,21 +5,23 @@ record() {
   destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
   shift 1
   if is_recording; then
-    notify-send "Video record" "There is already a recording in progress"
+    notify-send "Screen Recorder" "There is already a recording in progress"
     return 1
   else
-    notify-send "Video record" "Starting recording..." --expire-time=1000
+    notify-send "Screen Recorder" "Starting recording..." --expire-time=1000
     sleep 1
-    wl-screenrec --filename="${destination}" "$@"
+    if ! wl-screenrec --filename="${destination}" "$@"; then
+      notify-send --urgency=critical "Screen Recorder" "Couldn't start recording"      
+    fi
   fi
 }
 
 stop() {
   if is_recording; then
     pkill --signal INT wl-screenrec
-    notify-send "Video record" "Recording stopped..."
+    notify-send "Screen Recorder" "Recording stopped..."
   else
-    notify-send "Video record" "Nothing being recorded..."
+    notify-send "Screen Recorder" "Nothing being recorded..."
   fi
 }
 

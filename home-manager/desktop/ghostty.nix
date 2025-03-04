@@ -2,7 +2,7 @@
 {
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {
-    enable = true;
+    enable = pkgs.stdenv.isDarwin;
     package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
     enableFishIntegration = config.programs.fish.enable;
 
