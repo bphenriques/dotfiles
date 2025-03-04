@@ -21,8 +21,9 @@ let
       volume-osd = pkgs.callPackage ./volume-osd { };
       brightness-osd = pkgs.callPackage ./brightness-osd { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
-      swww-util = pkgs.callPackage ./swww-util { };
+      niri-keyboard-layout = pkgs.callPackage ./niri-keyboard-layout { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
+      swww-util = pkgs.callPackage ./swww-util { };
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshots = pkgs.callPackage ./screenshots { };
     }
