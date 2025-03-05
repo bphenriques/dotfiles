@@ -48,7 +48,9 @@ in
     "file://${config.home.homeDirectory}/games"
   ];
 
-  custom.programs.swappy.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
+  custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
+  custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
+
   custom.programs.shortcuts = {
     enable = true;
     files.bookmarks = [

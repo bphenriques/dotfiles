@@ -1,4 +1,12 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  iconOff ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/display-brightness-off-symbolic.svg",
+  iconLow ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/display-brightness-low-symbolic.svg",
+  iconMedium ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/display-brightness-medium-symbolic.svg",
+  iconHigh ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/display-brightness-high-symbolic.svg",
+  ...
+}:
 pkgs.writeShellApplication {
   name = "brightness-osd";
   runtimeInputs = [
@@ -8,15 +16,11 @@ pkgs.writeShellApplication {
     pkgs.gawk
     pkgs.findutils
   ];
-  text = let
-    iconBasePath = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status";
-  in
-  # FIXME: This is not really configurable. Do something else about this.
-  ''
-    OSD_BRIGHTNESS_OFF_ICON="${iconBasePath}/display-brightness-off-symbolic.svg"
-    OSD_BRIGHTNESS_LOW_ICON="${iconBasePath}/display-brightness-low-symbolic.svg"
-    OSD_BRIGHTNESS_MEDIUM_ICON="${iconBasePath}/display-brightness-medium-symbolic.svg"
-    OSD_BRIGHTNESS_HIGH_ICON="${iconBasePath}/display-brightness-high-symbolic.svg"
+  text = ''
+    OSD_BRIGHTNESS_OFF_ICON="${iconOff}"
+    OSD_BRIGHTNESS_LOW_ICON="${iconLow}"
+    OSD_BRIGHTNESS_MEDIUM_ICON="${iconMedium}"
+    OSD_BRIGHTNESS_HIGH_ICON="${iconHigh}"
 
     ${lib.fileContents ./script.sh}
   '';

@@ -3,13 +3,17 @@
   writeDmenuApplication = pkgs: {
     name,
     dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
+    placeholder ? "",
     entries
   }: pkgs.writeShellApplication {
       inherit name;
-      text = ''
+      text = let
+        options = lib.concatMapStringsSep "\\n" (entry: entry.label) entries;
+        exec = "${dmenu} --placeholder ${placeholder} -l ${toString (builtins.length entries)}";
+      in ''
         #shellcheck shell=bash
 
-        chosen="$(echo -e "${lib.concatMapStringsSep "\\n" (entry: entry.label) entries}" | ${dmenu} -l ${toString (builtins.length entries)})"
+        chosen="$(echo -e "${options}" | ${exec})"
         case ''${chosen} in
           ${lib.concatMapStringsSep "\n" (entry: ''"${entry.label}") ${entry.exec} ;;'') entries}
         esac

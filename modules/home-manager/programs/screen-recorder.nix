@@ -17,12 +17,14 @@ let
 
   screen-recorder = lib.getExe self.pkgs.screen-recorder;
   screenRecordingActions = [
-    { id = "recording-screen-audio";    symbol = "󰹑"; label = "Screen (with audio)";  exec = cfg.screen-audio; }
-    { id = "recording-screen-no-audio"; symbol = "󰹑"; label = "Screen (no audio)";    exec = cfg.screen-no-audio; }
-    { id = "recording-region-audio";    symbol = ""; label = "Region (with audio)";  exec = cfg.region-audio; }
-    { id = "recording-region-no-audio"; symbol = ""; label = "Region (no audio)";    exec = cfg.region-no-audio; }
-    { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.stop; }
+    { id = "recording-screen-audio";    symbol = "󰹑"; label = "Screen (with audio)";  exec = cfg.exec.screen-audio; }
+    { id = "recording-screen-no-audio"; symbol = "󰹑"; label = "Screen (no audio)";    exec = cfg.exec.screen-no-audio; }
+    { id = "recording-region-audio";    symbol = ""; label = "Region (with audio)";  exec = cfg.exec.region-audio; }
+    { id = "recording-region-no-audio"; symbol = ""; label = "Region (no audio)";    exec = cfg.exec.region-no-audio; }
+    { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.exec.stop; }
   ];
+
+  yamlFormat = pkgs.formats.yaml { };
 in
 {
   options.custom.programs.screen-recorder = {
@@ -33,20 +35,16 @@ in
       default = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
     };
 
-    wlr-which-key-menu = lib.mkOption {
-      description = "Name of the wlr-which-key menu";
-      type = lib.types.str;
-      default = "screen-recorder";
+    exec = {
+      screen-audio     = mkAppOpt ''${screen-recorder} screen-audio "${cfg.directory}"'';
+      screen-no-audio  = mkAppOpt ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
+      region-audio     = mkAppOpt ''${screen-recorder} region-audio "${cfg.directory}"'';
+      region-no-audio  = mkAppOpt ''${screen-recorder} region-no-audio "${cfg.directory}"'';
+      stop             = mkAppOpt ''${screen-recorder} stop'';
     };
-
-    screen-audio     = mkAppOpt ''${screen-recorder} screen-audio "${cfg.directory}"'';
-    screen-no-audio  = mkAppOpt ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
-    region-audio     = mkAppOpt ''${screen-recorder} region-audio "${cfg.directory}"'';
-    region-no-audio  = mkAppOpt ''${screen-recorder} region-no-audio "${cfg.directory}"'';
-    stop             = mkAppOpt ''${screen-recorder} stop'';
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.screen-recorder" pkgs lib.platforms.linux) ];
 
     home.packages = [
@@ -71,8 +69,8 @@ in
     ];
 
     # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
-    custom.programs.wlr-which-key.menus."${cfg.wlr-which-key-menu}" = lib.mkIf config.custom.programs.wlr-which-key.enable {
-      "Ctrl+s" = cmd "Save current recording" cfg.stop;
+    custom.programs.wlr-which-key.menus.screen-recorder = {
+      "Ctrl+s" = cmd "Save current recording" "screen-recorder stop";
       s = submenu "Screen" {
         a = cmd "with audio"  ''screen-recorder screen-audio "${cfg.directory}"'';
         m = cmd "no audio"    ''screen-recorder screen-no-audio "${cfg.directory}"'';

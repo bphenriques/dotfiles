@@ -1,8 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   imports = [
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
-    ./video-drivers.nix           # AMD iGPU + Nvidia dGPU
+    ./amd.nix
+    ./nvidia.nix
   ];
 
   # Networking
@@ -12,18 +13,8 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  # Power (AMD has better battery life with PPD over TLP: https://community.frame.work/t/responded-amd-7040-sleep-states/38101/13)
-  services.power-profiles-daemon.enable = true;
-  services.auto-epp = {
-    enable = true;
-    settings.Settings = { # See `cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences`
-      epp_state_for_AC = "balance_performance";
-      epp_state_for_BAT = "power";
-    };
-  };
-
   # RAM
-  zramSwap.enable = true;         # Run zramctl to check how good memory is compressed
+  zramSwap.enable = true; # Run zramctl to check how good memory is compressed
 
   # Battery
   services.upower = {
@@ -42,6 +33,9 @@
   };
 
   environment.systemPackages = [
+    # `top` but for GPUs. Very very useful to see which GPU is being used
+    (pkgs.nvtopPackages.amd.override { nvidia = (builtins.elem "nvidia" config.services.xserver.videoDrivers); })
+
     pkgs.cheese     # Webcam
   ];
 }
