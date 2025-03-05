@@ -15,12 +15,31 @@
 #  fi
 #}
 
+notify() {
+  message="$1"
+  notify-send \
+    --expire-time 3000 \
+    --category "screenshot" \
+    --hint string:x-canonical-private-synchronous:screenshot \
+    --hint string:x-dunst-stack-tag:screenshot \
+    "Screenshot" "$message"
+}
+
 case "${1:-}" in
-  screen)       shift 1 && grim "$1"                            ;;
-  screen-copy)  shift 1 && grim - | wl-copy                     ;;
-  screen-edit)  shift 1 && grim - | swappy -f -                 ;;
-  region)       shift 1 && grim -g "$(slurp)" "$1"              ;;
-  region-copy)  shift 1 && grim -g "$(slurp)" - | wl-copy       ;;
-  region-edit)  shift 1 && grim -g "$(slurp)" - | swappy -f -   ;;
-  *)            echo "Unknown command" && exit 1                ;;
+  screen)
+    shift 1
+    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').mp4"
+    grim "$destination"
+    notify "$destination"
+    ;;
+  region)
+    shift 1
+    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').mp4"
+    grim -g "$(slurp)" "$destination"
+    notify "$destination"
+    ;;
+  screen-copy)  grim - | wl-copy                     ;;
+  screen-edit)  grim - | swappy -f -                 ;;
+  region-copy)  grim -g "$(slurp)" - | wl-copy       ;;
+  region-edit)  grim -g "$(slurp)" - | swappy -f -   ;;
 esac

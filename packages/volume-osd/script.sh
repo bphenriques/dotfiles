@@ -47,8 +47,8 @@ case "${1:-}" in
   mute)         mute && notify                            ;;
   unmute)       unmute && notify                          ;;
   toggle-mute)  toggle_mute && notify                     ;;
-  increase)     shift 1 && increase "${1:-10}" && notify  ;;
-  decrease)     shift 1 && decrease "${1:-10}" && notify  ;;
+  increase)     shift 1 && increase "${1:-5}" && notify  ;;
+  decrease)     shift 1 && decrease "${1:-5}" && notify  ;;
   list)         shift 1 && list "$1"                      ;;
   set)          shift 1 && set_default "$1"               ;;
 esac

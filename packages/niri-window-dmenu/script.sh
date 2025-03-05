@@ -1,8 +1,9 @@
 #shellcheck shell=bash
-windows="$(niri msg --json windows)"
+
+windows="$(niri msg --json windows | jq -r -c "sort_by(.is_focused)")"
 selection="$(echo "${windows}" \
   | jq -r '.[] | "\(.app_id) - \(.title)\u0000icon\u001f\(.app_id)"' \
-  | fuzzel --counter --dmenu --index --width 65 --lines "$(echo "$windows" | jq length)"
+  | fuzzel --dmenu --index --width 65 --lines "$(echo "$windows" | jq length)"
 )"
 
 if [ "$selection" != -1 ]; then

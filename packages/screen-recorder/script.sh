@@ -5,13 +5,34 @@ record() {
   destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
   shift 1
   if is_recording; then
-    notify-send "Screen Recorder" "There is already a recording in progress"
+    notify-send \
+      --expire-time 1500 \
+      --icon "$ERROR_ICON" \
+      --category "screen-recorder" \
+      --hint string:x-canonical-private-synchronous:screen-recorder \
+      --hint string:x-dunst-stack-tag:screen-recorder \
+      "Screen Recorder" "There is already a recording in progress"
+
     return 1
   else
-    notify-send "Screen Recorder" "Starting recording..." --expire-time=1000
+    notify-send \
+      --expire-time 1000 \
+      --icon "$RECORD_ICON" \
+      --category "screen-recorder" \
+      --hint string:x-canonical-private-synchronous:screen-recorder \
+      --hint string:x-dunst-stack-tag:screen-recorder \
+      "Screen Recorder" "Starting recording..."
+
     sleep 1
     if ! wl-screenrec --filename="${destination}" "$@"; then
-      notify-send --urgency=critical "Screen Recorder" "Couldn't start recording"      
+      notify-send \
+        --urgency=critical \
+        --expire-time 1500 \
+        --icon "$ERROR_ICON" \
+        --category "screen-recorder" \
+        --hint string:x-canonical-private-synchronous:screen-recorder \
+        --hint string:x-dunst-stack-tag:screen-recorder \
+        "Screen Recorder" "Couldn't start recording"
     fi
   fi
 }
@@ -19,9 +40,21 @@ record() {
 stop() {
   if is_recording; then
     pkill --signal INT wl-screenrec
-    notify-send "Screen Recorder" "Recording stopped..."
+    notify-send \
+      --expire-time 1500 \
+      --icon "$INFORMATION_ICON" \
+      --category "screen-recorder" \
+      --hint string:x-canonical-private-synchronous:screen-recorder \
+      --hint string:x-dunst-stack-tag:screen-recorder \
+      "Screen Recorder" "Recording stopped..."
   else
-    notify-send "Screen Recorder" "Nothing being recorded..."
+    notify-send \
+      --expire-time 1000 \
+      --icon "$INFORMATION_ICON" \
+      --category "screen-recorder" \
+      --hint string:x-canonical-private-synchronous:screen-recorder \
+      --hint string:x-dunst-stack-tag:screen-recorder \
+      "Screen Recorder" "Nothing being recorded..."
   fi
 }
 

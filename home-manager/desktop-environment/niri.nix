@@ -170,17 +170,16 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+G"           = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${wlr-which-key}" "global"'';
 
       # Focus management
+      "Mod+Tab"         = ''spawn "${window-switcher}"'';
+      "Alt+Tab"         = "focus-window-previous";
+      "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";
       "Mod+Shift+Down"  = "focus-workspace-down";
       "Mod+Up"          = "focus-window-or-workspace-up";
       "Mod+Shift+Up"    = "focus-workspace-up";
       "Mod+Right"       = "focus-column-right";
-      "Mod+Tab"         = ''spawn "${window-switcher}"'';
       "Mod+Home"        = "focus-column-first";
-      "Mod+End"         = "focus-column-last";
-      "Alt+Tab"         = "focus-window-previous";
-      "Mod+O"           = "toggle-window-rule-opacity";
       "Mod+1" = "focus-workspace 1";
       "Mod+2" = "focus-workspace 2";
       "Mod+3" = "focus-workspace 3";
@@ -237,11 +236,27 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-
   # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
   custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
+    "n" = cmd "Network" "footclient --title=nmtui-tui nmtui";
+    "a" = submenu "Audio" {
+      "c" = cmd "Configure" "pavucontrol";
+      "m" = cmd "Mute" "volume-osd toggle-mute";
+      "h" = cmd "Output: headphones (tmp)" "volume-osd decrease";
+      "i" = cmd "Output: internal (tmp)" "volume-osd decrease";
+      "e" = cmd "Output: external (tmp)" "volume-osd decrease";
+    };
+    "i" = submenu "Input" {
+      "l" = cmd "Keyboard next layout" "niri-keyboard-layout next";
+    };
+    "p" = submenu "Power" {
+      "p" = cmd "Performance" "powerprofilesctl-notify set performance";
+      "b" = cmd "Balanced" "powerprofilesctl-notify set balanced";
+      "s" = cmd "Power Saver" "powerprofilesctl-notify set power-saver";
+      "g" = cmd "Get" "powerprofilesctl-notify get";
+    };
     "r" = lib.mkIf config.custom.programs.screen-recorder.enable 
-      (submenu "Screen Recorder" config.custom.programs.wlr-which-key.menus.screen-recorder);
+      (submenu "Record Screen" config.custom.programs.wlr-which-key.menus.screen-recorder);
     "s" = lib.mkIf config.custom.programs.screenshot.enable
       (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
   };

@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
+  ...
+}:
 pkgs.writeShellApplication {
   name = "screenshot";
   runtimeInputs = [
@@ -9,6 +14,8 @@ pkgs.writeShellApplication {
     pkgs.libnotify
     pkgs.wl-clipboard
   ];
-  text = lib.fileContents ./script.sh;
+  text = ''
+    ${lib.fileContents ./script.sh}
+  '';
   meta.platforms = lib.platforms.linux;
 }

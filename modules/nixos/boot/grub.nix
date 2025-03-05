@@ -27,7 +27,6 @@ in {
       };
     };
 
-
     fontSize = lib.mkOption {
       type = int;
       description = "Font size. Adjust to the screen as it is not DPI aware.";
@@ -45,7 +44,7 @@ in {
     boot.loader = {
       timeout = 0;  # Shorten the bootup time. Press ESC to go to the boot menu
       grub = {
-        font = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/HackNerdFontMono-Regular.ttf";
+        font = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/Hack/HackNerdFontMono-Regular.ttf";
         fontSize = cfg.fontSize;
         splashImage = null;       # Blends nicely in a OLED screen.
         timeoutStyle = "hidden";  # Ensure nothing shows up regarding grub unless prompted

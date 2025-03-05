@@ -9,7 +9,7 @@ set_profile_profile() {
       --category "powerprofilesctl" \
       --hint string:x-canonical-private-synchronous:powerprofilesctl \
       --hint string:x-dunst-stack-tag:powerprofilesctl \
-      "Power Profile: failed to set"
+      "Power Profile" "Failed to set"
   fi
 }
 
@@ -28,7 +28,7 @@ notify_current() {
     --category "powerprofilesctl" \
     --hint string:x-canonical-private-synchronous:powerprofilesctl \
     --hint string:x-dunst-stack-tag:powerprofilesctl \
-    "Power Profile: $current"
+    "Power Profile" "$current"
 }
 
 case "${1:-}" in
