@@ -14,6 +14,7 @@ let
   dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
   window-switcher       = lib.getExe self.pkgs.niri-window-dmenu;
   files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  wlr-which-key         = lib.getExe pkgs.wlr-which-key;
 
   emoji = pkgs.writeShellApplication {
     name = "emoji-picker";
@@ -39,6 +40,9 @@ let
     " "
     (x: ''"${x}"'')
     (lib.strings.splitString " " command);
+
+  cmd = desc: cmd: { inherit desc cmd; };
+  submenu = desc: submenu: { inherit desc submenu; };
 in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.niri = {
@@ -163,10 +167,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+K"           = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
       "Mod+Shift+Q"     = ''spawn "${lib.getExe session-dmenu}"'';
       "Mod+W"           = ''spawn "pkill" "-SIGUSR1" "waybar"'';
+      "Mod+G"           = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${wlr-which-key}" "global"'';
 
-      "Mod+G"           =
-        lib.mkIf (config.custom.programs.screen-recorder.enable && config.custom.programs.wlr-which-key.enable)
-          ''spawn "${lib.getExe pkgs.wlr-which-key}" "${config.custom.programs.screen-recorder.wlr-which-key-menu}"'';
       # Focus management
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";
@@ -234,4 +236,14 @@ lib.mkIf pkgs.stdenv.isLinux {
       };
     '';
   };
+
+
+  # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
+  custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
+    "r" = lib.mkIf config.custom.programs.screen-recorder.enable 
+      (submenu "Screen Recorder" config.custom.programs.wlr-which-key.menus.screen-recorder);
+    "s" = lib.mkIf config.custom.programs.screenshot.enable
+      (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
+  };
 }
+

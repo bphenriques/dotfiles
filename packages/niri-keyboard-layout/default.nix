@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  keyboardIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/devices/input-keyboard-symbolic.svg",
+  ...
+}:
 pkgs.writeShellApplication {
   name = "niri-keyboard-layout";
   runtimeInputs = [
@@ -6,6 +11,10 @@ pkgs.writeShellApplication {
     pkgs.jq
     pkgs.libnotify
   ];
-  text = lib.fileContents ./script.sh;
+  text = ''
+    KEYBOARD_ICON="${keyboardIcon}"
+
+    ${lib.fileContents ./script.sh}
+  '';
   meta.platforms = lib.platforms.linux;
 }
