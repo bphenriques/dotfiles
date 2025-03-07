@@ -28,13 +28,13 @@ notify() {
 case "${1:-}" in
   screen)
     shift 1
-    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').mp4"
+    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').png"
     grim "$destination"
     notify "$destination"
     ;;
   region)
     shift 1
-    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').mp4"
+    destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').png"
     grim -g "$(slurp)" "$destination"
     notify "$destination"
     ;;

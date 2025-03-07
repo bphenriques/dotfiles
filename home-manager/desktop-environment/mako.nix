@@ -3,7 +3,7 @@ let
   mkMakoOsd = category: ''
     [category=${category}]
     anchor=top-center
-    margin=4,0,4,0
+    margin=10,0,10,0
   '';
 in
 {

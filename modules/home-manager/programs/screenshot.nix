@@ -17,9 +17,16 @@ let
 
   screenshot = lib.getExe self.pkgs.screenshot;
   screenshotActions = [
-    { id = "screenshot-screen";    symbol = "󰹑"; label = "Screen";  exec = cfg.exec.screen; }
-    { id = "screenshot-region";    symbol = ""; label = "Region";  exec = cfg.exec.region; }
+    { id = "screenshot-screen";       symbol = "󰹑"; label = "Screen (save)";  exec = cfg.exec.screen; }
+    { id = "screenshot-screen-edit";  symbol = "󰹑"; label = "Screen (edit)";  exec = cfg.exec.screen-edit; }
+    { id = "screenshot-region";       symbol = ""; label = "Region (save)";  exec = cfg.exec.region; }
+    { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = cfg.exec.region-edit; }
   ];
+
+  dmenu = self.lib.builders.writeDmenuApplication pkgs {
+    name = "screenshot-menu";
+    entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
+  };
 in
 {
   options.custom.programs.screenshot = {
@@ -30,8 +37,11 @@ in
     };
 
     exec = {
-      screen  = mkAppOpt ''${screenshot} screen "${cfg.directory}"'';
-      region  = mkAppOpt ''${screenshot} region "${cfg.directory}"'';
+      menu          = mkAppOpt ''${lib.getExe dmenu}'';
+      screen        = mkAppOpt ''${screenshot} screen "${cfg.directory}"'';
+      screen-edit   = mkAppOpt ''${screenshot} screen-edit "${cfg.directory}"'';
+      region        = mkAppOpt ''${screenshot} region "${cfg.directory}"'';
+      region-edit   = mkAppOpt ''${screenshot} region-edit "${cfg.directory}"'';
     };
   };
 
@@ -43,14 +53,12 @@ in
       pkgs.slurp
       pkgs.swappy
       self.pkgs.screenshot
+      dmenu
       (pkgs.makeDesktopItem {
         name = "screenshot-menu";
         desktopName = "Screenshot";
         icon = mkIcon "screenshot" "󰹑";
-        exec = lib.getExe (self.lib.builders.writeDmenuApplication pkgs {
-          name = "screenshot-menu";
-          entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
-        });
+        exec = lib.getExe dmenu;
         actions = let
           toAction = b: nameValuePair b.id {
             name = b.label;
@@ -69,10 +77,12 @@ in
       s = submenu "Screen" {
         s = cmd "Save"  ''screenshot screen "${cfg.directory}"'';
         c = cmd "Copy"  ''screenshot screen-copy'';
+        e = cmd "Edit"  ''screenshot screen-edit'';
       };
       r = submenu "Region" {
         s = cmd "Save"  ''screenshot region "${cfg.directory}"'';
         c = cmd "Copy"  ''screenshot region-copy'';
+        e = cmd "Edit"  ''screenshot region-edit'';
       };
     };
   };

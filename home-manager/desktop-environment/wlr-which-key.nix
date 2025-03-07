@@ -15,7 +15,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       border = colors.withHashtag.base0D;
       border_width = 1;
       corner_r = 10;
-      separator = "\t";
+      separator = "  ➜  ";
 
       anchor = "bottom";
       margin_right = 0;
