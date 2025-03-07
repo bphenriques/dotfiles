@@ -1,4 +1,7 @@
 { config, lib, pkgs, self, osConfig, ... }:
+let
+  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
+in
 {
   imports = [
     ./fuzzel.nix            # Application launcher
@@ -10,16 +13,25 @@
 
   custom.programs.screenshot.enable = true;
   custom.programs.screen-recorder.enable = true;
+  custom.programs.volume-osd.enable = true;
   custom.programs.shortcuts.files.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  custom.programs.powerprofilesctl.enable = true;
+  custom.programs.volume-osd.package = self.pkgs.volume-osd.override {
+    headphonesIcon = mkIcon "volume-osd-headphones" "";
+    headphonesMuteIcon = mkIcon "volume-osd-headphones" "󰋐";
+    headsetIcon = mkIcon "volume-osd-headset" "󰋎";
+    headsetMuteIcon = mkIcon "volume-osd-headset-mute" "󰋐";
+    internalSpeakersIcon = mkIcon "volume-osd-internal" "󰽟";
+    internalSpeakersMuteIcon = mkIcon "volume-osd-internal-mute" "󰽠";
+    externalSpeakersIcon = mkIcon "volume-osd-external" "󰓃";
+    externalSpeakersMuteIcon = mkIcon "volume-osd-external-mute" "󰓄";
+  };
 
   home.packages = [
     pkgs.wdisplays
 
     # Management
-    pkgs.pavucontrol
-    self.pkgs.volume-osd
     self.pkgs.brightness-osd
-    self.pkgs.powerprofilesctl-notify
     self.pkgs.niri-keyboard-layout
   ];
 }

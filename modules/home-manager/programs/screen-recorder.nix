@@ -24,6 +24,11 @@ let
     { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.exec.stop; }
   ];
 
+  dmenu = self.lib.builders.writeDmenuApplication pkgs {
+    name = "screen-recorder-menu";
+    entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
+  };
+
   yamlFormat = pkgs.formats.yaml { };
 in
 {
@@ -36,6 +41,7 @@ in
     };
 
     exec = {
+      menu             = mkAppOpt ''${lib.getExe dmenu}'';
       screen-audio     = mkAppOpt ''${screen-recorder} screen-audio "${cfg.directory}"'';
       screen-no-audio  = mkAppOpt ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
       region-audio     = mkAppOpt ''${screen-recorder} region-audio "${cfg.directory}"'';
@@ -50,14 +56,12 @@ in
     home.packages = [
       pkgs.wl-screenrec
       self.pkgs.screen-recorder
+      dmenu
       (pkgs.makeDesktopItem {
         name = "screen-recoder-menu";
         desktopName = "Screen Recording";
         icon = mkIcon "screen-recorder" "󰑋";
-        exec = lib.getExe (self.lib.builders.writeDmenuApplication pkgs {
-          name = "screen-recorder-menu";
-          entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
-        });
+        exec = lib.getExe dmenu;
         actions = let
           toAction = b: nameValuePair b.id {
             name = b.label;

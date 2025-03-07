@@ -14,6 +14,7 @@ let
   dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
   window-switcher       = lib.getExe self.pkgs.niri-window-dmenu;
   files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  system-monitor        = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
   wlr-which-key         = lib.getExe pkgs.wlr-which-key;
 
   emoji = pkgs.writeShellApplication {
@@ -50,10 +51,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     screenshotPath = "${swappy.directory}/${swappy.format}";
 
     environment = {
-      DISPLAY = ":${toString config.custom.services.xwayland-satellite.displayId}";
-      QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-      QT_QPA_PLATFORM = "wayland";
-      NIXOS_OZONE_WL = "1";
+      NIXOS_OZONE_WL = "1"; # Electron apps
     };
 
     input = {
@@ -136,6 +134,12 @@ lib.mkIf pkgs.stdenv.isLinux {
       ];
     };
 
+    # TODO: Review:
+    # Windows key  + PrtScn -> full screen and save
+    # Windows key  + P -> opens the display format (can use kanshi)
+    # Windows key  + L -> lock computer
+      # Windows key + Ctrl + V -> sound output
+
     bindings = {
       # Size management
       "Mod+R"       = "switch-preset-column-width";
@@ -156,18 +160,20 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Shift+Comma" = "expel-window-from-column";
 
       # Screenshots
-      "Print"       = "screenshot-screen";
-      "Ctrl+Print"  = "screenshot";
+      "Print"       = ''screenshot-screen'';
+      "Shift+Print" = ''screenshot'';
+      "Mod+Print"   = ''spawn ${toNiriSpawn config.custom.programs.screenshot.exec.menu}'';
+      "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
 
       # Shortcuts
-      "Mod+Return"      = ''spawn "${terminal}"'';
-      "Mod+Space"       = ''spawn "${application-launcher}"'';
-      "Mod+Period"      = ''spawn "${lib.getExe emoji}"'';
-      "Mod+Shift+Space" = ''spawn ${toNiriSpawn files-browser}'';
-      "Mod+K"           = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
-      "Mod+Shift+Q"     = ''spawn "${lib.getExe session-dmenu}"'';
-      "Mod+W"           = ''spawn "pkill" "-SIGUSR1" "waybar"'';
-      "Mod+G"           = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${wlr-which-key}" "global"'';
+      "Mod+Space"         = ''spawn "${application-launcher}"'';
+      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${wlr-which-key}" "global"'';
+      "Mod+Return"        = ''spawn "${terminal}"'';
+      "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
+      "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';
+      "Mod+K"             = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
+      "Mod+Shift+Q"       = ''spawn "${lib.getExe session-dmenu}"'';
+      "Ctrl+Shift+Escape" = ''spawn ${toNiriSpawn system-monitor}'';
 
       # Focus management
       "Mod+Tab"         = ''spawn "${window-switcher}"'';
@@ -209,9 +215,9 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Ctrl+9" = "move-column-to-workspace 9";
 
       # Audio
-      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "increase"'';
-      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "decrease"'';
-      "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "toggle-mute"'';
+      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "sink-increase"'';
+      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "sink-decrease"'';
+      "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "sink-toggle-mute"'';
       "XF86AudioMicMute     allow-when-locked=true" = ''spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"'';
       "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
       "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
@@ -238,26 +244,17 @@ lib.mkIf pkgs.stdenv.isLinux {
 
   # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
   custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
-    "n" = cmd "Network" "footclient --title=nmtui-tui nmtui";
-    "a" = submenu "Audio" {
-      "c" = cmd "Configure" "pavucontrol";
-      "m" = cmd "Mute" "volume-osd toggle-mute";
-      "h" = cmd "Output: headphones (tmp)" "volume-osd decrease";
-      "i" = cmd "Output: internal (tmp)" "volume-osd decrease";
-      "e" = cmd "Output: external (tmp)" "volume-osd decrease";
+    n = cmd "Network" "footclient --title=nmtui-tui nmtui";
+    i = submenu "Input" {
+      l = cmd "Keyboard next layout" "niri-keyboard-layout next";
     };
-    "i" = submenu "Input" {
-      "l" = cmd "Keyboard next layout" "niri-keyboard-layout next";
-    };
-    "p" = submenu "Power" {
-      "p" = cmd "Performance" "powerprofilesctl-notify set performance";
-      "b" = cmd "Balanced" "powerprofilesctl-notify set balanced";
-      "s" = cmd "Power Saver" "powerprofilesctl-notify set power-saver";
-      "g" = cmd "Get" "powerprofilesctl-notify get";
-    };
-    "r" = lib.mkIf config.custom.programs.screen-recorder.enable 
+    a = lib.mkIf config.custom.programs.volume-osd.enable
+      (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
+    p = lib.mkIf config.custom.programs.screen-recorder.enable
+      (submenu "Power Profile" config.custom.programs.wlr-which-key.menus.powerprofilesctl);
+    r = lib.mkIf config.custom.programs.screen-recorder.enable
       (submenu "Record Screen" config.custom.programs.wlr-which-key.menus.screen-recorder);
-    "s" = lib.mkIf config.custom.programs.screenshot.enable
+    s = lib.mkIf config.custom.programs.screenshot.enable
       (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
   };
 }

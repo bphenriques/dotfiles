@@ -42,5 +42,7 @@ in
         ];
       };
     };
+
+    custom.programs.niri.environment.DISPLAY = ":${toString cfg.displayId}";
   };
 }

@@ -1,4 +1,4 @@
-{ pkgs, self, ... }:
+{ pkgs, self, config, ... }:
 {
   imports = [
     ./greetd.nix        # Login manager
@@ -21,5 +21,8 @@
 
   environment.systemPackages = [
     pkgs.libnotify  # Notifications
+
+    # `top` but for GPUs. Very very useful to see which GPU is being used
+    (pkgs.nvtopPackages.amd.override { nvidia = (builtins.elem "nvidia" config.services.xserver.videoDrivers); })
   ];
 }
