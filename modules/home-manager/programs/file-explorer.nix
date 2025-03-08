@@ -3,7 +3,7 @@ let
   inherit (builtins) listToAttrs replaceStrings;
   inherit (lib) map nameValuePair;
 
-  cfg = config.custom.programs.shortcuts;
+  cfg = config.custom.programs.file-explorer;
 
   fileBookmarkOpt = lib.types.submodule {
     options = {
@@ -16,41 +16,40 @@ let
   mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 in
 {
-  options.custom.programs.shortcuts = {
-    enable = lib.mkEnableOption "shortcuts";
-    files = {
-      browser = lib.mkOption {
-        description = "Package or executable to run that supports a single path argument";
-        type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-      };
+  options.custom.programs.file-explorer = {
+    enable = lib.mkEnableOption "file-explorer";
+    browser = lib.mkOption {
+      description = "Package or executable to run that supports a single path argument";
+      type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
+    };
 
-      bookmarks = lib.mkOption {
-        description = "File bookmarks";
-        type = lib.types.listOf fileBookmarkOpt;
-      };
+    bookmarks = lib.mkOption {
+      description = "File bookmarks";
+      type = lib.types.listOf fileBookmarkOpt;
     };
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.shortcuts" pkgs lib.platforms.linux) ];
+    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.file-explorer" pkgs lib.platforms.linux) ];
 
     home.packages = [
       (pkgs.makeDesktopItem {
-        name = "file-bookmarks";
-        desktopName = "Open file bookmark";
-        icon = mkIcon "wallpaper" "";
-        exec = cfg.files.browser;
+        name = "file-explorer";
+        desktopName = "File Explorer";
+        icon = mkIcon "file-explorer" "";
+        exec = cfg.browser;
         actions = let
           bookmarkToAction = b: nameValuePair (replaceStrings [" "] ["-"] b.name) {
             inherit (b) name icon;
-            exec = "${cfg.files.browser} ${b.path}";
+            exec = "${cfg.browser} ${b.path}";
           };
-        in listToAttrs (lib.map bookmarkToAction cfg.files.bookmarks);
+        in listToAttrs (lib.map bookmarkToAction cfg.bookmarks);
       })
     ];
+    custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "file-explorer.desktop" ];
 
     # Set some sane defaults
-    custom.programs.shortcuts.files.bookmarks = [
+    custom.programs.file-explorer.bookmarks = [
       {
         name = "Documents";
         icon = mkIcon "documents" "󱧶";

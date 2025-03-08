@@ -24,6 +24,8 @@
   programs.fd.enable = true;              # Better `find`.
   programs.jq.enable = true;              # JSON query.
   custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
+  custom.programs.fzf-fd.enable = true;   # Fuzzy fd
+  custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
 
   programs.tealdeer = {
     enable = true;
@@ -114,18 +116,15 @@
 
       # Utility
       whatsmyip = "${lib.getExe pkgs.curl} ifconfig.me";
-    } // (lib.optionalAttrs pkgs.stdenv.isLinux {
-      webp_to_png = ''nix-shell -p libwebp -p parallel --command "parallel dwebp {} -o {.}.png ::: *.webp"'';
-    });
+      webp_to_png = lib.mkIf pkgs.stdenv.isLinux ''nix-shell -p libwebp -p parallel --command "parallel dwebp {} -o {.}.png ::: *.webp"'';
+    };
   };
 
   programs.ssh = {
     enable = true;
-    includes = [ "$HOME/.ssh/local" ];
+    includes = [ "$HOME/.ssh/config.local" ];
     matchBlocks = {
-      "*" = {
-        extraOptions.SetEnv = "TERM=xterm-256color";
-      };
+      "*".extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.
       "bruno-home-nas" = {
         user = "Bruno-Admin";
         port = 6188;
@@ -141,7 +140,6 @@
     manpages.enable = false;
     json.enable = false;
   };
-  programs.man.enable = true;
 
   # Tighten permissions to private keys
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [

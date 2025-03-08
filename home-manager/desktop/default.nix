@@ -27,7 +27,6 @@
     pkgs.jetbrains.idea-community
 
     # Media
-    pkgs.newsflash       # RSS Reader
     pkgs.feishin         # Jellyfin player
     pkgs.cmus            # TUI music player
   ];

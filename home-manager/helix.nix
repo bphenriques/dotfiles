@@ -30,7 +30,7 @@
       language-server = {
         ltex-ls = {
           command = "ltex-ls";
-          config = { ltex = { language = "en-GB"; }; }; # https://valentjn.github.io/ltex/settings.html
+          config = { ltex = { language = "en-GB"; }; };
         };
       };
     };
@@ -109,31 +109,6 @@
     };
   };
 
-  home.packages = [
-    (pkgs.makeDesktopItem {
-      name = "helix";
-      desktopName = "Helix editor";
-      terminal = true;
-      categories = [ "Utility" "TextEditor" "Development" "IDE" ];
-      mimeTypes = [
-        "text/plain"
-        "application/json"
-        "application/xml"
-        "application/x-shellscript"
-        "text/x-makefile"
-        "text/x-tex"
-        "text/x-java"
-        "text/x-chdr"
-        "text/x-csrc"
-        "text/x-c++hdr"
-        "text/x-c++src"
-        "text/xml"
-      ];
-      exec = "${pkgs.helix}/bin/hx %F";
-      icon = "helix";
-    })
-  ];
-
   home.sessionVariables.EDITOR  = lib.getExe pkgs.helix;
-  custom.xdgDefaultApps.text = lib.mkBefore [ "helix.desktop" ];
+  custom.xdgDefaultApps.text = lib.mkBefore [ "Helix.desktop" ];
 }

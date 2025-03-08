@@ -11,7 +11,7 @@ let
   niri = lib.getExe pkgs.niri;
   hyprlock = lib.getExe pkgs.hyprlock;
 
-  suspend     = "${systemctl} suspend";
+  suspend = "${systemctl} suspend";
   lock = ''${pidof} hyprlock || ${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}'';
   power-off-monitors = "${niri} msg action power-off-monitors";
   power-on-monitors = "${niri} msg action power-on-monitors";

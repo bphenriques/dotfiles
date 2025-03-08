@@ -8,11 +8,6 @@ lib.mkIf pkgs.stdenv.isLinux {
       scrollback.lines = 10000;
       mouse.hide-when-typing = "yes";
       csd.hide-when-maximized = true;
-
-      url = {
-        launch = "${lib.getExe' pkgs.xdg-utils "xdg-open"} \${url}";
-        protocols = "http, https, ftp, ftps, file, mailto, ipfs";
-      };
     };
   };
 }

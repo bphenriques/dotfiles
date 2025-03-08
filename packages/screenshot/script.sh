@@ -1,20 +1,5 @@
 #shellcheck shell=bash
 
-#notify() {
-#  tempnotify='notify-send -u low --action=edit=Edit --action=save=Save'
-#  wl-paste > $dir/$file
-#  temp=$(${tempnotify} -i $dir/$file "Copied to clipboard. ")
-#  rm $dir/$file
-#  if [ $temp = 'edit' ]; then
-#    wl-paste > $dir/$file
-#    swappy -f $dir/$file
-#    rm $dir/$file
-#  elif [ $temp = 'open' ]; then
-#    wl-paste > $dir/$file
-#    $filemanager $dir
-#  fi
-#}
-
 notify() {
   message="$1"
   notify-send \
