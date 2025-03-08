@@ -1,7 +1,5 @@
 { pkgs, lib, config, ... }:
 {
-  custom.programs.fzf-fd.enable = true;   # Fuzzy fd
-  custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
   programs.fzf = {
     enable = true;
     defaultCommand = "${lib.getExe pkgs.fd} --type file --hidden --exclude=.git";

@@ -61,4 +61,3 @@ rec {
     targets.qt.platform = "gnome"; # It uses adwait or adwait-dark underneath
   };
 }
-

@@ -6,9 +6,6 @@
     ./nvidia.nix
   ];
 
-  # Networking
-  networking.networkmanager.wifi.powersave = true;
-
   # Bluetooth
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;

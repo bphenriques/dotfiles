@@ -22,7 +22,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       screenshot-high-bit-depth = "yes";    # Same output bitdepth as the video
       screenshot-png-compression = "2";     # Not to high, not too low.
       screenshot-directory = "${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}";
-      screenshot-template = "%f-%wH.%wM.%wS.%wT-#%#00n";
+      screenshot-template = "video-%f-%wH.%wM.%wS.%wT-#%#00n";
 
       # Subtitles
       slang = "eng,en,enUS,en-US,por,pt";   # Preferred langauge for subtitles

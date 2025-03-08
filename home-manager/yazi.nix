@@ -31,10 +31,6 @@ in
     ];
   };
 
-  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
-    "d ${config.xdg.cacheHome}/yazi 600 ${config.home.username} users 10d -"
-  ];
-
   xdg.configFile = {
     # TODO: Migrate to hm types
     # Smart sorting depending on the directory
@@ -65,15 +61,7 @@ in
     '';
   };
 
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
-    (pkgs.makeDesktopItem {
-      name = "yazi-tui";
-      desktopName = "Yazi File Manager";
-      icon = "yazi"; # FIXME
-      exec = "${lib.getExe' config.programs.foot.package "footclient"} --title=yazi-tui ${lib.getExe config.programs.yazi.package} %f";
-      mimeTypes = config.custom.xdgDefaultApps.mimes.inode;
-    })
+  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
+    "d ${config.xdg.cacheHome}/yazi 600 ${config.home.username} users 10d -"
   ];
-
-  custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "yazi-tui.desktop" ];
 }

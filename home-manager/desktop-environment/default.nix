@@ -1,4 +1,4 @@
-{ config, lib, pkgs, self, osConfig, ... }:
+{ config, lib, pkgs, self, ... }:
 let
   mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 in
@@ -14,7 +14,7 @@ in
   custom.programs.screenshot.enable = true;
   custom.programs.screen-recorder.enable = true;
   custom.programs.volume-osd.enable = true;
-  custom.programs.shortcuts.files.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  custom.programs.file-explorer.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   custom.programs.powerprofilesctl.enable = true;
   custom.programs.volume-osd.package = self.pkgs.volume-osd.override {
     headphonesIcon = mkIcon "volume-osd-headphones" "";

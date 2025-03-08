@@ -131,6 +131,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         "Volume Control"
         "nmtui-tui"
         "btop-tui"
+        "yazi-tui"
       ];
     };
 
@@ -138,7 +139,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     # Windows key  + PrtScn -> full screen and save
     # Windows key  + P -> opens the display format (can use kanshi)
     # Windows key  + L -> lock computer
-      # Windows key + Ctrl + V -> sound output
 
     bindings = {
       # Size management
@@ -246,7 +246,7 @@ lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
     n = cmd "Network" "footclient --title=nmtui-tui nmtui";
     i = submenu "Input" {
-      l = cmd "Keyboard next layout" "niri-keyboard-layout next";
+      n = cmd "Keyboard next layout" "niri-keyboard-layout next";
     };
     a = lib.mkIf config.custom.programs.volume-osd.enable
       (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
@@ -258,4 +258,3 @@ lib.mkIf pkgs.stdenv.isLinux {
       (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
   };
 }
-

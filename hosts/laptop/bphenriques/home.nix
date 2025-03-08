@@ -64,9 +64,9 @@ in
     };
   };
 
-  custom.programs.shortcuts = {
+  custom.programs.file-explorer = {
     enable = true;
-    files.bookmarks = [
+    bookmarks = [
       {
         name = "NAS Private";
         icon = mkIcon "nas-private" "󰉐";
