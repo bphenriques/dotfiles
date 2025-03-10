@@ -16,7 +16,6 @@ let
 
   mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 
-  # FIXME: not working
   notify = { msg, icon }: ''${lib.getExe pkgs.libnotify} --expire-time 5000 --icon "${icon}" --category "kanshi-osd" --hint string:x-canonical-private-synchronous:kanshi-osd --hint string:x-dunst-stack-tag:kanshi-osd "${msg}"'';
 in
 {

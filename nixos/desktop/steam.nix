@@ -1,5 +1,4 @@
 { pkgs, config, lib, ... }:
-# TODO: https://github.com/Misterio77/nix-config/blob/main/home/gabriel/features/games/steam.nix
 let
   steam-desktop-item = (pkgs.makeDesktopItem {
     name = "steam";
