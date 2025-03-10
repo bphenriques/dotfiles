@@ -1,14 +1,5 @@
 #shellcheck shell=bash
 
-# Issues:
-# - Applying to a class as whole does not work: brightnessctl --machine-readable --class=backlight set 10
-
-OSD_BRIGHTNESS_OFF_ICON="${OSD_BRIGHTNESS_OFF_ICON:-}"
-OSD_BRIGHTNESS_LOW_ICON="${OSD_BRIGHTNESS_LOW_ICON:-}"
-OSD_BRIGHTNESS_MEDIUM_ICON="${OSD_BRIGHTNESS_MEDIUM_ICON:-}"
-OSD_BRIGHTNESS_HIGH_ICON="${OSD_BRIGHTNESS_HIGH_ICON:-}"
-
-# ignore 'kbd_backlight'
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
 list_backlight_devices() { brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }'; }
 get_percentage() { brightnessctl --device="${2:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
@@ -44,16 +35,14 @@ notify() {
 case "${1:-}" in
   increase)
     shift 1
-    delta="+${1:-5}%"
     device="${2:-"$(default_device)"}"
-    set_brightness "$delta" "$device"
+    set_brightness "+${1:-5}%" "$device"
     notify "$(get_percentage "$device")"
     ;;
   decrease)
     shift 1
-    delta="${1:-5}-%"
     device="${2:-"$(default_device)"}"
-    set_brightness "$delta" "$device"
+    set_brightness "${1:-5}-%" "$device"
     notify "$(get_percentage "$device")"
     ;;
   list) list_backlight_devices ;;
