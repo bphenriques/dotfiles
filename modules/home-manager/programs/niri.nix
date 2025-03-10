@@ -206,8 +206,8 @@ in
       window-rule {
         ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.tui}
 
-        default-column-width { fixed 1024; }
-        default-window-height { fixed 768; }
+        default-column-width { fixed 1280; }
+        default-window-height { fixed 720; }
 
         open-floating true
       }

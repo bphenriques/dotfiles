@@ -14,7 +14,6 @@ in
     assertions = [ (lib.hm.assertions.assertPlatform "custom.services.swww" pkgs lib.platforms.linux) ];
 
     home.packages = [ pkgs.swww ];
-
     systemd.user.services = {
       swww = {
         Unit = {
