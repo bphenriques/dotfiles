@@ -7,7 +7,7 @@
     ./zathura.nix       # Documents
     ./mpv.nix           # Videos
     ./imv.nix           # Images
-    #./beets.nix         # FIXME: re-add once it works again Music library manager
+    ./beets.nix         # Music library manager
     ./foot.nix          # Terminal
     ./ghostty.nix       # Terminal
     ./mangohud.nix      # Game HUD
