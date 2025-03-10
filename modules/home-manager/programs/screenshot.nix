@@ -15,7 +15,7 @@ let
   submenu = desc: submenu: { inherit desc submenu; };
   mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 
-  screenshot = lib.getExe self.pkgs.screenshot;
+  screenshot = lib.getExe cfg.package;
   screenshotActions = [
     { id = "screenshot-screen";       symbol = "󰹑"; label = "Screen (save)";  exec = cfg.exec.screen; }
     { id = "screenshot-screen-edit";  symbol = "󰹑"; label = "Screen (edit)";  exec = cfg.exec.screen-edit; }
@@ -30,7 +30,11 @@ let
 in
 {
   options.custom.programs.screenshot = {
-    enable = lib.mkEnableOption "customn-screenshot";
+    enable = lib.mkEnableOption "custom-screenshot";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = self.pkgs.screenshot;
+    };
     directory = lib.mkOption {
       description = "Location of screenshots";
       type = lib.types.str;
@@ -52,7 +56,7 @@ in
       pkgs.grim
       pkgs.slurp
       pkgs.swappy
-      self.pkgs.screenshot
+      cfg.package
       dmenu
       (pkgs.makeDesktopItem {
         name = "screenshot-menu";
@@ -72,17 +76,16 @@ in
     custom.programs.swappy.enable = true;
     custom.programs.swappy.directory = cfg.directory;
 
-    # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
     custom.programs.wlr-which-key.menus.screenshot = {
       s = submenu "Screen" {
-        s = cmd "Save"  ''screenshot screen "${cfg.directory}"'';
-        c = cmd "Copy"  ''screenshot screen-copy'';
-        e = cmd "Edit"  ''screenshot screen-edit'';
+        s = cmd "Save"  ''${screenshot} screen "${cfg.directory}"'';
+        c = cmd "Copy"  ''${screenshot} screen-copy'';
+        e = cmd "Edit"  ''${screenshot} screen-edit'';
       };
       r = submenu "Region" {
-        s = cmd "Save"  ''screenshot region "${cfg.directory}"'';
-        c = cmd "Copy"  ''screenshot region-copy'';
-        e = cmd "Edit"  ''screenshot region-edit'';
+        s = cmd "Save"  ''${screenshot} region "${cfg.directory}"'';
+        c = cmd "Copy"  ''${screenshot} region-copy'';
+        e = cmd "Edit"  ''${screenshot} region-edit'';
       };
     };
   };

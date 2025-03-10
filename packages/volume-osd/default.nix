@@ -9,6 +9,7 @@
   internalSpeakersMuteIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/32x32/devices/audio-card.svg",
   externalSpeakersIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/32x32/devices/audio-speakers.svg",
   externalSpeakersMuteIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/32x32/devices/audio-speakers.svg",
+  errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
   ...
 }:
 pkgs.writeShellApplication {
@@ -27,6 +28,7 @@ pkgs.writeShellApplication {
     OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON="${internalSpeakersMuteIcon}"
     OSD_VOLUME_EXTERNAL_SPEAKERS_ICON="${externalSpeakersIcon}"
     OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON="${externalSpeakersMuteIcon}"
+    OSD_VOLUME_ERROR_ICON="${errorIcon}"
 
     ${lib.fileContents ./script.sh}
   '';
