@@ -2,10 +2,11 @@
 {
   writeDmenuApplication = pkgs: {
     name,
+    runtimeInputs ? [ ],
     dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
     entries
   }: pkgs.writeShellApplication {
-      inherit name;
+      inherit name runtimeInputs;
       text = let
         options = lib.concatMapStringsSep "\\n" (entry: entry.label) entries;
         exec = "${dmenu} -l ${toString (builtins.length entries)}";

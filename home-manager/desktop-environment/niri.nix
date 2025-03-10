@@ -6,13 +6,9 @@ let
   brightness            = lib.getExe self.pkgs.brightness-osd;
   terminal              = lib.getExe' pkgs.foot "footclient";
   playerctl             = lib.getExe pkgs.playerctl;
-  application-launcher  = lib.getExe pkgs.fuzzel;
   dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
-  window-switcher       = lib.getExe self.pkgs.niri-window-dmenu;
-  network-manager       = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}";
   files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   system-monitor        = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
-  wlr-which-key         = lib.getExe pkgs.wlr-which-key;
 
   emoji = pkgs.writeShellApplication {
     name = "emoji-picker";
@@ -25,9 +21,6 @@ let
     " "
     (x: ''"${x}"'')
     (lib.strings.splitString " " command);
-
-  cmd = desc: cmd: { inherit desc cmd; };
-  submenu = desc: submenu: { inherit desc submenu; };
 in
 {
   custom.programs.niri = {
@@ -119,10 +112,6 @@ in
       ];
     };
 
-    # TODO: Review:
-    # Windows key  + PrtScn -> full screen and save
-    # Windows key  + P -> opens the display format (can use kanshi)
-
     bindings = {
       # Size management
       "Mod+R"       = "switch-preset-column-width";
@@ -150,8 +139,8 @@ in
       "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
 
       # Shortcuts
-      "Mod+Space"         = ''spawn "${application-launcher}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${wlr-which-key}" "global"'';
+      "Mod+Space"         = ''spawn "${lib.getExe pkgs.fuzzel}"'';
+      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe pkgs.wlr-which-key}" "global"'';
       "Mod+Return"        = ''spawn "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';
@@ -161,7 +150,7 @@ in
       "Mod+L"             = ''spawn ${toNiriSpawn config.custom.programs.session.exec.lock}'';
 
       # Focus management
-      "Mod+Tab"         = ''spawn "${window-switcher}"'';
+      "Mod+Tab"         = ''spawn "${lib.getExe self.pkgs.niri-window-dmenu}"'';
       "Alt+Tab"         = "focus-window-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
@@ -171,15 +160,6 @@ in
       "Mod+Shift+Up"    = "focus-workspace-up";
       "Mod+Right"       = "focus-column-right";
       "Mod+Home"        = "focus-column-first";
-      "Mod+1" = "focus-workspace 1";
-      "Mod+2" = "focus-workspace 2";
-      "Mod+3" = "focus-workspace 3";
-      "Mod+4" = "focus-workspace 4";
-      "Mod+5" = "focus-workspace 5";
-      "Mod+6" = "focus-workspace 6";
-      "Mod+7" = "focus-workspace 7";
-      "Mod+8" = "focus-workspace 8";
-      "Mod+9" = "focus-workspace 9";
 
       # Moving things around
       "Mod+Ctrl+Left"  = "move-column-left";
@@ -188,16 +168,6 @@ in
       "Mod+Ctrl+Right" = "move-column-right";
       "Mod+BracketLeft"   = "consume-or-expel-window-left";
       "Mod+BracketRight"  = "consume-or-expel-window-right";
-
-      "Mod+Ctrl+1" = "move-column-to-workspace 1";
-      "Mod+Ctrl+2" = "move-column-to-workspace 2";
-      "Mod+Ctrl+3" = "move-column-to-workspace 3";
-      "Mod+Ctrl+4" = "move-column-to-workspace 4";
-      "Mod+Ctrl+5" = "move-column-to-workspace 5";
-      "Mod+Ctrl+6" = "move-column-to-workspace 6";
-      "Mod+Ctrl+7" = "move-column-to-workspace 7";
-      "Mod+Ctrl+8" = "move-column-to-workspace 8";
-      "Mod+Ctrl+9" = "move-column-to-workspace 9";
 
       # Audio
       "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "sink-increase"'';
@@ -225,20 +195,5 @@ in
         xcursor-size ${toString config.stylix.cursor.size}
       };
     '';
-  };
-
-  custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
-    n = cmd "Network" network-manager;
-    o = cmd "Output" (lib.getExe pkgs.wdisplays);
-    q = lib.mkIf config.custom.programs.session.enable
-      (cmd "Session menu" config.custom.programs.session.exec.menu);
-    a = lib.mkIf config.custom.programs.volume-osd.enable
-      (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
-    p = lib.mkIf config.custom.programs.screen-recorder.enable
-      (submenu "Power Profile" config.custom.programs.wlr-which-key.menus.powerprofilesctl);
-    r = lib.mkIf config.custom.programs.screen-recorder.enable
-      (submenu "Record Screen" config.custom.programs.wlr-which-key.menus.screen-recorder);
-    s = lib.mkIf config.custom.programs.screenshot.enable
-      (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
   };
 }

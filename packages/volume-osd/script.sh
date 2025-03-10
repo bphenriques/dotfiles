@@ -122,7 +122,7 @@ sink_dmenu_options() {
   done
 }
 
-sink_select_dmenu() {
+sink_select_fuzzel() {
   sinks="$(pactl -f json list sinks | jq -r '[ .[] | .name ]')"
   selection="$(sink_dmenu_options | fuzzel --dmenu --index --width 65 --lines "$(echo "$sinks" | jq length)")"
   if [ "$selection" != -1 ]; then
@@ -137,8 +137,8 @@ case "${1:-}" in
   sink-move)        shift 1 && set_sink_and_move "$1" && notify_current_sink                                    ;;
   sink-move-next)   set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink                            ;;
   sink-move-prev)   set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink                            ;;
-  sink-move-dmenu)
-    selection="$(sink_select_dmenu)"
+  sink-move-fuzzel)
+    selection="$(sink_select_fuzzel)"
     if [ "$selection" != "" ]; then
       set_sink_and_move "$selection" && notify_current_sink
     fi
