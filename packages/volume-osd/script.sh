@@ -1,11 +1,11 @@
 #shellcheck shell=bash
 
-is_sink_muted()   { pactl get-sink-mute "$1" | grep -q "Mute: yes"; }
-get_sink()        { pactl -f json list | jq -cr --arg sink "$1" '.sinks[] | select(.name == $sink)'; }
-get_sink_volume() { pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1; }
+get_sink()                { pactl -f json list sinks | jq -cr --arg sink "$1" '.[] | select(.name == $sink)'; }
+is_default_sink_muted()   { pactl get-sink-mute @DEFAULT_SINK@ | grep -q "Mute: yes"; }
+get_default_sink_volume() { pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1; }
 
 device_type() {
-  case "$(pactl get-default-sink)" in
+  case "$1" in
     *SteelSeries*)  echo -n "headset"      ;;
     *analog*)       echo -n "internal"     ;;
     *)              echo -n "external"     ;;
@@ -13,40 +13,44 @@ device_type() {
 }
 
 friendly_sink_name() {
-  sink_name="$(get_sink "$(pactl get-default-sink)" | jq -r '.name')"
+  local sink_name
+  sink_name="$(get_sink "$1" | jq -r '.name')"
   case "${sink_name}" in
-    *analog*) echo -n "Internal Speakers"                  ;;
-    *hdmi*)   echo -n "HDMI Output"                        ;;
-    *)        get_sink "$(pactl get-default-sink)" | jq -cr '.description' ;;
+    *analog*) echo -n "Internal Speakers"           ;;
+    *hdmi*)   echo -n "HDMI Output"                 ;;
+    *)        get_sink "$1" | jq -r '.description'  ;;
   esac
 }
 
-notify_volume() {
-  progress="$(get_sink_volume)"
-  icon=
-  icon_muted=
-  case "$(device_type)" in
-    internal)
-      icon="${OSD_VOLUME_INTERNAL_SPEAKERS_ICON}"
-      icon_muted="${OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON}"
-      ;;
-    external)
-      icon="${OSD_VOLUME_EXTERNAL_SPEAKERS_ICON}"
-      icon_muted="${OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON}"
-      ;;
-    headset)
-      icon="${OSD_VOLUME_HEADSET_ICON}"
-      icon_muted="${OSD_VOLUME_HEADSET_MUTE_ICON}"
-      ;;
-    headphones)
-      icon="${OSD_VOLUME_HEADPHONES_ICON}"
-      icon_muted="${OSD_VOLUME_HEADPHONES_MUTE_ICON}"
-      ;;
+get_icon() {
+  local device_type="$1"
+  case "$device_type" in
+    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_ICON}" ;;
+    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_ICON}" ;;
+    headset)      echo -n "${OSD_VOLUME_HEADSET_ICON}" ;;
+    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_ICON}" ;;
   esac
+}
 
-  if is_sink_muted @DEFAULT_SINK@ || [ "$progress" -eq 0 ]; then
-    icon="$icon_muted"
+get_mute_icon() {
+  local device_type="$1"
+  case "$device_type" in
+    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON}" ;;
+    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON}" ;;
+    headset)      echo -n "${OSD_VOLUME_HEADSET_MUTE_ICON}" ;;
+    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_MUTE_ICON}" ;;
+  esac
+}
+
+notify_current_sink_volume() {
+  current="$(pactl get-default-sink)"
+  progress="$(get_default_sink_volume)"
+  icon=
+  if is_default_sink_muted || [ "$progress" -eq 0 ]; then
+    icon="$(get_mute_icon "$(device_type "$current")")"
     progress=0
+  else
+    icon="$(get_icon "$(device_type "$current")")"
   fi
 
   notify-send \
@@ -59,25 +63,29 @@ notify_volume() {
     "Volume: $progress%"
 }
 
-notify_sink() {
-  percentage="$(get_sink_volume)"
-  icon=
-  case "$(device_type)" in
-    internal)   icon="${OSD_VOLUME_INTERNAL_SPEAKERS_ICON}" ;;
-    external)   icon="${OSD_VOLUME_EXTERNAL_SPEAKERS_ICON}" ;;
-    headset)    icon="${OSD_VOLUME_HEADSET_ICON}"           ;;
-    headphones) icon="${OSD_VOLUME_HEADPHONES_ICON}"        ;;
-  esac
-
-  progress="$percentage"
+notify_current_sink() {
+  current="$(pactl get-default-sink)"
+  progress="$(get_default_sink_volume)"
+  icon="$(get_icon "$(device_type "$current")")"
   notify-send \
-    --expire-time 1500 \
+    --expire-time 3000 \
     --icon "$icon" \
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
     --hint string:x-dunst-stack-tag:volume \
     --hint int:value:"$progress" \
-    "$(friendly_sink_name)"
+    "$(friendly_sink_name "$(pactl get-default-sink)")"
+}
+
+notify_failure() {
+  notify-send \
+    --urgency=critical \
+    --expire-time 3000 \
+    --icon "$OSD_VOLUME_ERROR_ICON" \
+    --category "volume-osd" \
+    --hint string:x-canonical-private-synchronous:volume \
+    --hint string:x-dunst-stack-tag:volume \
+    "${1:-'Failure while running volume-osd'}" "${2:-}"
 }
 
 move_all_inputs() {
@@ -88,30 +96,51 @@ move_all_inputs() {
 }
 
 get_next_sink() {
+  inc="${1:-"+1"}"
   current="$(get_sink "$(pactl get-default-sink)" | jq -cr '.index')"
   current_pos_index="$(pactl -f json list sinks | jq -cr --arg current "${current}" '[.[].index] | index($current | tonumber)')"
   number_sinks="$(pactl -f json list sinks | jq 'length')"
-  next_index="$(pactl -f json list sinks | jq -cr --arg current "$current_pos_index" --arg total "$number_sinks" '[.[].index][(($current | tonumber)+1) % ($total | tonumber)]')"
+  next_index="$(pactl -f json list sinks | jq -cr --arg inc "$inc" --arg current "$current_pos_index" --arg total "$number_sinks" '[.[].index][(($current | tonumber)+($inc | tonumber)) % ($total | tonumber)]')"
 
-  pactl -f json list sinks | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber))'
+  pactl -f json list sinks | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber)) | .name'
+}
+
+set_sink_and_move() {
+  if ! pactl set-default-sink "$1"; then
+    notify_failure "Failed to change sound output"
+    return 1
+  fi
+
+  if ! move_all_inputs "$(get_sink "$1" | jq -r '.index')"; then
+    notify_failure "Failed to move sound output"
+  fi
+}
+
+sink_dmenu_options() {
+  for sink_name in $(pactl -f json list sinks | jq -r '.[] | .name'); do
+    printf '%s\u0000icon\u001f%s\n' "$(friendly_sink_name "$sink_name")" "$(get_icon "$(device_type "$sink_name")")"
+  done
+}
+
+sink_select_dmenu() {
+  sinks="$(pactl -f json list sinks | jq -r '[ .[] | .name ]')"
+  selection="$(sink_dmenu_options | fuzzel --dmenu --index --width 65 --lines "$(echo "$sinks" | jq length)")"
+  if [ "$selection" != -1 ]; then
+    echo "$sinks" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'
+  fi
 }
 
 case "${1:-}" in
-  sink-toggle-mute)       pactl set-sink-mute @DEFAULT_SINK@ toggle && notify_volume                    ;;
-  sink-increase)          shift 1 && pactl set-sink-volume @DEFAULT_SINK@ "+${1:-5}%" && notify_volume  ;;
-  sink-decrease)          shift 1 && pactl set-sink-volume @DEFAULT_SINK@ "-${1:-5}%" && notify_volume  ;;
-  sink-move)
-    shift 1
-    pactl set-default-sink "$1"
-    current_index="$(get_sink "$(pactl get-default-sink)" | jq -r '.name')"
-    move_all_inputs "$(echo "$current_index" | jq -cr '.index')"
-    notify_sink
-    ;;
-  sink-move-next)
-    shift 1
-    next="$(get_next_sink)"
-    pactl set-default-sink "$(echo "$next" | jq -cr '.name')"
-    move_all_inputs "$(echo "$next" | jq -cr '.index')"
-    notify_sink
+  sink-toggle-mute) pactl set-sink-mute @DEFAULT_SINK@ toggle && notify_current_sink_volume                     ;;
+  sink-increase)    shift 1 && pactl set-sink-volume @DEFAULT_SINK@ "+${1:-5}%" && notify_current_sink_volume   ;;
+  sink-decrease)    shift 1 && pactl set-sink-volume @DEFAULT_SINK@ "-${1:-5}%" && notify_current_sink_volume   ;;
+  sink-move)        shift 1 && set_sink_and_move "$1" && notify_current_sink                                    ;;
+  sink-move-next)   set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink                            ;;
+  sink-move-prev)   set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink                            ;;
+  sink-move-dmenu)
+    selection="$(sink_select_dmenu)"
+    if [ "$selection" != "" ]; then
+      set_sink_and_move "$selection" && notify_current_sink
+    fi
     ;;
 esac

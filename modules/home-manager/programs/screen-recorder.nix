@@ -15,7 +15,7 @@ let
   submenu = desc: submenu: { inherit desc submenu; };
   mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
 
-  screen-recorder = lib.getExe self.pkgs.screen-recorder;
+  screen-recorder = lib.getExe cfg.package;
   screenRecordingActions = [
     { id = "recording-screen-audio";    symbol = "󰹑"; label = "Screen (with audio)";  exec = cfg.exec.screen-audio; }
     { id = "recording-screen-no-audio"; symbol = "󰹑"; label = "Screen (no audio)";    exec = cfg.exec.screen-no-audio; }
@@ -28,12 +28,18 @@ let
     name = "screen-recorder-menu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
   };
-
-  yamlFormat = pkgs.formats.yaml { };
 in
 {
   options.custom.programs.screen-recorder = {
-    enable = lib.mkEnableOption "customn-screen-recorder";
+    enable = lib.mkEnableOption "custom-screen-recorder";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = self.pkgs.screen-recorder.override {
+        recordIcon = mkIcon "screen-recorder-record-icon" "󰑋";
+        informationIcon = mkIcon "screen-recorder-information-icon" "";
+        errorIcon = mkIcon "screen-recorder-error-icon" "";
+      };
+    };
     directory = lib.mkOption {
       description = "Location of recordings";
       type = lib.types.str;
@@ -55,7 +61,7 @@ in
 
     home.packages = [
       pkgs.wl-screenrec
-      self.pkgs.screen-recorder
+      cfg.package
       dmenu
       (pkgs.makeDesktopItem {
         name = "screen-recoder-menu";
@@ -72,16 +78,15 @@ in
       })
     ];
 
-    # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
     custom.programs.wlr-which-key.menus.screen-recorder = {
-      "Ctrl+s" = cmd "Save current recording" "screen-recorder stop";
+      "Ctrl+s" = cmd "Save current recording" "${screen-recorder} stop";
       s = submenu "Screen" {
-        a = cmd "with audio"  ''screen-recorder screen-audio "${cfg.directory}"'';
-        m = cmd "no audio"    ''screen-recorder screen-no-audio "${cfg.directory}"'';
+        a = cmd "with audio"  ''${screen-recorder} screen-audio "${cfg.directory}"'';
+        m = cmd "no audio"    ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
       };
       r = submenu "Region" {
-        a = cmd "with audio"  ''screen-recorder region-audio "${cfg.directory}"'';
-        m = cmd "no audio"    ''screen-recorder region-no-audio "${cfg.directory}"'';
+        a = cmd "with audio"  ''${screen-recorder} region-audio "${cfg.directory}"'';
+        m = cmd "no audio"    ''${screen-recorder} region-no-audio "${cfg.directory}"'';
       };
     };
   };

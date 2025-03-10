@@ -49,21 +49,6 @@ in
 
   custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
   custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
-  custom.programs.volume-osd.defaultSinks = {
-    internal = {
-      name = "alsa_output.pci-0000_06_00.6.analog-stereo";
-      label = "Internal Speaker";
-    };
-    external = {
-      name = "alsa_output.pci-0000_01_00.1.hdmi-stereo";
-      label = "External Speaker";
-    };
-    headphones = {
-      name = "alsa_output.usb-SteelSeries_SteelSeries_Arctis_7-00.stereo-game";
-      label = "Steel Series Arctis 7 (Game)";
-    };
-  };
-
   custom.programs.file-explorer = {
     enable = true;
     bookmarks = [

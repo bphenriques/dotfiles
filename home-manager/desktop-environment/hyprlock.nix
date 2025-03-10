@@ -1,8 +1,18 @@
 { lib, pkgs, config, self, ... }:
 let
   background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
+  lockPackage = pkgs.writeShellApplication {
+    name = "session-lock";
+    runtimeInputs = [
+      pkgs.niri
+      pkgs.procps
+      pkgs.hyprlock
+    ];
+    text = ''pidof hyprlock || niri msg action do-screen-transition --delay-ms 750 && hyprlock'';
+  };
 in
 {
+  custom.programs.session.exec.lock = lockPackage;
   programs.hyprlock = {
     enable = true;
     settings = {
@@ -35,7 +45,7 @@ in
       label = [{
         text = ''cmd[update:1000] echo "<span font-weight='ultralight' >$(date +'%H:%M')</span>"'';
 
-        font_size = 300;
+        font_size = 350;
         font_family = config.stylix.fonts.sansSerif.name;
         color = "rgb(b6c4ff)";
         position = "0%, 2%";

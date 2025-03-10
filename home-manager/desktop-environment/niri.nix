@@ -4,15 +4,12 @@ let
 
   volume                = lib.getExe self.pkgs.volume-osd;
   brightness            = lib.getExe self.pkgs.brightness-osd;
-  systemctl             = lib.getExe' pkgs.systemd "systemctl";
-  pidof                 = lib.getExe' pkgs.procps "pidof";
-  niri                  = lib.getExe pkgs.niri;
-  hyprlock              = lib.getExe pkgs.hyprlock;
   terminal              = lib.getExe' pkgs.foot "footclient";
   playerctl             = lib.getExe pkgs.playerctl;
   application-launcher  = lib.getExe pkgs.fuzzel;
   dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
   window-switcher       = lib.getExe self.pkgs.niri-window-dmenu;
+  network-manager       = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}";
   files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   system-monitor        = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
   wlr-which-key         = lib.getExe pkgs.wlr-which-key;
@@ -21,19 +18,6 @@ let
     name = "emoji-picker";
     runtimeInputs = [ pkgs.wtype ];
     text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
-  };
-
-  session-dmenu = self.lib.builders.writeDmenuApplication pkgs {
-    name = "session-dmenu";
-    entries = [
-      { label = "    Lock";                exec = ''${pidof} hyprlock || ${niri} msg action do-screen-transition --delay-ms 750 && ${hyprlock}''; }
-      { label = "󰤄    Suspend";             exec = "${systemctl} suspend"; }
-      { label = "    Shutdown";            exec = "${systemctl} poweroff"; }
-      { label = "    Reboot";              exec = "${systemctl} reboot"; }
-      { label = "    Reboot to EFI setup"; exec = "${systemctl} reboot --firmware-setup"; }
-    ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
-      { label = "    Reboot to Windows";   exec = osConfig.custom.boot.grub.windows.rebootPackage; }
-    ];
   };
 
   # Good enough
@@ -45,7 +29,7 @@ let
   cmd = desc: cmd: { inherit desc cmd; };
   submenu = desc: submenu: { inherit desc submenu; };
 in
-lib.mkIf pkgs.stdenv.isLinux {
+{
   custom.programs.niri = {
     enable = true;
     screenshotPath = "${swappy.directory}/${swappy.format}";
@@ -138,7 +122,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     # TODO: Review:
     # Windows key  + PrtScn -> full screen and save
     # Windows key  + P -> opens the display format (can use kanshi)
-    # Windows key  + L -> lock computer
 
     bindings = {
       # Size management
@@ -151,6 +134,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Layout management
       "Mod+T"       = "toggle-column-tabbed-display";
+      "Mod+W"       = "toggle-window-floating";
       "Mod+Q"       = "close-window";
       "Mod+C"       = "center-column";
       "Mod+Shift+C" = "center-window";
@@ -172,8 +156,9 @@ lib.mkIf pkgs.stdenv.isLinux {
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';
       "Mod+K"             = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
-      "Mod+Shift+Q"       = ''spawn "${lib.getExe session-dmenu}"'';
+      "Mod+Shift+Q"       = ''spawn ${toNiriSpawn config.custom.programs.session.exec.menu}'';
       "Ctrl+Shift+Escape" = ''spawn ${toNiriSpawn system-monitor}'';
+      "Mod+L"             = ''spawn ${toNiriSpawn config.custom.programs.session.exec.lock}'';
 
       # Focus management
       "Mod+Tab"         = ''spawn "${window-switcher}"'';
@@ -242,12 +227,11 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-  # Limitation on the yaml generation that breaks the file if the line gets long (the full exe + arg)
   custom.programs.wlr-which-key.menus.global = lib.mkIf config.custom.programs.wlr-which-key.enable {
-    n = cmd "Network" "footclient --title=nmtui-tui nmtui";
-    i = submenu "Input" {
-      n = cmd "Keyboard next layout" "niri-keyboard-layout next";
-    };
+    n = cmd "Network" network-manager;
+    o = cmd "Output" (lib.getExe pkgs.wdisplays);
+    q = lib.mkIf config.custom.programs.session.enable
+      (cmd "Session menu" config.custom.programs.session.exec.menu);
     a = lib.mkIf config.custom.programs.volume-osd.enable
       (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
     p = lib.mkIf config.custom.programs.screen-recorder.enable
