@@ -4,13 +4,14 @@ let
 in
 {
   options.custom.services.swww = {
+    enable = lib.mkEnableOption "swww";
     directory = lib.mkOption {
       description = "Location of wallpaper";
       type = lib.types.str;
     };
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.services.swww" pkgs lib.platforms.linux) ];
 
     home.packages = [ pkgs.swww ];

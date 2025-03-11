@@ -13,7 +13,7 @@ let
 
   cmd = desc: cmd: { inherit desc cmd; };
   submenu = desc: submenu: { inherit desc submenu; };
-  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
+  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
   screenshotActions = [
