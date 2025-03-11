@@ -20,10 +20,10 @@ let
     in {
       volume-osd = pkgs.callPackage ./volume-osd { };
       brightness-osd = pkgs.callPackage ./brightness-osd { };
+      upower-notify = pkgs.callPackage ./upower-notify { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       niri-keyboard-layout = pkgs.callPackage ./niri-keyboard-layout { };
       niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
-
       powerprofilesctl-notify = pkgs.callPackage ./powerprofilesctl-notify { };
       swww-util = pkgs.callPackage ./swww-util { };
       screen-recorder = pkgs.callPackage ./screen-recorder { };

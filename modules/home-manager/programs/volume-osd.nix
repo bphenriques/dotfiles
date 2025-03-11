@@ -7,7 +7,7 @@ let
 
   volume-osd = lib.getExe cfg.package;
 
-  mkIcon = name: symbol: self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } name symbol;
+  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
   options.custom.programs.volume-osd = {
@@ -35,7 +35,7 @@ in
       m = cmdKeepOpen "Mute" "${volume-osd} sink-toggle-mute";
       n = cmdKeepOpen "Next audio sink" "${volume-osd} sink-move-next";
       p = cmdKeepOpen "Previous audio sink" "${volume-osd} sink-move-prev";
-      s = cmd "Select output" "${volume-osd} sink-move-dmenu";
+      s = cmd "Select output" "${volume-osd} sink-move-fuzzel";
     };
 
     home.packages = [

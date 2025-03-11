@@ -1,20 +1,7 @@
 { pkgs, config, lib, ... }:
-let
-  theme = lib.concatStringsSep ";" [
-    "text=white"
-    "time=white"
-    "container=darkgray"
-    "border=green"
-    "title=magenta"
-    "greet=magenta"
-    "prompt=white"
-    "input=gray"
-    "action=gray"
-    "button=cyan"
-  ];
-in {
+{
   services.greetd = let
-    options = ''--asterisks --time --remember --theme ${theme}'';
+    options = ''--asterisks --time --remember'';
     session = {
       command = ''${lib.getExe pkgs.greetd.tuigreet} ${options}'';
       user = config.users.users.greeter.name;
