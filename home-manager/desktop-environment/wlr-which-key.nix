@@ -32,7 +32,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       n = cmd "Network" network-manager;
       o = cmd "Output" (lib.getExe pkgs.wdisplays);
       q = lib.mkIf config.custom.programs.session.enable
-        (cmd "Session menu" config.custom.programs.session.exec.menu);
+        (cmd "Session" config.custom.programs.session.exec.menu);
       a = lib.mkIf config.custom.programs.volume-osd.enable
         (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
       p = lib.mkIf config.custom.programs.screen-recorder.enable

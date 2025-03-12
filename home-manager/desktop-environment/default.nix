@@ -17,5 +17,5 @@
   custom.programs.file-explorer.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
 
   custom.services.swww.enable = true;
-  custom.services.upower-notify.enable = osConfig.services.upower.enable or false;
+  custom.services.upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
 }

@@ -23,7 +23,7 @@ notify() {
   fi
 
   notify-send \
-    --expire-time 1500 \
+    --expire-time 3000 \
     --icon "$icon" \
     --category "brightness-osd" \
     --hint string:x-canonical-private-synchronous:brightness \
