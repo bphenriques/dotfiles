@@ -6,7 +6,7 @@ record() {
   shift 1
   if is_recording; then
     notify-send \
-      --expire-time 1500 \
+      --expire-time 5000 \
       --icon "$ERROR_ICON" \
       --category "screen-recorder" \
       --hint string:x-canonical-private-synchronous:screen-recorder \
@@ -27,7 +27,7 @@ record() {
     if ! wl-screenrec --filename="${destination}" "$@"; then
       notify-send \
         --urgency=critical \
-        --expire-time 1500 \
+        --expire-time 5000 \
         --icon "$ERROR_ICON" \
         --category "screen-recorder" \
         --hint string:x-canonical-private-synchronous:screen-recorder \
@@ -41,7 +41,7 @@ stop() {
   if is_recording; then
     pkill --signal INT wl-screenrec
     notify-send \
-      --expire-time 1500 \
+      --expire-time 3000 \
       --icon "$INFORMATION_ICON" \
       --category "screen-recorder" \
       --hint string:x-canonical-private-synchronous:screen-recorder \
@@ -49,7 +49,7 @@ stop() {
       "Screen Recorder" "Recording stopped..."
   else
     notify-send \
-      --expire-time 1000 \
+      --expire-time 3000 \
       --icon "$INFORMATION_ICON" \
       --category "screen-recorder" \
       --hint string:x-canonical-private-synchronous:screen-recorder \

@@ -7,7 +7,7 @@ notify_current() {
   esac
 
   notify-send \
-    --expire-time 1500 \
+    --expire-time 3000 \
     --icon "$KEYBOARD_ICON" \
     --category "keyboard-input" \
     --hint string:x-canonical-private-synchronous:keyboard-input \

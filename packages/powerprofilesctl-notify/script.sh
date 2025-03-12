@@ -4,7 +4,7 @@ set_profile_profile() {
   if ! powerprofilesctl set "$1"; then
     notify-send \
       --urgency=critical \
-      --expire-time 1500 \
+      --expire-time 5000 \
       --icon "$POWER_PROFILE_ERROR_ICON" \
       --category "powerprofilesctl" \
       --hint string:x-canonical-private-synchronous:powerprofilesctl \
@@ -23,7 +23,7 @@ notify_current() {
   esac
 
   notify-send \
-    --expire-time 1500 \
+    --expire-time 5000 \
     --icon "$icon" \
     --category "powerprofilesctl" \
     --hint string:x-canonical-private-synchronous:powerprofilesctl \
