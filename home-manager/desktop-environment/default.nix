@@ -7,11 +7,11 @@
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
+    ./wl-kbptr.nix          # Mouse simulation
   ];
 
   custom.programs.screenshot.enable = true;
   custom.programs.screen-recorder.enable = true;
-  custom.programs.powerprofilesctl.enable = true;
   custom.programs.session.enable = true;
   custom.programs.volume-osd.enable = true;
   custom.programs.file-explorer.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";

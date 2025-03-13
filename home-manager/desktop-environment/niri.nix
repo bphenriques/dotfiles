@@ -186,6 +186,12 @@ in
 
     extraConfig = ''
       window-rule {
+        match app-id="Firefox"
+        match app-id="Steam"
+        open-maximized true
+      }
+
+      window-rule {
         match is-active=false
         opacity 0.90
       }

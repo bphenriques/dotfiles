@@ -35,8 +35,6 @@ lib.mkIf pkgs.stdenv.isLinux {
         (cmd "Session" config.custom.programs.session.exec.menu);
       a = lib.mkIf config.custom.programs.volume-osd.enable
         (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
-      p = lib.mkIf config.custom.programs.screen-recorder.enable
-        (submenu "Power Profile" config.custom.programs.wlr-which-key.menus.powerprofilesctl);
       r = lib.mkIf config.custom.programs.screen-recorder.enable
         (submenu "Record Screen" config.custom.programs.wlr-which-key.menus.screen-recorder);
       s = lib.mkIf config.custom.programs.screenshot.enable
