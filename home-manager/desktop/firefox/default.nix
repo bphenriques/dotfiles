@@ -1,4 +1,7 @@
 { lib, pkgs, ... }:
+let
+  inherit (pkgs.nur.repos.rycee) firefox-addons;
+in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
     enable = true;
@@ -7,14 +10,14 @@ lib.mkIf pkgs.stdenv.isLinux {
         name = "Bruno";
         settings = lib.attrsets.mergeAttrsList [ (import ./basic.nix) (import ./telemetry.nix) ];
 
-        # Require manual activation once installed: compute list with  nix flake show "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons"
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
-          ublock-origin
-          bitwarden
-          keepa
-          linkding-extension
-          floccus
-          no-pdf-download
+        # Require manual activation once installed: compute list with nix flake show "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons"
+        extensions.packages = [
+          firefox-addons.ublock-origin
+          firefox-addons.bitwarden
+          firefox-addons.keepa
+          firefox-addons.linkding-extension
+          firefox-addons.floccus
+          firefox-addons.no-pdf-download
         ];
 
         search = {

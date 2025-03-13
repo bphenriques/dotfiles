@@ -7,16 +7,20 @@ in {
 
     vendorId = lib.mkOption {
       type = str;
-      description = "id of the product. You can find using lsusb: ID 2dc8:301c means 2dc8 as vendorId";
+      description = "id of the product. You can find using lsusb: ID 2dc8:310a means 2dc8 as vendorId";
     };
 
     productId = lib.mkOption {
       type = str;
-      description = "id of the product. You can find using lsusb: ID 2dc8:301c means 301c as productId";
+      description = "id of the product. You can find using lsusb: ID 2dc8:310a means 310a as productId";
     };
   };
 
+  # Tip: When on: press and hold X/B and Home to power off. Then hold X/B to power on. The mode will be the one selected:
+  # - X -> Xinput (displays as Xbox Controller)
+  # - D -> DInput (displays as 8Bitdo Ultimate 2C Wireless)
   config = lib.mkIf cfg.enable {
+    hardware.xpadneo.enable = true;   # Wireless Xbox(ish) gamepads (e.g., 8bitdo)
     services.udev.extraRules = ''
       ACTION=="add", \
         ATTRS{idVendor}=="${cfg.vendorId}", \
@@ -26,3 +30,4 @@ in {
     '';
   };
 }
+

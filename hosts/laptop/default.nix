@@ -3,7 +3,7 @@ let
   inherit (inputs.nixpkgs.lib.attrsets) attrValues;
 
   system = "x86_64-linux";
-  overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlay ];
+  overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlays.default ];
   nixosModules = attrValues inputs.self.nixosModules ++ [
     inputs.sops-nix.nixosModules.sops
     inputs.disko.nixosModules.disko
