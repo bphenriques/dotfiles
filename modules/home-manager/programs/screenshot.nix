@@ -11,8 +11,6 @@ let
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  cmd = desc: cmd: { inherit desc cmd; };
-  submenu = desc: submenu: { inherit desc submenu; };
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
@@ -76,17 +74,25 @@ in
     custom.programs.swappy.enable = true;
     custom.programs.swappy.directory = cfg.directory;
 
-    custom.programs.wlr-which-key.menus.screenshot = {
-      s = submenu "Screen" {
-        s = cmd "Save"  ''${screenshot} screen "${cfg.directory}"'';
-        c = cmd "Copy"  ''${screenshot} screen-copy'';
-        e = cmd "Edit"  ''${screenshot} screen-edit'';
-      };
-      r = submenu "Region" {
-        s = cmd "Save"  ''${screenshot} region "${cfg.directory}"'';
-        c = cmd "Copy"  ''${screenshot} region-copy'';
-        e = cmd "Edit"  ''${screenshot} region-edit'';
-      };
-    };
+    custom.programs.wlr-which-key.menus.screenshot = [
+      {
+        key = "s";
+        desc = "Screen";
+        submenu = [
+          { key = "m"; desc = "Save";  cmd = ''${screenshot} screen "${cfg.directory}"''; }
+          { key = "c"; desc = "Copy";  cmd = ''${screenshot} screen-copy''; }
+          { key = "e"; desc = "Edit";  cmd = ''${screenshot} screen-edit''; }
+        ];
+      }
+      {
+        key = "r";
+        desc = "Region";
+        submenu = [
+          { key = "m"; desc = "Save";  cmd = ''${screenshot} region "${cfg.directory}"''; }
+          { key = "c"; desc = "Copy";  cmd = ''${screenshot} region-copy''; }
+          { key = "e"; desc = "Edit";  cmd = ''${screenshot} region-edit''; }
+        ];
+      }
+    ];
   };
 }

@@ -60,6 +60,7 @@ notify_current_sink_volume() {
     --hint string:x-canonical-private-synchronous:volume \
     --hint string:x-dunst-stack-tag:volume \
     --hint int:value:"$progress" \
+    --transient \
     "Volume: $progress%"
 }
 
@@ -74,6 +75,7 @@ notify_current_sink() {
     --hint string:x-canonical-private-synchronous:volume \
     --hint string:x-dunst-stack-tag:volume \
     --hint int:value:"$progress" \
+    --transient \
     "$(friendly_sink_name "$(pactl get-default-sink)")"
 }
 
@@ -85,6 +87,7 @@ notify_failure() {
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
     --hint string:x-dunst-stack-tag:volume \
+    --transient \
     "${1:-'Failure while running volume-osd'}" "${2:-}"
 }
 

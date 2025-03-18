@@ -129,6 +129,7 @@ notify_current_battery() {
     --hint string:x-canonical-private-synchronous:upower-notify \
     --hint string:x-dunst-stack-tag:upower-notify \
     --hint int:value:"$percentage" \
+    --transient \
     "Battery: $percentage%"
 }
 
