@@ -2,11 +2,7 @@
 let
   cfg = config.custom.programs.volume-osd;
 
-  cmd = desc: cmd: { inherit desc cmd; };
-  cmdKeepOpen = desc: cmd: { inherit desc cmd; keep_open = true; };
-
   volume-osd = lib.getExe cfg.package;
-
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
@@ -30,13 +26,13 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.custom-volume-osd" pkgs lib.platforms.linux) ];
-    custom.programs.wlr-which-key.menus.volume-osd = {
-      c = cmd "Configure" (lib.getExe pkgs.pavucontrol);
-      m = cmdKeepOpen "Mute" "${volume-osd} sink-toggle-mute";
-      n = cmdKeepOpen "Next audio sink" "${volume-osd} sink-move-next";
-      p = cmdKeepOpen "Previous audio sink" "${volume-osd} sink-move-prev";
-      s = cmd "Select output" "${volume-osd} sink-move-fuzzel";
-    };
+    custom.programs.wlr-which-key.menus.volume-osd = [
+      { key = ["Left" "h"];     desc = "Previous audio sink"; cmd = "${volume-osd} sink-move-prev"; keep_open = true; }
+      { key = ["Right" "l"];    desc = "Next audio sink";     cmd = "${volume-osd} sink-move-next"; keep_open = true; }
+      { key = "space";          desc = "Select output";       cmd = "${volume-osd} sink-move-fuzzel"; }
+      { key = "m";              desc = "Mute";                cmd = "${volume-osd} sink-toggle-mute"; keep_open = true; }
+      { key = "c";              desc = "Configure";           cmd = (lib.getExe pkgs.pavucontrol); }
+    ];
 
     home.packages = [
       cfg.package
@@ -45,3 +41,4 @@ in
     ];
   };
 }
+

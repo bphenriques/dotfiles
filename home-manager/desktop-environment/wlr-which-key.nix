@@ -4,10 +4,6 @@ let
   inherit (config.stylix) fonts;
 
   terminal              = lib.getExe' pkgs.foot "footclient";
-  network-manager       = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}";
-
-  cmd = desc: cmd: { inherit desc cmd; };
-  submenu = desc: submenu: { inherit desc submenu; };
 in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
@@ -28,17 +24,18 @@ lib.mkIf pkgs.stdenv.isLinux {
       margin_top = 0;
     };
 
-    menus.global = {
-      n = cmd "Network" network-manager;
-      o = cmd "Output" (lib.getExe pkgs.wdisplays);
-      q = lib.mkIf config.custom.programs.session.enable
-        (cmd "Session" config.custom.programs.session.exec.menu);
-      a = lib.mkIf config.custom.programs.volume-osd.enable
-        (submenu "Audio" config.custom.programs.wlr-which-key.menus.volume-osd);
-      r = lib.mkIf config.custom.programs.screen-recorder.enable
-        (submenu "Record Screen" config.custom.programs.wlr-which-key.menus.screen-recorder);
-      s = lib.mkIf config.custom.programs.screenshot.enable
-        (submenu "Screenshot" config.custom.programs.wlr-which-key.menus.screenshot);
-    };
+    # TODO: Shortcut to see current battery, current music, current output
+    menus.global = [
+      { key = "n"; desc = "Network"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
+      { key = "d"; desc = "Display"; cmd = (lib.getExe pkgs.wdisplays); }
+    ] ++ lib.optionals config.custom.programs.session.enable [
+      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
+    ] ++ lib.optionals config.custom.programs.volume-osd.enable [
+      { key = "a"; desc = "Audio"; submenu = config.custom.programs.wlr-which-key.menus.volume-osd; }
+    ] ++ lib.optionals config.custom.programs.screen-recorder.enable [
+      { key = "r"; desc = "Record Screen"; submenu = config.custom.programs.wlr-which-key.menus.screen-recorder; }
+    ] ++ lib.optionals config.custom.programs.screenshot.enable [
+      { key = "s"; desc = "Screenshot"; submenu = config.custom.programs.wlr-which-key.menus.screenshot; }
+    ];
   };
 }

@@ -140,7 +140,7 @@ in
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe pkgs.fuzzel}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe pkgs.wlr-which-key}" "global"'';
+      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe self.pkgs.wlr-which-key}" "global"'';
       "Mod+Return"        = ''spawn "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';
@@ -186,14 +186,32 @@ in
 
     extraConfig = ''
       window-rule {
-        match app-id="Firefox"
+        match app-id=r#"firefox$"#
+        match app-id=r#"zen$"#
         match app-id="Steam"
+        match app-id=r#"^discord$"#
+        match app-id="jetbrains-idea-ce"
+
         open-maximized true
       }
 
       window-rule {
         match is-active=false
         opacity 0.90
+      }
+
+      window-rule {
+         match app-id=r#"^Bitwarden$"#
+         block-out-from "screen-capture"
+      }
+
+      window-rule {
+         match title="kew-tui"
+
+         open-floating true
+         default-column-width { fixed 400; }
+         default-window-height { fixed 600; }
+         default-floating-position x=32 y=32 relative-to="bottom-right"
       }
 
       cursor {

@@ -11,8 +11,6 @@ let
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  cmd = desc: cmd: { inherit desc cmd; };
-  submenu = desc: submenu: { inherit desc submenu; };
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screen-recorder = lib.getExe cfg.package;
@@ -78,16 +76,24 @@ in
       })
     ];
 
-    custom.programs.wlr-which-key.menus.screen-recorder = {
-      "Ctrl+s" = cmd "Save current recording" "${screen-recorder} stop";
-      s = submenu "Screen" {
-        a = cmd "with audio"  ''${screen-recorder} screen-audio "${cfg.directory}"'';
-        m = cmd "no audio"    ''${screen-recorder} screen-no-audio "${cfg.directory}"'';
-      };
-      r = submenu "Region" {
-        a = cmd "with audio"  ''${screen-recorder} region-audio "${cfg.directory}"'';
-        m = cmd "no audio"    ''${screen-recorder} region-no-audio "${cfg.directory}"'';
-      };
-    };
+    custom.programs.wlr-which-key.menus.screen-recorder = [
+      { key = "Ctrl+s"; desc = "Save recording";  cmd = "${screen-recorder} stop"; }
+      {
+        key = "s";
+        desc = "Screen";
+        submenu = [
+          { key = "a"; desc = "with audio"; cmd = ''${screen-recorder} screen-audio "${cfg.directory}"''; }
+          { key = "m"; desc = "no audio";   cmd = ''${screen-recorder} screen-no-audio "${cfg.directory}"''; }
+        ];
+      }
+      {
+        key = "r";
+        desc = "Region";
+        submenu = [
+          { key = "a"; desc = "with audio"; cmd = ''${screen-recorder} region-audio "${cfg.directory}"''; }
+          { key = "m"; desc = "no audio";   cmd = ''${screen-recorder} region-no-audio "${cfg.directory}"''; }
+        ];
+      }
+    ];
   };
 }

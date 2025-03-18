@@ -53,7 +53,6 @@ in
       upower-notify = {
         Unit = {
           Description = "upower notifications";
-          ConditionEnvironment = [ "WAYLAND_DISPLAY" ];
           PartOf = [ "graphical-session.target" ];
           After = [ "graphical-session.target" ];
         };

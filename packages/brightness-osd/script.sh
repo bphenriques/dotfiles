@@ -29,6 +29,7 @@ notify() {
     --hint string:x-canonical-private-synchronous:brightness \
     --hint string:x-dunst-stack-tag:brightness \
     --hint int:value:"$progress" \
+    --transient \
     "Brightness: $progress%"
 }
 
