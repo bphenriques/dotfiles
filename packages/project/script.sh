@@ -18,8 +18,8 @@ __proj_select() {
   target="${1-}"
   # shellcheck disable=SC2016
   fd --base-directory "$PROJ_ROOT" --type directory --max-depth 1 --exec basename \
-    | fzf --prompt "Switch to project: " --exit-0 --select-1 --no-multi --query="$target" --layout=reverse --preview='preview "$PROJ_ROOT"/{}' \
-    | xargs -I{} printf %s/%s "$PROJ_ROOT" {}
+      | fzf --prompt "Switch to project: " --exit-0 --select-1 --no-multi --query="$target" --layout=reverse --preview='preview "$PROJ_ROOT"/{}' \
+      | while read -r project; do printf %s/%s "$PROJ_ROOT" "$project"; done
 }
 
 # shellcheck disable=SC2016
