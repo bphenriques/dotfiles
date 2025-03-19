@@ -6,7 +6,7 @@ let
   brightness            = lib.getExe self.pkgs.brightness-osd;
   terminal              = lib.getExe' pkgs.foot "footclient";
   playerctl             = lib.getExe pkgs.playerctl;
-  dmenu                 = "${lib.getExe pkgs.fuzzel} -d";
+  dmenu                 = "${lib.getExe config.programs.fuzzel.package} -d";
   files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   system-monitor        = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
 
@@ -109,6 +109,7 @@ in
         "nmtui-tui"
         "btop-tui"
         "yazi-tui"
+        "rmpc-tui"
       ];
     };
 
@@ -139,8 +140,8 @@ in
       "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
 
       # Shortcuts
-      "Mod+Space"         = ''spawn "${lib.getExe pkgs.fuzzel}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe self.pkgs.wlr-which-key}" "global"'';
+      "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
+      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe config.custom.programs.wlr-which-key.package}" "global"'';
       "Mod+Return"        = ''spawn "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';

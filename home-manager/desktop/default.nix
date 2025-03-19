@@ -16,7 +16,7 @@
     ./rofi.nix            # Alternative customizable menu
     ./heroic.nix          # Unified game client
     ./umu-launcher.nix    # Ad-hoc game launcher
-    ./kew.nix             # Music player
+    ./mpd.nix             # Music player
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [

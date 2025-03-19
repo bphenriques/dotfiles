@@ -9,6 +9,7 @@
   pango,
 }:
 
+# Remove on next release when it supports list rather than maps in the config
 rustPlatform.buildRustPackage rec {
   pname = "wlr-which-key";
   version = "1.1.0";  # pretend

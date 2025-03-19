@@ -2,6 +2,7 @@
 lib.mkIf pkgs.stdenv.isLinux {
   programs.fuzzel = {
     enable = true;
+    package = pkgs.fuzzel-git;
     settings.main = {
       lines = 10;
       horizontal-pad = 30;
