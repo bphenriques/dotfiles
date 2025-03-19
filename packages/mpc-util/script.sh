@@ -1,9 +1,16 @@
 #shellcheck shell=bash
 
-# printf '%s by %s (%s)\u0000icon\u001f%s\n' "$(echo "$line" | awk '{$1=$1};1')" "$current_artist" "$current_album" "/home/bphenriques/image.png"        ;;
+select_title_file() {
+  mpc -f '%file%\t%title% by %artist% (%album%)' listall | while read -r line; do
+    printf "%s\u0000icon\u001f%s\n" "$line" "$MPC_UTIL_SONG_ICON" ;
+  done | fuzzel -d --with-nth=2 --accept-nth=1
+}
 
-select_title_file() { mpc -f '%file%\t%title% by %artist% (%album%)' listall | fuzzel -d --with-nth=2 --accept-nth=1; }
-select_artist() { mpc ls | fuzzel -d; }
+select_artist() {
+  mpc ls | while read -r line; do
+    printf "%s\u0000icon\u001f%s\n" "$line" "$MPC_UTIL_ARTIST_ICON" ;
+  done | fuzzel -d
+}
 
 mpc_file() {
   case "$1" in
