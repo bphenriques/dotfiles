@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, self, ... }:
 let
   inherit (config.lib.stylix) colors;
   inherit (config.stylix) fonts;
@@ -8,6 +8,7 @@ in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
     enable = true;
+    package = self.pkgs.wlr-which-key-git;
     settings = {
       font = "${fonts.monospace.name} ${toString fonts.sizes.popups}";
       background = colors.withHashtag.base00 + "dd";
@@ -32,6 +33,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
     ] ++ lib.optionals config.custom.programs.volume-osd.enable [
       { key = "a"; desc = "Audio"; submenu = config.custom.programs.wlr-which-key.menus.volume-osd; }
+    ] ++ lib.optionals config.custom.programs.mpc-util.enable [
+      { key = "m"; desc = "Music"; submenu = config.custom.programs.wlr-which-key.menus.mpc; }
     ] ++ lib.optionals config.custom.programs.screen-recorder.enable [
       { key = "r"; desc = "Record Screen"; submenu = config.custom.programs.wlr-which-key.menus.screen-recorder; }
     ] ++ lib.optionals config.custom.programs.screenshot.enable [

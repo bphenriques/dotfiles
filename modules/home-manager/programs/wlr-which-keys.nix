@@ -8,7 +8,7 @@ in
     enable = lib.mkEnableOption "wlr-which-key";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.wlr-which-key;
+      default = pkgs.wlr-which-key;
     };
     settings = lib.mkOption {
       type = yamlFormat.type;

@@ -10,8 +10,6 @@ let
   };
   mkAppOpt' = default: mkAppOpt // { inherit default; };
 
-  cmd = desc: cmd: { inherit desc cmd; };
-  submenu = desc: submenu: { inherit desc submenu; };
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   systemctl = lib.getExe' pkgs.systemd "systemctl";
