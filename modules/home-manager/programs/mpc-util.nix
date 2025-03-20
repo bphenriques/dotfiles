@@ -50,6 +50,8 @@ in
       previous          = mkAppOpt ''${mpc-util} previous'';
       next              = mkAppOpt ''${mpc-util} next'';
       clear             = mkAppOpt ''${mpc-util} clear'';
+      volume-increase   = mkAppOpt ''${mpc-util} volume-increase'';
+      volume-decrease   = mkAppOpt ''${mpc-util} volume-decrease'';
       search-play       = mkAppOpt ''${mpc-util} dmenu-any play'';
       search-enqueue    = mkAppOpt ''${mpc-util} dmenu-any add'';
       search-next       = mkAppOpt ''${mpc-util} dmenu-any next'';
@@ -81,6 +83,8 @@ in
       { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;              keep_open = true; }
       { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;          keep_open = true; }
       { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;              keep_open = true; }
+      { key = ["Up" "k"];     desc = "Increase volume";   cmd = cfg.exec.volume-increase;   keep_open = true; }
+      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = cfg.exec.volume-decrease;   keep_open = true; }
       { key = "a";            desc = "Shuffle all songs"; cmd = cfg.exec.play-shuffled;     keep_open = true; }
       { key = "c";            desc = "Clear queue";       cmd = cfg.exec.clear;             keep_open = true; }
       { key = "space";        desc = "Play...";           cmd = cfg.exec.search-play; }

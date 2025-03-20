@@ -12,21 +12,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-  # Bridges MPD with mpris for notifications and media keys
-  services.mpdris2 = {
-    enable = true;
-    notifications = true;
-    multimediaKeys = true;
-  };
-
+  # Custom tool that is binded to my keys and sends notifications.
+  # Downside? Notifications only work _when_ I use the cli-tool. I am ok with that. Alternative: mpdris2.
   custom.programs.mpc-util.enable = true;
-  home.packages = [
-    pkgs.rmpc   # MPD client: TUI with artwork
-    (pkgs.makeDesktopItem {
-      name = "rmpc";
-      desktopName = "rmpc";
-      icon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } "rmpc" "";
-      exec = ''${lib.getExe' pkgs.foot "footclient"} --title=rmpc-tui ${lib.getExe pkgs.rmpc}'';
-    })
-  ];
 }

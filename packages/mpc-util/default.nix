@@ -10,6 +10,7 @@ pkgs.writeShellApplication {
   name = "mpc-util";
   runtimeInputs = [
     pkgs.mpc
+    pkgs.libnotify
     #FIXME: re-add fuzzel on next relase
   ];
   text = ''
