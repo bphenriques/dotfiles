@@ -218,12 +218,12 @@ source_select_fuzzel() {
 
 case "${1:-}" in
   # For sinks
-  sink-toggle-mute)   set_mute @DEFAULT_SINK@ toggle && notify_current_source                 ;;
-  sink-increase)      set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_source          ;;
-  sink-decrease)      set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_source          ;;
-  sink-move)          set_sink_and_move "$2" && notify_current_source                         ;;
-  sink-move-next)     set_sink_and_move "$(get_next_sink "+1")" && notify_current_source      ;;
-  sink-move-prev)     set_sink_and_move "$(get_next_sink "-1")" && notify_current_source      ;;
+  sink-toggle-mute)   set_mute @DEFAULT_SINK@ toggle && notify_current_sink                 ;;
+  sink-increase)      set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink          ;;
+  sink-decrease)      set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink          ;;
+  sink-move)          set_sink_and_move "$2" && notify_current_sink                         ;;
+  sink-move-next)     set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink      ;;
+  sink-move-prev)     set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink      ;;
   sink-move-fuzzel)
     selection="$(sink_select_fuzzel)"
     if [ "$selection" != "" ]; then
