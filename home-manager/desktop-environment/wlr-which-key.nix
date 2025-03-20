@@ -25,6 +25,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       margin_top = 0;
 
       rows_per_column = 6;
+      column_padding = 20;
     };
 
     menus.global = lib.optionals config.custom.programs.mpc-util.enable [
@@ -34,7 +35,8 @@ lib.mkIf pkgs.stdenv.isLinux {
     ] ++ lib.optionals config.custom.programs.screenshot.enable [
       { key = "s"; desc = "Screenshot"; submenu = config.custom.programs.wlr-which-key.menus.screenshot; }
     ] ++ lib.optionals config.custom.programs.volume-osd.enable [
-      { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.volume-osd; }
+      { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.sound-output; }
+      { key = "Ctrl+a"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
     ] ++ [
       { key = "d"; desc = "Display Output"; cmd = (lib.getExe pkgs.wdisplays); }
       { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }

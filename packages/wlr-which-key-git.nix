@@ -17,8 +17,8 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "MaxVerevkin";
     repo = "wlr-which-key";
-    rev = "a4a6b747fafb0a015006a2978827c588b40a4562";
-    hash = "sha256-nijUyHA4hRXAScFVmw0at6dTsGLpxc7ueeryfU+50HQ=";
+    rev = "e2aa26ef0174d4acbfaf0b36f610b2aa326ceea3";
+    hash = "sha256-4e+i/P5QjXsptkI43Co+4LBB5cJ0WbR/wn2geG5Yfz4=";
   };
 
   cargoHash = "sha256-ioCPuEbCmFDmzjo1AjLmrcjbhX/1ZvltDp9WDa9oM8w=";
