@@ -20,7 +20,6 @@ lib.mkIf pkgs.stdenv.isLinux {
   };
 
   custom.programs.mpc-util.enable = true;
-
   home.packages = [
     pkgs.rmpc   # MPD client: TUI with artwork
     (pkgs.makeDesktopItem {

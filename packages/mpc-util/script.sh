@@ -1,15 +1,12 @@
 #shellcheck shell=bash
 
-select_title_file() {
-  mpc -f '%file%\t%title% by %artist% (%album%)' listall | while read -r line; do
-    printf "%s\u0000icon\u001f%s\n" "$line" "$MPC_UTIL_SONG_ICON" ;
-  done | fuzzel -d --with-nth=2 --accept-nth=1
-}
-
-select_artist() {
-  mpc ls | while read -r line; do
-    printf "%s\u0000icon\u001f%s\n" "$line" "$MPC_UTIL_ARTIST_ICON" ;
-  done | fuzzel -d
+# Assumption: the library is organized using the standard (?) Artist/Album/Song. Works for me. Might not work with you.
+select_title_artist_album() {
+  mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
+    printf "%s\t%s\u0000icon\u001f%s\n" "$artist" "$artist" "$MPC_UTIL_ARTIST_ICON"
+    printf "%s\t%s by %s\u0000icon\u001f%s\n" "$artist/$album" "$album" "$artist" "$MPC_UTIL_ALBUM_ICON"
+    printf "%s\t%s by %s (%s)\u0000icon\u001f%s\n" "$file" "$title" "$artist" "$album" "$MPC_UTIL_SONG_ICON"
+  done | LC_ALL=C sort --unique | fuzzel --dmenu --with-nth=2 --accept-nth=1
 }
 
 mpc_file() {
@@ -31,14 +28,9 @@ case "${1:-}" in
     mpc add /
     mpc play
     ;;
-  dmenu-title)
+  dmenu-any)
     shift 1
-    selection="$(select_title_file)"
-    [ "$selection" != "" ] && mpc_file "${1:-play}" "$selection"
-    ;;
-  dmenu-artist)
-    shift 1
-    selection="$(select_artist)"
+    selection="$(select_title_artist_album)"
     [ "$selection" != "" ] && mpc_file "${1:-play}" "$selection"
     ;;
 esac

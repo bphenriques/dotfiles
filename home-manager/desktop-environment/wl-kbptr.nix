@@ -6,7 +6,7 @@ let
   textOpacity = "BF"; # 75%
 in {
   home.packages = [
-    pkgs.wl-kbptr   # Select with g, h, b -> left, right and middle
+    pkgs.wl-kbptr
   ];
 
   xdg.configFile."wl-kbptr/config".text = lib.generators.toINI { } {
@@ -34,6 +34,7 @@ in {
   };
 
   # TODO: Move to niri submaps + wlrctl once we have https://github.com/YaLTeR/niri/issues/846
+  # Select with g, h, b -> left, right and middle
   custom.programs.niri.bindings = {
     "Mod+Alt+M" = ''spawn "${lib.getExe pkgs.wl-kbptr}"'';
   };
