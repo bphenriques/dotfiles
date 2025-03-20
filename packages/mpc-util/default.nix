@@ -15,6 +15,7 @@ pkgs.writeShellApplication {
   text = ''
     MPC_UTIL_SONG_ICON="${musicIcon}"
     MPC_UTIL_ARTIST_ICON="${artistIcon}"
+    MPC_UTIL_ALBUM_ICON="${albumIcon}"
 
     ${lib.fileContents ./script.sh}
   '';

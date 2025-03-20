@@ -12,16 +12,16 @@
 # Remove on next release when it supports list rather than maps in the config
 rustPlatform.buildRustPackage rec {
   pname = "wlr-which-key";
-  version = "1.1.0";  # pretend
+  version = "git";  # pretend
 
   src = fetchFromGitHub {
     owner = "MaxVerevkin";
     repo = "wlr-which-key";
-    rev = "131d280cadf498d599c03a98ea0ade1ffc92f382";
-    hash = "sha256-FGqzHrO8rU25XDLCW7RGHsFD7j61gxo6TaPJYHiwCdY=";
+    rev = "a4a6b747fafb0a015006a2978827c588b40a4562";
+    hash = "sha256-nijUyHA4hRXAScFVmw0at6dTsGLpxc7ueeryfU+50HQ=";
   };
 
-  cargoHash = "sha256-eyNZ+ATw6W71KWLSQ+5PXSAwBY8OijUEn8DALx6U0ME=";
+  cargoHash = "sha256-ioCPuEbCmFDmzjo1AjLmrcjbhX/1ZvltDp9WDa9oM8w=";
 
   nativeBuildInputs = [
     pkg-config

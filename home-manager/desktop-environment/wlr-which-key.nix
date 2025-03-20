@@ -23,22 +23,23 @@ lib.mkIf pkgs.stdenv.isLinux {
       margin_bottom = 30;
       margin_left = 0;
       margin_top = 0;
+
+      rows_per_column = 6;
     };
 
-    # TODO: Shortcut to see current battery, current music, current output
-    menus.global = [
-      { key = "n"; desc = "Network"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
-      { key = "d"; desc = "Display"; cmd = (lib.getExe pkgs.wdisplays); }
-    ] ++ lib.optionals config.custom.programs.session.enable [
-      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
-    ] ++ lib.optionals config.custom.programs.volume-osd.enable [
-      { key = "a"; desc = "Audio"; submenu = config.custom.programs.wlr-which-key.menus.volume-osd; }
-    ] ++ lib.optionals config.custom.programs.mpc-util.enable [
+    menus.global = lib.optionals config.custom.programs.mpc-util.enable [
       { key = "m"; desc = "Music"; submenu = config.custom.programs.wlr-which-key.menus.mpc; }
     ] ++ lib.optionals config.custom.programs.screen-recorder.enable [
       { key = "r"; desc = "Record Screen"; submenu = config.custom.programs.wlr-which-key.menus.screen-recorder; }
     ] ++ lib.optionals config.custom.programs.screenshot.enable [
       { key = "s"; desc = "Screenshot"; submenu = config.custom.programs.wlr-which-key.menus.screenshot; }
+    ] ++ lib.optionals config.custom.programs.volume-osd.enable [
+      { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.volume-osd; }
+    ] ++ [
+      { key = "d"; desc = "Display Output"; cmd = (lib.getExe pkgs.wdisplays); }
+      { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
+    ] ++ lib.optionals config.custom.programs.session.enable [
+      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
     ];
   };
 }

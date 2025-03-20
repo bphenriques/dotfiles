@@ -174,7 +174,7 @@ in
       "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "sink-increase"'';
       "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "sink-decrease"'';
       "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "sink-toggle-mute"'';
-      "XF86AudioMicMute     allow-when-locked=true" = ''spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"'';
+      "XF86AudioMicMute     allow-when-locked=true" = ''spawn "${volume}" "source-toggle-mute"'';
       "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
       "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
       "XF86AudioPlay        allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';

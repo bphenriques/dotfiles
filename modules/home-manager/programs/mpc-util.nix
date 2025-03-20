@@ -22,8 +22,7 @@ let
     { id = "mpc-next";          symbol = "󰒭"; label = "Next";  exec = cfg.exec.next; }
     { id = "mpc-clear";         symbol = ""; label = "Clear";  exec = cfg.exec.clear; }
     { id = "mpc-shuffle-play";  symbol = ""; label = "Shuffle all songs";  exec = cfg.exec.play-shuffled; }
-    { id = "mpc-play-title";    symbol = ""; label = "Play song";  exec = cfg.exec.search-title-play; }
-    { id = "mpc-play-artist";   symbol = "󰀖"; label = "Play artist";  exec = cfg.exec.search-artist-play; }
+    { id = "mpc-play";          symbol = ""; label = "Play...";  exec = cfg.exec.search-play; }
   ];
 
   dmenu = self.lib.builders.writeDmenuApplication pkgs {
@@ -44,19 +43,16 @@ in
     };
 
     exec = {
-      dmenu                   = mkAppOpt (lib.getExe dmenu);
-      play-pause              = mkAppOpt ''${mpc-util} play-pause'';
-      stop                    = mkAppOpt ''${mpc-util} stop'';
-      play-shuffled           = mkAppOpt ''${mpc-util} play-shuffled'';
-      previous                = mkAppOpt ''${mpc-util} previous'';
-      next                    = mkAppOpt ''${mpc-util} next'';
-      clear                   = mkAppOpt ''${mpc-util} clear'';
-      search-title-play       = mkAppOpt ''${mpc-util} dmenu-title play'';
-      search-artist-play      = mkAppOpt ''${mpc-util} dmenu-artist play'';
-      search-title-enqueue    = mkAppOpt ''${mpc-util} dmenu-title add'';
-      search-artist-enqueue   = mkAppOpt ''${mpc-util} dmenu-artist add'';
-      search-title-next       = mkAppOpt ''${mpc-util} dmenu-title next'';
-      search-artist-next      = mkAppOpt ''${mpc-util} dmenu-artist next'';
+      dmenu             = mkAppOpt (lib.getExe dmenu);
+      play-pause        = mkAppOpt ''${mpc-util} play-pause'';
+      stop              = mkAppOpt ''${mpc-util} stop'';
+      play-shuffled     = mkAppOpt ''${mpc-util} play-shuffled'';
+      previous          = mkAppOpt ''${mpc-util} previous'';
+      next              = mkAppOpt ''${mpc-util} next'';
+      clear             = mkAppOpt ''${mpc-util} clear'';
+      search-play       = mkAppOpt ''${mpc-util} dmenu-any play'';
+      search-enqueue    = mkAppOpt ''${mpc-util} dmenu-any add'';
+      search-next       = mkAppOpt ''${mpc-util} dmenu-any next'';
     };
   };
 
@@ -81,36 +77,15 @@ in
     ];
 
     custom.programs.wlr-which-key.menus.mpc = [
-      { key = "p";            desc = "Play/Pause";            cmd = cfg.exec.play-pause;    keep_open = true; }
-      { key = "s";            desc = "Stop";                  cmd = cfg.exec.stop;          keep_open = true; }
-      { key = ["Left" "h"];   desc = "Previous";              cmd = cfg.exec.previous;      keep_open = true; }
-      { key = ["Right" "l"];  desc = "Next";                  cmd = cfg.exec.next;          keep_open = true; }
-      { key = "a";            desc = "Shuffle all songs";     cmd = cfg.exec.play-shuffled; keep_open = true; }
-      { key = "c";            desc = "Clear";                 cmd = cfg.exec.clear;         keep_open = true; }
-      {
-        key = "space";
-        desc = "Play";
-        submenu = [
-          { key = "t"; desc = "Title";    cmd = cfg.exec.search-title-play; }
-          { key = "a"; desc = "Artist";   cmd = cfg.exec.search-artist-play; }
-        ];
-      }
-      {
-        key = "q";
-        desc = "Play (add to queue)";
-        submenu = [
-          { key = "t"; desc = "Title";    cmd = cfg.exec.search-title-enqueue; }
-          { key = "a"; desc = "Artist";   cmd = cfg.exec.search-artist-enqueue; }
-        ];
-      }
-      {
-        key = "n";
-        desc = "Play (up next)";
-        submenu = [
-          { key = "t"; desc = "Title";    cmd = cfg.exec.search-title-next; }
-          { key = "a"; desc = "Artist";   cmd = cfg.exec.search-artist-next; }
-        ];
-      }
+      { key = "p";            desc = "Play/Pause";        cmd = cfg.exec.play-pause;        keep_open = true; }
+      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;              keep_open = true; }
+      { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;          keep_open = true; }
+      { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;              keep_open = true; }
+      { key = "a";            desc = "Shuffle all songs"; cmd = cfg.exec.play-shuffled;     keep_open = true; }
+      { key = "c";            desc = "Clear queue";       cmd = cfg.exec.clear;             keep_open = true; }
+      { key = "space";        desc = "Play...";           cmd = cfg.exec.search-play; }
+      { key = "n";            desc = "Play next...";      cmd = cfg.exec.search-next; }
+      { key = "e";            desc = "Add to queue...";   cmd = cfg.exec.search-enqueue; }
     ];
   };
 }
