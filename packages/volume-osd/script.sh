@@ -2,6 +2,7 @@
 
 # Pulseaudio that has no equivalente in wireplumber (yet). Using its cli but not necessarily the service
 # This require actually filtering as it captures more than I wanted
+list_sinks()      { pactl -f json list sinks; }
 list_sources()    { pactl -f json list sources | jq -cr '[ .[] | select((.ports | any((.type == "Mic") or (.type == "Headset")))) ]'; }
 get_sink()        { pactl -f json list sinks | jq -cr --arg sink "$1" '.[] | select(.name == $sink)'; }
 get_source()      { pactl -f json list sources | jq -cr --arg source "$1" '.[] | select(.name == $source)'; }
@@ -25,7 +26,7 @@ friendly_sink_name() {
   local sink_name
   sink_name="$(get_sink "$1" | jq -r '.name')"
   case "${sink_name}" in
-    *analog*) echo -n "Internal"                    ;;
+    *analog*) echo -n "Laptop"                      ;;
     *hdmi*)   echo -n "HDMI"                        ;;
     *)        get_sink "$1" | jq -r '.description'  ;;
   esac
@@ -35,7 +36,7 @@ friendly_source_name() {
   local source_name
   source_name="$(get_source "$1" | jq -r '.name')"
   case "${source_name}" in
-    *analog*) echo -n "Internal"                      ;;
+    *analog*) echo -n "Laptop"                        ;;
     *)        get_source "$1" | jq -r '.description'  ;;
   esac
 }
@@ -142,11 +143,11 @@ move_all_sink_inputs() {
 get_next_sink() {
   inc="${1:-"+1"}"
   current="$(get_sink "$(pactl get-default-sink)" | jq -cr '.index')"
-  current_pos_index="$(pactl -f json list sinks | jq -cr --arg current "${current}" '[.[].index] | index($current | tonumber)')"
-  number_sinks="$(pactl -f json list sinks | jq 'length')"
-  next_index="$(pactl -f json list sinks | jq -cr --arg inc "$inc" --arg current "$current_pos_index" --arg total "$number_sinks" '[.[].index][(($current | tonumber)+($inc | tonumber)) % ($total | tonumber)]')"
+  current_pos_index="$(list_sinks | jq -cr --arg current "${current}" '[.[].index] | index($current | tonumber)')"
+  number_sinks="$(list_sinks | jq 'length')"
+  next_index="$(list_sinks | jq -cr --arg inc "$inc" --arg current "$current_pos_index" --arg total "$number_sinks" '[.[].index][(($current | tonumber)+($inc | tonumber)) % ($total | tonumber)]')"
 
-  pactl -f json list sinks | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber)) | .name'
+  list_sinks | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber)) | .name'
 }
 
 set_sink_and_move() {
@@ -161,13 +162,13 @@ set_sink_and_move() {
 }
 
 sink_dmenu_options() {
-  for sink_name in $(pactl -f json list sinks | jq -r '.[] | .name'); do
+  for sink_name in $(list_sinks | jq -r '.[].name'); do
     printf '%s\u0000icon\u001f%s\n' "$(friendly_sink_name "$sink_name")" "$(get_sink_icon "$(device_type "$sink_name")")"
   done
 }
 
 sink_select_fuzzel() {
-  sinks="$(list_sources | jq -r '[ .[] | .name ]')"
+  sinks="$(list_sinks | jq -r '[ .[].name ]')"
   selection="$(sink_dmenu_options | fuzzel --dmenu --index --width 65 --lines "$(echo "$sinks" | jq length)")"
   if [ "$selection" != -1 ]; then
     echo "$sinks" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'

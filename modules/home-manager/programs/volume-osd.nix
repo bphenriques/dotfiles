@@ -42,7 +42,7 @@ in
         { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} sink-move-next";   keep_open = true; }
         { key = "m";              desc = "Mute";            cmd = "${volume-osd} sink-toggle-mute"; keep_open = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} sink-move-fuzzel"; }
-        { key = "c"; desc = "Configure";    cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
+        { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
       ];
 
       sound-input = [
@@ -52,7 +52,7 @@ in
         { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} source-move-next";   keep_open = true; }
         { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keep_open = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} source-move-fuzzel"; }
-        { key = "c"; desc = "Configure";    cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
+        { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
       ];
     };
 
