@@ -17,10 +17,7 @@ let
   };
 
   # Good enough
-  toNiriSpawn = command: lib.strings.concatMapStringsSep
-    " "
-    (x: ''"${x}"'')
-    (lib.strings.splitString " " command);
+  toNiriSpawn = command: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') (lib.strings.splitString " " command);
 in
 {
   custom.programs.niri = {

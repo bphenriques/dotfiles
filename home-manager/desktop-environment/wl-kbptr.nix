@@ -2,8 +2,7 @@
 let
   cmd = desc: cmd: { inherit desc cmd; keep_open = true; };
   colors = config.lib.stylix.colors.withHashtag;
-  backgroundOpacity = "26"; # 15%
-  textOpacity = "BF"; # 75%
+  backgroundTransparency = "1A"; # 10%
 in {
   home.packages = [
     pkgs.wl-kbptr
@@ -11,25 +10,25 @@ in {
 
   xdg.configFile."wl-kbptr/config".text = lib.generators.toINI { } {
     mode_tile = {
-      label_color = colors.base07 + "${textOpacity}";
-      label_select_color = colors.base0A + "${textOpacity}";
-      unselectable_bg_color = colors.base04 + "${backgroundOpacity}";
-      selectable_bg_color = colors.base0D + "${backgroundOpacity}";
-      selectable_border_color = colors.base0D + "${backgroundOpacity}";
+      label_color = colors.base07;
+      label_select_color = colors.base0A;
+      unselectable_bg_color = colors.base04 + "${backgroundTransparency}";
+      selectable_bg_color = colors.base0D + "${backgroundTransparency}";
+      selectable_border_color = colors.base0D + "${backgroundTransparency}";
     };
 
     mode_bisect = {
-      label_color = colors.base07 + "${textOpacity}";
+      label_color = colors.base07;
       label_font_size = 20;
       label_padding = 12;
       pointer_size = 20;
-      pointer_color = colors.base08 + "${textOpacity}";
-      unselectable_bg_color = colors.base04 + "${backgroundOpacity}";
-      even_area_bg_color = colors.base0B + "${backgroundOpacity}";
-      even_area_border_color = colors.base0B + "${backgroundOpacity}";
-      odd_area_bg_color = colors.base0D + "${backgroundOpacity}";
-      odd_area_border_color = colors.base0D + "${backgroundOpacity}";
-      history_border_color = colors.base0B + "${backgroundOpacity}";
+      pointer_color = colors.base08;
+      unselectable_bg_color = colors.base04 + "${backgroundTransparency}";
+      even_area_bg_color = colors.base0B + "${backgroundTransparency}";
+      even_area_border_color = colors.base0B + "${backgroundTransparency}";
+      odd_area_bg_color = colors.base0D + "${backgroundTransparency}";
+      odd_area_border_color = colors.base0D + "${backgroundTransparency}";
+      history_border_color = colors.base0B + "${backgroundTransparency}";
     };
   };
 
