@@ -39,18 +39,18 @@ in
         { key = ["Up" "k"];       desc = "Increase volume"; cmd = "${volume-osd} sink-increase";    keep_open = true; }
         { key = ["Down" "j"];     desc = "Reduce volume";   cmd = "${volume-osd} sink-decrease";    keep_open = true; }
         { key = ["Left" "h"];     desc = "Previous device"; cmd = "${volume-osd} sink-move-prev";   keep_open = true; }
-        { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} sink-move-next";   keep_open = true; }
         { key = "m";              desc = "Mute";            cmd = "${volume-osd} sink-toggle-mute"; keep_open = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} sink-move-fuzzel"; }
+        { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} sink-move-next";   keep_open = true; }
         { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
       ];
 
       sound-input = [
         { key = ["Up" "k"];       desc = "Increase volume"; cmd = "${volume-osd} source-increase";    keep_open = true; }
         { key = ["Down" "j"];     desc = "Reduce volume";   cmd = "${volume-osd} source-decrease";    keep_open = true; }
+        { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keep_open = true; }
         { key = ["Left" "h"];     desc = "Previous device"; cmd = "${volume-osd} source-move-prev";   keep_open = true; }
         { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} source-move-next";   keep_open = true; }
-        { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keep_open = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} source-move-fuzzel"; }
         { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
       ];

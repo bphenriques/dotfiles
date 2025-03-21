@@ -16,7 +16,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       border = colors.withHashtag.base0D;
       border_width = 1;
       corner_r = 10;
-      separator = "  ➜  ";
+      separator = " ➜ ";
 
       anchor = "bottom";
       margin_right = 0;
@@ -39,6 +39,9 @@ lib.mkIf pkgs.stdenv.isLinux {
       { key = "A"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
     ] ++ [
       { key = "d"; desc = "Display Output"; cmd = (lib.getExe pkgs.wdisplays); }
+    ] ++ lib.optionals config.custom.programs.brightness-osd.enable [
+      { key = "b"; desc = "Brightness"; submenu = config.custom.programs.wlr-which-key.menus.brightness-osd; }
+    ] ++ [
       { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
     ] ++ lib.optionals config.custom.programs.session.enable [
       { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
