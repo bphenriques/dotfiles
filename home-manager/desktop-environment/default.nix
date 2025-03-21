@@ -16,6 +16,7 @@
   custom.programs.screen-recorder.enable = true;
   custom.programs.session.enable = true;
   custom.programs.volume-osd.enable = true;
+  custom.programs.brightness-osd.enable = true;
   custom.programs.file-explorer.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   custom.services.upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
 }
