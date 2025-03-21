@@ -12,7 +12,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-  # Custom tool that is binded to my keys and sends notifications.
-  # Downside? Notifications only work _when_ I use the cli-tool. I am ok with that. Alternative: mpdris2.
-  custom.programs.mpc-util.enable = true;
+  # Custom mpc extension that is binded to my keys and sends notifications.
+  # Downside: notifications only work through this. Alternative: mpdris2 or build my own event loop.
+  custom.programs.mpc-plus.enable = true;
 }
