@@ -27,7 +27,7 @@ let
       swww-util = pkgs.callPackage ./swww-util { };
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshot = pkgs.callPackage ./screenshot { };
-      mpc-util = pkgs.callPackage ./mpc-util { };
+      mpc-plus = pkgs.callPackage ./mpc-plus { };
 
       # Not using overlays because dealing with rust inside is finnicky and not worth my time :sweat:
       wlr-which-key-git = pkgs.callPackage ./wlr-which-key-git.nix { };
