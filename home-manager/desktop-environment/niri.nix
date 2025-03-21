@@ -2,13 +2,13 @@
 let
   inherit (config.custom.programs) swappy;
 
-  volume                = lib.getExe self.pkgs.volume-osd;
-  brightness            = lib.getExe self.pkgs.brightness-osd;
-  terminal              = lib.getExe' pkgs.foot "footclient";
-  playerctl             = lib.getExe pkgs.playerctl;
-  dmenu                 = "${lib.getExe config.programs.fuzzel.package} -d";
-  files-browser         = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
-  system-monitor        = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
+  volume          = lib.getExe config.custom.programs.volume-osd.package;
+  brightness      = lib.getExe config.custom.programs.brightness-osd.package;
+  terminal        = lib.getExe' pkgs.foot "footclient";
+  mpc-plus        = lib.getExe config.custom.programs.mpc-plus.package; # Replace with playerctl one day
+  dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
+  files-browser   = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  system-monitor  = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
 
   emoji = pkgs.writeShellApplication {
     name = "emoji-picker";
@@ -28,7 +28,9 @@ in
     screenshotPath = "${swappy.directory}/${swappy.format}";
 
     environment = {
-      NIXOS_OZONE_WL = "1"; # Electron apps
+      # Electron
+      NIXOS_OZONE_WL = "1";
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
     };
 
     input = {
@@ -175,10 +177,10 @@ in
       "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "sink-decrease"'';
       "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "sink-toggle-mute"'';
       "XF86AudioMicMute     allow-when-locked=true" = ''spawn "${volume}" "source-toggle-mute"'';
-      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
-      "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
-      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
-      "XF86AudioPause       allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
+      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${mpc-plus}" "previous"'';
+      "XF86AudioNext        allow-when-locked=true" = ''spawn "${mpc-plus}" "next"'';
+      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${mpc-plus}" "play-pause"'';
+      "XF86AudioPause       allow-when-locked=true" = ''spawn "${mpc-plus}" "play-pause"'';
 
       # Brightness
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';
@@ -186,6 +188,11 @@ in
     };
 
     extraConfig = ''
+      window-rule {
+        geometry-corner-radius 6
+        clip-to-geometry true
+      }
+
       window-rule {
         match app-id=r#"firefox$"#
         match app-id=r#"zen$"#
@@ -204,15 +211,6 @@ in
       window-rule {
          match app-id=r#"^Bitwarden$"#
          block-out-from "screen-capture"
-      }
-
-      window-rule {
-         match title="kew-tui"
-
-         open-floating true
-         default-column-width { fixed 400; }
-         default-window-height { fixed 600; }
-         default-floating-position x=32 y=32 relative-to="bottom-right"
       }
 
       cursor {
