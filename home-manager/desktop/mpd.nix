@@ -12,7 +12,11 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-  # Custom mpc extension that is binded to my keys and sends notifications.
-  # Downside: notifications only work through this. Alternative: mpdris2 or build my own event loop.
-  custom.programs.mpc-plus.enable = true;
+  custom.programs.mpc-plus.enable = true; # Extension of the known mpc client
+  custom.services.mpc-plus.enable = true; # Provides player/mixer events notifications
+  services.mpdris2 = {
+    enable = true;
+    multimediaKeys = true;  # Integration with multimedia keys. Nicer as keys control whathever is playing
+    notifications = false;  # Disabling as I prefer my own for finer grain control.
+  };
 }

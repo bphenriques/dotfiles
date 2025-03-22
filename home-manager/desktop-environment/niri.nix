@@ -5,7 +5,7 @@ let
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
   terminal        = lib.getExe' pkgs.foot "footclient";
-  mpc-plus        = lib.getExe config.custom.programs.mpc-plus.package; # Replace with playerctl one day
+  playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
   files-browser   = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   system-monitor  = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
@@ -174,10 +174,10 @@ in
       "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "sink-decrease"'';
       "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "sink-toggle-mute"'';
       "XF86AudioMicMute     allow-when-locked=true" = ''spawn "${volume}" "source-toggle-mute"'';
-      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${mpc-plus}" "previous"'';
-      "XF86AudioNext        allow-when-locked=true" = ''spawn "${mpc-plus}" "next"'';
-      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${mpc-plus}" "play-pause"'';
-      "XF86AudioPause       allow-when-locked=true" = ''spawn "${mpc-plus}" "play-pause"'';
+      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
+      "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
+      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
+      "XF86AudioPause       allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
 
       # Brightness
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';

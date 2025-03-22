@@ -25,24 +25,30 @@ mpc_file() {
   esac
 }
 
+save_or_compress() {
+  if command -v magick >/dev/null 2>&1; then
+    magick - -geometry x128 "$destination" >/dev/null 2>&1;
+  else
+    tee "$destination"
+  fi
+}
+
 get_mpc_artwork_icon() {
   art_cache_key="$(mpc -f '%artist%_%album%_%title%' | head -1)"
   destination="$MPC_PLUS_CACHE_DIR/$art_cache_key.png"
 
   # First generate the base image with a reasonable for notifications
-  if [ ! -f "$destination" ]; then
-    if command -v magick >/dev/null 2>&1; then
-      if ! mpc readpicture "$(mpc -f '%file%' | head -1)" | magick - -geometry x128 "$destination" >/dev/null 2>&1; then
-        echo -n "$MPC_PLUS_SONG_ICON"
-      fi
+  if [ -f "$destination" ]; then
+    echo -n "$destination"
+  else
+    if mpc readpicture "$(mpc -f '%file%' | head -1)" | save_or_compress; then
+      echo -n "$destination"
+    elif mpc albumart "$(mpc -f '%file%' | head -1)" | save_or_compress; then
+      echo -n "$destination"
     else
-      if ! mpc readpicture "$(mpc -f '%file%' | head -1)" > "$destination" >/dev/null 2>&1; then
-        echo -n "$MPC_PLUS_SONG_ICON"
-      fi
+      echo -n "$MPC_PLUS_SONG_ICON"
     fi
   fi
-
-  echo -n "$destination"
 }
 
 notification_icon() {
@@ -87,11 +93,11 @@ notify_current_status() {
   case "$(mpc status '%state%')" in
     playing)
       title="Now playing"
-      description="$(mpc -f '%title% by %artist%' | head -1)"
+      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
       ;;
     paused)
       title="Paused"
-      description="$(mpc -f '%title% by %artist%' | head -1)"
+      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
       ;;
     stopped)
       title="Nothing playing"
@@ -129,11 +135,11 @@ notify_mpd_volume() {
   case "$(mpc status '%state%')" in
     playing)
       title="Now playing"
-      description="$(mpc -f '%title% by %artist%' | head -1)"
+      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
       ;;
     paused)
       title="Paused"
-      description="$(mpc -f '%title% by %artist%' | head -1)"
+      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
       ;;
     stopped)
       title="Nothing playing"
@@ -152,25 +158,28 @@ notify_mpd_volume() {
     "${title}" "${description}"
 }
 
-play_shuffle_library() { mpc random on && mpc clear && mpc add / && mpc play; }
-
 case "${1:-}" in
-  play-pause)       mpc toggle && notify_current_status                                                                 ;;
-  stop)             mpc stop && notify_current_status                                                                   ;;
-  previous)         mpc prev && notify_current_status                                                                   ;;
-  next)             mpc next && notify_current_status                                                                   ;;
-  volume-increase)  mpc volume "+${2:-5}" && notify_mpd_volume                                                          ;;
-  volume-decrease)  mpc volume "-${2:-5}" && notify_mpd_volume                                                          ;;
+  play-pause)       mpc toggle                                          ;;
+  stop)             mpc stop                                            ;;
+  previous)         mpc prev                                            ;;
+  next)             mpc next                                            ;;
+  volume-increase)  mpc volume "+${2:-5}"                               ;;
+  volume-decrease)  mpc volume "-${2:-5}"                               ;;
+  play-shuffled)    mpc random on && mpc clear && mpc add / && mpc play ;;
   clear)            mpc clear && notify_action "Music Queue" "No songs" "${MPC_PLUS_CLEAR_ICON}"                        ;;
   toggle-random)    toggle_random && notify_action "Shuffle Songs: $(mpc status '%random%')" "" "$(random_status_icon)" ;;
   toggle-repeat)    toggle_repeat && notify_action "Repeat Song: $(mpc status '%repeat%')" "" "$(repeat_status_icon)"   ;;
-  play-shuffled)    play_shuffle_library && notify_current_status                                                       ;;
   dmenu-any)
-    shift 1
     selection="$(select_title_artist_album)"
     if [ "$selection" != "" ]; then
-      mpc_file "${1:-play}" "$selection"
-      notify_current_status
+      mpc_file "${2:-play}" "$selection"
     fi
     ;;
+  notifications-daemon)
+    mpc idleloop player mixer | while read -r event; do
+      case "$event" in
+        player)   notify_current_status   ;;
+        mixer)    notify_mpd_volume       ;;
+      esac
+    done
 esac
