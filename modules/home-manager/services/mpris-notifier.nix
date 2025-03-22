@@ -19,19 +19,17 @@ in
       source = tomlFormat.generate "config.toml" cfg.settings;
     };
 
-    systemd.user.services = {
-      mpris-notifier = {
-        Unit = {
-          Description = "mpris notifier";
-          PartOf = [ "graphical-session.target" ];
-          After = [ "graphical-session.target" ];
-        };
-        Install.WantedBy = [ config.wayland.systemd.target ];
-        Service = {
-          Type = "simple";
-          ExecStart = ''${lib.getExe pkgs.mpris-notifier}'';
-          Restart = "on-failure";
-        };
+    systemd.user.services.mpris-notifier = {
+      Unit = {
+        Description = "mpris notifier";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+      };
+      Install.WantedBy = [ config.wayland.systemd.target ];
+      Service = {
+        Type = "simple";
+        ExecStart = ''${lib.getExe pkgs.mpris-notifier}'';
+        Restart = "on-failure";
       };
     };
   };
