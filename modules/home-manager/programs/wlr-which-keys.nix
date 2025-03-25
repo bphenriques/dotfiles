@@ -26,7 +26,7 @@ in
 
     xdg.configFile = lib.attrsets.mapAttrs' (
       name: menu: lib.attrsets.nameValuePair "wlr-which-key/${name}.yaml" {
-        text = builtins.toJSON (cfg.settings // { inherit menu; }); # toJSON as YAML breaks (especially with nix paths)
+        text = builtins.toJSON (cfg.settings // { inherit menu; }); # toJSON as YAML breaks with nix paths
       }
     ) cfg.menus;
   };

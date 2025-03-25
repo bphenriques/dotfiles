@@ -1,5 +1,5 @@
 { inputs, ... }: {
-  git-versions = (final: prev: {
+  waiting-next-release = (final: prev: {
     # Remove on next release when it supports "--with-nth"
     fuzzel-git = prev.fuzzel.overrideAttrs (_: {
       version = "git";

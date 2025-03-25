@@ -69,15 +69,15 @@ in
     ];
 
     custom.programs.wlr-which-key.menus.mpc-plus = [
-      { key = "a";            desc = "Shuffle library";      cmd = cfg.exec.play-shuffled;  keep_open = true; }
-      { key = "p";            desc = "Play/Pause";        cmd = cfg.exec.play-pause;        keep_open = true; }
-      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;              keep_open = true; }
-      { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;          keep_open = true; }
-      { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;              keep_open = true; }
-      { key = ["Up" "k"];     desc = "Increase volume";   cmd = cfg.exec.volume-increase;   keep_open = true; }
-      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = cfg.exec.volume-decrease;   keep_open = true; }
-      { key = "z";            desc = "Toggle repeat";     cmd = cfg.exec.toggle-repeat;     keep_open = true; }
-      { key = "x";            desc = "Toggle random";     cmd = cfg.exec.toggle-random;     keep_open = true; }
+      { key = "a";            desc = "Shuffle library";   cmd = cfg.exec.play-shuffled;   keep_open = true; }
+      { key = ["space" "p"];  desc = "Play/Pause";        cmd = cfg.exec.play-pause;      keep_open = true; }
+      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;            keep_open = true; }
+      { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;        keep_open = true; }
+      { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;            keep_open = true; }
+      { key = ["Up" "k"];     desc = "Increase volume";   cmd = cfg.exec.volume-increase; keep_open = true; }
+      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = cfg.exec.volume-decrease; keep_open = true; }
+      { key = "z";            desc = "Toggle repeat";     cmd = cfg.exec.toggle-repeat;   keep_open = true; }
+      { key = "x";            desc = "Toggle random";     cmd = cfg.exec.toggle-random;   keep_open = true; }
       {
         key = "q";
         desc = "Queue";

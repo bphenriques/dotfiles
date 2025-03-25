@@ -35,7 +35,7 @@ Feel free to take a look around and ask me anything!
 2. On the target machine, boot onto the NixOS's installer, set `nixos`'s password using `passwd` and obtain its IP.
 3. On the source machine, create a new host with the initial hardware configuration and [disko](https://github.com/nix-community/disko) set:
    ```shell
-   HOST=new-host
+   HOST=laptop
    TARGET_IP=192.168.68.58
    ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
@@ -45,7 +45,7 @@ Feel free to take a look around and ask me anything!
 1. Boot onto the NixOS installer (see previous section).
 2. On a NixOS source machine run:
     ```shell
-    HOST=new-host
+    HOST=laptop
     TARGET_IP=192.168.68.58
     ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
     ```
@@ -53,7 +53,7 @@ Feel free to take a look around and ask me anything!
 3. On the target machine, run the post-install:
     ```shell
     HOST=laptop
-    BITWARDEN_EMAIL=...
+    BITWARDEN_EMAIL=me@me.com
     nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- $HOST $BITWARDEN_EMAIL
     ```
 
@@ -65,16 +65,16 @@ Feel free to take a look around and ask me anything!
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
    
-3. On the target machine, run the post-install:
+3. Run the post-install:
    ```shell
    HOST=work-macos
-   BITWARDEN_EMAIL=...
+   BITWARDEN_EMAIL=me@me.com
    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- $HOST $BITWARDEN_EMAIL
    ```
 
 5. Apply:
    ```shell
-   "$HOME"/.dotfiles/packages/dotfiles/dotfiles.sh sync
+   nix run "$HOME"/.dotfiles#dotfiles sync
    ```
 
 6. Reboot!

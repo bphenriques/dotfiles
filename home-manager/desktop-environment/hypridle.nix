@@ -17,8 +17,8 @@ in
       };
 
       listener = [
-        { timeout = 60 * 4;   on-timeout = notify { msg = "Turning off screen in 1 minute"; icon = (mkIcon "sleep" "󰒲"); }; }
-        { timeout = 60 * 5;   on-timeout = "${niri} msg action power-off-monitors"; on-resume = "${niri} msg action power-on-monitors"; }
+        { timeout = 60 * 9;   on-timeout = notify { msg = "Turning off screen in 1 minute"; icon = (mkIcon "sleep" "󰒲"); }; }
+        { timeout = 60 * 10;  on-timeout = "${niri} msg action power-off-monitors"; on-resume = "${niri} msg action power-on-monitors"; }
         { timeout = 60 * 10;  on-timeout = lock; }
         { timeout = 60 * 15;  on-timeout = "${lib.getExe' pkgs.systemd "systemctl"} suspend"; }
       ];
