@@ -40,6 +40,8 @@ Feel free to take a look around and ask me anything!
    ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
    ```
 
+4. Create a new host directory with the hardware configuration and basic nixos settings.
+
 #### Install remotely
 
 1. Boot onto the NixOS installer (see previous section).
@@ -47,7 +49,7 @@ Feel free to take a look around and ask me anything!
     ```shell
     HOST=laptop
     TARGET_IP=192.168.68.58
-    ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
+    nix run ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
     ```
 
 3. On the target machine, run the post-install:
@@ -74,7 +76,7 @@ Feel free to take a look around and ask me anything!
 
 5. Apply:
    ```shell
-   nix run "$HOME"/.dotfiles#dotfiles sync
+   nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#dotfiles" -- sync
    ```
 
 6. Reboot!
