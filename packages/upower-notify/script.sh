@@ -123,11 +123,9 @@ notify_current_battery() {
 
   notify-send \
     --urgency="$urgency" \
-    --expire-time 5000 \
     --icon "$icon" \
     --category "upower-notify" \
     --hint string:x-canonical-private-synchronous:upower-notify \
-    --hint string:x-dunst-stack-tag:upower-notify \
     --hint int:value:"$percentage" \
     --transient \
     "Battery: $percentage%"

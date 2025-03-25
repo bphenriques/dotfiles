@@ -1,14 +1,6 @@
 #shellcheck shell=bash
 
-notify() {
-  message="$1"
-  notify-send \
-    --expire-time 3000 \
-    --category "screenshot" \
-    --hint string:x-canonical-private-synchronous:screenshot \
-    --hint string:x-dunst-stack-tag:screenshot \
-    "Screenshot" "$message"
-}
+notify() { notify-send --category "screenshot" --hint string:x-canonical-private-synchronous:screenshot "Screenshot" "$1"; }
 
 case "${1:-}" in
   screen)

@@ -3,7 +3,7 @@ let
   niri = lib.getExe pkgs.niri;
   lock = ''${lib.getExe' pkgs.procps "pidof"} hyprlock || ${niri} msg action do-screen-transition --delay-ms 750 && ${lib.getExe pkgs.hyprlock}'';
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
-  notify = { msg, icon }: ''${lib.getExe pkgs.libnotify} --expire-time 5000 --icon "${icon}" --category "hypridle-notify" --hint string:x-canonical-private-synchronous:hypridle-notify --hint string:x-dunst-stack-tag:hypridle-notify "${msg}"'';
+  notify = { msg, icon }: ''${lib.getExe pkgs.libnotify} -i "${icon}" --category "hypridle-notify" -h string:x-canonical-private-synchronous:hypridle-notify --transient "${msg}"'';
 in
 {
   services.hypridle = {

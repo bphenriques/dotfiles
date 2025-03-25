@@ -44,9 +44,9 @@ in
       toggle-repeat     = mkAppOpt ''${mpc-plus} toggle-repeat'';
       volume-increase   = mkAppOpt ''${mpc-plus} volume-increase'';
       volume-decrease   = mkAppOpt ''${mpc-plus} volume-decrease'';
-      search-play       = mkAppOpt ''${mpc-plus} dmenu-any play'';
-      search-enqueue    = mkAppOpt ''${mpc-plus} dmenu-any add'';
-      search-next       = mkAppOpt ''${mpc-plus} dmenu-any next'';
+      search-play       = mkAppOpt ''${mpc-plus} dmenu-file-exec play'';
+      search-enqueue    = mkAppOpt ''${mpc-plus} dmenu-file-exec add'';
+      search-next       = mkAppOpt ''${mpc-plus} dmenu-file-exec next'';
     };
   };
 

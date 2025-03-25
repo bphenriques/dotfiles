@@ -56,7 +56,7 @@ in
           PartOf = [ "graphical-session.target" ];
           After = [ "graphical-session.target" ];
         };
-        Install.WantedBy = [ config.wayland.systemd.target ];
+        Install.WantedBy = [ "graphical-session.target" ];
         Service = {
           Type = "simple";
           Environment = [

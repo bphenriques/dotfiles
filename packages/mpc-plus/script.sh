@@ -4,6 +4,14 @@ XDG_CACHE_HOME="${XDG_CACHE_HOME:-"$HOME"/.cache}"
 MPC_PLUS_CACHE_DIR="${MPC_PLUS_CACHE_DIR:-"${XDG_CACHE_HOME}"/mpc-plus}"
 mkdir -p "${MPC_PLUS_CACHE_DIR}"
 
+_notify() { notify-send --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
+
+toggle_random() { case "$(mpc status '%random%')" in off) mpc random on ;; on) mpc random off ;; esac }
+random_status_icon() { case "$(mpc status '%random%')" in off) echo -n "${MPC_PLUS_NO_RANDOM_ICON}" ;; on) echo -n "${MPC_PLUS_RANDOM_ICON}" ;; esac }
+
+toggle_repeat() { case "$(mpc status '%repeat%')" in off) mpc repeat on ;; on) mpc repeat off ;; esac }
+repeat_status_icon() { case "$(mpc status '%repeat%')" in off) echo -n "${MPC_PLUS_NO_REPEAT_ICON}" ;; on) echo -n "${MPC_PLUS_REPEAT_ICON}" ;; esac }
+
 select_title_artist_album() {
   mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
     # Minor safeguard and assumption: the library is organized using the standard (?) Artist/Album/Song. Works for me. Might not work with you.
@@ -15,14 +23,6 @@ select_title_artist_album() {
       printf "%s\t%s\u0000icon\u001f%s\n" "$file" "$file" "$MPC_PLUS_SONG_ICON"
     fi
   done | LC_ALL=C sort --unique | fuzzel --dmenu --with-nth=2 --accept-nth=1
-}
-
-mpc_file() {
-  case "$1" in
-    play)     mpc clear && mpc add "$2" && mpc play ;;
-    next)     mpc insert "$2" && mpc play           ;;
-    add)      mpc add "$2" && mpc play              ;;
-  esac
 }
 
 save_or_compress() {
@@ -51,111 +51,28 @@ get_mpc_artwork_icon() {
   fi
 }
 
-notification_icon() {
-  case "$(mpc status '%state%')" in
-    playing)  get_mpc_artwork_icon                    ;;
-    paused)   get_mpc_artwork_icon                    ;;
-    stopped)  echo -n "${MPC_PLUS_STOPPED_ICON}"      ;;
-  esac
-}
-
-toggle_random() {
-  case "$(mpc status '%random%')" in
-    off)  mpc random on   ;;
-    on)   mpc random off  ;;
-  esac
-}
-
-toggle_repeat() {
-  case "$(mpc status '%repeat%')" in
-    off)  mpc repeat on   ;;
-    on)   mpc repeat off  ;;
-  esac
-}
-
-random_status_icon() {
-  case "$(mpc status '%random%')" in
-    on)   echo -n "${MPC_PLUS_RANDOM_ICON}"      ;;
-    off)  echo -n "${MPC_PLUS_NO_RANDOM_ICON}"   ;;
-  esac
-}
-
-repeat_status_icon() {
-  case "$(mpc status '%repeat%')" in
-    on)   echo -n "${MPC_PLUS_REPEAT_ICON}"      ;;
-    off)  echo -n "${MPC_PLUS_NO_REPEAT_ICON}"   ;;
-  esac
-}
-
-notify_current_status() {
-  title=
-  description=
+handle_event() {
+  local summary msg icon
+  msg="$(mpc -f '[%title%[ by %artist%]]|%file%' current)"
   case "$(mpc status '%state%')" in
     playing)
-      title="Now playing"
-      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
+      summary="Now playing"
+      icon="$(get_mpc_artwork_icon)"
       ;;
     paused)
-      title="Paused"
-      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
+      summary="Paused"
+      icon="$(get_mpc_artwork_icon)"
       ;;
     stopped)
-      title="Nothing playing"
-      description=""
+      summary="Nothing playing"
+      icon="${MPC_PLUS_STOPPED_ICON}"
       ;;
   esac
 
-  notify-send \
-    --expire-time 5000 \
-    --icon "$(notification_icon)" \
-    --category "mpc-current" \
-    --hint string:x-canonical-private-synchronous:mpd-current \
-    --hint string:x-dunst-stack-tag:mpd-current \
-    --transient \
-    "${title}" "${description}"
-}
-
-notify_action() {
-  title="$1"
-  description="$2"
-  icon="$3"
-  notify-send \
-    --expire-time 5000 \
-    --icon "$icon" \
-    --category "mpc-current" \
-    --hint string:x-canonical-private-synchronous:mpd-current \
-    --hint string:x-dunst-stack-tag:mpd-current \
-    --transient \
-    "${title}" "${description}"
-}
-
-notify_mpd_volume() {
-  title=
-  description=
-  case "$(mpc status '%state%')" in
-    playing)
-      title="Now playing"
-      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
-      ;;
-    paused)
-      title="Paused"
-      description="$(mpc -f '%title%[ by %artist%]' | head -1)"
-      ;;
-    stopped)
-      title="Nothing playing"
-      description=""
-      ;;
+  case "$1" in
+    player) _notify -i "${icon}" "$summary" "$msg"                                                ;;
+    mixer)  _notify -i "${icon}" -h "int:value:$(mpc volume | grep -Po '[\d]+')" "$summary" "$msg" ;;
   esac
-
-  notify-send \
-    --expire-time 5000 \
-    --icon "$(notification_icon)" \
-    --category "mpc-current" \
-    --hint string:x-canonical-private-synchronous:mpd-current \
-    --hint string:x-dunst-stack-tag:mpd-current \
-    --hint int:value:"$(mpc volume | grep -Po '[\d]+')" \
-    --transient \
-    "${title}" "${description}"
 }
 
 case "${1:-}" in
@@ -166,20 +83,18 @@ case "${1:-}" in
   volume-increase)  mpc volume "+${2:-5}"                               ;;
   volume-decrease)  mpc volume "-${2:-5}"                               ;;
   play-shuffled)    mpc random on && mpc clear && mpc add / && mpc play ;;
-  clear)            mpc clear && notify_action "Music Queue" "No songs" "${MPC_PLUS_CLEAR_ICON}"                        ;;
-  toggle-random)    toggle_random && notify_action "Shuffle Songs: $(mpc status '%random%')" "" "$(random_status_icon)" ;;
-  toggle-repeat)    toggle_repeat && notify_action "Repeat Song: $(mpc status '%repeat%')" "" "$(repeat_status_icon)"   ;;
-  dmenu-any)
+  clear)            mpc clear && _notify -i "${MPC_PLUS_CLEAR_ICON}" "Music Queue" "No songs"                       ;;
+  toggle-random)    toggle_random && _notify -i "$(random_status_icon)" "Shuffle Songs: $(mpc status '%random%')"   ;;
+  toggle-repeat)    toggle_repeat && _notify -i "$(repeat_status_icon)" "Repeat Song: $(mpc status '%repeat%')"     ;;
+  dmenu-file-exec)
     selection="$(select_title_artist_album)"
     if [ "$selection" != "" ]; then
-      mpc_file "${2:-play}" "$selection"
+      case "${2:-play}" in
+        play)     mpc clear && mpc add "$2" && mpc play ;;
+        next)     mpc insert "$2" && mpc play           ;;
+        add)      mpc add "$2" && mpc play              ;;
+      esac
     fi
     ;;
-  notifications-daemon)
-    mpc idleloop player mixer | while read -r event; do
-      case "$event" in
-        player)   notify_current_status   ;;
-        mixer)    notify_mpd_volume       ;;
-      esac
-    done
+  notifications-daemon) mpc idleloop player mixer | while read -r event; do handle_event "$event"; done  ;;
 esac

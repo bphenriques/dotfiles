@@ -3,7 +3,7 @@
   imports = [
     ./fuzzel.nix            # Application launcher
     ./wlr-which-key.nix     # Which.key as regular overlays
-    ./mako.nix              # Notifications
+    ./dunst.nix             # Notifications
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
