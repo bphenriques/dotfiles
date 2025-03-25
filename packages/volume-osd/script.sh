@@ -2,8 +2,8 @@
 
 # Pulseaudio that has no equivalente in wireplumber (yet). Using its cli but not necessarily the service
 # This require actually filtering as it captures more than I wanted
-list_sinks()      { pactl -f json list sinks; }
 list_sources()    { pactl -f json list sources | jq -cr '[ .[] | select((.ports | any((.type == "Mic") or (.type == "Headset")))) ]'; }
+list_sinks()      { pactl -f json list sinks; }
 get_sink()        { pactl -f json list sinks | jq -cr --arg sink "$1" '.[] | select(.name == $sink)'; }
 get_source()      { pactl -f json list sources | jq -cr --arg source "$1" '.[] | select(.name == $source)'; }
 is_sink_muted()   { pactl get-sink-mute "$1" | grep -q "Mute: yes"; }
@@ -89,11 +89,9 @@ notify_current_sink() {
   fi
 
   notify-send \
-    --expire-time 2000 \
     --icon "$icon" \
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
-    --hint string:x-dunst-stack-tag:volume \
     --hint int:value:"$progress" \
     --transient \
     "$(friendly_sink_name "$(pactl get-default-sink)")"
@@ -111,11 +109,9 @@ notify_current_source() {
   fi
 
   notify-send \
-    --expire-time 2000 \
     --icon "$icon" \
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
-    --hint string:x-dunst-stack-tag:volume \
     --hint int:value:"$progress" \
     --transient \
     "$(friendly_source_name "$(pactl get-default-source)")"
@@ -124,11 +120,9 @@ notify_current_source() {
 notify_failure() {
   notify-send \
     --urgency=critical \
-    --expire-time 3000 \
     --icon "$OSD_VOLUME_ERROR_ICON" \
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
-    --hint string:x-dunst-stack-tag:volume \
     --transient \
     "${1:-'Failure while running volume-osd'}" "${2:-}"
 }

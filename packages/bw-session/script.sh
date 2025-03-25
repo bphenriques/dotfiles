@@ -1,6 +1,5 @@
 #shellcheck shell=bash
 
-# Adapted from https://gist.github.com/seanh/d3d1a6dfa4b7d5d9f135984ae913cf0f
 set -e
 
 usage() {
@@ -9,6 +8,7 @@ usage() {
   echo 'fish: set -x BW_SESSION (bw-session session <EMAIL>)'
 }
 
+# FIXME
 create_sops_secret() {
   bw get template item \
     | jq --arg NAME "sops-age-key-system-$1-system" --arg FIELD "$(bw get template item.field | jq '.name')" '.name=$NAME' \
@@ -21,6 +21,7 @@ create_sops_secret() {
   bw get template item | yq '.name = env(SECRET_NAME) | .fields = '
 }
 
+# Adapted from https://gist.github.com/seanh/d3d1a6dfa4b7d5d9f135984ae913cf0f
 create_session() {
   test -z "$1" && echo "EMAIL not provided" && exit 1
 

@@ -15,15 +15,17 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.services.mpc-plus" pkgs lib.platforms.linux) ];
     systemd.user.services.mpc-plus = {
+      Install.WantedBy = [ "graphical-session.target" ];
       Unit = {
         Description = "mpc-plus notifications daemon";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session.target" ];
+        After = [ "mpd.service" ];
+        PartOf = [ "mpd.service" ];
       };
       Service = {
         Type = "simple";
-        ExecStart = ''${lib.getExe cfg.package} notifications-daemon'';
         Restart = "on-failure";
+        RestartSec = "5s";
+        ExecStart = ''${lib.getExe cfg.package} notifications-daemon'';
       };
     };
   };

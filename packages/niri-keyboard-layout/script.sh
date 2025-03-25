@@ -7,11 +7,9 @@ notify_current() {
   esac
 
   notify-send \
-    --expire-time 3000 \
     --icon "$KEYBOARD_ICON" \
     --category "keyboard-input" \
     --hint string:x-canonical-private-synchronous:keyboard-input \
-    --hint string:x-dunst-stack-tag:keyboard-input \
     --transient \
     "Keyboard Layout: $text"
 }

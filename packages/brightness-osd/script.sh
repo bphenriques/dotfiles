@@ -1,7 +1,6 @@
 #shellcheck shell=bash
 
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
-list_backlight_devices() { brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }'; }
 get_percentage() { brightnessctl --device="${2:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
 set_brightness() { brightnessctl --device="${2:-"$(default_device)"}" set "$1" ; }
 
@@ -23,14 +22,12 @@ notify() {
   fi
 
   notify-send \
-    --expire-time 3000 \
     --icon "$icon" \
     --category "brightness-osd" \
     --hint string:x-canonical-private-synchronous:brightness \
-    --hint string:x-dunst-stack-tag:brightness \
     --hint int:value:"$progress" \
     --transient \
-    "Brightness: $progress%"
+    "Brightness"
 }
 
 case "${1:-}" in
@@ -46,5 +43,5 @@ case "${1:-}" in
     set_brightness "${1:-5}-%" "$device"
     notify "$(get_percentage "$device")"
     ;;
-  list) list_backlight_devices ;;
+  list) brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }' ;;
 esac

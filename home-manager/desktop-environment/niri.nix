@@ -9,6 +9,7 @@ let
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
   files-browser   = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
   system-monitor  = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
+  dunstctl        = lib.getExe' pkgs.dunst "dunstctl";
 
   emoji = pkgs.writeShellApplication {
     name = "emoji-picker";
@@ -96,6 +97,7 @@ in
         "^(download)"
         "^(error)"
         "^(notification)"
+        "^(Extension)"
       ];
 
       pip = lib.map (title: ''title="${title}"'') [
@@ -137,6 +139,11 @@ in
       "Shift+Print" = ''screenshot'';
       "Mod+Print"   = ''spawn ${toNiriSpawn config.custom.programs.screenshot.exec.menu}'';
       "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
+
+      # Notifications (TODO: history)
+      "Mod+N"        = ''spawn "${dunstctl}" "action"'';
+      "Mod+Shift+N"  = ''spawn "${dunstctl}" "context"'';
+      "Mod+Ctrl+N"   = ''spawn "${dunstctl}" "close"'';
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
