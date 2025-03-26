@@ -9,6 +9,7 @@ lib.mkIf pkgs.stdenv.isDarwin {
     settings = let
       common = {
         copy-on-select = "clipboard";
+        command = lib.getExe config.programs.fish.package;
       };
 
       linux = lib.optionalAttrs pkgs.stdenv.isLinux {
@@ -25,7 +26,7 @@ lib.mkIf pkgs.stdenv.isDarwin {
     in lib.mergeAttrsList [ common linux darwin ];
   };
 
-  xdg.mimeApps.defaultApplications = {
+  xdg.mimeApps.defaultApplications = lib.mkIf pkgs.stdenv.isLinux {
     "x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
     "x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
   };

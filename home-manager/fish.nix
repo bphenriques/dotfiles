@@ -18,7 +18,6 @@ in
         ''bind alt-/ frg-widget''                                     # Find text
         ''bind alt-. ffd-widget''                                     # Find file (cd or $EDITOR)
         ''bind alt-space ${config.programs.yazi.shellWrapperName}''   # Browse files
-        ''bind alt-p p-widget''                                       # Open project
       ];
     };
 
