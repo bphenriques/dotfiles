@@ -17,6 +17,7 @@
     ./heroic.nix          # Unified game client
     ./umu-launcher.nix    # Ad-hoc game launcher
     ./mpd.nix             # Music player
+    ./wallpaper.nix       # Set wallpaper
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
