@@ -1,4 +1,4 @@
-# shellcheck shell=sh
+# shellcheck shell=bash
 
 PROJ_ROOT="${PROJ_ROOT:-XDG_DOCUMENTS_DIR}"
 
@@ -18,40 +18,8 @@ __proj_select() {
   target="${1-}"
   # shellcheck disable=SC2016
   fd --base-directory "$PROJ_ROOT" --type directory --max-depth 1 --exec basename \
-      | fzf --prompt "Switch to project: " --exit-0 --select-1 --no-multi --query="$target" --layout=reverse --preview='preview "$PROJ_ROOT"/{}' \
-      | while read -r project; do printf %s/%s "$PROJ_ROOT" "$project"; done
-}
-
-# shellcheck disable=SC2016
-__proj_fish_shell() {
-  echo '
-function p-widget
-  set --local buffer (commandline --current-buffer)
-  set --local target (project --select $buffer)
-
-  # Ensure prompt does not get broken if I cancel
-  builtin commandline --function cancel-commandline repaint
-
-  not test -z $target
-  and test -d $target
-  and cd $target
-end
-
-function p
-  if test (count $argv) -eq 0
-    cd $PROJ_ROOT
-  else
-    set --local target (project --select $argv[1])
-
-    # Ensure prompt does not get broken if I cancel
-    builtin commandline --function cancel-commandline repaint
-
-    not test -z $target
-    and test -d $target
-    and cd $target
-  end
-end
-'
+    | fzf --prompt "Switch to project: " --exit-0 --select-1 --no-multi --query="$target" --layout=reverse --preview='preview "$PROJ_ROOT"/{}' \
+    | xargs -I{} printf %s/%s "$PROJ_ROOT" {}
 }
 
 if [ ! -d "${PROJ_ROOT}" ]; then
@@ -77,12 +45,5 @@ case "${1:-}" in
       printf "Error: no match found for %s" "${search}"
       exit 2
     fi
-    ;;
-  --init-shell)
-    shift 1
-    case "${1:-}" in
-      fish) __proj_fish_shell                     ;;
-      *)    echo "Unsupported shell: $1"; exit 1  ;;
-    esac
     ;;
 esac

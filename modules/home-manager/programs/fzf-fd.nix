@@ -13,16 +13,23 @@ in {
     };
 
     enableFishIntegration = lib.mkOption {
-      default = true;
       type = lib.types.bool;
       description = "Whether to enable Fish integration.";
+      default = true;
+    };
+
+    fishKeybinding = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      description = "Keybinding to access widget";
+      default = "alt-/";
     };
   };
 
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
-    programs.fish.interactiveShellInit = lib.mkIf cfg.enableFishIntegration ''
-      ${lib.getExe cfg.package} --init-shell fish | source
-    '';
+    programs.fish = lib.mkIf cfg.enableFishIntegration {
+      plugins = [ { name = "fzf-fd"; src = "${cfg.package.src}/fish-plugin"; } ];
+      functions.fish_user_key_bindings = lib.mkIf (cfg.fishKeybinding != null) ''bind ${cfg.fishKeybinding} __ffd-widget'';
+    };
   };
 }

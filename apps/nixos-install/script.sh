@@ -11,10 +11,12 @@ info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
 
+bitwarden_key() { echo -n "^${1}-system$"; }
+
 import_age_system_private_key() {
   host="$1"
   target="$2"
-  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}-system$" > /dev/null; then
+  if yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "$(bitwarden_key "${host}")" > /dev/null; then
     info "'${host}' contains system wide private keys. Getting private keys from Bitwarden"
     bw unlock --check > /dev/null || fatal "Vault must be unlocked"
 
@@ -22,6 +24,8 @@ import_age_system_private_key() {
     bw get item "sops-age-key-${host}-system" \
       | jq --raw-output '.fields[] | select(.name=="private") | .value' \
       > "${target}"
+  else
+    fail "No Bitwarden key found: $(bitwarden_key "${host}")"
   fi
 }
 

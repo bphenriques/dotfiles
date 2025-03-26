@@ -8,7 +8,6 @@
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ];
-    shell = pkgs.fish;
   };
 
   home-manager.users.bphenriques = import ./home.nix;
