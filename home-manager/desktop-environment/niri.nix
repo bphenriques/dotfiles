@@ -7,7 +7,7 @@ let
   terminal        = lib.getExe' pkgs.foot "footclient";
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
-  files-browser   = "${terminal} --title=yazi-tui ${lib.getExe pkgs.yazi}";
+  files-browser   = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
   system-monitor  = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
   dunstctl        = lib.getExe' pkgs.dunst "dunstctl";
 

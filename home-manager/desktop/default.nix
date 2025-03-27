@@ -21,12 +21,7 @@
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    # Internet
-    pkgs.qbittorrent   # Torrent client
-    pkgs.filezilla     # Access files remotely
-
-    # Temporary
-    pkgs.jetbrains.idea-community
+    pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
  ];
 
   custom.services.xwayland-satellite.enable = pkgs.stdenv.isLinux;
