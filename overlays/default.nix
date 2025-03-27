@@ -1,5 +1,5 @@
 { inputs, ... }: {
-  waiting-next-release = (final: prev: {
+  git-versions = (final: prev: {
     # Remove on next release when it supports "--with-nth"
     fuzzel-git = prev.fuzzel.overrideAttrs (_: {
       version = "git";
@@ -11,5 +11,7 @@
         hash = "sha256-4AJW8lTJuN6MPvFlFzmM1DMsx72WSi93FUYiVPv/rwU=";
       };
     });
+
+    helix-git = inputs.helix.packages.${prev.system}.helix;
   });
 }

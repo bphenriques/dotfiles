@@ -3,6 +3,8 @@
   stylix.targets.helix.enable = true;
   programs.helix = {
     enable = true;
+    defaultEditor = true;
+    package = pkgs.helix-git;
 
     # Language Server Protocols. Check with hx --health
     extraPackages = [
@@ -25,6 +27,18 @@
         { name = "rust";    auto-format = false; }
         { name = "scala";   auto-format = false; }
         { name = "markdown"; language-servers = [ "marksman" "ltex-ls" ]; }
+        {
+          name = "nix";
+          auto-pairs = {
+            "=" = ";";
+            "(" = ")";
+            "{" = "}";
+            "[" = "]";
+            "'" = "'";
+            "\"" = "\"";
+            "`" = "`";
+          };
+        }
       ];
 
       language-server = {
@@ -80,15 +94,18 @@
 
       keys = {
         normal = {
-          C-s = ":w";
+          C-s = ":write";
           esc = [ "collapse_selection" "keep_primary_selection" ];
+          S-left = "jump_backward";
+          S-right = "jump_forward";
+          # tab = "collapse_selection";
 
           space = {
             q = ":write-quit-all";
             Q = ":quit!";
             space = "file_picker";
             w = ":write";
-          };
+         };
 
           # Smart Indent
           tab = "move_parent_node_end";
@@ -109,6 +126,5 @@
     };
   };
 
-  home.sessionVariables.EDITOR  = lib.getExe pkgs.helix;
   custom.xdgDefaultApps.text = lib.mkBefore [ "Helix.desktop" ];
 }

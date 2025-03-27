@@ -5,11 +5,11 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
-    ];
+   ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
-    ];
+   ];
   };
 
   inputs = {
@@ -33,6 +33,9 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    # For the impatient
+    helix.url = "github:NikitaRevenco/helix/patchy";
   };
 
   outputs = inputs @ { self, nixpkgs, ... }:
