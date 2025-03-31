@@ -1,4 +1,4 @@
-{ config, lib, programs, pkgs, self, osConfig, ... }:
+{ config, lib, pkgs, self, ... }:
 let
   inherit (config.custom.programs) swappy;
 
@@ -110,7 +110,6 @@ in
         "nmtui-tui"
         "btop-tui"
         "yazi-tui"
-        "rmpc-tui"
       ];
     };
 
@@ -140,7 +139,7 @@ in
       "Mod+Print"   = ''spawn ${toNiriSpawn config.custom.programs.screenshot.exec.menu}'';
       "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
 
-      # Notifications (TODO: history)
+      # Notifications
       "Mod+N"        = ''spawn "${dunstctl}" "action"'';
       "Mod+Shift+N"  = ''spawn "${dunstctl}" "context"'';
       "Mod+Ctrl+N"   = ''spawn "${dunstctl}" "close"'';
@@ -213,8 +212,8 @@ in
       }
 
       window-rule {
-         match app-id=r#"^Bitwarden$"#
-         block-out-from "screen-capture"
+        match app-id=r#"^Bitwarden$"#
+        block-out-from "screen-capture"
       }
 
       cursor {

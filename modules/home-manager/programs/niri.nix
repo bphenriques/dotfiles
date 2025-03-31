@@ -1,9 +1,6 @@
 { lib, pkgs, config, ... }:
 # My biased module to manage Niri. There are other options out there but this one I prefer (avoids dependencies).
 let
-  inherit (builtins) listToAttrs replaceStrings;
-  inherit (lib) map nameValuePair;
-
   cfg = config.custom.programs.niri;
 
   displayOutputOpt = lib.types.submodule {
