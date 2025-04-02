@@ -41,10 +41,10 @@ in
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
   
-  systemd.tmpfiles.rules = [
-    "z /mnt/games             0775 root                        ${groups.users.name}"
-    "z /mnt/bphenriques       0700 ${users.bphenriques.name}   ${groups.users.name}"
-  ];
+  # systemd.tmpfiles.rules = [
+  #  "z /mnt/games             0775 root                        ${groups.users.name}"
+  #  "z /mnt/bphenriques       0700 ${users.bphenriques.name}   ${groups.users.name}"
+  # ];
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }
