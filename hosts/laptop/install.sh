@@ -22,13 +22,11 @@ bw-session get-item-field "sops-age-key-laptop-system" "private" > "/tmp/system-
 
 echo "Running Disko..."
 sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
-  --flake ".#laptop" \
+  --flake "github:bphenriques/dotfiles/wayland-move-btrfs#laptop" \
   --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
   --extra-files /tmp/system-keys.txt "/var/lib/sops-nix/system-keys.txt"
 
-# github:bphenriques/dotfiles/wayland-move-btrfs
-
-#sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
+# sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
 #  --flake '/tmp/config/etc/nixos#mymachine' \
 #  --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
 #  --write-efi-boot-entries
