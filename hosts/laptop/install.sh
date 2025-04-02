@@ -8,7 +8,7 @@ export BW_SESSION
 
 # Authentication - I have private flakes, therefore need to set the Github token
 echo "Fetching Github credentials..."
-export GITBUB_TOKEN="$(nix run .#bw-session -- get-item-field "Github Token" "token")"
+export GITBUB_TOKEN="$(#bw-session -- get-item-field "Github Token" "token")"
 export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
 
 # Has to match disko settings
