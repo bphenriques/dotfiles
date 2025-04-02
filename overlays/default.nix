@@ -12,6 +12,6 @@
       };
     });
 
-    helix-git = inputs.helix.packages.${prev.system}.helix;
+    # helix-git = inputs.helix.packages.${prev.system}.helix;
   });
 }
