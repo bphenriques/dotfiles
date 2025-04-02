@@ -1,7 +1,7 @@
 # Run:
 # Run NixOS installer
 # Install flakes in the system
-# generate key with sudo ssh-key-gen -t ed25519 -C "email" and copy the public key to Github
+# generate key with sudo ssh-keygen -t ed25519 -C "email"
 # nix --experimental-features 'nix-command flakes' profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
 # nix --experimental-features 'nix-command flakes' profile install nixpkgs#jq
 # nix --experimental-features 'nix-command flakes' profile install github:nix-community/disko#disko
