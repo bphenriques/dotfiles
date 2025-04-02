@@ -19,7 +19,7 @@ let
     { id = "session-shutdown";  symbol = ""; label = "Shutdown";             exec = cfg.exec.shutdown; }
     { id = "session-reboot";    symbol = ""; label = "Reboot";               exec = cfg.exec.reboot; }
     { id = "session-efi";       symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
-  ] ++ lib.optionals (osConfig.custom.boot.grub.windows.efiDevice != "") [
+  ] ++ lib.optionals (osConfig.custom.boot.grub.enable && osConfig.custom.boot.grub.windows.efiDevice != "") [
     { id = "session-windows";   symbol = ""; label = "Reboot to Windows";    exec = cfg.exec.reboot-windows; }
   ];
 
