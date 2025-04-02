@@ -70,10 +70,6 @@ _:
                       mountpoint = "/home/bphenriques";
                       mountOptions = [ "compress=zstd" "noatime" ];
                     };
-                    "@home/bphenriques" = {
-                      mountpoint = "/home/bphenriques";
-                      mountOptions = [ "compress=zstd" "noatime" ];
-                    };
                     "@home/bphenriques/workdir" = {
                       mountpoint = "/home/bphenriques/workdir";
                       mountOptions = [ "compress=zstd" "noatime" ];
