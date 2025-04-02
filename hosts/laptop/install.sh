@@ -3,6 +3,7 @@
 # Install flakes in the system
 # nix profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
 # nix profile install nixpkgs#jq
+# Copy SSH key from /etc/ssh/ssh_gost? bla vbla bla -. does not work anyway
 
 set -e
 
