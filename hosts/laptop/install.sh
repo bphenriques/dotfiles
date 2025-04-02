@@ -2,9 +2,9 @@
 # Run NixOS installer
 # Install flakes in the system
 # generate key with sudo ssh-key-gen -t ed25519 -C "email" and copy the public key to Github
-# nix profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
-# nix profile install nixpkgs#jq
-# nix profile install github:nix-community/disko#disko
+# nix --experimental-features 'nix-command flakes' profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
+# nix --experimental-features 'nix-command flakes' profile install nixpkgs#jq
+# nix --experimental-features 'nix-command flakes' profile install github:nix-community/disko#disko
 # sudo disko --mode destroy,format,mount --flake github:bphenriques/dotfiles/wayland-move-btrfs#laptop
 # sudo nixos-install --no-channel-copy --no-root-password --flake github:bphenriques/dotfiles/wayland-move-btrfs#laptop
 
@@ -28,7 +28,7 @@ echo "Fetching Sops private keys..."
 bw-session get-item-field "sops-age-key-laptop-system" "private" > "/tmp/system-keys.txt"
 
 echo "Running Disko..."
-sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
+sudo nix --experimental-features 'nix-command flakes' run 'github:nix-community/disko/latest#disko-install' -- \
   --flake "github:bphenriques/dotfiles/wayland-move-btrfs#laptop" \
   --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
   --extra-files /tmp/system-keys.txt "/var/lib/sops-nix/system-keys.txt"
