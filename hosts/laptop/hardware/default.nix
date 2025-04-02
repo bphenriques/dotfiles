@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
@@ -10,10 +10,7 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  # RAM
-  zramSwap.enable = true; # Run zramctl to check how good memory is compressed
-
-  # Battery
+   # Battery
   services.upower = {
     enable = true;
     percentageLow = 30;
