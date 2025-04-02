@@ -1,5 +1,8 @@
 # Run:
+# Run NixOS installer
+# Install flakes in the system
 # nix profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
+# nix profile install nixpkgs#jq
 
 set -e
 
@@ -8,13 +11,13 @@ export BW_SESSION
 
 # Authentication - I have private flakes, therefore need to set the Github token
 echo "Fetching Github credentials..."
-export GITBUB_TOKEN="$(#bw-session -- get-item-field "Github Token" "token")"
+export GITBUB_TOKEN="$(bw-session -- get-item-field "Github Token" "token")"
 export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
 
 # Has to match disko settings
 echo "Fetching Luks keys..."
-nix run .#bw-session -- get-item-field "system-nixos-laptop" luks-main    > "/tmp/luks-main.key"
-nix run .#bw-session -- get-item-field "system-nixos-laptop" luks-backup  > "/tmp/luks-backup.key"
+bw-session -- get-item-field "system-nixos-laptop" luks-main    > "/tmp/luks-main.key"
+bw-session -- get-item-field "system-nixos-laptop" luks-backup  > "/tmp/luks-backup.key"
 
 # The key has to match the public key under .sops.yaml
 echo "Fetching Sops private keys..."
