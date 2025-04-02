@@ -11,13 +11,13 @@ export BW_SESSION
 
 # Authentication - I have private flakes, therefore need to set the Github token
 echo "Fetching Github credentials..."
-export GITBUB_TOKEN="$(bw-session -- get-item-field "Github Token" "token")"
+export GITBUB_TOKEN="$(bw-session get-item-field "Github Token" "token")"
 export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
 
 # Has to match disko settings
 echo "Fetching Luks keys..."
-bw-session -- get-item-field "system-nixos-laptop" luks-main    > "/tmp/luks-main.key"
-bw-session -- get-item-field "system-nixos-laptop" luks-backup  > "/tmp/luks-backup.key"
+bw-session get-item-field "system-nixos-laptop" luks-main    > "/tmp/luks-main.key"
+bw-session get-item-field "system-nixos-laptop" luks-backup  > "/tmp/luks-backup.key"
 
 # The key has to match the public key under .sops.yaml
 echo "Fetching Sops private keys..."
@@ -33,4 +33,6 @@ sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
 #  --flake '/tmp/config/etc/nixos#mymachine' \
 #  --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
 #  --write-efi-boot-entries
+
+# TODO: delete dangling files afterwards
 
