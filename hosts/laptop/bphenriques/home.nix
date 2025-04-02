@@ -30,6 +30,7 @@ in
     # Tidy up most things under $HOME
     "L ${config.home.homeDirectory}/nas-private               - - - - /mnt/nas-bphenriques"
     "L ${config.home.homeDirectory}/nas-media                 - - - - /mnt/nas-media"
+    # TODO: Likely not needed
     # "L ${config.home.homeDirectory}/games                     - - - - /mnt/games"
     # "L ${config.xdg.userDirs.documents}                       - - - - /mnt/bphenriques"
     "L ${config.xdg.userDirs.pictures}                        - - - - /mnt/nas-bphenriques/photos"
