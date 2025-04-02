@@ -35,7 +35,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     # For the impatient
-    helix.url = "github:NikitaRevenco/helix/patchy";
+    # helix.url = "github:NikitaRevenco/helix/patchy";
   };
 
   outputs = inputs @ { self, nixpkgs, ... }:
