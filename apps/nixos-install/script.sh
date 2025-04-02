@@ -43,6 +43,7 @@ remote_install() {
   host="$1"
   bw_email="$2"
   ssh_host="$3"
+  shift 3
 
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
@@ -51,52 +52,12 @@ remote_install() {
   extra_files="$(mktemp -d)"
   fetch_age_system_private_key "$host" > "${extra_files}/${SOPS_AGE_SYSTEM_FILE}"
 
-  nix run github:nix-community/nixos-anywhere -- --extra-files "$extra_files" --flake ".#${host}" "${ssh_host}"
+  nix run github:nix-community/nixos-anywhere -- \
+    --extra-files "$extra_files" \
+    --flake ".#${host}" \
+    "$@" \
+    "${ssh_host}"
 }
-
-disko_install() {
-  host="$1"
-  bw_email="$2"
-  disk_name="$3"
-  disk_device="$4"
-
-  check_bitwarden_unlocked
-
-  # Pre-setup files
-  info "$host - looking for luks encryption keys"
-  pre_files="$(mktemp -d)"
-  export_luke_keys "${host}" "${pre_files}"
-
-  # Post setup files
-  info "$host - looking for sops public keys under .sops.yaml"
-  post_files="$(mktemp -d)"
-  export_sops_private_key "${host}" "${post_files}"
-
-  # Authentication - I have private flakes, therefore need to set the Github token
-  export GITBUB_TOKEN="$(nix run .#bw-session -- get-item-field "Github Token" "token")"
-  export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
-
-  --option NAME VALUE
-
-  # sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
-  #   --flake "${FLAKE_URL}#${host}" \
-  #   --disk "${disk_name}" "${disk_device}"
-  #   --extra-files
-}
-
-
-                settings = {
-                  allowDiscards = true;
-                  keyFile = "/tmp/secret.key";  # # Plain password
-                };
-                additionalKeyFiles = [ "/tmp/secret-additional.key" ];  # Stronger password
-
-
-
-if [ "$1" = "--help" ]; then
-  usage
-  exit 1
-fi
 
 case "$1" in
   --help) usage && exit 0         ;;
