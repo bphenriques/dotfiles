@@ -1,9 +1,12 @@
 # Run:
 # Run NixOS installer
 # Install flakes in the system
+# generate key with sudo ssh-key-gen -t ed25519 -C "email" and copy the public key to Github
 # nix profile install github:bphenriques/dotfiles/wayland-move-btrfs#bw-session
 # nix profile install nixpkgs#jq
-# Copy SSH key from /etc/ssh/ssh_gost? bla vbla bla -. does not work anyway
+# nix profile install github:nix-community/disko#disko
+# sudo disko --mode destroy,format,mount --flake github:bphenriques/dotfiles/wayland-move-btrfs#laptop
+# sudo nixos-install --no-channel-copy --no-root-password --flake github:bphenriques/dotfiles/wayland-move-btrfs#laptop
 
 set -e
 
@@ -11,9 +14,9 @@ BW_SESSION="$(bw-session session "$1")"
 export BW_SESSION
 
 # Authentication - I have private flakes, therefore need to set the Github token
-echo "Fetching Github credentials..."
-export GITHUB_TOKEN="$(bw-session get-item-field "Github Token" "token")"
-export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
+# echo "Fetching Github credentials..."
+# export GITHUB_TOKEN="$(bw-session get-item-field "Github Token" "token")"
+# export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
 
 # Has to match disko settings
 echo "Fetching Luks keys..."
@@ -25,10 +28,10 @@ echo "Fetching Sops private keys..."
 bw-session get-item-field "sops-age-key-laptop-system" "private" > "/tmp/system-keys.txt"
 
 echo "Running Disko..."
-sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
-  --flake "github:bphenriques/dotfiles/wayland-move-btrfs#laptop" \
-  --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
-  --extra-files /tmp/system-keys.txt "/var/lib/sops-nix/system-keys.txt"
+#sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
+#  --flake "github:bphenriques/dotfiles/wayland-move-btrfs#laptop" \
+#  --disk vda /dev/disk/by-path/pci-0000:05:00.0-nvme-1 \
+#  --extra-files /tmp/system-keys.txt "/var/lib/sops-nix/system-keys.txt"
 
 # sudo nix run 'github:nix-community/disko/latest#disko-install' -- \
 #  --flake '/tmp/config/etc/nixos#mymachine' \
