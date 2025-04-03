@@ -57,7 +57,7 @@ Feel free to take a look around and ask me anything!
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 #### Install locally
@@ -68,14 +68,14 @@ Feel free to take a look around and ask me anything!
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#nixos-install" -- local "$HOST" "$BITWARDEN_EMAIL"   
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#nixos-install" -- local "$HOST" "$BITWARDEN_EMAIL"   
     ```
 
 3. Once installed and booted onto the NixOS installation run:
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 ### Darwin
