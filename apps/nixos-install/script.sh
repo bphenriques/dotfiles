@@ -17,7 +17,7 @@ fetch_github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | 
 unlock_bitwarden() {
   BW_SESSION="$(bw-session session "$1")"
   export BW_SESSION
-  bw unlock --check > /dev/null || fatal "Vault must be unlocked"
+  bw-session check > /dev/null || fatal "Vault must be unlocked"
 }
 
 # shellcheck disable=SC2030,SC2031
