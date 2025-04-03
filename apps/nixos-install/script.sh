@@ -15,7 +15,7 @@ bw_contains_sops_key() { bw-session get-item "system-nixos-$1" | jq -erc '.field
 fetch_github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | jq -re '.sshKey.privateKey'; }
 
 unlock_bitwarden() {
-  BW_SESSION="$(bw-session session "${bw_email}")"
+  BW_SESSION="$(bw-session session "$1")"
   export BW_SESSION
   bw unlock --check > /dev/null || fatal "Vault must be unlocked"
 }
