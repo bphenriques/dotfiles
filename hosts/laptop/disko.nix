@@ -67,18 +67,8 @@ _:
                       mountOptions = [ "compress=zstd" "noatime" ];
                     };
                     "@home/bphenriques" = { };
-                      #mountpoint = "/home/bphenriques";
-                    #  mountOptions = [ "compress=zstd" "noatime" ];
-                    #};
                     "@home/bphenriques/workdir" = { };
-                    #  #mountpoint = "/home/bphenriques/workdir";
-                    #  mountOptions = [ "compress=zstd" "noatime" ];
-                    #};
                     "@home/bphenriques/games" = { };
-                    "@home/bphenriques/.cache" = { };
-                      #mountpoint = "/home/bphenriques/games";
-                    #  mountOptions = [ "compress=zstd" "noatime" ];
-                    #};
                   };
                 };
               };
