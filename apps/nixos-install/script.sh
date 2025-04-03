@@ -90,7 +90,7 @@ local_install() {
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
   echo "Installing NixOS"
-  sudo nixos-install --experimental-features 'nix-command flakes' --no-channel-copy --no-root-password --flake "${FLAKE_URL}"
+  sudo nixos-install --no-channel-copy --no-root-password --flake "${FLAKE_URL}"
 
   echo "Post Install - Copying files"
   sudo chown -R root:root "${post_install_files}/*"
