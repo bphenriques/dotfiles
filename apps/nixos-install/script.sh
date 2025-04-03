@@ -99,7 +99,7 @@ local_install() {
 
   echo "Post Install - Removing sensitive files"
   sudo rm -rf /tmp/*.key
-  sudo rm -rf "${post_install_fxiles}"
+  sudo rm -rf "${post_install_files}"
 }
 
 case "$1" in
