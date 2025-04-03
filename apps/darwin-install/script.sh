@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#shellcheck shell=bash
 
 info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
 success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
