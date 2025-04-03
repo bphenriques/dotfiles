@@ -68,7 +68,9 @@ local_install() {
 
   echo "Fetching SSH deploy key due to private Github flakes..."
   sudo mkdir -p /root/.ssh
-  fetch_github_ssh_key | sudo tee /root/.ssh/id_ed25519 >/dev/null
+  fetch_github_ssh_key | sudo tee /tmp/github-deploy-ssh >/dev/null
+  sudo chmod 700 /tmp/github-deploy-ssh
+  sudo cp /tmp/github-deploy-ssh /root/.ssh/id_ed25519
   sudo ssh-keygen -f /root/.ssh/id_ed25519 -y | sudo tee /root/.ssh/id_ed25519.pub >/dev/null
   sudo chmod -R 700 /root/.ssh
 
@@ -97,7 +99,7 @@ local_install() {
   sudo cp "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}" "/mnt/${SOPS_AGE_SYSTEM_FILE}"
   sudo chown -R root:root "${post_install_files}"
 
-  echo "Post Install - Removing sensitive files"
+  echo "Post Install - Removing sensitive including post files (${post_install_files})"
   sudo rm -rf /tmp/*.key
   sudo rm -rf "${post_install_files}"
 }
