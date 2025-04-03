@@ -97,6 +97,6 @@ local_install() {
 }
 
 case "$1" in
-  remote) remote_install "$@"     ;;
-  local)  local_install "$@"      ;;
+  remote) shift 1 && remote_install "$@"     ;;
+  local)  shift 1 && local_install "$@"      ;;
 esac
