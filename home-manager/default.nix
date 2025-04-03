@@ -74,7 +74,10 @@
   ];
 
   # Gpg
-  programs.gpg.enable = pkgs.stdenv.isLinux;
+  programs.gpg = {
+    enable = pkgs.stdenv.isLinux;
+    homedir = "${config.xdg.dataHome}/gnupg";
+  };
   services.gpg-agent = {
     enable = pkgs.stdenv.isLinux;
     pinentryPackage = pkgs.pinentry-gnome3;

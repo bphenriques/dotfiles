@@ -30,8 +30,8 @@ _:
                 settings = {
                   allowDiscards = true;
                 };
-                passwordFile = "/tmp/luks-main.key";  # Plain password
-                additionalKeyFiles = [ "/tmp/luks-backup.key" ];  # Stronger password if present
+                passwordFile = "/tmp/luks-interactive-password.key";
+                additionalKeyFiles = [ "/tmp/luks-backup.key" ];
                 content = {
                   type = "btrfs";
                   extraArgs = [ "-L" "nixos" "-f" ]; # override existing partitions

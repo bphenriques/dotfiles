@@ -67,12 +67,11 @@ local_install() {
   unlock_bitwarden "${bw_email}"
 
   echo "Fetching SSH deploy key due to private Github flakes..."
-  sudo mkdir -p /root/.ssh
+  sudo mkdir -m 700 -p /root/.ssh
   fetch_github_ssh_key | sudo tee /tmp/github-deploy-ssh >/dev/null
   sudo chmod 700 /tmp/github-deploy-ssh
   sudo cp /tmp/github-deploy-ssh /root/.ssh/id_ed25519
   sudo ssh-keygen -f /root/.ssh/id_ed25519 -y | sudo tee /root/.ssh/id_ed25519.pub >/dev/null
-  sudo chmod -R 700 /root/.ssh
 
   # Pre-setup files
   fetch_bw_luks_fields "$host" | while read -r field; do
@@ -91,15 +90,15 @@ local_install() {
   echo "Formatting disks"
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
-  echo "Installing NixOS"
-  sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
-
-  echo "Post Install - Copying files"
+  echo "Post Format - Copying files"
   sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
   sudo cp "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}" "/mnt/${SOPS_AGE_SYSTEM_FILE}"
   sudo chown -R root:root "${post_install_files}"
 
-  echo "Post Install - Removing sensitive including post files (${post_install_files})"
+  echo "Installing NixOS"
+  sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
+
+  echo "Cleanup - Removing sensitive files (${post_install_files})"
   sudo rm -rf /tmp/*.key
   sudo rm -rf "${post_install_files}"
 }
