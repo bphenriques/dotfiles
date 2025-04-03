@@ -72,7 +72,7 @@ local_install() {
   sudo chmod +R 700 /root/.ssh
 
   # Pre-setup files
-  fetch_bw_luks_fields | while read -r field; do
+  fetch_bw_luks_fields "$host" | while read -r field; do
     echo "Fetching luks encryption key: $field"
     bw-session get-item-field "system-nixos-${host}" "$field" > "/tmp/${field}.key"
   done
