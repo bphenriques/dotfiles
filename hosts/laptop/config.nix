@@ -40,10 +40,11 @@ in
   users.mutableUsers = false;
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
-  # These paths are created automatically when partitioning, therefore I have to set the right owner
+  # Created by btrfs when formatting. Need to set the permissions manually
   systemd.tmpfiles.rules = [
     "z /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
     "z /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "z /home/${users.bphenriques.name}/.cache   0700 ${users.bphenriques.name}   ${groups.users.name}"
   ];
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
