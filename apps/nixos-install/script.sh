@@ -67,8 +67,8 @@ local_install() {
 
   echo "Fetching SSH deploy key due to private Github flakes"
   sudo mkdir -p /root/.ssh
-  fetch_github_ssh_key | sudo tee /root/.ssh/ed25519
-  sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub
+  fetch_github_ssh_key | sudo tee /root/.ssh/ed25519 >/dev/null
+  sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub >/dev/null
   sudo chmod +R 700 /root/.ssh
 
   # Pre-setup files
