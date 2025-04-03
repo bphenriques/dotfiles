@@ -40,12 +40,11 @@ in
   users.mutableUsers = false;
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
-
-  # TODO: Likely not needed
-  # systemd.tmpfiles.rules = [
-  #  "z /mnt/games             0775 root                        ${groups.users.name}"
-  #  "z /mnt/bphenriques       0700 ${users.bphenriques.name}   ${groups.users.name}"
-  # ];
+  # These paths are created automatically when partitioning, therefore I have to set the right owner
+  systemd.tmpfiles.rules = [
+    "z /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "z /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
+  ];
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }

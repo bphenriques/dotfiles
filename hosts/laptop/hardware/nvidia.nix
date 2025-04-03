@@ -18,4 +18,8 @@
       offload.enableOffloadCmd = false;
     };
   };
+
+  environment.variables = {
+    __GL_SHADER_DISK_CACHE_PATH = "$XDG_CACHE_HOME/nv"; # Move shader cache away from $HOME directly.
+  };
 }
