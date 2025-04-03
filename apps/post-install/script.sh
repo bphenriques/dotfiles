@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#shellcheck shell=bash
 
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
@@ -84,7 +84,7 @@ import_gpg() {
   success "GPG - Imported!"
 }
 
-# https://github.com/NixOS/nix/issues/2982
+# FIXME: I am not that bothered but I should point to the nixpkgs set in my flakes: https://github.com/NixOS/nix/issues/2982
 set_root_nixpkgs_channel() {
   info "Nix Channels - Setting.."
   sudo -i nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
@@ -92,7 +92,7 @@ set_root_nixpkgs_channel() {
   success "Nix Channels - Set"
 }
 
-# e.g. that does not work out of the box which leads to Permission denied (despite being pulled already): sudo nixos-rebuild switch --flake \".#$host\"
+# FIXME: getting permission denied (despite being pulled already) in fresh installations. Sorted out by building once from my Git repo.
 # https://discourse.nixos.org/t/nixos-rebuild-switch-fails-under-flakes-and-doas-with-git-warning-about-dubious-ownership/46069
 build_once_fix_git_permissions() {
   info ".dotfiles - building once.."
