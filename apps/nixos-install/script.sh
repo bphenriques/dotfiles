@@ -25,7 +25,7 @@ remote_install() {
   local host="$1"
   local bw_email="$2"
   local ssh_host="$3"
-  nixosAnywhereExtraArgs=()
+  extraArgs=()
 
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
@@ -49,11 +49,7 @@ remote_install() {
     nixosAnywhereExtraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   done
 
-  nixos-anywhere \
-    --flake ".#${host}" \
-    --target-host "${ssh_host}" \
-    --extra-files "$post_install_files" \
-    "${nixosAnywhereExtraArgs[@]}"
+  nixos-anywhere --flake ".#${host}" --target-host "${ssh_host}" --extra-files "$post_install_files" "${extraArgs[@]}"
 
   rm -r "${luks_files}"
   rm -r "${post_install_files}"
