@@ -87,7 +87,7 @@ local_install() {
   fi
 
   echo "Formatting disks"
-  disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
+  sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
   echo "Installing NixOS"
   sudo nixos-install --experimental-features 'nix-command flakes' --no-channel-copy --no-root-password --flake "${FLAKE_URL}"
