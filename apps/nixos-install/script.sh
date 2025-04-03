@@ -12,7 +12,7 @@ dotfiles_sops_contains_host() { yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.
 fetch_sops_private_key() { bw-session get-item-field "system-nixos-$1" "sops-private"; }
 fetch_bw_luks_fields() { bw-session get-item "system-nixos-$1" | jq -rc '.fields[] | select(.name | startswith("luks")) | .name'; }
 bw_contains_sops_key() { bw-session get-item "system-nixos-$1" | jq -erc '.fields[] | select(.name == "sops-private")) | .name'>/dev/null; }
-github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | jq -re '.sshKey.privateKey'; }
+fetch_github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | jq -re '.sshKey.privateKey'; }
 
 unlock_bitwarden() {
   BW_SESSION="$(bw-session session "${bw_email}")"
@@ -66,7 +66,7 @@ disko_install() {
   unlock_bitwarden "${bw_email}"
 
   echo "Fetching SSH deploy key due to the likelihood of private Github flakes being used"
-  github_ssh_key | sudo tee /root/.ssh/ed25519
+  fetch_github_ssh_key | sudo tee /root/.ssh/ed25519
   sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub
 
   # Pre-setup files
