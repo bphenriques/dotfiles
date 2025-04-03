@@ -63,11 +63,11 @@ disko_install() {
   local host="$1"
   local bw_email="$2"
 
+  unlock_bitwarden "${bw_email}"
+
   echo "Fetching SSH deploy key due to the likelihood of private Github flakes being used"
   github_ssh_key | sudo tee /root/.ssh/ed25519
   sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub
-
-  unlock_bitwarden "${bw_email}"
 
   # Pre-setup files
   fetch_bw_luks_fields | while read -r field; do
