@@ -29,9 +29,9 @@ _:
                 name = "crypted";
                 settings = {
                   allowDiscards = true;
-                  keyFile = "/tmp/luks-main.key";  # # Plain password
                 };
-                additionalKeyFiles = [ "/tmp/luks-backup.key" ];  # Stronger password
+                passwordFile = "/tmp/luks-main.key";  # Plain password
+                additionalKeyFiles = [ "/tmp/luks-backup.key" ];  # Stronger password if present
                 content = {
                   type = "btrfs";
                   extraArgs = [ "-L" "nixos" "-f" ]; # override existing partitions
