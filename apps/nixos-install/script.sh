@@ -93,12 +93,13 @@ local_install() {
   sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
 
   echo "Post Install - Copying files"
-  sudo chown -R root:root "${post_install_files}/*"
-  cp -r "${post_install_files}/*" /mnt
+  sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
+  sudo cp "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}" "/mnt/${SOPS_AGE_SYSTEM_FILE}"
+  sudo chown -R root:root "${post_install_files}"
 
   echo "Post Install - Removing sensitive files"
-  rm -rf /tmp/*.key
-  rm -rf "${post_install_files}"
+  sudo rm -rf /tmp/*.key
+  sudo rm -rf "${post_install_fxiles}"
 }
 
 case "$1" in
