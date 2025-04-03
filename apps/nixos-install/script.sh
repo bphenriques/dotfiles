@@ -6,10 +6,13 @@ DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
+press_to_continue() { echo 'Press any key to continue'; read -r _; }
+
 dotfiles_sops_contains_host() { yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}-system$" > /dev/null; }
 fetch_sops_private_key() { bw-session get-item-field "system-nixos-$1" "sops-private"; }
 fetch_bw_luks_fields() { bw-session get-item "system-nixos-$1" | jq -rc '.fields[] | select(.name | startswith("luks")) | .name'; }
 bw_contains_sops_key() { bw-session get-item "system-nixos-$1" | jq -erc '.fields[] | select(.name == "sops-private")) | .name'>/dev/null; }
+github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | jq -re '.sshKey.privateKey'; }
 
 unlock_bitwarden() {
   BW_SESSION="$(bw-session session "${bw_email}")"
@@ -59,6 +62,10 @@ remote_install() {
 disko_install() {
   local host="$1"
   local bw_email="$2"
+
+  echo "Fetching SSH deploy key due to the likelihood of private Github flakes being used"
+  github_ssh_key | sudo tee /root/.ssh/ed25519
+  sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub
 
   unlock_bitwarden "${bw_email}"
 
