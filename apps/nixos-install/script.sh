@@ -33,7 +33,7 @@ remote_install() {
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 
-  echo "${host} - Unlock Bitwarden account: ${bw_email}"
+  echo "${host} - Unlocking Bitwarden account: ${bw_email}"
   unlock_bitwarden "${bw_email}"
 
   post_install_files="$(mktemp -d)"
@@ -48,7 +48,7 @@ remote_install() {
     luks_local_file="${luks_files}/$field.key"
     luks_disko_expected_file_location="/tmp/${field}.key"
 
-    echo "Fetching luks encryption key: $field"
+    echo "Fetching luks encryption key: $field ..."
     bw-session get-item-field "system-nixos-${host}" "$field" > "${luks_local_file}"
     nixosAnywhereExtraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   done
@@ -63,10 +63,10 @@ local_install() {
   local host="$1"
   local bw_email="$2"
 
-  echo "${host} - Unlock Bitwarden account: ${bw_email}"
+  echo "${host} - Unlocking Bitwarden account: ${bw_email}"
   unlock_bitwarden "${bw_email}"
 
-  echo "Fetching SSH deploy key due to private Github flakes"
+  echo "Fetching SSH deploy key due to private Github flakes..."
   sudo mkdir -p /root/.ssh
   fetch_github_ssh_key | sudo tee /root/.ssh/ed25519 >/dev/null
   sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub >/dev/null
@@ -74,7 +74,7 @@ local_install() {
 
   # Pre-setup files
   fetch_bw_luks_fields "$host" | while read -r field; do
-    echo "Fetching luks encryption key: $field"
+    echo "Fetching luks encryption key: $field ..."
     bw-session get-item-field "system-nixos-${host}" "$field" > "/tmp/${field}.key"
   done
 
@@ -90,7 +90,7 @@ local_install() {
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
   echo "Installing NixOS"
-  sudo nixos-install --no-channel-copy --no-root-password --flake "${FLAKE_URL}"
+  sudo nixos-install --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
 
   echo "Post Install - Copying files"
   sudo chown -R root:root "${post_install_files}/*"
