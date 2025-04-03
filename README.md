@@ -37,7 +37,7 @@ Feel free to take a look around and ask me anything!
    ```shell
    HOST=laptop
    TARGET_IP=192.168.68.58
-   ssh nixos@$TARGET_IP -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > hosts/$HOST/hardware-configuration.nix
+   ssh "nixos@$TARGET_IP" -- nixos-generate-config --no-filesystems --root /mnt --show-hardware-config > "hosts/$HOST/hardware-configuration.nix"
    ```
 
 4. Create a new host directory with the hardware configuration and basic nixos settings.
@@ -49,14 +49,33 @@ Feel free to take a look around and ask me anything!
     ```shell
     HOST=laptop
     TARGET_IP=192.168.68.58
-    nix run ./bin/nixos-remote-install.sh $HOST nixos@$TARGET_IP
+    BITWARDEN_EMAIL=me@me.com
+    nix run .#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
     ```
 
-3. On the target machine, run the post-install:
+3. On the target machine, run:
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- $HOST $BITWARDEN_EMAIL
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
+    ```
+
+#### Install locally
+
+1. Boot onto the NixOS installer (see previous section).
+
+2. On the target machine, run:
+    ```shell
+    HOST=laptop
+    BITWARDEN_EMAIL=me@me.com
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#nixos-install" -- local "$HOST" "$BITWARDEN_EMAIL"   
+    ```
+
+3. Once installed and booted onto the NixOS installation run:
+    ```shell
+    HOST=laptop
+    BITWARDEN_EMAIL=me@me.com
+    nix run --extra-experimental-features 'nix-command flakes' "github:bphenriques/dotfiles/wayland-move-btrfs#post-install" -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 ### Darwin
