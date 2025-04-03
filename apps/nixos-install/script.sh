@@ -1,5 +1,7 @@
 #shellcheck shell=bash
 
+set -e
+
 BRANCH_NAME="${BRANCH_NAME:-main}"
 FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME}}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
