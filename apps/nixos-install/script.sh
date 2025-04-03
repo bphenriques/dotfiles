@@ -55,7 +55,7 @@ remote_install() {
   rm -r "${post_install_files}"
 }
 
-disko_install() {
+local_install() {
   local host="$1"
   local bw_email="$2"
 
