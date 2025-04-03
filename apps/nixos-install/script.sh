@@ -30,6 +30,7 @@ remote_install() {
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 
+  echo "${host} - Unlock Bitwarden account: ${bw_email}"
   unlock_bitwarden "${bw_email}"
 
   post_install_files="$(mktemp -d)"
@@ -59,6 +60,7 @@ local_install() {
   local host="$1"
   local bw_email="$2"
 
+  echo "${host} - Unlock Bitwarden account: ${bw_email}"
   unlock_bitwarden "${bw_email}"
 
   echo "Fetching SSH deploy key due to the likelihood of private Github flakes being used"
