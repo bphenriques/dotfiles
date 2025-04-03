@@ -69,7 +69,7 @@ local_install() {
   sudo mkdir -p /root/.ssh
   fetch_github_ssh_key | sudo tee /root/.ssh/ed25519 >/dev/null
   sudo ssh-keygen -f /root/.ssh/ed25519 -y | sudo tee /root/.ssh/ed25519.pub >/dev/null
-  sudo chmod +R 700 /root/.ssh
+  sudo chmod -R 700 /root/.ssh
 
   # Pre-setup files
   fetch_bw_luks_fields "$host" | while read -r field; do
