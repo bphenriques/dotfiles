@@ -2,7 +2,8 @@
 
 set -e
 
-BRANCH_NAME="${BRANCH_NAME:-main}"
+# FIXME
+BRANCH_NAME="${BRANCH_NAME:-wayland-move-btrfs}"
 FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME}}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
@@ -13,7 +14,7 @@ press_to_continue() { echo 'Press any key to continue'; read -r _; }
 dotfiles_sops_contains_host() { yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}-system$" > /dev/null; }
 fetch_sops_private_key() { bw-session get-item-field "system-nixos-$1" "sops-private"; }
 fetch_bw_luks_fields() { bw-session get-item "system-nixos-$1" | jq -rc '.fields[] | select(.name | startswith("luks")) | .name'; }
-bw_contains_sops_key() { bw-session get-item "system-nixos-$1" | jq -erc '.fields[] | select(.name == "sops-private")) | .name'>/dev/null; }
+bw_contains_sops_key() { bw-session get-item "system-nixos-$1" | jq -erc '.fields[] | select(.name == "sops-private") | .name'>/dev/null; }
 fetch_github_ssh_key() { bw-session get-item "system-nixos-deploy-github-ssh" | jq -re '.sshKey.privateKey'; }
 
 unlock_bitwarden() {
