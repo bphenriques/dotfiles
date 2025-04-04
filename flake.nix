@@ -33,9 +33,6 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
-
-    # For the impatient
-    # helix.url = "github:NikitaRevenco/helix/patchy";
   };
 
   outputs = inputs @ { self, nixpkgs, ... }:

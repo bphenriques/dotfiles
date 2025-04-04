@@ -4,7 +4,6 @@
   programs.helix = {
     enable = true;
     defaultEditor = true;
-    # package = pkgs.helix-git;
 
     # Language Server Protocols. Check with hx --health
     extraPackages = [
