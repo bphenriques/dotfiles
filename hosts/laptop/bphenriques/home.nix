@@ -27,19 +27,22 @@ in
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
-    # Tidy up most things under $HOME
-    "L ${config.home.homeDirectory}/nas-private               - - - - /mnt/nas-bphenriques"
-    "L ${config.home.homeDirectory}/nas-media                 - - - - /mnt/nas-media"
-    "L ${config.xdg.userDirs.pictures}                        - - - - /mnt/nas-bphenriques/photos"
-    "L ${config.xdg.userDirs.music}                           - - - - /mnt/nas-media/music"
+    # Create default directories
     "d ${config.xdg.userDirs.desktop}                         - - - -"
     "d ${config.xdg.userDirs.download}                        - - - -"
     "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
     "d ${config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR}  - - - -"
+
+    # Tidy up links to my NAS server under my $HOME
+    "L ${config.home.homeDirectory}/nas-private               - - - - /mnt/nas-bphenriques"
+    "L ${config.xdg.userDirs.pictures}                        - - - - /mnt/nas-bphenriques/photos"
+    "L ${config.home.homeDirectory}/nas-media                 - - - - /mnt/nas-media"
+    "L ${config.xdg.userDirs.music}                           - - - - /mnt/nas-media/music"
   ];
 
   gtk.gtk3.bookmarks = [
     "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
+    "file://${config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR}"
     "file://${config.home.homeDirectory}/nas-private"
     "file://${config.home.homeDirectory}/nas-media"
     "file://${config.home.homeDirectory}/games"
