@@ -12,12 +12,12 @@
     extraOptions = "min-free = ${toString (5 * 1024 * 1024 * 1024)}";
   };
 
-  boot.kernelParams = [
-    "boot.shell_on_fail" # allows for root shell if failure to boot
-  ];
-
-  # Not enabling useTmpfs despite having enough RAM. Might consider it.
-  boot.tmp.cleanOnBoot = true;
+  boot = {
+    tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
+    kernelParams = [
+      "boot.shell_on_fail" # allows for root shell if failure to boot
+    ];
+  };
 
   # Network
   networking.networkmanager.enable = true;

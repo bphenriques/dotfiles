@@ -1,4 +1,8 @@
-_:
+{ config, ... }:
+let
+  groups = config.users.groups;
+  users = config.users.users;
+in
 {
   disko.devices = {
     disk = {
@@ -40,23 +44,23 @@ _:
                   subvolumes = {
                     "@root" = {
                       mountpoint = "/";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@var_log" = {
                       mountpoint = "/var/log";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@var_cache" = {
                       mountpoint = "/var/cache";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@var_tmp" = {
                       mountpoint = "/var/tmp";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@nix" = {
                       mountpoint = "/nix";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@swap" = {
                       mountpoint = "/.swapvol";
@@ -78,4 +82,11 @@ _:
       };
     };
   };
+
+  # Btrfs makes the owner root:root, requires changing.
+  systemd.tmpfiles.rules = [
+    "z /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "z /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "z /home/${users.bphenriques.name}/.cache   0700 ${users.bphenriques.name}   ${groups.users.name}"
+  ];
 }

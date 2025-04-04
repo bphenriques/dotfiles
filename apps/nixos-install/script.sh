@@ -9,7 +9,6 @@ DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
 fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
-press_to_continue() { echo 'Press any key to continue'; read -r _; }
 
 dotfiles_sops_contains_host() { yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}-system$" > /dev/null; }
 fetch_sops_private_key() { bw-session get-item-field "system-nixos-$1" "sops-private"; }
@@ -33,37 +32,39 @@ remote_install() {
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 
-  echo "${host} - Unlocking Bitwarden account: ${bw_email}"
+  echo "${host} - Unlocking Bitwarden account (${bw_email})..."
   unlock_bitwarden "${bw_email}"
 
-  post_install_files="$(mktemp -d)"
+  echo "Checking for sops keys..."
+  post_format_files="$(mktemp -d)"
   if dotfiles_sops_contains_host "${host}"; then
     echo "Fetching sops system private key..."
-    mkdir -p "$(dirname "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}")"
-    fetch_sops_private_key "$host" > "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}"
+    mkdir -p "$(dirname "${post_format_files}/${SOPS_AGE_SYSTEM_FILE}")"
+    fetch_sops_private_key "$host" > "${post_format_files}/${SOPS_AGE_SYSTEM_FILE}"
   fi
 
+  echo "Checking for luks encryption keys..."
   luks_files="$(mktemp -d)"
   fetch_bw_luks_fields "$host" | while read -r field; do
     luks_local_file="${luks_files}/$field.key"
     luks_disko_expected_file_location="/tmp/${field}.key"
 
-    echo "Fetching luks encryption key: $field ..."
+    echo "Fetching luks encryption key ($field)..."
     bw-session get-item-field "system-nixos-${host}" "$field" > "${luks_local_file}"
     nixosAnywhereExtraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   done
 
-  nixos-anywhere --flake ".#${host}" --target-host "${ssh_host}" --extra-files "$post_install_files" "${extraArgs[@]}"
+  nixos-anywhere --flake ".#${host}" --target-host "${ssh_host}" --extra-files "$post_format_files" "${extraArgs[@]}"
 
   rm -r "${luks_files}"
-  rm -r "${post_install_files}"
+  rm -r "${post_format_files}"
 }
 
 local_install() {
   local host="$1"
   local bw_email="$2"
 
-  echo "${host} - Unlocking Bitwarden account: ${bw_email}"
+  echo "${host} - Unlocking Bitwarden account (${bw_email})..."
   unlock_bitwarden "${bw_email}"
 
   echo "Fetching SSH deploy key due to private Github flakes..."
@@ -73,34 +74,28 @@ local_install() {
   sudo cp /tmp/github-deploy-ssh /root/.ssh/id_ed25519
   sudo ssh-keygen -f /root/.ssh/id_ed25519 -y | sudo tee /root/.ssh/id_ed25519.pub >/dev/null
 
-  # Pre-setup files
+  echo "Checking for luks encryption keys..."
   fetch_bw_luks_fields "$host" | while read -r field; do
-    echo "Fetching luks encryption key: $field ..."
+    echo "Fetching luks encryption key ($field)..."
     bw-session get-item-field "system-nixos-${host}" "$field" > "/tmp/${field}.key"
   done
 
-  # Post setup files
-  post_install_files="$(mktemp -d)"
-  if bw_contains_sops_key "${host}"; then
-    echo "Fetching sops system private key..."
-    mkdir -p "$(dirname "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}")"
-    fetch_sops_private_key "$host" > "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}"
-  fi
-
-  echo "Formatting disks"
+  echo "Formatting disks..."
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
-  echo "Post Format - Copying files"
-  sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
-  sudo cp "${post_install_files}/${SOPS_AGE_SYSTEM_FILE}" "/mnt/${SOPS_AGE_SYSTEM_FILE}"
-  sudo chown -R root:root "${post_install_files}"
+  echo "Checking for sops keys..."
+  if bw_contains_sops_key "${host}"; then
+    echo "Copying sops system private key...: "/mnt/${SOPS_AGE_SYSTEM_FILE}""
+    sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
+    fetch_sops_private_key "$host" | sudo tee "/mnt/${SOPS_AGE_SYSTEM_FILE}" > /dev/null
+    sudo chown -R root:root "/mnt/${SOPS_AGE_SYSTEM_FILE}"
+  fi
 
-  echo "Installing NixOS"
+  echo "Installing NixOS..."
   sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
 
-  echo "Cleanup - Removing sensitive files (${post_install_files})"
+  echo "Cleaning up LUKS keys..."
   sudo rm -rf /tmp/*.key
-  sudo rm -rf "${post_install_files}"
 }
 
 case "$1" in

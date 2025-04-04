@@ -10,9 +10,5 @@
 
   # Gamepads
   hardware.xone.enable = true;                        # Wired Xbox(ish) gamepads (e.g., 8bitdo)
-  custom.hardware.gamepad-8bitdo-ultimate2c = {
-    enable = true;
-    vendorId = "2dc8";
-    productId = "310a";
-  };
+  custom.hardware.gamepad-8bitdo-ultimate2c.enable = true;
 }
