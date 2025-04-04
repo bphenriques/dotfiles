@@ -1,8 +1,4 @@
 { config, pkgs, ... }:
-let
-  groups = config.users.groups;
-  users = config.users.users;
-in
 {
   imports = [
     ./hardware
@@ -19,17 +15,21 @@ in
   networking.hostName = "bphenriques-laptop";
 
   boot = {
-   kernelPackages = pkgs.linuxPackages_6_12;
+    kernelPackages = pkgs.linuxPackages_6_12;
 
-    # boot.loader.systemd-boot.windows: https://search.nixos.org/options?channel=unstable&show=boot.loader.systemd-boot.windows.%3Cname%3E.efiDeviceHandle&from=0&size=50&sort=relevance&type=packages&query=systemd-boot
-    loader.systemd-boot = {
-      enable = true;
-      editor = false;
-      configurationLimit = 10;
+    initrd.systemd.enable = true; # Hibernation
+    loader = {
+      timeout = 0;  # The menu can be shown by pressing and holding a key before systemd-boot is launched.
+      systemd-boot = {
+        enable = true;
+        editor = false;
+        consoleMode = "1"; # bigger font in boot menu
+        configurationLimit = 10;
+      };
     };
   };
-  disko.devices.disk.vda.imageSize = "30G";
 
+    # boot.loader.systemd-boot.windows: https://search.nixos.org/options?channel=unstable&show=boot.loader.systemd-boot.windows.%3Cname%3E.efiDeviceHandle&from=0&size=50&sort=relevance&type=packages&query=systemd-boot
   # FIXME: custom.boot.grub.windows.efiDevice = "38CB-E581";
 
   # Secrets
@@ -39,13 +39,6 @@ in
   # Users
   users.mutableUsers = false;
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
-
-  # Created by btrfs when formatting. Need to set the permissions manually
-  systemd.tmpfiles.rules = [
-    "z /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
-    "z /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
-    "z /home/${users.bphenriques.name}/.cache   0700 ${users.bphenriques.name}   ${groups.users.name}"
-  ];
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }
