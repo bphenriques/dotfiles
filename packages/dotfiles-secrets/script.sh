@@ -12,7 +12,7 @@ fi
 fetch() {
   test -z "$2" && fatal "host argument not provided."
   case "$1" in
-    luks-key)         bw_get_item_field "system-nixos-$2" "luks-password"                   ;;
+    luks-key)         bw_get_item_field "system-nixos-$2" "luks-interactive-password"       ;;
     sops-secret)      bw_get_item_field "system-nixos-$2" "sops-private"                    ;;
     ssh-private-key)  bw get item "ssh-key-nixos-$2" | jq -re '.sshKey.privateKey'          ;;
     gpg-private-key)  bw get item "github-gpg-private" | jq -re '.notes'                    ;;
