@@ -8,12 +8,13 @@ if ! bw unlock --check > /dev/null; then
   exit 1
 fi
 
+# Note: Bitwarden does not filter by exact match. Therefore the secret names adjusted to avoid cli erroring in multiple matches.
 fetch() {
   test -z "$2" && fatal "host argument not provided."
   case "$1" in
     luks-key)         bw_get_item_field "system-nixos-$2" "luks-password"                   ;;
     sops-secret)      bw_get_item_field "system-nixos-$2" "sops-private"                    ;;
-    ssh-private-key)  bw get item "system-nixos-$2-ssh-key" | jq -re '.sshKey.privateKey'   ;;
+    ssh-private-key)  bw get item "ssh-key-nixos-$2" | jq -re '.sshKey.privateKey'          ;;
     gpg-private-key)  bw get item "github-gpg-private" | jq -re '.notes'                    ;;
     gpg-public-key)   bw get item "github-gpg-public" | jq -re '.notes'                     ;;
   esac
