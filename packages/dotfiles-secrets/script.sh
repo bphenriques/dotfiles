@@ -3,12 +3,7 @@
 fatal() { printf '[FAIL] %s\n' "$1" 1>&2; exit 1; }
 bw_get_item_field() { bw get item "$1" | jq -e --arg FIELD "$2" --raw-output '.fields[] | select(.name == $FIELD) | .value'; }
 
-if ! bw unlock --check > /dev/null; then
-  echo "Bitwarden not unlocked"
-  exit 1
-fi
-
-# Note: Bitwarden does not filter by exact match. Therefore the secret names adjusted to avoid cli erroring in multiple matches.
+# Note: Bitwarden doesn't support exact match. I don't want to use `ids`, therefore I adjusted the secret names.
 fetch() {
   test -z "$2" && fatal "host argument not provided."
   case "$1" in
@@ -20,7 +15,12 @@ fetch() {
   esac
 }
 
+if ! bw unlock --check > /dev/null; then
+  echo "Bitwarden not unlocked"
+  exit 1
+fi
 bw sync > /dev/null
+
 case "$1" in
   fetch)  shift 1 && fetch "$@" ;;
   exists) shift 1 && fetch "$@" > /dev/null ;;
