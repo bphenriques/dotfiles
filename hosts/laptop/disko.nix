@@ -35,7 +35,6 @@ in
                   allowDiscards = true;
                 };
                 passwordFile = "/tmp/luks-interactive-password.key";
-                additionalKeyFiles = [ "/tmp/luks-backup.key" ];
                 content = {
                   type = "btrfs";
                   extraArgs = [ "-L" "nixos" "-f" ]; # override existing partitions
@@ -83,10 +82,9 @@ in
     };
   };
 
-  # Btrfs makes the owner root:root, requires changing.
+  # Create subvolumeo or directory if it does not exist and set the owner correctly.
   systemd.tmpfiles.rules = [
-    "z /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
-    "z /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
-    "z /home/${users.bphenriques.name}/.cache   0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "v /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
+    "v /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"
   ];
 }

@@ -6,12 +6,13 @@ let
   crossPlatform = forAllSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
     in rec {
-      dotfiles = pkgs.callPackage ./dotfiles { };
       preview = pkgs.callPackage ./preview { };
       fzf-rg = pkgs.callPackage ./fzf-rg { };
       fzf-fd = pkgs.callPackage ./fzf-fd { inherit preview; };
       project = pkgs.callPackage ./project { inherit preview; };
       bw-session = pkgs.callPackage ./bw-session { };
+      dotfiles = pkgs.callPackage ./dotfiles { };
+      dotfiles-secrets = pkgs.callPackage ./dotfiles { inherit bw-session; };
     }
   );
 
