@@ -103,8 +103,6 @@ bw_email="$2"
 
 BW_SESSION="$(bw-session session "${bw_email}")"
 export BW_SESSION
-bw unlock --check > /dev/null || fatal "Vault must be unlocked"
-bw sync
 
 set_root_nixpkgs_channel
 
