@@ -12,7 +12,7 @@ let
       project = pkgs.callPackage ./project { inherit preview; };
       bw-session = pkgs.callPackage ./bw-session { };
       dotfiles = pkgs.callPackage ./dotfiles { };
-      dotfiles-secrets = pkgs.callPackage ./dotfiles { inherit bw-session; };
+      dotfiles-secrets = pkgs.callPackage ./dotfiles-secrets { inherit bw-session; };
     }
   );
 
