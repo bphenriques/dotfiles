@@ -2,11 +2,10 @@
 pkgs.writeShellApplication {
   name = "nixos-install";
   runtimeInputs = [
-    pkgs.yq-go
-    pkgs.jq
-    selfPkgs.bw-session
     pkgs.disko            # Local installations
     pkgs.nixos-anywhere   # Remote installations
+    selfPkgs.bw-session
+    selfPkgs.dotfiles-secrets
   ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.all;
