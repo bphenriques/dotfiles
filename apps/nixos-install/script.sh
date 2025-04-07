@@ -27,6 +27,8 @@ remote_install() {
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 
+  unlock_bitwarden "$bw_email"
+
   info "Checking for sops keys..."
   post_format_files="$(mktemp -d)"  
   if dotfiles-secrets fetch sops-secret "${host}" > /dev/null; then
@@ -38,10 +40,10 @@ remote_install() {
   info "Checking for luks encryption keys..."
   luks_files="$(mktemp -d)"
   if dotfiles-secrets fetch luks-key "$host" >/dev/null; then
-    luks_local_file="${luks_files}/$field.key"
-    luks_disko_expected_file_location="/tmp/${field}.key"
+    luks_local_file="${luks_files}/luks-interactive-password.key"
+    luks_disko_expected_file_location="/tmp/luks-interactive-password.key"
 
-    info "Fetching luks encryption key ($field)..."
+    info "Fetching luks encryption key..."
     dotfiles-secrets fetch luks-key "$host" > "${luks_local_file}"
     nixosAnywhereExtraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   fi
@@ -56,6 +58,8 @@ local_install() {
   local host="$1"
   local bw_email="$2"
 
+  unlock_bitwarden "$bw_email"
+
   info "Fetching SSH deploy key due to private Github flakes..."
   sudo mkdir -m 700 -p /root/.ssh
   dotfiles-secrets fetch ssh-private-key | sudo tee /tmp/github-deploy-ssh >/dev/null
@@ -63,8 +67,8 @@ local_install() {
   sudo cp /tmp/github-deploy-ssh /root/.ssh/id_ed25519
   sudo ssh-keygen -f /root/.ssh/id_ed25519 -y | sudo tee /root/.ssh/id_ed25519.pub >/dev/null
 
-  info "Fetching luks encryption key ($field)..."
-  dotfiles-secrets fetch luks-key "$host" > "/tmp/${field}.key" || fatal "No luks key available"
+  info "Fetching luks encryption key..."
+  dotfiles-secrets fetch luks-key "$host" > "/tmp/luks-interactive-password.key" || fatal "No luks key available"
 
   info "Formatting disks..."
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
@@ -88,6 +92,6 @@ local_install() {
 }
 
 case "$1" in
-  remote) shift 1 && unlock_bitwarden && remote_install "$@"     ;;
-  local)  shift 1 && unlock_bitwarden && local_install "$@"      ;;
+  remote) shift 1 && remote_install "$@"     ;;
+  local)  shift 1 && local_install "$@"      ;;
 esac
