@@ -5,14 +5,10 @@ DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 
-usage() {
-  echo "post-install.sh <host> <bitwarden-email>"
-}
-
-info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
-success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
-fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2; exit 1; }
-press_to_continue() { info 'Press any key to continue'; read -r _; }
+usage() { echo "Required arguments: <host> <bitwarden-email>"; }
+info() { printf '[ .. ] %s\n' "$1"; }
+success() { printf '[ OK ] %s\n' "$1"; }
+fatal() { printf '[FAIL] %s\n' "$1" 1>&2; exit 1; }
 append_if_absent() {
   line="$1"
   file="$2"
@@ -22,37 +18,33 @@ append_if_absent() {
 }
 
 clone_dotfiles() {
-  # Works for impermanence where the directory is mounted but empty
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
     git clone git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+  else
+    success "dotfiles - available in ${DOTFILES_LOCATION}"
   fi
+
   if ! test -d "${DOTFILES_PRIVATE_LOCATION}" || (find "${DOTFILES_PRIVATE_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles-private - Cloning to ${DOTFILES_PRIVATE_LOCATION}"
     git clone git@github.com:bphenriques/dotfiles-private.git "$DOTFILES_PRIVATE_LOCATION"
+  else
+    success "dotfiles-private - available in ${DOTFILES_PRIVATE_LOCATION}"
   fi
-
-  success "dotfiles - available in ${DOTFILES_LOCATION}"
 }
 
 setup_ssh() {
   mkdir -p "$HOME"/.ssh
-  if [ ! -f "$HOME"/.ssh/id_ed25519.pub ]; then
-    ssh-keygen -t ed25519 -C "$(git config user.email)" -f "$HOME"/.ssh/id_ed25519
-    info 'SSH Key - Copy the public key below to https://github.com/settings/ssh/new'
-    cat "$HOME"/.ssh/id_ed25519.pub
-    echo ''
-    press_to_continue
-  else
-    success "SSH Key - Key-pair already present"
-  fi
+  dotfiles-secrets fetch ssh-private-key > "$HOME"/.ssh/id_ed25519
+  ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub
+  chmod -R "$HOME"/.ssh
 }
 
 set_host() {
   host="$1"
-
   test -z "${host}" && fatal "host must not be empty!"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
+
   if [ -f "$HOST_FILE_LOCATION" ] && [ "$(cat "$HOST_FILE_LOCATION")" != "${host}" ]; then
     fatal "There is already a host set that is not identical. Delete ${HOST_FILE_LOCATION} and try again."
   fi
@@ -63,24 +55,24 @@ set_host() {
 
 import_age_private_keys() {
   host="$1"
-  bw unlock --check > /dev/null || fatal "Vault must be unlocked"
 
-  mkdir -p "$(dirname "${SOPS_AGE_KEY_FILE}")"
-  for secret in $(yq '.keys[] | anchor' < "${DOTFILES_LOCATION}"/.sops.yaml | grep -E "^${host}"); do
-    info "Adding '${secret}' to ${SOPS_AGE_KEY_FILE}"
-    value="$(bw get item "sops-age-key-${secret}" | jq --raw-output '.fields[] | select(.name=="private") | .value')"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ]; then
-      fatal "Can't find Bitwarden secret sops-age-key-${secret}'"
-    fi
-    append_if_absent "${value}" "${SOPS_AGE_KEY_FILE}"
-  done
+  info "Sops Private Key - Checking"
+  if dotfiles-secrets exists sops-private-key "${host}"; then
+    info "Fetching ${host} private sops key to ${SOPS_AGE_KEY_FILE}"
+    mkdir -p "$(dirname "${SOPS_AGE_KEY_FILE}")"
+    append_if_absent "$(dotfiles-secrets fetch sops-private-key "${host}")" > "${SOPS_AGE_KEY_FILE}"
+    success "Sops - Set"
+  else
+    success "Sops Private Key - Not needed"
+  fi
 }
 
 import_gpg() {
+  host="$1"
+
   info "GPG - Importing!"
-  bw get item "github-gpg-private" | jq --raw-output '.notes' | gpg --import
-  bw get item "github-gpg-public" | jq --raw-output '.notes' | gpg --import
+  dotfiles-secrets fetch gpg-private-key "$host" | gpg --import
+  dotfiles-secrets fetch gpg-public-key "$host" | gpg --import
   success "GPG - Imported!"
 }
 
@@ -111,6 +103,8 @@ bw_email="$2"
 
 BW_SESSION="$(bw-session session "${bw_email}")"
 export BW_SESSION
+bw unlock --check > /dev/null || fatal "Vault must be unlocked"
+bw sync
 
 set_root_nixpkgs_channel
 
@@ -118,6 +112,6 @@ setup_ssh
 clone_dotfiles
 set_host "${host}"
 import_age_private_keys "${host}"
-import_gpg
+import_gpg "${host}"
 
 build_once_fix_git_permissions

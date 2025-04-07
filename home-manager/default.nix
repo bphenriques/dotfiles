@@ -92,6 +92,10 @@
       LS_COLORS = "$(${lib.getExe pkgs.vivid} generate snazzy)"; # I refuse to maintain one >.<
       LANG    = "en_US.UTF-8";
       LC_ALL  = "en_US.UTF-8";
+
+      # Cleanup home
+      HISTFILE = "${config.xdg.stateHome}/bash/history";
+      LESSHISTFILE = "${config.xdg.stateHome}/less/history";
     } // (lib.optionalAttrs pkgs.config.allowUnfree {
        NIXPKGS_ALLOW_UNFREE = 1;
     }) // (lib.optionalAttrs pkgs.stdenv.isDarwin {

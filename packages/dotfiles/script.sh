@@ -11,10 +11,10 @@ usage() {
   echo "dotfiles [s]ync | [u]pdate | [b]uild | [o]ptimise | [r]epair | [f]ormat | [d]escribe | changelog"
 }
 
-info() { printf '[ \033[00;34m  \033[0m ] %s\n' "$1"; }
-success() { printf '[ \033[00;32mOK\033[0m ] %s\n' "$1"; }
-error() { printf '[\033[0;31mERROR\033[0m] %s\n' "$1" 1>&2; }
-fatal() { printf '[\033[0;31mFAIL\033[0m] %s\n' "$1" 1>&2 && exit 1; }
+info() { printf '[ .. ] %s\n' "$1"; }
+success() { printf '[ OK ] %s\n' "$1"; }
+error() { printf '[ERRO] %s\n' "$1" 1>&2; }
+fatal() { printf '[FAIL] %s\n' "$1" 1>&2; exit 1; }
 
 _darwin_sync() {
   pushd "${DOTFILES_LOCATION}" > /dev/null
@@ -64,7 +64,7 @@ end'
 cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
 
 case "${1:-}" in
-  sync | s)
+  sync|s)
     shift 1
 
     info "Dotfiles Sync - '$CURRENT_HOST' .."
@@ -80,7 +80,7 @@ case "${1:-}" in
       *)  fatal "Unsupported Operating System: $(uname -s)" ;;
     esac
     ;;
-  update | u)
+  update|u)
     info "Dotfiles Update - '$CURRENT_HOST' .."
     # Relevant docs: https://nix.dev/manual/nix/2.18/installation/upgrading#upgrading-nix
     _flake_update
@@ -97,7 +97,7 @@ case "${1:-}" in
       *)  fatal "Unsupported Operating System: $(uname)" ;;
     esac
     ;;
-  build  | b)
+  build|b)
     case "$(uname -s)" in
       Darwin) _darwin_build ;;
       Linux)
@@ -108,14 +108,14 @@ case "${1:-}" in
       *)  fatal "Unsupported Operating System: $(uname)" ;;
     esac
     ;;
-  optimise | o)
+  optimise|o)
     info "Optimizing Nix Store - GC + Dedup"
     nix store gc
     nix store optimise
     success "Optimizing Nix Store"
     ;;
-  repair | r) sudo nix-store --repair --verify --check-contents ;;
-  describe | d) nix-store -qR /run/current-system | sed -n -e 's/\/nix\/store\/[0-9a-z]\{32\}-//p' | sort | uniq ;;
+  repair|r) sudo nix-store --repair --verify --check-contents ;;
+  describe|d) nix-store -qR /run/current-system | sed -n -e 's/\/nix\/store\/[0-9a-z]\{32\}-//p' | sort | uniq ;;
   changelog)
     # nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
     # Improvements are blocked by https://github.com/NixOS/nix/issues/6129
