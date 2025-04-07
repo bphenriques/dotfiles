@@ -15,7 +15,6 @@ unlock_bitwarden() {
   info "${host} - Unlocking Bitwarden account (${bw_email})..."
   BW_SESSION="$(bw-session session "$1")"
   export BW_SESSION
-  bw sync
 }
 
 remote_install() {
