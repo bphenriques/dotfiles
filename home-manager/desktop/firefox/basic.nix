@@ -16,7 +16,7 @@
   "browser.toolbars.bookmarks.visibility" = "always";           # Always show the toolbar.
   "extensions.autoDisableScopes" = "0";                         # Automatically enable extensions
   "signon.rememberSignons" = false;                             # No thank you.
-
+  "extensions.autoDisableScopes" = 0;                           # Automatically enable extensions
 
   # Extra Security
   "privacy.globalprivacycontrol.functionality.enabled" = true;  # Private as much as possible.
