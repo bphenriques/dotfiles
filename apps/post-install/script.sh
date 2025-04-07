@@ -34,8 +34,10 @@ clone_dotfiles() {
 }
 
 setup_ssh() {
+  host="$1"
+
   mkdir -p "$HOME"/.ssh
-  dotfiles-secrets fetch ssh-private-key > "$HOME"/.ssh/id_ed25519
+  dotfiles-secrets fetch ssh-private-key "$host" > "$HOME"/.ssh/id_ed25519
   ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub
   chmod -R "$HOME"/.ssh
 }
