@@ -61,7 +61,7 @@ local_install() {
 
   info "Fetching SSH deploy key due to private Github flakes..."
   sudo mkdir -m 700 -p /root/.ssh
-  dotfiles-secrets fetch ssh-private-key | sudo tee /tmp/github-deploy-ssh >/dev/null
+  dotfiles-secrets fetch ssh-private-key "${host}" | sudo tee /tmp/github-deploy-ssh >/dev/null
   sudo chmod 700 /tmp/github-deploy-ssh
   sudo cp /tmp/github-deploy-ssh /root/.ssh/id_ed25519
   sudo ssh-keygen -f /root/.ssh/id_ed25519 -y | sudo tee /root/.ssh/id_ed25519.pub >/dev/null
