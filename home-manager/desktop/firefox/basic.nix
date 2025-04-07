@@ -14,7 +14,6 @@
   "identity.fxaccounts.enabled" = false;                        # Disable Firefox Sync.
   "browser.toolbars.bookmarks.showInPrivateBrowsing" = true;    # Show bookmarks in private tabs as well.
   "browser.toolbars.bookmarks.visibility" = "always";           # Always show the toolbar.
-  "extensions.autoDisableScopes" = "0";                         # Automatically enable extensions
   "signon.rememberSignons" = false;                             # No thank you.
   "extensions.autoDisableScopes" = 0;                           # Automatically enable extensions
 
