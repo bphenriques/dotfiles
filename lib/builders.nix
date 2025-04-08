@@ -21,8 +21,7 @@
       meta.platforms = lib.platforms.linux;
     };
 
-  # Good enough: this could be svg to be resisable. But then it would have to be installed following a dir convention.
-  # As it is, I can point directly to the generated file.
+  # Good enough: I can point directly to the generated file.
   mkNerdFontIcon = pkgs: { textColor ? "black", size ? "128x128", fontSize ? 160 }: name: symbol:
     let
       fontFile = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/Hack/HackNerdFontMono-Regular.ttf";
