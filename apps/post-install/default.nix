@@ -6,7 +6,7 @@ pkgs.writeShellApplication {
     pkgs.gnupg
     pkgs.bitwarden-cli
     selfPkgs.bw-session
-    selfPkgs.dotfiles-private
+    selfPkgs.dotfiles-secrets
   ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.all;
