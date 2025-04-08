@@ -36,15 +36,19 @@ clone_dotfiles() {
 setup_ssh() {
   host="$1"
 
-  test ! -d "$HOME"/.ssh && mkdir -m 700 "$HOME"/.ssh
-  info "SSH Key - Fetching private key"
-  dotfiles-secrets fetch ssh-private-key "$host" > /tmp/.ssh_id_ed25519
-  chmod 600 /tmp/.ssh_id_ed25519
-  mv /tmp/.ssh_id_ed25519 "$HOME"/.ssh/id_ed25519
+  if [ ! -f "$HOME"/.ssh/id_ed25519 ]; then
+    test ! -d "$HOME"/.ssh && mkdir -m 700 "$HOME"/.ssh
+    info "SSH Key - Fetching private key"
+    dotfiles-secrets fetch ssh-private-key "$host" > /tmp/.ssh_id_ed25519
+    chmod 600 /tmp/.ssh_id_ed25519
+    mv /tmp/.ssh_id_ed25519 "$HOME"/.ssh/id_ed25519
 
-  info "SSH Key - Deriving public key from the private one"
-  ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub
-  chmod 644 "$HOME"/.ssh/id_ed25519.pub
+    info "SSH Key - Deriving public key from the private one"
+    ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub
+    chmod 644 "$HOME"/.ssh/id_ed25519.pub
+  else
+    info "SSH Key - Already exists. Skipping."
+  fi
 }
 
 set_host() {
@@ -67,7 +71,7 @@ import_age_private_keys() {
   if dotfiles-secrets exists sops-private-key "${host}"; then
     info "Fetching ${host} private sops key to ${SOPS_AGE_KEY_FILE}"
     mkdir -p "$(dirname "${SOPS_AGE_KEY_FILE}")"
-    append_if_absent "$(dotfiles-secrets fetch sops-private-key "${host}")" > "${SOPS_AGE_KEY_FILE}"
+    append_if_absent "$(dotfiles-secrets fetch sops-private-key "${host}")" "${SOPS_AGE_KEY_FILE}"
     success "Sops - Set"
   else
     success "Sops Private Key - Not needed"
