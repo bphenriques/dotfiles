@@ -11,7 +11,5 @@
         hash = "sha256-4AJW8lTJuN6MPvFlFzmM1DMsx72WSi93FUYiVPv/rwU=";
       };
     });
-
-    # helix-git = inputs.helix.packages.${prev.system}.helix;
   });
 }

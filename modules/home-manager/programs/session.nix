@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
-  inherit (builtins) listToAttrs replaceStrings;
-  inherit (lib) map nameValuePair;
+  inherit (builtins) listToAttrs;
+  inherit (lib) map nameValuePair mapAttrsToList;
 
   cfg = config.custom.programs.session;
 
@@ -13,15 +13,21 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   systemctl = lib.getExe' pkgs.systemd "systemctl";
-  sessionActions = [
+  sessionActions = let
+    systemd-boot-windows = lib.optionals osConfig.boot.loader.systemd-boot.enable
+      (mapAttrsToList (name: value: {
+        id = "session-${name}";
+        symbol = "";
+        label = "Reboot to ${value.title}";
+        exec = ''systemctl reboot --boot-loader-entry="windows_${value.title}.conf"''; # systemctl reboot --boot-loader-entry=help
+      }) osConfig.boot.loader.systemd-boot.windows);
+  in [
     { id = "session-lock";      symbol = ""; label = "Lock";                 exec = cfg.exec.lock; }
     { id = "session-suspend";   symbol = "󰤄"; label = "Suspend";              exec = cfg.exec.suspend; }
     { id = "session-shutdown";  symbol = ""; label = "Shutdown";             exec = cfg.exec.shutdown; }
     { id = "session-reboot";    symbol = ""; label = "Reboot";               exec = cfg.exec.reboot; }
     { id = "session-efi";       symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
-  ] ++ lib.optionals (osConfig.custom.boot.grub.enable && osConfig.custom.boot.grub.windows.efiDevice != "") [
-    { id = "session-windows";   symbol = ""; label = "Reboot to Windows";    exec = cfg.exec.reboot-windows; }
-  ];
+  ] ++ systemd-boot-windows;
 
   dmenu = self.lib.builders.writeDmenuApplication pkgs {
     name = "session-dmenu";

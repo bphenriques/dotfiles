@@ -13,11 +13,10 @@ let
     inputs.stylix.homeManagerModules.stylix
   ];
   specialArgs = {
-    self = {
-      pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
+    self = inputs.self // {
       lib = mylib;
+      pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
     };
-
     community.pkgs = {
       firefox-addons = inputs.firefox-addons.packages.${system};
     };
