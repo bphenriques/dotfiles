@@ -56,17 +56,7 @@ in {
             }
             ''
           }
-
-          menuentry "EFI setup" --class efi {
-            fwsetup
-          }
-          menuentry "Reboot" --class restart {
-            reboot
-          }
-          menuentry "Shutdown" --class shutdown {
-            halt
-          }
-        '';
+      '';
       };
     };
 
