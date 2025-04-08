@@ -1,6 +1,6 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
-  inherit (builtins) listToAttrs replaceStrings;
+  inherit (builtins) listToAttrs;
   inherit (lib) map nameValuePair;
 
   cfg = config.custom.programs.mpc-plus;

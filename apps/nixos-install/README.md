@@ -21,13 +21,32 @@ Note: `nixos-facter`](https://github.com/nix-community/nixos-facter) is also int
 
 # Installation
 
-For the following to work, we need to prepare some base credentials:
-- SOPS
-- Luke
-- SSH
-- GPG
+The automations rely on the secrets being readily available in Bitwarden (the idea is to make it easier to rotate):
+- SOPS private key
+- Luke Encryption key
+- SSH key
+- GPG key
 
-# Install remotely
+For more details, check the `dotfiles-secrets` package.
+
+## Install locally
+
+1. Boot onto the NixOS installer (see previous section).
+2. On the target machine, run:
+    ```shell
+    HOST=laptop
+    BITWARDEN_EMAIL=me@me.com
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#nixos-install -- local "$HOST" "$BITWARDEN_EMAIL"   
+    ```
+
+3. Once installed and booted onto the NixOS installation run:
+    ```shell
+    HOST=laptop
+    BITWARDEN_EMAIL=me@me.com
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- "$HOST" "$BITWARDEN_EMAIL"
+    ```
+
+## Install remotely
 
 1. Boot onto the NixOS installer (see previous section). Set `nixos`'s password using `passwd` and get its IP. 
 2. On a NixOS source machine run:
@@ -45,41 +64,35 @@ For the following to work, we need to prepare some base credentials:
     nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
-# Install locally
+# Misc
 
-1. Boot onto the NixOS installer (see previous section).
+## NVMes
 
-2. On the target machine, run:
-    ```shell
-    HOST=laptop
-    BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#nixos-install -- local "$HOST" "$BITWARDEN_EMAIL"   
-    ```
+Brand new NVMes might need some adjustments as they might have conservative settings, specifically 
+[report their logical block address size as 512 bytes, even though they use larger blocks physically - typically 4 KiB, 8 KiB, or sometimes larger.](https://wiki.archlinux.org/title/Advanced_Format#NVMe_solid_state_drives)
 
-3. Once installed and booted onto the NixOS installation run:
-    ```shell
-    HOST=laptop
-    BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- "$HOST" "$BITWARDEN_EMAIL"
-    ```
+To start, install `nvme-cli`:
+```
+$ nix-shell -p nvme-cli
+```
 
-
-## Hardware
-
-### NVMes
-
-
-Found out that new NVME might need fine-tuning:
+Following this:
 1. List the nvmes available: `sudo nvme list`
-2. Then, list the blocks of the device: ``lsblk -t /dev/nvme0n1`
-3. You check if it supports
-# in the official docs.512 (physical/logical): `lsblk -t /dev/nvme0n1`
-# But.. it can support 4096/4096: `sudo nvme id-ns -H /dev/nvme031` (difference between "in-use" an in the official docs.512/512 is for compatibility and we can increase it: `sudo nvme format --lbaf=1 /dev/nvme0n1`.
-# - Where lbaf corresponds to the number next to "LBA Format"
-#
-# Now let's check again which LBA Format is in-use: `sudo nvme id-ns -H /dev/nvme0n1`
-#
-# Source
-- https://wiki.archlinux.o in the official docs.ormat
-- https://www.high-availability.com/docs/ZFS-Tuning-Guide/#alignment-shift-ashiftn
+2. Then, check if `nvme` to see what it has to say: 
+
+   ```
+   $ sudo nvme id-ns -H /dev/nvme0n1 | grep "Relative Performance"
+   LBA Format  0 : Metadata Size: 0   bytes - Data Size: 512 bytes - Relative Performance: 0x2 Good
+   LBA Format  1 : Metadata Size: 0   bytes - Data Size: 4096 bytes - Relative Performance: 0x1 Better (in use)
+   ```
+   
+3. In this case, the best option is "in use". Otherwise, I recommend changing the logical block size address:
+   ```
+   $ nvme format --lbaf=1 /dev/nvme0n1
+   ```
+
+   Where `--lbaf` corresponds to the number next to "LBA Format". In the above example is set to `1`.
+
+Source
+- https://wiki.archlinux.org/title/Advanced_Format#NVMe_solid_state_drives
 
