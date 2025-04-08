@@ -69,12 +69,12 @@ import_age_private_keys() {
 
   info "Sops Private Key - Checking"
   if dotfiles-secrets exists sops-private-key "${host}"; then
-    info "Fetching ${host} private sops key to ${SOPS_AGE_KEY_FILE}"
+    info "Fetching ${host} private sops key (${SOPS_AGE_KEY_FILE}).."
     mkdir -p "$(dirname "${SOPS_AGE_KEY_FILE}")"
     append_if_absent "$(dotfiles-secrets fetch sops-private-key "${host}")" "${SOPS_AGE_KEY_FILE}"
-    success "Sops - Set"
+    success "Sops - Added to ${SOPS_AGE_KEY_FILE}"
   else
-    success "Sops Private Key - Not needed"
+    success "Sops Private Key - Not required in this host"
   fi
 }
 
