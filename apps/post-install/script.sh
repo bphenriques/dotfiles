@@ -108,7 +108,7 @@ export BW_SESSION
 
 set_root_nixpkgs_channel
 
-setup_ssh
+setup_ssh "${host}"
 clone_dotfiles
 set_host "${host}"
 import_age_private_keys "${host}"
