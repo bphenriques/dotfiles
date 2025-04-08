@@ -36,7 +36,7 @@ clone_dotfiles() {
 setup_ssh() {
   host="$1"
 
-  mkdir -m 700 -p "$HOME"/.ssh
+  mkdir -m 700 "$HOME"/.ssh
   info "SSH Key - Fetching private key"
   dotfiles-secrets fetch ssh-private-key "$host" > /tmp/.ssh_id_ed25519
   chmod 600 /tmp/.ssh_id_ed25519
