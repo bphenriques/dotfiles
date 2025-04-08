@@ -1,5 +1,6 @@
 #shellcheck shell=bash
 
+BRANCH_NAME="${BRANCH_NAME:-wayland-move-btrfs}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
@@ -21,6 +22,7 @@ clone_dotfiles() {
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
     git clone git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+    git checkout "$BRANCH_NAME"
   else
     success "dotfiles - available in ${DOTFILES_LOCATION}"
   fi
@@ -100,6 +102,7 @@ set_root_nixpkgs_channel() {
 build_once_fix_git_permissions() {
   info ".dotfiles - building once.."
   cd "$DOTFILES_LOCATION" || fatal "Failed to go to dotfiles directory"
+  git checkout "$BRANCH_NAME"
   nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --show-trace
   success ".dotfiles - done"
 }
