@@ -44,7 +44,7 @@ setup_ssh() {
 
   info "SSH Key - Deriving public key from the private one"
   ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub
-  chmod 644 /tmp/.ssh_id_ed25519.pub
+  chmod 644 "$HOME"/.ssh/id_ed25519.pub
 }
 
 set_host() {
