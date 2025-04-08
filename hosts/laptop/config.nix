@@ -23,14 +23,15 @@
       systemd-boot = {
         enable = true;
         editor = false;
-        consoleMode = "1"; # bigger font in boot menu
+        consoleMode = "auto";
         configurationLimit = 10;
+        windows."Windows" = {
+          title = "Windows";
+          efiDeviceHandle = "HD0b";
+        };
       };
     };
   };
-
-    # boot.loader.systemd-boot.windows: https://search.nixos.org/options?channel=unstable&show=boot.loader.systemd-boot.windows.%3Cname%3E.efiDeviceHandle&from=0&size=50&sort=relevance&type=packages&query=systemd-boot
-  # FIXME: custom.boot.grub.windows.efiDevice = "38CB-E581";
 
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
