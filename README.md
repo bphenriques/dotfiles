@@ -1,5 +1,5 @@
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
-
+    
 Hi! 👋 
 
 This repository contains the definition of my machines using [nix](https://nixos.org/).
