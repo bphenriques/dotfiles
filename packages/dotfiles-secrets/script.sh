@@ -25,14 +25,3 @@ case "$1" in
   fetch)  shift 1 && fetch "$@" ;;
   exists) shift 1 && fetch "$@" > /dev/null ;;
 esac
-
-
-### Sops private key
-#
-#1. Generate key pair using: `nix-shell -p age --command "age-keygen"`.
-#2. Export the private key to `$HOME/.config/sops/age/keys.txt`
-#3. Add new host to `.sops.yaml` using the public key to `.sops.yaml` and the correct `path_regex`.
-#
-## FIXME
-#3. Upload to Bitwarden using the format `sops-age-key-$HOST-$USER` with a `private` field inside.
-#3. Add new host to `.sops.yaml` using the public key to `.sops.yaml` and the correct `path_regex`.

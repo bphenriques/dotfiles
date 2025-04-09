@@ -1,29 +1,40 @@
-{ inputs, mylib }:
+{ nixpkgs, nur, self, sops-nix, disko, home-manager, dotfiles-private, stylix, ... }:
 let
-  inherit (inputs.nixpkgs.lib.attrsets) attrValues;
+  inherit (nixpkgs.lib.attrsets) attrValues;
 
   system = "x86_64-linux";
-  overlays = attrValues inputs.self.overlays ++ [ inputs.nur.overlays.default ];
-  nixosModules = attrValues inputs.self.nixosModules ++ [
-    inputs.sops-nix.nixosModules.sops
-    inputs.disko.nixosModules.disko
-    inputs.home-manager.nixosModules.home-manager
-  ];
-  hmModules = attrValues inputs.self.homeManagerModules ++ [
-    inputs.stylix.homeManagerModules.stylix
-  ];
-  specialArgs = {
-    self = inputs.self // {
-      lib = mylib;
-      pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
-    };
-    community.pkgs = {
-      firefox-addons = inputs.firefox-addons.packages.${system};
+
+  nixModule = {
+    nixpkgs = {
+      overlays = attrValues self.overlays ++ [ nur.overlays.default ];
     };
   };
-in mylib.hosts.mkNixOSHost {
-  inherit system nixosModules hmModules overlays;
-  nixosSpecialArgs  = specialArgs;
-  hmSpecialArgs     = specialArgs;
-  hostModule        = ./config.nix;
+
+  nixosModules = attrValues self.nixosModules ++ [
+    sops-nix.nixosModules.sops
+    disko.nixosModules.disko
+    home-manager.nixosModules.home-manager
+  ];
+
+  sharedSpecialArgs = {
+    self = self // {
+      lib = {
+        builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
+      };
+      pkgs = self.packages.${system} // dotfiles-private.packages.${system};
+    };
+  };
+
+  hmModule = {
+    home-manager = {
+      sharedModules = attrValues self.homeManagerModules ++ [
+        stylix.homeManagerModules.stylix
+      ];
+      extraSpecialArgs = sharedSpecialArgs;
+    };
+  };
+in nixpkgs.lib.nixosSystem {
+  inherit system;
+  specialArgs = sharedSpecialArgs;
+  modules = nixosModules ++ [ nixModule hmModule ./config.nix ];
 }

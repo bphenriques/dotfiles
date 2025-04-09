@@ -2,7 +2,7 @@
 let
   cfg = config.custom.services.upower-notify;
 
-  mkIcon = text: icon: textColor: self.lib.builders.mkNerdFontIcon pkgs { inherit textColor; } text icon;
+  mkIcon = text: icon: textColor: self.lib.builders.mkNerdFontIcon { inherit textColor; } text icon;
 in
 {
   options.custom.services.upower-notify = {

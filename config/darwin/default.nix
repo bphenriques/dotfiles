@@ -1,6 +1,7 @@
 { pkgs, config, self, ... }:
 {
   imports = [
+    ../common.nix
     ./brew.nix
     ./hardware.nix
     ./preferences.nix

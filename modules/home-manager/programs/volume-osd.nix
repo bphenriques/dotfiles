@@ -3,7 +3,7 @@ let
   cfg = config.custom.programs.volume-osd;
 
   volume-osd = lib.getExe cfg.package;
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
   options.custom.programs.volume-osd = {

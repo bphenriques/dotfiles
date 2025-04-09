@@ -1,20 +1,36 @@
-{ inputs, mylib }:
+{ self, nixpkgs, home-manager, darwin, dotfiles-private, ... }:
 let
-  inherit (inputs.nixpkgs.lib.attrsets) attrValues;
+  inherit (nixpkgs.lib.attrsets) attrValues;
 
   system = "aarch64-darwin";
-  darwinModules = attrValues inputs.self.darwinModules ++ [ inputs.home-manager.darwinModules.home-manager ];
-  hmModules = attrValues inputs.self.homeManagerModules;
-  specialArgs = {
-    self = {
-      pkgs = inputs.self.packages.${system} // inputs.dotfiles-private.packages.${system};
-      lib = mylib;
-      themes = import ../../themes { lib = inputs.nixpkgs.lib; };
+  nixModule = {
+    nixpkgs = {
+      hostPlatform = system;
+      overlays = attrValues self.overlays ++ [ nur.overlays.default ];
     };
   };
-in mylib.hosts.mkMacOSHost {
-  inherit system darwinModules hmModules;
-  hostModule = ./config.nix;
-  darwinSpecialArgs = specialArgs;
-  hmSpecialArgs    = specialArgs;
+
+  darwinModules = attrValues self.darwinModules ++ [ home-manager.darwinModules.home-manager ];
+
+  sharedSpecialArgs = {
+    self = self // {
+      lib = {
+        builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
+      };
+      pkgs = self.packages.${system} // dotfiles-private.packages.${system};
+    };
+  };
+
+  hmModule = {
+    home-manager = {
+      sharedModules = attrValues self.homeManagerModules ++ [
+        stylix.homeManagerModules.stylix
+      ];
+      extraSpecialArgs = sharedSpecialArgs;
+    };
+  };
+
+in darwin.lib.darwinSystem {
+  inherit system sharedSpecialArgs;
+  modules = darwinModules ++ [ nixModule hmModule ./config.nix ];
 }

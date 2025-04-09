@@ -8,7 +8,7 @@ in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
     enable = true;
-    package = self.pkgs.wlr-which-key-git;
+    package = pkgs.wlr-which-key-git;
     settings = {
       font = "${fonts.monospace.name} ${toString fonts.sizes.popups}";
       background = colors.withHashtag.base00 + "dd";

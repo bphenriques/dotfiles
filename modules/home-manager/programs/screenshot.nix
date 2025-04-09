@@ -11,7 +11,7 @@ let
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
   screenshotActions = [
@@ -21,7 +21,7 @@ let
     { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = cfg.exec.region-edit; }
   ];
 
-  dmenu = self.lib.builders.writeDmenuApplication pkgs {
+  dmenu = self.lib.builders.writeDmenuApplication {
     name = "screenshot-menu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
   };

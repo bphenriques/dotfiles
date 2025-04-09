@@ -37,16 +37,16 @@
 
   outputs = inputs @ { self, nixpkgs, ... }:
     let
-      inherit (mylib.generators) forAllSystems readModulesAttrs;
-      mylib = import ./lib { inherit inputs; lib = nixpkgs.lib; };
+      generators = import ./lib/generators.nix { lib = nixpkgs.lib; };
+      inherit (generators) forAllSystems readModulesAttrs;
     in {
-      apps      = import ./apps { inherit nixpkgs mylib self; };
-      packages  = import ./packages { inherit nixpkgs mylib; };
+      apps      = import ./apps { inherit nixpkgs self generators; };
+      packages  = import ./packages { inherit nixpkgs generators; };
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
-      overlays  = import ./overlays { inherit inputs; };
+      overlays  = import ./overlays inputs;
 
       # Modules
       nixosModules        = readModulesAttrs ./modules/nixos;
@@ -54,7 +54,7 @@
       darwinModules       = readModulesAttrs ./modules/darwin;
 
       # Hosts
-      nixosConfigurations.laptop = import ./hosts/laptop { inherit inputs mylib; };
-      darwinConfigurations.work-macos = import ./hosts/work-macos { inherit inputs mylib; };
+      nixosConfigurations.laptop = import ./hosts/laptop inputs;
+      darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }

@@ -11,7 +11,7 @@ let
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   mpc-plus = lib.getExe cfg.package;
 in

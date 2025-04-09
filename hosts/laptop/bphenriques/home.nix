@@ -1,12 +1,12 @@
 { pkgs, config, self, ... }:
 let
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
   imports = [
-    ../../../home-manager
-    ../../../home-manager/desktop-environment
-    ../../../home-manager/desktop
+    ../../../config/home-manager
+    ../../../config/home-manager/desktop-environment
+    ../../../config/home-manager/desktop
     ./kanshi.nix
     ./stylix.nix
   ];
