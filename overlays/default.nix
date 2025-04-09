@@ -13,6 +13,6 @@ _: {
     });
 
     # I could overwrite the version but the build system is confusing to mess in this case. It is simpler to copy.
-    wlr-which-key-git = prev.callPackage ./wlr-which-key-git.nix { };
+    wlr-which-key-git = final.callPackage ./wlr-which-key-git.nix { };
   });
 }
