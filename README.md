@@ -1,5 +1,7 @@
 [![Laptop Host](https://img.shields.io/badge/Laptop-host-orange)](./hosts/laptop)
 [![Work MacOS Host](https://img.shields.io/badge/Work_MacOS-host-orange)](./hosts/work-macos)
+[![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
+[![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
 [![Darwin Install](https://img.shields.io/badge/Darwin_Install-docs-blue)](./apps/darwin-install/README.md)
 
@@ -31,6 +33,25 @@ Relevant Software:
 For those interested in the Nix aspects of the project:
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
 - [`stylix`](https://github.com/danth/stylix) for consistent theming in general
+- [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets 
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) to automate remote installations
 - Not using [flake-utils](https://github.com/numtide/flake-utils) intentionally. I find it an _unnecessary_ abstraction
 - Not using [impermanence](https://github.com/nix-community/impermanence). I tried and... it is _too much_
+
+## Flake Outputs
+
+For those familiar with [Nix Flakes](https://nixos.wiki/wiki/Flakes), take a look around at my [modules](./modules) and [packages](./packages):
+```
+$ nix run github:bphenriques/dotfiles#{package}
+```
+
+You can see the list of packages by running:
+```
+$ nix flake show github:bphenriques/dotfiles
+```
+
+## Acknowledgements and license
+
+My journey to move to Linux has been long, sometimes exhausting but enlightening. This would not be possible without the work of other developers in exposing their own dotfiles, writing great documentation ([Arch Linux Wiki](https://wiki.archlinux.org/title/Main_page) and [NixOS Wiki](https://wiki.nixos.org/wiki/NixOS_Wiki)), and [being available to help](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community). 
+
+Thank you! It is my turn to share my personal under the MIT license, which is only relevant to what I have built: [packages](./packages), some [modules](./modules) (that I should contribute upstream), and some [helpful functions](./lib).
