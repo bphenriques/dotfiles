@@ -17,8 +17,8 @@ I try to have a minimalist and keyboard oriented setup. Take a look around and a
   <em>Commit <a href=https://github.com/bphenriques/dotfiles/commit/db9275579208f7d1b4a3ef24aa01a2ab3ece9df4><code>db9275579208f7d1b4a3ef24aa01a2ab3ece9df4</code></a></em>
 </p>
 
-Relevant Software:
-- **Operating System**: [NixOS](https://nixos.org/)
+## Relevant Software
+
 - **Compositor**: [`niri`](https://github.com/YaLTeR/niri)
 - **Launcher**: [`fuzzel`](https://codeberg.org/dnkl/fuzzel)
 - **Terminal**: [`foot`](https://codeberg.org/dnkl/foot)
@@ -35,6 +35,7 @@ For those interested in the Nix aspects of the project:
 - [`stylix`](https://github.com/danth/stylix) for consistent theming in general
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets 
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) to automate remote installations
+- [`nur`](https://github.com/nix-community/NUR) to get access to some packages (e.g., Firefox addons)
 - Not using [flake-utils](https://github.com/numtide/flake-utils) intentionally. I find it an _unnecessary_ abstraction
 - Not using [impermanence](https://github.com/nix-community/impermanence). I tried and... it is _too much_
 
