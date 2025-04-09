@@ -53,6 +53,6 @@ $ nix flake show github:bphenriques/dotfiles
 
 ## Acknowledgements and license
 
-My journey to move to Linux has been long, sometimes exhausting but enlightening. This would not be possible without the work of other developers in exposing their own dotfiles, writing great documentation ([Arch Linux Wiki](https://wiki.archlinux.org/title/Main_page) and [NixOS Wiki](https://wiki.nixos.org/wiki/NixOS_Wiki)), and [being available to help](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community). 
+I started this project to learn more about Linux: long, sometimes exhausting but enlightening. This would not be possible without the work of other developers in exposing their own dotfiles, writing great documentation ([Arch Linux Wiki](https://wiki.archlinux.org/title/Main_page) and [NixOS Wiki](https://wiki.nixos.org/wiki/NixOS_Wiki)), and [being available to help](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community). 
 
-Thank you! It is my turn to share my personal under the MIT license, which is only relevant to what I have built: [packages](./packages), some [modules](./modules) (that I should contribute upstream), and some [helpful functions](./lib).
+Thank you! In turn, I am sharing my dotfiles under the MIT license, which is only relevant to what I have built: [packages](./packages), some [modules](./modules) (that I should contribute upstream), and some [helpful functions](./lib).
