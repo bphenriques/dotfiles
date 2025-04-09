@@ -15,9 +15,7 @@
 
 4. Finally, create a new `host/<name>` and start small with `config.nix`, `hardware-configuration.nix`, and `disko.nix` ([examples](https://github.com/nix-community/disko/tree/master/example)).
 
-This is what I consider a minimal _sane_ installation (e.g., tried [impermanence](https://github.com/nix-community/impermanence) but it is not for me).
-
-Note: `nixos-facter`](https://github.com/nix-community/nixos-facter) is also interesting, but seems a bit opaque.
+This is what I consider a minimal healthy setup that covers most things.
 
 # Installation
 
