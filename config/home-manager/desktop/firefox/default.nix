@@ -22,8 +22,8 @@ lib.mkIf pkgs.stdenv.isLinux {
 
         search = {
           force = true;
-          default = "Google";
-          order = [ "Google" ];
+          default = "google";
+          order = [ "google" ];
           engines = {
             "Nix Packages" = {
               definedAliases = [ "@n" "@nix" ];
@@ -60,12 +60,12 @@ lib.mkIf pkgs.stdenv.isLinux {
             "NixOS Wiki" = {
               definedAliases = [ "@nw" "@nixwiki" ];
               urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
-              iconUpdateURL = "https://nixos.wiki/favicon.png";
+              icon = "https://nixos.wiki/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000; # every day
             };
-            "YouTube" = {
+            "youtube" = {
               definedAliases = ["@yt"];
-              iconUpdateURL = "https://youtube.com/favicon.ico";
+              icon = "https://youtube.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000;
               urls = [{
                 template = "https://www.youtube.com/results";
@@ -83,7 +83,7 @@ lib.mkIf pkgs.stdenv.isLinux {
                 ];
               }];
             };
-            "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
+            "google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
           };
         };
       };
