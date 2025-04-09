@@ -17,7 +17,8 @@ I try to have a minimalist and keyboard oriented setup. Take a look around and a
   <em>Commit <a href=https://github.com/bphenriques/dotfiles/commit/db9275579208f7d1b4a3ef24aa01a2ab3ece9df4><code>db9275579208f7d1b4a3ef24aa01a2ab3ece9df4</code></a></em>
 </p>
 
-Relevant Software:
+## Relevant Software
+
 - **Operating System**: [NixOS](https://nixos.org/)
 - **Compositor**: [`niri`](https://github.com/YaLTeR/niri)
 - **Launcher**: [`fuzzel`](https://codeberg.org/dnkl/fuzzel)
@@ -42,7 +43,7 @@ For those interested in the Nix aspects of the project:
 
 For those familiar with [Nix Flakes](https://nixos.wiki/wiki/Flakes), take a look around at my [modules](./modules) and [packages](./packages):
 ```
-$ nix run github:bphenriques/dotfiles#{package}
+$ nix run github:bphenriques/dotfiles#{package} -- {args}
 ```
 
 You can see the list of packages by running:
