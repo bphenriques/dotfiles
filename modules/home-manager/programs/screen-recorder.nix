@@ -11,7 +11,7 @@ let
     type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
   };
 
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screen-recorder = lib.getExe cfg.package;
   screenRecordingActions = [
@@ -22,7 +22,7 @@ let
     { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.exec.stop; }
   ];
 
-  dmenu = self.lib.builders.writeDmenuApplication pkgs {
+  dmenu = self.lib.builders.writeDmenuApplication {
     name = "screen-recorder-menu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
   };

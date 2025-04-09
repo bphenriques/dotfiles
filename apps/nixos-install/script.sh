@@ -2,9 +2,7 @@
 
 set -e
 
-# FIXME
-BRANCH_NAME="${BRANCH_NAME:-wayland-move-btrfs}"
-FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME}}"
+FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME:-main}}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
 fatal() { printf '[FAIL] %s\n' "$1" 1>&2; exit 1; }

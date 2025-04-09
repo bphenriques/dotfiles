@@ -1,6 +1,6 @@
-{ lib }:
+{ lib, pkgs }:
 {
-  writeDmenuApplication = pkgs: {
+  writeDmenuApplication = {
     name,
     runtimeInputs ? [ ],
     dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
@@ -22,7 +22,7 @@
     };
 
   # Good enough: I can point directly to the generated file.
-  mkNerdFontIcon = pkgs: { textColor ? "black", size ? "128x128", fontSize ? 160 }: name: symbol:
+  mkNerdFontIcon = { textColor ? "black", size ? "128x128", fontSize ? 160 }: name: symbol:
     let
       fontFile = "${pkgs.nerd-fonts.hack}/share/fonts/truetype/NerdFonts/Hack/HackNerdFontMono-Regular.ttf";
       derivation = pkgs.runCommand "${name}-custom-icon.png" { } ''

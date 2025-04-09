@@ -10,7 +10,7 @@ let
   };
   mkAppOpt' = default: mkAppOpt // { inherit default; };
 
-  mkIcon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   systemctl = lib.getExe' pkgs.systemd "systemctl";
   sessionActions = let
@@ -29,7 +29,7 @@ let
     { id = "session-efi";       symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
   ] ++ systemd-boot-windows;
 
-  dmenu = self.lib.builders.writeDmenuApplication pkgs {
+  dmenu = self.lib.builders.writeDmenuApplication {
     name = "session-dmenu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) sessionActions;
   };

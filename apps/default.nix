@@ -1,6 +1,6 @@
-{ nixpkgs, mylib, self }:
+{ nixpkgs, generators, self }:
 let
-  inherit (mylib.generators) forAllSystems forLinuxSystems forDarwinSystems mergeAllSystems;
+  inherit (generators) forAllSystems forLinuxSystems forDarwinSystems mergeAllSystems;
   lib = nixpkgs.lib;
   pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
 

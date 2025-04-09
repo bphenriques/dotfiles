@@ -1,8 +1,8 @@
 { config, pkgs, lib, ... }:
 {
   imports = [
-    ../../home-manager
-    ../../home-manager/desktop
+    ../../config/home-manager
+    ../../config/home-manager/desktop
   ];
 
   # Consider moving some of these packages to project's shell.nix if team's okay with that.

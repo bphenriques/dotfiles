@@ -5,8 +5,8 @@
     ./disko.nix
     ./network-drives.nix
     ./peripherals.nix
-    ../../nixos
-    ../../nixos/desktop
+    ../../config/nixos
+    ../../config/nixos/desktop
 
     # Users
     ./bphenriques

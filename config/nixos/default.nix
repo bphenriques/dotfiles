@@ -1,5 +1,7 @@
 { pkgs, lib, self, ... }:
 {
+  imports = [ ../common.nix ];
+
   nix = {
     settings.auto-optimise-store   = true;  # Optimise the store when building.
     gc = {

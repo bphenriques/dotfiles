@@ -15,7 +15,7 @@
     (pkgs.makeDesktopItem {
       name = "system-monitor";
       desktopName = "System Monitor";
-      icon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } "system-monitor" "";
+      icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "system-monitor" "";
       exec = ''${lib.getExe' pkgs.foot "footclient"} --title=btop-tui ${lib.getExe config.programs.btop.package}'';
     })
   ];

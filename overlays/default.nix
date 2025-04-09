@@ -1,4 +1,4 @@
-{ inputs, ... }: {
+_: {
   git-versions = (final: prev: {
     # Remove on next release when it supports "--with-nth"
     fuzzel-git = prev.fuzzel.overrideAttrs (_: {
@@ -11,5 +11,8 @@
         hash = "sha256-4AJW8lTJuN6MPvFlFzmM1DMsx72WSi93FUYiVPv/rwU=";
       };
     });
+
+    # I could overwrite the version but the build system is confusing to mess in this case. It is simpler to copy.
+    wlr-which-key-git = prev.callPackage ./wlr-which-key-git.nix { };
   });
 }

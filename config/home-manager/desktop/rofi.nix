@@ -101,7 +101,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     (pkgs.makeDesktopItem {
       name = "browse-wallpapers";
       desktopName = "Browse Wallpapers";
-      icon = self.lib.builders.mkNerdFontIcon pkgs { textColor = config.lib.stylix.colors.withHashtag.base07; } "wallpaper" "󰸉";
+      icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "wallpaper" "󰸉";
       exec = ''${lib.getExe pkgs.rofi-wayland} -show filebrowser -theme ${config.xdg.configHome}/rofi/wallpaper.rasi'';
     })
   ];

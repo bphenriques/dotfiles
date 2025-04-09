@@ -28,8 +28,5 @@ create_session() {
 case "${1:-}" in
   ""|--help)      usage ;;
   session)        shift 1 && create_session "$@"  ;;
-
-  # TODO: deprecate
-  get-item-field) shift 1 && bw get item "$1" | jq --arg FIELD "$2" --raw-output '.fields[] | select(.name == $FIELD) | .value' ;;
 esac
 

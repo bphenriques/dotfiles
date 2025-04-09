@@ -1,7 +1,7 @@
-{ nixpkgs, mylib }:
+{ nixpkgs, generators, ... }:
 
 let
-  inherit (mylib.generators) forAllSystems forLinuxSystems mergeAllSystems;
+  inherit (generators) forAllSystems forLinuxSystems mergeAllSystems;
 
   crossPlatform = forAllSystems (system:
     let pkgs = nixpkgs.legacyPackages.${system};
@@ -29,9 +29,6 @@ let
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshot = pkgs.callPackage ./screenshot { };
       mpc-plus = pkgs.callPackage ./mpc-plus { };
-
-      # Not using overlays because dealing with rust inside is finnicky and not worth my time :sweat:
-      wlr-which-key-git = pkgs.callPackage ./wlr-which-key-git.nix { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]
