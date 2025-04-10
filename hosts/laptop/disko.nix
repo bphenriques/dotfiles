@@ -31,13 +31,11 @@ in
               content = {
                 type = "luks";
                 name = "crypted";
-                settings = {
-                  allowDiscards = true;
-                };
-                passwordFile = "/tmp/luks-interactive-password.key";
+                settings.allowDiscards = true;
+                passwordFile = "/tmp/luks-interactive-password.key";  # Required when setting up.
                 content = {
                   type = "btrfs";
-                  extraArgs = [ "-L" "nixos" "-f" ]; # override existing partitions
+                  extraArgs = [   "-f" ]; # override existing partitions
 
                   # In line with other distros for simplicity. Ephemeral/reproducible data does not need to be snapshoted.
                   subvolumes = {
@@ -67,7 +65,7 @@ in
                     };
                     "@home" = {
                       mountpoint = "/home";
-                      mountOptions = [ "compress=zstd" "noatime" ];
+                      mountOptions = [ "compress=zstd:1" "noatime" ];
                     };
                     "@home/bphenriques" = { };
                     "@home/bphenriques/workdir" = { };

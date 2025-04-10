@@ -88,7 +88,13 @@ local_install() {
   reboot
 }
 
+rescue() {
+  local host="$1"
+  sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
+}
+
 case "$1" in
-  remote) shift 1 && remote_install "$@"     ;;
-  local)  shift 1 && local_install "$@"      ;;
+  remote) shift 1 && remote_install "$@"  ;;
+  local)  shift 1 && local_install "$@"   ;;
+  rescue) shift 1 && rescue "$@"          ;;
 esac
