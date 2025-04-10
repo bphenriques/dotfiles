@@ -22,6 +22,7 @@ clone_dotfiles() {
   if ! test -d "${DOTFILES_LOCATION}" || (find "${DOTFILES_LOCATION}" -maxdepth 0 -empty | read -r _); then
     info "dotfiles - Cloning to ${DOTFILES_LOCATION}"
     git clone git@github.com:bphenriques/dotfiles.git "$DOTFILES_LOCATION"
+    cd "$DOTFILES_LOCATION"
     git checkout "$BRANCH_NAME"
   else
     success "dotfiles - available in ${DOTFILES_LOCATION}"
