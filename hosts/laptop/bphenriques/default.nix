@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, ... }:
 {
   sops.secrets.user_bphenriques_password.neededForUsers = true;
   users.users.bphenriques = {

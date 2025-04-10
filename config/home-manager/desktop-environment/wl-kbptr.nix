@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
 let
-  cmd = desc: cmd: { inherit desc cmd; keep_open = true; };
   colors = config.lib.stylix.colors.withHashtag;
   backgroundTransparency = "1A"; # 10%
 in {

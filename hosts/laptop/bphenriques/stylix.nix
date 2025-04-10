@@ -1,5 +1,5 @@
-{ pkgs, config, self, ... }:
-rec {
+{ pkgs, ... }:
+{
   stylix = {
     enable = true;
     autoEnable = false;

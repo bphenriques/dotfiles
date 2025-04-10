@@ -1,8 +1,6 @@
-{ lib, pkgs, config, self, ... }:
+{ lib, pkgs, config, ... }:
 let
   cfg = config.custom.services.mpc-plus;
-
-  tomlFormat = pkgs.formats.toml { };
 in
 {
   options.custom.services.mpc-plus = {

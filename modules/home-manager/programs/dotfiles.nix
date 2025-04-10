@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, ... }:
+{ lib, config, self, ... }:
 
 let
   cfg = config.custom.dotfiles;

@@ -1,4 +1,4 @@
-{ pkgs, config, lib, ... }:
+{ pkgs, config, ... }:
 let
   steam-desktop-item = (pkgs.makeDesktopItem {
     name = "steam";

@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, ... }:
+{ lib, pkgs, config, ... }:
 let
   inherit (lib) optionalString concatStringsSep;
 in

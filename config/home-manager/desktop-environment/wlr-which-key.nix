@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, ... }:
+{ config, pkgs, lib, ... }:
 let
   inherit (config.lib.stylix) colors;
   inherit (config.stylix) fonts;

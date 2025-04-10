@@ -1,4 +1,4 @@
-{ pkgs, lib, config, self, osConfig, ... }:
+{ pkgs, lib, config, self, ... }:
 {
   programs.btop = {
     enable = true;

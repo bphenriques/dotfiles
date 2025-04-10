@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+_:
 {
   boot.kernelParams = [
     "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)

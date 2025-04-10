@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, ... }:
 let
   inherit (builtins) listToAttrs replaceStrings;
-  inherit (lib) map nameValuePair;
+  inherit (lib) nameValuePair;
 
   cfg = config.custom.programs.file-explorer;
 

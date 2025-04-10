@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   commitTemplate = pkgs.writeText "git-message" ''
    # <type>(<scope>): Max. 50 characters    ------->

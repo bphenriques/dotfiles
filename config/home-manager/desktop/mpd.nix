@@ -1,4 +1,4 @@
-{ lib, pkgs, self, config, ... }:
+{ lib, pkgs, config, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;

@@ -1,8 +1,5 @@
-{ lib, pkgs, config, self, osConfig, ... }:
+{ lib, pkgs, config, self, ... }:
 let
-  inherit (builtins) listToAttrs;
-  inherit (lib) map nameValuePair;
-
   cfg = config.custom.programs.mpc-plus;
 
   mkAppOpt = default: lib.mkOption {

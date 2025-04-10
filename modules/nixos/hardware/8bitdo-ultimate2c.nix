@@ -6,7 +6,7 @@ let
   vendorId = "2dc8";
   productId = "310a";
 in {
-  options.custom.hardware.gamepad-8bitdo-ultimate2c = with lib.types; {
+  options.custom.hardware.gamepad-8bitdo-ultimate2c = {
     enable = lib.mkEnableOption "8bitdo 2.4 Ultimate 2C Controller support";
   };
 
@@ -16,7 +16,6 @@ in {
   config = lib.mkIf cfg.enable {
     hardware.xpadneo.enable = true;   # Wireless Xbox(ish) gamepads (e.g., 8bitdo)
 
-    # FIXME: This should be done automatically by Kernel 6.12
     services.udev.extraRules = ''
       ACTION=="add", \
         ATTRS{idVendor}=="${vendorId}", \

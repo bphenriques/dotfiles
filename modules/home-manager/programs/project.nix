@@ -1,4 +1,4 @@
-{ config, lib, pkgs, self, ... }:
+{ config, lib, self, ... }:
 
 let
   cfg = config.custom.programs.project;

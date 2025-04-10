@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+_:
 {
   # Keyboards
   hardware.keyboard.zsa.enable = true;                                    # ZSA Keyboard

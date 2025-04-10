@@ -1,4 +1,4 @@
-{ pkgs, config, self, ... }:
+{ config, self, ... }:
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in

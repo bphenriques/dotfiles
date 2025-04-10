@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, ... }:
+{ pkgs, lib, ... }:
 {
   stylix.targets.helix.enable = true;
   programs.helix = {

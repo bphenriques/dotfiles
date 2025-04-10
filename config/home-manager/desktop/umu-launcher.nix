@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   umu-run0 = pkgs.writeShellApplication {
     name = "umu-run0";

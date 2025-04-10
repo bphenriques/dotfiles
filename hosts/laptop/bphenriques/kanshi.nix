@@ -1,4 +1,4 @@
-{ pkgs, lib, self, config, ... }:
+_:
 let
   laptopScreen = {
     criteria = "eDP-1";

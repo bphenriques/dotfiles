@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ pkgs, config, ... }:
 let
   groups = config.users.groups;
   users = config.users.users;
@@ -20,7 +20,7 @@ let
   };
 in
 {
-  environment.systemPackages = [ pkgs.cifs-utils ]; # Samba Server
+  environment.systemPackages = [ pkgs.cifs-utils ]; # Samba
 
   sops = {
     secrets.samba_server_username = { };

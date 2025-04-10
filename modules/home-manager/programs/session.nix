@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
   inherit (builtins) listToAttrs;
-  inherit (lib) map nameValuePair mapAttrsToList;
+  inherit (lib) nameValuePair mapAttrsToList;
 
   cfg = config.custom.programs.session;
 

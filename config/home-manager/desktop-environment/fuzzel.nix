@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, ... }:
+{ config, pkgs, lib, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   programs.fuzzel = {
     enable = true;

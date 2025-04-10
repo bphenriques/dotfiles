@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, ... }:
+{ config, pkgs, lib, ... }:
 lib.mkIf pkgs.stdenv.isDarwin {
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {

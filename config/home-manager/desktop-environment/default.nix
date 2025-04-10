@@ -1,4 +1,4 @@
-{ config, lib, pkgs, self, osConfig, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 {
   imports = [
     ./fuzzel.nix            # Application launcher

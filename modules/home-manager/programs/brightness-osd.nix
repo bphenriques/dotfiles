@@ -1,4 +1,4 @@
-{ lib, pkgs, config, osConfig, self, ... }:
+{ lib, pkgs, config, self, ... }:
 let
   cfg = config.custom.programs.brightness-osd;
 

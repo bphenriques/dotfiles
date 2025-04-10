@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, ... }:
+{ pkgs, config, self, ... }:
 let
   background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
   lockPackage = pkgs.writeShellApplication {

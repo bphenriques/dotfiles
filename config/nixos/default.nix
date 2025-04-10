@@ -1,4 +1,4 @@
-{ pkgs, lib, self, ... }:
+{ pkgs, ... }:
 {
   imports = [ ../common.nix ];
 

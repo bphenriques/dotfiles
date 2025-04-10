@@ -1,4 +1,4 @@
-{ config, lib, self, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.custom.programs.wlr-which-key;
   yamlFormat = pkgs.formats.yaml { };

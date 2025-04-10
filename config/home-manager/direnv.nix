@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ config, ... }:
 {
   programs.direnv = {
     enable                  = true; # Automatically load .envrc or .env.

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+_:
 {
   services.pulseaudio.enable = false;  # Disable PulseAudio as pipewire is preferable
   services.pipewire = {

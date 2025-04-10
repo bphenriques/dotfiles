@@ -19,7 +19,6 @@ I try to have a minimalist and keyboard oriented setup. Take a look around and a
 
 ## Relevant Software
 
-- **Operating System**: [NixOS](https://nixos.org/)
 - **Compositor**: [`niri`](https://github.com/YaLTeR/niri)
 - **Launcher**: [`fuzzel`](https://codeberg.org/dnkl/fuzzel)
 - **Terminal**: [`foot`](https://codeberg.org/dnkl/foot)

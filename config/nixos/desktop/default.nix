@@ -1,4 +1,4 @@
-{ pkgs, self, config, ... }:
+{ pkgs, config, ... }:
 {
   imports = [
     ./greetd.nix        # Login manager

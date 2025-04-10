@@ -1,7 +1,7 @@
-{ lib, pkgs, config, self, osConfig, ... }:
+{ lib, pkgs, config, self, ... }:
 let
   inherit (builtins) listToAttrs;
-  inherit (lib) map nameValuePair;
+  inherit (lib) nameValuePair;
 
   cfg = config.custom.programs.screen-recorder;
 

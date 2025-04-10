@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, ... }:
+{ lib, config, self, ... }:
 let
   wallpapers = "${self.pkgs.wallpapers}/share/wallpapers";
 in
