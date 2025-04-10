@@ -90,6 +90,11 @@ local_install() {
 
 rescue() {
   local host="$1"
+  local bw_email="$2"
+
+  unlock_bitwarden "$bw_email"
+
+  dotfiles-secrets fetch luks-key "$host" > "/tmp/luks-interactive-password.key" || fatal "No luks key available"
   sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 }
 
