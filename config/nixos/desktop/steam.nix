@@ -13,7 +13,14 @@ in
 {
   # Tweaks
   boot = {
-    kernel.sysctl."vm.max_map_count" = "2147483642";        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
+    kernel.sysctl = {
+      "vm.max_map_count" = 2147483642;        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
+
+      # Extra tweaks as set by SteamOS. TODO: Document
+      "kernel.split_lock_mitigate" = 0;
+      "kernel.sched_cfs_bandwidth_slice_us" = 3000;
+      "net.ipv4.tcp_fin_timeout" = 5;
+    };
     kernelParams = [ "tsc=reliable" "clocksource=tsc" ];    # https://wiki.archlinux.org/title/gaming#Improve_clock_gettime_throughput
   };
 

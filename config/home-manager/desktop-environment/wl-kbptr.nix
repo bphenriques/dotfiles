@@ -8,12 +8,28 @@ in {
   ];
 
   xdg.configFile."wl-kbptr/config".text = lib.generators.toINI { } {
+    general = {
+      home_row_keys = "";
+      modes = "floating,click";
+    };
+
     mode_tile = {
       label_color = colors.base07;
       label_select_color = colors.base0A;
       unselectable_bg_color = colors.base04 + "${backgroundTransparency}";
       selectable_bg_color = colors.base0D + "${backgroundTransparency}";
       selectable_border_color = colors.base0D + "${backgroundTransparency}";
+    };
+
+    mode_floating = {
+      source = "stdin";
+      label_color = colors.base07;
+      label_select_color = colors.base0A;
+      unselectable_bg_color = colors.base04 + "${backgroundTransparency}";
+      selectable_bg_color = colors.base0D + "${backgroundTransparency}";
+      selectable_border_color = colors.base0D + "${backgroundTransparency}";
+    #label_font_family=sans-serif
+     # label_symbols=abcdefghijklmnopqrstuvwxyz      
     };
 
     mode_bisect = {
