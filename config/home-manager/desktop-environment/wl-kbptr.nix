@@ -4,13 +4,14 @@ let
   backgroundTransparency = "1A"; # 10%
 in {
   home.packages = [
-    pkgs.wl-kbptr
+    pkgs.wl-kbptr-git
   ];
 
+  # FIXME: Set font automatically from Stylix
   xdg.configFile."wl-kbptr/config".text = lib.generators.toINI { } {
     general = {
       home_row_keys = "";
-      modes = "floating,click";
+      modes = "tile,bisect";
     };
 
     mode_tile = {
@@ -28,8 +29,8 @@ in {
       unselectable_bg_color = colors.base04 + "${backgroundTransparency}";
       selectable_bg_color = colors.base0D + "${backgroundTransparency}";
       selectable_border_color = colors.base0D + "${backgroundTransparency}";
-    #label_font_family=sans-serif
-     # label_symbols=abcdefghijklmnopqrstuvwxyz      
+      #label_font_family=sans-serif
+       # label_symbols=abcdefghijklmnopqrstuvwxyz      
     };
 
     mode_bisect = {
@@ -50,6 +51,6 @@ in {
   # TODO: Move to niri submaps + wlrctl once we have https://github.com/YaLTeR/niri/issues/846
   # Select with g, h, b -> left, right and middle
   custom.programs.niri.bindings = {
-    "Mod+Alt+M" = ''spawn "${lib.getExe pkgs.wl-kbptr}"'';
+    "Mod+Alt+M" = ''spawn "${lib.getExe pkgs.wl-kbptr-git}"'';
   };
 }

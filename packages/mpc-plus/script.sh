@@ -90,9 +90,9 @@ case "${1:-}" in
     selection="$(select_title_artist_album)"
     if [ "$selection" != "" ]; then
       case "${2:-play}" in
-        play)     mpc clear && mpc add "$2" && mpc play ;;
-        next)     mpc insert "$2" && mpc play           ;;
-        add)      mpc add "$2" && mpc play              ;;
+        play)     mpc clear && mpc add "$selection" && mpc play ;;
+        next)     mpc insert "$selection" && mpc play           ;;
+        add)      mpc add "$selection" && mpc play              ;;
       esac
     fi
     ;;
