@@ -1,7 +1,6 @@
 #shellcheck shell=bash
 
-# Pulseaudio that has no equivalente in wireplumber (yet). Using its cli but not necessarily the service
-# This require actually filtering as it captures more than I wanted
+# TODO Migrate more calls to pipewire/wireplumber: https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/Migrate-PulseAudio#set-card-profile
 list_sources()    { pactl -f json list sources | jq -cr '[ .[] | select((.ports | any((.type == "Mic") or (.type == "Headset")))) ]'; }
 list_sinks()      { pactl -f json list sinks; }
 get_sink()        { pactl -f json list sinks | jq -cr --arg sink "$1" '.[] | select(.name == $sink)'; }
