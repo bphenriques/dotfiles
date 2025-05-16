@@ -58,6 +58,6 @@
       desktop = 1.0;
     };
 
-    targets.qt.platform = "gnome"; # It uses adwait or adwait-dark underneath
+    targets.qt.platform = "gnome"; # Stylix does not support adwaita.
   };
 }
