@@ -37,14 +37,18 @@ in
         variant = "euro,";
         options = "caps:ctrl_modifier";
       };
-      touchpad = [ "tap" "natural-scroll" ];
-      extraOptions = [ ''focus-follows-mouse max-scroll-amount="10%"'' ];
+      touchpad = [ "tap" "natural-scroll" "drag false" ];
+      extraOptions = [
+        ''focus-follows-mouse max-scroll-amount="10%"''
+      ];
     };
 
     layout = ''
       gaps 6
       center-focused-column "never"
       always-center-single-column
+      background-color "transparent"
+
       preset-column-widths {
         proportion 0.33333
         proportion 0.5
@@ -64,6 +68,7 @@ in
         width 2
         active-color "${config.lib.stylix.colors.withHashtag.base0D}"
         inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
+        urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
       }
 
       border {
@@ -81,6 +86,7 @@ in
         place-within-column
         active-color "${config.lib.stylix.colors.withHashtag.base0A}"
         inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
+        urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
         position "right"
         gaps-between-tabs 4
       }
@@ -113,6 +119,7 @@ in
       ];
     };
 
+    # TODO: expand-column-to-available-width, center-visible-columns
     bindings = {
       # Size management
       "Mod+R"       = "switch-preset-column-width";
@@ -130,14 +137,19 @@ in
       "Mod+Shift+C" = "center-window";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+Comma"   = "consume-window-into-column";
-      "Mod+Shift+Comma" = "expel-window-from-column";
+      "Mod+Ctrl+Shift+F" = "toggle-windowed-fullscreen";
+      "Mod+Comma"        = "consume-window-into-column";
+      "Mod+Shift+Comma"  = "expel-window-from-column";
+      "Mod+O repeat=false" = "toggle-overview";
 
-      # Screenshots
+       # Screenshots
       "Print"       = ''screenshot-screen'';
       "Shift+Print" = ''screenshot'';
       "Mod+Print"   = ''spawn ${toNiriSpawn config.custom.programs.screenshot.exec.menu}'';
       "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
+
+      # TODO: Fix screenshot UI moving around with keyboard. See release 25.05
+      # TODO: https://github.com/YaLTeR/niri/blob/2415346caaa4121ed202b8e376fb40b2a44eb61f/resources/default-config.kdl#L575
 
       # Notifications
       "Mod+N"        = ''spawn "${dunstctl}" "action"'';
@@ -190,7 +202,10 @@ in
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn "${brightness}" "decrease"'';
     };
 
-    extraConfig = ''
+    # TODO: Explore tiled state window rule from 25.05 release
+    # TODO: Explore is_urgent to add border red   
+    # TODO: Update to use another variant that is blurred: https://github.com/YaLTeR/niri/wiki/Overview#backdrop-customization
+   extraConfig = ''
       window-rule {
         geometry-corner-radius 6
         clip-to-geometry true
@@ -216,10 +231,27 @@ in
         block-out-from "screen-capture"
       }
 
+      layer-rule {
+        match namespace="swww-daemon"
+        place-within-backdrop true
+      }
+      
       cursor {
         xcursor-theme "${config.stylix.cursor.name}"
         xcursor-size ${toString config.stylix.cursor.size}
       };
+
+      overview {
+        workspace-shadow {
+          off
+        }
+      }
+
+      gestures {
+        hot-corners {
+          off
+        }
+      }
     '';
   };
 }
