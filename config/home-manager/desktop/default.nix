@@ -22,7 +22,11 @@
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
     pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
+
+    # Rom management
+    pkgs.igir          # Curates the files
+    pkgs.skyscraper    # Adds media files next to the files
  ];
 
-  custom.services.xwayland-satellite.enable = pkgs.stdenv.isLinux;
+  custom.services.xwayland-satellite.enable = true;
 }
