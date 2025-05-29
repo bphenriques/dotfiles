@@ -24,8 +24,8 @@
     pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
 
     # Rom management
-    pkgs.igir          # Curates the files
-    pkgs.skyscraper    # Adds media files next to the files
+    pkgs.igir-git      # Remove once https://github.com/NixOS/nixpkgs/pull/372184 is merged
+    (pkgs.skyscraper.override { enableXdg = true; })     # Adds media files next to the files
  ];
 
   custom.services.xwayland-satellite.enable = true;
