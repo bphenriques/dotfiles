@@ -68,7 +68,7 @@ in
     custom.programs.wlr-which-key.menus.mpc-plus = [
       { key = "a";            desc = "Shuffle library";   cmd = cfg.exec.play-shuffled;   keep_open = true; }
       { key = ["space" "p"];  desc = "Play/Pause";        cmd = cfg.exec.play-pause;      keep_open = true; }
-      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;            keep_open = true; }
+      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop; }
       { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;        keep_open = true; }
       { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;            keep_open = true; }
       { key = ["Up" "k"];     desc = "Increase volume";   cmd = cfg.exec.volume-increase; keep_open = true; }
@@ -79,11 +79,11 @@ in
         key = "q";
         desc = "Queue";
         submenu = [
-          { key = "a";      desc = "Play library";      cmd = cfg.exec.play-shuffled;     keep_open = true; }
+          { key = "a";      desc = "Play library";      cmd = cfg.exec.play-shuffled; }
           { key = "space";  desc = "Play...";           cmd = cfg.exec.search-play; }
           { key = "n";      desc = "Play next...";      cmd = cfg.exec.search-next; }
           { key = "e";      desc = "Enqueue...";        cmd = cfg.exec.search-enqueue; }
-          { key = "c";      desc = "Clear";             cmd = cfg.exec.clear; keep_open = true; }
+          { key = "c";      desc = "Clear";             cmd = cfg.exec.clear; }
         ];
       }
     ];

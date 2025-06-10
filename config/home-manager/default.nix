@@ -71,6 +71,8 @@
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
+
+    pkgs.jetbrains.idea-community
   ];
 
   # Gpg
@@ -138,6 +140,7 @@
       };
       "pi-zero".user = "pi";
       "rg353m".user = "ark";
+      "pixel".user = "bruno";
     };
   };
 
