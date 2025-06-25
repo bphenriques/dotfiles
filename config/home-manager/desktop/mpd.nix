@@ -3,6 +3,7 @@ lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
     musicDirectory = "${config.xdg.userDirs.music}/library";
+    playlistDirectory = "${config.xdg.userDirs.music}/playlists";
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {
