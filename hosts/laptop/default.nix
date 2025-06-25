@@ -28,7 +28,7 @@ let
   hmModule = {
     home-manager = {
       sharedModules = attrValues self.homeManagerModules ++ [
-        stylix.homeManagerModules.stylix
+        stylix.homeModules.stylix
       ];
       extraSpecialArgs = sharedSpecialArgs;
     };

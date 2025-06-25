@@ -18,6 +18,7 @@
 
   # Enable easier font management
   fonts.fontconfig.enable = true;
+  stylix.targets.fontconfig.enable = true;
 
   stylix.targets.bat.enable = true;
   programs.bat.enable = true;             # Better file previewer
