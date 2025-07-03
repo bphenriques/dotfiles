@@ -10,6 +10,20 @@ lib.mkIf pkgs.stdenv.isLinux {
         type "pipewire"
         name "PipeWire Sound Server"
       }
+
+      playlist_plugin {
+        name "m3u"
+        as_directory "yes"
+      }
+
+      playlist_plugin {
+        name "extm3u"
+        as_directory "yes"
+      }
+
+      input {
+        plugin "curl"
+      }
     '';
   };
 
