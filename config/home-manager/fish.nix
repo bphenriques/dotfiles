@@ -19,6 +19,13 @@ in
         ''bind alt-. ffd-widget''                                     # Find file (cd or $EDITOR)
         ''bind alt-space ${config.programs.yazi.shellWrapperName}''   # Browse files
       ];
+
+      source_sh = ''
+        for line in (cat $argv | grep -v '^#' |  grep -v '^\s*$' | sed -e 's/=/ /' -e "s/'//g" -e 's/"//g' )
+          set export (string split ' ' $line)
+          set -gx $export[1] $export[2]
+        end
+      '';
     };
 
     interactiveShellInit = let
