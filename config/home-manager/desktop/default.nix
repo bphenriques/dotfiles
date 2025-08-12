@@ -18,6 +18,7 @@
     ./umu-launcher.nix    # Ad-hoc game launcher
     ./mpd.nix             # Music player
     ./wallpaper.nix       # Set wallpaper
+    ./obsidian.nix        # note taking
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
