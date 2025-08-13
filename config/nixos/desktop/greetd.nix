@@ -3,7 +3,7 @@
   services.greetd = let
     options = ''--asterisks --time --remember'';
     session = {
-      command = ''${lib.getExe pkgs.greetd.tuigreet} ${options}'';
+      command = ''${lib.getExe pkgs.tuigreet} ${options}'';
       user = config.users.users.greeter.name;
     };
   in {
