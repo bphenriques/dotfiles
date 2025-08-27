@@ -39,6 +39,11 @@ let
       exit 1
     fi
 
+    if [ ! -f "${database}" ]; then
+      mkdir -p "$(dirname "${database}")"
+      cp -f "${databaseBackup}" "${database}"
+    fi
+
     ${lib.getExe basePackage} "$@"
     status=$?
     if [ $status -eq 0 ] && [ -f "${database}" ] && ([ ! -f "${databaseBackup}" ] || [[ "$(md5sum "${databaseBackup}")" = "$(md5sum "${database}")" ]]); then
