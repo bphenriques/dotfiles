@@ -22,8 +22,7 @@
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
+    pkgs.xwayland-satellite
     pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
  ];
-
-  custom.services.xwayland-satellite.enable = true;
 }

@@ -4,6 +4,7 @@ let
   cfg = config.custom.services.xwayland-satellite;
 in
 {
+  # TODO: Deprecate as Niri integrates with it.
   options.custom.services.xwayland-satellite = with lib.types; {
     enable = lib.mkEnableOption ''xwayland-satellite'';
     displayId = lib.mkOption {
