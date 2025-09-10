@@ -15,8 +15,6 @@ lib.mkIf pkgs.stdenv.isLinux {
           firefox-addons.ublock-origin
           firefox-addons.bitwarden
           firefox-addons.keepa
-          firefox-addons.linkding-extension
-          firefox-addons.floccus
           firefox-addons.no-pdf-download
         ];
 
