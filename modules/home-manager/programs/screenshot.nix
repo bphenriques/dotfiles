@@ -21,9 +21,10 @@ let
     { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = cfg.exec.region-edit; }
   ];
 
-  dmenu = self.lib.builders.writeDmenuApplication {
+  dmenu = self.lib.builders.writeFuzzelDmenuApplication {
     name = "screenshot-menu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
+    extraArgs = ''--minimal-lines --hide-prompt'';
   };
 in
 {

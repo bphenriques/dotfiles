@@ -22,9 +22,10 @@ let
     { id = "recording-stop";            symbol = ""; label = "Stop";                 exec = cfg.exec.stop; }
   ];
 
-  dmenu = self.lib.builders.writeDmenuApplication {
+  dmenu = self.lib.builders.writeFuzzelDmenuApplication {
     name = "screen-recorder-menu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenRecordingActions;
+    extraArgs = ''--minimal-lines --hide-prompt'';
   };
 in
 {

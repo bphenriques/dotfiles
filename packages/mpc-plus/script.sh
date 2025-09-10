@@ -12,7 +12,7 @@ random_status_icon() { case "$(mpc status '%random%')" in off) echo -n "${MPC_PL
 toggle_repeat() { case "$(mpc status '%repeat%')" in off) mpc repeat on ;; on) mpc repeat off ;; esac }
 repeat_status_icon() { case "$(mpc status '%repeat%')" in off) echo -n "${MPC_PLUS_NO_REPEAT_ICON}" ;; on) echo -n "${MPC_PLUS_REPEAT_ICON}" ;; esac }
 
-select_title_artist_album() {
+list_title_artist_album() {
   mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
     # Minor safeguard and assumption: the library is organized using the standard (?) Artist/Album/Song. Works for me. Might not work with you.
     if [ -n "$title" ] && [ -n "$artist" ] && [ -n "$album" ]; then
@@ -22,7 +22,11 @@ select_title_artist_album() {
     else
       printf "%s\t%s\u0000icon\u001f%s\n" "$file" "$file" "$MPC_PLUS_SONG_ICON"
     fi
-  done | LC_ALL=C sort --unique | fuzzel --dmenu --with-nth=2 --accept-nth=1
+  done | LC_ALL=C sort --unique
+}
+
+select_title_artist_album() {
+  list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1
 }
 
 save_or_compress() {

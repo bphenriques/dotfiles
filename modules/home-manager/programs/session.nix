@@ -29,9 +29,10 @@ let
     { id = "session-efi";       symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
   ] ++ systemd-boot-windows;
 
-  dmenu = self.lib.builders.writeDmenuApplication {
+  dmenu = self.lib.builders.writeFuzzelDmenuApplication {
     name = "session-dmenu";
     entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) sessionActions;
+    extraArgs = ''--minimal-lines --hide-prompt'';
   };
 in
 {
