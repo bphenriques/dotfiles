@@ -3,7 +3,6 @@ lib.mkIf pkgs.stdenv.isLinux {
   stylix.targets.rofi.enable = true;
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
     theme = let
       inherit (config.lib.formats.rasi) mkLiteral;
     in {
@@ -102,7 +101,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       name = "browse-wallpapers";
       desktopName = "Browse Wallpapers";
       icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "wallpaper" "󰸉";
-      exec = ''${lib.getExe pkgs.rofi-wayland} -show filebrowser -theme ${config.xdg.configHome}/rofi/wallpaper.rasi'';
+      exec = ''${lib.getExe config.programs.rofi.package} -show filebrowser -theme ${config.xdg.configHome}/rofi/wallpaper.rasi'';
     })
   ];
 }

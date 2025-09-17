@@ -7,9 +7,6 @@ _:
 
   # Integrated GPU: AMD
   hardware.amdgpu = {
-    amdvlk.enable = true;
-    amdvlk.support32Bit.enable = true;
-
     initrd.enable = true;
     opencl.enable = true;
   };
