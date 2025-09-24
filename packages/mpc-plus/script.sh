@@ -30,8 +30,12 @@ list_title_artist_album() {
     fi
   done | LC_ALL=C sort --unique
 }
-
 select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1; }
+
+# FIXME: Ideally we would get the file and check if the duration of the track is -1. This suffices _for me_.
+# shellcheck disable=SC2016
+list_radio_stream() { mpc lsplaylists | grep '^radio' | xargs -I{} sh -c 'printf "%s\t%s\n" {} "$(mpc playlist {})"' | LC_ALL=C sort --unique; }
+select_radio_stream() { list_radio_stream | fuzzel --dmenu --accept-nth=1 --with-nth="2.."; }
 
 get_mpc_artwork_icon() {
   art_cache_key="$(mpc -f '%artist%_%album%_%title%' | head -1)"
@@ -128,6 +132,12 @@ case "${1:-}" in
         next)     mpc insert "$selection" && mpc play           ;;
         add)      mpc add "$selection" && mpc play              ;;
       esac
+    fi
+    ;;
+  dmenu-radio-stream)
+    selection="$(select_radio_stream)"
+    if [ "$selection" != "" ]; then
+      mpc clear && mpc load "${selection}" && mpc play
     fi
     ;;
   list-servers)         config_list_servers ;;

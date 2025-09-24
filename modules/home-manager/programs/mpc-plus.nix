@@ -99,7 +99,7 @@ in
       { key = ["Down" "j"];   desc = "Reduce volume";     cmd = exec.volume-decrease; keep_open = true; }
       { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
       { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
-      { key = "d";            desc = "Select Server";     cmd = exec.select-server; }
+      { key = "d";            desc = "Select server";     cmd = exec.select-server; }
       {
         key = "space";
         desc = "Queue";
