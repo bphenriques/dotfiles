@@ -1,9 +1,15 @@
 #shellcheck shell=bash
 
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"$HOME"/.config}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-"$HOME"/.local/state}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-"$HOME"/.cache}"
-MPC_PLUS_CACHE_DIR="${MPC_PLUS_CACHE_DIR:-"${XDG_CACHE_HOME}"/mpc-plus}"
-mkdir -p "${MPC_PLUS_CACHE_DIR}"
 
+MPC_PLUS_CACHE_DIR="${XDG_CACHE_HOME}/mpc-plus"
+MPC_PLUS_CONFIG_DIR="${XDG_CONFIG_HOME}/mpc-plus"
+MPC_PLUS_STATE_DIR="${XDG_STATE_HOME}/mpc-plus"
+MPC_PLUS_SELECTED_HOST="${MPC_PLUS_STATE_DIR}/selected.env"
+
+save_or_compress() { magick - -geometry x128 "$destination" >/dev/null 2>&1; }
 _notify() { notify-send --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
 
 toggle_random() { case "$(mpc status '%random%')" in off) mpc random on ;; on) mpc random off ;; esac }
@@ -25,17 +31,7 @@ list_title_artist_album() {
   done | LC_ALL=C sort --unique
 }
 
-select_title_artist_album() {
-  list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1
-}
-
-save_or_compress() {
-  if command -v magick >/dev/null 2>&1; then
-    magick - -geometry x128 "$destination" >/dev/null 2>&1;
-  else
-    tee "$destination"
-  fi
-}
+select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1; }
 
 get_mpc_artwork_icon() {
   art_cache_key="$(mpc -f '%artist%_%album%_%title%' | head -1)"
@@ -79,6 +75,40 @@ handle_event() {
   esac
 }
 
+# shellcheck source=/dev/null
+load_config() {
+  mkdir -p "${MPC_PLUS_CONFIG_DIR}"
+  mkdir -p "${MPC_PLUS_CACHE_DIR}"
+  mkdir -p "${MPC_PLUS_STATE_DIR}"
+
+  if [ ! -f "${MPC_PLUS_CONFIG_DIR}"/default.json ]; then
+    echo '{ "host": "localhost", "port": 6600 }' > "${MPC_PLUS_CONFIG_DIR}"/default.json
+  fi
+
+  if [ ! -f "${MPC_PLUS_SELECTED_HOST}" ]; then
+    config_set_server default
+  fi
+
+  set -o allexport
+  source "${MPC_PLUS_SELECTED_HOST}"
+  set +o allexport
+}
+
+config_list_servers() { find -L "${MPC_PLUS_CONFIG_DIR}" -type f -name '*.json' ! -name 'config.json' -exec basename {} ".json" \;; }
+config_set_server() {
+  local selected="$1"
+  local device_file="${MPC_PLUS_CONFIG_DIR}/$selected.json";
+  if [ ! -f "${device_file}" ]; then
+    _notify --urgency=critical --icon "$MPC_PLUS_ERROR_ICON" "No configuration file available for $selected"
+  fi
+
+  printf 'MPD_HOST_DISPLAY_NAME="%s"\nMPD_HOST="%s"\nMPD_PORT="%s"' \
+    "$selected" "$(jq -cr '.host' < "${device_file}")" "$(jq -cr '.port' \
+    < "${device_file}")" \
+    > "${MPC_PLUS_SELECTED_HOST}"
+}
+
+load_config
 case "${1:-}" in
   play-pause)       mpc toggle                                          ;;
   stop)             mpc stop                                            ;;
@@ -99,6 +129,14 @@ case "${1:-}" in
         add)      mpc add "$selection" && mpc play              ;;
       esac
     fi
+    ;;
+  list-servers)         config_list_servers ;;
+  dmenu-select-server)
+    selection="$(config_list_servers | fuzzel --dmenu --placeholder "Current: ${MPD_HOST_DISPLAY_NAME}")"
+    if [ "$selection" != "" ]; then
+      config_set_server "$selection"
+    fi
+    _notify -i "${MPC_PLUS_DEVICE_ICON}" "MPD Server: $selection"
     ;;
   notifications-daemon) mpc idleloop player mixer | while read -r event; do handle_event "$event"; done  ;;
 esac

@@ -27,11 +27,17 @@ lib.mkIf pkgs.stdenv.isLinux {
     '';
   };
 
-  custom.programs.mpc-plus.enable = true; # Extension of the known mpc client
+  custom.programs.mpc-plus = {
+    enable = true; # Extension of the known mpc client
+    devices = {
+      "default" = { host = config.services.mpd.network.listenAddress; port = config.services.mpd.network.port; };
+      "pixel" = { };
+    };
+  };
   custom.services.mpc-plus.enable = true; # Provides player/mixer events notifications
   services.mpdris2 = {
     enable = true;
-    multimediaKeys = true;  # Integration with multimedia keys. Nicer as keys control whathever is playing
+    multimediaKeys = true;  # Integration with multimedia keys. Nicer as keys control whatever is playing
     notifications = false;  # Disabling as I prefer my own for finer grain control.
   };
 }
