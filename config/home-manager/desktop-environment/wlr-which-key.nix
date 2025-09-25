@@ -30,23 +30,11 @@ lib.mkIf pkgs.stdenv.isLinux {
 
     menus.global = lib.optionals config.custom.programs.mpc-plus.enable [
       { key = "m"; desc = "Music"; submenu = config.custom.programs.wlr-which-key.menus.mpc-plus; }
-    ] ++ lib.optionals config.custom.programs.screen-recorder.enable [
-      { key = "r"; desc = "Record Screen"; submenu = config.custom.programs.wlr-which-key.menus.screen-recorder; }
-    ] ++ lib.optionals config.custom.programs.screenshot.enable [
-      { key = "s"; desc = "Screenshot"; submenu = config.custom.programs.wlr-which-key.menus.screenshot; }
     ] ++ lib.optionals config.custom.programs.volume-osd.enable [
       { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.sound-output; }
       { key = "A"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
-      {
-        key = "d";
-        desc = "Display Output";
-        submenu =
-          (lib.optionals config.custom.programs.brightness-osd.enable config.custom.programs.wlr-which-key.menus.brightness-osd)
-          ++ [
-          { key = "c"; desc = "Configure"; cmd = (lib.getExe pkgs.wdisplays); }
-        ];
-      }
     ] ++ [
+      { key = "d"; desc = "Display Layout"; cmd = (lib.getExe pkgs.wdisplays); }
       { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
     ] ++ lib.optionals config.custom.programs.session.enable [
       { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }

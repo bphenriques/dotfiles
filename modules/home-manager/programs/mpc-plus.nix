@@ -3,24 +3,16 @@ let
   inherit (lib.attrsets) mapAttrs' nameValuePair;
   cfg = config.custom.programs.mpc-plus;
 
-  mkAppOpt = default: lib.mkOption {
-    inherit default;
-    description = "";
-    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-  };
-
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
+  deviceOpt = lib.types.submodule ({ name, config, ... }: {
+    options = {
+      host  = lib.mkOption { type = lib.types.str; default = name; };
+      port  = lib.mkOption { type = lib.types.port; default = 6600; };
+    };
+  });
+
   mpc-plus = lib.getExe cfg.package;
-
-  deviceOpt = lib.types.submodule ({ name, config, ... }:
-    {
-      options = {
-        host  = lib.mkOption { type = lib.types.str; default = name; };
-        port  = lib.mkOption { type = lib.types.port; default = 6600; };
-      };
-    });
-
   exec = {
     play-pause        = ''${mpc-plus} play-pause'';
     stop              = ''${mpc-plus} stop'';
@@ -83,9 +75,10 @@ in
         icon = mkIcon "music-player" "󰥠";
         exec = ''${lib.getExe config.custom.programs.wlr-which-key.package} mpc-plus'';
         actions = {
-          "shuffle"   = { name = "Shuffle library"; icon = (mkIcon "mpc-plus-shuffle-library" ""); exec = exec.play-shuffled; };
-          "find-play" = { name = "Play...";         icon = (mkIcon "mpc-plus-find-play" "");       exec = exec.search-play; };
-          "stop"      = { name = "Stop";            icon = (mkIcon "mpc-plus-stop" "");            exec = exec.stop; };
+          "shuffle"       = { name = "Shuffle library"; icon = (mkIcon "mpc-plus-shuffle-library" ""); exec = exec.play-shuffled; };
+          "find-play"     = { name = "Play...";         icon = (mkIcon "mpc-plus-find-play" "");       exec = exec.search-play; };
+          "stop"          = { name = "Stop";            icon = (mkIcon "mpc-plus-stop" "");            exec = exec.stop; };
+          "select-server" = { name = "Select server";   icon = (mkIcon "mpc-select-server" "󰓃");        exec = exec.select-server; };
         };
       })
     ];
@@ -99,17 +92,8 @@ in
       { key = ["Down" "j"];   desc = "Reduce volume";     cmd = exec.volume-decrease; keep_open = true; }
       { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
       { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
-      { key = "d";            desc = "Select server";     cmd = exec.select-server; }
-      {
-        key = "space";
-        desc = "Queue";
-        submenu = [
-          { key = "a";      desc = "Shuffle library";   cmd = exec.play-shuffled; }
-          { key = "space";  desc = "Play...";           cmd = exec.search-play; }
-          { key = "n";      desc = "Play next...";      cmd = exec.search-next; }
-          { key = "e";      desc = "Enqueue...";        cmd = exec.search-enqueue; }
-        ];
-      }
+      { key = "space";        desc = "Play...";           cmd = exec.search-play; }
+      { key = "a";            desc = "Shuffle library";   cmd = exec.play-shuffled; }
     ];
   };
 }

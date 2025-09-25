@@ -14,7 +14,7 @@
       pkgs.vscode-langservers-extracted            # LSP for HTML/CSS/JSON/ESLint
       pkgs.typescript-language-server              # LSP for Typescript
       pkgs.docker-compose-language-service         # LSP for docker-compose
-      pkgs.dockerfile-language-server-nodejs       # LSP for docker
+      pkgs.dockerfile-language-server              # LSP for docker
       pkgs.texlab                                  # LSP for LaTeX
       pkgs.nil                                     # LSP for Nix
       pkgs.terraform-ls                            # LSP for Terraform

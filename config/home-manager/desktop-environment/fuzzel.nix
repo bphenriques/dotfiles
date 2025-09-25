@@ -8,7 +8,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       vertical-pad = 10;
       inner-pad = 10;
       show-actions = true;
-      terminal = "${lib.getExe' config.programs.foot.package "footclient"}";
+      terminal = ''${lib.getExe' config.programs.foot.package "footclient"} --app-id "{cmd}" --title "{cmd}" {cmd}'';
       icon-theme = config.stylix.iconTheme."${config.stylix.polarity}";
       icons-enabled = true;
     };
