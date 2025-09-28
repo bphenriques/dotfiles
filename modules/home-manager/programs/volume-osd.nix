@@ -61,7 +61,7 @@ in
 
       # Using pulseaudio tools without actually using pulseaudio
       pkgs.pavucontrol  # UI
-      pkgs.pipewire     # Prefered command line interface
+      pkgs.pipewire     # Preferred command line interface
       pkgs.pulseaudio   # Other command line interface
     ];
   };

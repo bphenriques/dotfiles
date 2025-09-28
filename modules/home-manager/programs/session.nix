@@ -40,7 +40,7 @@ in
   options.custom.programs.session = {
     enable = lib.mkEnableOption "custom-session";
     exec = {
-      menu              = mkAppOpt' ''${lib.getExe dmenu}'';
+      dmenu             = mkAppOpt' ''${lib.getExe dmenu}'';
       lock              = mkAppOpt;
       suspend           = mkAppOpt' "${systemctl} suspend";
       shutdown          = mkAppOpt' "${systemctl} poweroff";
@@ -58,7 +58,7 @@ in
         name = "session-menu";
         desktopName = "Session";
         icon = mkIcon "session" "";
-        exec = lib.getExe dmenu;
+        exec = cfg.exec.dmenu;
         actions = let
           toAction = b: nameValuePair b.id {
             name = b.label;

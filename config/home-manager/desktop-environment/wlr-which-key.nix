@@ -8,7 +8,6 @@ in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
     enable = true;
-    package = pkgs.wlr-which-key-git;
     settings = {
       font = "${fonts.monospace.name} ${toString fonts.sizes.popups}";
       background = colors.withHashtag.base00 + "dd";
@@ -37,7 +36,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       { key = "d"; desc = "Display Layout"; cmd = (lib.getExe pkgs.wdisplays); }
       { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
     ] ++ lib.optionals config.custom.programs.session.enable [
-      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.menu; }
+      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }
     ];
   };
 }

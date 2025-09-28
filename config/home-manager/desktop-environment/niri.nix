@@ -142,8 +142,8 @@ in
        # Screenshots
       "Print"       = ''screenshot-screen'';
       "Shift+Print" = ''screenshot'';
-      "Mod+Print"   = ''spawn-sh "${config.custom.programs.screenshot.exec.menu}"'';
-      "Mod+Shift+S" = ''spawn-sh "${config.custom.programs.screenshot.exec.menu} region-edit"'';
+      "Mod+Print"   = ''spawn-sh "${config.custom.programs.screenshot.dmenu}"'';
+      "Mod+Shift+S" = ''spawn-sh "${lib.getExe config.custom.programs.screenshot.package} region-edit"'';
 
       # Notifications
       "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
@@ -157,7 +157,7 @@ in
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn-sh "${files-browser}"'';
       "Mod+K"             = ''spawn-sh "${lib.getExe self.pkgs.niri-keyboard-layout} next"'';
-      "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.menu}"'';
+      "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
       "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
       "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
 

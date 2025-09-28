@@ -14,18 +14,22 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
-  screenshotActions = [
-    { id = "screenshot-screen";       symbol = "󰹑"; label = "Screen (save)";  exec = cfg.exec.screen; }
-    { id = "screenshot-screen-edit";  symbol = "󰹑"; label = "Screen (edit)";  exec = cfg.exec.screen-edit; }
-    { id = "screenshot-region";       symbol = ""; label = "Region (save)";  exec = cfg.exec.region; }
-    { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = cfg.exec.region-edit; }
-  ];
-
-  dmenu = self.lib.builders.writeFuzzelDmenuApplication {
-    name = "screenshot-menu";
-    entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
-    extraArgs = ''--minimal-lines --hide-prompt'';
+  exec = {
+    menu          = lib.getExe cfg.dmenu;
+    screen        = ''${screenshot} screen "${cfg.directory}"'';
+    screen-edit   = ''${screenshot} screen-edit'';
+    screen-copy   = ''${screenshot} screen-copy'';
+    region        = ''${screenshot} region "${cfg.directory}"'';
+    region-edit   = ''${screenshot} region-edit'';
+    region-copy   = ''${screenshot} region-copy'';
   };
+
+  screenshotActions = [
+    { id = "screenshot-screen";       symbol = "󰹑"; label = "Screen (save)";  exec = exec.screen; }
+    { id = "screenshot-screen-edit";  symbol = "󰹑"; label = "Screen (edit)";  exec = exec.screen-edit; }
+    { id = "screenshot-region";       symbol = ""; label = "Region (save)";  exec = exec.region; }
+    { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = exec.region-edit; }
+  ];
 in
 {
   options.custom.programs.screenshot = {
@@ -39,12 +43,13 @@ in
       type = lib.types.str;
     };
 
-    exec = {
-      menu          = mkAppOpt ''${lib.getExe dmenu}'';
-      screen        = mkAppOpt ''${screenshot} screen "${cfg.directory}"'';
-      screen-edit   = mkAppOpt ''${screenshot} screen-edit "${cfg.directory}"'';
-      region        = mkAppOpt ''${screenshot} region "${cfg.directory}"'';
-      region-edit   = mkAppOpt ''${screenshot} region-edit "${cfg.directory}"'';
+    dmenu = lib.mkOption {
+      type = lib.types.package;
+      default = self.lib.builders.writeFuzzelDmenuApplication {
+        name = "screenshot-menu";
+        entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
+        extraArgs = ''--minimal-lines --hide-prompt'';
+      };
     };
   };
 
@@ -56,12 +61,12 @@ in
       pkgs.slurp
       pkgs.swappy
       cfg.package
-      dmenu
+      cfg.dmenu
       (pkgs.makeDesktopItem {
         name = "screenshot-menu";
         desktopName = "Screenshot";
         icon = mkIcon "screenshot" "󰹑";
-        exec = lib.getExe dmenu;
+        exec = lib.getExe cfg.dmenu;
         actions = let
           toAction = b: nameValuePair b.id {
             name = b.label;
@@ -80,18 +85,18 @@ in
         key = "s";
         desc = "Screen";
         submenu = [
-          { key = "m"; desc = "Save";  cmd = ''${screenshot} screen "${cfg.directory}"''; }
-          { key = "c"; desc = "Copy";  cmd = ''${screenshot} screen-copy''; }
-          { key = "e"; desc = "Edit";  cmd = ''${screenshot} screen-edit''; }
+          { key = "m"; desc = "Save";  cmd = exec.screen; }
+          { key = "c"; desc = "Copy";  cmd = exec.screen-copy; }
+          { key = "e"; desc = "Edit";  cmd = exec.screen-edit; }
         ];
       }
       {
         key = "r";
         desc = "Region";
         submenu = [
-          { key = "m"; desc = "Save";  cmd = ''${screenshot} region "${cfg.directory}"''; }
-          { key = "c"; desc = "Copy";  cmd = ''${screenshot} region-copy''; }
-          { key = "e"; desc = "Edit";  cmd = ''${screenshot} region-edit''; }
+          { key = "m"; desc = "Save";  cmd = exec.region; }
+          { key = "c"; desc = "Copy";  cmd = exec.region-copy; }
+          { key = "e"; desc = "Edit";  cmd = exec.region-edit; }
         ];
       }
     ];
