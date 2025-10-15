@@ -15,7 +15,7 @@
   networking.hostName = "bphenriques-laptop";
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_16;
+    kernelPackages = pkgs.linuxPackages_6_17;
 
     initrd.systemd.enable = true; # Hibernation
     loader = {
