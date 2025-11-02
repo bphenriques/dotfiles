@@ -1,9 +1,14 @@
 { lib, pkgs, config, ... }:
+let
+  musicDir = "/mnt/nas-media/music";
+in
 lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
-    musicDirectory = "${config.xdg.userDirs.music}/library";
-    playlistDirectory = "${config.xdg.userDirs.music}/playlists";
+
+    # FIXME: Make this a configurable setting.
+    musicDirectory = "${musicDir}/library";
+    playlistDirectory = "${musicDir}/playlists";
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {
@@ -28,16 +33,16 @@ lib.mkIf pkgs.stdenv.isLinux {
   };
 
   custom.programs.mpc-plus = {
-    enable = true; # Extension of the known mpc client
+    enable = true;
     devices = {
       "default" = { host = config.services.mpd.network.listenAddress; port = config.services.mpd.network.port; };
       "pixel" = { };
     };
   };
-  custom.services.mpc-plus.enable = true; # Provides player/mixer events notifications
+  custom.services.mpc-plus.enable = true; # notifications
   services.mpdris2 = {
     enable = true;
-    multimediaKeys = true;  # Integration with multimedia keys. Nicer as keys control whatever is playing
+    multimediaKeys = true;  # Integration with multimedia keys.
     notifications = false;  # Disabling as I prefer my own for finer grain control.
   };
 }
