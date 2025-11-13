@@ -28,7 +28,7 @@ let
     health    = [ "duplicates" "badfiles" ];
     utility   = [ "edit" "playlist" "scrub" "fish" ]; # https://beets.readthedocs.io/en/stable/plugins/smartplaylist.html
   in (providers ++ health ++ metadata ++ utility);
-  basePackage = pkgs.beets.override {
+  basePackage = pkgs.python3.pkgs.beets.override {
     # Reference: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/audio/beets/builtin-plugins.nix
     pluginOverrides = foldl' (acc: plugin: acc // { "${plugin}".enable = true; }) { } plugins;
   };

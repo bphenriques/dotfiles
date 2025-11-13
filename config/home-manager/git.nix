@@ -21,70 +21,39 @@ in
 
   stylix.targets.gitui.enable = true;
   programs.lazygit.enable = true;
+  programs.diff-so-fancy = {
+    enable = true;
+    enableGitIntegration = true;
+  };
   programs.git = {
     enable = true;
-    userName = "Bruno Henriques";
-    userEmail = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obsfuscation to prevent webscrappers
+    settings = {      
+      user.name = "Bruno Henriques";
+      user.email = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obsfuscation to prevent webscrappers
+      alias = {
+        co        = "checkout";
+        a         = "add";
+        aa        = "add --all";
+        s         = "status -s";
+        pr        = "pull --rebase";
+        cp        = "cherry-pick";
+        rb        = "rebase";
+        pushf     = "push --force-with-lease";
+        amend     = "commit --amend";
+        redo      = ''!git add --all && git commit --amend'';
+        wip       = ''!git add --all && git commit -m "WIP"'';
+        wipp      = "!git wip && git push";
 
-    diff-so-fancy.enable = true;
-    signing = {
-      key = "792C2768AD3A4930BCCFA467075389B5C3ADA858";
-      signByDefault = true;
-    };
+        # Tools
+        patch   = "!git --no-pager diff --no-color";
+        fix-upstream = "!git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) $(git rev-parse --abbrev-ref HEAD)";
+        root = "!git rev-parse --show-toplevel";
 
-    aliases = {
-      co        = "checkout";
-      a         = "add";
-      aa        = "add --all";
-      s         = "status -s";
-      pr         = "pull --rebase";
-      cp        = "cherry-pick";
-      rb        = "rebase";
-      pushf     = "push --force-with-lease";
-      amend     = "commit --amend";
-      redo      = ''!git add --all && git commit --amend'';
-      wip       = ''!git add --all && git commit -m "WIP"'';
-      wipp      = "!git wip && git push";
+        # History
+        ls      = "log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate";
+        graph   = "log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'";
+      };
 
-      # Tools
-      patch   = "!git --no-pager diff --no-color";
-      fix-upstream = "!git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) $(git rev-parse --abbrev-ref HEAD)";
-      root = "!git rev-parse --show-toplevel";
-
-      # History
-      ls      = "log --pretty=format:'%C(yellow)%h%d %Creset%s%Cblue [%cn] [%ar] %C(black)%C(bold)%cr%Creset' --decorate";
-      graph   = "log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'";
-    };
-
-    ignores = [
-      # Visual Code
-      ".vscode"
-
-      # IntelliJ files
-      ".idea"
-      ".iml"
-
-      # Vim
-      "*.swp"
-      "*.swo"
-
-      # NPM
-      "node_modules/"
-
-      # Python
-      "*.pyc"
-      "*.pyo"
-
-      # Personal tools
-      "bphenriques-tools/"
-    ] ++ lib.optionals pkgs.stdenv.isDarwin [
-      ".DS_Store"
-      ".DS_Store?"
-      ".Spotlight-V100"
-      ".Trashes"
-    ];
-
-    extraConfig = {
       commit.template = "${commitTemplate}";
 
       tag = {
@@ -120,5 +89,38 @@ in
       # Automatically translate HTTPS to SSH when cloning repos
       url."ssh://git@github.com/".insteadOf = "https://github.com/";
     };
+
+    signing = {
+      key = "792C2768AD3A4930BCCFA467075389B5C3ADA858";
+      signByDefault = true;
+    };
+
+    ignores = [
+      # Visual Code
+      ".vscode"
+
+      # IntelliJ files
+      ".idea"
+      ".iml"
+
+      # Vim
+      "*.swp"
+      "*.swo"
+
+      # NPM
+      "node_modules/"
+
+      # Python
+      "*.pyc"
+      "*.pyo"
+
+      # Personal tools
+      "bphenriques-tools/"
+    ] ++ lib.optionals pkgs.stdenv.isDarwin [
+      ".DS_Store"
+      ".DS_Store?"
+      ".Spotlight-V100"
+      ".Trashes"
+    ];
   };
 }
