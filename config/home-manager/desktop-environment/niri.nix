@@ -134,7 +134,7 @@ in
       "Mod+Shift+C" = "center-window";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+Ctrl+Shift+F" = "toggle-windowed-fullscreen";
+      "Mod+Ctrl+Shift+F" = "maximize-window-to-edges";
       "Mod+Comma"        = "consume-window-into-column";
       "Mod+Shift+Comma"  = "expel-window-from-column";
       "Mod+O repeat=false" = "toggle-overview";
@@ -163,7 +163,7 @@ in
 
       # Focus management
       "Mod+Tab"         = ''spawn "${lib.getExe self.pkgs.niri-window-dmenu}"'';
-      "Alt+Tab"         = "focus-window-previous";
+      #"Alt+Tab"         = "focus-window-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";
