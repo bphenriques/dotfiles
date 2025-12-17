@@ -73,7 +73,7 @@
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
 
-    pkgs.jetbrains.idea-community
+    pkgs.jetbrains.idea-oss
   ];
 
   # Gpg
@@ -88,7 +88,6 @@
 
   home = {
     sessionVariables = {
-      VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 
       # Colors
