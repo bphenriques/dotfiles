@@ -72,8 +72,6 @@
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
-
-    pkgs.jetbrains.idea-oss
   ];
 
   # Gpg
@@ -124,7 +122,6 @@
       e = "$EDITOR";
 
       # Utility
-      whatsmyip = "${lib.getExe pkgs.curl} ifconfig.me";
       webp_to_png = lib.mkIf pkgs.stdenv.isLinux ''nix-shell -p libwebp -p parallel --command "parallel dwebp {} -o {.}.png ::: *.webp"'';
     };
   };
