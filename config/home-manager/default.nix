@@ -128,6 +128,11 @@
 
   programs.ssh = {
     enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "prohibit-password"; # Recommended over "no" for remote admin
+    };
     includes = [ "$HOME/.ssh/config.local" ];
     matchBlocks = {
       "*".extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.

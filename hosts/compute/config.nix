@@ -10,6 +10,10 @@
     ./bphenriques
   ];
 
+  # Auto-reboot in case something wrong happens and ensure watchdog resets
+  boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
+  systemd.watchdog.runtimeTime = "30s";
+
   # Core
   networking.hostName = "compute";
   boot.kernelPackages = pkgs.linuxPackages_6_18;
