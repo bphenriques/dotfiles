@@ -54,6 +54,7 @@
 
       # Hosts
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
+      nixosConfigurations.compute = import ./hosts/compute inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }
