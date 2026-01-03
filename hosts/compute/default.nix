@@ -14,6 +14,7 @@ let
     sops-nix.nixosModules.sops
     disko.nixosModules.disko
     home-manager.nixosModules.home-manager
+    jellarr.nixosModules.default
   ];
 
   sharedSpecialArgs = {
