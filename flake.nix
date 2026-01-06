@@ -32,10 +32,6 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Homelab related
-    jellarr.url = "github:venkyr77/jellarr";
-    jellarr.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, ... }:

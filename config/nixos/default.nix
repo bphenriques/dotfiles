@@ -42,7 +42,7 @@
   };
 
   environment.systemPackages = let
-    filesystems = [ pkgs.exfat pkgs.ntfs3g ]; # Suport exFAT and NTFS formatted drives (pendisks + external disks)
+    filesystems = [ pkgs.exfat pkgs.ntfs3g ]; # Support exFAT and NTFS
     hardware    = [
       pkgs.powertop   # Check what is consuming too much energy
       pkgs.usbutils   # USB utilities

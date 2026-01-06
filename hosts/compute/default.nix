@@ -1,4 +1,4 @@
-{ nixpkgs, nur, self, sops-nix, disko, home-manager, stylix, ... }:
+{ nixpkgs, nur, self, sops-nix, disko, home-manager, dotfiles-private, stylix, ... }:
 let
   inherit (nixpkgs.lib.attrsets) attrValues;
 
@@ -14,7 +14,6 @@ let
     sops-nix.nixosModules.sops
     disko.nixosModules.disko
     home-manager.nixosModules.home-manager
-    jellarr.nixosModules.default
   ];
 
   sharedSpecialArgs = {
@@ -24,6 +23,10 @@ let
       };
       pkgs = self.packages.${system};
     };
+  };
+
+  nixosSpecialArgs = {
+    privateSettings = dotfiles-private.settings;
   };
 
   hmModule = {

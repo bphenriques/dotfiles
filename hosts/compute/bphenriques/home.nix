@@ -8,6 +8,7 @@ in
 {
   imports = [
     ../../../config/home-manager
+    ./stylix.nix
   ];
 
   xdg.userDirs = {

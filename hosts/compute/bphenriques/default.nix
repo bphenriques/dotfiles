@@ -8,6 +8,10 @@
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ];
+
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3"
+    ];
   };
 
   home-manager.users.bphenriques = import ./home.nix;

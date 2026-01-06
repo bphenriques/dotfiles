@@ -7,7 +7,6 @@
     ./peripherals.nix
     ../../config/nixos
     ../../config/nixos/desktop
-    ../../config/nixos/headless/services
 
     # Users
     ./bphenriques
