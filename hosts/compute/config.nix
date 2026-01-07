@@ -6,6 +6,7 @@
     ./network-drives.nix
     ../../config/nixos
     ../../config/nixos/headless
+    ./services
 
     # Users
     ./bphenriques
@@ -15,7 +16,7 @@
 
   # Auto-reboot in case something wrong happens and ensure watchdog resets
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
-  systemd.watchdog.runtimeTime = "30s";
+  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   # Core
   networking.hostName = "compute";

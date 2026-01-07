@@ -50,14 +50,15 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-        {
-          assertion =
-            let urls = lib.mapAttrsToList (_: v: v.internalUrl) cfg.services;
-            in urls == lib.unique urls;
-          message = "Conflicting URLs. All service URLs must be unique to avoid routing conflicts.";
-        }
-      ];
+    assertions = let
+       urls = lib.mapAttrsToList (_: v: v.internalUrl) cfg.services;
+       duplicates = lib.subtractLists urls (lib.unique urls);
+     in [
+      {
+        assertion = (builtins.length duplicates) == 0;
+        message = "Service URLs must be unique to avoid routing conflicts. Conflicting: ${toString duplicates}";
+      }
+    ];
 
     networking.firewall = {
       allowedTCPPorts = [ 80 443 ];
@@ -65,16 +66,17 @@ in
     };
 
     sops = {
-      templates."home-server-traefik-cloudflare" = {
+      secrets.cloudflare_dns_api_token = { };
+      templates.home-server = {
         content = ''
           CF_DNS_API_TOKEN=${config.sops.placeholder.cloudflare_dns_api_token}
-          CF_API_EMAIL=${config.sops.placeholder.cloudflare_dns_api_email}
+          CF_API_EMAIL=${cfg.cloudflareEmail}
         '';
       };
     };
 
     systemd.services.traefik.serviceConfig = {
-      EnvironmentFile = config.sops.templates."home-server-traefik-cloudflare".path;
+      EnvironmentFile = config.sops.templates.home-server.path;
     };
 
     services.traefik = {

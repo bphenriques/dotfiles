@@ -1,11 +1,11 @@
-{ comfig, ... }:
+{ config, ... }:
 let
   port = 8081;
+  publicUrl = config.custom.home-server.services.miniflux.publicUrl;
   oidcProvider = {
     name = "PocketId";
-    discoveryEndpoint = config.custom.home-server.services.miniflux.publicUrl;
+    discoveryEndpoint = config.custom.home-server.services.pocket-id.publicUrl;
   };
-  pocketIdPublicUrl = config.custom.home-server.services.pocket-id.publicUrl;
 in
 {
   custom.home-server.services.miniflux.internalUrl = "http://127.0.0.1:${toString port}";
@@ -14,7 +14,7 @@ in
     enable = true;
 
     createDatabaseLocally = true; # Automatic set up a postgres database.
-    adminCredentialsFile = config.sops.secrets.miniflux-secrets.path;
+    adminCredentialsFile = config.sops.templates.miniflux.path;
     config = {
       LISTEN_ADDR = "127.0.0.1:${toString port}";
       BASE_URL = publicUrl;
@@ -35,13 +35,13 @@ in
     secrets.miniflux_oidc_client_id = { };
     secrets.miniflux_oidc_client_secret = { };
 
-    templates."miniflux-env" = {
+    templates.miniflux = {
       owner = "miniflux";
       content = ''
-        ADMIN_USERNAME="${config.sops.placeholder.miniflux_admin_username}"
-        ADMIN_PASSWORD="${config.sops.placeholder.miniflux_admin_password}"
-        OAUTH2_CLIENT_ID="${config.sops.placeholder.miniflux_oidc_client_id}"
-        OAUTH2_CLIENT_SECRET="${config.sops.placeholder.miniflux_oidc_client_secret}"
+        ADMIN_USERNAME=${config.sops.placeholder.miniflux_admin_username}
+        ADMIN_PASSWORD=${config.sops.placeholder.miniflux_admin_password}
+        OAUTH2_CLIENT_ID=${config.sops.placeholder.miniflux_oidc_client_id}
+        OAUTH2_CLIENT_SECRET=${config.sops.placeholder.miniflux_oidc_client_secret}
       '';
     };
   };

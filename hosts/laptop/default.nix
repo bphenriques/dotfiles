@@ -22,6 +22,9 @@ let
         builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
       };
       pkgs = self.packages.${system} // dotfiles-private.packages.${system};
+      settings = {
+        headless = false;
+      };
     };
   };
 

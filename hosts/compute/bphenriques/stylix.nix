@@ -38,26 +38,6 @@
       };
     };
 
-    iconTheme = {
-      enable = true;
-      package = pkgs.papirus-icon-theme;
-      dark = "Papirus-Dark";
-      light = "Papirus-Light";
-    };
-
-    cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
-      size = 16;
-    };
-
-    opacity = {
-      applications = 1.0;
-      popups = 1.0;
-      terminal = 1.0;
-      desktop = 1.0;
-    };
-
     targets = {
       font-packages.enable = true;
       qt.platform = "gnome"; # Stylix does not support adwaita.

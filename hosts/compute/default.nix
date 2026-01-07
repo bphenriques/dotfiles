@@ -18,15 +18,11 @@ let
 
   sharedSpecialArgs = {
     self = self // {
-      lib = {
-        builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
-      };
       pkgs = self.packages.${system};
+      settings = dotfiles-private.settings // {
+        headless = true;
+      };
     };
-  };
-
-  nixosSpecialArgs = {
-    privateSettings = dotfiles-private.settings;
   };
 
   hmModule = {
