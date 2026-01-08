@@ -67,7 +67,8 @@ in
 
     sops = {
       secrets.cloudflare_dns_api_token = { };
-      templates.home-server = {
+      templates."home-server" = {
+        owner = "traefik";
         content = ''
           CF_DNS_API_TOKEN=${config.sops.placeholder.cloudflare_dns_api_token}
           CF_API_EMAIL=${cfg.cloudflareEmail}

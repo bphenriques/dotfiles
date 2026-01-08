@@ -9,13 +9,20 @@ in
   # https://wiki.servarr.com/prowlarr/environment-variables ?
   services.prowlarr = {
     enable = true;
-    settings = {
-      update.mechanism = "internal";
-      server = {
-        inherit port;
-        urlbase = publicUrl;
-        bindaddress = "127.0.0.1";
-      };
-    };
+    settings.server.port = port;
+    environmentFiles = [
+
+    ];
+  };
+
+  # PROWLARR__SERVER__URLBASE
+  # PROWLARR__AUTH__APIKEY
+  # Missing: download client, apps
+  #
+
+  # FIXME:
+  systemd.services.prowlarr = {
+    wants = [ "mnt-media.mount" ];
+    after = [ "mnt-media.mount" ];
   };
 }
