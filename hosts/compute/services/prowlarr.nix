@@ -1,28 +1,21 @@
 { config, ... }:
-let
-  port = 9096;
-  publicUrl = config.custom.home-server.services.prowlarr.publicUrl;
-in
 {
-  custom.home-server.services.prowlarr.internalUrl = "http://127.0.0.1:${toString port}";
+  custom.home-server.services.prowlarr.port = 9096;
 
   # https://wiki.servarr.com/prowlarr/environment-variables ?
   services.prowlarr = {
     enable = true;
-    settings.server.port = port;
+    settings.server.port = config.custom.home-server.services.prowlarr.port;
     environmentFiles = [
-
+      # TODO: setup PROWLARR__AUTH__APIKEY for automations
     ];
   };
 
-  # PROWLARR__SERVER__URLBASE
-  # PROWLARR__AUTH__APIKEY
-  # Missing: download client, apps
-  #
-
-  # FIXME:
   systemd.services.prowlarr = {
-    wants = [ "mnt-media.mount" ];
-    after = [ "mnt-media.mount" ];
+    after = [ "mnt-nas-media.mount" ];    # Start after
+    requires = [ "mnt-nas-media.mount" ]; # Stop the service if does not work.
+    environment = {
+      PROWLARR__SERVER__URLBASE = config.custom.home-server.services.prowlarr.publicUrl;
+    };
   };
 }

@@ -1,17 +1,12 @@
 { config, ... }:
-let
-  port = 8082;
-in
 {
-  custom.home-server.services.pocket-id = {
-    internalUrl = "http://127.0.0.1:${toString port}";
-  };
+  custom.home-server.services.pocket-id.port = 8082;
 
   services.pocket-id = {
     enable = true;
     settings = {
-      APP_URL = "${config.custom.home-server.services.pocket-id.publicUrl}";
-      PORT = (toString port);
+      APP_URL = config.custom.home-server.services.pocket-id.publicUrl;
+      PORT = (toString config.custom.home-server.services.pocket-id.port);
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;

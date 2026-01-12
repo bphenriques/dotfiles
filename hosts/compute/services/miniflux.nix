@@ -1,6 +1,5 @@
 { config, ... }:
 let
-  port = 8081;
   publicUrl = config.custom.home-server.services.miniflux.publicUrl;
   oidcProvider = {
     name = "PocketId";
@@ -8,7 +7,7 @@ let
   };
 in
 {
-  custom.home-server.services.miniflux.internalUrl = "http://127.0.0.1:${toString port}";
+  custom.home-server.services.miniflux.port = 8081;
 
   services.miniflux = {
     enable = true;
@@ -16,7 +15,7 @@ in
     createDatabaseLocally = true; # Automatic set up a postgres database.
     adminCredentialsFile = config.sops.templates."miniflux-secrets".path;
     config = {
-      LISTEN_ADDR = "127.0.0.1:${toString port}";
+      LISTEN_ADDR = "127.0.0.1:${toString config.custom.home-server.services.miniflux.port}";
       BASE_URL = publicUrl;
       OAUTH2_PROVIDER = "oidc";
       OAUTH2_REDIRECT_URL = "${publicUrl}/oauth2/oidc/callback";

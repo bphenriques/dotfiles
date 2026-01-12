@@ -5,10 +5,11 @@ let
   serviceOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       name = lib.mkOption { type = lib.types.str; default = name; };
-      internalUrl  = lib.mkOption { type = lib.types.str; };
+      internalUrl  = lib.mkOption { type = lib.types.str; default = "http://127.0.0.1:${toString config.port}"; };
       subdomain = lib.mkOption { type = lib.types.str; default = name; };
       host = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
       publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.host}"; };
+      port = lib.mkOption { type = lib.types.port; };
 
       # TODO actually use
       oidc = {
