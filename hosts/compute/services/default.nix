@@ -4,6 +4,8 @@
     ./miniflux.nix
 
     ./jellyseerr.nix
+    ./transmission.nix
+    ./tandoor-recipes.nix
 
     # Servarr
     ./prowlarr.nix
@@ -26,5 +28,3 @@
 # obsidian-livesync
 # romm
 # syncthing
-# tandoor
-# transmission

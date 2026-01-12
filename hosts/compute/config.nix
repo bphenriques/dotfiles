@@ -40,5 +40,5 @@
   # Peripherals
   boot.extraModprobeConfig = "options hid_apple fnmode=2 swap_opt_cmd=0"; # Nuphy Air75 (check the flags with `modinfo -p hid_apple`)
 
-  system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
+  system.stateVersion = "25.11"; # The release version of the first install of this system!
 }
