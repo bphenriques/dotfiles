@@ -26,5 +26,3 @@
 # homepage
 # immich
 # obsidian-livesync
-# romm
-# syncthing

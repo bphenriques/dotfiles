@@ -25,8 +25,7 @@ in
       ALLOWED_HOSTS = config.custom.home-server.services.tandoor.host;
       SOCIAL_PROVIDERS = "allauth.socialaccount.providers.openid_connect";
       SOCIAL_DEFAULT_GROUP = "user";
-      # Full url here? SCRIPT_NAME =
-
+ 
       # FIXME
       # random secret key, use for example `base64 /dev/urandom | head -c50` to generate one
       #SECRET_KEY_FILE = "test";

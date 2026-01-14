@@ -1,4 +1,6 @@
 { config, ... }:
+let encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
+in
 {
   custom.home-server.services.pocket-id.port = 8082;
 
@@ -10,7 +12,7 @@
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
-      ENCRYPTION_KEY_FILE = "/var/lib/pocket-id/encryption.key";
+      ENCRYPTION_KEY_FILE = encryptionKeyFile;
       EMAILS_VERIFIED = true;
       SIGNUP_DEFAULT_USER_GROUP_IDS = "users";
       ACCENT_COLOR = "default";
@@ -19,14 +21,16 @@
 
   systemd.services.pocket-id = {
     preStart = ''
-      if [ ! -f /var/lib/pocket-id/encryption.key ]; then
-        mkdir -p /var/lib/pocket-id
-        openssl rand -base64 32 > /var/lib/pocket-id/encryption.key
-        chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} /var/lib/pocket-id/encryption.key
+      if [ ! -f "${encryptionKeyFile}" ]; then
+        mkdir -p "$(dirname "${encryptionKeyFile}")"
+        openssl rand -base64 32 > "${encryptionKeyFile}"
+        chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} "${encryptionKeyFile}"
       fi
     '';
   };
-
-  # I can install pocket-id cli to generate a one-time password.
-  # Automatic provisioning is blocked by https://github.com/pocket-id/pocket-id/pull/1205
 }
+
+# Wait for pocket 2.2.0 where I can set a static api key
+# TODO: wallpaper
+# User provisioning?
+# OIDC client
