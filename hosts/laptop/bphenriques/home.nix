@@ -54,6 +54,7 @@ in
     "file://${mounts.nasMedia}"
   ];
 
+  custom.dotfiles.enable = true;
   custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
   custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
   custom.programs.file-explorer = {

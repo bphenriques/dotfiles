@@ -1,7 +1,7 @@
 _:
 {
   boot.kernelParams = [
-    "amdgpu.sg_display=0" # Fixes flickring or stays white (https://wiki.archlinux.org/title/AMDGPU)
+    "amdgpu.sg_display=0" # Fixes flickering or stays white (https://wiki.archlinux.org/title/AMDGPU)
     "amdgpu.dpm=1"        # Dynamic Power Play: Dynamically adjust GPU based on the current demand. Preview with `powerprofilesctl list-actions` and then check `amdgpu_dpm`
   ];
 

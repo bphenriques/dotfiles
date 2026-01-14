@@ -17,7 +17,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.swappy" pkgs lib.platforms.linux) ];
 
     home.packages = [

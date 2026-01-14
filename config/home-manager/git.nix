@@ -29,7 +29,7 @@ in
     enable = true;
     settings = {      
       user.name = "Bruno Henriques";
-      user.email = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obsfuscation to prevent webscrappers
+      user.email = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obfuscation to prevent webscrappers
       alias = {
         co        = "checkout";
         a         = "add";
