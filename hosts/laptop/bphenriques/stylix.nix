@@ -26,7 +26,7 @@
       };
 
       emoji = {
-        package = pkgs.noto-fonts-emoji;
+        package = pkgs.noto-fonts-color-emoji;
         name = "Noto Color Emoji";
       };
 
@@ -58,6 +58,9 @@
       desktop = 1.0;
     };
 
-    targets.qt.platform = "gnome"; # Stylix does not support adwaita.
+    targets = {
+      font-packages.enable = true;
+      qt.platform = "gnome"; # Stylix does not support adwaita.
+    };
   };
 }

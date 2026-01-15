@@ -7,7 +7,6 @@
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
-    ./wl-kbptr.nix          # Mouse simulation
   ];
 
   services.swww.enable = true;

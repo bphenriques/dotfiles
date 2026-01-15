@@ -18,6 +18,7 @@
 
   # Enable easier font management
   fonts.fontconfig.enable = true;
+  stylix.targets.fontconfig.enable = true;
 
   stylix.targets.bat.enable = true;
   programs.bat.enable = true;             # Better file previewer
@@ -71,6 +72,8 @@
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
+
+    pkgs.jetbrains.idea-oss
   ];
 
   # Gpg
@@ -85,7 +88,6 @@
 
   home = {
     sessionVariables = {
-      VISUAL  = "$EDITOR";
       PAGER   = "less -iMR";
 
       # Colors
@@ -138,6 +140,7 @@
       };
       "pi-zero".user = "pi";
       "rg353m".user = "ark";
+      "pixel".user = "bruno";
     };
   };
 

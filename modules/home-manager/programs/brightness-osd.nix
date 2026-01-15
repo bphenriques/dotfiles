@@ -2,7 +2,6 @@
 let
   cfg = config.custom.programs.brightness-osd;
 
-  brightness-osd = lib.getExe cfg.package;
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
@@ -22,11 +21,6 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       (lib.hm.assertions.assertPlatform "custom.programs.custom-brightness-osd" pkgs lib.platforms.linux)
-    ];
-
-    custom.programs.wlr-which-key.menus.brightness-osd = [
-      { key = ["Up" "k"];   desc = "Increase brightness"; cmd = "${brightness-osd} increase"; keep_open = true; }
-      { key = ["Down" "j"]; desc = "Reduce brightness";   cmd = "${brightness-osd} decrease"; keep_open = true; }
     ];
 
     home.packages = [

@@ -1,15 +1,16 @@
 { lib, pkgs }:
 {
-  writeDmenuApplication = {
+  writeFuzzelDmenuApplication = {
     name,
     runtimeInputs ? [ ],
-    dmenu ? ''${lib.getExe pkgs.fuzzel} --dmenu'',
+    package ? pkgs.fuzzel,
+    extraArgs ? "",
     entries
   }: pkgs.writeShellApplication {
       inherit name runtimeInputs;
       text = let
         options = lib.concatMapStringsSep "\\n" (entry: entry.label) entries;
-        exec = "${dmenu} -l ${toString (builtins.length entries)}";
+        exec = "${lib.getExe package} --dmenu ${extraArgs}";
       in ''
         #shellcheck shell=bash
 

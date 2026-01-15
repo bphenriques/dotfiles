@@ -1,16 +1,34 @@
 { lib, pkgs, config, self, ... }:
 let
+  inherit (lib.attrsets) mapAttrs' nameValuePair;
   cfg = config.custom.programs.mpc-plus;
-
-  mkAppOpt = default: lib.mkOption {
-    inherit default;
-    description = "";
-    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-  };
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
+  deviceOpt = lib.types.submodule ({ name, config, ... }: {
+    options = {
+      host  = lib.mkOption { type = lib.types.str; default = name; };
+      port  = lib.mkOption { type = lib.types.port; default = 6600; };
+    };
+  });
+
   mpc-plus = lib.getExe cfg.package;
+  exec = {
+    play-pause        = ''${mpc-plus} play-pause'';
+    stop              = ''${mpc-plus} stop'';
+    play-shuffled     = ''${mpc-plus} play-shuffled'';
+    previous          = ''${mpc-plus} previous'';
+    next              = ''${mpc-plus} next'';
+    clear             = ''${mpc-plus} clear'';
+    toggle-random     = ''${mpc-plus} toggle-random'';
+    toggle-repeat     = ''${mpc-plus} toggle-repeat'';
+    volume-increase   = ''${mpc-plus} volume-increase'';
+    volume-decrease   = ''${mpc-plus} volume-decrease'';
+    search-play       = ''${mpc-plus} dmenu-file-exec play'';
+    search-enqueue    = ''${mpc-plus} dmenu-file-exec add'';
+    search-next       = ''${mpc-plus} dmenu-file-exec next'';
+    select-server     = ''${mpc-plus} dmenu-select-server'';
+  };
 in
 {
   options.custom.programs.mpc-plus = {
@@ -27,65 +45,55 @@ in
         noShuffleIcon = mkIcon "mpc-plus-no-shuffle" "󰒞";
         repeatSongIcon = mkIcon "mpc-plus-repeat-song" "󰑖";
         noRepeatIcon = mkIcon "mpc-plus-no-repeat" "󰑗";
+        deviceIcon = mkIcon "mpc-plus-device" "󰓃";
+        errorIcon = mkIcon "mpc-plus-error" "";
       };
     };
 
-    exec = {
-      play-pause        = mkAppOpt ''${mpc-plus} play-pause'';
-      stop              = mkAppOpt ''${mpc-plus} stop'';
-      play-shuffled     = mkAppOpt ''${mpc-plus} play-shuffled'';
-      previous          = mkAppOpt ''${mpc-plus} previous'';
-      next              = mkAppOpt ''${mpc-plus} next'';
-      clear             = mkAppOpt ''${mpc-plus} clear'';
-      toggle-random     = mkAppOpt ''${mpc-plus} toggle-random'';
-      toggle-repeat     = mkAppOpt ''${mpc-plus} toggle-repeat'';
-      volume-increase   = mkAppOpt ''${mpc-plus} volume-increase'';
-      volume-decrease   = mkAppOpt ''${mpc-plus} volume-decrease'';
-      search-play       = mkAppOpt ''${mpc-plus} dmenu-file-exec play'';
-      search-enqueue    = mkAppOpt ''${mpc-plus} dmenu-file-exec add'';
-      search-next       = mkAppOpt ''${mpc-plus} dmenu-file-exec next'';
+    devices = lib.mkOption {
+      type = lib.types.attrsOf deviceOpt;
+      default = {
+        default = {
+          host = config.services.mpd.network.listenAddress;
+          port = config.services.mpd.network.port;
+        };
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.mpc-plus" pkgs lib.platforms.linux) ];
 
+    xdg.configFile= mapAttrs' (name: value: (nameValuePair "mpc-plus/${name}.json" { text = (builtins.toJSON value); })) cfg.devices;
+
     home.packages = [
       pkgs.mpc
+      cfg.package
       (pkgs.makeDesktopItem {
         name = "Music";
         desktopName = "Music";
         icon = mkIcon "music-player" "󰥠";
-        exec = "${lib.getExe config.custom.programs.wlr-which-key.package} mpc-plus";
+        exec = ''${lib.getExe config.custom.programs.wlr-which-key.package} mpc-plus'';
         actions = {
-          "stop"      = { name = "Stop";            icon = (mkIcon "mpc-plus-stop" "");            exec = cfg.exec.stop; };
-          "find-play" = { name = "Play...";         icon = (mkIcon "mpc-plus-find-play" "");       exec = cfg.exec.search-play; };
-          "shuffle"   = { name = "Shuffle library"; icon = (mkIcon "mpc-plus-suffle-library" "");  exec = cfg.exec.play-shuffled; };
+          "shuffle"       = { name = "Shuffle library"; icon = (mkIcon "mpc-plus-shuffle-library" ""); exec = exec.play-shuffled; };
+          "find-play"     = { name = "Play...";         icon = (mkIcon "mpc-plus-find-play" "");       exec = exec.search-play; };
+          "stop"          = { name = "Stop";            icon = (mkIcon "mpc-plus-stop" "");            exec = exec.stop; };
+          "select-server" = { name = "Select server";   icon = (mkIcon "mpc-select-server" "󰓃");        exec = exec.select-server; };
         };
       })
     ];
 
     custom.programs.wlr-which-key.menus.mpc-plus = [
-      { key = "a";            desc = "Shuffle library";   cmd = cfg.exec.play-shuffled;   keep_open = true; }
-      { key = ["space" "p"];  desc = "Play/Pause";        cmd = cfg.exec.play-pause;      keep_open = true; }
-      { key = "s";            desc = "Stop";              cmd = cfg.exec.stop;            keep_open = true; }
-      { key = ["Left" "h"];   desc = "Previous";          cmd = cfg.exec.previous;        keep_open = true; }
-      { key = ["Right" "l"];  desc = "Next";              cmd = cfg.exec.next;            keep_open = true; }
-      { key = ["Up" "k"];     desc = "Increase volume";   cmd = cfg.exec.volume-increase; keep_open = true; }
-      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = cfg.exec.volume-decrease; keep_open = true; }
-      { key = "z";            desc = "Toggle repeat";     cmd = cfg.exec.toggle-repeat;   keep_open = true; }
-      { key = "x";            desc = "Toggle random";     cmd = cfg.exec.toggle-random;   keep_open = true; }
-      {
-        key = "q";
-        desc = "Queue";
-        submenu = [
-          { key = "a";      desc = "Play library";      cmd = cfg.exec.play-shuffled;     keep_open = true; }
-          { key = "space";  desc = "Play...";           cmd = cfg.exec.search-play; }
-          { key = "n";      desc = "Play next...";      cmd = cfg.exec.search-next; }
-          { key = "e";      desc = "Enqueue...";        cmd = cfg.exec.search-enqueue; }
-          { key = "c";      desc = "Clear";             cmd = cfg.exec.clear; keep_open = true; }
-        ];
-      }
+      { key = "p";            desc = "Play/Pause";        cmd = exec.play-pause;      keep_open = true; }
+      { key = "s";            desc = "Stop";              cmd = exec.stop; }
+      { key = ["Left" "h"];   desc = "Previous";          cmd = exec.previous;        keep_open = true; }
+      { key = ["Right" "l"];  desc = "Next";              cmd = exec.next;            keep_open = true; }
+      { key = ["Up" "k"];     desc = "Increase volume";   cmd = exec.volume-increase; keep_open = true; }
+      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = exec.volume-decrease; keep_open = true; }
+      { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
+      { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
+      { key = "space";        desc = "Play...";           cmd = exec.search-play; }
+      { key = "a";            desc = "Shuffle library";   cmd = exec.play-shuffled; }
     ];
   };
 }

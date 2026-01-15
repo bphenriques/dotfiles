@@ -18,15 +18,12 @@
     ./umu-launcher.nix    # Ad-hoc game launcher
     ./mpd.nix             # Music player
     ./wallpaper.nix       # Set wallpaper
+    ./obsidian.nix        # note taking
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
+    pkgs.xwayland-satellite
     pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
-
-    # Rom management
-    pkgs.igir-git      # Remove once https://github.com/NixOS/nixpkgs/pull/372184 is merged
-    (pkgs.skyscraper.override { enableXdg = true; })     # Adds media files next to the files
+    pkgs.gparted       # TODO: I partially know how to do in the terminal... but... this is easier.
  ];
-
-  custom.services.xwayland-satellite.enable = true;
 }

@@ -15,9 +15,10 @@ set_mute()    { wpctl set-mute "$1" "$2"; }
 
 device_type() {
   case "$1" in
-    *SteelSeries*)  echo -n "headset"      ;;
-    *analog*)       echo -n "internal"     ;;
-    *)              echo -n "external"     ;;
+    *Headset*)      echo -n "headset"       ;;
+    *SteelSeries*)  echo -n "headset"       ;;
+    *analog*)       echo -n "internal"      ;;
+    *)              echo -n "external"      ;;
   esac
 }
 
@@ -25,9 +26,10 @@ friendly_sink_name() {
   local sink_name
   sink_name="$(get_sink "$1" | jq -r '.name')"
   case "${sink_name}" in
-    *analog*) echo -n "Laptop"                      ;;
-    *hdmi*)   echo -n "HDMI"                        ;;
-    *)        get_sink "$1" | jq -r '.description'  ;;
+    *Headset*)  echo -n "Headset"                     ;;
+    *analog*)   echo -n "Laptop"                      ;;
+    *hdmi*)     echo -n "HDMI"                        ;;
+    *)          get_sink "$1" | jq -r '.description'  ;;
   esac
 }
 
@@ -35,8 +37,9 @@ friendly_source_name() {
   local source_name
   source_name="$(get_source "$1" | jq -r '.name')"
   case "${source_name}" in
-    *analog*) echo -n "Laptop"                        ;;
-    *)        get_source "$1" | jq -r '.description'  ;;
+    *analog*)   echo -n "Laptop"                        ;;
+    *Headset*)  echo -n "Headset"                       ;;
+    *)          get_source "$1" | jq -r '.description'  ;;
   esac
 }
 

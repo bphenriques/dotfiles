@@ -26,51 +26,45 @@ in
                 mountOptions = [ "umask=0077" ];
               };
             };
-            luks = {
+            root = {
               size = "100%";
               content = {
-                type = "luks";
-                name = "crypted";
-                settings.allowDiscards = true;
-                passwordFile = "/tmp/luks-interactive-password.key";  # Required when setting up.
-                content = {
-                  type = "btrfs";
-                  extraArgs = [   "-f" ]; # override existing partitions
+                type = "btrfs";
+                extraArgs = [ "-f" ]; # override existing partitions
 
-                  # In line with other distros for simplicity. Ephemeral/reproducible data does not need to be snapshoted.
-                  subvolumes = {
-                    "@root" = {
-                      mountpoint = "/";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@var_log" = {
-                      mountpoint = "/var/log";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@var_cache" = {
-                      mountpoint = "/var/cache";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@var_tmp" = {
-                      mountpoint = "/var/tmp";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@nix" = {
-                      mountpoint = "/nix";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@swap" = {
-                      mountpoint = "/.swapvol";
-                      swap.swapfile.size = "13G"; # Dont forget to set the right offset: https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Acquire_swap_file_offset
-                    };
-                    "@home" = {
-                      mountpoint = "/home";
-                      mountOptions = [ "compress=zstd:1" "noatime" ];
-                    };
-                    "@home/bphenriques" = { };
-                    "@home/bphenriques/workdir" = { };
-                    "@home/bphenriques/games" = { };
+                # In line with other distros for simplicity. Ephemeral/reproducible data does not need to be snapshoted.
+                subvolumes = {
+                  "@root" = {
+                    mountpoint = "/";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
                   };
+                  "@var_log" = {
+                    mountpoint = "/var/log";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                  };
+                  "@var_cache" = {
+                    mountpoint = "/var/cache";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                  };
+                  "@var_tmp" = {
+                    mountpoint = "/var/tmp";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                  };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                  };
+                  "@swap" = {
+                    mountpoint = "/.swapvol";
+                    swap.swapfile.size = "13G"; # Dont forget to set the right offset: https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Acquire_swap_file_offset
+                  };
+                  "@home" = {
+                    mountpoint = "/home";
+                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                  };
+                  "@home/bphenriques" = { };
+                  "@home/bphenriques/workdir" = { };
+                  "@home/bphenriques/games" = { };
                 };
               };
             };
@@ -80,7 +74,7 @@ in
     };
   };
 
-  # Create subvolumeo or directory if it does not exist and set the owner correctly.
+  # Create subvolumes or directories if they do not exist and set the owner.
   systemd.tmpfiles.rules = [
     "v /home/${users.bphenriques.name}/games    0700 ${users.bphenriques.name}   ${groups.users.name}"
     "v /home/${users.bphenriques.name}/workdir  0700 ${users.bphenriques.name}   ${groups.users.name}"

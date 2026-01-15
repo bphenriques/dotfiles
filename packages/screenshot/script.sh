@@ -20,3 +20,10 @@ case "${1:-}" in
   region-copy)  grim -g "$(slurp)" - | wl-copy       ;;
   region-edit)  grim -g "$(slurp)" - | swappy -f -   ;;
 esac
+
+# TODO: idea from showcase
+# #!/bin/bash
+# screenshot_dir=~/Pictures/Screenshots
+# niri msg action screenshot &&
+#   inotifywait -e close $screenshot_dir &&
+#  swappy start --file "$(ls -d -t $screenshot_dir/* | head -n 1)"```

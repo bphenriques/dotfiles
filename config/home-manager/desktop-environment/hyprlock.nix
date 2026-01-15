@@ -1,4 +1,4 @@
-{ pkgs, config, self, ... }:
+{ pkgs, config, self, lib, ... }:
 let
   background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
   lockPackage = pkgs.writeShellApplication {
@@ -12,7 +12,7 @@ let
   };
 in
 {
-  custom.programs.session.exec.lock = lockPackage;
+  custom.programs.session.exec.lock = lib.getExe lockPackage;
   programs.hyprlock = {
     enable = true;
     settings = {

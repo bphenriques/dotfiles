@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  resizeArtwork ? true,
   musicIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/actions/music-artist-symbolic.svg",
   artistIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/actions/music-artist-symbolic.svg",
   albumIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/actions/music-artist-symbolic.svg",
@@ -11,6 +10,8 @@
   noShuffleIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/media-playlist-no-shuffle-symbolic.svg",
   repeatSongIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/media-playlist-repeat-song-symbolic.svg",
   noRepeatIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/media-playlist-no-repeat-symbolic.svg",
+  deviceIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/32x32/devices/audio-speakers.svg",
+  errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
   ...
 }:
 pkgs.writeShellApplication {
@@ -18,8 +19,8 @@ pkgs.writeShellApplication {
   runtimeInputs = [
     pkgs.mpc
     pkgs.libnotify
-    #FIXME: re-add fuzzel on next relase
-  ] ++ lib.optionals resizeArtwork [
+    pkgs.fuzzel
+    pkgs.jq
     pkgs.imagemagick
   ];
 
@@ -33,6 +34,8 @@ pkgs.writeShellApplication {
     MPC_PLUS_NO_RANDOM_ICON="${noShuffleIcon}"
     MPC_PLUS_REPEAT_ICON="${repeatSongIcon}"
     MPC_PLUS_NO_REPEAT_ICON="${noRepeatIcon}"
+    MPC_PLUS_DEVICE_ICON="${deviceIcon}"
+    MPC_PLUS_ERROR_ICON="${errorIcon}"
 
     ${lib.fileContents ./script.sh}
   '';

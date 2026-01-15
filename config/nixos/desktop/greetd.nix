@@ -1,12 +1,12 @@
 { pkgs, config, lib, ... }:
+let
+  session = {
+    command = ''${lib.getExe pkgs.tuigreet} --asterisks --time --remember'';
+    user = config.users.users.greeter.name;
+  };
+in
 {
-  services.greetd = let
-    options = ''--asterisks --time --remember'';
-    session = {
-      command = ''${lib.getExe pkgs.greetd.tuigreet} ${options}'';
-      user = config.users.users.greeter.name;
-    };
-  in {
+  services.greetd = {
     enable = true;
     settings = {
       terminal.vt = 1;

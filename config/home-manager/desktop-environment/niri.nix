@@ -16,9 +16,6 @@ let
     runtimeInputs = [ pkgs.wtype ];
     text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
   };
-
-  # Good enough
-  toNiriSpawn = command: lib.strings.concatMapStringsSep " " (x: ''"${x}"'') (lib.strings.splitString " " command);
 in
 {
   custom.programs.niri = {
@@ -137,7 +134,7 @@ in
       "Mod+Shift+C" = "center-window";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+Ctrl+Shift+F" = "toggle-windowed-fullscreen";
+      "Mod+Ctrl+Shift+F" = "maximize-window-to-edges";
       "Mod+Comma"        = "consume-window-into-column";
       "Mod+Shift+Comma"  = "expel-window-from-column";
       "Mod+O repeat=false" = "toggle-overview";
@@ -145,31 +142,28 @@ in
        # Screenshots
       "Print"       = ''screenshot-screen'';
       "Shift+Print" = ''screenshot'';
-      "Mod+Print"   = ''spawn ${toNiriSpawn config.custom.programs.screenshot.exec.menu}'';
-      "Mod+Shift+S" = ''spawn "screenshot" "region-edit"'';
-
-      # TODO: Fix screenshot UI moving around with keyboard. See release 25.05
-      # TODO: https://github.com/YaLTeR/niri/blob/2415346caaa4121ed202b8e376fb40b2a44eb61f/resources/default-config.kdl#L575
+      "Mod+Print"   = ''spawn-sh "${config.custom.programs.screenshot.dmenu}"'';
+      "Mod+Shift+S" = ''spawn-sh "${lib.getExe config.custom.programs.screenshot.package} region-edit"'';
 
       # Notifications
-      "Mod+N"        = ''spawn "${dunstctl}" "action"'';
-      "Mod+Shift+N"  = ''spawn "${dunstctl}" "context"'';
-      "Mod+Ctrl+N"   = ''spawn "${dunstctl}" "close"'';
+      "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
+      "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
+      "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn "${lib.getExe config.custom.programs.wlr-which-key.package}" "global"'';
-      "Mod+Return"        = ''spawn "${terminal}"'';
+      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn-sh "${lib.getExe config.custom.programs.wlr-which-key.package} global"'';
+      "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
-      "Mod+E"             = ''spawn ${toNiriSpawn files-browser}'';
-      "Mod+K"             = ''spawn "${lib.getExe self.pkgs.niri-keyboard-layout}" "next"'';
-      "Mod+Shift+Q"       = ''spawn ${toNiriSpawn config.custom.programs.session.exec.menu}'';
-      "Ctrl+Shift+Escape" = ''spawn ${toNiriSpawn system-monitor}'';
-      "Mod+L"             = ''spawn ${toNiriSpawn config.custom.programs.session.exec.lock}'';
+      "Mod+E"             = ''spawn-sh "${files-browser}"'';
+      "Mod+K"             = ''spawn-sh "${lib.getExe self.pkgs.niri-keyboard-layout} next"'';
+      "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
+      "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
+      "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
 
       # Focus management
       "Mod+Tab"         = ''spawn "${lib.getExe self.pkgs.niri-window-dmenu}"'';
-      "Alt+Tab"         = "focus-window-previous";
+      #"Alt+Tab"         = "focus-window-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";
@@ -188,18 +182,18 @@ in
       "Mod+BracketRight"  = "consume-or-expel-window-right";
 
       # Audio
-      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn "${volume}" "sink-increase"'';
-      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn "${volume}" "sink-decrease"'';
-      "XF86AudioMute        allow-when-locked=true" = ''spawn "${volume}" "sink-toggle-mute"'';
-      "XF86AudioMicMute     allow-when-locked=true" = ''spawn "${volume}" "source-toggle-mute"'';
-      "XF86AudioPrev        allow-when-locked=true" = ''spawn "${playerctl}" "previous"'';
-      "XF86AudioNext        allow-when-locked=true" = ''spawn "${playerctl}" "next"'';
-      "XF86AudioPlay        allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
-      "XF86AudioPause       allow-when-locked=true" = ''spawn "${playerctl}" "play-pause"'';
+      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-increase"'';
+      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-decrease"'';
+      "XF86AudioMute        allow-when-locked=true" = ''spawn-sh "${volume} sink-toggle-mute"'';
+      "XF86AudioMicMute     allow-when-locked=true" = ''spawn-sh "${volume} source-toggle-mute"'';
+      "XF86AudioPrev        allow-when-locked=true" = ''spawn-sh "${playerctl} previous"'';
+      "XF86AudioNext        allow-when-locked=true" = ''spawn-sh "${playerctl} next"'';
+      "XF86AudioPlay        allow-when-locked=true" = ''spawn-sh "${playerctl} play-pause"'';
+      "XF86AudioPause       allow-when-locked=true" = ''spawn-sh "${playerctl} play-pause"'';
 
       # Brightness
-      "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn "${brightness}" "increase"'';
-      "XF86MonBrightnessDown allow-when-locked=true" = ''spawn "${brightness}" "decrease"'';
+      "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn-sh "${brightness} increase"'';
+      "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightness} decrease"'';
     };
 
     # TODO: Explore tiled state window rule from 25.05 release
