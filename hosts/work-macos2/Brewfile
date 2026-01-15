@@ -1,0 +1,52 @@
+tap "common-fate/granted"
+tap "warrensbox/tap"
+
+# Core utilities
+brew "yq"
+brew "jq"
+brew "tree"
+
+# Scala
+brew "jenv"
+cask "temurin@17"
+cask "temurin@21"
+brew "openjdk"
+brew "sbt"
+cask "bloop"
+
+# Development
+cask "intellij-idea-ce"
+cask "postman"
+brew "go-task"
+
+# Infrastructure
+brew "warrensbox/tap/tfswitch"
+
+# Annoying
+brew "prettier"
+
+# Gitops
+brew "awscli"
+brew "helm"
+brew "kubeconform"
+brew "kubelogin"
+brew "kubectl"
+brew "kubeseal"
+
+# Shell
+brew "fish"
+brew "shellcheck"
+
+# Other
+cask "1password-cli"
+cask "slack"
+
+# MacOS specific
+cask "rectangle"
+cask "ghostty"
+
+# Optional
+# brew "localai"
+# Not needed as installed automatically
+# cask "google-chrome"
+# cask "slack"
