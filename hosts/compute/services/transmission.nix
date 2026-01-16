@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  mediaDir = /mnt/nas-media; # TODO: setting?
+  pathsCfg = config.custom.paths;
 in
 {
   custom.home-server.services.transmission.port = 9091;
@@ -8,9 +8,9 @@ in
   services.transmission = {
     enable = true;
     settings = {
-      #download-dir = "${mediaDir}/downloads/complete";
+      download-dir = pathsCfg.media.downloads.root;;
       incomplete_dir_enabled = true;
-      #incomplete-dir = "${mediaDir}/downloads/incomplete";
+      incomplete-dir = pathsCfg.media.downloads.incomplete;
       rpc-port = config.custom.home-server.services.transmission.port;
       rpc_url = config.custom.home-server.services.transmission.publicUrl;
       idle_seeding_limit_enabled = true;

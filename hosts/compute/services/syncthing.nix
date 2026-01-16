@@ -2,23 +2,14 @@
 let
   cfg = config.custom.home-server;
 
-  # --- 1. USER & PATHS ---
   # Ensure the 'user' here has R/W access to the Synology Mounts!
   user = "bphenriques";
   group = "users";
 
-  # Data Roots (Assumed mounted from Synology)
-  musicDir = "/mnt/media/music";
-  romsDir  = "/mnt/media/emulation";
-  backupDir = "/mnt/backups/galaxy-s20";
-
-  # --- 2. DEVICES ---
   devices = {
     galaxy-s20 = {
       id = "AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH";
       name = "Galaxy S20";
-      # Optional: Hardcode IP if Local Discovery is flaky on your network
-      # addresses = [ "tcp://192.168.1.50:22000" ];
     };
     retroid-pocket-5 = {
       id = "ZZZZZZZ-YYYYYYY-XXXXXXX-WWWWWWW-VVVVVVV-UUUUUUU-TTTTTTT-SSSSSSS";
@@ -42,6 +33,7 @@ in {
     oidc.enable = true;
   };
 
+  users.users.syncthing.extraGroups = [ "homelab" ];
   services.syncthing = {
     enable = true;
     user = user;
@@ -70,9 +62,9 @@ in {
       };
 
       folders = {
-        "music"        = mkFolder "music" musicDir [ "galaxy-s20" ];
-        "roms"         = mkFolder "roms" "${romsDir}/roms" [ "retroid-pocket-5" ];
-        "phone_backup" = mkFolder "phone-backup" backupDir [ "galaxy-s20" ];
+        "music"        = mkFolder "music" paths.media.music.library [ "galaxy-s20" ];
+        "roms"         = mkFolder "roms" paths.media.gaming.emulation.roms [ "retroid-pocket-5" ];
+        "phone_backup" = mkFolder "phone-backup" paths.bphenriques.backups.phone [ "galaxy-s20" ];
       };
 
       gui.theme = "dark";

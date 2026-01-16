@@ -1,6 +1,5 @@
 { config, pkgs, ... }:
 let
-  mediaDir = /mnt/nas-media; # TODO: setting?
   openId = {
     openid_connect.APPS = [
       {

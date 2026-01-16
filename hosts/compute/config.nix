@@ -3,7 +3,6 @@
   imports = [
     ./hardware
     ./disko.nix
-    ./network-drives.nix
     ../../config/nixos
     ../../config/nixos/headless
     ./services
@@ -14,7 +13,7 @@
 
   # TODO: https://blog.aldnav.com/blog/going-headless-with-nixos/
 
-  # Auto-reboot in case something wrong happens and ensure watchdog resets
+  # Auto-reboot in case something wrong happens and ensure watchdog is enabled.
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
@@ -29,6 +28,13 @@
     };
   };
 
+  # Homelab integration
+  custom.fileSystems.homelab.enable = true;
+
+  # Sops secrets for homelab authentication
+  sops.secrets.homelab_samba_username = { };
+  sops.secrets.homelab_samba_password = { };  
+
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
@@ -36,9 +42,6 @@
   # Users
   users.mutableUsers = false;
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
-
-  # Peripherals
-  boot.extraModprobeConfig = "options hid_apple fnmode=2 swap_opt_cmd=0"; # Nuphy Air75 (check the flags with `modinfo -p hid_apple`)
 
   system.stateVersion = "25.11"; # The release version of the first install of this system!
 }

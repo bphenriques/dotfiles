@@ -1,9 +1,6 @@
 { config, self, ... }:
 let
-  mounts = {
-    nasPrivate = "/mnt/nas-bphenriques";
-    nasMedia = "/mnt/nas-media";
-  };
+  pathsCfg = config.custom.paths;
 in
 {
   imports = [
@@ -30,8 +27,8 @@ in
     "d ${config.xdg.userDirs.download}                        - - - -"
 
     # Note: avoiding mounting directly to avoid slowing down access to $HOME in-case I am offline.
-    "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${mounts.nasPrivate}/photos"
-    "L ${config.xdg.userDirs.music}/nas                       - - - - ${mounts.nasMedia}/music"
+    "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${pathsCfg.photos.root}"
+    "L ${config.xdg.userDirs.music}/nas                       - - - - ${pathsCfg.music.root}"
   ];
 
   home.stateVersion = "24.05";

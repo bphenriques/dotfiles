@@ -1,8 +1,9 @@
 { config, pkgs, lib, ... }:
 let
   cfg = config.custom.home-server;
+  pathsCfg = config.custom.paths;
 
-  emulationDir = "/mnt/media/emulation";
+  emulationDir = pathsCfg.media.gaming.emulation;
   dataDir = "/var/lib/romm";
 
   # Helper to generate the long list of ROM volume mounts
