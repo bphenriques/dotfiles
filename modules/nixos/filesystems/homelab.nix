@@ -1,10 +1,13 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, utils, ... }:
 let
   inherit (lib) mkOption types;
 
   cfg = config.custom.fileSystems.homelab;
 
-  cifsCfg = types.submodule ({ name, ... }: {
+  # Convert a path to a systemd unit name (e.g., /mnt/homelab-bphenriques -> mnt-homelab\x2dbphenriques)
+  pathToUnitName = path: utils.escapeSystemdPath (lib.removePrefix "/" path);
+
+  cifsCfg = types.submodule ({ name, config, ... }: {
     options = {
       localMount = mkOption {
         type = types.str;
@@ -14,13 +17,20 @@ let
       remote = mkOption {
         type = types.str;
         default = name;
+        readOnly = true;
         description = "Remote folder name on the homelab server";
       };
       group = mkOption {
         type = types.str;
         default = "homelab-${name}";
         description = "Name of the group with access to the mount";
-      }
+      };
+      automountUnit = mkOption {
+        type = types.str;
+        default = "${pathToUnitName config.localMount}.automount";
+        readOnly = true;
+        description = "Systemd automount unit name for this mount";
+      };
     };
   });
 

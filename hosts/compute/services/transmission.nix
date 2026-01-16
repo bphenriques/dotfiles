@@ -1,10 +1,10 @@
 { config, pkgs, ... }:
 let
   pathsCfg = config.custom.paths;
+  homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
   custom.home-server.services.transmission.port = 9091;
-
   services.transmission = {
     enable = true;
     settings = {
@@ -32,9 +32,10 @@ in
     webHome = pkgs.flood-for-transmission;
   };
 
-  # FIXME: Permissions
-  # user = "media";
-  # group "media";
-
-  #systemd.services.transmission.serviceConfig.BindPaths = [ "/mnt" mediaDir ];
+  # Ensure we deal correctly with the remote storage dependencies: permissions and service dependency.
+  users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
+  systemd.services.transmission = {
+    requires = [ homelabMounts.media.automountUnit ];
+    after = [ homelabMounts.media.automountUnit ];
+  };
 }
