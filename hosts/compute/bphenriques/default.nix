@@ -8,8 +8,10 @@
     extraGroups = [ "wheel" ];
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
-      ++ lib.optionals config.custom.fileSystems.homelab.enable [ "homelab" ];
-      
+      ++ lib.optionals config.custom.fileSystems.homelab.enable (
+        lib.mapAttrsToList (key: value: value.group) config.custom.fileSystems.homelab.mounts
+      );
+
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3"
     ];

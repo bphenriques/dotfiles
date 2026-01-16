@@ -1,6 +1,6 @@
 { lib, config, pkgs, ... }:
 let
-  inherit (lib) mkOption types mkIf mkEnableOption;
+  inherit (lib) mkOption types;
 
   cfg = config.custom.fileSystems.homelab;
 
@@ -16,10 +16,17 @@ let
         default = name;
         description = "Remote folder name on the homelab server";
       };
+      group = mkOption {
+        type = types.str;
+        default = "homelab-${name}";
+        description = "Name of the group with access to the mount";
+      }
     };
   });
 
   mkCifsFs = name: mountCfg: {
+    users.groups."${mountCfg.group}" = { }; # gid assigned automatically
+
     fileSystems."${mountCfg.localMount}" = {
       device = "//${cfg.hostname}/${mountCfg.remote}";
       fsType = "cifs";
@@ -41,14 +48,14 @@ let
     };
 
     systemd.tmpfiles.rules = [
-      "d ${mountCfg.localMount} 0770 root homelab -"
+      "d ${mountCfg.localMount} 0770 root ${mountCfg.group} -"
     ];
   };
 
   mountConfigs = lib.attrsets.mapAttrsToList mkCifsFs cfg.mounts;
 in {
   options.custom.fileSystems.homelab = {
-    enable = mkEnableOption "Home-server storage";
+    enable = lib.mkEnableOption "Home-server storage";
     
     hostname = mkOption {
       type = types.str;
@@ -59,10 +66,6 @@ in {
     mounts = mkOption {
       type = types.attrsOf cifsCfg;
       description = "Attributes where the key is the remote root folder to configure";
-      default = {
-        bphenriques = { };
-        media = { };
-      };
       example = lib.literalExpression ''
         {
           bphenriques = { };
@@ -72,12 +75,9 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (lib.mkMerge ([
+  config = lib.mkIf cfg.enable (lib.mkMerge ([
     {
-      users.groups.homelab = { }; # gid assigned automatically
-
       environment.systemPackages = [ pkgs.cifs-utils ];
-
       sops = {
         secrets.homelab_samba_username = { };
         secrets.homelab_samba_password = { };

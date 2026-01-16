@@ -93,4 +93,3 @@ Following this:
 
 Source
 - https://wiki.archlinux.org/title/Advanced_Format#NVMe_solid_state_drives
-

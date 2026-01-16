@@ -19,10 +19,3 @@
     cloudflareEmail = self.settings.cloudflareEmail;
   };
 }
-
-
-# booklore
-# cleanuparr
-# homepage
-# immich
-# obsidian-livesync

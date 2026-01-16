@@ -1,11 +1,13 @@
 { config, pkgs, ... }:
 {
   imports = [
+    # Base
     ./hardware
     ./disko.nix
+    ./services
+    ./tasks
     ../../config/nixos
     ../../config/nixos/headless
-    ./services
 
     # Users
     ./bphenriques
@@ -13,11 +15,7 @@
 
   # TODO: https://blog.aldnav.com/blog/going-headless-with-nixos/
 
-  # Auto-reboot in case something wrong happens and ensure watchdog is enabled.
-  boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
-  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
-
-  # Core
+  # Basic setup
   networking.hostName = "compute";
   boot = {
     kernelPackages = pkgs.linuxPackages_6_18;
@@ -30,10 +28,10 @@
 
   # Homelab integration
   custom.fileSystems.homelab.enable = true;
-
-  # Sops secrets for homelab authentication
-  sops.secrets.homelab_samba_username = { };
-  sops.secrets.homelab_samba_password = { };  
+  custom.fileSystems.homelab.mounts = {
+    bphenriques = { };
+    media = { };
+  };
 
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;

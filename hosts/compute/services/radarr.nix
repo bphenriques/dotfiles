@@ -2,7 +2,7 @@
 {
   custom.home-server.services.radarr.port = 9098;
 
-  # https://wiki.servarr.com/prowlarr/environment-variables ?
+  # https://wiki.servarr.com/radarr/environment-variables ?
   services.radarr = {
     enable = true;
     settings.server.port = config.custom.home-server.services.radarr.port;

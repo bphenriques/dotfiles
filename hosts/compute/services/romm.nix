@@ -6,8 +6,6 @@ let
   emulationDir = pathsCfg.media.gaming.emulation;
   dataDir = "/var/lib/romm";
 
-  # Helper to generate the long list of ROM volume mounts
-  # This keeps the config clean and easy to expand later
   folders = [
     "bios" "gb" "gba" "gbc" "dos" "dreamcast" "fbneo"
     "megadrive" "n64" "nds" "nes" "psp" "psx" "snes"
@@ -16,7 +14,7 @@ let
 
 in {
   custom.home-server.services.romm = {
-    port = 8080;
+    port = 8095;
     oidc.enable = true;
     callbackPath = "/api/oauth/openid";
   };

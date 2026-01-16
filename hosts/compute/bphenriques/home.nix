@@ -26,7 +26,7 @@ in
     "d ${config.xdg.userDirs.music}                           - - - -"
     "d ${config.xdg.userDirs.download}                        - - - -"
 
-    # Note: avoiding mounting directly to avoid slowing down access to $HOME in-case I am offline.
+    # Note: avoiding mounting directly to avoid slowing down access to $HOME when offline.
     "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${pathsCfg.photos.root}"
     "L ${config.xdg.userDirs.music}/nas                       - - - - ${pathsCfg.music.root}"
   ];

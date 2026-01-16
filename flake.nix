@@ -1,5 +1,5 @@
 {
-  description = "bphenriques's machines expressed using nix";
+  description = "bphenriques's fleet";
 
   nixConfig = {
     extra-substituters = [

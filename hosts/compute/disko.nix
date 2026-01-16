@@ -4,9 +4,7 @@ _:
     disk = {
       vda = {
         type = "disk";
-        # Using `by-path` as b/c I won't move the SSDs and `by-id` may change (e.g., `/dev/nvme0n1`).
-        # How to: run `ls /dev/disk/by-path/ -l` and cross-reference with `sudo nix run nixpkgs#nvme-cli -- list`
-        device = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
+        device = "/dev/disk/by-uuid/1E22-325C";
         content = {
           type = "gpt";
 

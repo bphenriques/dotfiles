@@ -1,4 +1,4 @@
-{ nixpkgs, nur, self, sops-nix, disko, home-manager, dotfiles-private, stylix, ... }:
+{ nixpkgs, self, sops-nix, disko, home-manager, dotfiles-private, stylix, ... }:
 let
   inherit (nixpkgs.lib.attrsets) attrValues;
 
@@ -6,7 +6,7 @@ let
 
   nixModule = {
     nixpkgs = {
-      overlays = attrValues self.overlays ++ [ nur.overlays.default ];
+      overlays = attrValues self.overlays;
     };
   };
 

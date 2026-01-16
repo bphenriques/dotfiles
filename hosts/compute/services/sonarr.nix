@@ -2,7 +2,7 @@
 {
   custom.home-server.services.sonarr.port = 9097;
 
-  # https://wiki.servarr.com/prowlarr/environment-variables ?
+  # https://wiki.servarr.com/sonarr/environment-variables ?
   services.sonarr = {
     enable = true;
     settings.server.port = config.custom.home-server.services.sonarr.port;

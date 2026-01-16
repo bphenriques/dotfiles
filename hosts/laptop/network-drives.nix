@@ -36,12 +36,10 @@ in
   fileSystems = {
     "/mnt/nas-bphenriques"  = mkCifsFs "bruno-home-nas" "bphenriques" users.bphenriques groups.root;
     "/mnt/nas-media"        = mkCifsFs "bruno-home-nas" "media"       users.bphenriques groups.users;
-    "/mnt/nas-shared"       = mkCifsFs "bruno-home-nas" "shared"      users.bphenriques groups.users;
   };
 
   systemd.tmpfiles.rules = [
     "z /mnt/nas-bphenriques   0700 ${users.bphenriques.name} ${groups.users.name}"
     "z /mnt/nas-media         0775 root                      ${groups.users.name}"
-    "z /mnt/nas-shared        0775 root                      ${groups.users.name}"
   ];
 }
