@@ -1,11 +1,12 @@
 { self, ...}: {
   imports = [
-    ./pocket-id.nix
+    ./pocket-id
     ./miniflux.nix
 
     ./jellyseerr.nix
     ./transmission.nix
     ./tandoor-recipes.nix
+    #./obsidian-livesync
 
     # Servarr
     ./prowlarr.nix
