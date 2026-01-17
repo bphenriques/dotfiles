@@ -21,12 +21,6 @@ in
       # https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md#rpc
       # Considerations: https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md#scheduling
       # rpc_password
-
-      # TODO: notifications?
-      # script_torrent_added_enabled
-      # script_torrent_added_filename
-      # script-torrent-done-enabled = ""; # TODO notify
-      # script-torrent-done-filename = "";
     };
 
     webHome = pkgs.flood-for-transmission;

@@ -33,7 +33,11 @@ in {
     oidc.enable = true;
   };
 
-  users.users.syncthing.extraGroups = [ "homelab" ];
+  users.users.syncthing.extraGroups = [
+    config.users.groups.homelab-media.name
+    config.users.groups.homelab-bphenriques.name
+  ];
+
   services.syncthing = {
     enable = true;
     user = user;
