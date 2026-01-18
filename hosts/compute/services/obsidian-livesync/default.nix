@@ -35,13 +35,16 @@ let
     };
   };
 
-  databases = [
-    { name = "obsidiandb-bphenriques"; owner = "bphenriques"; }
-  ];
+  # Filter users with obsidian-livesync enabled and format for init script
+  enabledUsers = lib.filterAttrs (_: u: u.services.obsidian-livesync.enable) config.custom.home-server.users;
+  users = lib.mapAttrsToList (_: u: {
+    name = u.username;
+    passwordFile = u.services.obsidian-livesync.passwordFile;
+  }) enabledUsers;
 
-  users = [
-    { name = "bphenriques"; passwordFile = config.sops.templates."couchdb-user-bphenriques".path; }
-  ];
+  databases = lib.concatLists (lib.mapAttrsToList (_: u:
+    map (db: { name = db; owner = u.username; }) u.services.obsidian-livesync.databases
+  ) enabledUsers);
 in
 {
   custom.home-server.services.obsidian-livesync.port = 5984;
@@ -54,10 +57,11 @@ in
 
   sops = {
     secrets.obsidian_livesync_admin_password = { };
-    secrets.obsidian_livesync_bphenriques_password = { };
     templates = {
-      "couchdb-admin-password".content = config.sops.placeholder.obsidian_livesync_admin_password;
-      "couchdb-user-bphenriques".content = config.sops.placeholder.obsidian_livesync_bphenriques_password;
+      "couchdb-admin-password" = {
+        owner = config.services.couchdb.user;
+        content = config.sops.placeholder.obsidian_livesync_admin_password;
+      };
       "couchdb-admin" = {
         owner = config.services.couchdb.user;
         content = ''
@@ -71,12 +75,18 @@ in
   # Initialize databases and users after CouchDB starts
   systemd.services.couchdb-init = {
     description = "Initialize CouchDB databases and users";
+    wantedBy = [ "multi-user.target" ];
     after = [ "couchdb.service" ];
     requires = [ "couchdb.service" ];
-    wantedBy = [ "multi-user.target" ];
+    partOf = [ "couchdb.service" ];
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
+      User = config.services.couchdb.user;    # Ensure it is not root.
+      Group = config.services.couchdb.group;
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 3;
     };
     environment = {
       COUCHDB_URL = "http://${config.services.couchdb.bindAddress}:${toString config.services.couchdb.port}";

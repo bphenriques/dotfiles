@@ -1,6 +1,6 @@
-{ config, self, ... }:
+{ config, osConfig, self, ... }:
 let
-  pathsCfg = config.custom.paths;
+  pathsCfg = osConfig.custom.paths; # FIXME: This should move up
 in
 {
   imports = [
@@ -27,8 +27,8 @@ in
     "d ${config.xdg.userDirs.download}                        - - - -"
 
     # Note: avoiding mounting directly to avoid slowing down access to $HOME when offline.
-    "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${pathsCfg.photos.root}"
-    "L ${config.xdg.userDirs.music}/nas                       - - - - ${pathsCfg.music.root}"
+    "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${pathsCfg.bphenriques.photos.root}"
+    "L ${config.xdg.userDirs.music}/nas                       - - - - ${pathsCfg.media.music.root}"
   ];
 
   home.stateVersion = "24.05";

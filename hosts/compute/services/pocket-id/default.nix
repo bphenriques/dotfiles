@@ -1,17 +1,22 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.home-server.services.pocket-id;
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
   apiKeyFile = config.sops.templates."pocket-id-api-key".path;
 
-  groups = [
-    { name = "admins"; }
-    { name = "users"; }
-  ];
+  # Filter users with pocket-id enabled and format for init script
+  enabledUsers = lib.filterAttrs (_: u: u.services.pocket-id.enable) config.custom.home-server.users;
+  users = lib.mapAttrsToList (_: u: {
+    inherit (u) username email;
+    firstName = u.name;
+    lastName = "";
+    groups = u.services.pocket-id.groups;
+    isAdmin = builtins.elem "admins" u.services.pocket-id.groups;
+  }) enabledUsers;
 
-  users = [
-    { username = "bphenriques"; email = "bphenriques@example.com"; firstName = "Bruno"; lastName = "Henriques"; isAdmin = true; groups = [ "admins" "users" ]; }
-  ];
+  # Collect all unique groups from users
+  allGroups = lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.services.pocket-id.groups) enabledUsers));
+  groups = map (name: { inherit name; }) allGroups;
 in
 {
   custom.home-server.services.pocket-id.port = 8082;
@@ -33,7 +38,10 @@ in
 
   sops = {
     secrets.pocket_id_api_key = { };
-    templates."pocket-id-api-key".content = config.sops.placeholder.pocket_id_api_key;
+    templates."pocket-id-api-key" = {
+      owner = config.services.pocket-id.user;
+      content = config.sops.placeholder.pocket_id_api_key;
+    };
   };
 
   systemd.services.pocket-id = {
@@ -49,12 +57,18 @@ in
   # Initialize users and groups after Pocket ID starts
   systemd.services.pocket-id-init = {
     description = "Initialize Pocket ID users and groups";
-    after = [ "pocket-id.service" ];
-    requires = [ "pocket-id.service" ];
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "multi-user.target" ]; # Start only after this one.
+    after = [ "pocket-id.service" ];    # Start right after this one.
+    requires = [ "pocket-id.service" ]; # Not 'wants' as I would consider pocket-id as broken if the init fails.
+    partOf = [ "pocket-id.service" ];   # Restart when this one restarts
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
+      User = config.services.pocket-id.user;
+      Group = config.services.pocket-id.group;
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 3;
     };
     environment = {
       POCKET_ID_URL = "http://127.0.0.1:${toString serviceCfg.port}";

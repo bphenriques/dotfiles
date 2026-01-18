@@ -9,13 +9,11 @@ in {
     # Base mount point
     bphenriquesMount = mkOption {
       type = types.str;
-      default = homelabCfg.mounts.bphenriques.localMount;
       description = "Base mount point for bphenriques storage";
     };
     
     mediaMount = mkOption {
       type = types.str;
-      default = homelabCfg.mounts.media.localMount;
       description = "Base mount point for media storage";
     };
     
@@ -23,10 +21,11 @@ in {
     bphenriques = {
       backups = {
         root = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/backups"; };
-        phone = mkOption { type = types.str; default = "${cfg.bphenriques.backups.root}/phone"; };
+        phone = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/backups/phone"; };
       };
       
       photos = {
+        root = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos"; };
         library = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos/library"; };
         inbox = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos/inbox"; };
       };
@@ -43,11 +42,13 @@ in {
     # Shared Media - Painfully recoverable.
     media = {
       music = {
+        root = mkOption { type = types.str; default = "${cfg.mediaMount}/music"; };
         library = mkOption { type = types.str; default = "${cfg.mediaMount}/music/library"; };
         inbox = mkOption { type = types.str; default = "${cfg.mediaMount}/music/inbox"; };
       };
 
       books = {
+        root = mkOption { type = types.str; default = "${cfg.mediaMount}/books"; };
         library = mkOption { type = types.str; default = "${cfg.mediaMount}/books/library"; };
         inbox = mkOption { type = types.str; default = "${cfg.mediaMount}/books/inbox"; };
       };
@@ -57,7 +58,7 @@ in {
       gaming = {
         emulation = {
           root = mkOption { type = types.str; default = "${cfg.mediaMount}/gaming/emulation"; };
-          roms = mkOption { type = types.str; default = "${cfg.media.gaming.emulation.root}/roms"; };
+          roms = mkOption { type = types.str; default = "${cfg.mediaMount}/gaming/emulation/roms"; };
         };
       };
       
@@ -67,8 +68,15 @@ in {
       downloads = {
         root = mkOption { type = types.str; default = "${cfg.mediaMount}/downloads"; };
         incomplete = mkOption { type = types.str; default = "${cfg.mediaMount}/downloads/incomplete"; };
-        torrents = mkOption { type = types.str; default = "${cfg.media.downloads.root}/torrents"; };
+        torrents = mkOption { type = types.str; default = "${cfg.mediaMount}/torrents"; };
       };
+    };
+  };
+
+  config = lib.mkIf homelabCfg.enable {
+    custom.paths = {
+      bphenriquesMount = lib.mkDefault homelabCfg.mounts.bphenriques.localMount;
+      mediaMount = lib.mkDefault homelabCfg.mounts.media.localMount;
     };
   };
 }

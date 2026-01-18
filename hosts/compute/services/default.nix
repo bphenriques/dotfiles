@@ -8,6 +8,8 @@
     ./tandoor-recipes.nix
     #./obsidian-livesync
 
+    #./immich
+
     # Servarr
     ./prowlarr.nix
     ./sonarr.nix
