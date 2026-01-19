@@ -112,8 +112,9 @@ in {
       }
     ) cfg.mounts;
 
-    systemd.tmpfiles.rules = lib.mapAttrsToList (name: mountCfg:
-      "d ${mountCfg.localMount} 0770 root ${mountCfg.group} -"
-    ) cfg.mounts;
+    # FIXME: Do I realy need this?
+    #systemd.tmpfiles.rules = lib.mapAttrsToList (name: mountCfg:
+    #  "d ${mountCfg.localMount} 0770 root ${mountCfg.group} -"
+    #) cfg.mounts;
   };
 }

@@ -5,8 +5,8 @@ let
   userOpt = lib.types.submodule ({ name, ... }: {
     options = {
       username = lib.mkOption { type = lib.types.str; default = name; };
-      email = lib.mkOption { type = lib.types.str; description = "Email address for the user."; };
-      name = lib.mkOption { type = lib.types.str; description = "Display name of the user."; };
+      email = lib.mkOption { type = lib.types.str; };
+      name = lib.mkOption { type = lib.types.str; };
 
       services = {
         pocket-id = {

@@ -3,12 +3,13 @@
     ./pocket-id
     ./miniflux.nix
 
-    ./jellyseerr.nix
-    ./transmission.nix
-    ./tandoor-recipes.nix
+    #./jellyseerr.nix
+    #./transmission.nix
+    #./tandoor-recipes.nix
     #./obsidian-livesync
 
     #./immich
+    ./transmission
 
     # Servarr
     ./prowlarr.nix

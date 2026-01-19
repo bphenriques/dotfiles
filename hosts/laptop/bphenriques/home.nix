@@ -1,10 +1,10 @@
-{ config, self, ... }:
+{ config, self, osConfig, ... }:
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   mounts = {
-    nasPrivate = "/mnt/nas-bphenriques";
-    nasMedia = "/mnt/nas-media";
+    nasPrivate = osConfig.custom.paths.bphenriques.root;
+    nasMedia = osConfig.custom.paths.media.root;
   };
 in
 {

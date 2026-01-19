@@ -1,5 +1,7 @@
 { lib, config, ... }:
 {
+  imports = [ ./homelab.nix ];
+
   sops.secrets.user_bphenriques_password.neededForUsers = true;
   users.users.bphenriques = {
     isNormalUser = true;
@@ -17,24 +19,6 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3"
     ];
   };
-
-  custom.home-server.users.bphenriques = {
-    email = "bphenriques@example.com";
-    name = "Bruno Henriques";
-    services = {
-      pocket-id = {
-        enable = true;
-        groups = [ "admins" "users" ];
-      };
-      immich.enable = true;
-      obsidian-livesync = {
-        enable = true;
-        passwordFile = config.sops.secrets.obsidian_livesync_bphenriques_password.path;
-        databases = [ "obsidiandb-bphenriques" ];
-      };
-    };
-  };
-  sops.secrets.obsidian_livesync_bphenriques_password = { };
 
   home-manager.users.bphenriques = import ./home.nix;
 }

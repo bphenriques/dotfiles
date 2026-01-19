@@ -3,7 +3,6 @@
   imports = [
     ./hardware
     ./disko.nix
-    ./network-drives.nix
     ./peripherals.nix
     ../../config/nixos
     ../../config/nixos/desktop
@@ -31,6 +30,13 @@
         };
       };
     };
+  };
+
+  # Homelab integration
+  custom.fileSystems.homelab.enable = true;
+  custom.fileSystems.homelab.mounts = {
+    bphenriques = { };
+    media = { };
   };
 
   # Secrets

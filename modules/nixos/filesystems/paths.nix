@@ -6,77 +6,75 @@ let
   homelabCfg = config.custom.fileSystems.homelab;
 in {
   options.custom.paths = {
-    # Base mount point
-    bphenriquesMount = mkOption {
-      type = types.str;
-      description = "Base mount point for bphenriques storage";
-    };
-    
-    mediaMount = mkOption {
-      type = types.str;
-      description = "Base mount point for media storage";
-    };
-    
     # Private Media - Not recoverable.
     bphenriques = {
+      root = mkOption {
+        type = types.str;
+        description = "Base mount point for bphenriques storage";
+      };
       backups = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/backups"; };
-        phone = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/backups/phone"; };
+        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/backups"; };
+        phone = mkOption { type = types.str; default = "${cfg.bphenriques.root}/backups/phone"; };
       };
       
       photos = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos"; };
-        library = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/photos/inbox"; };
+        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos"; };
+        library = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos/inbox"; };
       };
       
       documents = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/documents"; };
-        consume = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/inbox/documents"; };
+        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/documents"; };
+        consume = mkOption { type = types.str; default = "${cfg.bphenriques.root}/inbox/documents"; };
       };
       
-      notes = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/notes"; };
-      private = mkOption { type = types.str; default = "${cfg.bphenriquesMount}/private"; };
+      notes = mkOption { type = types.str; default = "${cfg.bphenriques.root}/notes"; };
+      private = mkOption { type = types.str; default = "${cfg.bphenriques.root}/private"; };
     };
     
     # Shared Media - Painfully recoverable.
     media = {
+      root = mkOption {
+        type = types.str;
+        description = "Base mount point for media storage";
+      };
       music = {
-        root = mkOption { type = types.str; default = "${cfg.mediaMount}/music"; };
-        library = mkOption { type = types.str; default = "${cfg.mediaMount}/music/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.mediaMount}/music/inbox"; };
+        root = mkOption { type = types.str; default = "${cfg.media.root}/music"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/music/library"; };
+        playlists = mkOption { type = types.str; default = "${cfg.media.root}/music/playlists"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/music/inbox"; };
       };
 
       books = {
-        root = mkOption { type = types.str; default = "${cfg.mediaMount}/books"; };
-        library = mkOption { type = types.str; default = "${cfg.mediaMount}/books/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.mediaMount}/books/inbox"; };
+        root = mkOption { type = types.str; default = "${cfg.media.root}/books"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/books/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/books/inbox"; };
       };
       
-      comics = mkOption { type = types.str; default = "${cfg.mediaMount}/comics"; };
+      comics = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
       
       gaming = {
         emulation = {
-          root = mkOption { type = types.str; default = "${cfg.mediaMount}/gaming/emulation"; };
-          roms = mkOption { type = types.str; default = "${cfg.mediaMount}/gaming/emulation/roms"; };
+          root = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation"; };
+          roms = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation/roms"; };
         };
       };
       
-      movies = mkOption { type = types.str; default = "${cfg.mediaMount}/movies"; };
-      tv = mkOption { type = types.str; default = "${cfg.mediaMount}/tv"; };
+      movies = mkOption { type = types.str; default = "${cfg.media.root}/movies"; };
+      tv = mkOption { type = types.str; default = "${cfg.media.root}/tv"; };
       
       downloads = {
-        root = mkOption { type = types.str; default = "${cfg.mediaMount}/downloads"; };
-        incomplete = mkOption { type = types.str; default = "${cfg.mediaMount}/downloads/incomplete"; };
-        torrents = mkOption { type = types.str; default = "${cfg.mediaMount}/torrents"; };
+        root = mkOption { type = types.str; default = "${cfg.media.root}/downloads"; };
+        incomplete = mkOption { type = types.str; default = "${cfg.media.root}/downloads/incomplete"; };
+        torrents = mkOption { type = types.str; default = "${cfg.media.root}/torrents"; };
       };
     };
   };
 
   config = lib.mkIf homelabCfg.enable {
     custom.paths = {
-      bphenriquesMount = lib.mkDefault homelabCfg.mounts.bphenriques.localMount;
-      mediaMount = lib.mkDefault homelabCfg.mounts.media.localMount;
+      bphenriques.root = lib.mkDefault homelabCfg.mounts.bphenriques.localMount;
+      media.root = lib.mkDefault homelabCfg.mounts.media.localMount;
     };
   };
 }
