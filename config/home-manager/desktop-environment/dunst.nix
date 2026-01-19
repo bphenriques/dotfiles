@@ -9,8 +9,8 @@ in
   services.dunst = {
     enable = true;
     iconTheme = {
-      name = if (stylix.polarity == "dark") then stylix.iconTheme.dark else stylix.iconTheme.light;
-      package = stylix.iconTheme.package;
+      name = if (stylix.polarity == "dark") then stylix.icons.dark else stylix.icons.light;
+      package = stylix.icons.package;
     };
     settings = {
       global = {
