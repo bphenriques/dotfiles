@@ -4,6 +4,7 @@
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
     ./amd.nix
     ./nvidia.nix
+    ./peripherals.nix
   ];
 
   # Bluetooth

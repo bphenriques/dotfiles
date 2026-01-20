@@ -1,8 +1,6 @@
-{ config, ... }:
+{ config, self, ... }:
 {
-  custom.home-server.users.bphenriques = {
-    email = "bphenriques@example.com";
-    name = "Bruno Henriques";
+  custom.home-server.users.bphenriques = self.config.users.bphenriques // {
     services = {
       pocket-id = {
         enable = true;

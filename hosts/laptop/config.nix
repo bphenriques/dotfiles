@@ -3,7 +3,7 @@
   imports = [
     ./hardware
     ./disko.nix
-    ./peripherals.nix
+    ./homelab.nix
     ../../config/nixos
     ../../config/nixos/desktop
 
