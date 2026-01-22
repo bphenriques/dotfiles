@@ -5,6 +5,7 @@ let
 in
 {
   options.custom.dotfiles = {
+    enable = lib.mkEnableOption "dotfiles";
     directory = lib.mkOption {
       type = lib.types.str;
       description = "Location of the dotfiles repository";

@@ -1,5 +1,5 @@
 {
-  description = "bphenriques's machines expressed using nix";
+  description = "bphenriques's fleet";
 
   nixConfig = {
     extra-substituters = [
@@ -54,6 +54,7 @@
 
       # Hosts
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
+      nixosConfigurations.compute = import ./hosts/compute inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }

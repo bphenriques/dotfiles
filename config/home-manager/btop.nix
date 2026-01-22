@@ -11,7 +11,7 @@
   };
   stylix.targets.btop.enable = true;
 
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
+  home.packages = lib.optionals (pkgs.stdenv.isLinux && !self.settings.headless) [
     (pkgs.makeDesktopItem {
       name = "system-monitor";
       desktopName = "System Monitor";

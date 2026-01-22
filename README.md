@@ -7,7 +7,7 @@
 
 Hi! 👋 
 
-This is my personal configuration using [nix](https://nixos.org/) that works _for me_. I hope this helps you!
+This is my fleet configuration using [nix](https://nixos.org/) that works _for me_. I hope this helps you!
 
 I try to have a minimalist and keyboard oriented setup. Take a look around and ask me anything!
 
@@ -38,20 +38,33 @@ For those interested in the Nix aspects of the project:
 - Not using [flake-utils](https://github.com/numtide/flake-utils) intentionally. I find it an _unnecessary_ abstraction
 - Not using [impermanence](https://github.com/nix-community/impermanence). I tried and... it is _too much_
 
+## Homelab
+
+You will find the configuration of hosts part of my homelab:
+- `storage`: a Synology DS923+ (how I started my homelab). While it can't use NixOS, I am consolidating the setup here.
+- `compute`: a Beelink EQ14 as it is low powered and meets my needs.
+- (future) `ai` once I can justify the (big) expense.
+
+Having a unified project ensures everything is declaratively set together. The guidelines I am trying to follow:
+1. **Security**: I am not an expert, but I do my best.
+2. **3-2-1 Backups**: physical external drive and encrypted to ([backblaze](https://www.backblaze.com/)).
+3. **Reproducible**: _For the most part_ everything should be set declaretively.
+
+Stack:
+- **Reverse proxy**: [`traefik`](https://github.com/traefik/traefik).
+- **Authentication / Authorization**: [`pocket-id`](https://github.com/pocket-id/pocket-id) as OIDC provider for the apps that support it.
+- **DNS registration**: [Cloudflare](./infrastructure/cloudflare.md). To be terraformed.
+- **Remote access**: [Tailscale](./infrastructure/tailscale.md). Considering other options. To be terraformed.
+
 ## Flake Outputs
 
-For those familiar with [Nix Flakes](https://nixos.wiki/wiki/Flakes), take a look around at my [modules](./modules) and [packages](./packages):
-```
-$ nix run github:bphenriques/dotfiles#{package} -- {args}
-```
+For those familiar with [Nix Flakes](https://nixos.wiki/wiki/Flakes), take a look around at my [modules](./modules) and [packages](./packages).
 
-You can see the list of packages by running:
-```
-$ nix flake show github:bphenriques/dotfiles
-```
+Listing: `nix flake show github:bphenriques/dotfiles`
+Run packages: `nix run github:bphenriques/dotfiles#{package} -- {args}`
 
-## Acknowledgements and license
+## Acknowledgements
 
-I started this project to learn more about Linux: long, sometimes exhausting but enlightening. This would not be possible without the work of other developers in exposing their own dotfiles, writing great documentation ([Arch Linux Wiki](https://wiki.archlinux.org/title/Main_page) and [NixOS Wiki](https://wiki.nixos.org/wiki/NixOS_Wiki)), and [being available to help](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community). 
+I started this project to learn more about Linux: long, sometimes exhausting but enlightening. 
 
-Thank you! In turn, I am sharing my dotfiles under the MIT license, which is only relevant to what I have built: [packages](./packages), some [modules](./modules) (that I should contribute upstream), and some [helpful functions](./lib).
+I want to thank everyone that sharing their own dotfiles, those writing great documentation ([Arch Linux Wiki](https://wiki.archlinux.org/title/Main_page) and [NixOS Wiki](https://wiki.nixos.org/wiki/NixOS_Wiki)), and those [available to help](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community).

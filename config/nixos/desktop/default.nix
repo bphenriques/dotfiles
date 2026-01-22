@@ -12,11 +12,6 @@
     # ./sunshine.nix    # Still doesnt work.
   ];
 
-  # Boot
-  boot.kernelParams = [
-    "boot.shell_on_fail"  # Use shell when booting fails
-  ];
-
   services.flatpak.enable = true; # Easier to run some programs. Setup afterwards: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
   environment.systemPackages = [

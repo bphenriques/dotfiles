@@ -1,10 +1,10 @@
-{ config, self, ... }:
+{ config, self, osConfig, ... }:
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   mounts = {
-    nasPrivate = "/mnt/nas-bphenriques";
-    nasMedia = "/mnt/nas-media";
+    nasPrivate = osConfig.custom.paths.bphenriques.root;
+    nasMedia = osConfig.custom.paths.media.root;
   };
 in
 {
@@ -54,6 +54,7 @@ in
     "file://${mounts.nasMedia}"
   ];
 
+  custom.dotfiles.enable = true;
   custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
   custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
   custom.programs.file-explorer = {

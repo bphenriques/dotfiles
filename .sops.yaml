@@ -4,3 +4,6 @@ creation_rules:
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
       - age: [ *laptop-system ]
+  - path_regex: hosts/compute/secrets.yaml
+    key_groups:
+      - age: [ *laptop-system ]

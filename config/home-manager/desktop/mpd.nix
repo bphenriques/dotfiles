@@ -1,14 +1,10 @@
-{ lib, pkgs, config, ... }:
-let
-  musicDir = "/mnt/nas-media/music";
-in
+{ lib, pkgs, config, osConfig, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
 
-    # FIXME: Make this a configurable setting.
-    musicDirectory = "${musicDir}/library";
-    playlistDirectory = "${musicDir}/playlists";
+    musicDirectory = osConfig.custom.paths.media.music.library;
+    playlistDirectory = osConfig.custom.paths.media.music.playlists;
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {
