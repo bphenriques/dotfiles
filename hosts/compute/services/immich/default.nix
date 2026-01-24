@@ -8,6 +8,7 @@
 #         - app.immich:///oauth-callback
 { config, pkgs, lib, ... }:
 let
+  nuLib = import ../lib/nu.nix { inherit pkgs lib; };
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
   serviceCfg = config.custom.home-server.services.immich;
@@ -23,6 +24,8 @@ let
     { name = "bphenriques-library"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques" ]; exclusionPatterns = []; }
     { name = "bphenriques-inbox"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques-inbox" ]; exclusionPatterns = []; }
   ];
+
+  initScript = nuLib.checkedScript "immich-init" ./immich-init.nu;
 in
 {
   custom.home-server.services.immich.port = 2283;
@@ -92,7 +95,6 @@ in
       Group = config.services.immich.group;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitIntervalSec = 300;
       StartLimitBurst = 3;
     };
     environment = {
@@ -102,6 +104,6 @@ in
       IMMICH_LIBRARIES_JSON = builtins.toJSON libraries;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${./immich-init.nu}'';
+    script = ''nu ${initScript}'';
   };
 }

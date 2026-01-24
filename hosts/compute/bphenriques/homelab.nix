@@ -1,6 +1,6 @@
 { config, self, ... }:
 {
-  custom.home-server.users.bphenriques = self.config.users.bphenriques // {
+  custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
     services = {
       pocket-id = {
         enable = true;

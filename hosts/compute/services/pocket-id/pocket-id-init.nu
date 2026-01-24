@@ -7,23 +7,14 @@ const PAGINATION_LIMIT = 20
 
 let base_url = $env.POCKET_ID_URL
 let api_key = open $env.POCKET_ID_API_KEY_FILE | str trim
-let config = open $env.POCKET_ID_CONFIG_FILE | from json
-
-def api [method: string, endpoint: string, body?: record] {
-  let url = $"($base_url)/api($endpoint)"
-  let headers = { "X-API-KEY": $api_key, "Content-Type": "application/json" }
-  if $body != null {
-    http $method $url $body --headers $headers --full --allow-errors
-  } else {
-    http $method $url --headers $headers --full --allow-errors
-  }
-}
+let config = open $env.POCKET_ID_CONFIG_FILE
+let headers = { "X-API-KEY": $api_key, "Content-Type": "application/json" }
 
 def wait_ready [] {
   print "Waiting for Pocket ID to be ready..."
   for _ in 1..30 {
     try {
-      let r = http get $"($base_url)/.well-known/openid-configuration" --max-time 2 --full --allow-errors
+      let r = http get $"($base_url)/.well-known/openid-configuration" --max-time 2sec --full --allow-errors
       if $r.status == 200 { print "Pocket ID is ready"; return }
     } catch { }
     sleep 1sec
@@ -32,47 +23,53 @@ def wait_ready [] {
 }
 
 def get_all [resource: string] {
-  let r = api "get" $"/($resource)?pagination[limit]=($PAGINATION_LIMIT)"
+  let r = http get $"($base_url)/api/($resource)?pagination[limit]=($PAGINATION_LIMIT)" --headers $headers --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to list ($resource): ($r.status) - ($r.body)" } }
   $r.body.data
 }
 
 def ensure_group [group: record, existing: list] {
-  let found = $existing | where name == $group.name | first --skip-empty
+  let found = $existing | where name == $group.name | get 0?
   if $found != null { return $found.id }
 
-  let r = api "post" "/user-groups" { name: $group.name, customClaims: [{ key: "managed-by", value: "nix" }] }
+  let body = { name: $group.name, friendlyName: $group.name, customClaims: [{ key: "managed-by", value: "nix" }] } | to json
+  let r = http post $"($base_url)/api/user-groups" $body --headers $headers --full --allow-errors
   if $r.status != 201 { error make { msg: $"Failed to create group ($group.name): ($r.status) - ($r.body)" } }
   print $"Created group: ($group.name)"
   $r.body.id
 }
 
 def ensure_user [user: record, group_ids: list<string>, existing: list] {
-  let found = $existing | where username == $user.username | first --skip-empty
+  let found = $existing | where username == $user.username | get 0?
   let body = {
     username: $user.username
     email: $user.email
     firstName: $user.firstName
     lastName: $user.lastName
+    displayName: $"($user.firstName) ($user.lastName)"
     isAdmin: $user.isAdmin
     customClaims: [{ key: "managed-by", value: "nix" }]
-  }
+  } | to json
 
   let user_id = if $found != null {
-    let r = api "put" $"/users/($found.id)" $body
+    let r = http put $"($base_url)/api/users/($found.id)" $body --headers $headers --full --allow-errors
     if $r.status != 200 { error make { msg: $"Failed to update user ($user.username): ($r.status) - ($r.body)" } }
     $found.id
   } else {
-    let r = api "post" "/users" $body
+    let r = http post $"($base_url)/api/users" $body --headers $headers --full --allow-errors
     if $r.status != 201 { error make { msg: $"Failed to create user ($user.username): ($r.status) - ($r.body)" } }
     print $"Created user: ($user.username)"
-    # Send invite for new users
-    let ir = api "post" $"/users/($r.body.id)/one-time-access-email" {}
-    if $ir.status == 204 { print $"Sent invite email to ($user.email)" }
+    let ir = http post $"($base_url)/api/users/($r.body.id)/one-time-access-email" "{}" --headers $headers --full --allow-errors
+    if $ir.status == 204 {
+      print $"Sent invite email to ($user.email)"
+    } else {
+      print $"Failed to send invite email: ($ir.status) - ($ir.body)"
+    }
     $r.body.id
   }
 
-  let gr = api "put" $"/users/($user_id)/user-groups" { userGroupIds: $group_ids }
+  let group_body = { userGroupIds: $group_ids } | to json
+  let gr = http put $"($base_url)/api/users/($user_id)/user-groups" $group_body --headers $headers --full --allow-errors
   if $gr.status != 200 { error make { msg: $"Failed to set groups for ($user.username): ($gr.status) - ($gr.body)" } }
   $user_id
 }
@@ -80,12 +77,19 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
 def main [] {
   wait_ready
 
+  print $"Config groups: ($config.groups | get name)"
+  print $"Config users: ($config.users | get username)"
+
   let existing_groups = get_all "user-groups"
+  print $"Existing groups: ($existing_groups)"
+
   let group_map = $config.groups 
     | each { |g| { name: $g.name, id: (ensure_group $g $existing_groups) } } 
     | transpose -rd
 
   let existing_users = get_all "users"
+  print $"Existing users: ($existing_users)"
+
   $config.users | each { |u|
     let group_ids = $u.groups | each { |g| $group_map | get $g }
     ensure_user $u $group_ids $existing_users

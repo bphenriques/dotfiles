@@ -4,21 +4,12 @@ let base_url = $env.IMMICH_URL
 let api_key = open $env.IMMICH_API_KEY_FILE | str trim
 let users = $env.IMMICH_USERS_JSON | from json
 let libraries = $env.IMMICH_LIBRARIES_JSON | from json
-
-def api [method: string, endpoint: string, body?: record] {
-  let url = $"($base_url)/api($endpoint)"
-  let headers = { "x-api-key": $api_key, "Content-Type": "application/json" }
-  if $body != null {
-    http $method $url $body --headers $headers --full --allow-errors
-  } else {
-    http $method $url --headers $headers --full --allow-errors
-  }
-}
+let headers = { "x-api-key": $api_key, "Content-Type": "application/json" }
 
 def wait_ready [] {
   for _ in 1..60 {
     try {
-      let r = api "get" "/server/ping"
+      let r = http get $"($base_url)/api/server/ping" --headers $headers --full --allow-errors
       if $r.status == 200 { return }
     } catch { }
     sleep 2sec
@@ -27,13 +18,13 @@ def wait_ready [] {
 }
 
 def get_all [endpoint: string] {
-  let r = api "get" $endpoint
+  let r = http get $"($base_url)/api($endpoint)" --headers $headers --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to get ($endpoint): ($r.status)" } }
   $r.body
 }
 
 def ensure_user [user: record, existing: list] {
-  let found = $existing | where email == $user.email | first --skip-empty
+  let found = $existing | where email == $user.email | get 0?
   if $found != null {
     print $"User ($user.email) already exists"
     return $found.id
@@ -44,23 +35,24 @@ def ensure_user [user: record, existing: list] {
     name: $user.name
     password: (random chars --length 32)
     shouldChangePassword: false
-  }
-  let r = api "post" "/admin/users" $body
+  } | to json
+  let r = http post $"($base_url)/api/admin/users" $body --headers $headers --full --allow-errors
   if $r.status != 201 { error make { msg: $"Failed to create user ($user.email): ($r.status) - ($r.body)" } }
   print $"Created user ($user.email)"
   $r.body.id
 }
 
 def ensure_library [lib: record, owner_id: string, existing: list] {
-  let found = $existing | where { |l| $l.name == $lib.name and $l.ownerId == $owner_id } | first --skip-empty
+  let found = $existing | where { |l| $l.name == $lib.name and $l.ownerId == $owner_id } | get 0?
 
   if $found != null {
     if ($found.importPaths | sort) != ($lib.importPaths | sort) {
-      let r = api "put" $"/libraries/($found.id)" {
+      let body = {
         name: $lib.name
         importPaths: $lib.importPaths
         exclusionPatterns: $lib.exclusionPatterns
-      }
+      } | to json
+      let r = http put $"($base_url)/api/libraries/($found.id)" $body --headers $headers --full --allow-errors
       if $r.status != 200 { error make { msg: $"Failed to update library ($lib.name): ($r.status)" } }
       print $"Updated library ($lib.name) import paths"
     } else {
@@ -74,11 +66,11 @@ def ensure_library [lib: record, owner_id: string, existing: list] {
     ownerId: $owner_id
     importPaths: $lib.importPaths
     exclusionPatterns: $lib.exclusionPatterns
-  }
-  let r = api "post" "/libraries" $body
+  } | to json
+  let r = http post $"($base_url)/api/libraries" $body --headers $headers --full --allow-errors
   if $r.status != 201 { error make { msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)" } }
   print $"Created library ($lib.name)"
-  api "post" $"/libraries/($r.body.id)/scan" {} | ignore
+  http post $"($base_url)/api/libraries/($r.body.id)/scan" "{}" --headers $headers --full --allow-errors | ignore
   print $"Triggered scan for library ($lib.name)"
   $r.body.id
 }
