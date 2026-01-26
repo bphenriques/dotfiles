@@ -22,6 +22,7 @@ in
       ENCRYPTION_KEY_FILE = encryptionKeyFile;
       ACCENT_COLOR = "default";
       STATIC_API_KEY_FILE = apiKeyFile;
+      UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
       SMTP_HOST = self.settings.smtp.host;
@@ -32,13 +33,13 @@ in
       SMTP_PASSWORD_FILE = smtpPasswordFile;
 
       # invite-only, therefore the emails are valid for me.
-      ALLOW_USER_SIGNUPS = false;
+      ALLOW_USER_SIGNUPS = "withToken";
       EMAILS_VERIFIED = true;
       EMAIL_VERIFICATION_ENABLED = false;
 
       # Enable admin-triggered invite emails
       EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED = true;
-      EMAIL_ONE_TIME_ACCESS_AS_UNAUTHENTICATED_ENABLED = true; # FIXME:
+      EMAIL_ONE_TIME_ACCESS_AS_UNAUTHENTICATED_ENABLED = false;
     };
   };
 

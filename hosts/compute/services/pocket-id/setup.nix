@@ -6,9 +6,7 @@ let
 
   enabledUsers = lib.filterAttrs (_: u: u.services.pocket-id.enable) config.custom.home-server.users;
   users = lib.mapAttrsToList (_: u: {
-    inherit (u) username email;
-    firstName = u.name;
-    lastName = "";
+    inherit (u) username email firstName lastName name;
     groups = u.services.pocket-id.groups;
     isAdmin = builtins.elem "admins" u.services.pocket-id.groups;
   }) enabledUsers;

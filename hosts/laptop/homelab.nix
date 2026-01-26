@@ -10,6 +10,8 @@
   };
 
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
+    firstName = "Bruno";
+    lastName = "Henriques";
     services = {
       pocket-id = {
         enable = true;

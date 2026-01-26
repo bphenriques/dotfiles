@@ -16,9 +16,7 @@ let
 
   # Filter users with immich enabled and format for init script
   enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.home-server.users;
-  users = lib.mapAttrsToList (_: u: {
-    inherit (u) email name;
-  }) enabledUsers;
+  users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) enabledUsers;
 
   libraries = [
     { name = "bphenriques-library"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques" ]; exclusionPatterns = []; }

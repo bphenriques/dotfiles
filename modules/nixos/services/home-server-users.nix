@@ -2,11 +2,13 @@
 let
   cfg = config.custom.home-server.users;
 
-  userOpt = lib.types.submodule ({ name, ... }: {
+  userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       username = lib.mkOption { type = lib.types.str; default = name; };
       email = lib.mkOption { type = lib.types.str; };
-      name = lib.mkOption { type = lib.types.str; };
+      firstName = lib.mkOption { type = lib.types.str; };
+      lastName = lib.mkOption { type = lib.types.str; };
+      name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };
 
       services = {
         pocket-id = {
