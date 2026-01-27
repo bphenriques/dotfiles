@@ -28,7 +28,7 @@ let
   };
 
 in {
-  custom.home-server.services.syncthing = {
+  custom.home-server.routes.syncthing = {
     port = 8384;
     oidc.enable = true;
   };

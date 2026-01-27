@@ -13,15 +13,15 @@ let
   };
 in
 {
-  custom.home-server.services.tandoor.port = 9092;
-  custom.home-server.services.tandoor.subdomain = "recipes";
+  custom.home-server.routes.tandoor.port = 9092;
+  custom.home-server.routes.tandoor.subdomain = "recipes";
 
   services.tandoor-recipes = {
     enable = true;
     database.createLocally = true;
-    port = config.custom.home-server.services.tandoor.port;
+    port = config.custom.home-server.routes.tandoor.port;
     extraConfig = {
-      ALLOWED_HOSTS = config.custom.home-server.services.tandoor.host;
+      ALLOWED_HOSTS = config.custom.home-server.routes.tandoor.host;
       SOCIAL_PROVIDERS = "allauth.socialaccount.providers.openid_connect";
       SOCIAL_DEFAULT_GROUP = "user";
  

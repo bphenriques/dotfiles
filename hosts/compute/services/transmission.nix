@@ -4,15 +4,15 @@ let
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
-  custom.home-server.services.transmission.port = 9091;
+  custom.home-server.routes.transmission.port = 9091;
   services.transmission = {
     enable = true;
     settings = {
       download-dir = pathsCfg.media.downloads.root;
       incomplete_dir_enabled = true;
       incomplete-dir = pathsCfg.media.downloads.incomplete;
-      rpc-port = config.custom.home-server.services.transmission.port;
-      rpc_url = config.custom.home-server.services.transmission.publicUrl;
+      rpc-port = config.custom.home-server.routes.transmission.port;
+      rpc_url = config.custom.home-server.routes.transmission.publicUrl;
       idle_seeding_limit_enabled = true;
       idle_seeding_limit = 1; # 1 minute
       # TODO: password

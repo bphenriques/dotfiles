@@ -34,4 +34,10 @@
           png32:$out;
       '';
     in toString derivation; # only care about the path to the png file
+
+  writeNushellScript = name: src:
+    pkgs.runCommand "${name}-checked" { } ''
+      ${lib.getExe pkgs.nushell} --no-config-file -c 'nu-check "${src}"'
+      cp ${src} $out
+    '';
 }

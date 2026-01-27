@@ -70,8 +70,12 @@ def ensure_library [lib: record, owner_id: string, existing: list] {
   let r = http post $"($base_url)/api/libraries" $body --headers $headers --full --allow-errors
   if $r.status != 201 { error make { msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)" } }
   print $"Created library ($lib.name)"
-  http post $"($base_url)/api/libraries/($r.body.id)/scan" "{}" --headers $headers --full --allow-errors | ignore
-  print $"Triggered scan for library ($lib.name)"
+  let scan = http post $"($base_url)/api/libraries/($r.body.id)/scan" "{}" --headers $headers --full --allow-errors
+  if $scan.status == 204 {
+    print $"Triggered scan for library ($lib.name)"
+  } else {
+    print $"Warning: Failed to trigger scan for library ($lib.name): ($scan.status)"
+  }
   $r.body.id
 }
 

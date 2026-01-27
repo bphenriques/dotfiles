@@ -10,6 +10,7 @@ let
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       post-install = pkgs.callPackage ./post-install { inherit selfPkgs; };
+      generate-oidc-client = pkgs.callPackage ./generate-oidc-client { };
     });
 
   linux = forLinuxSystems (system:

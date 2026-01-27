@@ -1,15 +1,13 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.pocket-id;
+  serviceCfg = config.custom.home-server.routes.pocket-id;
 
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
-  apiKeyFile = config.sops.templates."pocket-id-api-key".path;
-  smtpPasswordFile = config.sops.templates."pocket-id-smtp-password".path;
 in
 {
   imports = [ ./setup.nix ];
 
-  custom.home-server.services.pocket-id.port = 8082;
+  custom.home-server.routes.pocket-id.port = 8082;
 
   services.pocket-id = {
     enable = true;
@@ -21,7 +19,7 @@ in
       ANALYTICS_DISABLED = true;
       ENCRYPTION_KEY_FILE = encryptionKeyFile;
       ACCENT_COLOR = "default";
-      STATIC_API_KEY_FILE = apiKeyFile;
+      STATIC_API_KEY_FILE = config.sops.templates."pocket-id-api-key".path;
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
@@ -30,7 +28,7 @@ in
       SMTP_FROM = self.settings.smtp.from;
       SMTP_USER = self.settings.smtp.user;
       SMTP_TLS = self.settings.smtp.tls;
-      SMTP_PASSWORD_FILE = smtpPasswordFile;
+      SMTP_PASSWORD_FILE = config.sops.templates."pocket-id-smtp-password".path;
 
       # invite-only, therefore the emails are valid for me.
       ALLOW_USER_SIGNUPS = "withToken";
@@ -45,11 +43,12 @@ in
 
   sops = {
     secrets.pocket_id_api_key = { };
-    secrets.pocket_id_smtp_password = { }; # https://myaccount.google.com/apppasswords
     templates."pocket-id-api-key" = {
       owner = config.services.pocket-id.user;
       content = config.sops.placeholder.pocket_id_api_key;
     };
+
+    secrets.pocket_id_smtp_password = { }; # https://myaccount.google.com/apppasswords
     templates."pocket-id-smtp-password" = {
       owner = config.services.pocket-id.user;
       content = config.sops.placeholder.pocket_id_smtp_password;

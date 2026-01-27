@@ -6,12 +6,12 @@
 #         - https://immich.<domain>/auth/login
 #         - https://immich.<domain>/user-settings
 #         - app.immich:///oauth-callback
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, self, ... }:
 let
   nuLib = import ../lib/nu.nix { inherit pkgs lib; };
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
-  serviceCfg = config.custom.home-server.services.immich;
+  serviceCfg = config.custom.home-server.routes.immich;
   apiKeyFile = config.sops.secrets.immich_api_key.path;
 
   # Filter users with immich enabled and format for init script
@@ -23,10 +23,10 @@ let
     { name = "bphenriques-inbox"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques-inbox" ]; exclusionPatterns = []; }
   ];
 
-  initScript = nuLib.checkedScript "immich-init" ./immich-init.nu;
+  initScript = self.lib.builders.writeNushellScript "immich-init" ./immich-init.nu;
 in
 {
-  custom.home-server.services.immich.port = 2283;
+  custom.home-server.routes.immich.port = 2283;
 
   services.immich = {
     enable = true;
@@ -41,7 +41,7 @@ in
       # OAuth/OIDC via Pocket-ID
       oauth = {
         enabled = true;
-        issuerUrl = config.custom.home-server.services.pocket-id.publicUrl;
+        issuerUrl = config.custom.home-server.routes.pocket-id.publicUrl;
         clientId = "immich";
         clientSecret._secret = config.sops.secrets.immich_oidc_client_secret.path;
         scope = "openid email profile";

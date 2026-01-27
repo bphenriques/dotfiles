@@ -21,7 +21,8 @@ def ensure_user [name: string, password_file: string] {
   if $r.status == 201 { return }
   if $r.status == 409 {
     let rev = (http get $url --user $auth)._rev
-    http put $url ($body | insert _rev $rev) --content-type application/json --user $auth | ignore
+    let update = http put $url ($body | insert _rev $rev) --content-type application/json --user $auth --full --allow-errors
+    if $update.status != 201 { error make { msg: $"User ($name) update failed: ($update.status)" } }
     return
   }
   error make { msg: $"User ($name) failed: ($r.status)" }
@@ -33,7 +34,8 @@ def ensure_database [name: string, owner: string] {
   if $r.status not-in [201, 412] { error make { msg: $"Database ($name) failed: ($r.status)" } }
 
   let security = { admins: { names: [$owner], roles: [] }, members: { names: [$owner], roles: [] } }
-  http put $"($url)/_security" $security --content-type application/json --user $auth | ignore
+  let sr = http put $"($url)/_security" $security --content-type application/json --user $auth --full --allow-errors
+  if $sr.status != 200 { error make { msg: $"Database ($name) security config failed: ($sr.status)" } }
 }
 
 def main [] {

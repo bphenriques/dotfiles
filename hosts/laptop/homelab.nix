@@ -1,6 +1,7 @@
 { self, config, ... }: {
   imports = [
     ../compute/services/pocket-id
+    ../compute/services/miniflux.nix
   ];
 
   custom.home-server = {

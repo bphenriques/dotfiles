@@ -2,7 +2,7 @@
 let
   cfg = config.custom.home-server;
 
-  serviceOpt = lib.types.submodule ({ name, config, ... }: {
+  routeOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       name = lib.mkOption { type = lib.types.str; default = name; };
       internalUrl  = lib.mkOption { type = lib.types.str; default = "http://127.0.0.1:${toString config.port}"; };
@@ -10,26 +10,17 @@ let
       host = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
       publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.host}"; };
       port = lib.mkOption { type = lib.types.port; };
-
-      # TODO actually use
-      oidc = {
-        enable = lib.mkEnableOption "OIDC registration";
-        callbackPath = lib.mkOption {
-          type = lib.types.str;
-          default = "/oauth2/oidc/callback";
-        };
-      };
     };
   });
 
-  mkTraefikService = service: {
+  mkTraefikRoute = route: {
     http = {
-      routers."${service.name}" = {
-        rule = "Host(`${service.host}`)";
+      routers."${route.name}" = {
+        rule = "Host(`${route.host}`)";
         entryPoints = [ "websecure" ];
-        service = "${service.name}-svc";
+        service = "${route.name}-svc";
       };
-      services."${service.name}-svc".loadBalancer.servers = [{ url = service.internalUrl; }];
+      services."${route.name}-svc".loadBalancer.servers = [{ url = route.internalUrl; }];
     };
   };
 in
@@ -44,15 +35,15 @@ in
       type = lib.types.str;
     };
 
-    services = lib.mkOption {
-      type = lib.types.attrsOf serviceOpt;
+    routes = lib.mkOption {
+      type = lib.types.attrsOf routeOpt;
       default = { };
     };
   };
 
   config = lib.mkIf cfg.enable {
     assertions = let
-       urls = lib.mapAttrsToList (_: v: v.internalUrl) cfg.services;
+       urls = lib.mapAttrsToList (_: v: v.internalUrl) cfg.routes;
        duplicates = lib.subtractLists urls (lib.unique urls);
      in [
       {
@@ -118,7 +109,7 @@ in
         #    endpoint = "unix:///var/run/docker.sock";
         #    exposedByDefault = false;
         #  };
-        #};
+        #};:
 
         certificatesResolvers.default.acme = {
           email = cfg.cloudflareEmail;
@@ -128,8 +119,8 @@ in
       };
 
       dynamicConfigOptions = let
-        serviceConfigs = lib.mapAttrsToList (name: value: mkTraefikService value) cfg.services;
-      in lib.foldl' lib.recursiveUpdate {} serviceConfigs;
+        routeConfigs = lib.mapAttrsToList (_: mkTraefikRoute) cfg.routes;
+      in lib.foldl' lib.recursiveUpdate {} routeConfigs;
     };
   };
 }

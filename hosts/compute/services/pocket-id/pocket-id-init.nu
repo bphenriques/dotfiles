@@ -3,7 +3,7 @@
 # Initializes users and groups. New users are invited.
 #
 # Limitation: renaming users will create a new one.
-const PAGINATION_LIMIT = 20
+const PAGINATION_LIMIT = 100
 
 let base_url = $env.POCKET_ID_URL
 let api_key = open $env.POCKET_ID_API_KEY_FILE | str trim
@@ -74,6 +74,57 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   $user_id
 }
 
+def parse_env_file [path: string] {
+  open $path
+  | lines
+  | where $it != '' and not ($it | str starts-with '#')
+  | parse --regex '^(?<key>[^=]+)=(?<value>.*)$'
+  | transpose --header-row --as-record
+}
+
+def ensure_oidc_client [client: record, existing: list] {
+  let found = $existing | where name == $client.name | get 0?
+  let creds = parse_env_file $client.credentialsFile
+
+  # Compute the desired state, anything that isn't relevant is discarded.
+  let desired = $client | reject credentialsFile | merge { isPublic: false }
+
+  if $found != null {
+    # Compare only the fields we care about (ignore id, createdAt, etc from API)
+    let dominated_fields = $desired | columns
+    let current = $found | select ...$dominated_fields
+
+    if $current != $desired {
+      let body = $desired | to json
+      let r = http put $"($base_url)/api/oidc/clients/($found.id)" $body --headers $headers --full --allow-errors
+      if $r.status != 200 {
+        error make { msg: $"Failed to update OIDC client ($client.name): ($r.status) - ($r.body)" }
+      }
+      print $"Updated OIDC client: ($client.name)"
+    } else {
+      print $"OIDC client up-to-date: ($client.name)"
+    }
+
+    return $found.id
+  }
+
+  # Create new client with credentials from SOPS
+  let body = $desired | merge {
+    credentials: {
+      clientId: ($creds | get OAUTH2_CLIENT_ID),
+      clientSecret: ($creds | get OAUTH2_CLIENT_SECRET)
+    }
+  } | to json
+
+  let r = http post $"($base_url)/api/oidc/clients" $body --headers $headers --full --allow-errors
+  if $r.status != 201 {
+    error make { msg: $"Failed to create OIDC client ($client.name): ($r.status) - ($r.body)" }
+  }
+
+  print $"Created OIDC client: ($client.name)"
+  $r.body.id
+}
+
 def main [] {
   wait_ready
 
@@ -94,6 +145,22 @@ def main [] {
     let group_ids = $u.groups | each { |g| $group_map | get $g }
     ensure_user $u $group_ids $existing_users
   } | ignore
+
+  print "Pocket ID users and groups initialization complete"
+
+  # Handle OIDC clients if defined
+  let clients_cfg = $config | get clients? | default []
+  if ($clients_cfg | is-empty) {
+    print "No OIDC clients defined; skipping client provisioning"
+    return
+  }
+
+  print $"Config OIDC clients: ($clients_cfg | get name)"
+
+  let existing_clients = get_all "oidc/clients"
+  print $"Existing OIDC clients: ($existing_clients | get name)"
+
+  $clients_cfg | each { |c| ensure_oidc_client $c $existing_clients } | ignore
 
   print "Pocket ID initialization complete"
 }

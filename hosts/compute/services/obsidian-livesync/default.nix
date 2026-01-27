@@ -1,7 +1,7 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, self, ... }:
 let
   nuLib = import ../lib/nu.nix { inherit pkgs lib; };
-  serviceCfg = config.custom.home-server.services.obsidian-livesync;
+  serviceCfg = config.custom.home-server.routes.obsidian-livesync;
 
   # Shared CORS configuration (used by both CouchDB and Traefik)
   cors = {
@@ -47,10 +47,10 @@ let
     map (db: { name = db; owner = u.username; }) u.services.obsidian-livesync.databases
   ) enabledUsers);
 
-  initScript = nuLib.checkedScript "couchdb-init" ./couchdb-init.nu;
+  initScript = self.lib.builders.writeNushellScript "couchdb-init" ./couchdb-init.nu;
 in
 {
-  custom.home-server.services.obsidian-livesync.port = 5984;
+  custom.home-server.routes.obsidian-livesync.port = 5984;
   services.couchdb = {
     enable = true;
     port = serviceCfg.port;

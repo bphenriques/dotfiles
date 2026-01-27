@@ -13,7 +13,7 @@ let
   mkMount = folders: "${emulationDir}/${folders}:/romm/library/${folders}:ro";
 
 in {
-  custom.home-server.services.romm = {
+  custom.home-server.routes.romm = {
     port = 8095;
     oidc.enable = true;
     callbackPath = "/api/oauth/openid";
@@ -72,7 +72,7 @@ in {
         autoStart = true;
         dependsOn = [ "romm-db" ];
 
-        ports = [ "${custom.home-server.services.romm.port}:8080" ];
+        ports = [ "${custom.home-server.routes.romm.port}:8080" ];
 
         environment = {
           HASHEOUS_API_ENABLED = "true";
