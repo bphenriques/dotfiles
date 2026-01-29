@@ -140,18 +140,27 @@ in
       };
     };
 
-    credentials.dir = lib.mkOption {
-      type = lib.types.str;
-      default = credentialsBaseDir;
-      readOnly = true;
-      description = "Base directory for OIDC credentials";
-    };
+    credentials = {
+      dir = lib.mkOption {
+        type = lib.types.str;
+        default = credentialsBaseDir;
+        readOnly = true;
+        description = "Base directory for OIDC credentials";
+      };
 
-    credentials.placeholder = lib.mkOption {
-      type = lib.types.str;
-      default = credentialsPlaceholder;
-      readOnly = true;
-      description = "Placeholder value written to credential files before real credentials are provisioned";
+      placeholder = lib.mkOption {
+        type = lib.types.str;
+        default = credentialsPlaceholder;
+        readOnly = true;
+        description = "Placeholder value written to credential files before real credentials are provisioned";
+      };
+
+      usersFile = lib.mkOption {
+        type = lib.types.str;
+        default = "${credentialsBaseDir}/oidc-users.json";
+        readOnly = true;
+        description = "JSON file mapping usernames to their OIDC provider user IDs";
+      };
     };
 
     clients = lib.mkOption {
@@ -160,18 +169,20 @@ in
       description = "OIDC clients to register with the provider";
     };
 
-    systemd.readyUnit = lib.mkOption {
-      type = lib.types.str;
-      default = "homelab-oidc-ready.target";
-      readOnly = true;
-      description = "Systemd target that depends on provisionUnit. Add to Wants in consuming services.";
-    };
-
-    systemd.provisionUnit = lib.mkOption {
-      type = lib.types.str;
-      default = oidcProvisionUnit;
-      readOnly = true;
-      description = "Systemd unit that provisions OIDC credentials. Consumers MUST add this to After.";
+    systemd = {
+      readyUnit = lib.mkOption {
+        type = lib.types.str;
+        default = "homelab-oidc-ready.target";
+        readOnly = true;
+        description = "Systemd target that depends on provisionUnit. Add to Wants in consuming services.";
+      };
+      
+      provisionUnit = lib.mkOption {
+        type = lib.types.str;
+        default = oidcProvisionUnit;
+        readOnly = true;
+        description = "Systemd unit that provisions OIDC credentials. Consumers MUST add this to After.";
+      };
     };
   };
 

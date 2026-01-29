@@ -1,17 +1,16 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.custom.home-server.routes.miniflux;
-  initScript = self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu;
+  oidcCfg = config.custom.home-server.oidc;
 
-  # Collect users with miniflux settings enabled
-  enabledUsers = lib.filterAttrs (_: u: u.services.miniflux.enable) config.custom.home-server.users;
+  initScript = self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu;
   userSettings = lib.mapAttrsToList (_: u:
-    { username = u.username; } // u.services.miniflux.settings
-  ) enabledUsers;
+    { username = u.username; is_admin = u.isAdmin; } // u.services.miniflux.settings
+  ) (lib.filterAttrs (_: u: u.services.miniflux.enable) config.custom.home-server.users);
 in
 {
   config = lib.mkIf config.services.miniflux.enable {
-    # Enable admin for API access (required for declarative settings)
+    # Enable admin for API access (required for declarative setup)
     services.miniflux = {
       adminCredentialsFile = config.sops.templates."miniflux-admin-credentials".path;
       config = {
@@ -19,23 +18,23 @@ in
         CREATE_ADMIN = true;
       };
     };
-
-    # Admin credentials for API access
-    sops.secrets."miniflux/admin/username" = { };
-    sops.secrets."miniflux/admin/password" = { };
-    sops.templates."miniflux-admin-credentials" = {
-      content = ''
-        ADMIN_USERNAME=${config.sops.placeholder."miniflux/admin/username"}
-        ADMIN_PASSWORD=${config.sops.placeholder."miniflux/admin/password"}
-      '';
+    sops = {
+      secrets."miniflux/admin/username" = { };
+      secrets."miniflux/admin/password" = { };
+      templates."miniflux-admin-credentials" = {
+        content = ''
+          ADMIN_USERNAME=${config.sops.placeholder."miniflux/admin/username"}
+          ADMIN_PASSWORD=${config.sops.placeholder."miniflux/admin/password"}
+        '';
+      };
     };
 
-    # Initialize user settings after Miniflux starts (re-runs when miniflux restarts)
     systemd.services.miniflux-init = {
-      description = "Initialize Miniflux user settings";
+      description = "Initialize Miniflux users and settings";
       wantedBy = [ "miniflux.service" ];
-      after = [ "miniflux.service" ];
+      after = [ "miniflux.service" oidcCfg.systemd.provisionUnit ];
       requires = [ "miniflux.service" ];
+      wants = [ oidcCfg.systemd.provisionUnit ];
       serviceConfig = {
         Type = "oneshot";
         Restart = "on-failure";
@@ -47,6 +46,7 @@ in
         MINIFLUX_ADMIN_USERNAME_FILE = config.sops.secrets."miniflux/admin/username".path;
         MINIFLUX_ADMIN_PASSWORD_FILE = config.sops.secrets."miniflux/admin/password".path;
         MINIFLUX_USER_SETTINGS_FILE = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON userSettings);
+        OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
       };
       path = [ pkgs.nushell ];
       script = ''nu ${initScript}'';

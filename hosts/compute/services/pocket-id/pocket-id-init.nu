@@ -75,7 +75,7 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   let group_body = { userGroupIds: $group_ids } | to json
   let gr = http put $"($base_url)/api/users/($user_id)/user-groups" $group_body --headers $headers --full --allow-errors
   if $gr.status != 200 { error make { msg: $"Failed to set groups for ($user.username): ($gr.status) - ($gr.body)" } }
-  $user_id
+  { username: $user.username, id: $user_id }
 }
 
 # Verifies that credentials for a client are set (not placeholder or empty).
@@ -172,10 +172,16 @@ def main [] {
   let existing_users = get_all "users"
   print $"Existing users: ($existing_users)"
 
-  $config.users | each { |u|
+  let provisioned_users = $config.users | each { |u|
     let group_ids = $u.groups | each { |g| $group_map | get $g }
     ensure_user $u $group_ids $existing_users
-  } | ignore
+  }
+
+  # Write oidc-users.json for other services to read (e.g., miniflux-init)
+  let users_file = $"($CREDENTIALS_DIR)/oidc-users.json"
+  $provisioned_users | to json | save --force $users_file
+  chmod 0644 $users_file
+  print $"Wrote users mapping to ($users_file)"
 
   print "Pocket ID users and groups initialization complete"
 

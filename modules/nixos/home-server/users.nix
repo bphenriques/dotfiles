@@ -9,6 +9,7 @@ let
       firstName = lib.mkOption { type = lib.types.str; };
       lastName = lib.mkOption { type = lib.types.str; };
       name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };
+      isAdmin = lib.mkOption { type = lib.types.bool; default = builtins.elem "admins" config.services.pocket-id.groups; };
 
       services = {
         pocket-id = {
