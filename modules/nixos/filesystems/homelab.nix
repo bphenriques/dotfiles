@@ -78,12 +78,12 @@ in {
     environment.systemPackages = [ pkgs.cifs-utils ];
     
     sops = {
-      secrets.homelab_samba_username = { };
-      secrets.homelab_samba_password = { };
+      secrets."homelab/samba/username" = { };
+      secrets."homelab/samba/password" = { };
       templates."homelab-samba-credentials" = {
         content = ''
-          username=${config.sops.placeholder.homelab_samba_username}
-          password=${config.sops.placeholder.homelab_samba_password}
+          username=${config.sops.placeholder."homelab/samba/username"}
+          password=${config.sops.placeholder."homelab/samba/password"}
         '';
       };
     };

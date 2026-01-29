@@ -2,11 +2,11 @@
 {
   imports = [ ./homelab.nix ];
 
-  sops.secrets.user_bphenriques_password.neededForUsers = true;
+  sops.secrets."users/bphenriques/password".neededForUsers = true;
   users.users.bphenriques = {
     isNormalUser = true;
     uid = 1000;
-    hashedPasswordFile = config.sops.secrets.user_bphenriques_password.path;
+    hashedPasswordFile = config.sops.secrets."users/bphenriques/password".path;
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]

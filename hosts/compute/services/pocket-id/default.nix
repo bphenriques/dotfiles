@@ -5,9 +5,19 @@ let
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
 in
 {
+  # sudo rm -rf /var/lib/pocket-id/
+  # sudo systemctl stop pocket-id
+  # sudo mkdir /var/lib/pocket-id
+  # sudo chown pocket-id:pocket-id /var/lib/pocket-id/
   imports = [ ./setup.nix ];
 
   custom.home-server.routes.pocket-id.port = 8082;
+  custom.home-server.oidc.provider = {
+    name = "Pocket-ID";
+    url = serviceCfg.publicUrl;
+    discoveryEndpoint = "${serviceCfg.publicUrl}/.well-known/openid-configuration";
+    local = true;
+  };
 
   services.pocket-id = {
     enable = true;
@@ -19,7 +29,7 @@ in
       ANALYTICS_DISABLED = true;
       ENCRYPTION_KEY_FILE = encryptionKeyFile;
       ACCENT_COLOR = "default";
-      STATIC_API_KEY_FILE = config.sops.templates."pocket-id-api-key".path;
+      STATIC_API_KEY_FILE = config.sops.templates.pocket-id-api-key.path;
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
@@ -28,7 +38,7 @@ in
       SMTP_FROM = self.settings.smtp.from;
       SMTP_USER = self.settings.smtp.user;
       SMTP_TLS = self.settings.smtp.tls;
-      SMTP_PASSWORD_FILE = config.sops.templates."pocket-id-smtp-password".path;
+      SMTP_PASSWORD_FILE = config.sops.templates.pocket-id-smtp-password.path;
 
       # invite-only, therefore the emails are valid for me.
       ALLOW_USER_SIGNUPS = "withToken";
@@ -42,16 +52,16 @@ in
   };
 
   sops = {
-    secrets.pocket_id_api_key = { };
+    secrets."pocket-id/api-key" = { };
     templates."pocket-id-api-key" = {
       owner = config.services.pocket-id.user;
-      content = config.sops.placeholder.pocket_id_api_key;
+      content = config.sops.placeholder."pocket-id/api-key";
     };
 
-    secrets.pocket_id_smtp_password = { }; # https://myaccount.google.com/apppasswords
+    secrets."pocket-id/smtp-password" = { }; # https://myaccount.google.com/apppasswords
     templates."pocket-id-smtp-password" = {
       owner = config.services.pocket-id.user;
-      content = config.sops.placeholder.pocket_id_smtp_password;
+      content = config.sops.placeholder."pocket-id/smtp-password";
     };
   };
 

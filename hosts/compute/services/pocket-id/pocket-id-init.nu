@@ -10,6 +10,10 @@ let api_key = open $env.POCKET_ID_API_KEY_FILE | str trim
 let config = open $env.POCKET_ID_CONFIG_FILE
 let headers = { "X-API-KEY": $api_key, "Content-Type": "application/json" }
 
+# OIDC credentials config (from Nix)
+let CREDENTIALS_DIR = $env.HOMELAB_OIDC_CREDENTIALS_DIR
+let CREDENTIALS_PLACEHOLDER = $env.HOMELAB_OIDC_PLACEHOLDER
+
 def wait_ready [] {
   print "Waiting for Pocket ID to be ready..."
   for _ in 1..30 {
@@ -74,23 +78,31 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   $user_id
 }
 
-def parse_env_file [path: string] {
-  open $path
-  | lines
-  | where $it != '' and not ($it | str starts-with '#')
-  | parse --regex '^(?<key>[^=]+)=(?<value>.*)$'
-  | transpose --header-row --as-record
+# Verifies that credentials for a client are set (not placeholder or empty).
+# If this fails, it means the client exists in Pocket-ID but local files are missing.
+# Recovery: delete client from Pocket-ID, delete /var/lib/homelab-oidc/{name}/, restart pocket-id-init.
+def assert_credentials_set [name: string] {
+  let client_dir = $"($CREDENTIALS_DIR)/($name)"
+  let id_val = (open $"($client_dir)/id" | str trim)
+  let secret_val = (open $"($client_dir)/secret" | str trim)
+
+  if $id_val == $CREDENTIALS_PLACEHOLDER or $id_val == "" {
+    error make { msg: $"OIDC client ($name): id is still placeholder or empty" }
+  }
+  if $secret_val == $CREDENTIALS_PLACEHOLDER or $secret_val == "" {
+    error make { msg: $"OIDC client ($name): secret is still placeholder or empty" }
+  }
+  print $"Verified credentials for ($name)"
 }
 
 def ensure_oidc_client [client: record, existing: list] {
   let found = $existing | where name == $client.name | get 0?
-  let creds = parse_env_file $client.credentialsFile
 
   # Compute the desired state, anything that isn't relevant is discarded.
-  let desired = $client | reject credentialsFile | merge { isPublic: false }
+  let desired = $client | merge { isPublic: false }
 
   if $found != null {
-    # Compare only the fields we care about (ignore id, createdAt, etc from API)
+    # Compare only the fields we care about (ignore id, createdAt, credentials, etc from API)
     let dominated_fields = $desired | columns
     let current = $found | select ...$dominated_fields
 
@@ -105,24 +117,43 @@ def ensure_oidc_client [client: record, existing: list] {
       print $"OIDC client up-to-date: ($client.name)"
     }
 
-    return $found.id
+    return
   }
 
-  # Create new client with credentials from SOPS
-  let body = $desired | merge {
-    credentials: {
-      clientId: ($creds | get OAUTH2_CLIENT_ID),
-      clientSecret: ($creds | get OAUTH2_CLIENT_SECRET)
-    }
-  } | to json
-
+  # Create new client - Pocket-ID will generate the client ID
+  let body = $desired | to json
   let r = http post $"($base_url)/api/oidc/clients" $body --headers $headers --full --allow-errors
   if $r.status != 201 {
     error make { msg: $"Failed to create OIDC client ($client.name): ($r.status) - ($r.body)" }
   }
 
-  print $"Created OIDC client: ($client.name)"
-  $r.body.id
+  # Create and generate a secret for the new client
+  let client_id = $r.body.id
+  let secret_r = http post $"($base_url)/api/oidc/clients/($client_id)/secret" "" --headers $headers --full --allow-errors
+  if $secret_r.status != 200 {
+    error make { msg: $"Failed to generate secret for OIDC client ($client.name): ($secret_r.status) - ($secret_r.body)" }
+  }
+  print $"Created OIDC client: ($client.name) with ID: ($client_id)"
+  let client_secret = $secret_r.body.secret
+
+  # Write credentials to files with proper permissions
+  # Directory: owned by root:homelab-oidc-{name}, mode 0750
+  # Files: owned by root:homelab-oidc-{name}, mode 0640
+  let client_dir = $"($CREDENTIALS_DIR)/($client.name)"
+  let client_group = $"homelab-oidc-($client.name)"
+  mkdir $client_dir
+  chmod 0750 $client_dir
+  chown $"root:($client_group)" $client_dir
+
+  $client_id | save --force $"($client_dir)/id"
+  chmod 0640 $"($client_dir)/id"
+  chown $"root:($client_group)" $"($client_dir)/id"
+
+  $client_secret | save --force $"($client_dir)/secret"
+  chmod 0640 $"($client_dir)/secret"
+  chown $"root:($client_group)" $"($client_dir)/secret"
+
+  print $"Wrote credentials to ($client_dir)"
 }
 
 def main [] {
@@ -161,6 +192,12 @@ def main [] {
   print $"Existing OIDC clients: ($existing_clients | get name)"
 
   $clients_cfg | each { |c| ensure_oidc_client $c $existing_clients } | ignore
+
+  # Verify all credentials are provisioned (not placeholders).
+  # This can happen if a client exists in Pocket-ID but local files were deleted/reset.
+  # TODO: Consider adding a "rotate" flag in Nix to force secret regeneration when
+  # local files are lost but client exists in Pocket-ID. For now, fail fast.
+  $clients_cfg | each { |c| assert_credentials_set $c.name } | ignore
 
   print "Pocket ID initialization complete"
 }

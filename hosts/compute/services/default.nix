@@ -1,7 +1,7 @@
 { self, ...}: {
   imports = [
     ./pocket-id
-    ./miniflux.nix
+    ./miniflux
 
     #./jellyseerr.nix
     #./transmission.nix
@@ -9,7 +9,7 @@
     #./obsidian-livesync
 
     #./immich
-    ./transmission
+    #./transmission
 
     # Servarr
     ./prowlarr.nix

@@ -18,9 +18,7 @@ let
 
   sharedSpecialArgs = {
     self = self // {
-      lib = {
-        builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
-      };
+      lib.builders = self.lib.builders.${system};
       pkgs = self.packages.${system} // dotfiles-private.packages.${system};
       settings = dotfiles-private.settings // {
         headless = true;

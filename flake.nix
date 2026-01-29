@@ -39,6 +39,12 @@
       generators = import ./lib/generators.nix { lib = nixpkgs.lib; };
       inherit (generators) forAllSystems readModulesAttrs;
     in {
+      lib.builders = forAllSystems (system:
+        import ./lib/builders.nix {
+          lib = nixpkgs.lib;
+          pkgs = nixpkgs.legacyPackages.${system};
+        }
+      );
       apps      = import ./apps { inherit nixpkgs self generators; };
       packages  = import ./packages { inherit nixpkgs generators; };
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
