@@ -7,6 +7,9 @@
     ./peripherals.nix
   ];
 
+  # Wifi
+  networking.networkmanager.wifi.powersave = false; # FIXME: Disable power saving as I frequently have Wifi drops
+
   # Bluetooth
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;

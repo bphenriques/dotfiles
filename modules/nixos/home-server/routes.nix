@@ -1,5 +1,6 @@
 { lib, config, ... }:
 let
+  # TODO optionally define healthcheck: check the advantages
   cfg = config.custom.home-server;
 
   routeOpt = lib.types.submodule ({ name, config, ... }: {

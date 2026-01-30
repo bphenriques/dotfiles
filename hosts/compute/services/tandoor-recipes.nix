@@ -1,3 +1,5 @@
+# TODO: Implement OIDC integration using per-service formatter approach
+# See: https://ampcode.com/threads/T-019c0bbe-8bb9-752a-bf7d-87da6d0eed2f
 { config, pkgs, ... }:
 let
   openId = {

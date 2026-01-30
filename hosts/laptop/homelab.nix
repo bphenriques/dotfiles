@@ -2,12 +2,19 @@
   imports = [
     ../compute/services/pocket-id
     ../compute/services/miniflux
+    ../compute/services/obsidian-livesync
   ];
 
   custom.home-server = {
     enable = true;
     domain = self.settings.laptop.domain;
     cloudflareEmail = self.settings.cloudflareEmail;
+  };
+
+  # TODO: should I be generating this password rather than using sops?
+  sops.secrets."obsidian-livesync/bphenriques/password" = {
+    group = config.services.couchdb.group;
+    mode = "0440";  # owner + group read
   };
 
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
@@ -208,7 +215,7 @@
       immich.enable = true;
       obsidian-livesync = {
         enable = true;
-        passwordFile = config.sops.secrets.obsidian_livesync_bphenriques_password.path;
+        passwordFile = config.sops.secrets."obsidian-livesync/bphenriques/password".path;
         databases = [ "obsidiandb-bphenriques" ];
       };
     };
