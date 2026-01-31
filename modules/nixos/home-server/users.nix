@@ -9,7 +9,7 @@ let
       firstName = lib.mkOption { type = lib.types.str; };
       lastName = lib.mkOption { type = lib.types.str; };
       name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };
-      isAdmin = lib.mkOption { type = lib.types.bool; default = builtins.elem "admins" config.services.pocket-id.groups; };
+      isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem "admins" config.services.pocket-id.groups; };
 
       services = {
         pocket-id = {
@@ -39,8 +39,11 @@ let
 
         obsidian-livesync = {
           enable = lib.mkEnableOption "Obsidian LiveSync (CouchDB) account for this user";
-          passwordFile = lib.mkOption { type = lib.types.path; };
-          databases = lib.mkOption { type = lib.types.listOf lib.types.str; default = []; };
+          databases = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            readOnly = true;
+            default = [ "obsidiandb-${name}" ];
+          };
         };
       };
     };

@@ -5,7 +5,7 @@ let
 
   initScript = self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu;
   userSettings = lib.mapAttrsToList (_: u:
-    { username = u.username; is_admin = u.isAdmin; } // u.services.miniflux.settings
+    { username = u.username; } // u.services.miniflux.settings
   ) (lib.filterAttrs (_: u: u.services.miniflux.enable) config.custom.home-server.users);
 in
 {

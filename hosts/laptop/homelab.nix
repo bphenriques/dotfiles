@@ -11,12 +11,6 @@
     cloudflareEmail = self.settings.cloudflareEmail;
   };
 
-  # TODO: should I be generating this password rather than using sops?
-  sops.secrets."obsidian-livesync/bphenriques/password" = {
-    group = config.services.couchdb.group;
-    mode = "0440";  # owner + group read
-  };
-
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
     firstName = "Bruno";
     lastName = "Henriques";
@@ -213,11 +207,7 @@
       };
 
       immich.enable = true;
-      obsidian-livesync = {
-        enable = true;
-        passwordFile = config.sops.secrets."obsidian-livesync/bphenriques/password".path;
-        databases = [ "obsidiandb-bphenriques" ];
-      };
+      obsidian-livesync.enable = true;
     };
   };
 }

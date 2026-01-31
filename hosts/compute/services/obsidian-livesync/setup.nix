@@ -8,7 +8,7 @@ let
   enabledUsers = lib.filterAttrs (_: u: u.services.obsidian-livesync.enable) config.custom.home-server.users;
   users = lib.mapAttrsToList (_: u: {
     name = u.username;
-    passwordFile = u.services.obsidian-livesync.passwordFile;
+    passwordFile = config.sops.secrets."obsidian-livesync/${u.username}/password".path;
   }) enabledUsers;
 
   databases = lib.concatLists (lib.mapAttrsToList (_: u:
@@ -17,6 +17,14 @@ let
 in
 {
   config = lib.mkIf config.services.couchdb.enable {
+    # Automatically configure sops secrets for each enabled user
+    sops.secrets = lib.mapAttrs' (_: u: lib.nameValuePair
+      "obsidian-livesync/${u.username}/password"
+      {
+        group = config.services.couchdb.group;
+        mode = "0440";  # owner + group read
+      }
+    ) enabledUsers;
     systemd.services.couchdb-init = {
       description = "Initialize CouchDB databases and users";
       wantedBy = [ "multi-user.target" ];

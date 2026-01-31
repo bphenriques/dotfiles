@@ -96,7 +96,7 @@ in
       StartLimitBurst = 3;
     };
     environment = {
-      IMMICH_URL = "http://127.0.0.1:${toString serviceCfg.port}";
+      IMMICH_URL = serviceCfg.internalUrl;
       IMMICH_API_KEY_FILE = apiKeyFile;
       IMMICH_USERS_JSON = builtins.toJSON users;
       IMMICH_LIBRARIES_JSON = builtins.toJSON libraries;
