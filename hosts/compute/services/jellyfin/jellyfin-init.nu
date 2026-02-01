@@ -1,19 +1,11 @@
 #!/usr/bin/env nu
 
-# Initializes Jellyfin declaratively via the API:
-# - Completes the startup wizard with admin credentials
-# - Configures branding (custom CSS, login disclaimer with SSO button)
-# - Configures trickplay with hardware acceleration
-# - Creates libraries (Movies, TV Shows, Music)
-# - Configures SSO plugin for the configured OIDC provider
-# - Creates users linked to their OIDC IDs
+# Initializes Jellyfin declaratively via the API.
+# Configures: startup wizard, server settings, branding, libraries, SSO, and users.
 #
-# Limitations:
-# - Libraries are additive only: manually created libraries are not removed
-# - Users are additive only: manually created users are not removed
-# - SSO provider is additive only: existing providers are not removed
-# - Full reconciliation would require tracking desired vs actual state and diffing,
-#   which adds complexity without significant benefit for a homelab setup
+# Limitations (additive-only):
+# - Manually created libraries, users, and SSO providers are not removed.
+# - Full reconciliation adds complexity without significant benefit
 
 let base_url = $env.JELLYFIN_URL
 let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
@@ -66,29 +58,26 @@ def complete_startup_wizard [] {
   print "  Startup wizard completed"
 }
 
-def authenticate []: nothing -> string {
+def authenticate []: nothing -> record<headers: list, api_key: string> {
   print $"Authenticating as: ($admin_username)"
   let r = http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers [Authorization "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""] --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)" } }
-  $r.body.AccessToken
-}
-
-def get_api_key [token: string]: nothing -> string {
-  let headers = [Authorization $"MediaBrowser Token=\"($token)\""]
+  
+  let headers = [Authorization $"MediaBrowser Token=\"($r.body.AccessToken)\""]
   
   let existing = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
   if $existing.status == 200 {
-    let key = $existing.body.Items | where AppName == "jellyfin-init" | first
-    if $key != null { return $key.AccessToken }
+    let matches = $existing.body.Items | where AppName == "jellyfin-init"
+    if not ($matches | is-empty) { return { headers: $headers, api_key: ($matches | first).AccessToken } }
   }
   
-  let r = http post $"($base_url)/Auth/Keys?app=jellyfin-init" { } --headers $headers --content-type application/json --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to create API key: ($r.status)" } }
+  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-init" { } --headers $headers --content-type application/json --full --allow-errors
+  if $create.status != 204 { error make { msg: $"Failed to create API key: ($create.status)" } }
   
   let keys = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
-  let key = $keys.body.Items | where AppName == "jellyfin-init" | first
-  if $key == null { error make { msg: "Failed to retrieve created API key" } }
-  $key.AccessToken
+  let matches = $keys.body.Items | where AppName == "jellyfin-init"
+  if $matches | is-empty { error make { msg: "Failed to retrieve created API key" } }
+  { headers: $headers, api_key: ($matches | first).AccessToken }
 }
 
 def ensure_server_name [headers: list] {
@@ -152,7 +141,7 @@ def ensure_sso [api_key: string] {
   if $r.status == 404 { error make { msg: "SSO plugin not installed" } }
   if $r.status != 200 { error make { msg: $"Failed to query SSO providers: ($r.status)" } }
   
-  if ($r.body | default {} | get -o $provider_name) != null {
+  if ($r.body | default {} | get -i $provider_name | is-not-empty) {
     print $"  SSO provider ($provider_name) already configured"
     return
   }
@@ -175,13 +164,13 @@ def ensure_users [headers: list] {
   if $existing.status != 200 { error make { msg: $"Failed to get users: ($existing.status)" } }
   
   for cfg in $user_configs {
-    let in_oidc = ($oidc_users | where username == $cfg.username | first) != null
-    if not $in_oidc {
+    let oidc_matches = $oidc_users | where username == $cfg.username
+    if $oidc_matches | is-empty {
       error make { msg: $"User ($cfg.username) not found in OIDC users" }
     }
     
-    let existing_user = $existing.body | where Name == $cfg.username | first
-    if $existing_user == null {
+    let existing_matches = $existing.body | where Name == $cfg.username
+    if $existing_matches | is-empty {
       let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: (random chars --length 32) } --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 200 { error make { msg: $"Failed to create user ($cfg.username): ($r.status)" } }
       print $"  ($cfg.username): created"
@@ -192,7 +181,9 @@ def ensure_users [headers: list] {
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
-      let user = $users.body | where Name == $cfg.username | first
+      let matches = $users.body | where Name == $cfg.username
+      if $matches | is-empty { error make { msg: $"User ($cfg.username) not found after creation" } }
+      let user = $matches | first
       let updated_policy = $user.Policy | merge $cfg.policy
       let r = http post $"($base_url)/Users/($user.Id)/Policy" $updated_policy --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 204 { error make { msg: $"Failed to update policy for ($cfg.username): ($r.status)" } }
@@ -210,16 +201,14 @@ def main [] {
     sleep 2sec
   }
 
-  let token = authenticate
-  let api_key = get_api_key $token
-  let headers = [Authorization $"MediaBrowser Token=\"($token)\""]
+  let auth = authenticate
   
-  ensure_server_name $headers
-  ensure_branding $headers
-  ensure_trickplay $headers
-  ensure_libraries $headers
-  ensure_sso $api_key
-  ensure_users $headers
+  ensure_server_name $auth.headers
+  ensure_branding $auth.headers
+  ensure_trickplay $auth.headers
+  ensure_libraries $auth.headers
+  ensure_sso $auth.api_key
+  ensure_users $auth.headers
 
   print "Jellyfin initialization complete"
 }
