@@ -4,6 +4,7 @@
     ../compute/services/miniflux
     ../compute/services/obsidian-livesync
     ../compute/services/jellyfin
+    ../compute/services/transmission.nix
   ];
 
   custom.home-server = {

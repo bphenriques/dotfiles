@@ -76,7 +76,7 @@ def authenticate []: nothing -> record<headers: list, api_key: string> {
   
   let keys = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
   let matches = $keys.body.Items | where AppName == "jellyfin-init"
-  if $matches | is-empty { error make { msg: "Failed to retrieve created API key" } }
+  if ($matches | is-empty) { error make { msg: "Failed to retrieve created API key" } }
   { headers: $headers, api_key: ($matches | first).AccessToken }
 }
 
@@ -165,12 +165,12 @@ def ensure_users [headers: list] {
   
   for cfg in $user_configs {
     let oidc_matches = $oidc_users | where username == $cfg.username
-    if $oidc_matches | is-empty {
+    if ($oidc_matches | is-empty) {
       error make { msg: $"User ($cfg.username) not found in OIDC users" }
     }
     
     let existing_matches = $existing.body | where Name == $cfg.username
-    if $existing_matches | is-empty {
+    if ($existing_matches | is-empty) {
       let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: (random chars --length 32) } --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 200 { error make { msg: $"Failed to create user ($cfg.username): ($r.status)" } }
       print $"  ($cfg.username): created"
@@ -182,7 +182,7 @@ def ensure_users [headers: list] {
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
       let matches = $users.body | where Name == $cfg.username
-      if $matches | is-empty { error make { msg: $"User ($cfg.username) not found after creation" } }
+      if ($matches | is-empty) { error make { msg: $"User ($cfg.username) not found after creation" } }
       let user = $matches | first
       let updated_policy = $user.Policy | merge $cfg.policy
       let r = http post $"($base_url)/Users/($user.Id)/Policy" $updated_policy --content-type application/json --headers $headers --full --allow-errors

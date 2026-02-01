@@ -1,7 +1,4 @@
 { config, ... }:
-let
-  homelabCfg = config.custom.fileSystems.homelab;
-in
 {
   imports = [ ./setup.nix ];
 
@@ -13,5 +10,5 @@ in
   };
 
   services.jellyfin.enable = true;
-  users.users.jellyfin.extraGroups = [ homelabCfg.mounts.media.group ]; # Ensure jellyfin has access to the media
+  users.users.jellyfin.extraGroups = [ config.custom.fileSystems.homelab.mounts.media.group ]; # Ensure jellyfin has access to the media
 }
