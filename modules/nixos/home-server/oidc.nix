@@ -119,9 +119,14 @@ in
 {
   options.custom.home-server.oidc = {
     provider = {
-      name = lib.mkOption {
+      displayName = lib.mkOption {
         type = lib.types.str;
-        description = "Display name of the OIDC provider";
+        description = "Display name of the OIDC provider (shown in UI, e.g., 'Pocket-ID')";
+      };
+
+      internalName = lib.mkOption {
+        type = lib.types.str;
+        description = "Internal name for URLs and identifiers (no special characters, e.g., 'PocketID')";
       };
 
       local = lib.mkOption {

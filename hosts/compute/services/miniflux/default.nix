@@ -23,7 +23,7 @@ in
       OAUTH2_PROVIDER = "oidc";
       OAUTH2_REDIRECT_URL = builtins.head oidcClient.callbackURLs;
       OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.url;
-      OAUTH2_OIDC_PROVIDER_NAME = oidcCfg.provider.name;
+      OAUTH2_OIDC_PROVIDER_NAME = oidcCfg.provider.displayName;
       OAUTH2_CLIENT_ID_FILE = "/run/credentials/miniflux.service/oidc-id";
       OAUTH2_CLIENT_SECRET_FILE = "/run/credentials/miniflux.service/oidc-secret";
     };

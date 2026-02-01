@@ -37,7 +37,7 @@
 
   writeNushellScript = name: src:
     pkgs.runCommand "${name}-checked" { } ''
-      ${lib.getExe pkgs.nushell} --no-config-file -c 'if not (nu-check --debug "${src}") { exit 1 }'
+      ${lib.getExe pkgs.nushell} --no-config-file --commands 'if not (nu-check "${src}") { exit 1 }'
       cp ${src} $out
     '';
 }

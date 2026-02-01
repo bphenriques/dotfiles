@@ -45,6 +45,8 @@ let
             default = [ "obsidiandb-${name}" ];
           };
         };
+
+        jellyfin.enable = lib.mkEnableOption "Jellyfin account for this user";
       };
     };
   });

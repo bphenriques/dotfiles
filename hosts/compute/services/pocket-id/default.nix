@@ -13,7 +13,8 @@ in
 
   custom.home-server.routes.pocket-id.port = 8082;
   custom.home-server.oidc.provider = {
-    name = "Pocket-ID";
+    displayName = "Pocket-ID";
+    internalName = "PocketID";
     url = serviceCfg.publicUrl;
     discoveryEndpoint = "${serviceCfg.publicUrl}/.well-known/openid-configuration";
     local = true;

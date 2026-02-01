@@ -3,6 +3,7 @@
     ../compute/services/pocket-id
     ../compute/services/miniflux
     ../compute/services/obsidian-livesync
+    ../compute/services/jellyfin
   ];
 
   custom.home-server = {
@@ -208,6 +209,7 @@
 
       immich.enable = true;
       obsidian-livesync.enable = true;
+      jellyfin.enable = true;
     };
   };
 }
