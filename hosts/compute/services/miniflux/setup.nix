@@ -3,10 +3,9 @@ let
   serviceCfg = config.custom.home-server.routes.miniflux;
   oidcCfg = config.custom.home-server.oidc;
 
-  initScript = self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu;
   userSettings = lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
-  ) (lib.filterAttrs (_: u: u.services.miniflux.enable) config.custom.home-server.users);
+  ) config.custom.home-server.enabledUsers.miniflux;
 in
 {
   config = lib.mkIf config.services.miniflux.enable {
@@ -49,7 +48,7 @@ in
         OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
       };
       path = [ pkgs.nushell ];
-      script = ''nu ${initScript}'';
+      script = ''nu ${self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu}'';
     };
   };
 }

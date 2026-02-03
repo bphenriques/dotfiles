@@ -14,9 +14,7 @@ let
   serviceCfg = config.custom.home-server.routes.immich;
   apiKeyFile = config.sops.secrets.immich_api_key.path;
 
-  # Filter users with immich enabled and format for init script
-  enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.home-server.users;
-  users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) enabledUsers;
+  users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) config.custom.home-server.enabledUsers.immich;
 
   libraries = [
     { name = "bphenriques-library"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques" ]; exclusionPatterns = []; }

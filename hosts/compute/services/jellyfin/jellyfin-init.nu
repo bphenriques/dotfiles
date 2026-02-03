@@ -141,7 +141,7 @@ def ensure_sso [api_key: string] {
   if $r.status == 404 { error make { msg: "SSO plugin not installed" } }
   if $r.status != 200 { error make { msg: $"Failed to query SSO providers: ($r.status)" } }
   
-  if ($r.body | default {} | get -i $provider_name | is-not-empty) {
+  if ($r.body | default {} | get -o $provider_name | is-not-empty) {
     print $"  SSO provider ($provider_name) already configured"
     return
   }

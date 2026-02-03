@@ -1,6 +1,12 @@
 { self, config, ... }: {
   imports = [
+    # *arr services
+    ../compute/services/radarr
+    ../compute/services/sonarr
+    ../compute/services/prowlarr
+    ../compute/services/recyclarr.nix
     ../compute/services/pocket-id
+    ../compute/services/tinyauth
     ../compute/services/miniflux
     ../compute/services/obsidian-livesync
     ../compute/services/jellyfin
@@ -11,6 +17,55 @@
     enable = true;
     domain = self.settings.laptop.domain;
     cloudflareEmail = self.settings.cloudflareEmail;
+
+    # Media quality profiles (synced by recyclarr from TRaSH guides)
+    media = {
+      radarr = {
+        qualityDefinitionTemplate = "radarr-quality-definition-movie";
+        defaultProfile = "hd";
+        profiles = {
+          hd = {
+            name = "HD Bluray + WEB";
+            recyclarrTemplates = [
+              "radarr-quality-definition-movie"
+              "radarr-quality-profile-hd-bluray-web"
+              "radarr-custom-formats-hd-bluray-web"
+            ];
+          };
+          uhd = {
+            name = "UHD Bluray + WEB";
+            recyclarrTemplates = [
+              "radarr-quality-definition-movie"
+              "radarr-quality-profile-uhd-bluray-web"
+              "radarr-custom-formats-uhd-bluray-web"
+            ];
+          };
+        };
+      };
+
+      sonarr = {
+        qualityDefinitionTemplate = "sonarr-quality-definition-series";
+        defaultProfile = "hd";
+        profiles = {
+          hd = {
+            name = "WEB-1080p";
+            recyclarrTemplates = [
+              "sonarr-quality-definition-series"
+              "sonarr-v4-quality-profile-web-1080p"
+              "sonarr-v4-custom-formats-web-1080p"
+            ];
+          };
+          uhd = {
+            name = "WEB-2160p";
+            recyclarrTemplates = [
+              "sonarr-quality-definition-series"
+              "sonarr-v4-quality-profile-web-2160p"
+              "sonarr-v4-custom-formats-web-2160p"
+            ];
+          };
+        };
+      };
+    };
   };
 
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {

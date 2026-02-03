@@ -6,20 +6,28 @@ let
   routeOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       name = lib.mkOption { type = lib.types.str; default = name; };
-      internalUrl  = lib.mkOption { type = lib.types.str; default = "http://127.0.0.1:${toString config.port}"; };
+      internalHost  = lib.mkOption { type = lib.types.str; default = "127.0.0.1:${toString config.port}"; };
+      internalUrl  = lib.mkOption { type = lib.types.str; default = "http://${config.internalHost}"; };
       subdomain = lib.mkOption { type = lib.types.str; default = name; };
-      host = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
-      publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.host}"; };
+      publicHost = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
+      publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.publicHost}"; };
       port = lib.mkOption { type = lib.types.port; };
+      requiresAuth = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether this route requires authentication via tinyauth";
+      };
     };
   });
 
   mkTraefikRoute = route: {
     http = {
       routers."${route.name}" = {
-        rule = "Host(`${route.host}`)";
+        rule = "Host(`${route.publicHost}`)";
         entryPoints = [ "websecure" ];
         service = "${route.name}-svc";
+      } // lib.optionalAttrs route.requiresAuth {
+        middlewares = [ "tinyauth" ];
       };
       services."${route.name}-svc".loadBalancer.servers = [{ url = route.internalUrl; }];
     };
@@ -39,6 +47,20 @@ in
     routes = lib.mkOption {
       type = lib.types.attrsOf routeOpt;
       default = { };
+    };
+
+    auth = {
+      enable = lib.mkEnableOption "Forward authentication via tinyauth";
+      internalUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:${toString cfg.auth.port}";
+        description = "Internal URL for tinyauth forwardAuth requests";
+      };
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 3000;
+        description = "Port tinyauth listens on";
+      };
     };
   };
 
@@ -121,7 +143,14 @@ in
 
       dynamicConfigOptions = let
         routeConfigs = lib.mapAttrsToList (_: mkTraefikRoute) cfg.routes;
-      in lib.foldl' lib.recursiveUpdate {} routeConfigs;
+        routesConfig = lib.foldl' lib.recursiveUpdate {} routeConfigs;
+        authMiddleware = lib.optionalAttrs cfg.auth.enable {
+          http.middlewares.tinyauth.forwardAuth = {
+            address = "${cfg.auth.internalUrl}/api/auth/traefik";
+            trustForwardHeader = true;
+          };
+        };
+      in lib.recursiveUpdate routesConfig authMiddleware;
     };
   };
 }

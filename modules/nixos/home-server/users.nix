@@ -52,8 +52,23 @@ let
   });
 in
 {
-  options.custom.home-server.users = lib.mkOption {
-    type = lib.types.attrsOf userOpt;
-    default = { };
+  options.custom.home-server = {
+    users = lib.mkOption {
+      type = lib.types.attrsOf userOpt;
+      default = { };
+    };
+
+    enabledUsers = lib.mkOption {
+      type = lib.types.attrs;
+      readOnly = true;
+      default = {
+        pocket-id = lib.filterAttrs (_: u: u.services.pocket-id.enable) cfg;
+        immich = lib.filterAttrs (_: u: u.services.immich.enable) cfg;
+        miniflux = lib.filterAttrs (_: u: u.services.miniflux.enable) cfg;
+        obsidian-livesync = lib.filterAttrs (_: u: u.services.obsidian-livesync.enable) cfg;
+        jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
+      };
+      description = "Read-only attrset of users filtered by enabled service.";
+    };
   };
 }

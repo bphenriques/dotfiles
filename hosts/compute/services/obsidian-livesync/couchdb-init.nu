@@ -68,8 +68,9 @@ def main [] {
   print "CouchDB is ready"
 
   ensure_single_node_setup
-  $env.COUCHDB_USERS_JSON | from json | each { |u| ensure_user $u.name $u.passwordFile } | ignore
-  $env.COUCHDB_DBS_JSON | from json | each { |db| ensure_database $db.name $db.owner } | ignore
+  let settings = open $env.COUCHDB_SETTINGS_FILE
+  $settings.users | each { |u| ensure_user $u.name $u.passwordFile } | ignore
+  $settings.databases | each { |db| ensure_database $db.name $db.owner } | ignore
 
   print "CouchDB initialization complete"
 }

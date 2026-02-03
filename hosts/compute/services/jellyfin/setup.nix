@@ -5,8 +5,6 @@ let
   oidcClient = config.custom.home-server.oidc.clients.jellyfin;
   oidcCfg = config.custom.home-server.oidc;
 
-  initScript = self.lib.builders.writeNushellScript "jellyfin-init" ./jellyfin-init.nu;
-
   plugins = [
     (rec {
       name = "SSO-Auth";
@@ -68,7 +66,7 @@ let
         IsHidden = false;
         EnableSubtitleManagement = true;
       };
-    }) (lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.home-server.users);
+    }) config.custom.home-server.enabledUsers.jellyfin;
   };
 in
 {
@@ -117,7 +115,7 @@ in
         OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
       };
       path = [ pkgs.nushell ];
-      script = ''nu ${initScript}'';
+      script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-init" ./jellyfin-init.nu}'';
     };
   };
 }
