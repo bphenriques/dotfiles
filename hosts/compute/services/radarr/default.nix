@@ -7,7 +7,7 @@ in
 
   custom.home-server.routes.radarr = {
     port = 9098;
-    requiresAuth = true;
+    forwardAuth.enable = true;
   };
 
   sops.secrets."radarr/api-key" = { };

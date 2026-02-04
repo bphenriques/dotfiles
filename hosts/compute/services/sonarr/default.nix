@@ -7,7 +7,7 @@ in
 
   custom.home-server.routes.sonarr = {
     port = 9097;
-    requiresAuth = true;
+    forwardAuth.enable = true;
   };
 
   sops.secrets."sonarr/api-key" = { };

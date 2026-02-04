@@ -12,10 +12,13 @@ let
       publicHost = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
       publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.publicHost}"; };
       port = lib.mkOption { type = lib.types.port; };
-      requiresAuth = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Whether this route requires authentication via tinyauth";
+      forwardAuth = {
+        enable = lib.mkEnableOption "forward authentication";
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "admin";
+          description = "Group required to access this route";
+        };
       };
     };
   });
@@ -26,12 +29,17 @@ let
         rule = "Host(`${route.publicHost}`)";
         entryPoints = [ "websecure" ];
         service = "${route.name}-svc";
-      } // lib.optionalAttrs route.requiresAuth {
-        middlewares = [ "tinyauth" ];
+      } // lib.optionalAttrs route.forwardAuth.enable {
+        middlewares = [ "tinyauth" "tinyauth-${route.forwardAuth.group}-only" ];
       };
       services."${route.name}-svc".loadBalancer.servers = [{ url = route.internalUrl; }];
     };
   };
+
+  usedGroups = lib.unique (map (r: r.forwardAuth.group) (lib.filter (r: r.forwardAuth.enable) (lib.attrValues cfg.routes)));
+  groupMiddlewares = lib.foldl' lib.recursiveUpdate {} (map (group: {
+    http.middlewares."tinyauth-${group}-only".headers.customRequestHeaders."X-Require-Group" = group;
+  }) usedGroups);
 in
 {
   options.custom.home-server = {
@@ -49,17 +57,11 @@ in
       default = { };
     };
 
-    auth = {
-      enable = lib.mkEnableOption "Forward authentication via tinyauth";
+    forwardAuth = {
+      enable = lib.mkEnableOption "Forward authentication service";
       internalUrl = lib.mkOption {
         type = lib.types.str;
-        default = "http://127.0.0.1:${toString cfg.auth.port}";
-        description = "Internal URL for tinyauth forwardAuth requests";
-      };
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 3000;
-        description = "Port tinyauth listens on";
+        description = "Internal URL for the service";
       };
     };
   };
@@ -68,10 +70,15 @@ in
     assertions = let
        urls = lib.mapAttrsToList (_: v: v.internalUrl) cfg.routes;
        duplicates = lib.subtractLists urls (lib.unique urls);
+       invalidGroups = lib.subtractLists cfg.groups.allowed usedGroups;
      in [
       {
         assertion = (builtins.length duplicates) == 0;
         message = "Service URLs must be unique to avoid routing conflicts. Conflicting: ${toString duplicates}";
+      }
+      {
+        assertion = (builtins.length invalidGroups) == 0;
+        message = "Invalid forwardAuth groups: ${toString invalidGroups}. Allowed: ${toString cfg.groups.allowed}";
       }
     ];
 
@@ -144,13 +151,13 @@ in
       dynamicConfigOptions = let
         routeConfigs = lib.mapAttrsToList (_: mkTraefikRoute) cfg.routes;
         routesConfig = lib.foldl' lib.recursiveUpdate {} routeConfigs;
-        authMiddleware = lib.optionalAttrs cfg.auth.enable {
+        authMiddleware = lib.optionalAttrs cfg.forwardAuth.enable {
           http.middlewares.tinyauth.forwardAuth = {
-            address = "${cfg.auth.internalUrl}/api/auth/traefik";
+            address = "${cfg.forwardAuth.internalUrl}/api/auth/traefik";
             trustForwardHeader = true;
           };
         };
-      in lib.recursiveUpdate routesConfig authMiddleware;
+      in lib.foldl' lib.recursiveUpdate {} [ routesConfig authMiddleware groupMiddlewares ];
     };
   };
 }

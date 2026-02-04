@@ -9,11 +9,10 @@ let
   settings = {
     # TODO: Add profile picture
     users = lib.mapAttrsToList (_: u: {
-      inherit (u) username email firstName lastName name isAdmin;
-      groups = u.services.pocket-id.groups;
+      inherit (u) username email firstName lastName name isAdmin groups;
     }) enabledUsers;
 
-    groups = map (name: { inherit name; }) (lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.services.pocket-id.groups) enabledUsers)));
+    groups = map (name: { inherit name; }) (lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.groups) enabledUsers)));
 
     # TODO: Logo (light and dark)
     clients = lib.mapAttrsToList (_: client: {

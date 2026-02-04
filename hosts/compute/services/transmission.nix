@@ -4,7 +4,10 @@ let
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
-  custom.home-server.routes.transmission.port = 9091;
+  custom.home-server.routes.transmission = {
+    port = 9091;
+    forwardAuth.enable = true;
+  };
   services.transmission = {
     enable = true;
     package = pkgs.transmission_4;

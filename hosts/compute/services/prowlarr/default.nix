@@ -7,7 +7,7 @@ in
 
   custom.home-server.routes.prowlarr = {
     port = 9096;
-    requiresAuth = true;
+    forwardAuth.enable = true;
   };
 
   sops.secrets."prowlarr/api-key" = { };

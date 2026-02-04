@@ -1,6 +1,7 @@
 { lib, config, ... }:
 let
   cfg = config.custom.home-server.users;
+  groupsCfg = config.custom.home-server.groups;
 
   userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
@@ -9,17 +10,15 @@ let
       firstName = lib.mkOption { type = lib.types.str; };
       lastName = lib.mkOption { type = lib.types.str; };
       name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };
-      isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem "admins" config.services.pocket-id.groups; };
+      groups = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ groupsCfg.users ];
+        description = "Groups assigned to this user. If admin group is included, the user is marked as admin.";
+      };
+      isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem groupsCfg.admin config.groups; };
 
       services = {
-        pocket-id = {
-          enable = lib.mkEnableOption "Pocket-ID account for this user";
-          groups = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ "users" ];
-            description = "Groups to assign in Pocket-ID. If 'admins' is included, the user is marked as admin.";
-          };
-        };
+        pocket-id.enable = lib.mkEnableOption "Pocket-ID account for this user";
 
         immich.enable = lib.mkEnableOption "Immich account for this user";
 
@@ -53,6 +52,27 @@ let
 in
 {
   options.custom.home-server = {
+    groups = {
+      admin = lib.mkOption {
+        type = lib.types.str;
+        default = "admin";
+        description = "Name of the admin group";
+      };
+
+      users = lib.mkOption {
+        type = lib.types.str;
+        default = "users";
+        description = "Name of the users group";
+      };
+
+      allowed = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        readOnly = true;
+        default = [ groupsCfg.admin groupsCfg.users ];
+        description = "List of allowed group names (read-only, derived from admin and users)";
+      };
+    };
+
     users = lib.mkOption {
       type = lib.types.attrsOf userOpt;
       default = { };

@@ -9,9 +9,9 @@ let
 in
 {
   custom.home-server.routes.tinyauth.port = 3000;
-  custom.home-server.auth = {
+  custom.home-server.forwardAuth = {
     enable = true;
-    port = serviceCfg.port;
+    internalUrl = serviceCfg.internalUrl;
   };
 
   custom.home-server.oidc.clients.tinyauth.callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];

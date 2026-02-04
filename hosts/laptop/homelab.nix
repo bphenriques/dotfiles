@@ -73,11 +73,9 @@
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
     firstName = "Bruno";
     lastName = "Henriques";
+    groups = [ "admin" "users" ];
     services = {
-      pocket-id = {
-        enable = true;
-        groups = [ "admins" "users" ];
-      };
+      pocket-id.enable = true;
 
       miniflux = {
         enable = true;

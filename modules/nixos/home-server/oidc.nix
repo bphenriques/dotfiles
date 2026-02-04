@@ -97,18 +97,6 @@ let
     };
   });
 
-  # Generate group for each client
-  mkClientGroup = name: _: {
-    ${clientGroup name} = { gid = clientGid name; };
-  };
-
-  # Generate tmpfiles rules for each client
-  mkClientTmpfiles = _: client: [
-    "d ${client.credentialsDir} 0750 root ${client.group} -"
-    "f ${client.idFile} 0640 root ${client.group} - ${credentialsPlaceholder}"
-    "f ${client.secretFile} 0640 root ${client.group} - ${credentialsPlaceholder}"
-  ];
-
   # Unit that provisions credentials (local: pocket-id-init, remote: sync service)
   # TODO: Add homelab-oidc-sync.service for remote provider support
   oidcProvisionUnit =
@@ -200,12 +188,18 @@ in
     ];
 
     # Per-client groups with deterministic GIDs
-    users.groups = lib.mkMerge (lib.mapAttrsToList mkClientGroup homeServerCfg.oidc.clients);
+    users.groups = lib.mkMerge (lib.mapAttrsToList (name: _: {
+      ${clientGroup name} = { gid = clientGid name; };
+    }) homeServerCfg.oidc.clients);
 
     # Base directory + per-client subdirectories for OIDC credentials
     systemd.tmpfiles.rules = [
       "d ${credentialsBaseDir} 0750 root root -"
-    ] ++ lib.flatten (lib.mapAttrsToList mkClientTmpfiles homeServerCfg.oidc.clients);
+    ] ++ lib.flatten (lib.mapAttrsToList (_: client: [
+      "d ${client.credentialsDir} 0750 root ${client.group} -"
+      "f ${client.idFile} 0640 root ${client.group} - ${credentialsPlaceholder}"
+      "f ${client.secretFile} 0640 root ${client.group} - ${credentialsPlaceholder}"
+    ]) homeServerCfg.oidc.clients);
 
     # Target that indicates OIDC credentials are ready for all configured clients
     systemd.targets."homelab-oidc-ready" = {
