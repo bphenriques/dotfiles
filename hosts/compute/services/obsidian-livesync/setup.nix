@@ -15,37 +15,35 @@ let
   };
 in
 {
-  config = lib.mkIf config.services.couchdb.enable {
-    # Automatically configure sops secrets for each enabled user
-    sops.secrets = lib.mapAttrs' (_: u: lib.nameValuePair
-      "obsidian-livesync/${u.username}/password"
-      { group = config.services.couchdb.group; mode = "0440"; } # owner + group read
-    ) enabledUsers;
+  # Automatically configure sops secrets for each enabled user
+  sops.secrets = lib.mapAttrs' (_: u: lib.nameValuePair
+    "obsidian-livesync/${u.username}/password"
+    { group = config.services.couchdb.group; mode = "0440"; } # owner + group read
+  ) enabledUsers;
 
-    systemd.services.couchdb-init = {
-      description = "Initialize CouchDB databases and users";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "couchdb.service" ];
-      requires = [ "couchdb.service" ];
-      partOf = [ "couchdb.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = config.services.couchdb.user;    # Ensure it is not root.
-        Group = config.services.couchdb.group;
-        Restart = "on-failure";
-        RestartSec = 10;
-        StartLimitBurst = 3;
-      };
-      environment = {
-        COUCHDB_URL = serviceCfg.internalUrl;
-        COUCHDB_BIND_ADDRESS = config.services.couchdb.bindAddress;
-        COUCHDB_PORT = toString config.services.couchdb.port;
-        COUCHDB_ADMIN_USER = config.services.couchdb.adminUser;
-        COUCHDB_ADMIN_PASS_FILE = config.sops.templates."couchdb-admin-password".path;
-        COUCHDB_SETTINGS_FILE = pkgs.writeText "couchdb-settings.json" (builtins.toJSON settings);
-      };
-      path = [ pkgs.nushell ];
-      script = ''nu ${self.lib.builders.writeNushellScript "couchdb-init" ./couchdb-init.nu}'';
+  systemd.services.couchdb-init = {
+    description = "Initialize CouchDB databases and users";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "couchdb.service" ];
+    requires = [ "couchdb.service" ];
+    partOf = [ "couchdb.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = config.services.couchdb.user;    # Ensure it is not root.
+      Group = config.services.couchdb.group;
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitBurst = 3;
     };
+    environment = {
+      COUCHDB_URL = serviceCfg.internalUrl;
+      COUCHDB_BIND_ADDRESS = config.services.couchdb.bindAddress;
+      COUCHDB_PORT = toString config.services.couchdb.port;
+      COUCHDB_ADMIN_USER = config.services.couchdb.adminUser;
+      COUCHDB_ADMIN_PASS_FILE = config.sops.templates."couchdb-admin-password".path;
+      COUCHDB_SETTINGS_FILE = pkgs.writeText "couchdb-settings.json" (builtins.toJSON settings);
+    };
+    path = [ pkgs.nushell ];
+    script = ''nu ${self.lib.builders.writeNushellScript "couchdb-init" ./couchdb-init.nu}'';
   };
 }

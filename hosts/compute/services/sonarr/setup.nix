@@ -18,26 +18,24 @@ let
   };
 in
 {
-  config = lib.mkIf config.services.sonarr.enable {
-    systemd.services.sonarr-init = {
-      description = "Initialize Sonarr with declarative configuration";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "sonarr.service" "transmission.service" "recyclarr.service" ];
-      requires = [ "sonarr.service" "recyclarr.service" ];
-      wants = [ "transmission.service" "recyclarr.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = 10;
-        StartLimitBurst = 3;
-      };
-      environment = {
-        SONARR_URL = serviceCfg.internalUrl;
-        SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
-        SONARR_CONFIG_FILE = pkgs.writeText "sonarr-config.json" (builtins.toJSON settings);
-      };
-      path = [ pkgs.nushell ];
-      script = ''nu ${self.lib.builders.writeNushellScript "sonarr-init" ./sonarr-init.nu}'';
+  systemd.services.sonarr-init = {
+    description = "Initialize Sonarr with declarative configuration";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "sonarr.service" "transmission.service" "recyclarr.service" ];
+    requires = [ "sonarr.service" "recyclarr.service" ];
+    wants = [ "transmission.service" "recyclarr.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitBurst = 3;
     };
+    environment = {
+      SONARR_URL = serviceCfg.internalUrl;
+      SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
+      SONARR_CONFIG_FILE = pkgs.writeText "sonarr-config.json" (builtins.toJSON settings);
+    };
+    path = [ pkgs.nushell ];
+    script = ''nu ${self.lib.builders.writeNushellScript "sonarr-init" ./sonarr-init.nu}'';
   };
 }

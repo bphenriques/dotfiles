@@ -51,8 +51,8 @@ let
       enableAuthorization = true;
       enableAllFolders = true;
       enabledFolders = [ ];
-      roles = [ "users" "admins" ];
-      adminRoles = [ "admins" ];
+      roles = [ "users" "admins" ]; # FIXME: get the settings from oidc
+      adminRoles = [ "admins" ];    # FIXME: get the settings from oidc
       enableFolderRoles = false;
       folderRoleMapping = [ ];
       roleClaim = "groups";
@@ -70,52 +70,52 @@ let
   };
 in
 {
-  config = lib.mkIf config.services.jellyfin.enable {
-    sops = {
-      secrets."jellyfin/admin/username" = { };
-      secrets."jellyfin/admin/password" = { };
-    };
+  sops = {
+    secrets."jellyfin/admin/username" = { };
+    secrets."jellyfin/admin/password" = { };
+  };
 
-    systemd.services.jellyfin.serviceConfig.ExecStartPre = let
-      installPlugin = plugin: ''
-        pluginDir="/var/lib/jellyfin/plugins/${plugin.name}_${plugin.version}"
-        if [ ! -f "$pluginDir/.installed" ]; then
-          rm -rf "$pluginDir"
-          mkdir -p "$pluginDir"
-          cp -r ${plugin.src}/* "$pluginDir/"
-          touch "$pluginDir/.installed"
-        fi
-        chmod -R u+rw "/var/lib/jellyfin/plugins"
-        chown -R jellyfin:jellyfin "/var/lib/jellyfin/plugins"
-      '';
-      script = pkgs.writeShellScript "jellyfin-install-plugins" ''
-        ${lib.concatMapStringsSep "\n" installPlugin plugins}
-      '';
-    in [ "+${script}" ]; # The plus signals to run as root as we need to set permissions
+  custom.home-server.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
 
-    systemd.services.jellyfin-init = {
-      description = "Initialize Jellyfin with declarative configuration";
-      wantedBy = [ "jellyfin.target" ];
-      after = [ "jellyfin.service" oidcCfg.systemd.provisionUnit ];
-      requires = [ "jellyfin.service" ];
-      wants = [ oidcCfg.systemd.readyUnit ];
-      serviceConfig = {
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = 10;
-        StartLimitBurst = 3;
-      };
-      environment = {
-        JELLYFIN_URL = serviceCfg.internalUrl;
-        JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
-        JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-        JELLYFIN_CONFIG_FILE = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
-        OIDC_CLIENT_ID_FILE = oidcClient.idFile;
-        OIDC_CLIENT_SECRET_FILE = oidcClient.secretFile;
-        OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
-      };
-      path = [ pkgs.nushell ];
-      script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-init" ./jellyfin-init.nu}'';
+  systemd.services.jellyfin.serviceConfig.ExecStartPre = let
+    installPlugin = plugin: ''
+      pluginDir="/var/lib/jellyfin/plugins/${plugin.name}_${plugin.version}"
+      if [ ! -f "$pluginDir/.installed" ]; then
+        rm -rf "$pluginDir"
+        mkdir -p "$pluginDir"
+        cp -r ${plugin.src}/* "$pluginDir/"
+        touch "$pluginDir/.installed"
+      fi
+      chmod -R u+rw "/var/lib/jellyfin/plugins"
+      chown -R jellyfin:jellyfin "/var/lib/jellyfin/plugins"
+    '';
+    script = pkgs.writeShellScript "jellyfin-install-plugins" ''
+      ${lib.concatMapStringsSep "\n" installPlugin plugins}
+    '';
+  in [ "+${script}" ]; # The plus signals to run as root as we need to set permissions
+
+  systemd.services.jellyfin-init = {
+    description = "Initialize Jellyfin with declarative configuration";
+    wantedBy = [ "jellyfin.target" ];
+    after = [ "jellyfin.service" oidcCfg.systemd.provisionedTarget ];
+    requires = [ "jellyfin.service" ];
+    wants = [ oidcCfg.systemd.provisionedTarget ];
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitBurst = 3;
     };
+    environment = {
+      JELLYFIN_URL = serviceCfg.internalUrl;
+      JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
+      JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
+      JELLYFIN_CONFIG_FILE = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
+      OIDC_CLIENT_ID_FILE = oidcClient.idFile;
+      OIDC_CLIENT_SECRET_FILE = oidcClient.secretFile;
+      OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
+    };
+    path = [ pkgs.nushell ];
+    script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-init" ./jellyfin-init.nu}'';
   };
 }

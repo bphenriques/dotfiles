@@ -1,15 +1,19 @@
 { self, config, ... }: {
   imports = [
+    # Media
     ../compute/services/radarr
     ../compute/services/sonarr
     ../compute/services/prowlarr
+    ../compute/services/jellyseerr
     ../compute/services/recyclarr.nix
-    ../auth/services/pocket-id
-    ../compute/services/tinyauth
-    ../compute/services/miniflux
-    ../compute/services/obsidian-livesync
     ../compute/services/jellyfin
     ../compute/services/transmission.nix
+
+    #
+    ../auth/services/pocket-id
+    ../compute/services/tinyauth.nix
+    ../compute/services/miniflux
+    ../compute/services/obsidian-livesync
   ];
 
   custom.home-server = {

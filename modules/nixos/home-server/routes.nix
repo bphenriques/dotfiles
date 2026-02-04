@@ -30,16 +30,13 @@ let
         entryPoints = [ "websecure" ];
         service = "${route.name}-svc";
       } // lib.optionalAttrs route.forwardAuth.enable {
-        middlewares = [ "tinyauth" "tinyauth-${route.forwardAuth.group}-only" ];
+        middlewares = [ "tinyauth" ];
       };
       services."${route.name}-svc".loadBalancer.servers = [{ url = route.internalUrl; }];
     };
   };
 
   usedGroups = lib.unique (map (r: r.forwardAuth.group) (lib.filter (r: r.forwardAuth.enable) (lib.attrValues cfg.routes)));
-  groupMiddlewares = lib.foldl' lib.recursiveUpdate {} (map (group: {
-    http.middlewares."tinyauth-${group}-only".headers.customRequestHeaders."X-Require-Group" = group;
-  }) usedGroups);
 in
 {
   options.custom.home-server = {
@@ -157,7 +154,7 @@ in
             trustForwardHeader = true;
           };
         };
-      in lib.foldl' lib.recursiveUpdate {} [ routesConfig authMiddleware groupMiddlewares ];
+      in lib.foldl' lib.recursiveUpdate {} [ routesConfig authMiddleware ];
     };
   };
 }

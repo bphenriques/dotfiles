@@ -31,8 +31,8 @@ in
 
   # Wait for OIDC credentials; LoadCredential reads files as root before dropping privileges
   systemd.services.miniflux = {
-    wants = [ oidcCfg.systemd.readyUnit ];
-    after = [ oidcCfg.systemd.readyUnit oidcCfg.systemd.provisionUnit ];
+    wants = [ oidcCfg.systemd.provisionedTarget ];
+    after = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.LoadCredential = [
       "oidc-id:${oidcClient.idFile}"
       "oidc-secret:${oidcClient.secretFile}"

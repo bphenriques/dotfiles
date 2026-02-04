@@ -18,26 +18,24 @@ let
   };
 in
 {
-  config = lib.mkIf config.services.radarr.enable {
-    systemd.services.radarr-init = {
-      description = "Initialize Radarr with declarative configuration";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "radarr.service" "transmission.service" "recyclarr.service" ];
-      requires = [ "radarr.service" "recyclarr.service" ];
-      wants = [ "transmission.service" "recyclarr.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = 10;
-        StartLimitBurst = 3;
-      };
-      environment = {
-        RADARR_URL = serviceCfg.internalUrl;
-        RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
-        RADARR_CONFIG_FILE = pkgs.writeText "radarr-config.json" (builtins.toJSON settings);
-      };
-      path = [ pkgs.nushell ];
-      script = ''nu ${self.lib.builders.writeNushellScript "radarr-init" ./radarr-init.nu}'';
+  systemd.services.radarr-init = {
+    description = "Initialize Radarr with declarative configuration";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "radarr.service" "transmission.service" "recyclarr.service" ];
+    requires = [ "radarr.service" "recyclarr.service" ];
+    wants = [ "transmission.service" "recyclarr.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitBurst = 3;
     };
+    environment = {
+      RADARR_URL = serviceCfg.internalUrl;
+      RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
+      RADARR_CONFIG_FILE = pkgs.writeText "radarr-config.json" (builtins.toJSON settings);
+    };
+    path = [ pkgs.nushell ];
+    script = ''nu ${self.lib.builders.writeNushellScript "radarr-init" ./radarr-init.nu}'';
   };
 }

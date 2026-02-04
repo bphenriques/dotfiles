@@ -75,33 +75,31 @@ let
   settingsFile = pkgs.writeText "jellyseerr-settings.json" (builtins.toJSON settingsJson);
 in
 {
-  config = lib.mkIf config.services.jellyseerr.enable {
-    sops.secrets."jellyseerr/api-key" = { };
+  sops.secrets."jellyseerr/api-key" = { };
 
-    systemd.services.jellyseerr-init = {
-      description = "Initialize Jellyseerr with declarative configuration";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "jellyfin-init.service" "jellyseerr.service" "radarr-init.service" "sonarr-init.service" ];
-      requires = [ "jellyseerr.service" ];
-      wants = [ "jellyfin-init.service" "radarr-init.service" "sonarr-init.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = 10;
-        StartLimitBurst = 3;
-      };
-      environment = {
-        JELLYSEERR_URL = serviceCfg.internalUrl;
-        JELLYSEERR_SETTINGS_TEMPLATE = settingsFile;
-        JELLYSEERR_API_KEY_FILE = config.sops.secrets."jellyseerr/api-key".path;
-        JELLYSEERR_CONFIG_FILE = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
-        JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
-        JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-        RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
-        SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
-      };
-      path = [ pkgs.nushell ];
-      script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-init" ./jellyseerr-init.nu}'';
+  systemd.services.jellyseerr-init = {
+    description = "Initialize Jellyseerr with declarative configuration";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "jellyfin-init.service" "jellyseerr.service" "radarr-init.service" "sonarr-init.service" ];
+    requires = [ "jellyseerr.service" ];
+    wants = [ "jellyfin-init.service" "radarr-init.service" "sonarr-init.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 10;
+      StartLimitBurst = 3;
     };
+    environment = {
+      JELLYSEERR_URL = serviceCfg.internalUrl;
+      JELLYSEERR_SETTINGS_TEMPLATE = settingsFile;
+      JELLYSEERR_API_KEY_FILE = config.sops.secrets."jellyseerr/api-key".path;
+      JELLYSEERR_CONFIG_FILE = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
+      JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
+      JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
+      RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
+      SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
+    };
+    path = [ pkgs.nushell ];
+    script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-init" ./jellyseerr-init.nu}'';
   };
 }

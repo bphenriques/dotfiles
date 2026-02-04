@@ -4,8 +4,9 @@ let
   oidcCfg = cfg.oidc;
   oidcClient = cfg.oidc.clients.tinyauth;
   serviceCfg = cfg.routes.tinyauth;
+
   dataDir = "/var/lib/tinyauth";
-  envFile = "/run/tinyauth/env"; # OIDC client_id (no _FILE support)
+  envFile = "/run/tinyauth/env";
 in
 {
   custom.home-server.routes.tinyauth.port = 3000;
@@ -25,7 +26,7 @@ in
   virtualisation.oci-containers = {
     backend = "podman";
     containers.tinyauth = {
-      image = "ghcr.io/steveiliop56/tinyauth:v4";
+      image = "ghcr.io/steveiliop56/tinyauth:4.1.0";
       autoStart = true;
       ports = [ "${serviceCfg.internalHost}:3000" ];
       environment = {
@@ -33,9 +34,7 @@ in
         DISABLE_ANALYTICS = "true";
         SECURE_COOKIE = "true";
         LOG_LEVEL = "info";
-        # BACKGROUND_IMAGE
-        # TRUSTED_PROXIES?
-        OAUTH_AUTO_REDIRECT = "pocketid"; # Auto-redirect
+        OAUTH_AUTO_REDIRECT = "pocketid";
 
         # Pocket-ID OIDC configuration
         PROVIDERS_POCKETID_NAME = oidcCfg.provider.displayName;
@@ -43,10 +42,14 @@ in
         PROVIDERS_POCKETID_TOKEN_URL = "${oidcCfg.provider.url}/api/oidc/token";
         PROVIDERS_POCKETID_USER_INFO_URL = "${oidcCfg.provider.url}/api/oidc/userinfo";
         PROVIDERS_POCKETID_REDIRECT_URL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
-        PROVIDERS_POCKETID_SCOPES = "openid,profile,email";
+        PROVIDERS_POCKETID_SCOPES = "openid,profile,email,groups";
         PROVIDERS_POCKETID_CLIENT_SECRET_FILE = "/run/secrets/client_secret";
         SECRET_FILE = "/run/secrets/secret";
-      };
+      } // lib.listToAttrs (lib.mapAttrsToList (name: route: {
+        name = "TINYAUTH_APPS_${lib.toUpper name}_OAUTH_GROUPS";
+        value = route.forwardAuth.group;
+      }) (lib.filterAttrs (_: r: r.forwardAuth.enable) cfg.routes));  # FIXME: This is likely only available next version of tinyauth
+
       environmentFiles = [ envFile ];
       volumes = [
         "${dataDir}:/data"
@@ -63,8 +66,8 @@ in
   };
 
   systemd.services.podman-tinyauth = {
-    after = [ oidcCfg.systemd.provisionUnit ];
-    wants = [ oidcCfg.systemd.readyUnit ];
+    after = [ oidcCfg.systemd.provisionedTarget ];
+    wants = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
     # Generate env file for client_id (tinyauth doesn't support _FILE for this)
     serviceConfig.ExecStartPre = let

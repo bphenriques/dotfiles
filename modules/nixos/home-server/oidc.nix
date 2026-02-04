@@ -25,14 +25,14 @@
 #   Renaming clients creates orphan groups; manual cleanup may be needed.
 #
 # Systemd units:
-#   - provisionUnit: The actual unit that provisions credentials (pocket-id-init.service
-#     for local, homelab-oidc-sync.service for remote). Consumers MUST After this unit.
-#   - readyUnit: A target that depends on provisionUnit. Useful for conceptual grouping.
+#   - provisionedTarget: A target that indicates OIDC credentials are ready.
+#     Internally depends on the provisioning unit (pocket-id-init.service for local,
+#     homelab-oidc-sync.service for remote).
 #
 # Consumer pattern:
 #   systemd.services.<name> = {
-#     wants = [ oidcCfg.systemd.readyUnit ];
-#     after = [ oidcCfg.systemd.readyUnit oidcCfg.systemd.provisionUnit ];
+#     wants = [ oidcCfg.systemd.provisionedTarget ];
+#     after = [ oidcCfg.systemd.provisionedTarget ];
 #     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
 #   };
 #
@@ -163,18 +163,11 @@ in
     };
 
     systemd = {
-      readyUnit = lib.mkOption {
+      provisionedTarget = lib.mkOption {
         type = lib.types.str;
         default = "homelab-oidc-ready.target";
         readOnly = true;
-        description = "Systemd target that depends on provisionUnit. Add to Wants in consuming services.";
-      };
-      
-      provisionUnit = lib.mkOption {
-        type = lib.types.str;
-        default = oidcProvisionUnit;
-        readOnly = true;
-        description = "Systemd unit that provisions OIDC credentials. Consumers MUST add this to After.";
+        description = "Systemd target indicating OIDC credentials are ready. Use in both Wants and After.";
       };
     };
   };
