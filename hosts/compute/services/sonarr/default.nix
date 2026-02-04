@@ -21,7 +21,10 @@ in
     environmentFiles = [ config.sops.templates."sonarr.env".path ];
   };
 
-  systemd.services.sonarr.environment.SONARR__AUTH__METHOD = "External";
+  systemd.services.sonarr.environment = {
+    SONARR__AUTH__METHOD = "External";
+    SONARR__LOG__LEVEL = "info";
+  };
 
   users.users.sonarr.extraGroups = [ homelabMounts.media.group ];
   systemd.services.sonarr = {

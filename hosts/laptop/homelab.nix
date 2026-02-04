@@ -1,11 +1,10 @@
 { self, config, ... }: {
   imports = [
-    # *arr services
     ../compute/services/radarr
     ../compute/services/sonarr
     ../compute/services/prowlarr
     ../compute/services/recyclarr.nix
-    ../compute/services/pocket-id
+    ../auth/services/pocket-id
     ../compute/services/tinyauth
     ../compute/services/miniflux
     ../compute/services/obsidian-livesync
@@ -18,11 +17,14 @@
     domain = self.settings.laptop.domain;
     cloudflareEmail = self.settings.cloudflareEmail;
 
-    # Media quality profiles (synced by recyclarr from TRaSH guides)
     media = {
       radarr = {
         qualityDefinitionTemplate = "radarr-quality-definition-movie";
         defaultProfile = "hd";
+
+        # Recyclarr configuration using TRaSH Guide include templates
+        # See: https://recyclarr.dev/reference/configuration/include/
+        # See: https://trash-guides.info/
         profiles = {
           hd = {
             name = "HD Bluray + WEB";

@@ -9,7 +9,6 @@ let
 in
 {
   config = lib.mkIf config.services.miniflux.enable {
-    # Enable admin for API access (required for declarative setup)
     services.miniflux = {
       adminCredentialsFile = config.sops.templates."miniflux-admin-credentials".path;
       config = {

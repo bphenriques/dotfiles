@@ -22,6 +22,18 @@ def wait_ready [] {
   error make { msg: "Prowlarr failed to start after 30 attempts" }
 }
 
+def get_default_app_profile_id [] {
+  let profiles = http get $"($base_url)/api/v1/appprofile" --headers $headers --full --allow-errors
+  if $profiles.status != 200 {
+    error make { msg: $"Failed to get app profiles: ($profiles.status) - ($profiles.body)" }
+  }
+  let profile = ($profiles.body | get 0?)
+  if $profile == null {
+    error make { msg: "No app profiles found in Prowlarr" }
+  }
+  $profile.id
+}
+
 def ensure_indexers [] {
   print "Configuring indexers..."
   let indexers = ($config | get -o indexers) | default []
@@ -41,6 +53,8 @@ def ensure_indexers [] {
   if $schemas.status != 200 {
     error make { msg: $"Failed to get indexer schemas: ($schemas.status)" }
   }
+
+  let app_profile_id = get_default_app_profile_id
 
   for idx in $indexers {
     if $idx.name in $existing_names {
@@ -65,6 +79,7 @@ def ensure_indexers [] {
     let payload = $schema | merge {
       name: $idx.name
       enable: true
+      appProfileId: $app_profile_id
       fields: $fields
     }
 

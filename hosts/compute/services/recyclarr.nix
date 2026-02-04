@@ -6,15 +6,8 @@ let
   # Build recyclarr include templates from media settings
   mkIncludeTemplates = serviceCfg:
     [{ template = serviceCfg.qualityDefinitionTemplate; }]
-    ++ lib.concatMap (profile: map (t: { template = t; }) profile.recyclarrTemplates)
-        (lib.attrValues serviceCfg.profiles);
+      ++ lib.concatMap (profile: map (t: { template = t; }) profile.recyclarrTemplates) (lib.attrValues serviceCfg.profiles);
 
-  # Recyclarr configuration using TRaSH Guide include templates
-  # See: https://recyclarr.dev/reference/configuration/include/
-  # See: https://trash-guides.info/
-  #
-  # API keys are loaded via secrets.yml using !secret syntax
-  # Placeholders are post-processed to YAML tags
   recyclarrConfig = {
     radarr.movies = {
       base_url = config.custom.home-server.routes.radarr.internalUrl;
@@ -30,7 +23,6 @@ let
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
-  # Group for sops secrets access with DynamicUser
   users.groups.${secretsGroup} = { };
 
   sops.templates."recyclarr-secrets.yml" = {

@@ -19,6 +19,7 @@ in
       ratio-limit = 1;
       idle_seeding_limit_enabled = true;
       idle_seeding_limit = 1; # 1 minute
+      umask = 2; # 0002 - Allow group read/write for sonarr/radarr access
     };
     webHome = pkgs.flood-for-transmission;
   };
@@ -29,4 +30,16 @@ in
     requires = [ homelabMounts.media.automountUnit ];
     after = [ homelabMounts.media.automountUnit ];
   };
+
+  # Create download category directories with correct group permissions for sonarr/radarr access
+  systemd.tmpfiles.rules = 
+    let
+      user = config.services.transmission.user;
+      group = homelabMounts.media.group;
+      downloadsDir = pathsCfg.media.downloads.root;
+    in [
+      "d ${downloadsDir}/sonarr 0775 ${user} ${group} -"
+      "d ${downloadsDir}/radarr 0775 ${user} ${group} -"
+      "d ${pathsCfg.media.downloads.incomplete} 0775 ${user} ${group} -"
+    ];
 }

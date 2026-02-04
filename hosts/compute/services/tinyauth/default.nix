@@ -5,6 +5,7 @@ let
   oidcClient = cfg.oidc.clients.tinyauth;
   serviceCfg = cfg.routes.tinyauth;
   dataDir = "/var/lib/tinyauth";
+  envFile = "/run/tinyauth/env"; # OIDC client_id (no _FILE support)
 in
 {
   custom.home-server.routes.tinyauth.port = 3000;
@@ -13,9 +14,7 @@ in
     port = serviceCfg.port;
   };
 
-  custom.home-server.oidc.clients.tinyauth = {
-    callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
-  };
+  custom.home-server.oidc.clients.tinyauth.callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
 
   sops.secrets."tinyauth/secret" = { };
 
@@ -34,9 +33,9 @@ in
         DISABLE_ANALYTICS = "true";
         SECURE_COOKIE = "true";
         LOG_LEVEL = "info";
-
-        # Use OAuth auto-redirect to Pocket-ID (skip local login screen)
-        OAUTH_AUTO_REDIRECT = "pocketid";
+        # BACKGROUND_IMAGE
+        # TRUSTED_PROXIES?
+        OAUTH_AUTO_REDIRECT = "pocketid"; # Auto-redirect
 
         # Pocket-ID OIDC configuration
         PROVIDERS_POCKETID_NAME = oidcCfg.provider.displayName;
@@ -45,27 +44,35 @@ in
         PROVIDERS_POCKETID_USER_INFO_URL = "${oidcCfg.provider.url}/api/oidc/userinfo";
         PROVIDERS_POCKETID_REDIRECT_URL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
         PROVIDERS_POCKETID_SCOPES = "openid,profile,email";
-        PROVIDERS_POCKETID_CLIENT_ID_FILE = "/run/secrets/client_id";
         PROVIDERS_POCKETID_CLIENT_SECRET_FILE = "/run/secrets/client_secret";
         SECRET_FILE = "/run/secrets/secret";
       };
+      environmentFiles = [ envFile ];
       volumes = [
         "${dataDir}:/data"
-        "${oidcClient.idFile}:/run/secrets/client_id:ro"
         "${oidcClient.secretFile}:/run/secrets/client_secret:ro"
         "${config.sops.secrets."tinyauth/secret".path}:/run/secrets/secret:ro"
       ];
       extraOptions = [
-        "--read-only"
-        "--cap-drop=ALL"
+        "--read-only"                            # immutable filesystem
+        "--group-add=${toString (config.users.groups.${oidcClient.group}.gid)}" # read OIDC credentials
+        "--tmpfs=/tmp:rw,noexec,nosuid,size=64m" # ephemeral tmp, no exec
+        "--memory=256m"                          # OOM-kill if exceeded
       ];
     };
   };
 
-  # Ensure tinyauth waits for OIDC credentials to be provisioned
   systemd.services.podman-tinyauth = {
     after = [ oidcCfg.systemd.provisionUnit ];
     wants = [ oidcCfg.systemd.readyUnit ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
+    # Generate env file for client_id (tinyauth doesn't support _FILE for this)
+    serviceConfig.ExecStartPre = let
+      script = pkgs.writeShellScript "tinyauth-env" ''
+        mkdir -p "$(dirname "${envFile}")"
+        echo "PROVIDERS_POCKETID_CLIENT_ID=$(cat ${oidcClient.idFile})" > "${envFile}"
+        chmod 600 "${envFile}"
+      '';
+    in [ "!${script}" ];
   };
 }

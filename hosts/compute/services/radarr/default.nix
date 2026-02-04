@@ -21,7 +21,10 @@ in
     environmentFiles = [ config.sops.templates."radarr.env".path ];
   };
 
-  systemd.services.radarr.environment.RADARR__AUTH__METHOD = "External";
+  systemd.services.radarr.environment = {
+    RADARR__AUTH__METHOD = "External";
+    SONARR__LOG__LEVEL = "info";
+  };
 
   users.users.radarr.extraGroups = [ homelabMounts.media.group ];
   systemd.services.radarr = {

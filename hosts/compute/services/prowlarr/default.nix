@@ -25,6 +25,9 @@ in
     requires = [ homelabMounts.media.automountUnit ];
     after = [ homelabMounts.media.automountUnit ];
     serviceConfig.SupplementaryGroups = [ homelabMounts.media.group ];
-    environment.PROWLARR__AUTH__METHOD = "External";
+    environment = {
+      PROWLARR__AUTH__METHOD = "External";
+      PROWLARR__LOG__LEVEL = "info";
+    };
   };
 }
