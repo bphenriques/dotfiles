@@ -30,16 +30,4 @@ in
     requires = [ homelabMounts.media.automountUnit ];
     after = [ homelabMounts.media.automountUnit ];
   };
-
-  # Create download category directories with correct group permissions for sonarr/radarr access
-  systemd.tmpfiles.rules = 
-    let
-      user = config.services.transmission.user;
-      group = homelabMounts.media.group;
-      downloadsDir = pathsCfg.media.downloads.root;
-    in [
-      "d ${downloadsDir}/sonarr 0775 ${user} ${group} -"
-      "d ${downloadsDir}/radarr 0775 ${user} ${group} -"
-      "d ${pathsCfg.media.downloads.incomplete} 0775 ${user} ${group} -"
-    ];
 }
