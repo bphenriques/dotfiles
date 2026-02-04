@@ -30,5 +30,11 @@ in
   systemd.services.radarr = {
     requires = [ homelabMounts.media.automountUnit ];
     after = [ homelabMounts.media.automountUnit ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
+    };
   };
 }

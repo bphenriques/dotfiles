@@ -24,7 +24,13 @@ in
   systemd.services.prowlarr = {
     requires = [ homelabMounts.media.automountUnit ];
     after = [ homelabMounts.media.automountUnit ];
-    serviceConfig.SupplementaryGroups = [ homelabMounts.media.group ];
+    serviceConfig = {
+      SupplementaryGroups = [ homelabMounts.media.group ];
+      Restart = "on-failure";
+      RestartSec = "10s";
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
+    };
     environment = {
       PROWLARR__AUTH__METHOD = "External";
       PROWLARR__LOG__LEVEL = "info";
