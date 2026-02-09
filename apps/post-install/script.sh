@@ -42,9 +42,10 @@ setup_ssh() {
   if [ ! -f "$HOME"/.ssh/id_ed25519 ]; then
     test ! -d "$HOME"/.ssh && mkdir -m 700 "$HOME"/.ssh
     info "SSH Key - Fetching private key"
-    dotfiles-secrets fetch ssh-private-key "$host" > /tmp/.ssh_id_ed25519
-    chmod 600 /tmp/.ssh_id_ed25519
-    mv /tmp/.ssh_id_ed25519 "$HOME"/.ssh/id_ed25519
+
+    tmpfile="$(mktemp)" && chmod 600 "$tmpfile"
+    dotfiles-secrets fetch ssh-private-key "$host" > "$tmpfile"
+    mv "$tmpfile" "$HOME/.ssh/id_ed25519"
 
     info "SSH Key - Deriving public key from the private one"
     ssh-keygen -f "$HOME"/.ssh/id_ed25519 -y > "$HOME"/.ssh/id_ed25519.pub

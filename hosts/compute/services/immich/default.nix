@@ -23,6 +23,7 @@ in
     host = serviceCfg.internalHost;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
+    accelerationDevices = null; # Give access to all devices
 
     settings = {
       server.externalDomain = serviceCfg.publicUrl;

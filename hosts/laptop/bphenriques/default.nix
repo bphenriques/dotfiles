@@ -1,10 +1,10 @@
 { lib, config, ... }:
 {
-  sops.secrets."users/bphenriques/password".neededForUsers = true;
+  sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
   users.users.bphenriques = {
     isNormalUser = true;
     uid = 1000;
-    hashedPasswordFile = config.sops.secrets."users/bphenriques/password".path; # mkpasswd --method=SHA-512 --stdin
+    hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path; # mkpasswd --method=SHA-512 --stdin
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
