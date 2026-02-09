@@ -1,11 +1,8 @@
 #!/usr/bin/env nu
 
-# Initializes Jellyfin declaratively via the API.
-# Configures: startup wizard, server settings, branding, libraries, SSO, and users.
+# Initializes Jellyfin declaratively via the API (startup wizard, server settings, branding, libraries, SSO, and users)
 #
-# Limitations (additive-only):
-# - Manually created libraries, users, and SSO providers are not removed.
-# - Full reconciliation adds complexity without significant benefit
+# FIXME: Not fully declarative. Entities are not removed, fine for the low cadence changes in here.
 
 let base_url = $env.JELLYFIN_URL
 let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
@@ -112,10 +109,8 @@ def ensure_libraries [headers: list] {
   print "Configuring libraries..."
   let existing = http get $"($base_url)/Library/VirtualFolders" --headers $headers --full --allow-errors
   if $existing.status != 200 { error make { msg: $"Failed to get libraries: ($existing.status)" } }
-  let existing_names = $existing.body | get Name
-  
   for lib in $config.libraries {
-    if $lib.Name in $existing_names {
+    if $lib.Name in ($existing.body | get Name) {
       print $"  Library exists: ($lib.Name)"
     } else {
       let paths = $lib.Locations | each { |p| $"&paths=($p | url encode)" } | str join ""
@@ -135,7 +130,7 @@ def ensure_libraries [headers: list] {
 
 def ensure_sso [api_key: string] {
   print "Configuring SSO..."
-  let provider_name = $config.ssoProviderName
+  let provider_name = $config.ssoConfig.providerName
   
   let r = http get $"($base_url)/sso/OID/Get?api_key=($api_key)" --full --allow-errors
   if $r.status == 404 { error make { msg: "SSO plugin not installed" } }
@@ -152,42 +147,52 @@ def ensure_sso [api_key: string] {
   print $"  SSO provider ($provider_name) configured"
 }
 
-def ensure_users [headers: list] {
+# FIXME: Remove passwordFile check once Jellyseerr supports OIDC
+# Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
+def ensure_users [headers: list, users: record] {
   print "Configuring users..."
-  let user_configs = $config.userConfigs
-  if ($user_configs | is-empty) {
-    print "  No users configured"
-    return
-  }
-  
   let existing = http get $"($base_url)/Users" --headers $headers --full --allow-errors
   if $existing.status != 200 { error make { msg: $"Failed to get users: ($existing.status)" } }
   
-  for cfg in $user_configs {
-    let oidc_matches = $oidc_users | where username == $cfg.username
-    if ($oidc_matches | is-empty) {
-      error make { msg: $"User ($cfg.username) not found in OIDC users" }
+  for cfg in $users {
+    let has_password_file = ($cfg.passwordFile? | default null) != null
+    if not $has_password_file {
+      let oidc_matches = $oidc_users | where username == $cfg.username
+      if ($oidc_matches | is-empty) {
+        error make { msg: $"User '$cfg.username' not found in OIDC users" }
+      }
     }
-    
+
     let existing_matches = $existing.body | where Name == $cfg.username
     if ($existing_matches | is-empty) {
-      let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: (random chars --length 32) } --content-type application/json --headers $headers --full --allow-errors
-      if $r.status != 200 { error make { msg: $"Failed to create user ($cfg.username): ($r.status)" } }
-      print $"  ($cfg.username): created"
-    } else {
-      print $"  ($cfg.username): exists"
+      let initial_password = if $has_password_file { open $cfg.passwordFile | str trim } else { random chars --length 32 }
+      let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: $initial_password } --content-type application/json --headers $headers --full --allow-errors
+      if $r.status != 200 { error make { msg: $"Failed to create user '$cfg.username': ($r.status)" } }
+      print $"  '$cfg.username': created"
+    } else {authenticate
+      print $"  '$cfg.username': exists"
+      if $has_password_file {
+        let user = $existing_matches | first
+        let password = open $cfg.passwordFile | str trim
+        let r = http post $"($base_url)/Users/($user.Id)/Password" { NewPw: $password, ResetPassword: true } --content-type application/json --headers $headers --full --allow-errors
+        if $r.status == 204 {
+          print $"  '$cfg.username': password updated"
+        } else {
+          print $"  '$cfg.username': password update failed (($r.status))"
+        }
+      }
     }
-    
+
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
       let matches = $users.body | where Name == $cfg.username
-      if ($matches | is-empty) { error make { msg: $"User ($cfg.username) not found after creation" } }
+      if ($matches | is-empty) { error make { msg: $"User '$cfg.username' not found after creation" } }
       let user = $matches | first
       let updated_policy = $user.Policy | merge $cfg.policy
       let r = http post $"($base_url)/Users/($user.Id)/Policy" $updated_policy --content-type application/json --headers $headers --full --allow-errors
-      if $r.status != 204 { error make { msg: $"Failed to update policy for ($cfg.username): ($r.status)" } }
-      print $"  ($cfg.username): policy updated"
+      if $r.status != 204 { error make { msg: $"Failed to update policy for '$cfg.username': ($r.status)" } }
+      print $"  '$cfg.username': policy updated"
     }
   }
 }
@@ -202,13 +207,12 @@ def main [] {
   }
 
   let auth = authenticate
-  
   ensure_server_name $auth.headers
   ensure_branding $auth.headers
   ensure_trickplay $auth.headers
   ensure_libraries $auth.headers
   ensure_sso $auth.api_key
-  ensure_users $auth.headers
+  ensure_users $auth.headers $config.userConfigs
 
   print "Jellyfin initialization complete"
 }

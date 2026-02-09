@@ -9,7 +9,6 @@
     ../compute/services/jellyfin
     ../compute/services/transmission.nix
 
-    #
     ../auth/services/pocket-id
     ../compute/services/tinyauth.nix
     ../compute/services/miniflux
@@ -270,6 +269,27 @@
       immich.enable = true;
       obsidian-livesync.enable = true;
       jellyfin.enable = true;
+    };
+  };
+
+  sops.secrets."jellyfin/home/password" = { }; # FIXME: Remove once Jellyseerr supports OIDC - dedicated local account for Jellyseerr auth
+  custom.home-server.users.home = {
+    email = "home@localhost";
+    firstName = "Home";
+    lastName = "User";
+    services = {
+      jellyfin = {
+        enable = true;
+        passwordFile = config.sops.secrets."jellyfin/home/password".path;
+      };
+      jellyseerr = {
+        enable = true;
+        permissions = {
+          autoApprove = true;
+          advancedRequests = true;
+          viewRecentlyAdded = true;
+        };
+      };
     };
   };
 }

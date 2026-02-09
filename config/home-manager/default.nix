@@ -51,6 +51,9 @@
   };
 
   home.packages = [
+    # Adhoc shell for data processing
+    pkgs.nushell
+
     # Consistency across different operating systems
     pkgs.coreutils
     pkgs.findutils

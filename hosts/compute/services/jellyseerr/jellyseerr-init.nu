@@ -1,15 +1,8 @@
 #!/usr/bin/env nu
 
-# Initializes Jellyseerr declaratively via the API.
-# - Pre-seeds settings.json to skip the setup wizard (if missing)
-# - Configures Radarr and Sonarr server connections
-#
-# Limitations:
-# - Only creates entities if missing;
-# - Won't reconcile whenever there is a config drift.
+# Initializes Jellyseerr (partially) declaratively via the API.
+# - TODO: reconcile on config drift.
 
-let settings_file = "/var/lib/jellyseerr/settings.json"
-let settings_template = $env.JELLYSEERR_SETTINGS_TEMPLATE
 let base_url = $env.JELLYSEERR_URL
 let api_key = open $env.JELLYSEERR_API_KEY_FILE | str trim
 let jellyfin_admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
@@ -19,82 +12,64 @@ let sonarr_api_key = open $env.SONARR_API_KEY_FILE | str trim
 let config = open $env.JELLYSEERR_CONFIG_FILE
 let headers = [X-Api-Key $api_key]
 
-def authenticate_jellyfin []: nothing -> string {
-  let jellyfin_url = $config.jellyfin.url
-  print "Authenticating to Jellyfin..."
-  let r = http post $"($jellyfin_url)/Users/AuthenticateByName" {
-    Username: $jellyfin_admin_username
-    Pw: $jellyfin_admin_password
-  } --content-type application/json --headers [
-    Authorization "MediaBrowser Client=\"jellyseerr-init\", Device=\"nix\", DeviceId=\"jellyseerr-init\", Version=\"1\""
-  ] --full --allow-errors
-
-  if $r.status != 200 {
-    error make { msg: $"Failed to authenticate to Jellyfin: ($r.status) - ($r.body)" }
+def wait_ready [] {
+  for attempt in 1..30 {
+    print $"Waiting for Jellyseerr... ($attempt)"
+    try { http get $"($base_url)/api/v1/status" --max-time 2sec | ignore; return } catch { sleep 1sec }
   }
-
-  $r.body.AccessToken
+  error make { msg: "Jellyseerr failed to start after 30 attempts" }
 }
 
-def get_jellyfin_api_key [headers: list]: nothing -> record {
-  let jellyfin_url = $config.jellyfin.url
-  let r = http get $"($jellyfin_url)/Auth/Keys" --headers $headers --full --allow-errors
-  if $r.status != 200 {
-    error make { msg: $"Failed to get API keys: ($r.status) - ($r.body)" }
-  }
-  $r.body.Items | default [] | where AppName == "jellyseerr" | get 0?
-}
+def complete_setup_wizard [] {
+  let r = http get $"($base_url)/api/v1/settings/public" --full --allow-errors
+  let public_settings = if $r.status == 200 { $r.body } else { { initialized: false, mediaServerType: 0 } }
 
-def get_or_create_jellyfin_api_key [access_token: string]: nothing -> string {
-  let jellyfin_url = $config.jellyfin.url
-  print "Getting/creating Jellyfin API key for Jellyseerr..."
-  let headers = [Authorization $"MediaBrowser Token=\"($access_token)\""]
-
-  let existing_key = get_jellyfin_api_key $headers
-  if $existing_key != null {
-    print "  Using existing Jellyfin API key"
-    return $existing_key.AccessToken
-  }
-
-  let r = http post $"($jellyfin_url)/Auth/Keys?app=jellyseerr" { } --headers $headers --content-type application/json --full --allow-errors
-  if $r.status not-in [200, 204] {
-    error make { msg: $"Failed to create API key: ($r.status) - ($r.body)" }
-  }
-
-  # POST returns 204 with no body, so we need to fetch the created key
-  let created_key = get_jellyfin_api_key $headers
-  if $created_key == null {
-    error make { msg: "Failed to retrieve created API key" }
-  }
-
-  print "  Created new Jellyfin API key"
-  $created_key.AccessToken
-}
-
-def preseed_settings [jellyfin_api_key: string] {
-  if ($settings_file | path exists) {
-    print "Settings file already exists, skipping pre-seed"
+  if ($public_settings.initialized? | default false) {
+    print "Jellyseerr is already initialized"
     return
   }
 
-  print "Pre-seeding settings.json..."
-  let template = open $settings_template
-  let settings = $template
-    | str replace "__API_KEY__" $api_key
-    | str replace "__JELLYFIN_API_KEY__" $jellyfin_api_key
+  let jellyfinServerType = 2 # mediaServerType: 0 = NOT_CONFIGURED, 2 = Jellyfin
+  if ($public_settings.mediaServerType? | default 0) == $jellyfinServerType {
+    print "Jellyfin already configured, completing initialization..."
+    # Just need to login (without hostname) and mark as initialized
+    let payload = {
+      username: $jellyfin_admin_username
+      password: $jellyfin_admin_password
+    }
+    let r = http post $"($base_url)/api/v1/auth/jellyfin" $payload --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201] {
+      error make { msg: $"Failed to login to Jellyfin: ($r.status) - ($r.body)" }
+    }
+    print "  Logged in successfully"
+  } else {
+    print "Completing setup wizard..."
+    let jellyfin_cfg = $config.jellyfin
 
-  $settings | save --force $settings_file
-  print "  Settings pre-seeded successfully"
-}
+    let payload = {
+      username: $jellyfin_admin_username
+      password: $jellyfin_admin_password
+      hostname: $jellyfin_cfg.hostname
+      port: $jellyfin_cfg.port
+      urlBase: $jellyfin_cfg.urlBase
+      useSsl: $jellyfin_cfg.useSsl
+      email: $"($jellyfin_admin_username)@localhost"
+      serverType: $jellyfinServerType
+    }
 
-def wait_ready [] {
-  print "Waiting for Jellyseerr..."
-  for attempt in 1..30 {
-    let r = try { http get $"($base_url)/api/v1/status" --headers $headers --full --allow-errors } catch { null }
-    if $r != null and $r.status == 200 { return }
-    sleep 2sec
+    let r = http post $"($base_url)/api/v1/auth/jellyfin" $payload --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201] {
+      error make { msg: $"Failed to complete Jellyfin setup: ($r.status) - ($r.body)" }
+    }
+    print "  Jellyfin configured and admin user created"
   }
-  error make { msg: "Jellyseerr failed to start after 30 attempts" }
+
+  # Mark as initialized
+  let init_r = http post $"($base_url)/api/v1/settings/initialize" {} --headers $headers --content-type application/json --full --allow-errors
+  if $init_r.status not-in [200, 204] {
+    error make { msg: $"  Warning: Failed to mark as initialized: ($init_r.status) - ($init_r.body)" }
+  }
+  print "  Setup wizard completed"
 }
 
 def get_quality_profile_id [service_url: string, service_api_key: string, profile_name: string] {
@@ -109,97 +84,193 @@ def get_quality_profile_id [service_url: string, service_api_key: string, profil
   $profile.id
 }
 
-def ensure_radarr [] {
-  print "Configuring Radarr server..."
-  let existing = http get $"($base_url)/api/v1/settings/radarr" --headers $headers --full --allow-errors
+def ensure_arr_server [kind: string, cfg: record, api_key: string] {
+  let endpoint = $kind | str downcase
+  print $"Configuring ($kind) server..."
+
+  let existing = http get $"($base_url)/api/v1/settings/($endpoint)" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make { msg: $"Failed to get Radarr servers: ($existing.status) - ($existing.body)" }
+    error make { msg: $"Failed to get ($kind) servers: ($existing.status) - ($existing.body)" }
   }
 
-  let radarr_cfg = $config | get radarr
   let existing_names = ($existing.body | default [] | get -o name | default [])
-
-  if $radarr_cfg.name in $existing_names {
-    print $"  Radarr server exists: ($radarr_cfg.name)"
+  if $cfg.name in $existing_names {
+    print $"  ($kind) server exists: ($cfg.name)"
     return
   }
 
-  let radarr_url = $"http://($radarr_cfg.hostname):($radarr_cfg.port)"
-  let profile_id = get_quality_profile_id $radarr_url $radarr_api_key $radarr_cfg.activeProfileName
-
-  let payload = {
-    name: $radarr_cfg.name
-    hostname: $radarr_cfg.hostname
-    port: $radarr_cfg.port
-    apiKey: $radarr_api_key
-    useSsl: $radarr_cfg.useSsl
-    baseUrl: $radarr_cfg.baseUrl
+  let profile_id = get_quality_profile_id $"http://($cfg.hostname):($cfg.port)" $api_key $cfg.activeProfileName
+  mut payload = {
+    name: $cfg.name
+    hostname: $cfg.hostname
+    port: $cfg.port
+    apiKey: $api_key
+    useSsl: $cfg.useSsl
+    baseUrl: $cfg.baseUrl
     activeProfileId: $profile_id
-    activeProfileName: $radarr_cfg.activeProfileName
-    activeDirectory: $radarr_cfg.activeDirectory
-    is4k: $radarr_cfg.is4k
-    minimumAvailability: $radarr_cfg.minimumAvailability
-    isDefault: $radarr_cfg.isDefault
-    externalUrl: $radarr_cfg.externalUrl
+    activeProfileName: $cfg.activeProfileName
+    activeDirectory: $cfg.activeDirectory
+    is4k: $cfg.is4k
+    isDefault: $cfg.isDefault
+    externalUrl: $cfg.externalUrl
   }
 
-  let r = http post $"($base_url)/api/v1/settings/radarr" $payload --headers $headers --content-type application/json --full --allow-errors
-  if $r.status not-in [200, 201] {
-    error make { msg: $"Failed to create Radarr server ($radarr_cfg.name): ($r.status) - ($r.body)" }
+  # Service-specific fields
+  if $kind == "Radarr" {
+    $payload = $payload | merge { minimumAvailability: $cfg.minimumAvailability }
+  } else if $kind == "Sonarr" {
+    $payload = $payload | merge { enableSeasonFolders: true }
   }
-  print $"  Created Radarr server: ($radarr_cfg.name)"
+
+  let r = http post $"($base_url)/api/v1/settings/($endpoint)" $payload --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 201] {
+    error make { msg: $"Failed to create ($kind) server ($cfg.name): ($r.status) - ($r.body)" }
+  }
+  print $"  Created ($kind) server: ($cfg.name)"
 }
 
-def ensure_sonarr [] {
-  print "Configuring Sonarr server..."
-  let existing = http get $"($base_url)/api/v1/settings/sonarr" --headers $headers --full --allow-errors
-  if $existing.status != 200 {
-    error make { msg: $"Failed to get Sonarr servers: ($existing.status) - ($existing.body)" }
+def set_application_url [app_url: string] {
+  print "Setting Application URL..."
+  let payload = { applicationUrl: $app_url }
+  let r = http post $"($base_url)/api/v1/settings/main" $payload --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 204] {
+    error make { msg: $"Failed to set Application URL: ($r.status) - ($r.body)" }
   }
+  print $"  Application URL set to: ($app_url)"
+}
 
-  let sonarr_cfg = $config | get sonarr
-  let existing_names = ($existing.body | default [] | get -o name | default [])
+def sync_jellyfin_users [users: record] {
+  print "Syncing Jellyfin users..."
 
-  if $sonarr_cfg.name in $existing_names {
-    print $"  Sonarr server exists: ($sonarr_cfg.name)"
+  # Get configured usernames from Nix config
+  let wanted_usernames = $users | transpose key value | get value | get username
+  if ($wanted_usernames | is-empty) {
+    print "  No users configured"
     return
   }
 
-  let sonarr_url = $"http://($sonarr_cfg.hostname):($sonarr_cfg.port)"
-  let profile_id = get_quality_profile_id $sonarr_url $sonarr_api_key $sonarr_cfg.activeProfileName
-
-  let payload = {
-    name: $sonarr_cfg.name
-    hostname: $sonarr_cfg.hostname
-    port: $sonarr_cfg.port
-    apiKey: $sonarr_api_key
-    useSsl: $sonarr_cfg.useSsl
-    baseUrl: $sonarr_cfg.baseUrl
-    activeProfileId: $profile_id
-    activeProfileName: $sonarr_cfg.activeProfileName
-    activeDirectory: $sonarr_cfg.activeDirectory
-    is4k: $sonarr_cfg.is4k
-    isDefault: $sonarr_cfg.isDefault
-    externalUrl: $sonarr_cfg.externalUrl
+  # Get list of Jellyfin users from settings endpoint
+  let jf_users = http get $"($base_url)/api/v1/settings/jellyfin/users" --headers $headers --full --allow-errors
+  if $jf_users.status != 200 {
+    error make { msg: $"Failed to get Jellyfin users: ($jf_users.status) - ($jf_users.body)" }
   }
 
-  let r = http post $"($base_url)/api/v1/settings/sonarr" $payload --headers $headers --content-type application/json --full --allow-errors
+  # Only import users that are in our Nix config
+  let jf_to_import = $jf_users.body | where { |u| ($u.username? | default "") in $wanted_usernames }
+  let jf_user_ids = $jf_to_import | get id
+  if ($jf_user_ids | is-empty) {
+    print "  No matching Jellyfin users to sync"
+    return
+  }
+
+  let payload = { jellyfinUserIds: $jf_user_ids }
+  let r = http post $"($base_url)/api/v1/user/import-from-jellyfin" $payload --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201] {
-    error make { msg: $"Failed to create Sonarr server ($sonarr_cfg.name): ($r.status) - ($r.body)" }
+    error make { msg: $"Failed to sync Jellyfin users: ($r.status) - ($r.body)" }
   }
-  print $"  Created Sonarr server: ($sonarr_cfg.name)"
+
+  let imported = ($r.body | default [])
+  if ($imported | length) > 0 {
+    print $"  Imported ($imported | length) users from Jellyfin"
+  } else {
+    print "  All configured users already synced"
+  }
+}
+
+# Permission bitmask values from Jellyseerr v2.2.3
+# Source: https://github.com/Fallenbagel/jellyseerr/blob/v2.2.3/server/lib/permissions.ts
+const PERM_REQUEST               = 32
+const PERM_REQUEST_4K            = 1024
+const PERM_REQUEST_ADVANCED      = 8192
+const PERM_AUTO_APPROVE          = 128
+const PERM_AUTO_APPROVE_MOVIE    = 256
+const PERM_AUTO_APPROVE_TV       = 512
+const PERM_AUTO_APPROVE_4K       = 32768
+const PERM_AUTO_APPROVE_4K_MOVIE = 65536
+const PERM_AUTO_APPROVE_4K_TV    = 131072
+const PERM_RECENT_VIEW           = 67108864
+
+# Composite permission sets
+const REQUEST_ALL = $PERM_REQUEST bit-or $PERM_REQUEST_4K
+const AUTO_APPROVE_ALL = (
+  $PERM_AUTO_APPROVE
+  bit-or $PERM_AUTO_APPROVE_MOVIE
+  bit-or $PERM_AUTO_APPROVE_TV
+  bit-or $PERM_AUTO_APPROVE_4K
+  bit-or $PERM_AUTO_APPROVE_4K_MOVIE
+  bit-or $PERM_AUTO_APPROVE_4K_TV
+)
+
+# Mask of all bits managed by this script (used to clear before applying desired state)
+const MANAGED_MASK = (
+  $REQUEST_ALL
+  bit-or $PERM_REQUEST_ADVANCED
+  bit-or $AUTO_APPROVE_ALL
+  bit-or $PERM_RECENT_VIEW
+)
+
+def configure_user_permissions [users: record] {
+  print "Configuring user permissions..."
+
+  # Get all Jellyseerr users
+  let all_users = http get $"($base_url)/api/v1/user" --headers $headers --full --allow-errors
+  if $all_users.status != 200 {
+    error make { msg: $"Failed to get users: ($all_users.status) - ($all_users.body)" }
+  }
+
+  let users_list = $all_users.body.results? | default []
+  for entry in ($users | transpose key value) {
+    let username = $entry.value.username
+    let user = $users_list | where { |u| ($u.jellyfinUsername? | default "") == $username } | first
+    if $user == null {
+      error make { msg: $"Failed to find user: ($username)" }
+    }
+
+    # Build desired permissions from config
+    mut managed_perms = $REQUEST_ALL
+    if $entry.value.autoApprove {
+      $managed_perms = $managed_perms bit-or $AUTO_APPROVE_ALL
+    }
+    if $entry.value.advancedRequests {
+      $managed_perms = $managed_perms bit-or $PERM_REQUEST_ADVANCED
+    }
+    if $entry.value.viewRecentlyAdded {
+      $managed_perms = $managed_perms bit-or $PERM_RECENT_VIEW
+    }
+
+    # Clear managed bits, preserve any other Jellyseerr-granted permissions
+    let current_perms = $user.permissions? | default 0
+    let base_perms = $current_perms bit-and (0xFFFFFFFF bit-xor $MANAGED_MASK)
+    let desired_perms = $base_perms bit-or $managed_perms
+    if $current_perms == $desired_perms {
+      print $"  User '($username)' permissions already configured"
+      continue
+    }
+
+    let user_id = $user.id
+    let r = http put $"($base_url)/api/v1/user/($user_id)" { permissions: $desired_perms } --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 204] {
+      error make { msg: $"Failed to  update permissions for '($username)': ($r.status) - ($r.body)" }
+    }
+    print $"  Updated permissions for '($username)'"
+  }
 }
 
 def main [] {
-  let access_token = authenticate_jellyfin
-  let jellyfin_api_key = get_or_create_jellyfin_api_key $access_token
-  preseed_settings $jellyfin_api_key
-
   wait_ready
-  print "Jellyseerr is ready"
+  complete_setup_wizard
 
-  ensure_radarr
-  ensure_sonarr
+  set_application_url $config.applicationUrl
+  ensure_arr_server "Radarr" $config.radarr $radarr_api_key
+  ensure_arr_server "Sonarr" $config.sonarr $sonarr_api_key
+
+  let users = $config.users
+  if ($users | is-not-empty) {
+    sync_jellyfin_users $users
+    configure_user_permissions $users
+  } else {
+    print "  No users to configure"
+  }
 
   print "Jellyseerr initialization complete"
 }

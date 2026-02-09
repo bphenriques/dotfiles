@@ -17,6 +17,7 @@ let
     })
   ];
 
+  jellyfinConfigJson = builtins.toJSON jellyfinConfig;
   jellyfinConfig = {
     serverName = "Jellyfin";
     libraries = [
@@ -42,8 +43,8 @@ let
         .disclaimerContainer { display: block; }
       '';
     };
-    ssoProviderName = oidcCfg.provider.internalName;
     ssoConfig = {
+      providerName = oidcCfg.provider.internalName;
       oidEndpoint = oidcCfg.provider.url;
       oidClientId = "__OIDC_CLIENT_ID__";
       oidSecret = "__OIDC_CLIENT_SECRET__";
@@ -62,6 +63,7 @@ let
     };
     userConfigs = lib.mapAttrsToList (_: u: {
       username = u.username;
+      passwordFile = u.services.jellyfin.passwordFile;
       policy = {
         IsHidden = false;
         EnableSubtitleManagement = true;
@@ -100,8 +102,10 @@ in
     after = [ "jellyfin.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "jellyfin.service" ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
+    restartTriggers = [ jellyfinConfigJson ];
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
       StartLimitBurst = 3;
@@ -110,7 +114,7 @@ in
       JELLYFIN_URL = serviceCfg.internalUrl;
       JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
       JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-      JELLYFIN_CONFIG_FILE = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
+      JELLYFIN_CONFIG_FILE = pkgs.writeText "jellyfin-config.json" jellyfinConfigJson;
       OIDC_CLIENT_ID_FILE = oidcClient.idFile;
       OIDC_CLIENT_SECRET_FILE = oidcClient.secretFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;

@@ -5,45 +5,18 @@ let
   sonarrCfg = config.custom.home-server.routes.sonarr;
   jellyfinCfg = config.custom.home-server.routes.jellyfin;
   mediaCfg = config.custom.home-server.media;
+  jellyseerrUsers = config.custom.home-server.enabledUsers.jellyseerr;
 
-  # Settings to pre-seed settings.json and skip the setup wizard
-  # Only __API_KEY__ and __JELLYFIN_API_KEY__ are injected at runtime
-  settingsJson = {
-    clientId = builtins.hashString "sha256" "jellyseerr-${config.networking.hostName}";
-    vapidPrivate = "";
-    vapidPublic = "";
-    main = {
-      apiKey = "__API_KEY__";
-      applicationTitle = "Jellyseerr";
-      applicationUrl = serviceCfg.publicUrl;
-      localLogin = false;
-      mediaServerLogin = true;
-      mediaServerType = 2; # Jellyfin
-      partialRequestsEnabled = true;
-      cacheImages = false;
-      locale = "en";
-    };
-    jellyfin = {
-      name = "Jellyfin";
-      ip = "127.0.0.1";
-      port = jellyfinCfg.port;
-      useSsl = false;
-      urlBase = "";
-      serverId = mediaCfg.jellyfin.serverId;
-      externalHostname = config.custom.home-server.routes.jellyfin.publicUrl;
-      apiKey = "__JELLYFIN_API_KEY__";
-    };
-    public = {
-      initialized = true;
-    };
-    radarr = [ ];
-    sonarr = [ ];
-  };
+  initConfigJson = builtins.toJSON initConfig;
 
-  # Config passed to jellyseerr-init.nu for Radarr/Sonarr registration
+  # Config passed to jellyseerr-init.nu for setup and Radarr/Sonarr registration
   initConfig = {
+    applicationUrl = serviceCfg.publicUrl;
     jellyfin = {
-      url = jellyfinCfg.internalUrl;
+      hostname = "127.0.0.1";
+      port = jellyfinCfg.port;
+      urlBase = "";
+      useSsl = false;
     };
     radarr = {
       name = "Radarr";
@@ -70,30 +43,35 @@ let
       isDefault = true;
       externalUrl = sonarrCfg.publicUrl;
     };
+    # Users with their Jellyseerr permission settings
+    users = lib.mapAttrs (_: user: {
+      username = user.username;
+      autoApprove = user.services.jellyseerr.permissions.autoApprove;
+      advancedRequests = user.services.jellyseerr.permissions.advancedRequests;
+      viewRecentlyAdded = user.services.jellyseerr.permissions.viewRecentlyAdded;
+    }) jellyseerrUsers;
   };
-
-  settingsFile = pkgs.writeText "jellyseerr-settings.json" (builtins.toJSON settingsJson);
 in
 {
-  sops.secrets."jellyseerr/api-key" = { };
-
   systemd.services.jellyseerr-init = {
     description = "Initialize Jellyseerr with declarative configuration";
     wantedBy = [ "multi-user.target" ];
-    after = [ "jellyfin-init.service" "jellyseerr.service" "radarr-init.service" "sonarr-init.service" ];
+    after = [ "jellyseerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
     requires = [ "jellyseerr.service" ];
-    wants = [ "jellyfin-init.service" "radarr-init.service" "sonarr-init.service" ];
+    wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
+    partOf = [ "jellyfin-init.service" ];  # Restart when jellyfin-init restarts (new users to sync)
+    restartTriggers = [ initConfigJson ];
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
       StartLimitBurst = 3;
     };
     environment = {
       JELLYSEERR_URL = serviceCfg.internalUrl;
-      JELLYSEERR_SETTINGS_TEMPLATE = settingsFile;
       JELLYSEERR_API_KEY_FILE = config.sops.secrets."jellyseerr/api-key".path;
-      JELLYSEERR_CONFIG_FILE = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
+      JELLYSEERR_CONFIG_FILE = pkgs.writeText "jellyseerr-config.json" initConfigJson;
       JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
       JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
       RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;

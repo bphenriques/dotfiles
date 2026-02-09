@@ -90,13 +90,13 @@ in
         owner = "traefik";
         content = ''
           CF_DNS_API_TOKEN=${config.sops.placeholder.cloudflare_dns_api_token}
-          CF_API_EMAIL=${cfg.cloudflareEmail}
         '';
       };
     };
 
-    systemd.services.traefik.serviceConfig = {
-      EnvironmentFile = config.sops.templates.home-server.path;
+    systemd.services.traefik = {
+      serviceConfig.EnvironmentFile = config.sops.templates.home-server.path;
+      environment.CF_API_EMAIL = cfg.cloudflareEmail;
     };
 
     services.traefik = {

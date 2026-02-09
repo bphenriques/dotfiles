@@ -45,7 +45,24 @@ let
           };
         };
 
-        jellyfin.enable = lib.mkEnableOption "Jellyfin account for this user";
+        jellyfin = {
+          enable = lib.mkEnableOption "Jellyfin account for this user";
+          # FIXME: Remove once Jellyseerr supports OIDC - used for local Jellyfin auth
+          passwordFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Path to file containing local Jellyfin password (for Jellyseerr auth until OIDC is supported)";
+          };
+        };
+
+        jellyseerr = {
+          enable = lib.mkEnableOption "Jellyseerr account for this user (requires Jellyfin)";
+          permissions = {
+            autoApprove = lib.mkEnableOption "auto-approve requests";
+            advancedRequests = lib.mkEnableOption "advanced request options (e.g., quality profile)";
+            viewRecentlyAdded = lib.mkEnableOption "view recently added media";
+          };
+        };
       };
     };
   });
@@ -87,8 +104,23 @@ in
         miniflux = lib.filterAttrs (_: u: u.services.miniflux.enable) cfg;
         obsidian-livesync = lib.filterAttrs (_: u: u.services.obsidian-livesync.enable) cfg;
         jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
+        jellyseerr = lib.filterAttrs (_: u: u.services.jellyseerr.enable) cfg;
       };
       description = "Read-only attrset of users filtered by enabled service.";
     };
   };
+
+  config.assertions = let
+    jellyseerrUsers = lib.attrValues config.custom.home-server.enabledUsers.jellyseerr;
+  in [
+    {
+      assertion = lib.all (u: u.services.jellyfin.enable) jellyseerrUsers;
+      message = "All Jellyseerr users must have jellyfin.enable = true.";
+    }
+    {
+      # FIXME: Remove once Jellyseerr supports OIDC
+      assertion = lib.all (u: u.services.jellyfin.passwordFile != null) jellyseerrUsers;
+      message = "All Jellyseerr users must have a Jellyfin passwordFile until Jellyseerr supports OIDC.";
+    }
+  ];
 }
