@@ -1,34 +1,26 @@
-# TODO: Add ./immich to services/default.nix imports
-# TODO: Add immich_oidc_client_secret and immich_api_key to secrets.yaml
-# TODO: Register OIDC client in Pocket-ID:
-#       - Client ID: immich
-#       - Redirect URIs:
-#         - https://immich.<domain>/auth/login
-#         - https://immich.<domain>/user-settings
-#         - app.immich:///oauth-callback
-{ config, pkgs, lib, self, ... }:
+{ config, ... }:
 let
-  nuLib = import ../lib/nu.nix { inherit pkgs lib; };
-  pathsCfg = config.custom.paths;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
   serviceCfg = config.custom.home-server.routes.immich;
-  apiKeyFile = config.sops.secrets.immich_api_key.path;
-
-  users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) config.custom.home-server.enabledUsers.immich;
-
-  libraries = [
-    { name = "bphenriques-library"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques" ]; exclusionPatterns = []; }
-    { name = "bphenriques-inbox"; ownerEmail = "bphenriques@example.com"; importPaths = [ "/mnt/media/bphenriques-inbox" ]; exclusionPatterns = []; }
-  ];
-
-  initScript = self.lib.builders.writeNushellScript "immich-init" ./immich-init.nu;
+  oidcCfg = config.custom.home-server.oidc;
+  oidcClient = oidcCfg.clients.immich;
 in
 {
-  custom.home-server.routes.immich.port = 2283;
+  imports = [ ./setup.nix ];
+
+  custom.home-server = {
+    routes.immich.port = 2283;
+    oidc.clients.immich = {
+      callbackURLs = [
+        "${serviceCfg.publicUrl}/auth/login"
+        "${serviceCfg.publicUrl}/user-settings"
+        "app.immich:///oauth-callback"
+      ];
+    };
+  };
 
   services.immich = {
     enable = true;
-    host = "127.0.0.1";
+    host = serviceCfg.internalHost;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
 
@@ -36,70 +28,25 @@ in
       server.externalDomain = serviceCfg.publicUrl;
       newVersionCheck.enabled = false;
 
-      # OAuth/OIDC via Pocket-ID
       oauth = {
         enabled = true;
-        issuerUrl = config.custom.home-server.routes.pocket-id.publicUrl;
-        clientId = "immich";
-        clientSecret._secret = config.sops.secrets.immich_oidc_client_secret.path;
+        issuerUrl = oidcCfg.provider.url;
+        clientId._secret = oidcClient.idFile;
+        clientSecret._secret = oidcClient.secretFile;
         scope = "openid email profile";
         signingAlgorithm = "RS256";
-        buttonText = "Login with PocketId";
+        buttonText = "Login with ${oidcCfg.provider.displayName}";
         autoRegister = true;
         autoLaunch = false;
       };
+      passwordLogin.enabled = true; # Only for administrator
+      library.watch.enabled = true; # Auto-import changes from external libraries
 
-      passwordLogin.enabled = true;
-
-      # Preserve user storage structure
       storageTemplate = {
         enabled = true;
         hashVerificationEnabled = true;
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
     };
-  };
-
-  # Add immich user to homelab group for NAS access
-  users.users.immich.extraGroups = [ config.users.groups.homelab-bphenriques.name ];
-
-  # Depend on NAS mount and bind external photo libraries into Immich's sandbox
-  systemd.services.immich-server = {
-    requires = [ homelabMounts.bphenriques.automountUnit ];
-    after = [ homelabMounts.bphenriques.automountUnit ];
-    serviceConfig.BindReadOnlyPaths = [
-      "${pathsCfg.bphenriques.photos.library}:/mnt/media/bphenriques:ro"
-      "${pathsCfg.bphenriques.photos.inbox}:/mnt/media/bphenriques-inbox:ro"
-    ];
-  };
-
-  sops.secrets = {
-    immich_oidc_client_secret = { };
-    immich_api_key.owner = config.services.immich.user;
-  };
-
-  # Initialize users and external libraries after Immich starts
-  systemd.services.immich-init = {
-    description = "Initialize Immich users and external libraries";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "immich-server.service" ];
-    requires = [ "immich-server.service" ];
-    partOf = [ "immich-server.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      User = config.services.immich.user;
-      Group = config.services.immich.group;
-      Restart = "on-failure";
-      RestartSec = 10;
-      StartLimitBurst = 3;
-    };
-    environment = {
-      IMMICH_URL = serviceCfg.internalUrl;
-      IMMICH_API_KEY_FILE = apiKeyFile;
-      IMMICH_USERS_JSON = builtins.toJSON users;
-      IMMICH_LIBRARIES_JSON = builtins.toJSON libraries;
-    };
-    path = [ pkgs.nushell ];
-    script = ''nu ${initScript}'';
   };
 }

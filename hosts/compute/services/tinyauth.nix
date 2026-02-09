@@ -28,7 +28,7 @@ in
     containers.tinyauth = {
       image = "ghcr.io/steveiliop56/tinyauth:4.1.0";
       autoStart = true;
-      ports = [ "${serviceCfg.internalHost}:3000" ];
+      ports = [  "${serviceCfg.internalHost}:${toString serviceCfg.port}:3000" ];
       environment = {
         APP_URL = serviceCfg.publicUrl;
         DISABLE_ANALYTICS = "true";

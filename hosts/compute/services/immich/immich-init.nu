@@ -1,28 +1,71 @@
 #!/usr/bin/env nu
 
-# Initializes Immich: users and external libraries.
-
 let base_url = $env.IMMICH_URL
-let api_key = open $env.IMMICH_API_KEY_FILE | str trim
-let users = $env.IMMICH_USERS_JSON | from json
-let libraries = $env.IMMICH_LIBRARIES_JSON | from json
-let headers = { "x-api-key": $api_key }
+let config = open $env.IMMICH_CONFIG_FILE
 
 def wait_ready [] {
   for attempt in 1..60 {
     print $"Waiting for Immich... ($attempt)"
-    try { http get $"($base_url)/api/server/ping" --headers $headers --max-time 2sec | ignore; return } catch { sleep 2sec }
+    try { http get $"($base_url)/api/server/ping" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
   error make { msg: "Immich failed to start" }
 }
 
-def get_all [endpoint: string] {
+def generate_password [file: string] {
+  if ($file | path exists) {
+    return (open $file | str trim)
+  }
+  let password = (random chars --length 32)
+  $password | save --force $file
+  chmod 600 $file
+  print $"Generated admin password and saved to ($file)"
+  $password
+}
+
+def admin_signup [admin: record, password: string] {
+  let body = {
+    email: $admin.email
+    name: $admin.name
+    password: $password
+  }
+  let r = http post $"($base_url)/api/auth/admin-sign-up" $body --content-type application/json --full --allow-errors
+  if $r.status == 201 {
+    print $"Admin user ($admin.email) registered successfully"
+  } else if $r.status == 400 and ($r.body | to text | str contains "admin") {
+    print "Admin already exists, skipping signup"
+  } else {
+    error make { msg: $"Failed to register admin: ($r.status) - ($r.body)" }
+  }
+}
+
+def complete_admin_onboarding [headers: record] {
+  # System-level admin onboarding
+  let r = http post $"($base_url)/api/system-metadata/admin-onboarding" {} --headers $headers --content-type application/json --full --allow-errors
+  if $r.status == 204 or $r.status == 200 {
+    print "System admin onboarding completed"
+  } else if $r.status == 400 {
+    print "System admin onboarding already completed"
+  } else {
+    print $"Warning: Failed to complete system admin onboarding: ($r.status)"
+  }
+}
+
+def login [email: string, password: string] {
+  let body = { email: $email, password: $password }
+  let r = http post $"($base_url)/api/auth/login" $body --content-type application/json --full --allow-errors
+  if $r.status != 201 {
+    error make { msg: $"Failed to login: ($r.status) - ($r.body)" }
+  }
+  $r.body.accessToken
+}
+
+def get_all [endpoint: string, headers: record] {
   let r = http get $"($base_url)/api($endpoint)" --headers $headers --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to get ($endpoint): ($r.status) - ($r.body)" } }
   $r.body
 }
 
-def ensure_user [user: record, existing: list] {
+def ensure_user [user: record, existing: list, headers: record] {
   let found = $existing | where email == $user.email | get 0?
   if $found != null {
     print $"User ($user.email) already exists"
@@ -41,7 +84,7 @@ def ensure_user [user: record, existing: list] {
   $r.body.id
 }
 
-def ensure_library [lib: record, owner_id: string, existing: list] {
+def ensure_library [lib: record, owner_id: string, existing: list, headers: record] {
   let found = $existing | where name == $lib.name and ownerId == $owner_id | get 0?
 
   if $found != null {
@@ -82,14 +125,32 @@ def main [] {
   wait_ready
   print "Immich is ready"
 
-  let existing_users = get_all "/admin/users"
-  let user_map = $users
-    | each { |u| [$u.email (ensure_user $u $existing_users)] }
+  let admin = $config.admin
+  let password = generate_password $admin.passwordFile
+
+  # Register admin on first run
+  admin_signup $admin $password
+
+  # Login and use access token for API operations
+  let token = login $admin.email $password
+  let headers = { "Authorization": $"Bearer ($token)" }
+
+  # Complete admin onboarding to skip the getting started wizard
+  complete_admin_onboarding $headers
+
+  # Create users and complete their onboarding
+  let existing_users = get_all "/admin/users" $headers
+  let user_map = $config.users
+    | each { |u|
+        let user_id = ensure_user $u $existing_users $headers
+        [$u.email $user_id]
+      }
     | into record
 
-  let existing_libraries = get_all "/libraries"
-  $libraries | each { |lib|
-    ensure_library $lib ($user_map | get $lib.ownerEmail) $existing_libraries
+  # Create libraries
+  let existing_libraries = get_all "/libraries" $headers
+  $config.libraries | each { |lib|
+    ensure_library $lib ($user_map | get $lib.ownerEmail) $existing_libraries $headers
   } | ignore
 
   print "Immich initialization complete"

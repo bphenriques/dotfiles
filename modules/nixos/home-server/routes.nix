@@ -6,8 +6,8 @@ let
   routeOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       name = lib.mkOption { type = lib.types.str; default = name; };
-      internalHost  = lib.mkOption { type = lib.types.str; default = "127.0.0.1:${toString config.port}"; };
-      internalUrl  = lib.mkOption { type = lib.types.str; default = "http://${config.internalHost}"; };
+      internalHost  = lib.mkOption { type = lib.types.str; default = "127.0.0.1"; };
+      internalUrl  = lib.mkOption { type = lib.types.str; default = "http://${config.internalHost}:${toString config.port}"; };
       subdomain = lib.mkOption { type = lib.types.str; default = name; };
       publicHost = lib.mkOption { type = lib.types.str; default = "${config.subdomain}.${cfg.domain}"; };
       publicUrl = lib.mkOption { type = lib.types.str; default = "https://${config.publicHost}"; };
