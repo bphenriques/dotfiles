@@ -1,100 +1,118 @@
 { config, pkgs, lib, ... }:
 let
   cfg = config.custom.home-server;
+  serviceCfg = cfg.routes.romm;
+  oidcCfg = cfg.oidc;
+  oidcClient = oidcCfg.clients.romm;
   pathsCfg = config.custom.paths;
+  homelabMounts = config.custom.fileSystems.homelab.mounts;
 
-  emulationDir = pathsCfg.media.gaming.emulation;
   dataDir = "/var/lib/romm";
+  envFile = "/run/romm/env";
 
-  folders = [
-    "bios" "gb" "gba" "gbc" "dos" "dreamcast" "fbneo"
-    "megadrive" "n64" "nds" "nes" "psp" "psx" "snes"
-  ];
-  mkMount = folders: "${emulationDir}/${folders}:/romm/library/${folders}:ro";
+  romsDir = pathsCfg.media.gaming.emulation.roms;
+  biosDir = pathsCfg.media.gaming.emulation.bios;
 
-in {
-  custom.home-server.routes.romm = {
-    port = 8095;
-    oidc.enable = true;
-    callbackPath = "/api/oauth/openid";
+  configFile = pkgs.writeText "romm-config.yml" ''
+    # TODO: Enable netplay once STUN/TURN servers are configured (https://github.com/rommapp/romm/releases/tag/4.5.0)
+    # emulatorjs:
+    #   netplay:
+    #     enabled: true
+    #     ice_servers:
+    #       - urls: "stun:stun.l.google.com:19302"
+
+    exclude:
+      roms:
+        single_file:
+          extensions: [ 'stfolder' ]
+          names: [ ".stignore" ]
+        multi_file:
+          names: [ ".stfolder" ]
+  '';
+in
+{
+  custom.home-server.routes.romm.port = 8095;
+  custom.home-server.oidc.clients.romm.callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
+
+  sops.secrets = {
+    "romm/db_password" = { };
+    "romm/db_root_password" = { };
+    "romm/auth_secret" = { };
+    "romm/admin_user" = { };
+    "romm/admin_password" = { };
   };
 
-  # 2. SOPS Secrets & Environment
-  # We consolidate all env vars here to inject them into the container
   sops.templates."romm.env".content = ''
-    # --- Database Config ---
     DB_HOST=romm-db
     DB_NAME=romm
     DB_USER=romm-user
-    DB_PASSWD=${config.sops.placeholder.romm_db_password}
-
+    DB_PASSWD=${config.sops.placeholder."romm/db_password"}
     MYSQL_DATABASE=romm
     MYSQL_USER=romm-user
-    MYSQL_PASSWORD=${config.sops.placeholder.romm_db_password}
-    MYSQL_ROOT_PASSWORD=${config.sops.placeholder.romm_db_root_password}
-
-    # --- App Config ---
-    ROMM_AUTH_SECRET_KEY=${config.sops.placeholder.romm_auth_secret}
-    ROMM_AUTH_USERNAME=${config.sops.placeholder.romm_admin_user}
-    ROMM_AUTH_PASSWORD=${config.sops.placeholder.romm_admin_password}
-
-    # --- OIDC Config ---
-    OIDC_CLIENT_ID=romm
-    OIDC_CLIENT_SECRET=${config.sops.placeholder.oidc_secret_romm}
-    OIDC_REDIRECT_URI=${cfg.services.romm.publicUrl}/api/oauth/openid
-    OIDC_SERVER_APPLICATION_URL=${cfg.services.pocket-id.publicUrl}
+    MYSQL_PASSWORD=${config.sops.placeholder."romm/db_password"}
+    MYSQL_ROOT_PASSWORD=${config.sops.placeholder."romm/db_root_password"}
+    ROMM_AUTH_SECRET_KEY=${config.sops.placeholder."romm/auth_secret"}
+    ROMM_AUTH_USERNAME=${config.sops.placeholder."romm/admin_user"}
+    ROMM_AUTH_PASSWORD=${config.sops.placeholder."romm/admin_password"}
   '';
 
-  # Define the placeholder secrets in your sops.yaml
-  sops.secrets = {
-    romm_db_password = {};
-    romm_db_root_password = {};
-    romm_auth_secret = {}; # Generate this with `openssl rand -hex 32`
-    romm_admin_user = {};
-    romm_admin_password = {};
-    oidc_secret_romm = {}; # Generate this for the OIDC handshake
-  };
+  systemd.tmpfiles.rules = [
+    "d ${dataDir}           0750 root root -"
+    "d ${dataDir}/mysql     0750 root root -"
+    "d ${dataDir}/resources 0750 root root -"
+    "d ${dataDir}/redis     0750 root root -"
+    "d ${dataDir}/assets    0750 root root -"
+  ];
 
   virtualisation.oci-containers = {
     backend = "podman";
 
-    containers = {
-      romm-db = {
-        image = "mariadb:latest";
-        autoStart = true;
-        environmentFiles = [ config.sops.templates."romm.env".path ];
-        volumes = [ "${dataDir}/mysql:/var/lib/mysql" ];
-        extraOptions = [ "--network=romm-net" ];
+    containers.romm-db = {
+      image = "mariadb:11.4.5";
+      autoStart = true;
+      environmentFiles = [ config.sops.templates."romm.env".path ];
+      volumes = [ "${dataDir}/mysql:/var/lib/mysql" ];
+      extraOptions = [
+        "--network=romm-net"
+        "--memory=512m"
+      ];
+    };
+
+    containers.romm = {
+      image = "rommapp/romm:4.6.0";
+      autoStart = true;
+      dependsOn = [ "romm-db" ];
+      ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:8080" ];
+
+      environment = {
+        DISABLE_SETUP_WIZARD = "true";
+        HASHEOUS_API_ENABLED = "true";
+
+        # OIDC
+        OIDC_ENABLED = "true";
+        OIDC_PROVIDER = "pocketid";
+        OIDC_REDIRECT_URI = builtins.head oidcClient.callbackURLs;
+        OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.url;
       };
 
-      romm = {
-        image = "rommapp/romm:4.4.1";
-        autoStart = true;
-        dependsOn = [ "romm-db" ];
+      environmentFiles = [ config.sops.templates."romm.env".path envFile ];
 
-        ports = [ "${custom.home-server.routes.romm.port}:8080" ];
+      volumes = [
+        "${dataDir}/resources:/romm/resources"
+        "${dataDir}/redis:/redis-data"
+        "${dataDir}/assets:/romm/assets"
+        "${configFile}:/romm/config/config.yml:ro"
+        "${romsDir}:/romm/library/roms:ro"
+        "${biosDir}:/romm/bios:ro"
+      ];
 
-        environment = {
-          HASHEOUS_API_ENABLED = "true";
-          DISABLE_SETUP_WIZARD = "true";
-          OIDC_ENABLED = "true";
-          OIDC_PROVIDER = "pocketid";
-        };
-
-        environmentFiles = [ config.sops.templates."romm.env".path ];
-
-        volumes = [
-          # App Data
-          "${dataDir}/resources:/romm/resources"
-          "${dataDir}/redis:/redis-data"
-          "${dataDir}/assets:/romm/assets"
-          "${dataDir}/config:/romm/config"
-        ] ++ (map mkMount folders); # Append the ROM mounts generated above
-
-        # Connect to the custom network and set the user ID (PUID:PGID)
-        # Assuming 1000:100 is your main user/group. Adjust if needed.
-        extraOptions = [ "--network=romm-net" "--user=1000:100" ];
-      };
+      extraOptions = [
+        "--network=romm-net"
+        "--group-add=${toString (config.users.groups.${homelabMounts.media.group}.gid)}"
+        "--read-only"
+        "--tmpfs=/tmp:rw,noexec,nosuid,size=128m"
+        "--memory=512m"
+      ];
     };
   };
 
@@ -104,5 +122,26 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "oneshot";
     script = ''${lib.getExe pkgs.podman} network create --ignore romm-net'';
+  };
+
+  systemd.services.podman-romm = {
+    after = [ oidcCfg.systemd.provisionedTarget "init-romm-network.service" ];
+    wants = [ oidcCfg.systemd.provisionedTarget "init-romm-network.service" ];
+    serviceConfig.SupplementaryGroups = [ oidcClient.group ];
+    serviceConfig.ExecStartPre = let
+      script = pkgs.writeShellScript "romm-env" ''
+        mkdir -p "$(dirname "${envFile}")"
+        cat > "${envFile}" <<EOF
+        OIDC_CLIENT_ID=$(cat ${oidcClient.idFile})
+        OIDC_CLIENT_SECRET=$(cat ${oidcClient.secretFile})
+        EOF
+        chmod 600 "${envFile}"
+      '';
+    in [ "!${script}" ];
+  };
+
+  systemd.services.podman-romm-db = {
+    after = [ "init-romm-network.service" ];
+    wants = [ "init-romm-network.service" ];
   };
 }

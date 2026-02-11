@@ -1,8 +1,8 @@
-{ config, pkgs, lib, ... }:
+{ config, ... }:
 let
-  cfg = config.custom.home-server;
+  pathsCfg = config.custom.paths;
+  homelabMounts = config.custom.fileSystems.homelab.mounts;
 
-  # Ensure the 'user' here has R/W access to the Synology Mounts!
   user = "bphenriques";
   group = "users";
 
@@ -17,61 +17,70 @@ let
     };
   };
 
-  mkFolder = id: path: devices: {
-    inherit id path devices;
+  mkFolder = id: path: deviceList: {
+    inherit id path;
+    devices = deviceList;
     type = "sendreceive";
-    ignorePerms = true;  # Critical as NAS manages permissions differently.
+    ignorePerms = true;
     versioning = {
       type = "simple";
       params = { keep = "5"; };
     };
   };
-
-in {
+in
+{
+  # Syncthing doesn't support OIDC natively, use tinyauth forwardAuth
   custom.home-server.routes.syncthing = {
     port = 8384;
-    oidc.enable = true;
+    forwardAuth.enable = true;
   };
 
   users.users.syncthing.extraGroups = [
-    config.users.groups.homelab-media.name
-    config.users.groups.homelab-bphenriques.name
+    homelabMounts.media.group
+    homelabMounts.bphenriques.group
   ];
 
   services.syncthing = {
     enable = true;
-    user = user;
-    group = group;
+    inherit user group;
     dataDir = "/var/lib/syncthing";
     configDir = "/var/lib/syncthing/.config/syncthing";
 
-    # Enforce declarative config
     overrideDevices = true;
     overrideFolders = true;
 
-    # Open Firewall for Transfer (22000) & Local Discovery (21027/udp)
     openDefaultPorts = true;
     guiAddress = "0.0.0.0:8384";
 
     settings = {
-      devices = devices;
+      inherit devices;
 
-      # Privacy & Network Tweaks
       options = {
-        urAccepted = -1;                # Disable Usage Reporting
-        globalAnnounceEnabled = false;  # Disable Global Discovery (Privacy)
-        relaysEnabled = false;          # Disable Relays (LAN only)
-        natEnabled = false;             # Disable UPnP (since we are local only)
-        localAnnounceEnabled = true;    # Ensure devices on the same LAN can find each other
+        urAccepted = -1;
+        globalAnnounceEnabled = false;
+        relaysEnabled = false;
+        natEnabled = false;
+        localAnnounceEnabled = true;
       };
 
       folders = {
-        "music"        = mkFolder "music" paths.media.music.library [ "galaxy-s20" ];
-        "roms"         = mkFolder "roms" paths.media.gaming.emulation.roms [ "retroid-pocket-5" ];
-        "phone_backup" = mkFolder "phone-backup" paths.bphenriques.backups.phone [ "galaxy-s20" ];
+        "music"        = mkFolder "music" pathsCfg.media.music.library [ "galaxy-s20" ];
+        "roms"         = mkFolder "roms" pathsCfg.media.gaming.emulation.roms [ "retroid-pocket-5" ];
+        "phone_backup" = mkFolder "phone-backup" pathsCfg.bphenriques.backups.phone [ "galaxy-s20" ];
       };
 
       gui.theme = "dark";
+    };
+  };
+
+  systemd.services.syncthing = {
+    requires = [ homelabMounts.media.automountUnit homelabMounts.bphenriques.automountUnit ];
+    after = [ homelabMounts.media.automountUnit homelabMounts.bphenriques.automountUnit ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
     };
   };
 }

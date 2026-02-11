@@ -57,6 +57,7 @@ in {
         emulation = {
           root = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation"; };
           roms = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation/roms"; };
+          bios = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation/bios"; };
         };
       };
       
