@@ -17,6 +17,7 @@
     ../compute/services/miniflux
     ../compute/services/obsidian-livesync
     ../compute/services/immich
+    ../compute/services/tandoor-recipes
   ];
 
   custom.home-server = {

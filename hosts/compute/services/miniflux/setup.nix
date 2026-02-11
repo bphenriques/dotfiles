@@ -32,6 +32,7 @@ in
     after = [ "miniflux.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "miniflux.service" ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
+    restartTriggers = [ (builtins.toJSON userSettings) ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

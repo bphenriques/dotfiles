@@ -24,6 +24,7 @@ in
     after = [ "radarr.service" "transmission.service" "recyclarr.service" ];
     requires = [ "radarr.service" "recyclarr.service" ];
     wants = [ "transmission.service" "recyclarr.service" ];
+    restartTriggers = [ (builtins.toJSON settings) ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

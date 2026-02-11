@@ -24,6 +24,7 @@ in
     after = [ "sonarr.service" "transmission.service" "recyclarr.service" ];
     requires = [ "sonarr.service" "recyclarr.service" ];
     wants = [ "transmission.service" "recyclarr.service" ];
+    restartTriggers = [ (builtins.toJSON settings) ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

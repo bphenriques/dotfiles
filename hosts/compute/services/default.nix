@@ -5,8 +5,7 @@
     ./miniflux
 
     ./jellyseerr
-    #./transmission.nix
-    #./tandoor-recipes.nix
+    ./tandoor-recipes
     #./obsidian-livesync
 
     #./immich
