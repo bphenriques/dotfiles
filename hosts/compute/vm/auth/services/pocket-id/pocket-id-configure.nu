@@ -81,7 +81,7 @@ def write_credential [path: string, content: string, group: string] {
 
 # Verifies that credentials for a client are set (not placeholder or empty).
 # If this fails, it means the client exists in Pocket-ID but local files are missing.
-# Recovery: delete client from Pocket-ID, delete /var/lib/homelab-oidc/{name}/, restart pocket-id-init.
+# Recovery: delete client from Pocket-ID, delete /var/lib/homelab-oidc/{name}/, restart pocket-id-configure.
 def assert_credentials_set [name: string] {
   let client_dir = $"($CREDENTIALS_DIR)/($name)"
   ["id", "secret"] | each { |field|
@@ -162,7 +162,7 @@ def main [] {
     ensure_user $u $group_ids $existing_users
   }
 
-  # Write oidc-users.json for other services to read (e.g., miniflux-init)
+  # Write oidc-users.json for other services to read (e.g., miniflux-configure)
   let users_file = $"($CREDENTIALS_DIR)/oidc-users.json"
   $provisioned_users | to json | save --force $users_file
   chmod 0644 $users_file

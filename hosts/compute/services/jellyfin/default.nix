@@ -1,14 +1,24 @@
 { config, ... }:
+let
+  serviceCfg = config.custom.home-server.services.jellyfin;
+in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
 
-  custom.home-server.routes.jellyfin.port = 8096;
+  custom.home-server.services.jellyfin = {
+    port = 8096;
+    dashboard = {
+      enable = true;
+      category = "Media";
+      description = "Media Player";
+      icon = "jellyfin.svg";
+    };
+  };
+
   custom.home-server.oidc.clients.jellyfin = {
-    callbackURLs = [
-      "${config.custom.home-server.routes.jellyfin.publicUrl}/sso/OID/redirect/PocketID"
-    ];
+    callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
   };
 
   services.jellyfin.enable = true;
-  users.users.jellyfin.extraGroups = [ config.custom.fileSystems.homelab.mounts.media.group ]; # Ensure jellyfin has access to the media
+  users.users.jellyfin.extraGroups = [ config.custom.fileSystems.homelab.mounts.media.group ];
 }

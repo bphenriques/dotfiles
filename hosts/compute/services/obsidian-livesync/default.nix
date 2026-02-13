@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.obsidian-livesync;
+  serviceCfg = config.custom.home-server.services.obsidian-livesync;
 
   # Shared CORS configuration (used by both CouchDB and Traefik)
   cors = {
@@ -17,7 +17,7 @@ let
       single_node = true;
       max_document_size = 50000000;
     };
-    chttpd_auth_lockout.mode = "warn";  # Don't lock out on failed auth attempts
+    chttpd_auth_lockout.mode = "warn";
     chttpd = {
       require_valid_user = true;
       require_valid_user_except_for_up = true;
@@ -38,7 +38,17 @@ let
   };
 in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
+
+  custom.home-server.services.obsidian-livesync = {
+    port = 5984;
+    dashboard = {
+      enable = true;
+      category = "Productivity";
+      description = "Obsidian Sync";
+      icon = "obsidian.svg";
+    };
+  };
 
   sops = {
     secrets."obsidian-livesync/admin/password" = { };
@@ -57,7 +67,6 @@ in
     };
   };
 
-  custom.home-server.routes.obsidian-livesync.port = 5984;
   services.couchdb = {
     enable = true;
     port = serviceCfg.port;

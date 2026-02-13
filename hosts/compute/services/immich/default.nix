@@ -1,21 +1,29 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.immich;
+  serviceCfg = config.custom.home-server.services.immich;
   oidcCfg = config.custom.home-server.oidc;
   oidcClient = oidcCfg.clients.immich;
 in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
 
-  custom.home-server = {
-    routes.immich.port = 2283;
-    oidc.clients.immich = {
-      callbackURLs = [
-        "${serviceCfg.publicUrl}/auth/login"
-        "${serviceCfg.publicUrl}/user-settings"
-        "app.immich:///oauth-callback"
-      ];
+  custom.home-server.services.immich = {
+    port = 2283;
+    subdomain = "photos";
+    dashboard = {
+      enable = true;
+      category = "Media";
+      description = "Photo & Video Gallery";
+      icon = "immich.svg";
     };
+  };
+
+  custom.home-server.oidc.clients.immich = {
+    callbackURLs = [
+      "${serviceCfg.publicUrl}/auth/login"
+      "${serviceCfg.publicUrl}/user-settings"
+      "app.immich:///oauth-callback"
+    ];
   };
 
   services.immich = {
@@ -23,7 +31,7 @@ in
     host = serviceCfg.internalHost;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
-    accelerationDevices = null; # Give access to all devices
+    accelerationDevices = null;
 
     settings = {
       server.externalDomain = serviceCfg.publicUrl;
@@ -40,8 +48,8 @@ in
         autoRegister = true;
         autoLaunch = false;
       };
-      passwordLogin.enabled = true; # Only for administrator
-      library.watch.enabled = true; # Auto-import changes from external libraries
+      passwordLogin.enabled = true;
+      library.watch.enabled = true;
 
       storageTemplate = {
         enabled = true;

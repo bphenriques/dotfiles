@@ -10,11 +10,11 @@ let
 
   recyclarrConfig = {
     radarr.movies = {
-      base_url = config.custom.home-server.routes.radarr.internalUrl;
+      base_url = config.custom.home-server.services.radarr.internalUrl;
       include = mkIncludeTemplates config.custom.home-server.media.radarr;
     };
     sonarr.tv = {
-      base_url = config.custom.home-server.routes.sonarr.internalUrl;
+      base_url = config.custom.home-server.services.sonarr.internalUrl;
       include = mkIncludeTemplates config.custom.home-server.media.sonarr;
     };
   };
@@ -47,7 +47,7 @@ in
       CacheDirectory = "recyclarr";
       ExecStartPre = "${pkgs.coreutils}/bin/ln -sf ${config.sops.templates."recyclarr-secrets.yml".path} ${appDataDir}/secrets.yml";
       ExecStart = "${pkgs.recyclarr}/bin/recyclarr sync --config ${configFile}";
-      ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart --no-block radarr-init sonarr-init";
+      ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart --no-block radarr-configure sonarr-configure";
 
       # Hardening
       ProtectSystem = "strict";

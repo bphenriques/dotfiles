@@ -1,21 +1,21 @@
 { self, ...}: {
   imports = [
-    ./pocket-id
-    ./tinyauth
+    ../vm/auth/services/pocket-id
+    ./tinyauth.nix
     ./miniflux
 
-    ./jellyseerr
-    ./tandoor-recipes
     #./obsidian-livesync
 
     #./immich
     #./transmission
 
-    # Servarr
-    ./prowlarr
-    ./sonarr
-    ./radarr
-    ./recyclarr.nix
+    # Arrs services
+    ./arrs/radarr.nix
+    ./arrs/sonarr.nix
+    ./arrs/prowlarr
+    ./arrs/jellyseerr
+    ./arrs/recyclarr.nix
+    ./arrs/cleanuparr.nix
   ];
 
   custom.home-server = {

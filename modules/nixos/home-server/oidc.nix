@@ -26,7 +26,7 @@
 #
 # Systemd units:
 #   - provisionedTarget: A target that indicates OIDC credentials are ready.
-#     Internally depends on the provisioning unit (pocket-id-init.service for local,
+#     Internally depends on the provisioning unit (pocket-id-configure.service for local,
 #     homelab-oidc-sync.service for remote).
 #
 # Consumer pattern:
@@ -61,7 +61,7 @@ let
 
       callbackURLs = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = [ "${homeServerCfg.routes.${name}.publicUrl}/oauth2/oidc/callback" ];
+        default = [ "${homeServerCfg.services.${name}.publicUrl}/oauth2/oidc/callback" ];
         description = "Callback URLs for the OIDC client";
       };
 
@@ -97,11 +97,11 @@ let
     };
   });
 
-  # Unit that provisions credentials (local: pocket-id-init, remote: sync service)
+  # Unit that provisions credentials (local: pocket-id-configure, remote: sync service)
   # TODO: Add homelab-oidc-sync.service for remote provider support
   oidcProvisionUnit =
     if homeServerCfg.oidc.provider.local
-    then "pocket-id-init.service"
+    then "pocket-id-configure.service"
     else "homelab-oidc-sync.service";
 in
 {
@@ -119,7 +119,7 @@ in
 
       local = lib.mkOption {
         type = lib.types.bool;
-        description = "Whether the OIDC provider runs on this host. Enables systemd dependencies on pocket-id-init.";
+        description = "Whether the OIDC provider runs on this host. Enables systemd dependencies on pocket-id-configure.";
       };
 
       url = lib.mkOption {

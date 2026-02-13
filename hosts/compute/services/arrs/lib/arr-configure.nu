@@ -1,24 +1,29 @@
 #!/usr/bin/env nu
 
-# Initializes Sonarr declaratively via the API.
+# Generic *arr service initialization script (radarr/sonarr)
 #
-# Limitations:
-# - Only creates entities if missing;
-# - Won't reconcile whenever there is a config drift.
+# Environment variables:
+#   ARR_NAME          - Display name (e.g., "Radarr", "Sonarr")
+#   ARR_URL           - Service URL
+#   ARR_API_KEY_FILE  - Path to API key file
+#   ARR_CONFIG_FILE   - Path to JSON config file
+#   ARR_CATEGORY_FIELD - Download client category field ("movieCategory" or "tvCategory")
 
-let base_url = $env.SONARR_URL
-let api_key = open $env.SONARR_API_KEY_FILE | str trim
-let config = open $env.SONARR_CONFIG_FILE
+let arr_name = $env.ARR_NAME
+let base_url = $env.ARR_URL
+let api_key = open $env.ARR_API_KEY_FILE | str trim
+let config = open $env.ARR_CONFIG_FILE
+let category_field = $env.ARR_CATEGORY_FIELD
 let headers = [X-Api-Key $api_key]
 
 def wait_ready [] {
-  print "Waiting for Sonarr..."
+  print $"Waiting for ($arr_name)..."
   for attempt in 1..30 {
     let r = try { http get $"($base_url)/api/v3/system/status" --headers $headers --full --allow-errors } catch { null }
     if $r != null and $r.status == 200 { return }
     sleep 2sec
   }
-  error make { msg: "Sonarr failed to start after 30 attempts" }
+  error make { msg: $"($arr_name) failed to start after 30 attempts" }
 }
 
 def get_quality_profile_id [name: string] {
@@ -41,12 +46,8 @@ def ensure_root_folders [] {
     error make { msg: $"Failed to get root folders: ($existing.status) - ($existing.body)" }
   }
 
-  let default_profile_name = ($config | get -o defaultQualityProfile)
-  let default_profile_id = if $default_profile_name != null {
-    get_quality_profile_id $default_profile_name
-  } else {
-    null
-  }
+  let default_profile_name = $config.defaultQualityProfile
+  let default_profile_id = get_quality_profile_id $default_profile_name
 
   let root_folders = ($config | get -o rootFolders) | default []
   for folder in $root_folders {
@@ -69,7 +70,6 @@ def ensure_root_folders [] {
   }
 }
 
-# NOTE: Only creates the Transmission client if missing; does not reconcile existing settings.
 def ensure_download_client [] {
   print "Configuring download client..."
   let existing = http get $"($base_url)/api/v3/downloadclient" --headers $headers --full --allow-errors
@@ -77,12 +77,7 @@ def ensure_download_client [] {
     error make { msg: $"Failed to get download clients: ($existing.status) - ($existing.body)" }
   }
 
-  let existing_names = (
-    $existing.body
-    | default []
-    | get -o name
-    | default []
-  )
+  let existing_names = ($existing.body | default [] | get -o name | default [])
 
   let dc = $config | get downloadClient
   if $dc.name in $existing_names {
@@ -90,29 +85,27 @@ def ensure_download_client [] {
     return
   }
 
-  # Get schema for Transmission
   let schemas = http get $"($base_url)/api/v3/downloadclient/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
     error make { msg: $"Failed to get download client schemas: ($schemas.status)" }
   }
 
-  let transmission_schema = (
-    $schemas.body
-    | where implementation == "Transmission"
-    | get 0?
-  )
+  let transmission_schema = ($schemas.body | where implementation == "Transmission" | get 0?)
   if $transmission_schema == null {
     error make { msg: "Transmission schema not found" }
   }
 
-  # Build the download client config
   let fields = $transmission_schema.fields | each { |f|
-    match $f.name {
-      "host" => ($f | upsert value $dc.host)
-      "port" => ($f | upsert value $dc.port)
-      "urlBase" => ($f | upsert value $dc.urlBase)
-      "tvCategory" => ($f | upsert value $dc.category)
-      _ => $f
+    if $f.name == "host" {
+      $f | upsert value $dc.host
+    } else if $f.name == "port" {
+      $f | upsert value $dc.port
+    } else if $f.name == "urlBase" {
+      $f | upsert value $dc.urlBase
+    } else if $f.name == $category_field {
+      $f | upsert value $dc.category
+    } else {
+      $f
     }
   }
 
@@ -138,10 +131,10 @@ def ensure_download_client [] {
 
 def main [] {
   wait_ready
-  print "Sonarr is ready"
+  print $"($arr_name) is ready"
 
   ensure_root_folders
   ensure_download_client
 
-  print "Sonarr initialization complete"
+  print $"($arr_name) initialization complete"
 }

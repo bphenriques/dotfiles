@@ -1,7 +1,12 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = config.custom.home-server;
-  serviceCfg = cfg.routes.booklore;
+  serviceCfg = cfg.services.booklore;
   oidcCfg = cfg.oidc;
   oidcClient = oidcCfg.clients.booklore;
   pathsCfg = config.custom.paths;
@@ -10,7 +15,15 @@ let
   envFile = "/run/booklore/env";
 in
 {
-  custom.home-server.routes.booklore.port = 6060;
+  custom.home-server.services.booklore = {
+    port = 6060;
+    dashboard = {
+      enable = true;
+      category = "Media";
+      description = "Book Library";
+      icon = "booklore.svg";
+    };
+  };
 
   # Booklore uses public OIDC client with PKCE (no client secret required)
   custom.home-server.oidc.clients.booklore = {
@@ -35,66 +48,65 @@ in
     "d ${dataDir}/mysql 0750 root root -"
   ];
 
-  virtualisation.oci-containers = {
-    backend = "podman";
+  virtualisation.oci-containers.containers.booklore-db = {
+    image = "lscr.io/linuxserver/mariadb:11.4.5";
+    autoStart = true;
+    environment = {
+      PUID = "1000";
+      PGID = "1000";
+      TZ = config.time.timeZone;
+      MYSQL_DATABASE = "booklore";
+      MYSQL_USER = "booklore";
+    };
+    environmentFiles = [ config.sops.templates."booklore.env".path ];
+    volumes = [ "${dataDir}/mysql:/config" ];
+    extraOptions = [
+      "--network=booklore-net"
+      "--memory=512m"
+    ];
+  };
 
-    containers.booklore-db = {
-      image = "lscr.io/linuxserver/mariadb:11.4.5";
-      autoStart = true;
-      environment = {
-        PUID = "1000";
-        PGID = "1000";
-        TZ = config.time.timeZone;
-        MYSQL_DATABASE = "booklore";
-        MYSQL_USER = "booklore";
-      };
-      environmentFiles = [ config.sops.templates."booklore.env".path ];
-      volumes = [ "${dataDir}/mysql:/config" ];
-      extraOptions = [
-        "--network=booklore-net"
-        "--memory=512m"
-      ];
+  virtualisation.oci-containers.containers.booklore = {
+    image = "booklore/booklore:v1.16.0";
+    autoStart = true;
+    dependsOn = [ "booklore-db" ];
+    ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:6060" ];
+
+    environment = {
+      PUID = "1000";
+      PGID = "1000";
+      TZ = config.time.timeZone;
+      BOOKLORE_PORT = "6060";
+      DATABASE_URL = "jdbc:mariadb://booklore-db:3306/booklore";
+      DATABASE_USERNAME = "booklore";
+      SWAGGER_ENABLED = "false";
+
+      # OIDC (public client with PKCE)
+      OIDC_ENABLED = "true";
+      OIDC_ISSUER_URI = oidcCfg.provider.url;
+      OIDC_SCOPE = "openid profile email offline_access";
+      OIDC_USERNAME_CLAIM = "preferred_username";
+      OIDC_EMAIL_CLAIM = "email";
+      OIDC_DISPLAY_NAME_CLAIM = "name";
     };
 
-    containers.booklore = {
-      image = "booklore/booklore:v1.16.0";
-      autoStart = true;
-      dependsOn = [ "booklore-db" ];
-      ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:6060" ];
+    environmentFiles = [
+      config.sops.templates."booklore.env".path
+      envFile
+    ];
 
-      environment = {
-        PUID = "1000";
-        PGID = "1000";
-        TZ = config.time.timeZone;
-        BOOKLORE_PORT = "6060";
-        DATABASE_URL = "jdbc:mariadb://booklore-db:3306/booklore";
-        DATABASE_USERNAME = "booklore";
-        SWAGGER_ENABLED = "false";
+    volumes = [
+      "${dataDir}/data:/app/data"
+      "${pathsCfg.media.books.library}:/data/books"
+      "${pathsCfg.media.books.inbox}:/bookdrop"
+    ];
 
-        # OIDC (public client with PKCE)
-        OIDC_ENABLED = "true";
-        OIDC_ISSUER_URI = oidcCfg.provider.url;
-        OIDC_SCOPE = "openid profile email offline_access";
-        OIDC_USERNAME_CLAIM = "preferred_username";
-        OIDC_EMAIL_CLAIM = "email";
-        OIDC_DISPLAY_NAME_CLAIM = "name";
-      };
-
-      environmentFiles = [ config.sops.templates."booklore.env".path envFile ];
-
-      volumes = [
-        "${dataDir}/data:/app/data"
-        "${pathsCfg.media.books.library}:/data/books"
-        "${pathsCfg.media.books.inbox}:/bookdrop"
-      ];
-
-      extraOptions = [
-        "--network=booklore-net"
-        "--read-only"
-        "--tmpfs=/tmp:rw,noexec,nosuid,size=128m"
-        "--memory=512m"
-      ];
-    };
+    extraOptions = [
+      "--network=booklore-net"
+      "--read-only"
+      "--tmpfs=/tmp:rw,noexec,nosuid,size=128m"
+      "--memory=512m"
+    ];
   };
 
   systemd.services.init-booklore-network = {
@@ -102,22 +114,26 @@ in
     after = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "oneshot";
-    script = ''${lib.getExe pkgs.podman} network create --ignore booklore-net'';
+    script = "${lib.getExe pkgs.podman} network create --ignore booklore-net";
   };
 
   systemd.services.podman-booklore = {
-    after = [ oidcCfg.systemd.provisionedTarget "init-booklore-network.service" ];
-    wants = [ oidcCfg.systemd.provisionedTarget "init-booklore-network.service" ];
+    after = [
+      oidcCfg.systemd.provisionedTarget
+      "init-booklore-network.service"
+    ];
+    wants = [
+      oidcCfg.systemd.provisionedTarget
+      "init-booklore-network.service"
+    ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
-    serviceConfig.ExecStartPre = let
-      script = pkgs.writeShellScript "booklore-env" ''
-        mkdir -p "$(dirname "${envFile}")"
-        cat > "${envFile}" <<EOF
-        OIDC_CLIENT_ID=$(cat ${oidcClient.idFile})
-        EOF
-        chmod 600 "${envFile}"
-      '';
-    in [ "!${script}" ];
+    preStart = ''
+      mkdir -p "$(dirname "${envFile}")"
+      cat > "${envFile}" <<EOF
+      OIDC_CLIENT_ID=$(cat ${oidcClient.idFile})
+      EOF
+      chmod 600 "${envFile}"
+    '';
   };
 
   systemd.services.podman-booklore-db = {

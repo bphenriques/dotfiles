@@ -1,15 +1,15 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.jellyseerr;
-  radarrCfg = config.custom.home-server.routes.radarr;
-  sonarrCfg = config.custom.home-server.routes.sonarr;
-  jellyfinCfg = config.custom.home-server.routes.jellyfin;
+  serviceCfg = config.custom.home-server.services.jellyseerr;
+  radarrCfg = config.custom.home-server.services.radarr;
+  sonarrCfg = config.custom.home-server.services.sonarr;
+  jellyfinCfg = config.custom.home-server.services.jellyfin;
   mediaCfg = config.custom.home-server.media;
   jellyseerrUsers = config.custom.home-server.enabledUsers.jellyseerr;
 
   initConfigJson = builtins.toJSON initConfig;
 
-  # Config passed to jellyseerr-init.nu for setup and Radarr/Sonarr registration
+  # Config passed to jellyseerr-configure.nu for setup and Radarr/Sonarr registration
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;
     jellyfin = {
@@ -53,13 +53,13 @@ let
   };
 in
 {
-  systemd.services.jellyseerr-init = {
-    description = "Initialize Jellyseerr with declarative configuration";
+  systemd.services.jellyseerr-configure = {
+    description = "Configure Jellyseerr with declarative configuration";
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyseerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
     requires = [ "jellyseerr.service" ];
     wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
-    partOf = [ "jellyfin-init.service" ];  # Restart when jellyfin-init restarts (new users to sync)
+    partOf = [ "jellyfin-configure.service" ];  # Restart when jellyfin-configure restarts (new users to sync)
     restartTriggers = [ initConfigJson ];
     serviceConfig = {
       Type = "oneshot";
@@ -78,6 +78,6 @@ in
       SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-init" ./jellyseerr-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-configure" ./jellyseerr-configure.nu}'';
   };
 }

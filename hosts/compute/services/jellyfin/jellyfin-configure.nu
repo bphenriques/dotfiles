@@ -64,15 +64,15 @@ def authenticate []: nothing -> record<headers: list, api_key: string> {
   
   let existing = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
   if $existing.status == 200 {
-    let matches = $existing.body.Items | where AppName == "jellyfin-init"
+    let matches = $existing.body.Items | where AppName == "jellyfin-configure"
     if not ($matches | is-empty) { return { headers: $headers, api_key: ($matches | first).AccessToken } }
   }
   
-  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-init" { } --headers $headers --content-type application/json --full --allow-errors
+  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-configure" { } --headers $headers --content-type application/json --full --allow-errors
   if $create.status != 204 { error make { msg: $"Failed to create API key: ($create.status)" } }
   
   let keys = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
-  let matches = $keys.body.Items | where AppName == "jellyfin-init"
+  let matches = $keys.body.Items | where AppName == "jellyfin-configure"
   if ($matches | is-empty) { error make { msg: "Failed to retrieve created API key" } }
   { headers: $headers, api_key: ($matches | first).AccessToken }
 }

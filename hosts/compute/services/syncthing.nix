@@ -29,10 +29,15 @@ let
   };
 in
 {
-  # Syncthing doesn't support OIDC natively, use tinyauth forwardAuth
-  custom.home-server.routes.syncthing = {
+  custom.home-server.services.syncthing = {
     port = 8384;
     forwardAuth.enable = true;
+    dashboard = {
+      enable = true;
+      category = "Admin";
+      description = "File Sync";
+      icon = "syncthing.svg";
+    };
   };
 
   users.users.syncthing.extraGroups = [

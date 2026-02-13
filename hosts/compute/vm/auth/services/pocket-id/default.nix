@@ -1,17 +1,13 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.pocket-id;
+  serviceCfg = config.custom.home-server.services.pocket-id;
 
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
 in
 {
-  # sudo rm -rf /var/lib/pocket-id/
-  # sudo systemctl stop pocket-id
-  # sudo mkdir /var/lib/pocket-id
-  # sudo chown pocket-id:pocket-id /var/lib/pocket-id/
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
 
-  custom.home-server.routes.pocket-id.port = 8082;
+  custom.home-server.services.pocket-id.port = 8082;
   custom.home-server.oidc.provider = {
     displayName = "Pocket-ID";
     internalName = "PocketID";

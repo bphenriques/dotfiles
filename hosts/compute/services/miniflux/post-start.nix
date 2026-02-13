@@ -1,11 +1,11 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.miniflux;
+  serviceCfg = config.custom.home-server.services.miniflux;
   oidcCfg = config.custom.home-server.oidc;
 
-  userSettings = lib.mapAttrsToList (_: u:
+  userSettings = builtins.toJSON (lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
-  ) config.custom.home-server.enabledUsers.miniflux;
+  ) config.custom.home-server.enabledUsers.miniflux);
 in
 {
   services.miniflux = {
@@ -26,13 +26,13 @@ in
     };
   };
 
-  systemd.services.miniflux-init = {
-    description = "Initialize Miniflux users and settings";
+  systemd.services.miniflux-configure = {
+    description = "Configure Miniflux users and settings";
     wantedBy = [ "miniflux.service" ];
     after = [ "miniflux.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "miniflux.service" ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
-    restartTriggers = [ (builtins.toJSON userSettings) ];
+    restartTriggers = [ userSettings ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";
@@ -43,10 +43,10 @@ in
       MINIFLUX_URL = serviceCfg.internalUrl;
       MINIFLUX_ADMIN_USERNAME_FILE = config.sops.secrets."miniflux/admin/username".path;
       MINIFLUX_ADMIN_PASSWORD_FILE = config.sops.secrets."miniflux/admin/password".path;
-      MINIFLUX_USER_SETTINGS_FILE = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON userSettings);
+      MINIFLUX_USER_SETTINGS_FILE = pkgs.writeText "miniflux-user-settings.json" userSettings;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "miniflux-init" ./miniflux-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "miniflux-configure" ./miniflux-configure.nu}'';
   };
 }

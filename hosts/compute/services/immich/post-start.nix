@@ -5,7 +5,7 @@
 let
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
-  serviceCfg = config.custom.home-server.routes.immich;
+  serviceCfg = config.custom.home-server.services.immich;
   oidcClient = config.custom.home-server.oidc.clients.immich;
   oidcCfg = config.custom.home-server.oidc;
 
@@ -57,8 +57,8 @@ in
     };
   };
 
-  systemd.services.immich-init = {
-    description = "Initialize Immich users and external libraries";
+  systemd.services.immich-configure = {
+    description = "Configure Immich users and external libraries";
     wantedBy = [ "multi-user.target" ];
     after = [ "immich-server.service" ];
     requires = [ "immich-server.service" ];
@@ -78,7 +78,7 @@ in
       IMMICH_CONFIG_FILE = pkgs.writeText "immich-config.json" immichConfigJson;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "immich-init" ./immich-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "immich-configure" ./immich-configure.nu}'';
   };
 
   assertions = [

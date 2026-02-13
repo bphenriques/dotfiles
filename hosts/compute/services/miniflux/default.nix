@@ -1,13 +1,22 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.miniflux;
+  serviceCfg = config.custom.home-server.services.miniflux;
   oidcClient = config.custom.home-server.oidc.clients.miniflux;
   oidcCfg = config.custom.home-server.oidc;
 in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
 
-  custom.home-server.routes.miniflux.port = 8081;
+  custom.home-server.services.miniflux = {
+    port = 8081;
+    dashboard = {
+      enable = true;
+      category = "Media";
+      description = "RSS Server";
+      icon = "miniflux.svg";
+    };
+  };
+
   custom.home-server.oidc.clients.miniflux = { };
 
   services.miniflux = {
@@ -29,7 +38,6 @@ in
     };
   };
 
-  # Wait for OIDC credentials; LoadCredential reads files as root before dropping privileges
   systemd.services.miniflux = {
     wants = [ oidcCfg.systemd.provisionedTarget ];
     after = [ oidcCfg.systemd.provisionedTarget ];

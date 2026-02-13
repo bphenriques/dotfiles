@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.jellyfin;
+  serviceCfg = config.custom.home-server.services.jellyfin;
   pathsCfg = config.custom.paths;
   oidcClient = config.custom.home-server.oidc.clients.jellyfin;
   oidcCfg = config.custom.home-server.oidc;
@@ -96,8 +96,8 @@ in
     '';
   in [ "+${script}" ]; # The plus signals to run as root as we need to set permissions
 
-  systemd.services.jellyfin-init = {
-    description = "Initialize Jellyfin with declarative configuration";
+  systemd.services.jellyfin-configure = {
+    description = "Configure Jellyfin with declarative configuration";
     wantedBy = [ "jellyfin.target" ];
     after = [ "jellyfin.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "jellyfin.service" ];
@@ -120,6 +120,6 @@ in
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-init" ./jellyfin-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-configure" ./jellyfin-configure.nu}'';
   };
 }

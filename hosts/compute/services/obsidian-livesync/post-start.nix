@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.obsidian-livesync;
+  serviceCfg = config.custom.home-server.services.obsidian-livesync;
 
   enabledUsers = config.custom.home-server.enabledUsers.obsidian-livesync;
   settings = {
@@ -21,8 +21,8 @@ in
     { group = config.services.couchdb.group; mode = "0440"; } # owner + group read
   ) enabledUsers;
 
-  systemd.services.couchdb-init = {
-    description = "Initialize CouchDB databases and users";
+  systemd.services.couchdb-configure = {
+    description = "Configure CouchDB databases and users";
     wantedBy = [ "multi-user.target" ];
     after = [ "couchdb.service" ];
     requires = [ "couchdb.service" ];
@@ -44,6 +44,6 @@ in
       COUCHDB_SETTINGS_FILE = pkgs.writeText "couchdb-settings.json" (builtins.toJSON settings);
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "couchdb-init" ./couchdb-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "couchdb-configure" ./couchdb-configure.nu}'';
   };
 }

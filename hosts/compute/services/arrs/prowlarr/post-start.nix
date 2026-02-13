@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.routes.prowlarr;
+  serviceCfg = config.custom.home-server.services.prowlarr;
 
   settings = {
     # Indexers have the following fields:
@@ -13,26 +13,26 @@ let
         name = "Radarr";
         implementation = "Radarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.home-server.routes.radarr.internalUrl;
+        baseUrl = config.custom.home-server.services.radarr.internalUrl;
         prowlarrUrl = serviceCfg.internalUrl;
       }
       {
         name = "Sonarr";
         implementation = "Sonarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.home-server.routes.sonarr.internalUrl;
+        baseUrl = config.custom.home-server.services.sonarr.internalUrl;
         prowlarrUrl = serviceCfg.internalUrl;
       }
     ];
   };
 in
 {
-  systemd.services.prowlarr-init = {
-    description = "Initialize Prowlarr with declarative configuration";
+  systemd.services.prowlarr-configure = {
+    description = "Configure Prowlarr with declarative configuration";
     wantedBy = [ "multi-user.target" ];
-    after = [ "prowlarr.service" "radarr-init.service" "sonarr-init.service" ];
+    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" ];
     requires = [ "prowlarr.service" ];
-    wants = [ "radarr-init.service" "sonarr-init.service" ];
+    wants = [ "radarr-configure.service" "sonarr-configure.service" ];
     restartTriggers = [ (builtins.toJSON settings) ];
     serviceConfig = {
       Type = "oneshot";
@@ -48,6 +48,6 @@ in
       SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
     };
     path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-init" ./prowlarr-init.nu}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-configure" ./prowlarr-configure.nu}'';
   };
 }

@@ -1,13 +1,20 @@
 { config, ... }:
 let
+  serviceCfg = config.custom.home-server.services.prowlarr;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./post-start.nix ];
 
-  custom.home-server.routes.prowlarr = {
+  custom.home-server.services.prowlarr = {
     port = 9096;
     forwardAuth.enable = true;
+    dashboard = {
+      enable = true;
+      category = "Admin";
+      description = "Manage *rr services";
+      icon = "prowlarr.svg";
+    };
   };
 
   sops.secrets."prowlarr/api-key" = { };
@@ -17,7 +24,7 @@ in
 
   services.prowlarr = {
     enable = true;
-    settings.server.port = config.custom.home-server.routes.prowlarr.port;
+    settings.server.port = serviceCfg.port;
     environmentFiles = [ config.sops.templates."prowlarr.env".path ];
   };
 
