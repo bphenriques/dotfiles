@@ -4,6 +4,7 @@
     # Base
     ./hardware
     ./disko.nix
+    ./data-stores
     ./services
     ./tasks
     ../../config/nixos

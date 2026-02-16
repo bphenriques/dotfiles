@@ -37,7 +37,7 @@ in
       SMTP_TLS = self.settings.smtp.tls;
       SMTP_PASSWORD_FILE = config.sops.templates.pocket-id-smtp-password.path;
 
-      # invite-only, therefore the emails are valid for me.
+      # Invite only, therefore the emails are valid for me.
       ALLOW_USER_SIGNUPS = "withToken";
       EMAILS_VERIFIED = true;
       EMAIL_VERIFICATION_ENABLED = false;

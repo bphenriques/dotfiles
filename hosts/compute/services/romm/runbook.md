@@ -1,41 +1,37 @@
-# ROMM Runbook
+# RomM Runbook
+
+## Architecture
+
+RomM uses:
+- **Native NixOS MariaDB** (`services.mysql`) for the database
+- **Socket authentication** - no database password needed
+- **Podman container** for the RomM application
+
+## Admin User
+
+An admin user is automatically created on first boot via `romm-configure.service`.
+- Username: `admin`
+- Password: stored in `/var/lib/romm/credentials/admin-password`
+
+Check status: `systemctl status romm-configure`
+
+### Rotating Admin Password
+
+```bash
+rm /var/lib/romm/credentials/admin-password
+systemctl restart romm-configure
+```
 
 ## Secret Rotation
 
-Secrets are auto-generated on first boot and stored in `/var/lib/romm/secrets.env`.
+### Application Secret (ROMM_AUTH_SECRET_KEY)
 
-### Rotating Application Secrets (AUTH_SECRET, ADMIN_PASSWORD)
-
-These can be rotated without database changes:
+The auth secret is auto-generated on first boot and stored in `/var/lib/romm/secrets.env`.
 
 ```bash
-# Stop services
-systemctl stop podman-romm podman-romm-db
-
-# Remove secrets file
-rm /var/lib/romm/secrets.env
-
-# Regenerate and restart
-systemctl start romm-pre-start-secrets podman-romm-db podman-romm
-```
-
-### Rotating Database Passwords
-
-Database password rotation requires manual MariaDB intervention:
-
-```bash
-# 1. Stop the app container (keep DB running)
 systemctl stop podman-romm
-
-# 2. Connect to MariaDB and change password
-podman exec -it romm-db mariadb -u root -p
-# Then run: ALTER USER 'romm-user'@'%' IDENTIFIED BY 'new_password';
-
-# 3. Update secrets file with new password
-# Edit /var/lib/romm/secrets.env and update DB_PASSWD and MYSQL_PASSWORD
-
-# 4. Restart services
-systemctl restart podman-romm-db podman-romm
+rm /var/lib/romm/secrets.env
+systemctl start podman-romm
 ```
 
 ## Troubleshooting
@@ -43,33 +39,63 @@ systemctl restart podman-romm-db podman-romm
 ### Check service status
 
 ```bash
-systemctl status podman-romm podman-romm-db romm-pre-start-secrets
+systemctl status podman-romm mysql romm-configure
 ```
 
 ### View logs
 
 ```bash
 journalctl -u podman-romm -f
-journalctl -u podman-romm-db -f
+journalctl -u romm-configure -f
+journalctl -u mysql -f
 ```
 
-### Network issues
+### Database connection issues
 
 ```bash
-# Verify network exists
-podman network ls | grep romm-internal
+# Verify MySQL is running and socket exists
+systemctl status mysql
+ls -la /run/mysqld/mysqld.sock
 
-# Recreate if needed
-podman network rm romm-internal
-systemctl restart podman-romm-db podman-romm
+# Test database connection
+sudo -u romm mysql -u romm romm -e "SELECT 1"
+
+# Check RomM user and database exist
+sudo mysql -e "SELECT user, host FROM mysql.user WHERE user='romm'"
+sudo mysql -e "SHOW DATABASES LIKE 'romm'"
+```
+
+### Container cannot access MySQL socket
+
+```bash
+# Verify romm user is in mysql group
+id romm
+
+# Check socket permissions
+ls -la /run/mysqld/
 ```
 
 ## Data Locations
 
 | Path | Description |
 |------|-------------|
-| `/var/lib/romm/secrets.env` | Generated secrets |
-| `/var/lib/romm/mysql` | MariaDB data |
-| `/var/lib/romm/resources` | ROMM resources |
+| `/var/lib/romm/credentials/admin-password` | Admin password |
+| `/var/lib/romm/secrets.env` | Auth secret |
+| `/var/lib/mysql` | MariaDB data (managed by NixOS) |
+| `/var/lib/romm/resources` | RomM resources |
 | `/var/lib/romm/redis` | Redis data |
-| `/var/lib/romm/assets` | ROMM assets |
+| `/var/lib/romm/assets` | RomM assets |
+
+## Backup
+
+### Database
+
+```bash
+sudo mysqldump romm > romm-backup.sql
+```
+
+### Restore
+
+```bash
+sudo mysql romm < romm-backup.sql
+```

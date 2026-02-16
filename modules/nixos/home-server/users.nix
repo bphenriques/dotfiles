@@ -85,7 +85,7 @@ in
       allowed = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         readOnly = true;
-        default = [ groupsCfg.admin groupsCfg.users "users2" ];
+        default = [ groupsCfg.admin groupsCfg.users ];
         description = "List of allowed group names (read-only, derived from admin and users)";
       };
     };

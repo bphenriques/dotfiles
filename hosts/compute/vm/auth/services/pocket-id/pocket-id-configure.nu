@@ -44,6 +44,7 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   let body = {
     username: $user.username
     email: $user.email
+    emailVerified: true
     firstName: $user.firstName
     lastName: $user.lastName
     displayName: $"($user.firstName) ($user.lastName)"

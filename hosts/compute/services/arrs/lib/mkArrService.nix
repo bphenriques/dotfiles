@@ -12,7 +12,7 @@
 #     description = "Movie Tracker";
 #     rootPath = config.custom.paths.media.movies;
 #     categoryField = "movieCategory";
-#     forwardAuthGroup = "users2";  # optional
+#     forwardAuthGroup = config.custom.home-server.groups.admin;
 #   }
 { config, pkgs, lib, self }:
 
@@ -22,11 +22,8 @@
   description,         # Dashboard description
   rootPath,            # Media root folder path
   categoryField,       # Download client category field ("movieCategory" or "tvCategory")
-  forwardAuthGroup,    # Forward auth group (e.g., "users", "users2")
-  downloadClient,      # Download client type (only "transmission" supported)
+  forwardAuthGroup,    # Forward auth group (required)
 }:
-
-assert downloadClient == "transmission" || throw "Only 'transmission' download client is supported, got: ${downloadClient}";
 
 let
   upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name;
@@ -97,6 +94,7 @@ in
     after = [ "${name}.service" "transmission.service" "recyclarr.service" ];
     requires = [ "${name}.service" "recyclarr.service" ];
     wants = [ "transmission.service" "recyclarr.service" ];
+    partOf = [ "${name}.service" ];
     restartTriggers = [ (builtins.toJSON settings) ];
     serviceConfig = {
       Type = "oneshot";

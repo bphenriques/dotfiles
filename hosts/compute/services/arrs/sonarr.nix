@@ -7,5 +7,4 @@ import ./lib/mkArrService.nix { inherit config pkgs lib self; } {
   rootPath = config.custom.paths.media.tv;
   categoryField = "tvCategory";
   forwardAuthGroup = config.custom.home-server.groups.admin;
-  downloadClient = "transmission";
 }

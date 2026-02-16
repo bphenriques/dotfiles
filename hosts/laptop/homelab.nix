@@ -1,5 +1,7 @@
 { self, config, ... }: {
   imports = [
+    ../compute/data-stores
+
     # Auth
     ../compute/vm/auth/services/pocket-id
     ../compute/services/tinyauth.nix
