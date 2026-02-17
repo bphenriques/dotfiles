@@ -1,6 +1,6 @@
 { self, ...}: {
   imports = [
-    ../vm/auth/services/pocket-id
+    ./oidc-provider.nix
     ./tinyauth.nix
     ./miniflux
 

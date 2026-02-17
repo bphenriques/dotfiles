@@ -1,26 +1,18 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.pocket-id;
-
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
+  port = 8082;
+  fqdn = "auth.${self.settings.compute.domain}";
+  cloudflareEmail = self.settings.cloudflareEmail;
 in
 {
   imports = [ ./post-start.nix ];
 
-  custom.home-server.services.pocket-id.port = 8082;
-  custom.home-server.oidc.provider = {
-    displayName = "Pocket-ID";
-    internalName = "PocketID";
-    url = serviceCfg.publicUrl;
-    discoveryEndpoint = "${serviceCfg.publicUrl}/.well-known/openid-configuration";
-    local = true;
-  };
-
   services.pocket-id = {
     enable = true;
     settings = {
-      APP_URL = serviceCfg.publicUrl;
-      PORT = toString serviceCfg.port;
+      APP_URL = "https://${fqdn}";
+      PORT = toString port;
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
@@ -55,7 +47,7 @@ in
       content = config.sops.placeholder."pocket-id/api-key";
     };
 
-    secrets."pocket-id/smtp-password" = { }; # https://myaccount.google.com/apppasswords
+    secrets."pocket-id/smtp-password" = { };
     templates."pocket-id-smtp-password" = {
       owner = config.services.pocket-id.user;
       content = config.sops.placeholder."pocket-id/smtp-password";
@@ -69,4 +61,12 @@ in
       chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} "${encryptionKeyFile}"
     fi
   '';
+
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "pocket-id-invite" ''
+      export POCKET_ID_URL="http://127.0.0.1:${toString port}"
+      export POCKET_ID_API_KEY_FILE="${config.sops.templates.pocket-id-api-key.path}"
+      exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-invite" ./pocket-id-invite.nu} "$@"
+    '')
+  ];
 }

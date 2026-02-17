@@ -1,9 +1,10 @@
 { self, config, ... }: {
   imports = [
+    ../compute/microvm.nix
     ../compute/datastores
 
     # Auth
-    ../compute/vm/auth/services/pocket-id
+    ../compute/services/oidc-provider.nix
     ../compute/services/tinyauth.nix
 
     # Arrs services
@@ -13,7 +14,6 @@
     ../compute/services/arrs/jellyseerr
     ../compute/services/arrs/recyclarr.nix
     ../compute/services/arrs/cleanuparr.nix
-
 
     # Media
     ../compute/services/jellyfin
@@ -85,12 +85,9 @@
   };
 
   custom.home-server.users.bphenriques = self.settings.users.bphenriques // {
-    firstName = "Bruno";
-    lastName = "Henriques";
     groups = [ "admin" "users" ];
     services = {
       pocket-id.enable = true;
-
       miniflux = {
         enable = true;
         settings = {
@@ -283,7 +280,7 @@
     };
   };
 
-  sops.secrets."jellyfin/home/password" = { }; # FIXME: Remove once Jellyseerr supports OIDC - dedicated local account for Jellyseerr auth
+  sops.secrets."jellyfin/home/password" = { };
   custom.home-server.users.home = {
     email = "home@localhost";
     firstName = "Home";

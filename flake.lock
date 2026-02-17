@@ -116,11 +116,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770161973,
-        "narHash": "sha256-5lUMzEGF/GaVP2ZUUqV8WZg3FD/CFlDZ8T6khPGdJ8I=",
+        "lastModified": 1771370592,
+        "narHash": "sha256-/lwdpX/hmeS3NDF99J63T5UIHO+cWctP4bWZYAIf7yE=",
         "ref": "refs/heads/main",
-        "rev": "2e2932bf7f865689d537aa26d5bb4d32d7c2ee5e",
-        "revCount": 23,
+        "rev": "7ffd8898c0c25aa4f5af23ac57beecac1f0f9c75",
+        "revCount": 26,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/dotfiles-private"
       },
@@ -242,6 +242,27 @@
         "type": "github"
       }
     },
+    "microvm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "spectrum": "spectrum"
+      },
+      "locked": {
+        "lastModified": 1770310890,
+        "narHash": "sha256-lyWAs4XKg3kLYaf4gm5qc5WJrDkYy3/qeV5G733fJww=",
+        "owner": "astro",
+        "repo": "microvm.nix",
+        "rev": "68c9f9c6ca91841f04f726a298c385411b7bfcd5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "astro",
+        "repo": "microvm.nix",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1768783163,
@@ -340,6 +361,7 @@
         "disko": "disko",
         "dotfiles-private": "dotfiles-private",
         "home-manager": "home-manager",
+        "microvm": "microvm",
         "nixpkgs": "nixpkgs",
         "nur": "nur",
         "sops-nix": "sops-nix",
@@ -364,6 +386,22 @@
         "owner": "Mic92",
         "repo": "sops-nix",
         "type": "github"
+      }
+    },
+    "spectrum": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1759482047,
+        "narHash": "sha256-H1wiXRQHxxPyMMlP39ce3ROKCwI5/tUn36P8x6dFiiQ=",
+        "ref": "refs/heads/main",
+        "rev": "c5d5786d3dc938af0b279c542d1e43bce381b4b9",
+        "revCount": 996,
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://spectrum-os.org/git/spectrum"
       }
     },
     "stylix": {

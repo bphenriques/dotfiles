@@ -4,9 +4,10 @@
     # Base
     ./hardware
     ./disko.nix
-    ./data-stores
+    ./datastores
     ./services
     ./tasks
+    ./microvm.nix
     ../../config/nixos
     ../../config/nixos/headless
 
