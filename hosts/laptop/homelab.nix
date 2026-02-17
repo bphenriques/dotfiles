@@ -1,6 +1,6 @@
 { self, config, ... }: {
   imports = [
-    ../compute/data-stores
+    ../compute/datastores
 
     # Auth
     ../compute/vm/auth/services/pocket-id
@@ -278,7 +278,7 @@
       };
 
       immich.enable = true;
-      obsidian-livesync.enable = true;
+      couchdb.enable = true;
       jellyfin.enable = true;
     };
   };

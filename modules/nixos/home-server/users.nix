@@ -36,8 +36,8 @@ let
           };
         };
 
-        obsidian-livesync = {
-          enable = lib.mkEnableOption "Obsidian LiveSync (CouchDB) account for this user";
+        couchdb = {
+          enable = lib.mkEnableOption "CouchDB account for this user";
           databases = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             readOnly = true;
@@ -102,7 +102,7 @@ in
         pocket-id = lib.filterAttrs (_: u: u.services.pocket-id.enable) cfg;
         immich = lib.filterAttrs (_: u: u.services.immich.enable) cfg;
         miniflux = lib.filterAttrs (_: u: u.services.miniflux.enable) cfg;
-        obsidian-livesync = lib.filterAttrs (_: u: u.services.obsidian-livesync.enable) cfg;
+        couchdb = lib.filterAttrs (_: u: u.services.couchdb.enable) cfg;
         jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
         jellyseerr = lib.filterAttrs (_: u: u.services.jellyseerr.enable) cfg;
       };

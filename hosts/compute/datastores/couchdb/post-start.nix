@@ -1,23 +1,22 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.obsidian-livesync;
+  serviceCfg = config.custom.home-server.services.couchdb;
 
-  enabledUsers = config.custom.home-server.enabledUsers.obsidian-livesync;
+  enabledUsers = config.custom.home-server.enabledUsers.couchdb;
   settings = {
     users = lib.mapAttrsToList (_: u: {
       name = u.username;
-      passwordFile = config.sops.secrets."obsidian-livesync/${u.username}/password".path;
+      passwordFile = config.sops.secrets."couchdb/${u.username}/password".path;
     }) enabledUsers;
 
     databases = lib.concatLists (lib.mapAttrsToList (_: u:
-      map (db: { name = db; owner = u.username; }) u.services.obsidian-livesync.databases
+      map (db: { name = db; owner = u.username; }) u.services.couchdb.databases
     ) enabledUsers);
   };
 in
 {
-  # Automatically configure sops secrets for each enabled user
   sops.secrets = lib.mapAttrs' (_: u: lib.nameValuePair
-    "obsidian-livesync/${u.username}/password"
+    "couchdb/${u.username}/password"
     { group = config.services.couchdb.group; mode = "0440"; } # owner + group read
   ) enabledUsers;
 

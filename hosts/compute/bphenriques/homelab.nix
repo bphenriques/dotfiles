@@ -7,7 +7,7 @@
         groups = [ "admins" "users" ];
       };
       immich.enable = true;
-      obsidian-livesync = {
+      couchdb = {
         enable = true;
         databases = [ "obsidiandb-bphenriques" ];
       };
