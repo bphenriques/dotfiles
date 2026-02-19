@@ -6,8 +6,6 @@ let
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
   serviceCfg = config.custom.home-server.services.immich;
-  oidcClient = config.custom.home-server.oidc.clients.immich;
-  oidcCfg = config.custom.home-server.oidc;
 
   enabledUsers = config.custom.home-server.enabledUsers.immich;
 
@@ -30,8 +28,7 @@ let
     ) enabledUsers);
   };
 
-  nasUnits = lib.unique (lib.mapAttrsToList (username: _: homelabMounts.${username}.automountUnit) enabledUsers);
-
+  # FIXME: Do we really need this?
   photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
     let userPaths = pathsCfg.${username}.photos;
     in [
@@ -39,6 +36,7 @@ let
       "${userPaths.inbox}:/mnt/media/${username}-inbox"
     ]
   ) enabledUsers);
+  nasUnits = lib.unique (lib.mapAttrsToList (username: _: homelabMounts.${username}.automountUnit) enabledUsers);
 in
 {
   # Ensure immich has access to the mounted directories.
@@ -49,12 +47,8 @@ in
 
   systemd.services.immich-server = {
     requires = nasUnits;
-    after = nasUnits ++ [ oidcCfg.systemd.provisionedTarget ];
-    wants = [ oidcCfg.systemd.provisionedTarget ];
-    serviceConfig = {
-      SupplementaryGroups = [ oidcClient.group ];
-      BindPaths = photoBinds;
-    };
+    after = nasUnits;
+    serviceConfig.BindPaths = photoBinds;
   };
 
   systemd.services.immich-configure = {

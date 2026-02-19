@@ -100,6 +100,8 @@ in
       HASHEOUS_API_ENABLED = "true";
       DISABLE_USERPASS_LOGIN = "false";
 
+      # FIXME: mysql or postgres but then need to figure out authentication. Ideally mysql or postgresqlssh
+      # ROMM_DB_DRIVE = "mysql";
       DB_HOST = "localhost";
       DB_NAME = db.name;
       DB_USER = db.user;

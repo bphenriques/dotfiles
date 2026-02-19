@@ -18,13 +18,11 @@ in
     };
   };
 
-  custom.home-server.oidc.clients.immich = {
-    callbackURLs = [
-      "${serviceCfg.publicUrl}/auth/login"
-      "${serviceCfg.publicUrl}/user-settings"
-      "app.immich:///oauth-callback"
-    ];
-  };
+  custom.home-server.oidc.clients.immich.callbackURLs = [
+    "${serviceCfg.publicUrl}/auth/login"
+    "${serviceCfg.publicUrl}/user-settings"
+    "app.immich:///oauth-callback"
+  ];
 
   services.immich = {
     enable = true;
@@ -57,5 +55,11 @@ in
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
     };
+  };
+
+  systemd.services.immich-server = {
+    requires = [ oidcCfg.systemd.provisionedTarget ];
+    after = [ oidcCfg.systemd.provisionedTarget ];
+    serviceConfig.SupplementaryGroups = [ oidcClient.group ];
   };
 }

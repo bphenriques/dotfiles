@@ -13,18 +13,18 @@
 
 ## Before Deployment
 
-- [ ] Generate auth VM age key:
-  ```bash
-  age-keygen -o /var/lib/sops-nix/system-keys.txt
-  ```
-- [ ] Update `.sops.yaml`: Replace `age1xxxxxxxxx...` placeholder with actual key
+- [ ] First boot: Deploy VM (secrets will fail, expected)
+- [ ] Extract VM's age key: `ssh auth` then `age-keygen -y /var/lib/sops-nix/key.txt`
+- [ ] Add VM's public key to `.sops.yaml` under `&auth-vm`
+- [ ] Re-encrypt secrets: `sops updatekeys hosts/auth/secrets.yaml`
+- [ ] Redeploy VM (secrets now work)
 - [ ] Encrypt `secrets.yaml` with actual secrets:
   - `pocket-id/api-key`
   - `pocket-id/smtp-password`
   - `cloudflare_dns_api_token`
-- [ ] Update SSH authorized key in `config.nix` (line ~45) with your actual public key
 - [ ] Add Pocket-ID API key to `compute/secrets.yaml` under `pocket-id/api-key` (same key as auth VM)
-- [ ] Fix `system.stateVersion` in `config.nix` to actual NixOS release (e.g., `"24.11"`)
+
+See [RUNBOOK.md](./RUNBOOK.md) for detailed bootstrap steps.
 
 ## Network Configuration
 

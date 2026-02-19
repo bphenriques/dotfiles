@@ -105,20 +105,20 @@ Internet → Cloudflare (proxy) → Router → Auth VM (10.20.0.10)
 - **Rate limiting**: 50 req/s to prevent brute-force
 - **Internal bridge**: VM on private 10.20.0.0/24, not directly on LAN
 
-### OIDC Credential Provisioning
+### OIDC and User Provisioning
 
 ```
-1. pocket-id-configure.service (auth VM)
-   └─► Manages users and groups only
+1. Auth VM runs Pocket-ID only (no admin scripts)
 
 2. homelab-oidc-provision.service (compute, on boot)
-   └─► Calls Pocket-ID API to create/update OIDC clients
+   └─► Provisions users and groups from home-server.users config
+   └─► Provisions OIDC clients
    └─► Regenerates secrets and writes to /run/homelab-oidc/{client}/ (tmpfs)
 
 3. Services on compute depend on homelab-oidc-ready.target
 ```
 
-**Design**: Credentials are ephemeral (tmpfs) and regenerated on boot. For 24/7 server, this means rotation only on rare reboots. Manual rotation: `systemctl restart homelab-oidc-provision`.
+**Design**: All Pocket-ID admin is done externally from compute host. Auth VM is minimal and more secure. Credentials are ephemeral (tmpfs) and regenerated on boot. Manual rotation: `systemctl restart homelab-oidc-provision`.
 
 ### Security Layers
 

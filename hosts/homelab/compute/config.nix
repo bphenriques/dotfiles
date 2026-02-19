@@ -8,8 +8,8 @@
     ./services
     ./tasks
     ./microvm.nix
-    ../../config/nixos
-    ../../config/nixos/headless
+    ../../../config/nixos
+    ../../../config/nixos/headless
 
     # Users
     ./bphenriques

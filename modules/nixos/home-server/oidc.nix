@@ -1,31 +1,16 @@
-# OIDC Credential Management
+# OIDC Configuration
 #
-# This module provisions OIDC clients with Pocket-ID and manages credentials.
-#
-# Flow:
-#   1. On boot, homelab-oidc-provision.service calls Pocket-ID API
-#   2. For each client: ensure it exists, regenerate secret, write to /run/homelab-oidc/{client}/
-#   3. Client services depend on homelab-oidc-ready.target
-#   4. Client services read credentials from their respective files (idFile, secretFile)
-#
-# Credentials are stored in tmpfs (/run/) and regenerated on every boot.
-# For a 24/7 server, this means secrets rotate only on reboot (rare).
-# Manual rotation: systemctl restart homelab-oidc-provision && restart dependent services.
-#
-# Per-client groups:
-#   Each client gets its own group (homelab-oidc-{name}) with a deterministic GID based on
-#   a hash of the client name (base 42000 + first 4 hex chars of SHA256). This ensures:
-#   - Consistent GIDs across hosts for multi-host setups
-#   - Per-service isolation (only services in the group can read credentials)
+# This module defines OIDC options and generates the provisioning config.
+# The actual provisioning service is defined in hosts/compute/services/oidc-provision/.
 #
 # Consumer pattern:
 #   systemd.services.<name> = {
-#     wants = [ oidcCfg.systemd.provisionedTarget ];
-#     after = [ oidcCfg.systemd.provisionedTarget ];
+#     wants = [ config.custom.home-server.oidc.systemd.provisionedTarget ];
+#     after = [ config.custom.home-server.oidc.systemd.provisionedTarget ];
 #     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
 #   };
 #
-{ lib, config, pkgs, self, ... }:
+{ lib, config, ... }:
 let
   homeServerCfg = config.custom.home-server;
   cfg = homeServerCfg.oidc;
@@ -52,6 +37,13 @@ let
       };
 
       pkce = lib.mkOption { type = lib.types.bool; default = false; };
+
+      gid = lib.mkOption {
+        type = lib.types.int;
+        default = clientGid name;
+        readOnly = true;
+        description = "GID for this client's credentials group";
+      };
 
       group = lib.mkOption {
         type = lib.types.str;
@@ -83,10 +75,11 @@ let
     };
   });
 
-  # Generate config file for the provisioning script
-  provisionConfigFile = pkgs.writeText "oidc-provision-config.json" (builtins.toJSON {
-    clients = lib.mapAttrsToList (_: client: { inherit (client) name callbackURLs pkce; }) cfg.clients;
-  });
+  # Users enabled for Pocket-ID
+  enabledUsers = homeServerCfg.enabledUsers.pocket-id;
+
+  # Derive groups from user memberships
+  allGroups = lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.groups) enabledUsers));
 in
 {
   options.custom.home-server.oidc = {
@@ -104,6 +97,11 @@ in
       url = lib.mkOption {
         type = lib.types.str;
         description = "Public URL of the OIDC provider";
+      };
+
+      internalUrl = lib.mkOption {
+        type = lib.types.str;
+        description = "Internal URL of the OIDC provider when beloging to the same network";
       };
 
       discoveryEndpoint = lib.mkOption {
@@ -139,65 +137,22 @@ in
       description = "OIDC clients to register with the provider";
     };
 
-    systemd = {
-      provisionedTarget = lib.mkOption {
-        type = lib.types.str;
-        default = "homelab-oidc-ready.target";
-        readOnly = true;
-        description = "Systemd target indicating OIDC credentials are ready. Use in both Wants and After.";
+    # Config data for the provisioning service
+    provisionConfig = lib.mkOption {
+      type = lib.types.attrs;
+      readOnly = true;
+      default = {
+        users = lib.mapAttrsToList (_: u: { inherit (u) username email firstName lastName isAdmin groups; }) enabledUsers;
+        groups = map (name: { inherit name; }) allGroups;
+        clients = lib.mapAttrsToList (_: client: { inherit (client) name callbackURLs pkce; }) cfg.clients;
       };
-    };
-  };
-
-  config = lib.mkIf (cfg.clients != { }) {
-    # Per-client groups with deterministic GIDs
-    users.groups = lib.mkMerge (lib.mapAttrsToList (name: _: {
-      ${clientGroup name} = { gid = clientGid name; };
-    }) cfg.clients);
-
-    # Base directory for credentials (tmpfs via /run/)
-    systemd.tmpfiles.rules = [
-      "d ${credentialsBaseDir} 0750 root root -"
-    ];
-
-    # Provisioning service that calls Pocket-ID API
-    systemd.services.homelab-oidc-provision = {
-      description = "Provision OIDC clients with Pocket-ID";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ "multi-user.target" ];
-
-      # Re-run when config changes
-      restartTriggers = [ provisionConfigFile ];
-
-      environment = {
-        POCKET_ID_URL = cfg.provider.url;
-        POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
-        OIDC_CONFIG_FILE = toString provisionConfigFile;
-        OIDC_CREDENTIALS_DIR = credentialsBaseDir;
-      };
-
-      path = [ pkgs.nushell ];
-
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = ''nu ${self.lib.builders.writeNushellScript "oidc-provision" ./oidc-provision.nu}'';
-
-        # Security hardening
-        PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        NoNewPrivileges = true;
-        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
-      };
+      description = "Provisioning config data for Pocket-ID (users, groups, clients)";
     };
 
-    # Target that indicates OIDC credentials are ready
-    systemd.targets."homelab-oidc-ready" = {
-      description = "OIDC credentials are ready";
-      requires = [ "homelab-oidc-provision.service" ];
-      after = [ "homelab-oidc-provision.service" ];
+    systemd.provisionedTarget = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = "Systemd service indicating OIDC credentials are ready. Use in both wants and after.";
     };
   };
 }

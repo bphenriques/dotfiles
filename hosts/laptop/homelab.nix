@@ -1,34 +1,34 @@
 { self, config, ... }: {
   imports = [
-    ../compute/microvm.nix
-    ../compute/datastores
+    ../homelab/compute/microvm.nix
+    ../homelab/compute/datastores
 
     # Auth
-    ../compute/services/oidc-provider.nix
-    ../compute/services/tinyauth.nix
+    ../homelab/compute/services/oidc-provision
+    ../homelab/compute/services/tinyauth.nix
 
     # Arrs services
-    ../compute/services/arrs/radarr.nix
-    ../compute/services/arrs/sonarr.nix
-    ../compute/services/arrs/prowlarr
-    ../compute/services/arrs/jellyseerr
-    ../compute/services/arrs/recyclarr.nix
-    ../compute/services/arrs/cleanuparr.nix
+    ../homelab/compute/services/arrs/radarr.nix
+    #../homelab/compute/services/arrs/sonarr.nix
+    #../homelab/compute/services/arrs/prowlarr
+    #../homelab/compute/services/arrs/jellyseerr
+    #../homelab/compute/services/arrs/recyclarr.nix
+    #../homelab/compute/services/arrs/cleanuparr.nix
 
     # Media
-    ../compute/services/jellyfin
-    ../compute/services/transmission.nix
-    ../compute/services/miniflux
-    ../compute/services/obsidian-livesync
-    ../compute/services/immich
-    ../compute/services/homepage.nix
-    ../compute/services/romm
-    # ../compute/services/syncthing.nix
+    #../homelab/compute/services/jellyfin
+    ../homelab/compute/services/transmission.nix
+    # ../homelab/compute/services/miniflux
+    #../homelab/compute/services/obsidian-livesync
+    #../homelab/compute/services/immich
+    ../homelab/compute/services/homepage.nix
+    ../homelab/compute/services/romm
+    # ../homelab/compute/services/syncthing.nix
   ];
 
   custom.home-server = {
     enable = true;
-    domain = self.settings.laptop.domain;
+    domain = self.settings.compute.domain;
     cloudflareEmail = self.settings.cloudflareEmail;
 
     media = {

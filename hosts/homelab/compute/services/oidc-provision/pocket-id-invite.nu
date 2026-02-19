@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 # Resends one-time access email to a user for passkey setup.
-# Usage: pocket-id-invite.nu <username>
+# Usage: pocket-id-invite <username>
 const PAGINATION_LIMIT = 20
 
 let base_url = $env.POCKET_ID_URL

@@ -1,18 +1,18 @@
+# Pocket-ID Service
+#
+# This is a minimal Pocket-ID instance. All admin (users, groups, OIDC clients)
+# is done externally from the compute host via homelab-oidc-provision.service.
+
 { config, pkgs, lib, self, ... }:
 let
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
-  port = 8082;
-  fqdn = "auth.${self.settings.compute.domain}";
-  cloudflareEmail = self.settings.cloudflareEmail;
 in
 {
-  imports = [ ./post-start.nix ];
-
   services.pocket-id = {
     enable = true;
     settings = {
-      APP_URL = "https://${fqdn}";
-      PORT = toString port;
+      APP_URL = "https://auth.${self.settings.compute.domain}";
+      PORT = 8082;
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
@@ -61,12 +61,4 @@ in
       chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} "${encryptionKeyFile}"
     fi
   '';
-
-  environment.systemPackages = [
-    (pkgs.writeShellScriptBin "pocket-id-invite" ''
-      export POCKET_ID_URL="http://127.0.0.1:${toString port}"
-      export POCKET_ID_API_KEY_FILE="${config.sops.templates.pocket-id-api-key.path}"
-      exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-invite" ./pocket-id-invite.nu} "$@"
-    '')
-  ];
 }

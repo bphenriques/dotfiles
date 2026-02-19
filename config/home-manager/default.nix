@@ -134,6 +134,11 @@
     includes = [ "$HOME/.ssh/config.local" ];
     matchBlocks = {
       "*".extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.
+      "auth" = {
+        hostname = "10.20.0.10";
+        user = "root";
+        port = 2222;
+      };
       "bruno-home-nas" = {
         user = "Bruno-Admin";
         port = 6188;

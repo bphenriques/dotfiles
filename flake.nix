@@ -60,11 +60,8 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      # Hosts - Homelab Server
-      nixosConfigurations.auth = import ./hosts/auth inputs;
-      nixosConfigurations.compute = import ./hosts/compute inputs;
-
-      # Hosts - Clients
+      nixosConfigurations.auth = import ./hosts/homelab/auth inputs;
+      nixosConfigurations.compute = import ./hosts/homelab/compute inputs;
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };

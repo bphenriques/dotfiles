@@ -27,6 +27,19 @@ The automations rely on the secrets being readily available in Bitwarden (the id
 
 For more details, check the `dotfiles-secrets` package.
 
+> **TODO**: Consider using `sops.age.generateKey = true` for new machines instead of
+> pre-provisioning keys in Bitwarden. This auto-generates the age key on first boot
+> (stored in `/var/lib/sops-nix/key.txt`). Bootstrap workflow (blue-green style):
+> 1. First boot - key generates, secrets fail (expected)
+> 2. Extract public key: `age-keygen -y /var/lib/sops-nix/key.txt`
+> 3. Add new key to `.sops.yaml` alongside existing keys
+> 4. Re-encrypt: `sops updatekeys <secrets.yaml>`
+> 5. Redeploy - secrets now work
+> 6. (Optional) Remove old key from `.sops.yaml` and re-encrypt again
+>
+> See `hosts/auth/RUNBOOK.md` for detailed example. Avoids manual key management
+> while keeping keys unique per machine.
+
 ## Install locally
 
 1. Boot onto the NixOS installer (see previous section).

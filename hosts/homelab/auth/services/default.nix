@@ -1,7 +1,7 @@
 { self, lib, config, ... }:
 {
   imports = [
-    ./pocket-id
+    ./pocket-id.nix
     ./fail2ban.nix
     ./traefik.nix
   ];

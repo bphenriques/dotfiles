@@ -1,12 +1,13 @@
 keys:
-  - &laptop-system age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
+  - &admin age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
+  - &auth-vm age1ykl3zszv7wlm72380w6h8c5uvtyfqs3hh467mq5vf5eqmv8t95gq8kshpj
 creation_rules:
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
-      - age: [ *laptop-system ]
+      - age: [ *admin ]
   - path_regex: hosts/compute/secrets.yaml
     key_groups:
-      - age: [ *laptop-system ]
-  - path_regex: hosts/vm/auth/secrets.yaml
+      - age: [ *admin ]
+  - path_regex: hosts/auth/secrets.yaml
     key_groups:
-      - age: [ *laptop-system ]
+      - age: [ *admin, *auth-vm ]

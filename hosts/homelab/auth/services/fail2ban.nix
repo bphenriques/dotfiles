@@ -7,7 +7,7 @@ _: {
     jails.sshd = {
       settings = {
         enabled = true;
-        port = 22;
+        port = 2222;
         filter = "sshd";
         maxretry = 3;
       };

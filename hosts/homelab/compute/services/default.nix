@@ -1,6 +1,6 @@
 { self, ...}: {
   imports = [
-    ./oidc-provider.nix
+    ./oidc-provision
     ./tinyauth.nix
     ./miniflux
 
@@ -13,8 +13,8 @@
     ./arrs/radarr.nix
     ./arrs/sonarr.nix
     ./arrs/prowlarr
-    ./arrs/jellyseerr
-    ./arrs/recyclarr.nix
+    #./arrs/jellyseerr
+    #./arrs/recyclarr.nix
     ./arrs/cleanuparr.nix
   ];
 
