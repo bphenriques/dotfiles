@@ -8,7 +8,7 @@ in
     ./microvm.nix
     ../../../config/common.nix
     ../../../config/nixos/headless/default.nix
-    ./services
+    ./pocket-id.nix
   ];
 
   # Network configuration
@@ -17,34 +17,10 @@ in
     nameservers = networking.cloudflare.nameservers;
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 2222 80 443 ];  # SSH (internal only), HTTP/HTTPS (filtered below)
-      allowedUDPPorts = [ 443 ];          # QUIC/HTTP3
-
-      # Restrict HTTPS (443) to Cloudflare IPs + internal subnet. Ensures origin IP protection even if leaked.
-      # These rules run BEFORE the generic allow rules, so we drop non-matching traffic first.
-      extraInputRules = let
-        cloudflareIPv4Set = "{ ${builtins.concatStringsSep ", " networking.cloudflare.ipv4} }";
-        cloudflareIPv6Set = "{ ${builtins.concatStringsSep ", " networking.cloudflare.ipv6} }";
-      in ''
-        # Allow 443 from internal subnet
-        ip saddr ${networking.bridge.subnet} tcp dport 443 accept
-        ip saddr ${networking.bridge.subnet} udp dport 443 accept
-
-        # Allow 443 from Cloudflare IPs
-        ip saddr ${cloudflareIPv4Set} tcp dport 443 accept
-        ip saddr ${cloudflareIPv4Set} udp dport 443 accept
-        ip6 saddr ${cloudflareIPv6Set} tcp dport 443 accept
-        ip6 saddr ${cloudflareIPv6Set} udp dport 443 accept
-
-        # Drop 443 from all other sources (before allowedTCPPorts processes it)
-        tcp dport 443 drop
-        udp dport 443 drop
-      '';
+      allowedTCPPorts = [ 80 ];
+      allowedUDPPorts = [ ];
     };
   };
-
-  # SSH on non-standard port (internal access only)
-  services.openssh.ports = [ 2222 ];
 
   # Secrets - age key auto-generated on first boot, stored in persistent /var
   sops.defaultSopsFile = ./secrets.yaml;

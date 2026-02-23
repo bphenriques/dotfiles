@@ -1,8 +1,8 @@
-# Configures the auth VM as a microvm running on compute.
-# The VM is isolated but can be reached via internal bridge network.
+# Configures microvms running on compute.
+# VMs are isolated but can be reached via internal bridge network.
 #
-# Note: The auth VM's NixOS configuration is defined in nixosConfigurations.auth
-# This module just declares that it should run as a microvm on this host.
+# Note: Each VM's NixOS configuration is defined in nixosConfigurations.<name>
+# This module just declares that they should run as microvms on this host.
 
 { config, lib, pkgs, self, ... }:
 let
@@ -34,18 +34,37 @@ in
     };
   };
 
-  # NAT for VM internet access
+  # NAT for VM internet access + port forwarding to gateway VM
   networking.nat = {
     enable = true;
     internalInterfaces = [ bridgeName ];
     externalInterface = "wlp4s0";  # Laptop WiFi interface. Replace with the right interface in compute.
+
+    # Forward external traffic to gateway VM (Pangolin)
+    forwardPorts = [
+      { destination = "${networking.vm.gateway.ip}:443"; proto = "tcp"; sourcePort = 443; }
+      { destination = "${networking.vm.gateway.ip}:443"; proto = "udp"; sourcePort = 443; }
+      { destination = "${networking.vm.gateway.ip}:51820"; proto = "udp"; sourcePort = 51820; }
+    ];
   };
 
-  # Resolve auth domain to internal IP for host<->VM API calls
-  networking.hosts.${networking.vm.auth.ip} = [ "auth.${self.settings.compute.domain}" ];
+  # Resolve VM domains to internal IPs for host<->VM API calls
+  networking.hosts = {
+    ${networking.vm.auth.ip} = [ "auth.${self.settings.compute.domain}" ];
+    ${networking.vm.gateway.ip} = [
+      "pangolin.${self.settings.compute.domain}"
+      "gateway.${self.settings.compute.domain}"
+    ];
+  };
 
-  microvm.vms.auth = {
-    flake = self;
-    restartIfChanged = true;
+  microvm.vms = {
+    auth = {
+      flake = self;
+      restartIfChanged = true;
+    };
+    gateway = {
+      flake = self;
+      restartIfChanged = true;
+    };
   };
 }

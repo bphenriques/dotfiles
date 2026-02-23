@@ -1,6 +1,7 @@
 { self, ...}: {
   imports = [
     ./oidc-provision
+    ./pangolin-oidc.nix
     ./tinyauth.nix
     ./miniflux
 

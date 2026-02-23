@@ -1,6 +1,9 @@
 keys:
   - &admin age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
   - &auth-vm age1ykl3zszv7wlm72380w6h8c5uvtyfqs3hh467mq5vf5eqmv8t95gq8kshpj
+  # Gateway VM key will be auto-generated on first boot
+  # Add here after: cat /var/lib/sops-nix/key.txt | age-keygen -y
+  - &gateway-vm age1placeholder000000000000000000000000000000000000000000000
 creation_rules:
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
@@ -8,6 +11,9 @@ creation_rules:
   - path_regex: hosts/compute/secrets.yaml
     key_groups:
       - age: [ *admin ]
-  - path_regex: hosts/auth/secrets.yaml
+  - path_regex: hosts/homelab/auth/secrets.yaml
     key_groups:
       - age: [ *admin, *auth-vm ]
+  - path_regex: hosts/homelab/gateway/secrets.yaml
+    key_groups:
+      - age: [ *admin, *gateway-vm ]

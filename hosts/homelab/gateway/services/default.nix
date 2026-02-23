@@ -1,9 +1,7 @@
 { self, lib, config, ... }:
 {
   imports = [
-    ./pocket-id.nix
-    ./fail2ban.nix
-    ./traefik.nix
+    ./pangolin.nix
   ];
 
   # Network hardening

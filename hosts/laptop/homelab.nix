@@ -5,6 +5,7 @@
 
     # Auth
     ../homelab/compute/services/oidc-provision
+    ../homelab/compute/services/pangolin-oidc.nix
     ../homelab/compute/services/tinyauth.nix
 
     # Arrs services

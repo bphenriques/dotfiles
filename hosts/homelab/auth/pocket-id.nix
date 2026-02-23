@@ -12,7 +12,7 @@ in
     enable = true;
     settings = {
       APP_URL = "https://auth.${self.settings.compute.domain}";
-      PORT = 8082;
+      PORT = 80;
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;

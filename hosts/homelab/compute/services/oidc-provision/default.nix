@@ -13,6 +13,8 @@ let
   provisionConfigFile = pkgs.writeText "oidc-provision-config.json" (builtins.toJSON cfg.provisionConfig);
 in
 {
+  imports = [ ./pangolin-oidc.nix ];
+
   # OIDC provider metadata (Pocket-ID running in auth VM)
   custom.home-server.oidc = {
     systemd.provisionedTarget = "homelab-oidc-provision.service";
@@ -51,7 +53,7 @@ in
     restartTriggers = [ provisionConfigFile ];
 
     environment = {
-      POCKET_ID_URL = publicUrl;         # Use internal URL to distinguish from requests made externally
+      POCKET_ID_URL = publicUrl;         # FIXME: Use internal URL to distinguish from requests made externally
       POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
       OIDC_CONFIG_FILE = toString provisionConfigFile;
       OIDC_CREDENTIALS_DIR = cfg.credentials.dir;
