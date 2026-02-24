@@ -3,12 +3,15 @@
   imports = [
     ./hardware
     ./disko.nix
-    ./homelab.nix
     ../../config/nixos
     ../../config/nixos/desktop
 
     # Users
     ./bphenriques
+
+    # Temporary
+    ../homelab/compute/datastores
+    ../homelab/compute/services
   ];
 
   networking.hostName = "bphenriques-laptop";

@@ -1,18 +1,23 @@
-# Pocket-ID Service
-#
-# This is a minimal Pocket-ID instance. All admin (users, groups, OIDC clients)
-# is done externally from the compute host via homelab-oidc-provision.service.
-
 { config, pkgs, lib, self, ... }:
 let
+  publicUrl = "https://auth.${self.settings.hosts.compute.domain}";
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
+  serviceCfg = config.custom.home-server.services.pocket-id;
+  port = 8094;
 in
 {
+  imports = [ ./post-start.nix ];
+
+  custom.home-server.services.pocket-id = {
+    subdomain = "auth";
+    port = port;
+  };
+
   services.pocket-id = {
     enable = true;
     settings = {
-      APP_URL = "https://auth.${self.settings.compute.domain}";
-      PORT = 80;
+      APP_URL = serviceCfg.publicUrl;
+      PORT = port;
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
@@ -29,19 +34,17 @@ in
       SMTP_TLS = self.settings.smtp.tls;
       SMTP_PASSWORD_FILE = config.sops.templates.pocket-id-smtp-password.path;
 
-      # Invite only, therefore the emails are valid for me.
+      # Invite only
       ALLOW_USER_SIGNUPS = "withToken";
       EMAILS_VERIFIED = true;
       EMAIL_VERIFICATION_ENABLED = false;
-
-      # Enable admin-triggered invite emails
       EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED = true;
       EMAIL_ONE_TIME_ACCESS_AS_UNAUTHENTICATED_ENABLED = false;
     };
   };
 
   sops = {
-    secrets."pocket-id/api-key" = { };
+    secrets."pocket-id/api-key".mode = "0400";
     templates."pocket-id-api-key" = {
       owner = config.services.pocket-id.user;
       content = config.sops.placeholder."pocket-id/api-key";
@@ -61,4 +64,14 @@ in
       chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} "${encryptionKeyFile}"
     fi
   '';
+
+  # OIDC provider metadata for consumers
+  custom.home-server.oidc.provider = {
+    displayName = "Pocket-ID";
+    internalName = "PocketID";
+    url = publicUrl;
+    internalUrl = publicUrl;
+    discoveryEndpoint = "${publicUrl}/.well-known/openid-configuration";
+    apiKeyFile = config.sops.secrets."pocket-id/api-key".path;
+  };
 }

@@ -1,10 +1,5 @@
 #!/usr/bin/env nu
-
 # Provisions Pocket-ID: users, groups, and OIDC clients.
-#
-# This script is called on boot by homelab-oidc-provision.service.
-# It manages all Pocket-ID configuration from the compute host,
-# keeping the auth VM simple and secure.
 #
 # Environment variables:
 #   POCKET_ID_URL - Pocket-ID base URL
@@ -34,10 +29,6 @@ def get_all [resource: string] {
   $r.body.data
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Groups
-# ─────────────────────────────────────────────────────────────────────────────
-
 def ensure_group [group: record, existing: list] {
   let found = $existing | where name == $group.name | get 0?
   if $found != null { return $found.id }
@@ -48,10 +39,6 @@ def ensure_group [group: record, existing: list] {
   print $"  Created group: ($group.name)"
   $r.body.id
 }
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Users
-# ─────────────────────────────────────────────────────────────────────────────
 
 def ensure_user [user: record, group_ids: list<string>, existing: list] {
   let found = $existing | where username == $user.username | get 0?
@@ -92,10 +79,6 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   { username: $user.username, id: $user_id }
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# OIDC Clients
-# ─────────────────────────────────────────────────────────────────────────────
-
 def write_credential [path: string, content: string, group: string] {
   $content | save --force $path
   chmod 0640 $path
@@ -108,7 +91,7 @@ def provision_client [client: record, existing: list] {
   let desired = {
     name: $client.name
     callbackURLs: $client.callbackURLs
-    pkce: $client.pkce
+    pkceEnabled: $client.pkce
     isPublic: false
   }
 
@@ -157,10 +140,6 @@ def provision_client [client: record, existing: list] {
   print $"  Wrote credentials to ($client_dir)"
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────
-
 def main [] {
   wait_ready
   print "Pocket ID is ready"
@@ -175,11 +154,17 @@ def main [] {
   # Provision users
   print "Provisioning users..."
   let existing_users = get_all "users"
-  $config.users | each { |u|
+  let provisioned_users = $config.users | each { |u|
     print $"Processing user: ($u.username)"
     let group_ids = $u.groups | each { |g| $group_map | get $g }
     ensure_user $u $group_ids $existing_users
-  } | ignore
+  }
+
+  # Write users mapping file
+  let users_file = $"($credentials_dir)/oidc-users.json"
+  $provisioned_users | to json | save --force $users_file
+  chmod 0644 $users_file
+  print $"Wrote users mapping to ($users_file)"
 
   # Provision OIDC clients
   if ($config.clients | is-empty) {

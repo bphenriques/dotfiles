@@ -95,7 +95,7 @@ in
     requires = [ "${name}.service" "recyclarr.service" ];
     wants = [ "transmission.service" "recyclarr.service" ];
     partOf = [ "${name}.service" ];
-    restartTriggers = [ (builtins.toJSON settings) ];
+    restartTriggers = [ (builtins.toJSON settings) ./arr-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

@@ -60,6 +60,7 @@ in
   systemd.services.immich-server = {
     requires = [ oidcCfg.systemd.provisionedTarget ];
     after = [ oidcCfg.systemd.provisionedTarget ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
   };
 }

@@ -32,8 +32,6 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
-    microvm.url = "github:astro/microvm.nix";     # Lightweight VMs for isolated services
-    microvm.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, ... }:
@@ -60,8 +58,6 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      nixosConfigurations.auth = import ./hosts/homelab/auth inputs;
-      nixosConfigurations.gateway = import ./hosts/homelab/gateway inputs;
       nixosConfigurations.compute = import ./hosts/homelab/compute inputs;
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;

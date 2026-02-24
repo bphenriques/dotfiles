@@ -1,4 +1,4 @@
-{ nixpkgs, nur, self, sops-nix, disko, home-manager, dotfiles-private, stylix, microvm, ... }:
+{ nixpkgs, nur, self, sops-nix, disko, home-manager, dotfiles-private, stylix, ... }:
 let
   inherit (nixpkgs.lib.attrsets) attrValues;
 
@@ -14,7 +14,6 @@ let
     sops-nix.nixosModules.sops
     disko.nixosModules.disko
     home-manager.nixosModules.home-manager
-    microvm.nixosModules.host # TODO: Remove once we test everything in here and turn on compute host
   ];
 
   sharedSpecialArgs = {

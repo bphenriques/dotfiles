@@ -5,18 +5,19 @@ in
 {
   imports = [ ./post-start.nix ];
 
-  custom.home-server.services.jellyfin = {
-    port = 8096;
-    dashboard = {
-      enable = true;
-      category = "Media";
-      description = "Media Player";
-      icon = "jellyfin.svg";
+  custom.home-server = {
+    services.jellyfin = {
+      port = 8096;
+      dashboard = {
+        enable = true;
+        category = "Media";
+        description = "Media Player";
+        icon = "jellyfin.svg";
+      };
     };
-  };
-
-  custom.home-server.oidc.clients.jellyfin = {
-    callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+    oidc.clients.jellyfin = {
+      callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+    };
   };
 
   services.jellyfin.enable = true;

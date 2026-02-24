@@ -41,6 +41,7 @@ in
   systemd.services.miniflux = {
     wants = [ oidcCfg.systemd.provisionedTarget ];
     after = [ oidcCfg.systemd.provisionedTarget ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.LoadCredential = [
       "oidc-id:${oidcClient.idFile}"
       "oidc-secret:${oidcClient.secretFile}"

@@ -29,6 +29,7 @@ let
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshot = pkgs.callPackage ./screenshot { };
       mpc-plus = pkgs.callPackage ./mpc-plus { };
+      wg-manage = pkgs.callPackage ./wg-manage { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

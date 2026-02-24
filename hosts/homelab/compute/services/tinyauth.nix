@@ -82,6 +82,7 @@ in
   systemd.services.podman-tinyauth = {
     after = [ oidcCfg.systemd.provisionedTarget ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
     preStart = ''
       mkdir -p "$(dirname "${envFile}")"

@@ -33,7 +33,7 @@ in
     after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" ];
     requires = [ "prowlarr.service" ];
     wants = [ "radarr-configure.service" "sonarr-configure.service" ];
-    restartTriggers = [ (builtins.toJSON settings) ];
+    restartTriggers = [ (builtins.toJSON settings) ./prowlarr-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

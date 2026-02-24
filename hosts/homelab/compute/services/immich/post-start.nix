@@ -57,7 +57,7 @@ in
     after = [ "immich-server.service" ];
     requires = [ "immich-server.service" ];
     partOf = [ "immich-server.service" ];
-    restartTriggers = [ immichConfigJson ];
+    restartTriggers = [ immichConfigJson ./immich-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

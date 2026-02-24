@@ -60,7 +60,7 @@ in
     requires = [ "jellyseerr.service" ];
     wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
     partOf = [ "jellyfin-configure.service" ];  # Restart when jellyfin-configure restarts (new users to sync)
-    restartTriggers = [ initConfigJson ];
+    restartTriggers = [ initConfigJson ./jellyseerr-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

@@ -100,7 +100,6 @@ in
       HASHEOUS_API_ENABLED = "true";
       DISABLE_USERPASS_LOGIN = "false";
 
-      # FIXME: mysql or postgres but then need to figure out authentication. Ideally mysql or postgresqlssh
       # ROMM_DB_DRIVE = "mysql";
       DB_HOST = "localhost";
       DB_NAME = db.name;
@@ -163,7 +162,7 @@ in
       oidcCfg.systemd.provisionedTarget
       "mysql.service"
     ];
-    partOf = [ homelabMounts.media.automountUnit ];
+    partOf = [ homelabMounts.media.automountUnit oidcCfg.systemd.provisionedTarget ];
     wants = [
       oidcCfg.systemd.provisionedTarget
       "mysql.service"

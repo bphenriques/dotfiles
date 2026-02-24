@@ -26,6 +26,7 @@ in
     after = [ "couchdb.service" ];
     requires = [ "couchdb.service" ];
     partOf = [ "couchdb.service" ];
+    restartTriggers = [ ./couchdb-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       User = config.services.couchdb.user;    # Ensure it is not root.

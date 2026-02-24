@@ -126,6 +126,7 @@ in
       oidcCfg.systemd.provisionedTarget
       "init-booklore-network.service"
     ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
     serviceConfig.SupplementaryGroups = [ oidcClient.group ];
     preStart = ''
       mkdir -p "$(dirname "${envFile}")"

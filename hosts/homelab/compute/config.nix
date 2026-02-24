@@ -7,15 +7,12 @@
     ./datastores
     ./services
     ./tasks
-    ./microvm.nix
     ../../../config/nixos
     ../../../config/nixos/headless
 
     # Users
     ./bphenriques
   ];
-
-  # TODO: https://blog.aldnav.com/blog/going-headless-with-nixos/
 
   # Basic setup
   networking.hostName = "compute";

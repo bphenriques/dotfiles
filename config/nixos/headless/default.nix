@@ -16,3 +16,5 @@ _: {
     };
   };
 }
+
+# TODO: https://blog.aldnav.com/blog/going-headless-with-nixos/

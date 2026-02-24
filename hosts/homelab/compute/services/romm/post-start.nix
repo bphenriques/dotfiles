@@ -20,7 +20,7 @@ in
     after = [ "podman-romm.service" ];
     requires = [ "podman-romm.service" ];
     partOf = [ "podman-romm.service" ];
-    restartTriggers = [ (builtins.toJSON adminConfig) ];
+    restartTriggers = [ (builtins.toJSON adminConfig) ./romm-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

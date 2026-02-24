@@ -63,6 +63,14 @@ let
             viewRecentlyAdded = lib.mkEnableOption "view recently added media";
           };
         };
+
+        wireguard = {
+          enable = lib.mkEnableOption "Wireguard configuration for this user (requires Wireguard)";
+          devices = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ name ];
+          };
+        };
       };
     };
   });
@@ -105,6 +113,7 @@ in
         couchdb = lib.filterAttrs (_: u: u.services.couchdb.enable) cfg;
         jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
         jellyseerr = lib.filterAttrs (_: u: u.services.jellyseerr.enable) cfg;
+        wireguard = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg;
       };
       description = "Read-only attrset of users filtered by enabled service.";
     };

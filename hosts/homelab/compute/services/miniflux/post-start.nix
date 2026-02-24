@@ -32,7 +32,8 @@ in
     after = [ "miniflux.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "miniflux.service" ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
-    restartTriggers = [ userSettings ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
+    restartTriggers = [ userSettings ./miniflux-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       Restart = "on-failure";

@@ -4,8 +4,7 @@ let
 in
 {
   imports = [
-    ../../../config/home-manager
-    ./stylix.nix
+    ../../../../config/home-manager
   ];
 
   xdg.userDirs = {

@@ -102,7 +102,8 @@ in
     after = [ "jellyfin.service" oidcCfg.systemd.provisionedTarget ];
     requires = [ "jellyfin.service" ];
     wants = [ oidcCfg.systemd.provisionedTarget ];
-    restartTriggers = [ jellyfinConfigJson ];
+    partOf = [ oidcCfg.systemd.provisionedTarget ];
+    restartTriggers = [ jellyfinConfigJson ./jellyfin-configure.nu ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

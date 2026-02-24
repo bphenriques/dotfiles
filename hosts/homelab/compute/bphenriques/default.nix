@@ -1,7 +1,5 @@
 { lib, config, ... }:
 {
-  imports = [ ./homelab.nix ];
-
   sops.secrets."users/bphenriques/password".neededForUsers = true;
   users.users.bphenriques = {
     isNormalUser = true;
