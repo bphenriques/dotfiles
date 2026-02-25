@@ -1,8 +1,8 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.couchdb;
+  serviceCfg = config.custom.homelab.services.couchdb;
 
-  enabledUsers = config.custom.home-server.enabledUsers.couchdb;
+  enabledUsers = config.custom.homelab.enabledUsers.couchdb;
   settings = {
     users = lib.mapAttrsToList (_: u: {
       name = u.username;

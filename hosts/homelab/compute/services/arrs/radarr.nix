@@ -6,10 +6,10 @@ let
     description = "Movie Tracker";
     rootPath = config.custom.paths.media.movies;
     categoryField = "movieCategory";
-    forwardAuthGroup = config.custom.home-server.groups.admin;
+    forwardAuthGroup = config.custom.homelab.groups.admin;
   };
   profiles = {
-    custom.home-server.media.radarr = {
+    custom.homelab.media.radarr = {
       qualityDefinitionTemplate = "radarr-quality-definition-movie";
       defaultProfile = "hd";
 

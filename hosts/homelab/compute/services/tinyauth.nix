@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.custom.home-server;
+  cfg = config.custom.homelab;
   oidcCfg = cfg.oidc;
   oidcClient = cfg.oidc.clients.tinyauth;
   serviceCfg = cfg.services.tinyauth;
@@ -14,7 +14,7 @@ let
   envFile = "/run/tinyauth/env";
 in
 {
-  custom.home-server.services.tinyauth = {
+  custom.homelab.services.tinyauth = {
     port = 3000;
     dashboard = {
       enable = false; # Internal service, not shown on dashboard
@@ -24,14 +24,15 @@ in
     };
   };
 
-  custom.home-server.forwardAuth = {
+  custom.homelab.ingress.traefik.forwardAuth = {
     enable = true;
     internalUrl = serviceCfg.internalUrl;
   };
 
-  custom.home-server.oidc.clients.tinyauth.callbackURLs = [
-    "${serviceCfg.publicUrl}/api/oauth/callback/pocketid"
-  ];
+  custom.homelab.oidc.clients.tinyauth = {
+    callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
+    systemd.dependentServices = [ "podman-tinyauth" ];
+  };
 
   sops.secrets."tinyauth/secret" = { };
 
@@ -80,10 +81,7 @@ in
   };
 
   systemd.services.podman-tinyauth = {
-    after = [ oidcCfg.systemd.provisionedTarget ];
-    wants = [ oidcCfg.systemd.provisionedTarget ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
-    serviceConfig.SupplementaryGroups = [ oidcClient.group ];
+    serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
     preStart = ''
       mkdir -p "$(dirname "${envFile}")"
       echo "PROVIDERS_POCKETID_CLIENT_ID=$(cat ${oidcClient.idFile})" > "${envFile}"

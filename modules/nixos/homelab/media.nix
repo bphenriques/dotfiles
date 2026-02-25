@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  cfg = config.custom.home-server.media;
+  cfg = config.custom.homelab.media;
 
   # Quality profile definition
   qualityProfileOpt = lib.types.submodule {
@@ -35,7 +35,7 @@ let
   };
 in
 {
-  options.custom.home-server.media = {
+  options.custom.homelab.media = {
     jellyfin.serverId = lib.mkOption {
       type = lib.types.str;
       description = "Jellyfin server ID for integrations (e.g., Jellyseerr)";

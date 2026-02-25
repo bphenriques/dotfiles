@@ -1,8 +1,8 @@
 { config, pkgs, lib, self, ... }:
 let
-  cfg = config.custom.home-server;
+  cfg = config.custom.homelab;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
-  groupsCfg = config.custom.home-server.groups;
+  groupsCfg = config.custom.homelab.groups;
 
   serviceCfg = cfg.services.romm;
   oidcCfg = cfg.oidc;
@@ -44,7 +44,7 @@ let
   configFile = yamlFormat.generate "romm-config.yml" rommConfig;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
   sops.secrets = {
     "romm/mobygames/api-key" = { };
@@ -52,7 +52,7 @@ in
     "romm/screenscraper/password" = { };
   };
 
-  custom.home-server = {
+  custom.homelab = {
     services.romm = {
       port = 8095;
       dashboard = {
@@ -62,7 +62,10 @@ in
         icon = "romm.svg";
       };
     };
-    oidc.clients.romm.callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
+    oidc.clients.romm = {
+      callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
+      systemd.dependentServices = [ "podman-romm" ];
+    };
   };
 
   # MySQL database and user for romm
@@ -82,6 +85,7 @@ in
     isSystemUser = true;
     extraGroups = [ homelabMounts.media.group "mysql" ];
   };
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   systemd.tmpfiles.rules = [
     "d ${dataDir}           0750 ${rommUser.name} ${rommUser.group} -"
@@ -156,17 +160,9 @@ in
   };
 
   systemd.services.podman-romm = {
-    requires = [ homelabMounts.media.automountUnit "mysql.service" ];
-    after = [
-      homelabMounts.media.automountUnit
-      oidcCfg.systemd.provisionedTarget
-      "mysql.service"
-    ];
-    partOf = [ homelabMounts.media.automountUnit oidcCfg.systemd.provisionedTarget ];
-    wants = [
-      oidcCfg.systemd.provisionedTarget
-      "mysql.service"
-    ];
+    requires = [ "mysql.service" ];
+    after = [ "mysql.service" ];
+    wants = [ "mysql.service" ];
     path = [ pkgs.openssl ];
     preStart = ''
       [ -f "${secretsFile}" ] && exit 0
@@ -174,6 +170,6 @@ in
       echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
     '';
     restartTriggers = [ (builtins.toJSON rommConfig) ];
-    serviceConfig.SupplementaryGroups = [ oidcClient.group ];
+    serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
   };
 }

@@ -1,7 +1,7 @@
 { lib, config, ... }:
 let
-  cfg = config.custom.home-server.users;
-  groupsCfg = config.custom.home-server.groups;
+  cfg = config.custom.homelab.users;
+  groupsCfg = config.custom.homelab.groups;
 
   userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
@@ -76,7 +76,7 @@ let
   });
 in
 {
-  options.custom.home-server = {
+  options.custom.homelab = {
     groups = {
       admin = lib.mkOption {
         type = lib.types.str;
@@ -120,7 +120,7 @@ in
   };
 
   config.assertions = let
-    jellyseerrUsers = lib.attrValues config.custom.home-server.enabledUsers.jellyseerr;
+    jellyseerrUsers = lib.attrValues config.custom.homelab.enabledUsers.jellyseerr;
   in [
     {
       assertion = lib.all (u: u.services.jellyfin.enable) jellyseerrUsers;

@@ -1,8 +1,8 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.jellyfin;
+  serviceCfg = config.custom.homelab.services.jellyfin;
   pathsCfg = config.custom.paths;
-  oidcCfg = config.custom.home-server.oidc;
+  oidcCfg = config.custom.homelab.oidc;
 
   jellyfinConfigJson = builtins.toJSON jellyfinConfig;
   jellyfinConfig = {
@@ -25,7 +25,7 @@ let
       };
     } // lib.optionalAttrs (u.services.jellyfin ? passwordFile) {
       passwordFile = u.services.jellyfin.passwordFile;
-    }) config.custom.home-server.enabledUsers.jellyfin;
+    }) config.custom.homelab.enabledUsers.jellyfin;
   };
 in
 {
@@ -34,15 +34,13 @@ in
     secrets."jellyfin/admin/password" = { };
   };
 
-  custom.home-server.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
+  custom.homelab.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
 
   systemd.services.jellyfin-configure = {
     description = "Configure Jellyfin with declarative configuration";
     wantedBy = [ "multi-user.target" ];
-    after = [ "jellyfin.service" oidcCfg.systemd.provisionedTarget ];
+    after = [ "jellyfin.service" ];
     requires = [ "jellyfin.service" ];
-    wants = [ oidcCfg.systemd.provisionedTarget ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
     restartTriggers = [ jellyfinConfigJson ./jellyfin-configure.nu ];
     serviceConfig = {
       Type = "oneshot";

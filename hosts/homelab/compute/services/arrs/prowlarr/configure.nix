@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.prowlarr;
+  serviceCfg = config.custom.homelab.services.prowlarr;
 
   settings = {
     # Indexers have the following fields:
@@ -13,14 +13,14 @@ let
         name = "Radarr";
         implementation = "Radarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.home-server.services.radarr.internalUrl;
+        baseUrl = config.custom.homelab.services.radarr.internalUrl;
         prowlarrUrl = serviceCfg.internalUrl;
       }
       {
         name = "Sonarr";
         implementation = "Sonarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.home-server.services.sonarr.internalUrl;
+        baseUrl = config.custom.homelab.services.sonarr.internalUrl;
         prowlarrUrl = serviceCfg.internalUrl;
       }
     ];

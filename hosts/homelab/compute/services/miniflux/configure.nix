@@ -1,11 +1,11 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.miniflux;
-  oidcCfg = config.custom.home-server.oidc;
+  serviceCfg = config.custom.homelab.services.miniflux;
+  oidcCfg = config.custom.homelab.oidc;
 
   userSettings = builtins.toJSON (lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
-  ) config.custom.home-server.enabledUsers.miniflux);
+  ) config.custom.homelab.enabledUsers.miniflux);
 in
 {
   services.miniflux = {
@@ -29,10 +29,8 @@ in
   systemd.services.miniflux-configure = {
     description = "Configure Miniflux users and settings";
     wantedBy = [ "miniflux.service" ];
-    after = [ "miniflux.service" oidcCfg.systemd.provisionedTarget ];
+    after = [ "miniflux.service" ];
     requires = [ "miniflux.service" ];
-    wants = [ oidcCfg.systemd.provisionedTarget ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
     restartTriggers = [ userSettings ./miniflux-configure.nu ];
     serviceConfig = {
       Type = "oneshot";

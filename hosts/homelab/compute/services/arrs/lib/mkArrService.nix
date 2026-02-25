@@ -2,8 +2,8 @@
 #
 # Assumptions:
 # - Transmission is the only download client used
-# - config.custom.home-server.services.transmission.port is defined
-# - config.custom.home-server.media.${name}.profiles and defaultProfile exist
+# - config.custom.homelab.services.transmission.port is defined
+# - config.custom.homelab.media.${name}.profiles and defaultProfile exist
 #
 # Usage:
 #   mkArrService {
@@ -12,7 +12,7 @@
 #     description = "Movie Tracker";
 #     rootPath = config.custom.paths.media.movies;
 #     categoryField = "movieCategory";
-#     forwardAuthGroup = config.custom.home-server.groups.admin;
+#     forwardAuthGroup = config.custom.homelab.groups.admin;
 #   }
 { config, pkgs, lib, self }:
 {
@@ -27,8 +27,8 @@ let
   upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name;
   envPrefix = lib.toUpper name;
 
-  serviceCfg = config.custom.home-server.services.${name};
-  mediaCfg = config.custom.home-server.media.${name};
+  serviceCfg = config.custom.homelab.services.${name};
+  mediaCfg = config.custom.homelab.media.${name};
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 
   settings = {
@@ -36,7 +36,7 @@ let
     downloadClient = {
       inherit name;
       host = "127.0.0.1";
-      port = config.custom.home-server.services.transmission.port;
+      port = config.custom.homelab.services.transmission.port;
       urlBase = "/transmission/";
       category = name;
     };
@@ -44,7 +44,7 @@ let
   };
 in
 {
-  custom.home-server.services.${name} = {
+  custom.homelab.services.${name} = {
     inherit port;
     forwardAuth = {
       enable = true;
@@ -74,8 +74,7 @@ in
       "${envPrefix}__AUTH__METHOD" = "External";
       "${envPrefix}__LOG__LEVEL" = "info";
     };
-    requires = [ homelabMounts.media.automountUnit ];
-    after = [ homelabMounts.media.automountUnit "network-online.target" ];
+    after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     serviceConfig = {
       Restart = "on-failure";
@@ -86,6 +85,7 @@ in
   };
 
   users.users.${name}.extraGroups = [ homelabMounts.media.group ];
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ name ];
 
   systemd.services."${name}-configure" = {
     description = "Configure ${upperName} with declarative configuration";

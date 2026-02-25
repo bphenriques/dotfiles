@@ -1,8 +1,8 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.jellyfin;
-  oidcClient = config.custom.home-server.oidc.clients.jellyfin;
-  oidcCfg = config.custom.home-server.oidc;
+  serviceCfg = config.custom.homelab.services.jellyfin;
+  oidcClient = config.custom.homelab.oidc.clients.jellyfin;
+  oidcCfg = config.custom.homelab.oidc;
 
   themeCSS = ''@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");'';
   plugins = {
@@ -41,8 +41,8 @@ let
     enableAuthorization = true;
     enableAllFolders = true;
     enabledFolders = [ ];
-    roles = [ config.custom.home-server.groups.users config.custom.home-server.groups.admin ];
-    adminRoles = [ config.custom.home-server.groups.admin ];
+    roles = [ config.custom.homelab.groups.users config.custom.homelab.groups.admin ];
+    adminRoles = [ config.custom.homelab.groups.admin ];
     enableFolderRoles = false;
     folderRoleMapping = [ ];
     roleClaim = "groups";
@@ -77,7 +77,6 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyfin-configure.service" ];
     requires = [ "jellyfin-configure.service" ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
     restartTriggers = [ ssoConfigJson ./sso-configure.nu ];
     serviceConfig = {
       Type = "oneshot";

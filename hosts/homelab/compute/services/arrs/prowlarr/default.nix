@@ -1,12 +1,12 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.prowlarr;
+  serviceCfg = config.custom.homelab.services.prowlarr;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.prowlarr = {
+  custom.homelab.services.prowlarr = {
     port = 9096;
     forwardAuth.enable = true;
     dashboard = {
@@ -28,9 +28,8 @@ in
     environmentFiles = [ config.sops.templates."prowlarr.env".path ];
   };
 
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "prowlarr" ];
   systemd.services.prowlarr = {
-    requires = [ homelabMounts.media.automountUnit ];
-    after = [ homelabMounts.media.automountUnit ];
     serviceConfig = {
       SupplementaryGroups = [ homelabMounts.media.group ];
       Restart = "on-failure";

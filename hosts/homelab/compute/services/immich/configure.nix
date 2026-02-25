@@ -5,9 +5,9 @@
 let
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
-  serviceCfg = config.custom.home-server.services.immich;
+  serviceCfg = config.custom.homelab.services.immich;
 
-  enabledUsers = config.custom.home-server.enabledUsers.immich;
+  enabledUsers = config.custom.homelab.enabledUsers.immich;
 
   credentialsDir = "/var/lib/immich/credentials";
 
@@ -36,7 +36,6 @@ let
       "${userPaths.inbox}:/mnt/media/${username}-inbox"
     ]
   ) enabledUsers);
-  nasUnits = lib.unique (lib.mapAttrsToList (username: _: homelabMounts.${username}.automountUnit) enabledUsers);
 in
 {
   # Ensure immich has access to the mounted directories.
@@ -45,11 +44,12 @@ in
     "d ${credentialsDir} 0700 ${config.services.immich.user} ${config.services.immich.group} -"
   ];
 
-  systemd.services.immich-server = {
-    requires = nasUnits;
-    after = nasUnits;
-    serviceConfig.BindPaths = photoBinds;
-  };
+  # Register immich-server as dependent on each user's mount
+  custom.fileSystems.homelab.mounts = lib.mapAttrs' (username: _:
+    lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
+  ) enabledUsers;
+
+  systemd.services.immich-server.serviceConfig.BindPaths = photoBinds;
 
   systemd.services.immich-configure = {
     description = "Configure Immich users and external libraries";

@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 let
-  serviceCfg = config.custom.home-server.services.transmission;
+  serviceCfg = config.custom.homelab.services.transmission;
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
-  custom.home-server.services.transmission = {
+  custom.homelab.services.transmission = {
     port = 9091;
     forwardAuth.enable = true;
     dashboard = {
@@ -36,9 +36,9 @@ in
   };
 
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "transmission" ];
+
   systemd.services.transmission = {
-    requires = [ homelabMounts.media.automountUnit ];
-    after = [ homelabMounts.media.automountUnit ];
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";

@@ -6,10 +6,10 @@ let
     description = "TV Tracker";
     rootPath = config.custom.paths.media.tv;
     categoryField = "tvCategory";
-    forwardAuthGroup = config.custom.home-server.groups.admin;
+    forwardAuthGroup = config.custom.homelab.groups.admin;
   };
   profiles = {
-    custom.home-server.media.sonarr = {
+    custom.homelab.media.sonarr = {
       qualityDefinitionTemplate = "sonarr-quality-definition-series";
       defaultProfile = "hd";
       profiles = {

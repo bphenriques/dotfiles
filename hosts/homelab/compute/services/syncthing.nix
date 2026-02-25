@@ -29,7 +29,7 @@ let
   };
 in
 {
-  custom.home-server.services.syncthing = {
+  custom.homelab.services.syncthing = {
     port = 8384;
     forwardAuth.enable = true;
     dashboard = {
@@ -44,6 +44,8 @@ in
     homelabMounts.media.group
     homelabMounts.bphenriques.group
   ];
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "syncthing" ];
+  custom.fileSystems.homelab.mounts.bphenriques.systemd.dependentServices = [ "syncthing" ];
 
   services.syncthing = {
     enable = true;
@@ -79,8 +81,6 @@ in
   };
 
   systemd.services.syncthing = {
-    requires = [ homelabMounts.media.automountUnit homelabMounts.bphenriques.automountUnit ];
-    after = [ homelabMounts.media.automountUnit homelabMounts.bphenriques.automountUnit ];
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";

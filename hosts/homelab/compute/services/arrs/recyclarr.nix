@@ -10,12 +10,12 @@ let
 
   recyclarrConfig = {
     radarr.movies = {
-      base_url = config.custom.home-server.services.radarr.internalUrl;
-      include = mkIncludeTemplates config.custom.home-server.media.radarr;
+      base_url = config.custom.homelab.services.radarr.internalUrl;
+      include = mkIncludeTemplates config.custom.homelab.media.radarr;
     };
     sonarr.tv = {
-      base_url = config.custom.home-server.services.sonarr.internalUrl;
-      include = mkIncludeTemplates config.custom.home-server.media.sonarr;
+      base_url = config.custom.homelab.services.sonarr.internalUrl;
+      include = mkIncludeTemplates config.custom.homelab.media.sonarr;
     };
   };
 

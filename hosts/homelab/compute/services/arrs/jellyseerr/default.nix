@@ -1,11 +1,11 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.jellyseerr;
+  serviceCfg = config.custom.homelab.services.jellyseerr;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.jellyseerr = {
+  custom.homelab.services.jellyseerr = {
     port = 9099;
     dashboard = {
       enable = true;

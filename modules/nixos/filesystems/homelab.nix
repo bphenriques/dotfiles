@@ -36,11 +36,30 @@ let
         default = nameToGid name;
         description = "GID for the mount group (auto-generated from name)";
       };
-      automountUnit = mkOption {
+      systemd.automountUnit = mkOption {
         type = types.str;
         default = "${pathToUnitName config.localMount}.automount";
         readOnly = true;
         description = "Systemd automount unit name for this mount";
+      };
+      systemd.dependentServices = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          Systemd services that depend on this mount being available.
+
+          For each service listed, the module automatically adds:
+            - requires = [ automountUnit ]
+            - after = [ automountUnit ]
+
+          This ensures services don't start until the mount is ready.
+
+          Group membership for mount access must still be configured explicitly
+          via users.users.<name>.extraGroups.
+
+          Example:
+            custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
+        '';
       };
     };
   });
@@ -111,5 +130,18 @@ in {
         ];
       }
     ) cfg.mounts;
+
+    # Auto-wire systemd dependencies for services that depend on mounts
+    systemd.services = lib.mkMerge (
+      lib.mapAttrsToList (_: mountCfg:
+        lib.listToAttrs (map (svcName: {
+          name = svcName;
+          value = {
+            requires = [ mountCfg.systemd.automountUnit ];
+            after = [ mountCfg.systemd.automountUnit ];
+          };
+        }) mountCfg.systemd.dependentServices)
+      ) cfg.mounts
+    );
   };
 }

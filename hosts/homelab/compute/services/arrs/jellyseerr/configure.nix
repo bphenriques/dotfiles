@@ -1,10 +1,10 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.jellyseerr;
-  radarrCfg = config.custom.home-server.services.radarr;
-  sonarrCfg = config.custom.home-server.services.sonarr;
-  jellyfinCfg = config.custom.home-server.services.jellyfin;
-  mediaCfg = config.custom.home-server.media;
+  serviceCfg = config.custom.homelab.services.jellyseerr;
+  radarrCfg = config.custom.homelab.services.radarr;
+  sonarrCfg = config.custom.homelab.services.sonarr;
+  jellyfinCfg = config.custom.homelab.services.jellyfin;
+  mediaCfg = config.custom.homelab.media;
 
   initConfigJson = builtins.toJSON initConfig;
 
@@ -45,7 +45,7 @@ let
     users = lib.mapAttrs (_: user: {
       inherit (user) username;
       inherit (user.services.jellyseerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
-    }) config.custom.home-server.enabledUsers.jellyseerr;
+    }) config.custom.homelab.enabledUsers.jellyseerr;
   };
 in
 {

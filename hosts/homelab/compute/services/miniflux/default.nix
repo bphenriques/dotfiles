@@ -1,13 +1,13 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.miniflux;
-  oidcClient = config.custom.home-server.oidc.clients.miniflux;
-  oidcCfg = config.custom.home-server.oidc;
+  serviceCfg = config.custom.homelab.services.miniflux;
+  oidcClient = config.custom.homelab.oidc.clients.miniflux;
+  oidcCfg = config.custom.homelab.oidc;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.miniflux = {
+  custom.homelab.services.miniflux = {
     port = 8081;
     dashboard = {
       enable = true;
@@ -17,7 +17,9 @@ in
     };
   };
 
-  custom.home-server.oidc.clients.miniflux = { };
+  custom.homelab.oidc.clients.miniflux = {
+    systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
+  };
 
   services.miniflux = {
     enable = true;
@@ -33,18 +35,10 @@ in
       OAUTH2_REDIRECT_URL = builtins.head oidcClient.callbackURLs;
       OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.url;
       OAUTH2_OIDC_PROVIDER_NAME = oidcCfg.provider.displayName;
-      OAUTH2_CLIENT_ID_FILE = "/run/credentials/miniflux.service/oidc-id";
-      OAUTH2_CLIENT_SECRET_FILE = "/run/credentials/miniflux.service/oidc-secret";
+      OAUTH2_CLIENT_ID_FILE = oidcClient.systemd.credentialPaths.id;
+      OAUTH2_CLIENT_SECRET_FILE = oidcClient.systemd.credentialPaths.secret;
     };
   };
 
-  systemd.services.miniflux = {
-    wants = [ oidcCfg.systemd.provisionedTarget ];
-    after = [ oidcCfg.systemd.provisionedTarget ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
-    serviceConfig.LoadCredential = [
-      "oidc-id:${oidcClient.idFile}"
-      "oidc-secret:${oidcClient.secretFile}"
-    ];
-  };
+  systemd.services.miniflux.serviceConfig.LoadCredential = oidcClient.systemd.loadCredentials;
 }

@@ -1,6 +1,7 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.jellyfin;
+  serviceCfg = config.custom.homelab.services.jellyfin;
+  homelabMounts = config.custom.fileSystems.homelab.mounts;
 in
 {
   imports = [
@@ -8,7 +9,7 @@ in
     ./configure.nix
   ];
 
-  custom.home-server = {
+  custom.homelab = {
     services.jellyfin = {
       port = 8096;
       dashboard = {
@@ -18,9 +19,20 @@ in
         icon = "jellyfin.svg";
       };
     };
-    oidc.clients.jellyfin.callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+    oidc.clients.jellyfin = {
+      callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+      systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
+    };
   };
 
   services.jellyfin.enable = true;
-  users.users.jellyfin.extraGroups = [ config.custom.fileSystems.homelab.mounts.media.group ];
+  users.users.jellyfin.extraGroups = [ homelabMounts.media.group ];
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "jellyfin" ];
+
+  assertions = [
+    {
+      assertion = homelabMounts ? media;
+      message = "Jellyfin requires custom.fileSystems.homelab.mounts.media to be configured.";
+    }
+  ];
 }

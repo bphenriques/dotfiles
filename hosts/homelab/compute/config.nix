@@ -32,6 +32,17 @@
     media = { };
   };
 
+  # Podman for containers (romm, tinyauth, cleanuparr)
+  virtualisation = {
+    podman.enable = true;
+    oci-containers.backend = "podman";
+    containers.containersConf.settings.containers = {
+      default_capabilities = [];
+      pids_limit = 100;
+      no_new_privileges = true;
+    };
+  };
+
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

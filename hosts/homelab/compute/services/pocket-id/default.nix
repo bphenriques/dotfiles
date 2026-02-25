@@ -2,13 +2,13 @@
 let
   publicUrl = "https://auth.${self.settings.hosts.compute.domain}";
   encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
-  serviceCfg = config.custom.home-server.services.pocket-id;
+  serviceCfg = config.custom.homelab.services.pocket-id;
   port = 8094;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.pocket-id = {
+  custom.homelab.services.pocket-id = {
     subdomain = "auth";
     port = port;
   };
@@ -66,7 +66,7 @@ in
   '';
 
   # OIDC provider metadata for consumers
-  custom.home-server.oidc.provider = {
+  custom.homelab.oidc.provider = {
     displayName = "Pocket-ID";
     internalName = "PocketID";
     url = publicUrl;

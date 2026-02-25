@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.home-server.services.romm;
+  serviceCfg = config.custom.homelab.services.romm;
   dataDir = "/var/lib/romm";
   credentialsDir = "${dataDir}/credentials";
 

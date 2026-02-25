@@ -1,13 +1,13 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.immich;
-  oidcCfg = config.custom.home-server.oidc;
+  serviceCfg = config.custom.homelab.services.immich;
+  oidcCfg = config.custom.homelab.oidc;
   oidcClient = oidcCfg.clients.immich;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.immich = {
+  custom.homelab.services.immich = {
     port = 2283;
     subdomain = "photos";
     dashboard = {
@@ -18,11 +18,14 @@ in
     };
   };
 
-  custom.home-server.oidc.clients.immich.callbackURLs = [
-    "${serviceCfg.publicUrl}/auth/login"
-    "${serviceCfg.publicUrl}/user-settings"
-    "app.immich:///oauth-callback"
-  ];
+  custom.homelab.oidc.clients.immich = {
+    callbackURLs = [
+      "${serviceCfg.publicUrl}/auth/login"
+      "${serviceCfg.publicUrl}/user-settings"
+      "app.immich:///oauth-callback"
+    ];
+    systemd.dependentServices = [ "immich-server" ];
+  };
 
   services.immich = {
     enable = true;
@@ -57,10 +60,5 @@ in
     };
   };
 
-  systemd.services.immich-server = {
-    requires = [ oidcCfg.systemd.provisionedTarget ];
-    after = [ oidcCfg.systemd.provisionedTarget ];
-    partOf = [ oidcCfg.systemd.provisionedTarget ];
-    serviceConfig.SupplementaryGroups = [ oidcClient.group ];
-  };
+  systemd.services.immich-server.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
 }

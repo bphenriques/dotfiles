@@ -6,8 +6,7 @@
     ./miniflux
     ./pocket-id
     ./romm
-    #./booklore.nix
-    #./homepage.nix
+    ./homepage.nix
     ./obsidian-livesync.nix
     #./syncthing.nix
     ./tinyauth.nix
@@ -15,13 +14,13 @@
     ./wireguard.nix
   ];
 
-  custom.home-server = {
+  custom.homelab = {
     enable = true;
     domain = self.settings.hosts.compute.domain;
-    cloudflareEmail = self.settings.cloudflare.email;
+    ingress.traefik.cloudflareEmail = self.settings.cloudflare.email;
   };
 
-  custom.home-server.users.bphenriques = {
+  custom.homelab.users.bphenriques = {
     inherit (self.settings.users.bphenriques) username firstName lastName email;
     groups = [ "admin" "users" ];
     services = {
@@ -223,7 +222,7 @@
   };
 
   sops.secrets."jellyfin/home/password" = { };
-  custom.home-server.users.home = {
+  custom.homelab.users.home = {
     email = "home@localhost";
     firstName = "Home";
     lastName = "User";

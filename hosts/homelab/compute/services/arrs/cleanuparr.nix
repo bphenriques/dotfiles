@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.cleanuparr;
-  sonarrCfg = config.custom.home-server.services.sonarr;
-  radarrCfg = config.custom.home-server.services.radarr;
-  transmissionCfg = config.custom.home-server.services.transmission;
+  serviceCfg = config.custom.homelab.services.cleanuparr;
+  sonarrCfg = config.custom.homelab.services.sonarr;
+  radarrCfg = config.custom.homelab.services.radarr;
+  transmissionCfg = config.custom.homelab.services.transmission;
 
   dataDir = "/var/lib/cleanuparr";
 
@@ -15,7 +15,7 @@ let
   };
 in
 {
-  custom.home-server.services.cleanuparr = {
+  custom.homelab.services.cleanuparr = {
     port = 11011;
     forwardAuth.enable = true;
     dashboard = {

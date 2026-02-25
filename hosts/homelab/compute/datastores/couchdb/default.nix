@@ -1,11 +1,11 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.home-server.services.couchdb;
+  serviceCfg = config.custom.homelab.services.couchdb;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [ ./configure.nix ];
 
-  custom.home-server.services.couchdb.port = 5984;
+  custom.homelab.services.couchdb.port = 5984;
 
   sops = {
     secrets."couchdb/admin/password" = { };

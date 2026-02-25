@@ -5,9 +5,9 @@
 
 { config, pkgs, lib, self, ... }:
 let
-  cfg = config.custom.home-server.oidc;
+  cfg = config.custom.homelab.oidc;
   provisionConfigFile = pkgs.writeText "oidc-provision-config.json" (builtins.toJSON cfg.provisionConfig);
-  pocketIdCfg = config.custom.home-server.services.pocket-id;
+  pocketIdCfg = config.custom.homelab.services.pocket-id;
 in
 {
   assertions = [{
@@ -26,7 +26,7 @@ in
   }) cfg.clients);
 
 
-  custom.home-server.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
+  custom.homelab.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
   systemd.services.pocket-id-provision = let
     script = self.lib.builders.writeNushellScript "oidc-provision" ./oidc-provision.nu;
   in {
