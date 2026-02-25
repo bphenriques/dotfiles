@@ -15,7 +15,6 @@
 #     forwardAuthGroup = config.custom.home-server.groups.admin;
 #   }
 { config, pkgs, lib, self }:
-
 {
   name,                # Service name (e.g., "radarr", "sonarr")
   port,                # Port number
@@ -24,7 +23,6 @@
   categoryField,       # Download client category field ("movieCategory" or "tvCategory")
   forwardAuthGroup,    # Forward auth group (required)
 }:
-
 let
   upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name;
   envPrefix = lib.toUpper name;
@@ -77,7 +75,8 @@ in
       "${envPrefix}__LOG__LEVEL" = "info";
     };
     requires = [ homelabMounts.media.automountUnit ];
-    after = [ homelabMounts.media.automountUnit ];
+    after = [ homelabMounts.media.automountUnit "network-online.target" ];
+    wants = [ "network-online.target" ];
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";

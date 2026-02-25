@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-# Initializes Jellyfin declaratively via the API (startup wizard, server settings, branding, libraries, SSO, and users)
+# Initializes Jellyfin declaratively via the API (startup wizard, server settings, branding, libraries, and users)
 #
 # FIXME: Not fully declarative. Entities are not removed, fine for the low cadence changes in here.
 
@@ -8,8 +8,6 @@ let base_url = $env.JELLYFIN_URL
 let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
 let admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let config = open $env.JELLYFIN_CONFIG_FILE
-let oidc_client_id = open $env.OIDC_CLIENT_ID_FILE | str trim
-let oidc_client_secret = open $env.OIDC_CLIENT_SECRET_FILE | str trim
 let oidc_users = open $env.OIDC_USERS_FILE
 
 def wait_ready [] {
@@ -55,26 +53,12 @@ def complete_startup_wizard [] {
   print "  Startup wizard completed"
 }
 
-def authenticate []: nothing -> record<headers: list, api_key: string> {
+def authenticate []: nothing -> record<headers: list> {
   print $"Authenticating as: ($admin_username)"
   let r = http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers [Authorization "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""] --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)" } }
   
-  let headers = [Authorization $"MediaBrowser Token=\"($r.body.AccessToken)\""]
-  
-  let existing = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
-  if $existing.status == 200 {
-    let matches = $existing.body.Items | where AppName == "jellyfin-configure"
-    if not ($matches | is-empty) { return { headers: $headers, api_key: ($matches | first).AccessToken } }
-  }
-  
-  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-configure" { } --headers $headers --content-type application/json --full --allow-errors
-  if $create.status != 204 { error make { msg: $"Failed to create API key: ($create.status)" } }
-  
-  let keys = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
-  let matches = $keys.body.Items | where AppName == "jellyfin-configure"
-  if ($matches | is-empty) { error make { msg: "Failed to retrieve created API key" } }
-  { headers: $headers, api_key: ($matches | first).AccessToken }
+  { headers: [Authorization $"MediaBrowser Token=\"($r.body.AccessToken)\""] }
 }
 
 def ensure_server_name [headers: list] {
@@ -86,13 +70,6 @@ def ensure_server_name [headers: list] {
   let r = http post $"($base_url)/System/Configuration" $updated --content-type application/json --headers $headers --full --allow-errors
   if $r.status != 204 { error make { msg: $"Failed to configure server name: ($r.status)" } }
   print $"  Server name set to: ($config.serverName)"
-}
-
-def ensure_branding [headers: list] {
-  print "Configuring branding..."
-  let r = http post $"($base_url)/System/Configuration/Branding" $config.brandingConfig --content-type application/json --headers $headers --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to configure branding: ($r.status)" } }
-  print "  Branding configured"
 }
 
 def ensure_trickplay [headers: list] {
@@ -128,28 +105,9 @@ def ensure_libraries [headers: list] {
   }
 }
 
-def ensure_sso [api_key: string] {
-  print "Configuring SSO..."
-  let provider_name = $config.ssoConfig.providerName
-  
-  let r = http get $"($base_url)/sso/OID/Get?api_key=($api_key)" --full --allow-errors
-  if $r.status == 404 { error make { msg: "SSO plugin not installed" } }
-  if $r.status != 200 { error make { msg: $"Failed to query SSO providers: ($r.status)" } }
-  
-  if ($r.body | default {} | get -o $provider_name | is-not-empty) {
-    print $"  SSO provider ($provider_name) already configured"
-    return
-  }
-  
-  let sso_config = $config.ssoConfig | update oidClientId $oidc_client_id | update oidSecret $oidc_client_secret
-  let create = http post $"($base_url)/sso/OID/Add/($provider_name | url encode)?api_key=($api_key)" $sso_config --content-type application/json --full --allow-errors
-  if $create.status not-in [200, 204] { error make { msg: $"Failed to configure SSO provider ($provider_name): ($create.status)" } }
-  print $"  SSO provider ($provider_name) configured"
-}
-
 # FIXME: Remove passwordFile check once Jellyseerr supports OIDC
 # Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
-def ensure_users [headers: list, users: record] {
+def ensure_users [headers: list, users: list] {
   print "Configuring users..."
   let existing = http get $"($base_url)/Users" --headers $headers --full --allow-errors
   if $existing.status != 200 { error make { msg: $"Failed to get users: ($existing.status)" } }
@@ -169,7 +127,7 @@ def ensure_users [headers: list, users: record] {
       let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: $initial_password } --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 200 { error make { msg: $"Failed to create user '$cfg.username': ($r.status)" } }
       print $"  '$cfg.username': created"
-    } else {authenticate
+    } else {
       print $"  '$cfg.username': exists"
       if $has_password_file {
         let user = $existing_matches | first
@@ -208,10 +166,8 @@ def main [] {
 
   let auth = authenticate
   ensure_server_name $auth.headers
-  ensure_branding $auth.headers
   ensure_trickplay $auth.headers
   ensure_libraries $auth.headers
-  ensure_sso $auth.api_key
   ensure_users $auth.headers $config.userConfigs
 
   print "Jellyfin initialization complete"

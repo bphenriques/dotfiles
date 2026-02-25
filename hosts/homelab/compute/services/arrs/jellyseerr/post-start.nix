@@ -5,7 +5,6 @@ let
   sonarrCfg = config.custom.home-server.services.sonarr;
   jellyfinCfg = config.custom.home-server.services.jellyfin;
   mediaCfg = config.custom.home-server.media;
-  jellyseerrUsers = config.custom.home-server.enabledUsers.jellyseerr;
 
   initConfigJson = builtins.toJSON initConfig;
 
@@ -43,13 +42,10 @@ let
       isDefault = true;
       externalUrl = sonarrCfg.publicUrl;
     };
-    # Users with their Jellyseerr permission settings
     users = lib.mapAttrs (_: user: {
-      username = user.username;
-      autoApprove = user.services.jellyseerr.permissions.autoApprove;
-      advancedRequests = user.services.jellyseerr.permissions.advancedRequests;
-      viewRecentlyAdded = user.services.jellyseerr.permissions.viewRecentlyAdded;
-    }) jellyseerrUsers;
+      inherit (user) username;
+      inherit (user.services.jellyseerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
+    }) config.custom.home-server.enabledUsers.jellyseerr;
   };
 in
 {

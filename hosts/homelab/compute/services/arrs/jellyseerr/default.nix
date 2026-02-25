@@ -15,10 +15,12 @@ in
     };
   };
 
-  sops.secrets."jellyseerr/api-key" = { };
-  sops.templates."jellyseerr.env".content = ''
-    API_KEY=${config.sops.placeholder."jellyseerr/api-key"}
-  '';
+  sops = {
+    secrets."jellyseerr/api-key" = { };
+    templates."jellyseerr.env".content = ''
+      API_KEY=${config.sops.placeholder."jellyseerr/api-key"}
+    '';
+  };
 
   services.jellyseerr = {
     enable = true;

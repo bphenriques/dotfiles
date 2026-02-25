@@ -63,11 +63,10 @@ in
     };
   };
 
-  # Run daily at 3 AM
   systemd.timers.recyclarr = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*-*-* 03:00:00";
+      OnCalendar = "*-*-* 03:00:00"; # Run daily at 3 AM
       RandomizedDelaySec = "1h";
       Persistent = true;
     };

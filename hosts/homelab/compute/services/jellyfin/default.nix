@@ -3,7 +3,10 @@ let
   serviceCfg = config.custom.home-server.services.jellyfin;
 in
 {
-  imports = [ ./post-start.nix ];
+  imports = [
+    ./plugins.nix
+    ./configure.nix
+  ];
 
   custom.home-server = {
     services.jellyfin = {
@@ -15,9 +18,7 @@ in
         icon = "jellyfin.svg";
       };
     };
-    oidc.clients.jellyfin = {
-      callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
-    };
+    oidc.clients.jellyfin.callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
   };
 
   services.jellyfin.enable = true;

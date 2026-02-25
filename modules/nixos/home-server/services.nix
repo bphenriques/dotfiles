@@ -238,6 +238,11 @@ in
           http.middlewares.tinyauth.forwardAuth = {
             address = "${cfg.forwardAuth.internalUrl}/api/auth/traefik";
             trustForwardHeader = true;
+            authResponseHeaders = [
+              "X-Forwarded-User" # TODO READ WHY THIS IS REQUIRED AGAIN
+              "X-Forwarded-Groups"
+              "X-Forwarded-Email"
+            ];
           };
         };
       in lib.foldl' lib.recursiveUpdate { } [ routesConfig authMiddleware ];
