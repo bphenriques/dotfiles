@@ -3,11 +3,19 @@
 # Consumes the service registry and configures the homepage-dashboard service.
 # Generates services.yaml from registered services with dashboard metadata.
 #
-{ lib, config, ... }:
+{ lib, config, pkgs, ... }:
 let
   cfg = config.custom.homelab;
   homepageCfg = cfg.homepage;
   registry = cfg._registry;
+
+  customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
+    postInstall = (oldAttrs.postInstall or "") + ''
+      mkdir -p $out/share/homepage/public/images
+      ln -s ${homepageCfg.wallpaper} $out/share/homepage/public/images/background.png
+      ln -s ${homepageCfg.favicon} $out/share/homepage/public/images/favicon.ico
+    '';
+  });
 
   categoryType = lib.types.enum [
     "Media"
@@ -16,6 +24,8 @@ let
     "Development"
     "Infrastructure"
   ];
+
+  adminCategories = [ "Admin" "Infrastructure" ];
 
   mkServiceEntry = service: {
     "${service.name}" = {
@@ -36,14 +46,15 @@ let
       cat: lib.hasAttr cat registry.servicesByCategory
     ) homepageCfg.categoryOrder;
     sections = map (
-      cat: mkCategorySection cat registry.servicesByCategory.${cat}
+      cat: mkCategorySection (if isAdminCategory cat then "Admin" else "Home") registry.servicesByCategory.${cat}
     ) orderedCategories;
   in lib.flatten sections;
 
+  isAdminCategory = category: builtins.elem category adminCategories;
   mkLayoutEntry = category: {
     "${category}" = {
-      tab = category;
-      style = "row";
+      tab = if isAdminCategory category then "Admin" else "Home";
+      style = if isAdminCategory category then "column" else "row";
       columns = 4;
       header = false;
       useEqualHeights = true;
@@ -51,25 +62,29 @@ let
   };
 
   defaultSettings = {
-    title = "Home";
-    language = "en-GB";
-    background = "/images/background.png";
-    favicon = "/images/favicon.ico";
-    theme = "dark";
-    color = "stone";
-    statusStyle = "dot";
-    headerStyle = "clean";
-    hideVersion = true;
-    target = "_self";
-    quicklaunch = {
-      searchDescriptions = true;
-      hideInternetSearch = true;
-      hideVisitURL = true;
-    };
-    layout = lib.listToAttrs (
-      map (cat: lib.nameValuePair cat (mkLayoutEntry cat).${cat}) homepageCfg.categoryOrder
-    );
+    layout = [
+      {
+        "Home" = {
+          tab = "Home";
+          style = "row";
+          columns = 4;
+          header = false;
+          useEqualHeights = true;
+        };
+      }
+      {
+        "Admin" = {
+          tab = "Admin";
+          style = "column";
+          columns = 4;
+          header = false;
+          useEqualHeights = true;
+        };
+      }
+    ];
   };
+
+
 in
 {
   options.custom.homelab.homepage = {
@@ -98,6 +113,16 @@ in
       default = [ "Media" "Productivity" "Admin" "Infrastructure" "Development" ];
       description = "Order of categories displayed in dashboard";
     };
+
+    wallpaper = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to wallpaper image for background";
+    };
+
+    favicon = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to favicon file";
+    };
   };
 
   config = lib.mkIf (cfg.enable && homepageCfg.enable) (let
@@ -110,8 +135,12 @@ in
 
     services.homepage-dashboard = {
       enable = true;
+      package = customPackage;
       listenPort = serviceCfg.port;
-      settings = defaultSettings // homepageCfg.settings;
+      settings = defaultSettings // homepageCfg.settings // {
+        background = "/images/background.png";
+        favicon = "/images/favicon.ico";
+      };
       services = servicesYaml;
       widgets = homepageCfg.widgets;
       bookmarks = homepageCfg.bookmarks;

@@ -35,10 +35,10 @@ in
       OAUTH2_REDIRECT_URL = builtins.head oidcClient.callbackURLs;
       OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.url;
       OAUTH2_OIDC_PROVIDER_NAME = oidcCfg.provider.displayName;
-      OAUTH2_CLIENT_ID_FILE = oidcClient.systemd.credentialPaths.id;
-      OAUTH2_CLIENT_SECRET_FILE = oidcClient.systemd.credentialPaths.secret;
+      OAUTH2_CLIENT_ID_FILE = oidcClient.idFile;
+      OAUTH2_CLIENT_SECRET_FILE = oidcClient.secretFile;
     };
   };
 
-  systemd.services.miniflux.serviceConfig.LoadCredential = oidcClient.systemd.loadCredentials;
+  systemd.services.miniflux.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
 }

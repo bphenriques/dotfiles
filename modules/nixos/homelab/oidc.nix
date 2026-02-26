@@ -94,43 +94,18 @@ let
           description = ''
             Ready-to-use LoadCredential entries for systemd services.
 
-            Use when the service supports reading credentials from files specified via environment variables.
-            The credentials are loaded into systemd's secure credentials directory.
+            Use when the service reads credentials via $CREDENTIALS_DIRECTORY in scripts
+            (e.g., ExecStart scripts, nushell configure scripts).
+
+            Credentials are available at $CREDENTIALS_DIRECTORY/oidc-id and $CREDENTIALS_DIRECTORY/oidc-secret.
+
+            NOTE: Do NOT use $CREDENTIALS_DIRECTORY in Environment= directives - it won't expand.
+            For environment variables, use idFile/secretFile with supplementaryGroups instead.
 
             Example:
               systemd.services.myservice.serviceConfig.LoadCredential = oidcClient.systemd.loadCredentials;
+              # Then in script: open $"($env.CREDENTIALS_DIRECTORY)/oidc-id"
           '';
-        };
-
-        credentialPaths = {
-          id = lib.mkOption {
-            type = lib.types.str;
-            default = "\${CREDENTIALS_DIRECTORY}/oidc-id";
-            readOnly = true;
-            description = ''
-              Path to client ID within systemd's credentials directory.
-
-              Use in environment variables that expect a file path (e.g., OAUTH2_CLIENT_ID_FILE).
-              Requires loadCredentials to be set on the service.
-
-              Example:
-                environment.OAUTH2_CLIENT_ID_FILE = oidcClient.systemd.credentialPaths.id;
-            '';
-          };
-          secret = lib.mkOption {
-            type = lib.types.str;
-            default = "\${CREDENTIALS_DIRECTORY}/oidc-secret";
-            readOnly = true;
-            description = ''
-              Path to client secret within systemd's credentials directory.
-
-              Use in environment variables that expect a file path (e.g., OAUTH2_CLIENT_SECRET_FILE).
-              Requires loadCredentials to be set on the service.
-
-              Example:
-                environment.OAUTH2_CLIENT_SECRET_FILE = oidcClient.systemd.credentialPaths.secret;
-            '';
-          };
         };
 
         supplementaryGroups = lib.mkOption {
@@ -141,10 +116,11 @@ let
             Groups to add to service's SupplementaryGroups for direct credential file access.
 
             Use when the service reads credentials directly from idFile/secretFile paths
-            (e.g., Nix's _secret pattern, container volume mounts) rather than via systemd credentials.
+            (e.g., app config files, Nix's _secret pattern, container volume mounts, environment variables).
 
             Example:
               systemd.services.myservice.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
+              environment.OAUTH2_CLIENT_ID_FILE = oidcClient.idFile;
           '';
         };
       };

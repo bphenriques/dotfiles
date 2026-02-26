@@ -16,8 +16,9 @@ in
   }];
 
   # Base directory for credentials (tmpfs via /run/)
+  # 0755 allows services to traverse to their subdirectories (per-client dirs are 0750 with group ownership)
   systemd.tmpfiles.rules = [
-    "d ${cfg.credentials.dir} 0750 root root -"
+    "d ${cfg.credentials.dir} 0755 root root -"
   ];
 
   # Per-client groups with deterministic GIDs

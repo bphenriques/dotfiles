@@ -54,7 +54,6 @@ in
     '';
     serviceConfig = {
       LoadCredential = oidcClient.systemd.loadCredentials;
-      SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
       BindPaths = [
         "${pathsCfg.media.books.library}:/mnt/media/books"
         "${pathsCfg.media.comics}:/mnt/media/comics"

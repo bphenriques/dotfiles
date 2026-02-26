@@ -43,7 +43,6 @@ in
       RestartSec = 10;
       StartLimitBurst = 3;
       LoadCredential = oidcClient.systemd.loadCredentials;
-      SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
     };
     environment = {
       KAVITA_URL = serviceCfg.internalUrl;

@@ -44,8 +44,6 @@ let
   configFile = yamlFormat.generate "romm-config.yml" rommConfig;
 in
 {
-  imports = [ ./configure.nix ];
-
   sops.secrets = {
     "romm/mobygames/api-key" = { };
     "romm/screenscraper/user" = { };
@@ -68,7 +66,7 @@ in
     };
   };
 
-  # MySQL database and user for romm
+  # MariaDB database and user for romm
   services.mysql = {
     ensureDatabases = [ db.name ];
     ensureUsers = [{
@@ -102,13 +100,12 @@ in
     environment = {
       DISABLE_SETUP_WIZARD = "true";
       HASHEOUS_API_ENABLED = "true";
-      DISABLE_USERPASS_LOGIN = "false";
+      DISABLE_USERPASS_LOGIN = "true";
 
-      # ROMM_DB_DRIVE = "mysql";
       DB_HOST = "localhost";
       DB_NAME = db.name;
       DB_USER = db.user;
-      DB_EXTRA_QUERY_PARAMS = builtins.toJSON { unix_socket = "/run/mysqld/mysqld.sock"; };
+      DB_QUERY_JSON = builtins.toJSON { unix_socket = "/run/mysqld/mysqld.sock"; };
 
       # Scrapers
       MOBYGAMES_API_KEY_FILE = "/run/secrets/mobygames_api_key";
@@ -136,7 +133,7 @@ in
       "${dataDir}/redis:/redis-data"
       "${dataDir}/assets:/romm/assets"
 
-      # MySQL socket for auth (directory mount to preserve permissions)
+      # MySQL socket for auth
       "/run/mysqld:/run/mysqld"
 
       # Secrets
@@ -155,6 +152,7 @@ in
     user = "${toString rommUser.uid}:${toString rommUser.gid}";
     extraOptions = [
       "--group-add=${toString homelabMounts.media.gid}"
+      "--group-add=${toString oidcClient.gid}"
       "--memory=512m"
     ];
   };
@@ -170,6 +168,5 @@ in
       echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
     '';
     restartTriggers = [ (builtins.toJSON rommConfig) ];
-    serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
   };
 }
