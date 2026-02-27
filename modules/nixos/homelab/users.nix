@@ -2,23 +2,6 @@
 let
   cfg = config.custom.homelab.users;
   groupsCfg = config.custom.homelab.groups;
-  homelabServices = config.custom.homelab.services;
-  serviceNames = builtins.attrNames homelabServices;
-
-  # Compute service-derived groups for a user based on enabled services
-  serviceGroupsForUser = u:
-    lib.concatMap
-      (serviceName:
-        let
-          service = homelabServices.${serviceName};
-          hasToggle = lib.hasAttr serviceName u.services;
-          enabled = hasToggle && (u.services.${serviceName}.enable or false);
-          userServiceCfg = if hasToggle then u.services.${serviceName} else { };
-          groupBuilder = service.userGroupBuilder or (_: []);
-        in
-        lib.optionals enabled (groupBuilder userServiceCfg)
-      )
-      serviceNames;
 
   userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
@@ -31,12 +14,6 @@ let
         type = lib.types.listOf lib.types.str;
         default = [ groupsCfg.users ];
         description = "Groups assigned to this user. If admin group is included, the user is marked as admin.";
-      };
-      finalGroups = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        readOnly = true;
-        default = lib.unique (config.groups ++ serviceGroupsForUser config);
-        description = "Computed groups: base groups plus service-specific groups (e.g. kavita-* roles).";
       };
       isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem groupsCfg.admin config.groups; };
 

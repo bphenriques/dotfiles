@@ -102,17 +102,6 @@ let
         default = null;
         description = "Dashboard configuration for homepage (presentation metadata)";
       };
-
-      # Per-user group computation
-      userGroupBuilder = lib.mkOption {
-        type = lib.types.functionTo (lib.types.listOf lib.types.str);
-        default = _: [];
-        description = ''
-          Function: userServiceCfg -> [string].
-          Given the per-user service config (custom.homelab.users.<user>.services.<service>),
-          compute the OIDC groups/roles for that user.
-        '';
-      };
     };
   });
 
