@@ -1,46 +1,3 @@
-# Service Registry Module
-#
-# Pure schema defining what a service is: identity, routing, auth, and dashboard metadata.
-# No config consumers (Traefik, homepage) - those are in separate modules.
-#
-# POTENTIAL IMPROVEMENT: Centralized mount wiring
-# ================================================
-# Currently each service manually wires homelab mounts:
-#
-#   users.users.SERVICE.extraGroups = [ homelabMounts.MOUNT.group ];
-#   systemd.services.SERVICE = {
-#     requires = [ homelabMounts.MOUNT.automountUnit ];
-#     after = [ homelabMounts.MOUNT.automountUnit ];
-#     serviceConfig.BindPaths = [ "source:target" ];
-#   };
-#   assertions = [{ assertion = homelabMounts ? MOUNT; message = "..."; }];
-#
-# This could be centralized by extending serviceOpt with:
-#
-#   custom.homelab.services.kavita = {
-#     port = 8097;
-#     homelabMounts = [{
-#       name = "media";
-#       binds = [
-#         { source = pathsCfg.media.books.library; target = "/mnt/media/books"; }
-#       ];
-#     }];
-#   };
-#
-# The module would then auto-compute:
-#   - serviceCfg._systemd.mountDependencies (requires/after units)
-#   - serviceCfg._systemd.mountGroups (extraGroups)
-#   - serviceCfg._systemd.bindPaths (BindPaths entries)
-#   - Auto-generate assertions
-#
-# Challenges:
-#   - Knowing the systemd unit name (kavita.service vs podman-romm.service)
-#   - Knowing the user name (may be dynamic or custom)
-#   - Container services need --group-add for GID, not just extraGroups
-#   - BindPaths creates ad-hoc directories which may not be desired
-#
-# For now, each service handles its own mount wiring for flexibility.
-#
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
@@ -133,9 +90,9 @@ let
         '';
 
         group = lib.mkOption {
-          type = lib.types.str;
-          default = "admin";
-          description = "Group required to access this service via forwardAuth";
+          type = lib.types.enum [ cfg.groups.admin cfg.groups.users ];
+          default = cfg.groups.admin;
+          description = "Group required to access this service via forwardAuth (admin or users)";
         };
       };
 
@@ -145,6 +102,17 @@ let
         default = null;
         description = "Dashboard configuration for homepage (presentation metadata)";
       };
+
+      # Per-user group computation
+      userGroupBuilder = lib.mkOption {
+        type = lib.types.functionTo (lib.types.listOf lib.types.str);
+        default = _: [];
+        description = ''
+          Function: userServiceCfg -> [string].
+          Given the per-user service config (custom.homelab.users.<user>.services.<service>),
+          compute the OIDC groups/roles for that user.
+        '';
+      };
     };
   });
 
@@ -152,10 +120,6 @@ let
   allServices = lib.attrValues cfg.services;
   dashboardServices = lib.filter (s: s.dashboard != null && s.dashboard.enable) allServices;
   servicesByCategory = lib.groupBy (s: s.dashboard.category) dashboardServices;
-  usedForwardAuthGroups = lib.unique (
-    map (s: s.forwardAuth.group)
-    (lib.filter (s: s.forwardAuth.enable) allServices)
-  );
 in
 {
   options.custom.homelab = {
@@ -200,14 +164,6 @@ in
         readOnly = true;
         description = "Dashboard services grouped by category";
       };
-
-      usedForwardAuthGroups = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = usedForwardAuthGroups;
-        internal = true;
-        readOnly = true;
-        description = "All groups used by forwardAuth-enabled services";
-      };
     };
 
   };
@@ -216,15 +172,10 @@ in
     assertions = let
       urls = map (s: s.internalUrl) allServices;
       duplicates = lib.filter (url: lib.count (u: u == url) urls > 1) (lib.unique urls);
-      invalidGroups = lib.subtractLists config.custom.homelab.groups.allowed usedForwardAuthGroups;
     in [
       {
         assertion = duplicates == [ ];
         message = "Service URLs must be unique. Conflicting: ${toString duplicates}";
-      }
-      {
-        assertion = invalidGroups == [ ];
-        message = "Invalid forwardAuth groups: ${toString invalidGroups}. Allowed: ${toString config.custom.homelab.groups.allowed}";
       }
     ];
   };

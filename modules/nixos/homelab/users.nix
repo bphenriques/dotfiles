@@ -2,6 +2,23 @@
 let
   cfg = config.custom.homelab.users;
   groupsCfg = config.custom.homelab.groups;
+  homelabServices = config.custom.homelab.services;
+  serviceNames = builtins.attrNames homelabServices;
+
+  # Compute service-derived groups for a user based on enabled services
+  serviceGroupsForUser = u:
+    lib.concatMap
+      (serviceName:
+        let
+          service = homelabServices.${serviceName};
+          hasToggle = lib.hasAttr serviceName u.services;
+          enabled = hasToggle && (u.services.${serviceName}.enable or false);
+          userServiceCfg = if hasToggle then u.services.${serviceName} else { };
+          groupBuilder = service.userGroupBuilder or (_: []);
+        in
+        lib.optionals enabled (groupBuilder userServiceCfg)
+      )
+      serviceNames;
 
   userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
@@ -14,6 +31,12 @@ let
         type = lib.types.listOf lib.types.str;
         default = [ groupsCfg.users ];
         description = "Groups assigned to this user. If admin group is included, the user is marked as admin.";
+      };
+      finalGroups = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        readOnly = true;
+        default = lib.unique (config.groups ++ serviceGroupsForUser config);
+        description = "Computed groups: base groups plus service-specific groups (e.g. kavita-* roles).";
       };
       isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem groupsCfg.admin config.groups; };
 
@@ -71,6 +94,16 @@ let
             default = [ name ];
           };
         };
+
+        kavita = {
+          enable = lib.mkEnableOption "Kavita permissions for this user";
+          libraries = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ "Books" "Manga" "Comics" ];
+            description = "Kavita libraries this user can access (derives kavita-library-<name> roles).";
+            example = [ "Books" "Manga" "Comics" ];
+          };
+        };
       };
     };
   });
@@ -88,13 +121,6 @@ in
         type = lib.types.str;
         default = "users";
         description = "Name of the users group";
-      };
-
-      allowed = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        readOnly = true;
-        default = [ groupsCfg.admin groupsCfg.users ];
-        description = "List of allowed group names (read-only, derived from admin and users)";
       };
     };
 
@@ -114,6 +140,7 @@ in
         jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
         jellyseerr = lib.filterAttrs (_: u: u.services.jellyseerr.enable) cfg;
         wireguard = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg;
+        kavita = lib.filterAttrs (_: u: u.services.kavita.enable) cfg;
       };
       description = "Read-only attrset of users filtered by enabled service.";
     };

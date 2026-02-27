@@ -25,6 +25,8 @@ let
       }
     ];
   };
+
+  settingsFile = pkgs.writeText "prowlarr-config.json" (builtins.toJSON settings);
 in
 {
   systemd.services.prowlarr-configure = {
@@ -33,17 +35,20 @@ in
     after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" ];
     requires = [ "prowlarr.service" ];
     wants = [ "radarr-configure.service" "sonarr-configure.service" ];
-    restartTriggers = [ (builtins.toJSON settings) ./prowlarr-configure.nu ];
+    partOf = [ "prowlarr.service" ];
+    restartTriggers = [ settingsFile ./prowlarr-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       PROWLARR_URL = serviceCfg.internalUrl;
       PROWLARR_API_KEY_FILE = config.sops.secrets."prowlarr/api-key".path;
-      PROWLARR_CONFIG_FILE = pkgs.writeText "prowlarr-config.json" (builtins.toJSON settings);
+      PROWLARR_CONFIG_FILE = settingsFile;
       RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
       SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
     };

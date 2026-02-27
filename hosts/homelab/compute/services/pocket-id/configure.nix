@@ -36,8 +36,10 @@ in
     after = [ "network-online.target" "pocket-id.service" ];
     wants = [ "network-online.target" ];
     requires = [ "pocket-id.service" ];
-
+    partOf = [ "pocket-id.service" ];
     restartTriggers = [ provisionConfigFile ./oidc-provision.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
 
     environment = {
       POCKET_ID_URL = pocketIdCfg.internalUrl;
@@ -49,6 +51,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = 10;
       PrivateTmp = true;
       ProtectSystem = "strict";
       ReadWritePaths = [ cfg.credentials.dir ];

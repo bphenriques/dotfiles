@@ -215,6 +215,7 @@
       immich.enable = true;
       couchdb.enable = true;
       jellyfin.enable = true;
+      kavita.enable = true;
       wireguard = {
         enable = true;
         devices = self.settings.users.bphenriques.wireguardDevices;

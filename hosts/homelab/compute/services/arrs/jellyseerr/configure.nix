@@ -6,8 +6,6 @@ let
   jellyfinCfg = config.custom.homelab.services.jellyfin;
   mediaCfg = config.custom.homelab.media;
 
-  initConfigJson = builtins.toJSON initConfig;
-
   # Config passed to jellyseerr-configure.nu for setup and Radarr/Sonarr registration
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;
@@ -47,6 +45,8 @@ let
       inherit (user.services.jellyseerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
     }) config.custom.homelab.enabledUsers.jellyseerr;
   };
+
+  initConfigFile = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
 in
 {
   systemd.services.jellyseerr-configure = {
@@ -55,19 +55,20 @@ in
     after = [ "jellyseerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
     requires = [ "jellyseerr.service" ];
     wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
-    partOf = [ "jellyfin-configure.service" ];  # Restart when jellyfin-configure restarts (new users to sync)
-    restartTriggers = [ initConfigJson ./jellyseerr-configure.nu ];
+    partOf = [ "jellyseerr.service" "jellyfin-configure.service" ];
+    restartTriggers = [ initConfigFile ./jellyseerr-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       JELLYSEERR_URL = serviceCfg.internalUrl;
       JELLYSEERR_API_KEY_FILE = config.sops.secrets."jellyseerr/api-key".path;
-      JELLYSEERR_CONFIG_FILE = pkgs.writeText "jellyseerr-config.json" initConfigJson;
+      JELLYSEERR_CONFIG_FILE = initConfigFile;
       JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
       JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
       RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;

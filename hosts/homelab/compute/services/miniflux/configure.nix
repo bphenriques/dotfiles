@@ -3,9 +3,9 @@ let
   serviceCfg = config.custom.homelab.services.miniflux;
   oidcCfg = config.custom.homelab.oidc;
 
-  userSettings = builtins.toJSON (lib.mapAttrsToList (_: u:
+  userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
-  ) config.custom.homelab.enabledUsers.miniflux);
+  ) config.custom.homelab.enabledUsers.miniflux));
 in
 {
   services.miniflux = {
@@ -31,18 +31,21 @@ in
     wantedBy = [ "miniflux.service" ];
     after = [ "miniflux.service" ];
     requires = [ "miniflux.service" ];
-    restartTriggers = [ userSettings ./miniflux-configure.nu ];
+    partOf = [ "miniflux.service" ];
+    restartTriggers = [ userSettingsFile ./miniflux-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       MINIFLUX_URL = serviceCfg.internalUrl;
       MINIFLUX_ADMIN_USERNAME_FILE = config.sops.secrets."miniflux/admin/username".path;
       MINIFLUX_ADMIN_PASSWORD_FILE = config.sops.secrets."miniflux/admin/password".path;
-      MINIFLUX_USER_SETTINGS_FILE = pkgs.writeText "miniflux-user-settings.json" userSettings;
+      MINIFLUX_USER_SETTINGS_FILE = userSettingsFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
     };
     path = [ pkgs.nushell ];

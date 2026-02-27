@@ -168,15 +168,13 @@ in
       umask 077
       echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
     '';
-    restartTriggers = [ (builtins.toJSON rommConfig) ];
-
-    # Retry with delays if mount isn't ready yet (e.g., network filesystem race at boot)
+    restartTriggers = [ configFile ];
+    startLimitIntervalSec = 180;
+    startLimitBurst = 10;
     serviceConfig = {
-      # Restart = "on-failure"; Should we enforce?
+      Restart = lib.mkForce "on-failure";
       RestartSec = "10s";
       RestartMaxDelaySec = "60s";
     };
-    startLimitIntervalSec = 180;  # 3 minutes
-    startLimitBurst = 10;
   };
 }

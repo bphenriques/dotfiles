@@ -22,17 +22,6 @@ def generate_password [file: string] {
   $password
 }
 
-def admin_exists [] {
-  let r = http get $"($base_url)/api/admin/exists" --full --allow-errors
-  if $r.status == 200 {
-    $r.body
-  } else if $r.status == 404 {
-    false
-  } else {
-    error make { msg: $"Failed to check admin existence: ($r.status) - ($r.body)" }
-  }
-}
-
 def register_admin [password: string] {
   let body = {
     username: "admin"
@@ -129,20 +118,21 @@ def update_server_settings [headers: record] {
   print "Server settings updated"
 }
 
-def update_oidc_settings [library_ids: list, headers: record] {
+def update_oidc_settings [library_map: record, headers: record] {
   let current_settings = get_settings $headers
   let oidc = $config.oidc
 
-  # Update the nested oidcConfig object with our settings
-  # Note: authority, clientId, secret are read from appsettings.json by Kavita
-  let updated_oidc_config = $current_settings.oidcConfig
+  # Resolve library names to IDs
+  let default_library_ids = $oidc.defaultLibraries | each { |name| $library_map | get $name }
+
+  # OIDC for authentication only - roles managed via API
+  let base_oidc_config = ($current_settings.oidcConfig? | default {})
+  let updated_oidc_config = $base_oidc_config
     | upsert providerName $oidc.buttonText
     | upsert provisionAccounts $oidc.provisionAccounts
     | upsert syncUserSettings $oidc.syncUserSettings
-    | upsert rolesClaim $oidc.rolesClaim
-    | upsert rolesPrefix $oidc.rolesPrefix
     | upsert defaultRoles $oidc.defaultRoles
-    | upsert defaultLibraries $library_ids
+    | upsert defaultLibraries $default_library_ids
     | upsert autoLogin $oidc.autoLogin
     | upsert disablePasswordAuthentication $oidc.disablePasswordAuth
 
@@ -152,30 +142,82 @@ def update_oidc_settings [library_ids: list, headers: record] {
   print "OIDC settings updated"
 }
 
+def get_users [headers: record] {
+  let r = http get $"($base_url)/api/Users" --headers $headers --full --allow-errors
+  if $r.status != 200 { error make { msg: $"Failed to get users: ($r.status) - ($r.body)" } }
+  $r.body
+}
+
+def update_user [kavita_user: record, roles: list, library_ids: list, headers: record] {
+  # Patch the existing user record with our desired values
+  let body = $kavita_user
+    | upsert userId $kavita_user.id
+    | upsert roles $roles
+    | upsert libraries $library_ids
+
+  let r = http post $"($base_url)/api/Account/update" $body --headers $headers --content-type application/json --full --allow-errors
+  if $r.status != 200 {
+    error make { msg: $"Failed to update user ($kavita_user.userName): ($r.status) - ($r.body)" }
+  }
+}
+
+def sync_user_roles [library_map: record, headers: record] {
+  if ($config.users | is-empty) {
+    print "  No users configured for role sync"
+    return
+  }
+
+  let kavita_users = get_users $headers
+
+  for user_config in $config.users {
+    let kavita_user = $kavita_users | where email == $user_config.email | get 0?
+
+    if $kavita_user == null {
+      print $"  User ($user_config.email) not found in Kavita (will be created on first login)"
+      continue
+    }
+
+    if $kavita_user.userName == $config.adminUsername {
+      print $"  Skipping admin user"
+      continue
+    }
+
+    # Map library names to IDs
+    let user_library_ids = $user_config.libraries | each { |lib_name|
+      $library_map | get $lib_name
+    }
+
+    update_user $kavita_user $user_config.roles $user_library_ids $headers
+    print $"  Updated user ($kavita_user.username): roles=($user_config.roles), libraries=($user_config.libraries)"
+  }
+}
+
 def main [] {
   wait_ready
   print "Kavita is ready"
 
-  # Generate admin password and register if needed
+  # Generate admin password and register if needed (idempotent - 400 means already exists)
   let password = generate_password $config.adminPasswordFile
-  if not (admin_exists) {
-    register_admin $password
-  }
+  register_admin $password
 
   # Login and configure via API
-  let token = login "admin" $password
+  let token = login $config.adminUsername $password
   let headers = { "Authorization": $"Bearer ($token)" }
 
   # Create libraries
   ensure_libraries $config.libraries $headers
 
-  # Get library IDs for OIDC default libraries
+  # Build library name -> ID map for settings and user sync
   let libraries = get_libraries $headers
-  let library_ids = $libraries | get id
+  let library_map = $libraries | each { |lib| [$lib.name $lib.id] } | into record
 
   # Update settings via API
   update_server_settings $headers
-  update_oidc_settings $library_ids $headers
+  update_oidc_settings $library_map $headers
+
+  # Sync user roles (if any configured)
+  print "Syncing user roles..."
+  sync_user_roles $library_map $headers
 
   print "Kavita configuration complete"
 }

@@ -42,6 +42,8 @@ let
     };
     defaultQualityProfile = mediaCfg.profiles.${mediaCfg.defaultProfile}.name;
   };
+
+  settingsFile = pkgs.writeText "${name}-config.json" (builtins.toJSON settings);
 in
 {
   custom.homelab.services.${name} = {
@@ -94,18 +96,20 @@ in
     requires = [ "${name}.service" "recyclarr.service" ];
     wants = [ "transmission.service" "recyclarr.service" ];
     partOf = [ "${name}.service" ];
-    restartTriggers = [ (builtins.toJSON settings) ./arr-configure.nu ];
+    restartTriggers = [ settingsFile ./arr-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       ARR_NAME = upperName;
       ARR_URL = serviceCfg.internalUrl;
       ARR_API_KEY_FILE = config.sops.secrets."${name}/api-key".path;
-      ARR_CONFIG_FILE = pkgs.writeText "${name}-config.json" (builtins.toJSON settings);
+      ARR_CONFIG_FILE = settingsFile;
       ARR_CATEGORY_FIELD = categoryField;
     };
     path = [ pkgs.nushell ];

@@ -11,7 +11,7 @@ let
 
   credentialsDir = "/var/lib/immich/credentials";
 
-  immichConfigJson = builtins.toJSON {
+  immichConfigFile = pkgs.writeText "immich-config.json" (builtins.toJSON {
     admin = {
       email = "admin@immich.local";
       name = "Immich Admin";
@@ -26,7 +26,7 @@ let
         { name = "${username}-inbox"; ownerEmail = u.email; importPaths = [ userPaths.inbox ]; exclusionPatterns = [ ]; }
       ]
     ) enabledUsers);
-  };
+  });
 
   # FIXME: Do we really need this?
   photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
@@ -57,7 +57,9 @@ in
     after = [ "immich-server.service" ];
     requires = [ "immich-server.service" ];
     partOf = [ "immich-server.service" ];
-    restartTriggers = [ immichConfigJson ./immich-configure.nu ];
+    restartTriggers = [ immichConfigFile ./immich-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -65,11 +67,10 @@ in
       Group = config.services.immich.group;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       IMMICH_URL = serviceCfg.internalUrl;
-      IMMICH_CONFIG_FILE = pkgs.writeText "immich-config.json" immichConfigJson;
+      IMMICH_CONFIG_FILE = immichConfigFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "immich-configure" ./immich-configure.nu}'';
@@ -77,7 +78,7 @@ in
 
   assertions = [
     {
-      assertion = lib.all (username: pathsCfg ? ${username} && pathsCfg.${username} ? photos) (lib.attrNames enabledUsers);
+      assertion = lib.all (username: pathsCfg ? ${username}.photos) (lib.attrNames enabledUsers);
       message = "Each enabled Immich user must have custom.paths.<username>.photos configured.";
     }
     {

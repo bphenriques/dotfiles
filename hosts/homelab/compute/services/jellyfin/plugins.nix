@@ -51,7 +51,7 @@ let
     schemeOverride = "https";
   };
 
-  ssoConfigJson = builtins.toJSON { inherit brandingConfig ssoConfig; };
+  ssoConfigFile = pkgs.writeText "sso-config.json" (builtins.toJSON { inherit brandingConfig ssoConfig; });
 in
 {
   systemd.services.jellyfin.serviceConfig.ExecStartPre = let
@@ -77,19 +77,21 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyfin-configure.service" ];
     requires = [ "jellyfin-configure.service" ];
-    restartTriggers = [ ssoConfigJson ./sso-configure.nu ];
+    partOf = [ "jellyfin.service" ];
+    restartTriggers = [ ssoConfigFile ./sso-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       JELLYFIN_URL = serviceCfg.internalUrl;
       JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
       JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-      SSO_CONFIG_FILE = pkgs.writeText "sso-config.json" ssoConfigJson;
+      SSO_CONFIG_FILE = ssoConfigFile;
       OIDC_CLIENT_ID_FILE = oidcClient.idFile;
       OIDC_CLIENT_SECRET_FILE = oidcClient.secretFile;
     };

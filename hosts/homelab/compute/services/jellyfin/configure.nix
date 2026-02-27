@@ -4,7 +4,6 @@ let
   pathsCfg = config.custom.paths;
   oidcCfg = config.custom.homelab.oidc;
 
-  jellyfinConfigJson = builtins.toJSON jellyfinConfig;
   jellyfinConfig = {
     serverName = "Jellyfin";
     libraries = [
@@ -27,6 +26,8 @@ let
       passwordFile = u.services.jellyfin.passwordFile;
     }) config.custom.homelab.enabledUsers.jellyfin;
   };
+
+  jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
 in
 {
   sops = {
@@ -41,19 +42,21 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyfin.service" ];
     requires = [ "jellyfin.service" ];
-    restartTriggers = [ jellyfinConfigJson ./jellyfin-configure.nu ];
+    partOf = [ "jellyfin.service" ];
+    restartTriggers = [ jellyfinConfigFile ./jellyfin-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       JELLYFIN_URL = serviceCfg.internalUrl;
       JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
       JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-      JELLYFIN_CONFIG_FILE = pkgs.writeText "jellyfin-config.json" jellyfinConfigJson;
+      JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # FIXME: This has nothing to do really.
     };
     path = [ pkgs.nushell ];

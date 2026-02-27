@@ -130,8 +130,8 @@ let
   # Users enabled for Pocket-ID
   enabledUsers = homelabCfg.enabledUsers.pocket-id;
 
-  # Derive groups from user memberships
-  allGroups = lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.groups) enabledUsers));
+  # Derive groups from user memberships (using finalGroups to include service-specific roles)
+  allGroups = lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.finalGroups) enabledUsers));
 in
 {
   options.custom.homelab.oidc = {
@@ -194,7 +194,7 @@ in
       type = lib.types.attrs;
       readOnly = true;
       default = {
-        users = lib.mapAttrsToList (_: u: { inherit (u) username email firstName lastName isAdmin groups; }) enabledUsers;
+        users = lib.mapAttrsToList (_: u: { inherit (u) username email firstName lastName isAdmin; groups = u.finalGroups; }) enabledUsers;
         groups = map (name: { inherit name; }) allGroups;
         clients = lib.mapAttrsToList (_: client: { inherit (client) name callbackURLs pkce; }) cfg.clients;
       };
