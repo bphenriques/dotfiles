@@ -15,6 +15,7 @@ in
       icon = "transmission.svg";
     };
   };
+  # https://gethomepage.dev/widgets/services/transmission/
 
   services.transmission = {
     enable = true;

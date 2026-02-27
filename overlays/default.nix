@@ -1,5 +1,5 @@
 _: {
-  git-versions = (final: prev: {
+  git-versions = (_final: _prev: {
     # intentionally left empty
   });
 }

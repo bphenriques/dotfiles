@@ -50,9 +50,19 @@ in {
         library = mkOption { type = types.str; default = "${cfg.media.root}/books/library"; };
         inbox = mkOption { type = types.str; default = "${cfg.media.root}/books/inbox"; };
       };
-      
-      comics = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
-      
+
+      comics = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/comics/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/comics/inbox"; };
+      };
+
+      manga = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/manga"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/manga/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/manga/inbox"; };
+      };
+
       gaming = {
         emulation = {
           root = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation"; };

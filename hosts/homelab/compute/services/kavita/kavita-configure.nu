@@ -1,9 +1,7 @@
 #!/usr/bin/env nu
 
 let base_url = $env.KAVITA_URL
-let data_dir = $env.KAVITA_DATA_DIR
 let config = open $env.KAVITA_CONFIG_FILE
-let appsettings_path = $"($data_dir)/config/appsettings.json"
 
 def wait_ready [] {
   for attempt in 1..60 {
@@ -71,7 +69,6 @@ def get_settings [headers: record] {
 def update_settings [settings: record, headers: record] {
   let r = http post $"($base_url)/api/Settings" $settings --headers $headers --content-type application/json --full --allow-errors
   if $r.status != 200 { error make { msg: $"Failed to update settings: ($r.status) - ($r.body)" } }
-  print "Server settings updated"
 }
 
 def get_libraries [headers: record] {
@@ -93,6 +90,8 @@ def create_library [lib: record, headers: record] {
     manageReadingLists: true
     allowScrobbling: false
     enableMetadata: true
+    fileGroupTypes: $lib.fileGroupTypes
+    excludePatterns: []
   }
   let r = http post $"($base_url)/api/Library/create" $body --headers $headers --content-type application/json --full --allow-errors
   if $r.status == 200 {
@@ -117,63 +116,45 @@ def ensure_libraries [libraries: list, headers: record] {
   } | ignore
 }
 
-def update_oidc_settings [oidc_id: string, oidc_secret: string, library_ids: list, headers: record] {
+def update_server_settings [headers: record] {
+  let current_settings = get_settings $headers
+  let server = $config.server
+
+  let updated_settings = $current_settings
+    | upsert hostName $server.hostName
+    | upsert allowStatCollection $server.allowStatCollection
+    | upsert enableFolderWatching $server.enableFolderWatching
+
+  update_settings $updated_settings $headers
+  print "Server settings updated"
+}
+
+def update_oidc_settings [library_ids: list, headers: record] {
   let current_settings = get_settings $headers
   let oidc = $config.oidc
 
-  let updated_settings = $current_settings
-    | upsert oidcAuthority $oidc.authority
-    | upsert oidcClientId $oidc_id
-    | upsert oidcClientSecret $oidc_secret
-    | upsert oidcProviderName $oidc.buttonText
-    | upsert oidcProvisionAccounts $oidc.provisionAccounts
-    | upsert oidcSyncUserSettings $oidc.syncUserSettings
-    | upsert oidcRolesClaim $oidc.rolesClaim
-    | upsert oidcRolesPrefix $oidc.rolesPrefix
-    | upsert oidcDefaultRoles $oidc.defaultRoles
-    | upsert oidcDefaultLibraries $library_ids
+  # Update the nested oidcConfig object with our settings
+  # Note: authority, clientId, secret are read from appsettings.json by Kavita
+  let updated_oidc_config = $current_settings.oidcConfig
+    | upsert providerName $oidc.buttonText
+    | upsert provisionAccounts $oidc.provisionAccounts
+    | upsert syncUserSettings $oidc.syncUserSettings
+    | upsert rolesClaim $oidc.rolesClaim
+    | upsert rolesPrefix $oidc.rolesPrefix
+    | upsert defaultRoles $oidc.defaultRoles
+    | upsert defaultLibraries $library_ids
+    | upsert autoLogin $oidc.autoLogin
+    | upsert disablePasswordAuthentication $oidc.disablePasswordAuth
+
+  let updated_settings = $current_settings | upsert oidcConfig $updated_oidc_config
 
   update_settings $updated_settings $headers
-}
-
-def update_appsettings [oidc_id: string, oidc_secret: string] {
-  if not ($appsettings_path | path exists) {
-    print "appsettings.json not found, skipping"
-    return
-  }
-
-  let current = open $appsettings_path
-  let authentication = {
-    Authority: $config.oidc.authority
-    ClientId: $oidc_id
-    ClientSecret: $oidc_secret
-  }
-
-  let needs_update = (
-    ($current | get -i Authentication.Authority | default "") != $authentication.Authority or
-    ($current | get -i Authentication.ClientId | default "") != $authentication.ClientId or
-    ($current | get -i Authentication.ClientSecret | default "") != $authentication.ClientSecret
-  )
-
-  if $needs_update {
-    let updated = $current | upsert Authentication $authentication
-    $updated | save --force $appsettings_path
-    print "Updated appsettings.json with OIDC credentials"
-    print "NOTE: Kavita requires a restart for OIDC changes to take effect on first setup"
-  } else {
-    print "appsettings.json OIDC configuration is up to date"
-  }
+  print "OIDC settings updated"
 }
 
 def main [] {
   wait_ready
   print "Kavita is ready"
-
-  let oidc_id = open $"($env.CREDENTIALS_DIRECTORY)/oidc-id" | str trim
-  let oidc_secret = open $"($env.CREDENTIALS_DIRECTORY)/oidc-secret" | str trim
-
-  # Update appsettings.json with OIDC credentials (needed for startup)
-  update_appsettings $oidc_id $oidc_secret
 
   # Generate admin password and register if needed
   let password = generate_password $config.adminPasswordFile
@@ -192,8 +173,9 @@ def main [] {
   let libraries = get_libraries $headers
   let library_ids = $libraries | get id
 
-  # Update OIDC settings via API
-  update_oidc_settings $oidc_id $oidc_secret $library_ids $headers
+  # Update settings via API
+  update_server_settings $headers
+  update_oidc_settings $library_ids $headers
 
   print "Kavita configuration complete"
 }

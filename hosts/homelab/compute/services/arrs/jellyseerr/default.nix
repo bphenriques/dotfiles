@@ -13,6 +13,7 @@ in
       description = "TV / Movie Finder";
       icon = "jellyseerr.svg";
     };
+    # TODO: https://gethomepage.dev/widgets/services/jellyseerr/
   };
 
   sops = {

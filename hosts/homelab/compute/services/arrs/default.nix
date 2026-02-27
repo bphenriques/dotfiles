@@ -10,4 +10,6 @@ _: {
     ./cleanuparr.nix
     ./recyclarr.nix
   ];
+
+  # TODO: https://gethomepage.dev/widgets/services/calendar/
 }

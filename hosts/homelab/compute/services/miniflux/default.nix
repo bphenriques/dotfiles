@@ -15,6 +15,7 @@ in
       description = "RSS Server";
       icon = "miniflux.svg";
     };
+    # TODO: https://gethomepage.dev/widgets/services/miniflux/
   };
 
   custom.homelab.oidc.clients.miniflux = {

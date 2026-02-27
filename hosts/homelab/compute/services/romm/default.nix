@@ -60,6 +60,7 @@ in
         icon = "romm.svg";
       };
     };
+    # TODO: https://gethomepage.dev/widgets/services/romm/
     oidc.clients.romm = {
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
       systemd.dependentServices = [ "podman-romm" ];
@@ -168,5 +169,14 @@ in
       echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
     '';
     restartTriggers = [ (builtins.toJSON rommConfig) ];
+
+    # Retry with delays if mount isn't ready yet (e.g., network filesystem race at boot)
+    serviceConfig = {
+      # Restart = "on-failure"; Should we enforce?
+      RestartSec = "10s";
+      RestartMaxDelaySec = "60s";
+    };
+    startLimitIntervalSec = 180;  # 3 minutes
+    startLimitBurst = 10;
   };
 }

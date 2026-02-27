@@ -3,12 +3,13 @@
     ./arrs
     ./immich
     ./jellyfin
+    ./kavita
     ./miniflux
     ./pocket-id
     ./romm
     ./homepage.nix
     ./obsidian-livesync.nix
-    #./syncthing.nix
+    ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
     ./wireguard.nix

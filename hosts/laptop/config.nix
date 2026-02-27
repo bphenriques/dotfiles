@@ -1,4 +1,7 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+let
+  homelabNetwork = import ../homelab/network.nix;
+in
 {
   imports = [
     ./hardware
@@ -36,10 +39,14 @@
   };
 
   # Homelab integration
-  custom.fileSystems.homelab.enable = true;
-  custom.fileSystems.homelab.mounts = {
-    bphenriques = { };
-    media = { };
+  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) homelabNetwork.hosts;
+  custom.fileSystems.homelab = {
+    enable = true;
+    hostname = homelabNetwork.hosts.bruno-home-nas;
+    mounts = {
+      bphenriques = { };
+      media = { };
+    };
   };
 
   # Secrets

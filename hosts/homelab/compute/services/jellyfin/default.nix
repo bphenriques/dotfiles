@@ -18,6 +18,7 @@ in
         description = "Media Player";
         icon = "jellyfin.svg";
       };
+      # TODO: https://gethomepage.dev/widgets/services/jellyfin/
     };
     oidc.clients.jellyfin = {
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];

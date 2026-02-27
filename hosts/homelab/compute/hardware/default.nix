@@ -7,6 +7,8 @@
   # Misc drivers
   hardware.enableRedistributableFirmware = true;
 
+  services.smartd.enable = true; # TODO check email settings
+
   # GPU
   #hardware.graphics = {
   #  enable = true;

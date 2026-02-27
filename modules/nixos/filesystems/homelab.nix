@@ -52,7 +52,9 @@ let
             - requires = [ automountUnit ]
             - after = [ automountUnit ]
 
-          This ensures services don't start until the mount is ready.
+          The automount unit is always active; actual mount happens on first
+          access to the mount point. This avoids boot failures when the network
+          isn't fully ready yet while still ensuring proper service ordering.
 
           Group membership for mount access must still be configured explicitly
           via users.users.<name>.extraGroups.
@@ -66,11 +68,15 @@ let
 in {
   options.custom.fileSystems.homelab = {
     enable = lib.mkEnableOption "Home-server storage";
-    
+
     hostname = mkOption {
       type = types.str;
-      default = "bruno-home-nas";
-      description = "Hostname or IP of the homelab server";
+      description = ''
+        IP address or hostname of the homelab server.
+
+        Prefer using an IP address or a hostname defined in /etc/hosts
+        to ensure reliable resolution at boot time (before mDNS/Avahi is ready).
+      '';
     };
     
     credentialsPath = mkOption {
@@ -121,7 +127,9 @@ in {
           "dir_mode=0770"
           # Credentials
           "credentials=${cfg.credentialsPath}"
-          # Network Split
+          # Automount: don't mount at boot, trigger on first access.
+          # This avoids boot failures when network isn't fully ready yet.
+          "_netdev"
           "x-systemd.automount"
           "noauto"
           "x-systemd.idle-timeout=15"

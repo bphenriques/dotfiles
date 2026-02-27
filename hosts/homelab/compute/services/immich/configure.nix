@@ -32,8 +32,8 @@ let
   photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
     let userPaths = pathsCfg.${username}.photos;
     in [
-      "${userPaths.library}:/mnt/media/${username}"
-      "${userPaths.inbox}:/mnt/media/${username}-inbox"
+      "${userPaths.library}:/mnt/immich/${username}"
+      "${userPaths.inbox}:/mnt/immich/${username}-inbox"
     ]
   ) enabledUsers);
 in

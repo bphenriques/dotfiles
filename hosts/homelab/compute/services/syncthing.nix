@@ -1,31 +1,40 @@
-{ config, ... }:
+{ self, config, lib, ... }:
 let
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 
-  user = "bphenriques";
-  group = "users";
+  romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
-  devices = {
-    galaxy-s20 = {
-      id = "AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH";
-      name = "Galaxy S20";
-    };
-    retroid-pocket-5 = {
-      id = "ZZZZZZZ-YYYYYYY-XXXXXXX-WWWWWWW-VVVVVVV-UUUUUUU-TTTTTTT-SSSSSSS";
-      name = "Retroid Pocket 5";
-    };
+  allSyncthingDevices = lib.pipe self.settings.users [
+    (lib.mapAttrsToList (_: u: u.syncthingDevices or []))
+    lib.flatten
+  ];
+  userSyncthingDevices = user: self.settings.users.${user}.syncthingDevices or [];
+  toDeviceNames = devices: map (d: d.name) devices;
+
+  mkSendOnlyFolder = id: path: devices: {
+    inherit id path;
+    devices = toDeviceNames devices;
+    type = "sendonly";
+    ignorePerms = true;
   };
 
-  mkFolder = id: path: deviceList: {
+  mkSyncFolder = id: path: devices: {
     inherit id path;
-    devices = deviceList;
+    devices = toDeviceNames devices;
     type = "sendreceive";
     ignorePerms = true;
-    versioning = {
-      type = "simple";
-      params = { keep = "5"; };
-    };
+  };
+
+  publicFolders = {
+    music = mkSendOnlyFolder "music" pathsCfg.media.music.library allSyncthingDevices;
+  } // lib.listToAttrs (map (system: lib.nameValuePair "roms-${system}" (
+    mkSendOnlyFolder "roms-${system}" "${pathsCfg.media.gaming.emulation.roms}/${system}" allSyncthingDevices
+  )) romSystems);
+
+  bphenriquesFolders = {
+    bphenriques-phone-backup = mkSyncFolder "bphenriques-phone-backup" pathsCfg.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
+    bphenriques-photos-inbox = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
   };
 in
 {
@@ -44,12 +53,13 @@ in
     homelabMounts.media.group
     homelabMounts.bphenriques.group
   ];
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "syncthing" ];
-  custom.fileSystems.homelab.mounts.bphenriques.systemd.dependentServices = [ "syncthing" ];
+  custom.fileSystems.homelab.mounts = {
+    media.systemd.dependentServices = [ "syncthing" ];
+    bphenriques.systemd.dependentServices = [ "syncthing" ];
+  };
 
   services.syncthing = {
     enable = true;
-    inherit user group;
     dataDir = "/var/lib/syncthing";
     configDir = "/var/lib/syncthing/.config/syncthing";
 
@@ -60,32 +70,29 @@ in
     guiAddress = "0.0.0.0:8384";
 
     settings = {
-      inherit devices;
-
+      devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { id = d.id; }) allSyncthingDevices);
       options = {
         urAccepted = -1;
+        crashReportingEnabled = false;
         globalAnnounceEnabled = false;
         relaysEnabled = false;
         natEnabled = false;
         localAnnounceEnabled = true;
       };
 
-      folders = {
-        "music"        = mkFolder "music" pathsCfg.media.music.library [ "galaxy-s20" ];
-        "roms"         = mkFolder "roms" pathsCfg.media.gaming.emulation.roms [ "retroid-pocket-5" ];
-        "phone_backup" = mkFolder "phone-backup" pathsCfg.bphenriques.backups.phone [ "galaxy-s20" ];
-      };
+      folders = publicFolders // bphenriquesFolders;
 
-      gui.theme = "dark";
+      gui = {
+        theme = "dark";
+        insecureAdminAccess = true;
+      };
     };
   };
 
-  systemd.services.syncthing = {
-    serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "10s";
-      RestartMaxDelaySec = "5min";
-      RestartSteps = 5;
-    };
+  systemd.services.syncthing.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+    RestartMaxDelaySec = "5min";
+    RestartSteps = 5;
   };
 }

@@ -16,6 +16,7 @@ in
       description = "Photo & Video Gallery";
       icon = "immich.svg";
     };
+    # TODO https://gethomepage.dev/widgets/services/immich/
   };
 
   custom.homelab.oidc.clients.immich = {

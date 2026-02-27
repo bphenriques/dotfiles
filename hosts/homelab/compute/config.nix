@@ -1,4 +1,7 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+let
+  homelabNetwork = import ../network.nix;
+in
 {
   imports = [
     # Base
@@ -26,10 +29,14 @@
   };
 
   # Homelab integration
-  custom.fileSystems.homelab.enable = true;
-  custom.fileSystems.homelab.mounts = {
-    bphenriques = { };
-    media = { };
+  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) homelabNetwork.hosts;
+  custom.fileSystems.homelab = {
+    enable = true;
+    hostname = homelabNetwork.hosts.bruno-home-nas;
+    mounts = {
+      bphenriques = { };
+      media = { };
+    };
   };
 
   # Podman for containers (romm, tinyauth, cleanuparr)
