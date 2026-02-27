@@ -7,17 +7,35 @@
   # Misc drivers
   hardware.enableRedistributableFirmware = true;
 
-  services.smartd.enable = true; # TODO check email settings
+  # Disk
+  services.fstrim.enable = true;       # Weekly TRIM for NVMe longevity
+  services.smartd.enable = true; # TODO check prometheus alerting once I introduce it
 
-  # GPU
-  #hardware.graphics = {
-  #  enable = true;
-  #  extraPackages = with pkgs; [
-  #    intel-media-driver # LIBVA_DRIVER_NAME=iHD
-  #    intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but good fallback)
-  #    vaapiVdpau
-  #    libvdpau-va-gl
-  #  ];
-  #};
-  # TODO: disable wifi card to lower power usage.
+  # RAM
+  zramSwap = {
+    enable = true;
+    memoryPercent = 25;                # ~8GB on 32GB RAM - OOM safety net without NVMe wear
+    algorithm = "zstd";
+  };
+
+  # Graphics
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver   # primary VAAPI driver (iHD)
+      intel-vaapi-driver   # fallback
+    ];
+  };
+  environment.systemPackages = [ pkgs.intel_gpu_top ]; # iGPU monitoring
+
+  # Power management
+  powerManagement = {
+    powertop.enable = true;            # Auto-tune power settings at boot
+    cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
+  };
+  boot.blacklistedKernelModules = [
+    "iwlwifi"    # WiFi (always on Ethernet)
+    "btusb"      # Bluetooth USB
+    "bluetooth"  # Bluetooth stack
+  ];
 }

@@ -48,9 +48,7 @@ in
       UMask = "0077";
     };
     path = [ pkgs.openssl ];
-    script = ''
-      openssl rand -base64 64 | tr -d '\n' > "${tokenKeyFile}"
-    '';
+    script = ''openssl rand -base64 64 | tr -d '\n' > "${tokenKeyFile}"'';
   };
 
   services.kavita = {

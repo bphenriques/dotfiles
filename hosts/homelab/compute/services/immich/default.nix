@@ -61,5 +61,5 @@ in
     };
   };
 
-  systemd.services.immich-server.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups;
+  systemd.services.immich-server.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups ++ [ "video" "render" ];
 }

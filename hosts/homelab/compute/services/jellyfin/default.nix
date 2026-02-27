@@ -27,7 +27,7 @@ in
   };
 
   services.jellyfin.enable = true;
-  users.users.jellyfin.extraGroups = [ homelabMounts.media.group ];
+  users.users.jellyfin.extraGroups = [ homelabMounts.media.group "video" "render" ];
   custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "jellyfin" ];
 
   assertions = [

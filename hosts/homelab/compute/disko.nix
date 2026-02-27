@@ -4,7 +4,7 @@ _:
     disk = {
       vda = {
         type = "disk";
-        device = "/dev/disk/by-uuid/1E22-325C";
+        device = "/dev/nvme0n1";
         content = {
           type = "gpt";
 
@@ -26,6 +26,7 @@ _:
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/";
+                mountOptions = [ "noatime" ];
               };
             };
           };

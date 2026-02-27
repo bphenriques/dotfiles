@@ -147,6 +147,14 @@ in {
           value = {
             requires = [ mountCfg.systemd.automountUnit ];
             after = [ mountCfg.systemd.automountUnit ];
+
+            # Retry with delays if mount isn't ready yet (network filesystem race at boot)
+            serviceConfig = {
+              Restart = lib.mkDefault "on-failure";
+              RestartSec = lib.mkDefault "10s";
+            };
+            startLimitIntervalSec = lib.mkDefault 180;  # 3 minutes
+            startLimitBurst = lib.mkDefault 10;
           };
         }) mountCfg.systemd.dependentServices)
       ) cfg.mounts

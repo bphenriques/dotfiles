@@ -1,8 +1,3 @@
-# WireGuard VPN Server
-#
-# Single WireGuard server for homelab access. Clients are derived from
-# users with wireguard.enable in custom.homelab.users.
-#
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
@@ -88,9 +83,7 @@ in
     restartTriggers = [ clientsJson ];
     path = [ wgManage ];
     serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
-    script = ''
-      wg-manage bootstrap ${lib.optionalString (clientNames != [ ]) clientsJson}
-    '';
+    script = ''wg-manage bootstrap ${lib.optionalString (clientNames != [ ]) clientsJson}'';
   };
 
   networking.wireguard.interfaces.${interface} = {

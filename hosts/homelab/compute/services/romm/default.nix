@@ -169,12 +169,5 @@ in
       echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
     '';
     restartTriggers = [ configFile ];
-    startLimitIntervalSec = 180;
-    startLimitBurst = 10;
-    serviceConfig = {
-      Restart = lib.mkForce "on-failure";
-      RestartSec = "10s";
-      RestartMaxDelaySec = "60s";
-    };
   };
 }
