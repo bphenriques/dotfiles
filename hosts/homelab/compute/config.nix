@@ -50,8 +50,6 @@ in
     };
   };
 
-  programs.fish.enable = true;
-
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

@@ -1,18 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [ ../common.nix ];
-
-  nix = {
-    settings.auto-optimise-store   = true;  # Optimise the store when building.
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
-
-    # Ensure we have at least 5GiB always available. Less than that and my system gets unstable.
-    extraOptions = "min-free = ${toString (5 * 1024 * 1024 * 1024)}";
-  };
 
   boot = {
     tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
@@ -21,24 +9,14 @@
     ];
   };
 
-  # Network
-  networking.networkmanager.enable = true;
-
   # Localization
   time.timeZone = "Europe/Lisbon";
   i18n = {
     defaultLocale = "en_GB.UTF-8";
-    extraLocaleSettings = {
-      LC_ADDRESS = "pt_PT.UTF-8";
-      LC_IDENTIFICATION = "pt_PT.UTF-8";
-      LC_MEASUREMENT = "pt_PT.UTF-8";
-      LC_MONETARY = "pt_PT.UTF-8";
-      LC_NAME = "pt_PT.UTF-8";
-      LC_NUMERIC = "pt_PT.UTF-8";
-      LC_PAPER = "pt_PT.UTF-8";
-      LC_TELEPHONE = "pt_PT.UTF-8";
-      LC_TIME = "pt_PT.UTF-8";
-    };
+    extraLocaleSettings = lib.genAttrs [
+      "LC_ADDRESS" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MONETARY"
+      "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME"
+    ] (_: "pt_PT.UTF-8");
   };
 
   environment.systemPackages = let
@@ -50,7 +28,6 @@
   in filesystems ++ hardware;
 
   programs.fish.enable = true;  # System level.
-  services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`
 
   # Disabling some defaults
   programs.command-not-found.enable = false;

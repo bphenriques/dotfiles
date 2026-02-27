@@ -4,8 +4,8 @@
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
   ];
 
-  # Misc drivers
-  hardware.enableRedistributableFirmware = true;
+  hardware.enableRedistributableFirmware = true;  # Misc drivers
+  services.fwupd.enable = true;                   # Updates firmwares: `fwupdmgr`.
 
   # Disk
   services.fstrim.enable = true;       # Weekly TRIM for NVMe longevity

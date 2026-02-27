@@ -7,6 +7,12 @@
     ./peripherals.nix
   ];
 
+  # Misc
+  services.fwupd.enable = true;                   # Updates firmwares: `fwupdmgr`.
+
+  # Storage
+  services.fstrim.enable = true;
+
   # Wifi
   networking.networkmanager.wifi.powersave = false; # FIXME: Disable power saving as I frequently have Wifi drops
 

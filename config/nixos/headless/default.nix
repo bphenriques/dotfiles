@@ -3,16 +3,19 @@ _: {
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
+  networking.useDHCP = true;  # Explicit DHCP; static IP assigned via router MAC reservation
   networking.firewall.enable = true;
   services.openssh = {
     enable = true;
     settings = {
-      PermitRootLogin = "prohibit-password";  # Allow root with key only (needed for management/sync)
+      PermitRootLogin = "prohibit-password";
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       X11Forwarding = false;
       AllowAgentForwarding = false;
       AllowTcpForwarding = false;
+      MaxAuthTries = 3;
+      LoginGraceTime = "30s";
     };
   };
 }
