@@ -1,6 +1,11 @@
-Hi! 👋
+# NixOS & Darwin Dotfiles
 
-This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) that works _for me_. I hope this helps you!
+[![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
+[![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
+[![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
+[![Darwin Install](https://img.shields.io/badge/Darwin_Install-docs-blue)](./apps/darwin-install/README.md)
+
+Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that works _for me_. I hope this helps you!
 
 <p float="center">
   <img src="hosts/laptop/screenshots/general.png" width="49%" />
@@ -19,23 +24,25 @@ See [apps/](./apps) for installation scripts.
 
 ## Nix Stack
 
+Layout:
+- `hosts/` — per-host configurations
+- `modules/` — reusable modules
+- `packages/` — custom packages
+- `apps/` — helper scripts
+
+Key dependencies:
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
-- [`stylix`](https://github.com/danth/stylix) for consistent theming in general
+- [`stylix`](https://github.com/danth/stylix) for consistent theming
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
-- [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) to automate remote installations
-- Not using [flake-utils](https://github.com/numtide/flake-utils) intentionally. I find it an _unnecessary_ abstraction
-- Not using [impermanence](https://github.com/nix-community/impermanence). I tried and... it is _too much_
+- [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
+
+Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
 ## Flake Outputs
 
-For those familiar with [Nix Flakes](https://nixos.wiki/wiki/Flakes), take a look around at my [modules](./modules) and [packages](./packages):
-```
-$ nix run github:bphenriques/dotfiles#{package} -- {args}
-```
-
-You can see the list of packages by running:
 ```
 $ nix flake show github:bphenriques/dotfiles
+$ nix run github:bphenriques/dotfiles#<package>
 ```
 
 ## Acknowledgements
