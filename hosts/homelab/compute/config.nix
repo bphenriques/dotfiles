@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 let
-  homelabNetwork = import ../network.nix;
+  shared = import ../shared.nix;
 in
 {
   imports = [
@@ -29,10 +29,10 @@ in
   };
 
   # Homelab integration
-  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) homelabNetwork.hosts;
+  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) shared.hosts;
   custom.fileSystems.homelab = {
     enable = true;
-    hostname = homelabNetwork.hosts.bruno-home-nas;
+    hostname = shared.hosts.bruno-home-nas;
     mounts = {
       bphenriques = { };
       media = { };

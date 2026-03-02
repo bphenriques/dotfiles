@@ -20,15 +20,14 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 | [work-macos](./hosts/work-macos) | Darwin | Work MacBook |
 | [homelab](./hosts/homelab) | NixOS + Synology | Self-hosted infrastructure |
 
-See [apps/](./apps) for installation scripts.
-
 ## Nix Stack
 
 Layout:
-- `hosts/` — per-host configurations
-- `modules/` — reusable modules
-- `packages/` — custom packages
-- `apps/` — helper scripts
+- [`hosts/`](./hosts) — per-host configurations
+- [`modules/`](./modules) — reusable modules
+- [`packages/`](./packages) — custom packages
+- [`lib/`](./lib) — custom helpers and builders
+- [`apps/`](./apps) — helper scripts (e.g., installation)
 
 Key dependencies:
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
