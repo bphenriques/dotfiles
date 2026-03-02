@@ -2,6 +2,13 @@
 {
   imports = [ ../common.nix ];
 
+  system.nixos.label = let
+    rev = self.shortRev or self.dirtyShortRev or "dirty";
+    # self.lastModifiedDate is YYYYMMDDHHMMSS format -> YYMMdd-HHmm.shortRev
+    date = self.lastModifiedDate or "00000000000000";
+    fmt = "${builtins.substring 2 6 date}-${builtins.substring 8 4 date}";
+  in "${fmt}.${rev}";
+
   # Pin nixpkgs registry to flake input (replaces nix-channel for flake workflows)
   # Allows: nix shell nixpkgs#hello, nix run nixpkgs#cowsay, etc.
   nix.registry.nixpkgs.flake = self.inputs.nixpkgs;
