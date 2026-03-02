@@ -1,6 +1,10 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, self, ... }:
 {
   imports = [ ../common.nix ];
+
+  # Pin nixpkgs registry to flake input (replaces nix-channel for flake workflows)
+  # Allows: nix shell nixpkgs#hello, nix run nixpkgs#cowsay, etc.
+  nix.registry.nixpkgs.flake = self.inputs.nixpkgs;
 
   boot = {
     tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.

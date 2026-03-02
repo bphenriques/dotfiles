@@ -1,6 +1,6 @@
 { lib, pkgs, selfPkgs, ... }:
 pkgs.writeShellApplication {
-  name = "post-install";
+  name = "desktop-post-install";
   runtimeInputs = [
     pkgs.git
     pkgs.gnupg

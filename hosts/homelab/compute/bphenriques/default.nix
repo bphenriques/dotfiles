@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, config, self, ... }:
 {
   sops.secrets."users/bphenriques/password".neededForUsers = true;
   users.users.bphenriques = {
@@ -13,9 +13,7 @@
         "homelab-bphenriques"
       ];
 
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3"
-    ];
+    openssh.authorizedKeys.keys = self.settings.hosts.authorizedSSHKeys;
   };
 
   home-manager.users.bphenriques = import ./home.nix;

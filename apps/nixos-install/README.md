@@ -1,44 +1,20 @@
-# Setting up new host
+# NixOS Installation
 
-1. Create a bootable USB [NixOS installer](https://nixos.org/download/).
+## Prerequisites
+
+1. Create bootable USB from [NixOS installer](https://nixos.org/download/) 
    ```shell
    sudo fdisk -l
    sudo dd bs=4M if=<ISO_FILE> of=<DRIVE> status=progress oflag=sync
    ```
 
-2. If you are still new to NixOS install as it is, extract its configuration and play around.
-3. Otherwise, if you have a host set, extract its `hardware-configuration.nix` by running:
-
+2. Run and extract the hardware configuration:
    ```
-   $ nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
+   nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
    ```
-
-4. Finally, create a new `host/<name>` and start small with `config.nix`, `hardware-configuration.nix`, and `disko.nix` ([examples](https://github.com/nix-community/disko/tree/master/example)).
-
-This is what I consider a minimal healthy setup that covers most things.
-
-# Installation
-
-The automations rely on the secrets being readily available in Bitwarden (the idea is to make it easier to rotate):
-- SOPS private key
-- Luke Encryption key
-- SSH key
-- GPG key
-
-For more details, check the `dotfiles-secrets` package.
-
-> **TODO**: Consider using `sops.age.generateKey = true` for new machines instead of
-> pre-provisioning keys in Bitwarden. This auto-generates the age key on first boot
-> (stored in `/var/lib/sops-nix/key.txt`). Bootstrap workflow (blue-green style):
-> 1. First boot - key generates, secrets fail (expected)
-> 2. Extract public key: `age-keygen -y /var/lib/sops-nix/key.txt`
-> 3. Add new key to `.sops.yaml` alongside existing keys
-> 4. Re-encrypt: `sops updatekeys <secrets.yaml>`
-> 5. Redeploy - secrets now work
-> 6. (Optional) Remove old key from `.sops.yaml` and re-encrypt again
->
-> See `hosts/auth/RUNBOOK.md` for detailed example. Avoids manual key management
-> while keeping keys unique per machine.
+3. Create host directory: `hosts/<name>/` with `config.nix`, `hardware-configuration.nix`, `disko.nix`
+4. Bootstrap secrets in Bitwarden: `dotfiles-secrets init-host <host> [--luks]`
+5. Update `.sops.yaml` with the public key from step 2
 
 ## Install locally
 
@@ -50,11 +26,11 @@ For more details, check the `dotfiles-secrets` package.
     nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#nixos-install -- local "$HOST" "$BITWARDEN_EMAIL"   
     ```
 
-3. Once installed and booted onto the NixOS installation run:
+3. (if workstation) Once installed and booted onto the NixOS installation run:
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- "$HOST" "$BITWARDEN_EMAIL"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#desktop-post-install -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 ## Install remotely
@@ -68,11 +44,11 @@ For more details, check the `dotfiles-secrets` package.
     nix run github:bphenriques/dotfiles#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
     ```
 
-3. Once the new machine reboots, run the post-installation setup:
+3. (if workstation) Once the new machine reboots, run the post-installation setup:
     ```shell
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- "$HOST" "$BITWARDEN_EMAIL"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#desktop-post-install -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 # Misc
@@ -106,3 +82,4 @@ Following this:
 
 Source
 - https://wiki.archlinux.org/title/Advanced_Format#NVMe_solid_state_drives
+

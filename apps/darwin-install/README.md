@@ -11,11 +11,11 @@
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
 
-3. Run the post-install:
+3. Run the desktop post-install:
    ```shell
    HOST=work-macos
    BITWARDEN_EMAIL=me@me.com
-   nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#post-install -- $HOST $BITWARDEN_EMAIL
+   nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#desktop-post-install -- $HOST $BITWARDEN_EMAIL
    ```
 
 4. Apply:

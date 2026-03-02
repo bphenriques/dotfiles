@@ -14,5 +14,13 @@
       ];
   };
 
+  programs.git = {
+    enable = true;
+    config.safe.directory = [
+      "/home/bphenriques/.dotfiles"
+      "/home/bphenriques/.dotfiles-private"
+    ];
+  };
+
   home-manager.users.bphenriques = import ./home.nix;
 }

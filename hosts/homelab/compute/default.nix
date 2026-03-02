@@ -21,6 +21,7 @@ let
       pkgs = self.packages.${system};
       lib.builders = self.lib.builders.${system};
       settings = dotfiles-private.settings // {
+        hosts = import ../../hosts.nix;
         headless = true;
       };
     };

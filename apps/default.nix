@@ -9,7 +9,7 @@ let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
     in pkgsToApps {
-      post-install = pkgs.callPackage ./post-install { inherit selfPkgs; };
+      desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
     });
 
   linux = forLinuxSystems (system:
