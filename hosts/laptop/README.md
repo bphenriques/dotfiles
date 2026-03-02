@@ -2,6 +2,11 @@
 
 Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 
+<p float="center">
+  <img src="screenshots/general.png" width="49%" />
+  <img src="screenshots/music-menu.png" width="49%" />
+</p>
+
 ## Hardware
 
 - **Model**: Lenovo Legion Slim 5 14APH8 (Type 82Y5)

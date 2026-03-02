@@ -16,9 +16,9 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 
 | Host | Platform | Description |
 |------|----------|-------------|
+| [homelab](./hosts/homelab) | NixOS + Synology | Self-hosted infrastructure |
 | [laptop](./hosts/laptop) | NixOS | Personal workstation |
 | [work-macos](./hosts/work-macos) | Darwin | Work MacBook |
-| [homelab](./hosts/homelab) | NixOS + Synology | Self-hosted infrastructure |
 
 ## Nix Stack
 
