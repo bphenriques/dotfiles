@@ -3,7 +3,7 @@
   projectRootFile = "flake.nix";
   programs = {
     # Formatters
-    nixfmt.enable = true;     # Official Nix formatter
+    nixfmt.enable = true;     # Official Nix formatter. Placeholder setup but I am not actually convinced.
     shfmt.enable = true;      # Shell script formatter
 
     # Checks
