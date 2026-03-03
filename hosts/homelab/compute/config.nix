@@ -10,8 +10,8 @@ in
     ./datastores
     ./services
     ./tasks
-    ../../../config/nixos
-    ../../../config/nixos/headless
+    ../../../profiles/nixos
+    ../../../profiles/nixos/headless
 
     # Users
     ./bphenriques

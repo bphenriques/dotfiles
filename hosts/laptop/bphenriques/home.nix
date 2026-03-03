@@ -9,9 +9,9 @@ let
 in
 {
   imports = [
-    ../../../config/home-manager
-    ../../../config/home-manager/desktop-environment
-    ../../../config/home-manager/desktop
+    ../../../profiles/home-manager
+    ../../../profiles/home-manager/desktop-environment
+    ../../../profiles/home-manager/desktop
     ./kanshi.nix
     ./stylix.nix
   ];

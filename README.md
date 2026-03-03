@@ -23,11 +23,12 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 ## Nix Stack
 
 Layout:
-- [`hosts/`](./hosts) — per-host configurations
-- [`modules/`](./modules) — reusable modules
-- [`packages/`](./packages) — custom packages
+- [`hosts/`](./hosts) — per-host configurations (hardware, services, users)
+- [`modules/`](./modules) — reusable modules that *define* options (e.g., `custom.homelab.*`)
+- [`profiles/`](./profiles) — shared opinionated configuration that *sets* standard options (imported by hosts)
+- [`packages/`](./packages) — custom packages and scripts
 - [`lib/`](./lib) — custom helpers and builders
-- [`apps/`](./apps) — helper scripts (e.g., installation)
+- [`apps/`](./apps) — runnable scripts (installation, post-install)
 
 Key dependencies:
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning

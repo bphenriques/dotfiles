@@ -32,12 +32,14 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
   };
 
-  outputs = inputs @ { self, nixpkgs, ... }:
+  outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
     let
       generators = import ./lib/generators.nix { lib = nixpkgs.lib; };
       inherit (generators) forAllSystems readModulesAttrs;
+      treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -47,7 +49,8 @@
       );
       apps      = import ./apps { inherit nixpkgs self generators; };
       packages  = import ./packages { inherit nixpkgs generators; };
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);                       # `nix fmt`
+      checks    = forAllSystems (system: { formatting = treefmtEval.${system}.config.build.check self; });  # `nix flake check`
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });

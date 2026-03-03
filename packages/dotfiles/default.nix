@@ -5,7 +5,7 @@ pkgs.stdenv.mkDerivation rec {
   buildCommand = let
     script = pkgs.writeShellApplication {
       name = name;
-      runtimeInputs = [ ];
+      runtimeInputs = [ pkgs.nvd pkgs.nix-output-monitor ]; # For `dotfiles changelog` and better build UI
       text = lib.fileContents ./script.sh;
       meta.platforms = lib.platforms.all;
     };

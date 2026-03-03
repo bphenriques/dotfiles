@@ -6,8 +6,8 @@ in
   imports = [
     ./hardware
     ./disko.nix
-    ../../config/nixos
-    ../../config/nixos/desktop
+    ../../profiles/nixos
+    ../../profiles/nixos/desktop
 
     # Users
     ./bphenriques

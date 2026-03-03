@@ -5,5 +5,6 @@
 
   hosts = {
     bruno-home-nas = "192.168.1.192";
+    compute = "192.168.1.100"; # TODO: Update with actual IP
   };
 }
