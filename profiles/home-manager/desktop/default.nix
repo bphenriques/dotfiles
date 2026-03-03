@@ -49,9 +49,11 @@
   programs.ssh = {
     enable = true;
     includes = [ "$HOME/.ssh/config.local" ];
-    addKeysToAgent = "4h";  # Cache the keys temporarily but expire after 4 hours.
     matchBlocks = {
-      "*".extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.
+      "*" = {
+        extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.
+        addKeysToAgent = "4h";  # Cache the keys temporarily but expire after 4 hours.
+      };
       "bruno-home-nas" = {
         user = "Bruno-Admin";
         port = 6188;

@@ -50,10 +50,10 @@ in
       content = config.sops.placeholder."pocket-id/api-key";
     };
 
-    secrets."pocket-id/smtp-password" = { };
+    secrets."smtp-password" = { };
     templates."pocket-id-smtp-password" = {
       owner = config.services.pocket-id.user;
-      content = config.sops.placeholder."pocket-id/smtp-password";
+      content = config.sops.placeholder."smtp-password";
     };
   };
 

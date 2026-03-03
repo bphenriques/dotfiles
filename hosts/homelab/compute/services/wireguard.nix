@@ -8,19 +8,19 @@ let
   clientSubnet = "10.100.0.0/24";
   dns = "1.1.1.1";
   endpoint = self.settings.services.wireguard.endpoint;
-  smtpFrom = self.settings.smtp.from;
+  smtp = self.settings.smtp;
 
   dataDir = "/var/lib/wireguard";
   serverKeyFile = "${dataDir}/server/private.key";
   serverPubKeyFile = "${dataDir}/server/public.key";
 
-  clientNames = lib.concatLists (
+  clients = lib.concatLists (
     lib.mapAttrsToList
-      (_: u: map (d: "${u.username}-${d}") u.services.wireguard.devices)
+      (_: u: map (d: { name = "${u.username}-${d}"; email = u.email; }) u.services.wireguard.devices)
       cfg.enabledUsers.wireguard
   );
 
-  clientsJson = pkgs.writeText "wireguard-clients.json" (builtins.toJSON clientNames);
+  clientsJson = pkgs.writeText "wireguard-clients.json" (builtins.toJSON clients);
 
   wgEnv = {
     WG_DATA_DIR = dataDir;
@@ -29,23 +29,22 @@ let
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
     WG_SERVER_ALLOWED_IPS = clientSubnet;
-  } // lib.optionalAttrs (smtpFrom != "") {
-    WG_SMTP_FROM = smtpFrom;
+  } // lib.optionalAttrs (smtp.from != "") {
+    WG_SMTP_FROM = smtp.from;
+    WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
   };
 
-  script = pkgs.writeTextFile {
-    name = "wg-manage.nu";
-    text = lib.fileContents ../../../../packages/wg-manage/script.nu;
+  wgManagePkg = self.pkgs.wg-manage.override {
+    homepageUrl = cfg.services.homepage.publicUrl;
   };
 
   wgManage = pkgs.writeShellApplication {
     name = "wg-manage";
-    runtimeInputs = with pkgs; [ nushell wireguard-tools qrencode coreutils mutt ];
+    runtimeInputs = [ wgManagePkg ];
     text = ''
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") wgEnv)}
-      exec nu ${script} "$@"
+      exec wg-manage-bin "$@"
     '';
-    meta.platforms = lib.platforms.linux;
   };
 in
 {
@@ -83,7 +82,7 @@ in
     restartTriggers = [ clientsJson ];
     path = [ wgManage ];
     serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
-    script = ''wg-manage bootstrap ${lib.optionalString (clientNames != [ ]) clientsJson}'';
+    script = ''wg-manage bootstrap ${clientsJson}'';
   };
 
   networking.wireguard.interfaces.${interface} = {
@@ -94,6 +93,11 @@ in
 
   networking.firewall.allowedUDPPorts = [ port ];
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
+  sops = {
+    secrets."smtp-password" = { };
+    templates."wireguard-smtp-url".content = "smtp://${smtp.user}:${config.sops.placeholder."smtp-password"}@${smtp.host}:${toString smtp.port}";
+  };
 
   environment.systemPackages = [ wgManage ];
 }

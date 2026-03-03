@@ -3,10 +3,16 @@
 # WireGuard client management (IPv4 only)
 #
 # Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_CLIENT_SUBNET, WG_CLIENT_DNS
-# Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET), WG_SMTP_FROM (for email)
+# Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
+# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE (set by package)
 
 def require_env [name: string] {
-  $env | get -o $name | if ($in == null or ($in | is-empty)) { error make { msg: $"($name) required" } } else { $in }
+  let val = ($env | get -o $name)
+  if ($val == null or ($val | is-empty)) {
+    error make { msg: $"($name) required" }
+  } else {
+    $val
+  }
 }
 
 let data_dir = require_env "WG_DATA_DIR"
@@ -34,10 +40,23 @@ def list_clients [] {
 }
 
 def next_ip [] {
-  let prefix = $client_subnet | split row "/" | get 0 | split row "." | slice 0..2 | str join "."
-  let used = list_clients | get -o ip | default [] | each { $in | split row "." | get 3? | default "0" | into int }
-  let next = 2..254 | where { |n| not ($n in $used) } | get 0? | if ($in == null) { error make { msg: "No free IPs" } } else { $in }
-  $"($prefix).($next)"
+  # Assumes IPv4 /24 subnet
+  let parts = ($client_subnet | split row "/")
+  let base_ip = ($parts | get 0)
+  let cidr = ($parts | get 1 | into int)
+  if $cidr != 24 {
+    error make { msg: $"Only /24 subnets supported (got /($cidr))" }
+  }
+
+  let prefix = ($base_ip | split row "." | slice 0..2 | str join ".")
+  let used = (list_clients | get -o ip | default [] | each {|ip| $ip | split row "." | get 3 | into int })
+  let next = (2..254 | where {|n| not ($n in $used) } | get 0?)
+
+  if $next == null {
+    error make { msg: "No free IPs" }
+  } else {
+    $"($prefix).($next)"
+  }
 }
 
 def render_conf [priv_key: string, ip: string] {
@@ -55,13 +74,29 @@ PersistentKeepalive = 25
 }
 
 def send_email [name: string, to: string] {
+  let smtp_url_file = require_env "WG_SMTP_URL_FILE"
+  let smtp_url = (open --raw $smtp_url_file | str trim)
   let from = require_env "WG_SMTP_FROM"
+  let template_file = require_env "WG_EMAIL_TEMPLATE_FILE"
   let dir = $"($clients_dir)/($name)"
-  let qr = mktemp --suffix=.png | str trim
+  let tmpdir = (mktemp --tmpdir -d | str trim)
+  let qr = $"($tmpdir)/wireguard.png"
   open --raw $"($dir)/client.conf" | qrencode -o $qr
-  echo $"WireGuard config for '($name)' attached." | mutt -s $"WireGuard: ($name)" -e $"set from=($from)" -a $"($dir)/client.conf" -a $qr -- $to
-  rm $qr
-  print $"Email sent to ($to)"
+
+  # Template is pre-rendered HTML at build time; just substitute the name
+  let body = (open --raw $template_file | str replace --all "{{NAME}}" $name)
+
+  let mutt_cfg = $"set from=($from); set smtp_url=($smtp_url); set ssl_starttls=yes; set content_type=text/html"
+  echo $body | mutt -s "Home Server - Remote Access" -e $mutt_cfg -a $"($dir)/client.conf" -a $qr -- $to
+  let exit_code = $env.LAST_EXIT_CODE
+
+  rm -r $tmpdir
+
+  if $exit_code != 0 {
+    print $"Error sending email to ($to) \(exit code: ($exit_code)\)"
+  } else {
+    print $"Email sent to ($to)"
+  }
 }
 
 # Not thread-safe: concurrent calls may assign the same IP
@@ -82,8 +117,12 @@ def create_client [name: string] {
 }
 
 def "main list" [] {
-  print "NAME\tIP"
-  list_clients | each { |c| print $"($c.name)\t($c.ip)" }
+  let clients = list_clients
+  if ($clients | is-empty) {
+    print "No clients"
+  } else {
+    $clients | select name ip | print
+  }
 }
 
 def "main add" [name: string, email?: string] {
@@ -103,8 +142,15 @@ def "main remove" [name: string] {
 
 def "main bootstrap" [config_file?: path] {
   if $config_file != null {
-    for name in (open $config_file) {
-      if ($"($clients_dir)/($name)" | path exists) { print $"Skipping '($name)'" } else { create_client $name }
+    for entry in (open $config_file) {
+      if ($"($clients_dir)/($entry.name)" | path exists) {
+        print $"Skipping '($entry.name)'"
+      } else {
+        create_client $entry.name
+        if ($entry.email? != null and $entry.email != "") {
+          send_email $entry.name $entry.email
+        }
+      }
     }
   }
 
@@ -114,7 +160,7 @@ def "main bootstrap" [config_file?: path] {
 
   for c in ($clients | where { $in.pub_key not-in $live_peers }) {
     wg set $interface peer $c.pub_key allowed-ips $"($c.ip)/32"
-    print $"Added: ($c.name)"
+    print $"Synced: ($c.name)"
   }
 
   for p in ($live_peers | where { $in not-in $file_pubkeys }) {

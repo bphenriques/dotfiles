@@ -3,6 +3,13 @@ let
   cfg = config.custom.homelab.users;
   groupsCfg = config.custom.homelab.groups;
 
+  syncthingDeviceOpt = lib.types.submodule {
+    options = {
+      name = lib.mkOption { type = lib.types.str; };
+      id = lib.mkOption { type = lib.types.str; };
+    };
+  };
+
   userOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       username = lib.mkOption { type = lib.types.str; default = name; };
@@ -18,7 +25,9 @@ let
       isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem groupsCfg.admin config.groups; };
 
       services = {
-        pocket-id.enable = lib.mkEnableOption "Pocket-ID account for this user";
+        pocket-id.enable = lib.mkEnableOption "Pocket-ID account for this user" // {
+          enable = true;
+        };
 
         immich.enable = lib.mkEnableOption "Immich account for this user";
 
@@ -68,7 +77,14 @@ let
           enable = lib.mkEnableOption "Wireguard configuration for this user (requires Wireguard)";
           devices = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            default = [ name ];
+          };
+        };
+
+        syncthing = {
+          enable = lib.mkEnableOption "Syncthing configuration for this user";
+          devices = lib.mkOption {
+            type = lib.types.listOf syncthingDeviceOpt;
+            default = [ ];
           };
         };
 
@@ -117,6 +133,7 @@ in
         jellyfin = lib.filterAttrs (_: u: u.services.jellyfin.enable) cfg;
         jellyseerr = lib.filterAttrs (_: u: u.services.jellyseerr.enable) cfg;
         wireguard = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg;
+        syncthing = lib.filterAttrs (_: u: u.services.syncthing.enable) cfg;
         kavita = lib.filterAttrs (_: u: u.services.kavita.enable) cfg;
       };
       description = "Read-only attrset of users filtered by enabled service.";

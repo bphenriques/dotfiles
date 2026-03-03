@@ -116,11 +116,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772148828,
-        "narHash": "sha256-53M+780+SfH9cQS3bGSRMjLaCZvZUrQin824Lwq1pAE=",
+        "lastModified": 1772577650,
+        "narHash": "sha256-yztL0w9/6MLX9i27o3XfmMg/Hz5WBFz3S80sQW9+Fxo=",
         "ref": "refs/heads/main",
-        "rev": "0be949d7ccdad786d194c0c49c45e3702bfb414b",
-        "revCount": 33,
+        "rev": "0370b891f82776d6b1c5a912819448b3d4b9ad23",
+        "revCount": 37,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/dotfiles-private"
       },

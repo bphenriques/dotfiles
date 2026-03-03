@@ -1,15 +1,16 @@
-{ self, config, lib, ... }:
+{ config, lib, ... }:
 let
   pathsCfg = config.custom.paths;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
+  syncthingUsers = config.custom.homelab.enabledUsers.syncthing;
 
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
-  allSyncthingDevices = lib.pipe self.settings.users [
-    (lib.mapAttrsToList (_: u: u.syncthingDevices or []))
+  allSyncthingDevices = lib.pipe syncthingUsers [
+    (lib.mapAttrsToList (_: u: u.services.syncthing.devices))
     lib.flatten
   ];
-  userSyncthingDevices = user: self.settings.users.${user}.syncthingDevices or [];
+  userSyncthingDevices = user: syncthingUsers.${user}.services.syncthing.devices;
   toDeviceNames = devices: map (d: d.name) devices;
 
   mkSendOnlyFolder = id: path: devices: {
