@@ -8,6 +8,8 @@ let
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";
   favicon = self.lib.builders.mkEmojiFavicon { } "homepage" "🏠";
 in
+
+# TODO turn this around and spin up homepage here.
 {
   custom.homelab.homepage = {
     enable = true;

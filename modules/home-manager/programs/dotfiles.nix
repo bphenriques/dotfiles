@@ -15,7 +15,13 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       default = self.pkgs.dotfiles;
-      description = "package to install.";
+      description = "package to install regarding management dotfiles.";
+    };
+
+    packageSecrets = lib.mkOption {
+      type = lib.types.package;
+      default = self.pkgs.dotfiles-secrets;
+      description = "package to install regarding secrets.";
     };
 
     enableFishIntegration = lib.mkOption {
@@ -26,7 +32,7 @@ in
   };
 
   config = {
-    home.packages = [ cfg.package ];
+    home.packages = [ cfg.package cfg.packageSecrets ];
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
 
     programs.fish = lib.mkIf cfg.enableFishIntegration {

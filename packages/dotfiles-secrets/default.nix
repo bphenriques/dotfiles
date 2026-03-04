@@ -1,7 +1,7 @@
 { lib, pkgs, bw-session, ... }:
 pkgs.writeShellApplication {
   name = "dotfiles-secrets";
-  runtimeInputs = [ pkgs.bitwarden-cli pkgs.jq pkgs.age pkgs.openssl ];
+  runtimeInputs = [ pkgs.bitwarden-cli bw-session pkgs.jq pkgs.age pkgs.openssl ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.all;
 }

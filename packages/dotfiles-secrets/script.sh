@@ -50,7 +50,7 @@ init_host() {
   info "Generating SOPS age key..."
   local tmpdir
   tmpdir="$(mktemp -d)"
-  trap 'rm -rf "$tmpdir"' EXIT
+  trap "rm -rf \"$tmpdir\"" EXIT
 
   # Build fields array. Optionally add LUKS key
   age-keygen -o "$tmpdir/age.key" 2>/dev/null
@@ -118,9 +118,15 @@ EOF
   exit 1
 }
 
-bw unlock --check > /dev/null 2>&1 || fatal "Bitwarden vault is locked. Run: bw unlock"
-bw sync > /dev/null
+unlock_bitwarden() {
+  local bw_email="$1"
+  info "Unlocking Bitwarden account (${bw_email})..."
+  BW_SESSION="$(bw-session session "$bw_email")"
+  export BW_SESSION
+}
 
+unlock_bitwarden "$1"
+shift
 case "${1:-}" in
   -h|--help|"") usage ;;
   fetch)        shift && fetch "$@" ;;
