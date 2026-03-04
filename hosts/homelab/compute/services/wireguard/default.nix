@@ -11,7 +11,7 @@
 let
   cfg = config.custom.homelab;
   
-  interface = "enp1s0";
+  interface = "wg0";
   port = 51820;
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
