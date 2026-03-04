@@ -6,13 +6,13 @@
     ./kavita
     ./miniflux
     ./pocket-id
-    ./romm
+    ./romm.nix
     ./homepage.nix
     ./obsidian-livesync.nix
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
-    ./wireguard.nix
+    ./wireguard
   ];
 
   custom.homelab = {

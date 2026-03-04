@@ -25,13 +25,14 @@ let
   };
 
   # Example: https://github.com/rommapp/romm/blob/master/examples/config.example.yml
-  rommConfig = {
+  yamlFormat = pkgs.formats.yaml { };
+  configFile = yamlFormat.generate "romm-config.yml" {
     exclude.roms = {
       single_file = {
         extensions = [ "stfolder" ];
         names = [ ".stignore" ];
       };
-      multi_file.names = [ ".stfolder" ];
+      multi_file.names = [ ".stfolder" ]; # syncthing
     };
     system.platforms = {
       megadrive = "genesis";
@@ -40,8 +41,6 @@ let
       pico8 = "pico";
     };
   };
-  yamlFormat = pkgs.formats.yaml { };
-  configFile = yamlFormat.generate "romm-config.yml" rommConfig;
 in
 {
   sops.secrets = {
@@ -67,7 +66,6 @@ in
     };
   };
 
-  # MariaDB database and user for romm
   services.mysql = {
     ensureDatabases = [ db.name ];
     ensureUsers = [{
@@ -94,7 +92,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.romm = {
-    image = "rommapp/romm:4.6.1";
+    image = "rommapp/romm:4.7.0";
     autoStart = true;
     ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:8080" ];
 

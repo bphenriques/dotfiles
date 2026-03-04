@@ -4,7 +4,7 @@
 #
 # Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_CLIENT_SUBNET, WG_CLIENT_DNS
 # Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
-# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE (set by package)
+# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE, WG_EMAIL_SUBJECT (set by package)
 
 def require_env [name: string] {
   let val = ($env | get -o $name)
@@ -78,6 +78,7 @@ def send_email [name: string, to: string] {
   let smtp_url = (open --raw $smtp_url_file | str trim)
   let from = require_env "WG_SMTP_FROM"
   let template_file = require_env "WG_EMAIL_TEMPLATE_FILE"
+  let subject = require_env "WG_EMAIL_SUBJECT"
   let dir = $"($clients_dir)/($name)"
   let tmpdir = (mktemp --tmpdir -d | str trim)
   let qr = $"($tmpdir)/wireguard.png"
@@ -87,7 +88,7 @@ def send_email [name: string, to: string] {
   let body = (open --raw $template_file | str replace --all "{{NAME}}" $name)
 
   let mutt_cfg = $"set from=($from); set smtp_url=($smtp_url); set ssl_starttls=yes; set content_type=text/html"
-  echo $body | mutt -s "Home Server - Remote Access" -e $mutt_cfg -a $"($dir)/client.conf" -a $qr -- $to
+  echo $body | mutt -s $subject -e $mutt_cfg -a $"($dir)/client.conf" -a $qr -- $to
   let exit_code = $env.LAST_EXIT_CODE
 
   rm -r $tmpdir
@@ -100,20 +101,31 @@ def send_email [name: string, to: string] {
 }
 
 # Not thread-safe: concurrent calls may assign the same IP
-def create_client [name: string] {
+def create_client [name: string, email?: string] {
   let dir = $"($clients_dir)/($name)"
   let ip = next_ip
   mkdir $dir
 
-  let priv_key = wg genkey | str trim
-  let pub_key = $priv_key | wg pubkey | str trim
+  let priv_key = (wg genkey | str trim)
+  let pub_key = ($priv_key | wg pubkey | str trim)
   $priv_key | save -f $"($dir)/private.key"; chmod 0600 $"($dir)/private.key"
-  { name: $name, ip: $ip, pub_key: $pub_key } | save -f $"($dir)/meta.json"
+
+  mut meta = { name: $name, ip: $ip, pub_key: $pub_key }
+  if $email != null { $meta = ($meta | insert email $email) }
+  $meta | save -f $"($dir)/meta.json"
 
   render_conf $priv_key $ip | save -f $"($dir)/client.conf"; chmod 0600 $"($dir)/client.conf"
   wg set $interface peer $pub_key allowed-ips $"($ip)/32"
 
   print $"Client '($name)' added (($ip))"
+}
+
+def get_client [name: string] {
+  let dir = $"($clients_dir)/($name)"
+  if not ($dir | path exists) {
+    error make { msg: $"Client '($name)' not found" }
+  }
+  open $"($dir)/meta.json"
 }
 
 def "main list" [] {
@@ -125,38 +137,64 @@ def "main list" [] {
   }
 }
 
-def "main add" [name: string, email?: string] {
-  let dir = $"($clients_dir)/($name)"
-  if ($dir | path exists) { print $"Client '($name)' exists" } else { create_client $name }
-  if $email != null { send_email $name $email } else { show_qr $name }
+def "main show" [name: string] {
+  get_client $name | ignore  # validates client exists
+  show_qr $name
 }
 
-def "main remove" [name: string] {
+def "main email" [name: string] {
+  let client = get_client $name
+  let email = $client.email? | if ($in == null or ($in | is-empty)) {
+    error make { msg: $"Client '($name)' has no email" }
+  } else { $in }
+  send_email $name $email
+}
+
+def "main add" [name: string, email?: string] {
   let dir = $"($clients_dir)/($name)"
-  if not ($dir | path exists) { error make { msg: $"Client '($name)' not found" } }
-  let meta = open $"($dir)/meta.json"
-  rm -r $dir
-  wg set $interface peer $meta.pub_key remove
-  print $"Client '($name)' removed"
+  if ($dir | path exists) {
+    print $"Client '($name)' exists"
+  } else {
+    create_client $name $email
+  }
+
+  if $email != null {
+    send_email $name $email
+  } else {
+    show_qr $name
+  }
+}
+
+def "main remove" [...names: string] {
+  for name in $names {
+    let dir = $"($clients_dir)/($name)"
+    if not ($dir | path exists) {
+      print $"Client '($name)' not found"
+      continue
+    }
+    let meta = open $"($dir)/meta.json"
+    rm -r $dir
+    wg set $interface peer $meta.pub_key remove
+    print $"Client '($name)' removed"
+  }
 }
 
 def "main bootstrap" [config_file?: path] {
   if $config_file != null {
     for entry in (open $config_file) {
+      let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
       if ($"($clients_dir)/($entry.name)" | path exists) {
         print $"Skipping '($entry.name)'"
       } else {
-        create_client $entry.name
-        if ($entry.email? != null and $entry.email != "") {
-          send_email $entry.name $entry.email
-        }
+        create_client $entry.name $email
+        if $email != null { send_email $entry.name $email }
       }
     }
   }
 
   let live_peers = get_live_peers
   let clients = list_clients
-  let file_pubkeys = $clients | get -o pub_key | default []
+  let file_pubkeys = ($clients | get -o pub_key | default [])
 
   for c in ($clients | where { $in.pub_key not-in $live_peers }) {
     wg set $interface peer $c.pub_key allowed-ips $"($c.ip)/32"
@@ -171,8 +209,10 @@ def "main bootstrap" [config_file?: path] {
 def main [] {
   print "wg-manage - WireGuard client management
 
-  list                 List clients
-  add <name> [email]   Add client (show QR, or email if provided)
-  remove <name>        Remove client
-  bootstrap [file]     Bootstrap from JSON and sync peers"
+  list                   List clients
+  add <name> [email]     Add client (sends email if provided, else shows QR)
+  remove <name>...       Remove one or more clients
+  show <name>            Show QR code for client
+  email <name>           Send config email (client must have email)
+  bootstrap [file]       Bootstrap from JSON and sync peers"
 }

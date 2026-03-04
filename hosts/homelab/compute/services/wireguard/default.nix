@@ -34,8 +34,10 @@ let
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
   };
 
-  wgManagePkg = self.pkgs.wg-manage.override {
+  wgManagePkg = self.packages.${pkgs.system}.wg-manage.override {
     homepageUrl = cfg.services.homepage.publicUrl;
+    emailSubject = "🏠 Home Sweet (Remote) Home: WireGuard VPN key inside";
+    emailTemplateMd = ./email-template.md;
   };
 
   wgManage = pkgs.writeShellApplication {
