@@ -13,6 +13,8 @@
     ./tinyauth.nix
     ./transmission.nix
     ./wireguard
+    # TODO: Unifi
+    # TODO: collabora-online
   ];
 
   custom.homelab = {

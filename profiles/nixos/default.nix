@@ -4,7 +4,7 @@
 
   system.nixos.label = let
     rev = self.shortRev or self.dirtyShortRev or "dirty";
-    # self.lastModifiedDate is YYYYMMDDHHMMSS format -> YYMMdd-HHmm.shortRev
+    # self.lastModifiedDate is YYYYMMDDHHMMSS format -> YYMMdd-HHmm.shortRev'
     date = self.lastModifiedDate or "00000000000000";
     fmt = "${builtins.substring 2 6 date}-${builtins.substring 8 4 date}";
   in "${fmt}.${rev}";

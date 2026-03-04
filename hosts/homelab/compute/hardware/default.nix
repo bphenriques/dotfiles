@@ -28,6 +28,11 @@
   };
   environment.systemPackages = [ pkgs.intel_gpu_top ]; # iGPU monitoring
 
+  networking.bonds.bond0 = {
+    interfaces = [ "enp1s0" "enp1s1" ];
+    driverOptions.mode = "balance-alb";  # switch to 802.3ad after configuring on the switch (cleaner)
+  };
+
   # Power management
   powerManagement = {
     powertop.enable = true;            # Auto-tune power settings at boot

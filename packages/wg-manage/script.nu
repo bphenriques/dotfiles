@@ -2,9 +2,9 @@
 
 # WireGuard client management (IPv4 only)
 #
-# Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_CLIENT_SUBNET, WG_CLIENT_DNS
+# Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_SERVER_IP, WG_CLIENT_SUBNET, WG_CLIENT_DNS
 # Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
-# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE, WG_EMAIL_SUBJECT (set by package)
+# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE, WG_EMAIL_SUBJECT
 
 def require_env [name: string] {
   let val = ($env | get -o $name)
@@ -18,9 +18,10 @@ def require_env [name: string] {
 let data_dir = require_env "WG_DATA_DIR"
 let interface = require_env "WG_INTERFACE"
 let endpoint = require_env "WG_SERVER_ENDPOINT"
+let server_ip = require_env "WG_SERVER_IP"
 let client_subnet = require_env "WG_CLIENT_SUBNET"
 let client_dns = require_env "WG_CLIENT_DNS"
-let allowed_ips = $env.WG_SERVER_ALLOWED_IPS? | default $client_subnet
+let allowed_ips_full = $env.WG_SERVER_ALLOWED_IPS? | default $client_subnet
 let clients_dir = $"($data_dir)/clients"
 let server_pubkey_file = $"($data_dir)/server/public.key"
 
@@ -68,7 +69,7 @@ DNS = ($client_dns)
 [Peer]
 PublicKey = (get_server_pubkey)
 Endpoint = ($endpoint)
-AllowedIPs = ($allowed_ips)
+AllowedIPs = ($allowed_ips_full)
 PersistentKeepalive = 25
 "
 }
@@ -101,23 +102,23 @@ def send_email [name: string, to: string] {
 }
 
 # Not thread-safe: concurrent calls may assign the same IP
-def create_client [name: string, email?: string] {
+def create_client [name: string, --email: string, --ip: string] {
   let dir = $"($clients_dir)/($name)"
-  let ip = next_ip
+  let client_ip = if $ip == null { next_ip } else { $ip }
   mkdir $dir
 
   let priv_key = (wg genkey | str trim)
   let pub_key = ($priv_key | wg pubkey | str trim)
   $priv_key | save -f $"($dir)/private.key"; chmod 0600 $"($dir)/private.key"
 
-  mut meta = { name: $name, ip: $ip, pub_key: $pub_key }
+  mut meta = { name: $name, ip: $client_ip, pub_key: $pub_key }
   if $email != null { $meta = ($meta | insert email $email) }
   $meta | save -f $"($dir)/meta.json"
 
-  render_conf $priv_key $ip | save -f $"($dir)/client.conf"; chmod 0600 $"($dir)/client.conf"
-  wg set $interface peer $pub_key allowed-ips $"($ip)/32"
+  render_conf $priv_key $client_ip | save -f $"($dir)/client.conf"; chmod 0600 $"($dir)/client.conf"
+  wg set $interface peer $pub_key allowed-ips $"($client_ip)/32"
 
-  print $"Client '($name)' added (($ip))"
+  print $"Client '($name)' added (($client_ip))"
 }
 
 def get_client [name: string] {
@@ -155,7 +156,11 @@ def "main add" [name: string, email?: string] {
   if ($dir | path exists) {
     print $"Client '($name)' exists"
   } else {
-    create_client $name $email
+    if $email != null {
+      create_client $name --email $email
+    } else {
+      create_client $name
+    }
   }
 
   if $email != null {
@@ -179,19 +184,21 @@ def "main remove" [...names: string] {
   }
 }
 
-def "main bootstrap" [config_file?: path] {
-  if $config_file != null {
-    for entry in (open $config_file) {
-      let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
-      if ($"($clients_dir)/($entry.name)" | path exists) {
-        print $"Skipping '($entry.name)'"
-      } else {
-        create_client $entry.name $email
-        if $email != null { send_email $entry.name $email }
-      }
+def "main bootstrap" [config_file: path] {
+  # Create clients from config (skips existing)
+  for entry in (open $config_file) {
+    let dir = $"($clients_dir)/($entry.name)"
+    if ($dir | path exists) {
+      print $"Skipping '($entry.name)'"
+      continue
     }
+
+    let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
+    create_client $entry.name --ip $entry.ip --email $email
+    if $email != null { send_email $entry.name $email }
   }
 
+  # Sync peers to WireGuard interface
   let live_peers = get_live_peers
   let clients = list_clients
   let file_pubkeys = ($clients | get -o pub_key | default [])
@@ -210,9 +217,9 @@ def main [] {
   print "wg-manage - WireGuard client management
 
   list                   List clients
-  add <name> [email]     Add client (sends email if provided, else shows QR)
-  remove <name>...       Remove one or more clients
+  add <name> [email]     Add client (restricted access, email optional)
   show <name>            Show QR code for client
   email <name>           Send config email (client must have email)
-  bootstrap [file]       Bootstrap from JSON and sync peers"
+  remove <name>...       Remove one or more clients
+  bootstrap <file>       Bootstrap clients from JSON and sync peers"
 }
