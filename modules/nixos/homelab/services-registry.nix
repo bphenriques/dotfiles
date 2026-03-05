@@ -10,22 +10,23 @@ let
     "Infrastructure"
   ];
 
-  dashboardOpts = lib.types.submodule {
+  mkHomepageOpts = serviceName: lib.types.submodule {
     options = {
-      enable = lib.mkEnableOption "dashboard entry for this service";
+      enable = lib.mkEnableOption "homepage entry for this service";
 
       category = lib.mkOption {
         type = categoryType;
-        description = "Dashboard category/tab for this service";
+        description = "Homepage category/tab for this service";
       };
 
       description = lib.mkOption {
         type = lib.types.str;
-        description = "Short description shown on dashboard";
+        description = "Short description shown on homepage";
       };
 
       icon = lib.mkOption {
         type = lib.types.str;
+        default = "${serviceName}.svg";
         description = "Icon name from dashboard-icons (e.g. 'miniflux.svg')";
       };
 
@@ -46,19 +47,25 @@ let
         description = "Service identifier (defaults to attribute name)";
       };
 
-      # Routing
-      internalHost = lib.mkOption {
+      # Routing (backend)
+      host = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
-        description = "Internal hostname or IP where the service listens";
+        description = "Hostname or IP where the service listens (local or remote)";
       };
 
-      internalUrl = lib.mkOption {
+      port = lib.mkOption {
+        type = lib.types.port;
+        description = "Port the service listens on";
+      };
+
+      url = lib.mkOption {
         type = lib.types.str;
-        default = "http://${config.internalHost}:${toString config.port}";
-        description = "Full internal URL for proxying (derived from internalHost and port)";
+        default = "http://${config.host}:${toString config.port}";
+        description = "Full URL for proxying (derived from host and port)";
       };
 
+      # Routing (public)
       subdomain = lib.mkOption {
         type = lib.types.str;
         default = name;
@@ -77,11 +84,6 @@ let
         description = "Full public URL (derived from publicHost)";
       };
 
-      port = lib.mkOption {
-        type = lib.types.port;
-        description = "Port the service listens on";
-      };
-
       # Ingress-level authentication (Traefik forwardAuth)
       forwardAuth = {
         enable = lib.mkEnableOption ''
@@ -96,19 +98,37 @@ let
         };
       };
 
-      # Dashboard/UI metadata
-      dashboard = lib.mkOption {
-        type = lib.types.nullOr dashboardOpts;
-        default = null;
-        description = "Dashboard configuration for homepage (presentation metadata)";
+      # Integrations with external tools
+      integrations = {
+        homepage = lib.mkOption {
+          type = lib.types.nullOr (mkHomepageOpts name);
+          default = null;
+          description = "Homepage dashboard integration";
+        };
+      };
+
+      # Per-service secrets (contract from _service-secrets-options.nix)
+      secrets = lib.mkOption {
+        type = lib.types.submodule (import ./_service-secrets-options.nix {
+          inherit lib;
+          serviceName = name;
+        });
+        default = { };
+        description = "Generated secrets for this service";
+      };
+
+      # Per-service OIDC client (contract from _service-oidc-options.nix)
+      oidc = lib.mkOption {
+        type = lib.types.submodule (import ./_service-oidc-options.nix {
+          inherit lib;
+          serviceName = name;
+          serviceConfig = config;
+        });
+        default = { };
+        description = "OIDC client configuration for this service";
       };
     };
   });
-
-  # Derived views for consumers
-  allServices = lib.attrValues cfg.services;
-  dashboardServices = lib.filter (s: s.dashboard != null && s.dashboard.enable) allServices;
-  servicesByCategory = lib.groupBy (s: s.dashboard.category) dashboardServices;
 in
 {
   options.custom.homelab = {
@@ -123,35 +143,18 @@ in
       type = lib.types.attrsOf serviceOpt;
       default = { };
       description = ''
-        Registry of HTTP services: routing (host/port) and optional dashboard/UI metadata.
+        Registry of HTTP services: routing, secrets, OIDC, and integrations.
         Each service gets a subdomain under the base domain.
       '';
     };
 
     # Read-only derived views for consumers
-    _registry = {
+    registry = {
       allServices = lib.mkOption {
         type = lib.types.listOf serviceOpt;
-        default = allServices;
-        internal = true;
+        default = lib.attrValues cfg.services;
         readOnly = true;
         description = "All registered services as a list";
-      };
-
-      dashboardServices = lib.mkOption {
-        type = lib.types.listOf serviceOpt;
-        default = dashboardServices;
-        internal = true;
-        readOnly = true;
-        description = "Services with dashboard enabled";
-      };
-
-      servicesByCategory = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.listOf serviceOpt);
-        default = servicesByCategory;
-        internal = true;
-        readOnly = true;
-        description = "Dashboard services grouped by category";
       };
     };
 
@@ -159,7 +162,8 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = let
-      urls = map (s: s.internalUrl) allServices;
+      allServices = lib.attrValues cfg.services;
+      urls = map (s: s.url) allServices;
       duplicates = lib.filter (url: lib.count (u: u == url) urls > 1) (lib.unique urls);
     in [
       {

@@ -6,10 +6,9 @@ let
 
   serviceCfg = cfg.services.romm;
   oidcCfg = cfg.oidc;
-  oidcClient = oidcCfg.clients.romm;
 
   dataDir = "/var/lib/romm";
-  secretsFile = "${dataDir}/secrets.env";
+  envFile = "/run/romm/romm.env";
 
   # Dedicated user for RomM container - member of media group for CIFS access
   rommUser = {
@@ -44,34 +43,58 @@ let
 in
 {
   sops.secrets = {
-    "romm/mobygames/api-key" = { };
-    "romm/screenscraper/user" = { };
-    "romm/screenscraper/password" = { };
+    "romm/mobygames/api-key" = { owner = rommUser.name; };
+    "romm/screenscraper/user" = { owner = rommUser.name; };
+    "romm/screenscraper/password" = { owner = rommUser.name; };
   };
 
-  custom.homelab = {
-    services.romm = {
-      port = 8095;
-      dashboard = {
-        enable = true;
-        category = "Media";
-        description = "ROM Manager";
-        icon = "romm.svg";
-      };
+  custom.homelab.services.romm = {
+    port = 8095;
+    integrations.homepage = {
+      enable = true;
+      category = "Media";
+      description = "ROM Manager";
     };
-    # TODO: https://gethomepage.dev/widgets/services/romm/
-    oidc.clients.romm = {
+    secrets = {
+      gid = 970;  # Fixed GID for container access
+      files = {
+        auth-secret-key = { rotatable = true; length = 64; };
+        db-password = { rotatable = false; };
+      };
+      systemd.dependentServices = [ "podman-romm" ];
+    };
+    oidc = {
+      enable = true;
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
       systemd.dependentServices = [ "podman-romm" ];
     };
   };
 
-  services.mysql = {
-    ensureDatabases = [ db.name ];
-    ensureUsers = [{
-      name = db.user;
-      ensurePermissions = { "${db.name}.*" = "ALL PRIVILEGES"; };
-    }];
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "podman-romm" ];
+
+  # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
+  services.mysql.ensureDatabases = [ db.name ];
+  systemd.services.romm-db-setup = {
+    description = "Setup RomM MySQL user and password";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "mysql.service" "homelab-secrets-romm.service" ];
+    requires = [ "mysql.service" "homelab-secrets-romm.service" ];
+    before = [ "podman-romm.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      set -euo pipefail
+      PASSWORD=$(cat ${serviceCfg.secrets.files.db-password.path})
+      # Idempotent: create user if missing, set password, grant privileges
+      # Password is hex-only (openssl rand -hex), so SQL interpolation is safe
+      ${config.services.mysql.package}/bin/mysql -u root <<SQL
+        CREATE USER IF NOT EXISTS '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';
+        ALTER USER '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';
+        GRANT ALL PRIVILEGES ON \`${db.name}\`.* TO '${db.user}'@'localhost';
+      SQL
+    '';
   };
 
   # Create dedicated user for RomM container with media group access
@@ -80,9 +103,8 @@ in
     uid = rommUser.uid;
     group = rommUser.group;
     isSystemUser = true;
-    extraGroups = [ homelabMounts.media.group "mysql" ];
+    extraGroups = [ homelabMounts.media.group serviceCfg.secrets.group ];
   };
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   systemd.tmpfiles.rules = [
     "d ${dataDir}           0750 ${rommUser.name} ${rommUser.group} -"
@@ -94,17 +116,18 @@ in
   virtualisation.oci-containers.containers.romm = {
     image = "rommapp/romm:4.7.0";
     autoStart = true;
-    ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:8080" ];
 
     environment = {
+      ROMM_PORT = toString serviceCfg.port;  # Host network: bind to configured port
       DISABLE_SETUP_WIZARD = "true";
       HASHEOUS_API_ENABLED = "true";
       DISABLE_USERPASS_LOGIN = "true";
 
-      DB_HOST = "localhost";
+      DB_HOST = "127.0.0.1";  # Host MySQL via host network
       DB_NAME = db.name;
       DB_USER = db.user;
-      DB_QUERY_JSON = builtins.toJSON { unix_socket = "/run/mysqld/mysqld.sock"; };
+      DB_PASSWD_FILE = "/run/secrets/db_password";
+      DB_PORT = "3306";
 
       # Scrapers
       MOBYGAMES_API_KEY_FILE = "/run/secrets/mobygames_api_key";
@@ -114,7 +137,7 @@ in
       # OIDC
       OIDC_ENABLED = "true";
       OIDC_PROVIDER = oidcCfg.provider.displayName;
-      OIDC_REDIRECT_URI = builtins.head oidcClient.callbackURLs;
+      OIDC_REDIRECT_URI = builtins.head serviceCfg.oidc.callbackURLs;
       OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.url;
       OIDC_CLIENT_ID_FILE = "/run/secrets/oidc_client_id";
       OIDC_CLIENT_SECRET_FILE = "/run/secrets/oidc_client_secret";
@@ -124,7 +147,7 @@ in
       OIDC_ROLE_VIEWER = groupsCfg.users;
     };
 
-    environmentFiles = [ secretsFile ];
+    environmentFiles = [ envFile ];
 
     volumes = [
       # Setup
@@ -132,12 +155,10 @@ in
       "${dataDir}/redis:/redis-data"
       "${dataDir}/assets:/romm/assets"
 
-      # MySQL socket for auth
-      "/run/mysqld:/run/mysqld"
-
       # Secrets
-      "${oidcClient.idFile}:/run/secrets/oidc_client_id:ro"
-      "${oidcClient.secretFile}:/run/secrets/oidc_client_secret:ro"
+      "${serviceCfg.secrets.files.db-password.path}:/run/secrets/db_password:ro"
+      "${serviceCfg.oidc.idFile}:/run/secrets/oidc_client_id:ro"
+      "${serviceCfg.oidc.secretFile}:/run/secrets/oidc_client_secret:ro"
       "${config.sops.secrets."romm/mobygames/api-key".path}:/run/secrets/mobygames_api_key:ro"
       "${config.sops.secrets."romm/screenscraper/user".path}:/run/secrets/screenscraper_user:ro"
       "${config.sops.secrets."romm/screenscraper/password".path}:/run/secrets/screenscraper_password:ro"
@@ -150,21 +171,22 @@ in
 
     user = "${toString rommUser.uid}:${toString rommUser.gid}";
     extraOptions = [
+      "--network=host"  # Use host network for MySQL access
       "--group-add=${toString homelabMounts.media.gid}"
-      "--group-add=${toString oidcClient.gid}"
+      "--group-add=${toString serviceCfg.oidc.gid}"
+      "--group-add=${toString serviceCfg.secrets.gid}"
       "--memory=512m"
     ];
   };
 
   systemd.services.podman-romm = {
-    requires = [ "mysql.service" ];
-    after = [ "mysql.service" ];
-    wants = [ "mysql.service" ];
-    path = [ pkgs.openssl ];
+    requires = [ "romm-db-setup.service" ];
+    after = [ "romm-db-setup.service" ];
+    wants = [ "romm-db-setup.service" ];
+    serviceConfig.RuntimeDirectory = "romm";
     preStart = ''
-      [ -f "${secretsFile}" ] && exit 0
-      umask 077
-      echo "ROMM_AUTH_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n')" > "${secretsFile}"
+      echo "ROMM_AUTH_SECRET_KEY=$(cat ${serviceCfg.secrets.files.auth-secret-key.path})" > "${envFile}"
+      chmod 600 "${envFile}"
     '';
     restartTriggers = [ configFile ];
   };

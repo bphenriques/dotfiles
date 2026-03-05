@@ -1,7 +1,9 @@
 { config, pkgs, lib, ... }:
 let
   appDataDir = "/var/lib/recyclarr";
-  secretsGroup = "recyclarr-secrets";
+  radarrCfg = config.custom.homelab.services.radarr;
+  sonarrCfg = config.custom.homelab.services.sonarr;
+  secretsFile = "${appDataDir}/secrets.yml";
 
   # Build recyclarr include templates from media settings
   mkIncludeTemplates = serviceCfg:
@@ -10,11 +12,11 @@ let
 
   recyclarrConfig = {
     radarr.movies = {
-      base_url = config.custom.homelab.services.radarr.internalUrl;
+      base_url = radarrCfg.url;
       include = mkIncludeTemplates config.custom.homelab.media.radarr;
     };
     sonarr.tv = {
-      base_url = config.custom.homelab.services.sonarr.internalUrl;
+      base_url = sonarrCfg.url;
       include = mkIncludeTemplates config.custom.homelab.media.sonarr;
     };
   };
@@ -23,17 +25,6 @@ let
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
-  users.groups.${secretsGroup} = { };
-
-  sops.templates."recyclarr-secrets.yml" = {
-    content = ''
-      movies_api_key: ${config.sops.placeholder."radarr/api-key"}
-      tv_api_key: ${config.sops.placeholder."sonarr/api-key"}
-    '';
-    group = secretsGroup;
-    mode = "0440";
-  };
-
   # Recyclarr runs as a systemd timer to periodically sync TRaSH guides
   systemd.services.recyclarr = {
     description = "Sync TRaSH guides to Radarr/Sonarr via Recyclarr";
@@ -41,11 +32,8 @@ in
     wants = [ "radarr.service" "sonarr.service" ];
     serviceConfig = {
       Type = "oneshot";
-      DynamicUser = true;
-      SupplementaryGroups = [ secretsGroup ];
       StateDirectory = "recyclarr";
       CacheDirectory = "recyclarr";
-      ExecStartPre = "${pkgs.coreutils}/bin/ln -sf ${config.sops.templates."recyclarr-secrets.yml".path} ${appDataDir}/secrets.yml";
       ExecStart = "${pkgs.recyclarr}/bin/recyclarr sync --config ${configFile}";
       ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart --no-block radarr-configure sonarr-configure";
 
@@ -61,6 +49,14 @@ in
     environment = {
       RECYCLARR_APP_DATA = appDataDir;
     };
+    preStart = ''
+      # Generate secrets.yml from API key files
+      cat > "${secretsFile}" <<EOF
+movies_api_key: $(cat "${radarrCfg.secrets.files.api-key.path}")
+tv_api_key: $(cat "${sonarrCfg.secrets.files.api-key.path}")
+EOF
+      chmod 600 "${secretsFile}"
+    '';
   };
 
   systemd.timers.recyclarr = {
@@ -71,4 +67,8 @@ in
       Persistent = true;
     };
   };
+
+  # Cross-service dependencies
+  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "recyclarr" ];
+  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "recyclarr" ];
 }

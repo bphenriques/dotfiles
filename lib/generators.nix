@@ -14,7 +14,11 @@ rec {
   # Generates a attr with { "{dir}-{filename}" = {file-path}; }
   readModulesAttrs = dir:
     let
-      isNixModule = path: lib.hasSuffix ".nix" (baseNameOf path) && (baseNameOf path) != "default.nix";
+      isNixModule = path:
+        let name = baseNameOf path;
+        in lib.hasSuffix ".nix" name
+           && name != "default.nix"
+           && !lib.hasPrefix "_" name;  # Skip files starting with underscore
       targetFiles = filter isNixModule (listFilesRecursive dir);
       toModuleName = path: (baseNameOf (dirOf path)) + "-" + (removeSuffix ".nix" (baseNameOf path));
     in listToAttrs (map (path: nameValuePair (toModuleName path) path) targetFiles);

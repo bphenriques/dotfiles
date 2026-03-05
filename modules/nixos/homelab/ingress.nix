@@ -1,13 +1,10 @@
-# Traefik Ingress Module
-#
 # Consumes the service registry and configures Traefik routing.
 # Handles TLS certificates, HTTP->HTTPS redirection, and forwardAuth middleware.
-#
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
-  ingressCfg = cfg.ingress.traefik;
-  registry = cfg._registry;
+  ingressCfg = cfg.ingress;
+  registry = cfg.registry;
 
   mkTraefikRoute = service: {
     http = {
@@ -16,25 +13,25 @@ let
         entryPoints = [ "websecure" ];
         service = "${service.name}-svc";
       } // lib.optionalAttrs service.forwardAuth.enable {
-        middlewares = [ "tinyauth" ];
+        middlewares = [ "forwardAuth" ];
       };
-      services."${service.name}-svc".loadBalancer.servers = [{ url = service.internalUrl; }];
+      services."${service.name}-svc".loadBalancer.servers = [{ url = service.url; }];
     };
   };
 in
 {
-  options.custom.homelab.ingress.traefik = {
+  options.custom.homelab.ingress = {
     cloudflareEmail = lib.mkOption {
       type = lib.types.str;
       description = "Cloudflare account email for DNS challenge and ACME registration";
     };
 
     forwardAuth = {
-      enable = lib.mkEnableOption "forwardAuth middleware via tinyauth";
+      enable = lib.mkEnableOption "forwardAuth middleware";
 
-      internalUrl = lib.mkOption {
+      url = lib.mkOption {
         type = lib.types.str;
-        description = "Internal URL of the forward auth service (e.g. tinyauth)";
+        description = "URL of the forward auth service";
       };
     };
   };
@@ -66,7 +63,7 @@ in
         log.level = "ERROR";
         entryPoints = {
           web = {
-            address = ":80";
+            address = "0.0.0.0:80";
             http.redirections.entryPoint = {
               to = "websecure";
               scheme = "https";
@@ -74,7 +71,7 @@ in
           };
 
           websecure = {
-            address = ":443";
+            address = "0.0.0.0:443";
             http.tls = {
               certResolver = "default";
               domains = [{
@@ -101,8 +98,8 @@ in
         routeConfigs = map mkTraefikRoute registry.allServices;
         routesConfig = lib.foldl' lib.recursiveUpdate { } routeConfigs;
         authMiddleware = lib.optionalAttrs ingressCfg.forwardAuth.enable {
-          http.middlewares.tinyauth.forwardAuth = {
-            address = "${ingressCfg.forwardAuth.internalUrl}/api/auth/traefik";
+          http.middlewares.forwardAuth.forwardAuth = {
+            address = "${ingressCfg.forwardAuth.url}/api/auth/traefik";
             trustForwardHeader = true;
             authResponseHeaders = [
               "X-Forwarded-User"

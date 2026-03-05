@@ -11,17 +11,6 @@ def wait_ready [] {
   error make { msg: "Kavita failed to start" }
 }
 
-def generate_password [file: string] {
-  if ($file | path exists) {
-    return (open $file | str trim)
-  }
-  let password = (random chars --length 32)
-  $password | save --force $file
-  chmod 600 $file
-  print $"Generated admin password and saved to ($file)"
-  $password
-}
-
 def register_admin [password: string] {
   let body = {
     username: "admin"
@@ -197,7 +186,7 @@ def main [] {
   print "Kavita is ready"
 
   # Generate admin password and register if needed (idempotent - 400 means already exists)
-  let password = generate_password $config.adminPasswordFile
+  let password = open $config.adminPasswordFile | str trim
   register_admin $password
 
   # Login and configure via API

@@ -1,16 +1,38 @@
 { config, pkgs, lib, self, ... }:
 let
   publicUrl = "https://auth.${self.settings.hosts.compute.domain}";
-  encryptionKeyFile = "/var/lib/pocket-id/encryption.key";
   serviceCfg = config.custom.homelab.services.pocket-id;
   port = 8094;
 in
 {
   imports = [ ./configure.nix ];
 
-  custom.homelab.services.pocket-id = {
-    subdomain = "auth";
-    port = port;
+  custom.homelab = {
+    services.pocket-id = {
+      subdomain = "auth";
+      port = port;
+      secrets = {
+        files = {
+          encryption-key = { rotatable = true; };
+          api-key = { rotatable = true; };
+        };
+        systemd.dependentServices = [ "pocket-id" ];
+      };
+      integrations.homepage = {
+        enable = true;
+        category = "Infrastructure";
+        description = "OIDC Provider";
+      };
+    };
+
+    oidc.provider = {
+      displayName = "Pocket-ID";
+      internalName = "PocketID";
+      url = publicUrl;
+      internalUrl = publicUrl;
+      discoveryEndpoint = "${publicUrl}/.well-known/openid-configuration";
+      apiKeyFile = serviceCfg.secrets.files.api-key.path;
+    };
   };
 
   services.pocket-id = {
@@ -21,9 +43,9 @@ in
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
-      ENCRYPTION_KEY_FILE = encryptionKeyFile;
+      ENCRYPTION_KEY_FILE = serviceCfg.secrets.files.encryption-key.path;
       ACCENT_COLOR = "default";
-      STATIC_API_KEY_FILE = config.sops.templates.pocket-id-api-key.path;
+      STATIC_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
@@ -44,34 +66,10 @@ in
   };
 
   sops = {
-    secrets."pocket-id/api-key".mode = "0400";
-    templates."pocket-id-api-key" = {
-      owner = config.services.pocket-id.user;
-      content = config.sops.placeholder."pocket-id/api-key";
-    };
-
     secrets."smtp-password" = { };
     templates."pocket-id-smtp-password" = {
       owner = config.services.pocket-id.user;
       content = config.sops.placeholder."smtp-password";
     };
-  };
-
-  systemd.services.pocket-id.preStart = ''
-    if [ ! -f "${encryptionKeyFile}" ]; then
-      mkdir -p "$(dirname "${encryptionKeyFile}")"
-      ${lib.getExe pkgs.openssl} rand -base64 32 > "${encryptionKeyFile}"
-      chown ${config.services.pocket-id.user}:${config.services.pocket-id.group} "${encryptionKeyFile}"
-    fi
-  '';
-
-  # OIDC provider metadata for consumers
-  custom.homelab.oidc.provider = {
-    displayName = "Pocket-ID";
-    internalName = "PocketID";
-    url = publicUrl;
-    internalUrl = publicUrl;
-    discoveryEndpoint = "${publicUrl}/.well-known/openid-configuration";
-    apiKeyFile = config.sops.secrets."pocket-id/api-key".path;
   };
 }

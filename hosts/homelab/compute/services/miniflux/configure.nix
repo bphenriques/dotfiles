@@ -3,28 +3,37 @@ let
   serviceCfg = config.custom.homelab.services.miniflux;
   oidcCfg = config.custom.homelab.oidc;
 
+  # Credentials file location (derived from secrets)
+  adminCredentialsFile = "${serviceCfg.secrets.secretsDir}/admin-credentials.env";
+  adminUsernameFile = pkgs.writeText "miniflux-admin-username" "admin";
+
   userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
   ) config.custom.homelab.enabledUsers.miniflux));
 in
 {
+  custom.homelab.services.miniflux.secrets = {
+    files.admin-password = { rotatable = false; };
+    systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
+  };
+
   services.miniflux = {
-    adminCredentialsFile = config.sops.templates."miniflux-admin-credentials".path;
+    inherit adminCredentialsFile;
     config = {
       DISABLE_LOCAL_AUTH = 0;
       CREATE_ADMIN = true;
     };
   };
-  sops = {
-    secrets."miniflux/admin/username" = { };
-    secrets."miniflux/admin/password" = { };
-    templates."miniflux-admin-credentials" = {
-      content = ''
-        ADMIN_USERNAME=${config.sops.placeholder."miniflux/admin/username"}
-        ADMIN_PASSWORD=${config.sops.placeholder."miniflux/admin/password"}
-      '';
-    };
-  };
+
+  # Generate credentials file in secrets service (runs before miniflux)
+  systemd.services.homelab-secrets-miniflux.serviceConfig.ExecStartPost = pkgs.writeShellScript "generate-miniflux-credentials" ''
+    cat > "${adminCredentialsFile}" <<EOF
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=$(cat "${serviceCfg.secrets.files.admin-password.path}")
+EOF
+    chown root:${serviceCfg.secrets.group} "${adminCredentialsFile}"
+    chmod 640 "${adminCredentialsFile}"
+  '';
 
   systemd.services.miniflux-configure = {
     description = "Configure Miniflux users and settings";
@@ -42,9 +51,9 @@ in
       RestartSec = 10;
     };
     environment = {
-      MINIFLUX_URL = serviceCfg.internalUrl;
-      MINIFLUX_ADMIN_USERNAME_FILE = config.sops.secrets."miniflux/admin/username".path;
-      MINIFLUX_ADMIN_PASSWORD_FILE = config.sops.secrets."miniflux/admin/password".path;
+      MINIFLUX_URL = serviceCfg.url;
+      MINIFLUX_ADMIN_USERNAME_FILE = adminUsernameFile;
+      MINIFLUX_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       MINIFLUX_USER_SETTINGS_FILE = userSettingsFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
     };

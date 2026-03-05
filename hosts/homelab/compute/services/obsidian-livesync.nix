@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, config, ... }:
 let
   cors = {
     origins = [ "app://obsidian.md" "capacitor://localhost" "http://localhost" ];

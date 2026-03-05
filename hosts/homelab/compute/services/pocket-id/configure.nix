@@ -42,7 +42,7 @@ in
     startLimitBurst = 3;
 
     environment = {
-      POCKET_ID_URL = pocketIdCfg.internalUrl;
+      POCKET_ID_URL = pocketIdCfg.url;
       POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
       OIDC_CONFIG_FILE = toString provisionConfigFile;
       OIDC_CREDENTIALS_DIR = cfg.credentials.dir;
@@ -68,7 +68,7 @@ in
   # Manual invite script
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "pocket-id-invite" ''
-      export POCKET_ID_URL="${pocketIdCfg.internalUrl}"
+      export POCKET_ID_URL="${pocketIdCfg.url}"
       export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
       exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-invite" ./pocket-id-invite.nu} "$@"
     '')

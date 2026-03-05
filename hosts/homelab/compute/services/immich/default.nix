@@ -2,7 +2,6 @@
 let
   serviceCfg = config.custom.homelab.services.immich;
   oidcCfg = config.custom.homelab.oidc;
-  oidcClient = oidcCfg.clients.immich;
 in
 {
   imports = [ ./configure.nix ];
@@ -10,27 +9,32 @@ in
   custom.homelab.services.immich = {
     port = 2283;
     subdomain = "photos";
-    dashboard = {
+    integrations.homepage = {
       enable = true;
       category = "Media";
       description = "Photo & Video Gallery";
-      icon = "immich.svg";
     };
-    # TODO https://gethomepage.dev/widgets/services/immich/
-  };
 
-  custom.homelab.oidc.clients.immich = {
-    callbackURLs = [
-      "${serviceCfg.publicUrl}/auth/login"
-      "${serviceCfg.publicUrl}/user-settings"
-      "app.immich:///oauth-callback"
-    ];
-    systemd.dependentServices = [ "immich-server" ];
+    # TODO: admin-password could be removed if Immich supports OIDC-only admin
+    secrets = {
+      files.admin-password = { rotatable = false; };
+      systemd.dependentServices = [ "immich-configure" ];
+    };
+
+    oidc = {
+      enable = true;
+      callbackURLs = [
+        "${serviceCfg.publicUrl}/auth/login"
+        "${serviceCfg.publicUrl}/user-settings"
+        "app.immich:///oauth-callback"
+      ];
+      systemd.dependentServices = [ "immich-server" ];
+    };
   };
 
   services.immich = {
     enable = true;
-    host = serviceCfg.internalHost;
+    host = serviceCfg.host;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
     accelerationDevices = null;
@@ -42,8 +46,8 @@ in
       oauth = {
         enabled = true;
         issuerUrl = oidcCfg.provider.url;
-        clientId._secret = oidcClient.idFile;
-        clientSecret._secret = oidcClient.secretFile;
+        clientId._secret = serviceCfg.oidc.idFile;
+        clientSecret._secret = serviceCfg.oidc.secretFile;
         scope = "openid email profile";
         signingAlgorithm = "RS256";
         buttonText = "Login with ${oidcCfg.provider.displayName}";
@@ -61,5 +65,5 @@ in
     };
   };
 
-  systemd.services.immich-server.serviceConfig.SupplementaryGroups = oidcClient.systemd.supplementaryGroups ++ [ "video" "render" ];
+  systemd.services.immich-server.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups ++ [ "video" "render" ];
 }

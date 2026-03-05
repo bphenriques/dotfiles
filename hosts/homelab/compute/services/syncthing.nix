@@ -42,11 +42,10 @@ in
   custom.homelab.services.syncthing = {
     port = 8384;
     forwardAuth.enable = true;
-    dashboard = {
+    integrations.homepage = {
       enable = true;
       category = "Admin";
       description = "File Sync";
-      icon = "syncthing.svg";
     };
   };
 

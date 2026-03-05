@@ -6,54 +6,39 @@ let
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 
   kavitaCfg = config.services.kavita;
-  credentialsDir = "${kavitaCfg.dataDir}/credentials";
-  tokenKeyFile = "${credentialsDir}/token-key";
 in
 {
   imports = [ ./configure.nix ];
 
-  # It is possible to login using admin but requires query parameter
-  custom.homelab = {
-    services.kavita = {
-      port = 8097;
-      dashboard = {
-        enable = true;
-        category = "Media";
-        description = "Book Server";
-        icon = "kavita.svg";
+  custom.homelab.services.kavita = {
+    port = 8097;
+    secrets = {
+      files = {
+        token-key = { rotatable = true; length = 64; };
+        admin-password = { rotatable = false; }; # TODO: admin-password could be removed if Kavita supports OIDC-only admin
       };
-      # TODO: https://gethomepage.dev/widgets/services/kavita/
+      systemd.dependentServices = [ "kavita" "kavita-configure" ];
     };
-
-    oidc.clients.kavita = {
+    oidc = {
+      enable = true;
       callbackURLs = [
         "${serviceCfg.publicUrl}/signin-oidc"
         "${serviceCfg.publicUrl}/signout-callback-oidc"
       ];
-      # kavita reads OIDC credentials from appsettings.json (injected in preStart)
       systemd.dependentServices = [ "kavita" ];
+    };
+    integrations.homepage = {
+      enable = true;
+      category = "Media";
+      description = "Book Server";
     };
   };
 
-  # Generate token-key before kavita.service starts (LoadCredential requires the file to exist)
-  systemd.tmpfiles.rules = [ "d ${credentialsDir} 0700 ${kavitaCfg.user} ${kavitaCfg.user} -" ];
-  systemd.services.kavita-init = {
-    description = "Initialize Kavita token key";
-    unitConfig.ConditionPathExists = "!${tokenKeyFile}";
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      User = kavitaCfg.user;
-      Group = kavitaCfg.user;
-      UMask = "0077";
-    };
-    path = [ pkgs.openssl ];
-    script = ''openssl rand -base64 64 | tr -d '\n' > "${tokenKeyFile}"'';
-  };
+  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "kavita" ];
 
   services.kavita = {
     enable = true;
-    tokenKeyFile = tokenKeyFile;
+    tokenKeyFile = serviceCfg.secrets.files.token-key.path;
     settings.Port = serviceCfg.port;
     # OIDC Authentication - credentials injected via preStart from OIDC provisioning
     settings.OpenIdConnectSettings = {
@@ -62,17 +47,15 @@ in
       Secret = "@OIDC_CLIENT_SECRET@";
     };
   };
+  systemd.services.kavita.serviceConfig = {
+    LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
+    BindPaths = [
+      "${pathsCfg.media.books.library}:/mnt/kavita/books"
+      "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
+      "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
+    ];
+  };
   systemd.services.kavita = {
-    after = [ "kavita-init.service" ];
-    requires = [ "kavita-init.service" ];
-    serviceConfig = {
-      LoadCredential = oidcCfg.clients.kavita.systemd.loadCredentials;
-      BindPaths = [
-        "${pathsCfg.media.books.library}:/mnt/kavita/books"
-        "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
-        "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
-      ];
-    };
     # Inject OIDC credentials into appsettings.json after NixOS module writes it
     preStart = lib.mkAfter ''
       ${pkgs.replace-secret}/bin/replace-secret '@OIDC_CLIENT_ID@' \
@@ -84,5 +67,4 @@ in
     '';
   };
   users.users.kavita.extraGroups = [ homelabMounts.media.group ];
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "kavita" ];
 }

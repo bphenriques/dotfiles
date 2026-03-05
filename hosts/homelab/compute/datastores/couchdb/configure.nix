@@ -36,11 +36,11 @@ in
       StartLimitBurst = 3;
     };
     environment = {
-      COUCHDB_URL = serviceCfg.internalUrl;
+      COUCHDB_URL = serviceCfg.url;
       COUCHDB_BIND_ADDRESS = config.services.couchdb.bindAddress;
       COUCHDB_PORT = toString config.services.couchdb.port;
       COUCHDB_ADMIN_USER = config.services.couchdb.adminUser;
-      COUCHDB_ADMIN_PASS_FILE = config.sops.templates."couchdb-admin-password".path;
+      COUCHDB_ADMIN_PASS_FILE = serviceCfg.secrets.files.admin-password.path;
       COUCHDB_SETTINGS_FILE = pkgs.writeText "couchdb-settings.json" (builtins.toJSON settings);
     };
     path = [ pkgs.nushell ];

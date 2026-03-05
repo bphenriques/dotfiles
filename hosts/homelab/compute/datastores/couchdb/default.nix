@@ -1,33 +1,23 @@
-{ config, ... }:
+{ config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.couchdb;
+  adminConfigFile = "${serviceCfg.secrets.secretsDir}/admin.ini";
 in
 {
   imports = [ ./configure.nix ];
 
-  custom.homelab.services.couchdb.port = 5984;
-
-  sops = {
-    secrets."couchdb/admin/password" = { };
-    templates = {
-      "couchdb-admin-password" = {
-        owner = config.services.couchdb.user;
-        content = config.sops.placeholder."couchdb/admin/password";
-      };
-      "couchdb-admin" = {
-        owner = config.services.couchdb.user;
-        content = ''
-          [admins]
-          ${config.services.couchdb.adminUser} = ${config.sops.placeholder."couchdb/admin/password"}
-        '';
-      };
+  custom.homelab.services.couchdb = {
+    port = 5984;
+    secrets = {
+      files.admin-password = { rotatable = false; };
+      systemd.dependentServices = [ "couchdb" "couchdb-configure" ];
     };
   };
 
   services.couchdb = {
     enable = true;
     port = serviceCfg.port;
-    extraConfigFiles = [ config.sops.templates."couchdb-admin".path ];
+    extraConfigFiles = [ adminConfigFile ];
     extraConfig = {
       couchdb.single_node = true;
       chttpd_auth_lockout.mode = "warn";
@@ -39,4 +29,17 @@ in
       httpd."WWW-Authenticate" = "Basic realm=\"couchdb\"";
     };
   };
+
+  # CouchDB needs RuntimeDirectory for couchdb.uri file
+  systemd.services.couchdb.serviceConfig.RuntimeDirectory = "couchdb";
+
+  # Generate admin.ini in secrets service (runs before couchdb)
+  systemd.services.homelab-secrets-couchdb.serviceConfig.ExecStartPost = pkgs.writeShellScript "generate-couchdb-admin-ini" ''
+    cat > "${adminConfigFile}" <<EOF
+[admins]
+${config.services.couchdb.adminUser} = $(cat "${serviceCfg.secrets.files.admin-password.path}")
+EOF
+    chown root:${serviceCfg.secrets.group} "${adminConfigFile}"
+    chmod 640 "${adminConfigFile}"
+  '';
 }

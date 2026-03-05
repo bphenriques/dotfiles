@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.prowlarr;
   homelabMounts = config.custom.fileSystems.homelab.mounts;
@@ -8,24 +8,23 @@ in
 
   custom.homelab.services.prowlarr = {
     port = 9096;
+    secrets = {
+      files.api-key = { rotatable = true; };
+      envFile."PROWLARR__AUTH__APIKEY" = "api-key";
+      systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
+    };
     forwardAuth.enable = true;
-    dashboard = {
+    integrations.homepage = {
       enable = true;
       category = "Admin";
       description = "Manage *rr services";
-      icon = "prowlarr.svg";
     };
   };
-
-  sops.secrets."prowlarr/api-key" = { };
-  sops.templates."prowlarr.env".content = ''
-    PROWLARR__AUTH__APIKEY=${config.sops.placeholder."prowlarr/api-key"}
-  '';
 
   services.prowlarr = {
     enable = true;
     settings.server.port = serviceCfg.port;
-    environmentFiles = [ config.sops.templates."prowlarr.env".path ];
+    environmentFiles = [ serviceCfg.secrets.envFilePath ];
   };
 
   custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "prowlarr" ];

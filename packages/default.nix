@@ -24,7 +24,6 @@ let
       upower-notify = pkgs.callPackage ./upower-notify { };
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       niri-keyboard-layout = pkgs.callPackage ./niri-keyboard-layout { };
-      niri-smart-paste = pkgs.callPackage ./niri-smart-paste { };
       swww-util = pkgs.callPackage ./swww-util { };
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshot = pkgs.callPackage ./screenshot { };

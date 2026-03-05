@@ -31,6 +31,7 @@ let
   mediaCfg = config.custom.homelab.media.${name};
   homelabMounts = config.custom.fileSystems.homelab.mounts;
 
+
   settings = {
     rootFolders = [{ path = rootPath; }];
     downloadClient = {
@@ -52,7 +53,12 @@ in
       enable = true;
       group = forwardAuthGroup;
     };
-    dashboard = {
+    secrets = {
+      files.api-key = { rotatable = true; };
+      envFile."${envPrefix}__AUTH__APIKEY" = "api-key";
+      systemd.dependentServices = [ name "${name}-configure" ];
+    };
+    integrations.homepage = {
       enable = true;
       category = "Media";
       inherit description;
@@ -60,15 +66,10 @@ in
     };
   };
 
-  sops.secrets."${name}/api-key" = { };
-  sops.templates."${name}.env".content = ''
-    ${envPrefix}__AUTH__APIKEY=${config.sops.placeholder."${name}/api-key"}
-  '';
-
   services.${name} = {
     enable = true;
     settings.server.port = serviceCfg.port;
-    environmentFiles = [ config.sops.templates."${name}.env".path ];
+    environmentFiles = [ serviceCfg.secrets.envFilePath ];
   };
 
   systemd.services.${name} = {
@@ -107,8 +108,8 @@ in
     };
     environment = {
       ARR_NAME = upperName;
-      ARR_URL = serviceCfg.internalUrl;
-      ARR_API_KEY_FILE = config.sops.secrets."${name}/api-key".path;
+      ARR_URL = serviceCfg.url;
+      ARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       ARR_CONFIG_FILE = settingsFile;
       ARR_CATEGORY_FIELD = categoryField;
     };

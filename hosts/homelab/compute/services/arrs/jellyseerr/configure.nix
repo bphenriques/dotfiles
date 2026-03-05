@@ -6,7 +6,6 @@ let
   jellyfinCfg = config.custom.homelab.services.jellyfin;
   mediaCfg = config.custom.homelab.media;
 
-  # Config passed to jellyseerr-configure.nu for setup and Radarr/Sonarr registration
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;
     jellyfin = {
@@ -49,6 +48,11 @@ let
   initConfigFile = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
 in
 {
+  # Cross-service: extend other services' secrets to include this service as dependent
+  custom.homelab.services.jellyfin.secrets.systemd.dependentServices = [ "jellyseerr-configure" ];
+  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "jellyseerr-configure" ];
+  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "jellyseerr-configure" ];
+
   systemd.services.jellyseerr-configure = {
     description = "Configure Jellyseerr with declarative configuration";
     wantedBy = [ "multi-user.target" ];
@@ -66,13 +70,13 @@ in
       RestartSec = 10;
     };
     environment = {
-      JELLYSEERR_URL = serviceCfg.internalUrl;
-      JELLYSEERR_API_KEY_FILE = config.sops.secrets."jellyseerr/api-key".path;
+      JELLYSEERR_URL = serviceCfg.url;
+      JELLYSEERR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       JELLYSEERR_CONFIG_FILE = initConfigFile;
-      JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
-      JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
-      RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
-      SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
+      JELLYFIN_ADMIN_USERNAME_FILE = "${jellyfinCfg.secrets.secretsDir}/admin-username";
+      JELLYFIN_ADMIN_PASSWORD_FILE = jellyfinCfg.secrets.files.admin-password.path;
+      RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
+      SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-configure" ./jellyseerr-configure.nu}'';

@@ -1,6 +1,8 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.custom.homelab.services.prowlarr;
+  radarrCfg = config.custom.homelab.services.radarr;
+  sonarrCfg = config.custom.homelab.services.sonarr;
 
   settings = {
     # Indexers have the following fields:
@@ -13,15 +15,15 @@ let
         name = "Radarr";
         implementation = "Radarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.homelab.services.radarr.internalUrl;
-        prowlarrUrl = serviceCfg.internalUrl;
+        baseUrl = radarrCfg.url;
+        prowlarrUrl = serviceCfg.url;
       }
       {
         name = "Sonarr";
         implementation = "Sonarr";
         syncLevel = "fullSync";
-        baseUrl = config.custom.homelab.services.sonarr.internalUrl;
-        prowlarrUrl = serviceCfg.internalUrl;
+        baseUrl = sonarrCfg.url;
+        prowlarrUrl = serviceCfg.url;
       }
     ];
   };
@@ -46,13 +48,17 @@ in
       RestartSec = 10;
     };
     environment = {
-      PROWLARR_URL = serviceCfg.internalUrl;
-      PROWLARR_API_KEY_FILE = config.sops.secrets."prowlarr/api-key".path;
+      PROWLARR_URL = serviceCfg.url;
+      PROWLARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       PROWLARR_CONFIG_FILE = settingsFile;
-      RADARR_API_KEY_FILE = config.sops.secrets."radarr/api-key".path;
-      SONARR_API_KEY_FILE = config.sops.secrets."sonarr/api-key".path;
+      RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
+      SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-configure" ./prowlarr-configure.nu}'';
   };
+
+  # Cross-service dependencies
+  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "prowlarr-configure" ];
+  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "prowlarr-configure" ];
 }

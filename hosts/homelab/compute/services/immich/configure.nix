@@ -9,13 +9,12 @@ let
 
   enabledUsers = config.custom.homelab.enabledUsers.immich;
 
-  credentialsDir = "/var/lib/immich/credentials";
-
+  # TODO: admin could be removed if Immich supports OIDC-only admin
   immichConfigFile = pkgs.writeText "immich-config.json" (builtins.toJSON {
     admin = {
       email = "admin@immich.local";
       name = "Immich Admin";
-      passwordFile = "${credentialsDir}/admin-password";
+      passwordFile = serviceCfg.secrets.files.admin-password.path;
     };
     users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) enabledUsers;
 
@@ -40,9 +39,6 @@ in
 {
   # Ensure immich has access to the mounted directories.
   users.users.immich.extraGroups = lib.mapAttrsToList (username: _: homelabMounts."${username}".group) enabledUsers;
-  systemd.tmpfiles.rules = [
-    "d ${credentialsDir} 0700 ${config.services.immich.user} ${config.services.immich.group} -"
-  ];
 
   # Register immich-server as dependent on each user's mount
   custom.fileSystems.homelab.mounts = lib.mapAttrs' (username: _:
@@ -69,7 +65,7 @@ in
       RestartSec = 10;
     };
     environment = {
-      IMMICH_URL = serviceCfg.internalUrl;
+      IMMICH_URL = serviceCfg.url;
       IMMICH_CONFIG_FILE = immichConfigFile;
     };
     path = [ pkgs.nushell ];

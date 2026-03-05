@@ -4,6 +4,9 @@ let
   pathsCfg = config.custom.paths;
   oidcCfg = config.custom.homelab.oidc;
 
+  adminUsername = "admin";
+  adminUsernameFile = "${serviceCfg.secrets.secretsDir}/admin-username";
+
   jellyfinConfig = {
     serverName = "Jellyfin";
     libraries = [
@@ -30,11 +33,6 @@ let
   jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
 in
 {
-  sops = {
-    secrets."jellyfin/admin/username" = { };
-    secrets."jellyfin/admin/password" = { };
-  };
-
   custom.homelab.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
 
   systemd.services.jellyfin-configure = {
@@ -53,13 +51,21 @@ in
       RestartSec = 10;
     };
     environment = {
-      JELLYFIN_URL = serviceCfg.internalUrl;
-      JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
-      JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
+      JELLYFIN_URL = serviceCfg.url;
+      JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
+      JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # FIXME: This has nothing to do really.
     };
-    path = [ pkgs.nushell ];
+    path = [ pkgs.nushell pkgs.openssl ];
+    preStart = ''
+      # Create admin username file if missing (password is managed by homelab-secrets-jellyfin)
+      if [ ! -f "${adminUsernameFile}" ]; then
+        echo "${adminUsername}" > "${adminUsernameFile}"
+        chown root:${serviceCfg.secrets.group} "${adminUsernameFile}"
+        chmod 640 "${adminUsernameFile}"
+      fi
+    '';
     script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-configure" ./jellyfin-configure.nu}'';
   };
 }

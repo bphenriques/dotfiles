@@ -18,11 +18,10 @@ in
   custom.homelab.services.cleanuparr = {
     port = 11011;
     forwardAuth.enable = true;
-    dashboard = {
+    integrations.homepage = {
       enable = true;
       category = "Admin";
       description = "Queue Cleanup";
-      icon = "cleanuparr.svg";
     };
   };
 
@@ -40,7 +39,7 @@ in
   virtualisation.oci-containers.containers.cleanuparr = {
     image = "ghcr.io/cleanuparr/cleanuparr:2.4.7";
     autoStart = true;
-    ports = [ "${serviceCfg.internalHost}:${toString serviceCfg.port}:11011" ];
+    ports = [ "${serviceCfg.host}:${toString serviceCfg.port}:11011" ];
     environment = {
       PORT = "11011";
       BASE_PATH = "";

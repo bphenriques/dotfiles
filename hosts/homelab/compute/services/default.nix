@@ -13,14 +13,13 @@
     ./tinyauth.nix
     ./transmission.nix
     ./wireguard
-    # TODO: Unifi
     # TODO: collabora-online
   ];
 
   custom.homelab = {
     enable = true;
     domain = self.settings.hosts.compute.domain;
-    ingress.traefik.cloudflareEmail = self.settings.cloudflare.email;
+    ingress.cloudflareEmail = self.settings.cloudflare.email;
 
     # Individual users whose information is kept private
     users = self.settings.users // {

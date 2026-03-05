@@ -7,6 +7,12 @@
 # - Clients created via CLI (wg-manage add) are always restricted
 # - Client IPs are deterministic (hash of name) for stable firewall rules
 #
+
+# Troubleshoot
+# - Ensure port forwarding right port and UDP
+# - sudo wg show -> Check handshake
+# - Check for traffic: sudo tcpdump -ni any udp port 51820
+# - Lastly, check if the service's listen address is 0.0.0.0 (all interfaces)
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;

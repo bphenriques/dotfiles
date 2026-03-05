@@ -7,7 +7,10 @@
 let
   cfg = config.custom.homelab;
   homepageCfg = cfg.homepage;
-  registry = cfg._registry;
+
+  # Homepage-specific derived views
+  homepageServices = lib.filter (s: s.integrations.homepage != null && s.integrations.homepage.enable) cfg.registry.allServices;
+  servicesByCategory = lib.groupBy (s: s.integrations.homepage.category) homepageServices;
 
   customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
     postInstall = (oldAttrs.postInstall or "") + ''
@@ -30,9 +33,9 @@ let
   mkServiceEntry = service: {
     "${service.name}" = {
       href = service.publicUrl;
-      description = service.dashboard.description;
-      icon = service.dashboard.icon;
-    } // lib.optionalAttrs service.dashboard.siteMonitor {
+      description = service.integrations.homepage.description;
+      icon = service.integrations.homepage.icon;
+    } // lib.optionalAttrs service.integrations.homepage.siteMonitor {
       siteMonitor = service.publicUrl;
     };
   };
@@ -43,10 +46,10 @@ let
 
   servicesYaml = let
     orderedCategories = lib.filter (
-      cat: lib.hasAttr cat registry.servicesByCategory
+      cat: lib.hasAttr cat servicesByCategory
     ) homepageCfg.categoryOrder;
     sections = map (
-      cat: mkCategorySection (if isAdminCategory cat then "Admin" else "Home") registry.servicesByCategory.${cat}
+      cat: mkCategorySection (if isAdminCategory cat then "Admin" else "Home") servicesByCategory.${cat}
     ) orderedCategories;
   in lib.flatten sections;
 
@@ -83,8 +86,6 @@ let
       }
     ];
   };
-
-
 in
 {
   options.custom.homelab.homepage = {

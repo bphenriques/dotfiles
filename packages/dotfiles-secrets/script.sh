@@ -50,7 +50,7 @@ init_host() {
   info "Generating SOPS age key..."
   local tmpdir
   tmpdir="$(mktemp -d)"
-  trap "rm -rf \"$tmpdir\"" EXIT
+  trap 'rm -rf "$tmpdir"' EXIT
 
   # Build fields array. Optionally add LUKS key
   age-keygen -o "$tmpdir/age.key" 2>/dev/null
@@ -85,6 +85,7 @@ init_host() {
   echo "  1. Create hosts/${host}/.sops.yaml with the public key above"
   echo "  2. Create hosts/${host}/secrets.yaml and encrypt with: sops hosts/${host}/secrets.yaml"
   echo "  3. Apply the changes"
+  rm -rf "$tmpdir"
 }
 
 usage() {

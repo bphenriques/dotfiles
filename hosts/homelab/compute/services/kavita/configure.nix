@@ -10,10 +10,11 @@ let
   # Libraries available to all users
   publicLibraries = [ "Books" "Comics" "Manga" ];
 
+  # TODO: admin could be removed if Kavita supports OIDC-only admin
   kavitaConfigFile = pkgs.writeText "kavita-config.json" (builtins.toJSON {
-    kavitaUrl = serviceCfg.internalUrl;
+    kavitaUrl = serviceCfg.url;
     adminUsername = "admin";
-    adminPasswordFile = "${kavitaCfg.dataDir}/credentials/admin-password";
+    adminPasswordFile = serviceCfg.secrets.files.admin-password.path;
 
     server = {
       hostName = serviceCfg.publicUrl;
@@ -67,7 +68,7 @@ in
       RestartSec = 10;
     };
     environment = {
-      KAVITA_URL = serviceCfg.internalUrl;
+      KAVITA_URL = serviceCfg.url;
       KAVITA_CONFIG_FILE = kavitaConfigFile;
     };
     path = [ pkgs.nushell ];

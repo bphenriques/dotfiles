@@ -8,14 +8,13 @@ in
   custom.homelab.services.transmission = {
     port = 9091;
     forwardAuth.enable = true;
-    dashboard = {
+    # https://gethomepage.dev/widgets/services/transmission/
+    integrations.homepage = {
       enable = true;
       category = "Media";
       description = "Torrent Client";
-      icon = "transmission.svg";
     };
   };
-  # https://gethomepage.dev/widgets/services/transmission/
 
   services.transmission = {
     enable = true;

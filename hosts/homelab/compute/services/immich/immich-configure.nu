@@ -11,17 +11,6 @@ def wait_ready [] {
   error make { msg: "Immich failed to start" }
 }
 
-def generate_password [file: string] {
-  if ($file | path exists) {
-    return (open $file | str trim)
-  }
-  let password = (random chars --length 32)
-  $password | save --force $file
-  chmod 600 $file
-  print $"Generated admin password and saved to ($file)"
-  $password
-}
-
 def admin_signup [admin: record, password: string] {
   let body = {
     email: $admin.email
@@ -126,7 +115,7 @@ def main [] {
   print "Immich is ready"
 
   let admin = $config.admin
-  let password = generate_password $admin.passwordFile
+  let password = open $admin.passwordFile | str trim
 
   # Register admin on first run
   admin_signup $admin $password

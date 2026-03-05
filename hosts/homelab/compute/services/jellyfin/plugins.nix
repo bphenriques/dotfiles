@@ -1,8 +1,9 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.custom.homelab.services.jellyfin;
-  oidcClient = config.custom.homelab.oidc.clients.jellyfin;
   oidcCfg = config.custom.homelab.oidc;
+
+  adminUsernameFile = "${serviceCfg.secrets.secretsDir}/admin-username";
 
   themeCSS = ''@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");'';
   plugins = {
@@ -88,12 +89,12 @@ in
       RestartSec = 10;
     };
     environment = {
-      JELLYFIN_URL = serviceCfg.internalUrl;
-      JELLYFIN_ADMIN_USERNAME_FILE = config.sops.secrets."jellyfin/admin/username".path;
-      JELLYFIN_ADMIN_PASSWORD_FILE = config.sops.secrets."jellyfin/admin/password".path;
+      JELLYFIN_URL = serviceCfg.url;
+      JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
+      JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       SSO_CONFIG_FILE = ssoConfigFile;
-      OIDC_CLIENT_ID_FILE = oidcClient.idFile;
-      OIDC_CLIENT_SECRET_FILE = oidcClient.secretFile;
+      OIDC_CLIENT_ID_FILE = serviceCfg.oidc.idFile;
+      OIDC_CLIENT_SECRET_FILE = serviceCfg.oidc.secretFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-sso-configure" ./sso-configure.nu}'';

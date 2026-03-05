@@ -7,20 +7,18 @@ in
 
   custom.homelab.services.jellyseerr = {
     port = 9099;
-    dashboard = {
+    secrets = {
+      files.api-key = { rotatable = true; };
+      envFile.API_KEY = "api-key";
+      systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
+    };
+
+    # TODO: https://gethomepage.dev/widgets/services/jellyseerr/
+    integrations.homepage = {
       enable = true;
       category = "Media";
       description = "TV / Movie Finder";
-      icon = "jellyseerr.svg";
     };
-    # TODO: https://gethomepage.dev/widgets/services/jellyseerr/
-  };
-
-  sops = {
-    secrets."jellyseerr/api-key" = { };
-    templates."jellyseerr.env".content = ''
-      API_KEY=${config.sops.placeholder."jellyseerr/api-key"}
-    '';
   };
 
   services.jellyseerr = {
@@ -28,5 +26,5 @@ in
     port = serviceCfg.port;
   };
 
-  systemd.services.jellyseerr.serviceConfig.EnvironmentFile = config.sops.templates."jellyseerr.env".path;
+  systemd.services.jellyseerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.envFilePath;
 }

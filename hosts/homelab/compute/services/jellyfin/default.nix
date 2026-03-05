@@ -9,20 +9,22 @@ in
     ./configure.nix
   ];
 
-  custom.homelab = {
-    services.jellyfin = {
-      port = 8096;
-      dashboard = {
-        enable = true;
-        category = "Media";
-        description = "Media Player";
-        icon = "jellyfin.svg";
-      };
-      # TODO: https://gethomepage.dev/widgets/services/jellyfin/
+  custom.homelab.services.jellyfin = {
+    port = 8096;
+    secrets = {
+      files.admin-password = { rotatable = false; };
+      systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
-    oidc.clients.jellyfin = {
+    # TODO: https://gethomepage.dev/widgets/services/jellyfin/
+    oidc = {
+      enable = true;
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
+    };
+    integrations.homepage = {
+      enable = true;
+      category = "Media";
+      description = "Media Player";
     };
   };
 
