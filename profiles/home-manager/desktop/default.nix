@@ -10,6 +10,7 @@
     ./firefox             # Browser
     ./zathura.nix         # Documents
     ./git.nix
+    ./claude-code.nix     # AI Assistant
     ./mpv.nix             # Videos
     ./imv.nix             # Images
     ./beets.nix           # Music library manager

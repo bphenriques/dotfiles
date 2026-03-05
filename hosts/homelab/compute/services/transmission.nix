@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.transmission;
-  pathsCfg = config.custom.paths;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  pathsCfg = config.custom.homelab.paths;
+  homelabMounts = config.custom.homelab.cifs.mounts;
 in
 {
   custom.homelab.services.transmission = {
@@ -36,7 +36,7 @@ in
   };
 
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "transmission" ];
+  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "transmission" ];
 
   systemd.services.transmission = {
     serviceConfig = {

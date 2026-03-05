@@ -10,7 +10,7 @@
 #     name = "radarr";
 #     port = 9098;
 #     description = "Movie Tracker";
-#     rootPath = config.custom.paths.media.movies;
+#     rootPath = config.custom.homelab.paths.media.movies;
 #     categoryField = "movieCategory";
 #     forwardAuthGroup = config.custom.homelab.groups.admin;
 #   }
@@ -29,7 +29,7 @@ let
 
   serviceCfg = config.custom.homelab.services.${name};
   mediaCfg = config.custom.homelab.media.${name};
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  homelabMounts = config.custom.homelab.cifs.mounts;
 
 
   settings = {
@@ -88,7 +88,7 @@ in
   };
 
   users.users.${name}.extraGroups = [ homelabMounts.media.group ];
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ name ];
+  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ name ];
 
   systemd.services."${name}-configure" = {
     description = "Configure ${upperName} with declarative configuration";

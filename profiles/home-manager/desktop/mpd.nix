@@ -3,8 +3,8 @@ lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
 
-    musicDirectory = osConfig.custom.paths.media.music.library;
-    playlistDirectory = osConfig.custom.paths.media.music.playlists;
+    musicDirectory = osConfig.custom.homelab.paths.media.music.library;
+    playlistDirectory = osConfig.custom.homelab.paths.media.music.playlists;
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {

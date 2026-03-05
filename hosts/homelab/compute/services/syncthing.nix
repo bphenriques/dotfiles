@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
-  pathsCfg = config.custom.paths;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  pathsCfg = config.custom.homelab.paths;
+  homelabMounts = config.custom.homelab.cifs.mounts;
   syncthingUsers = config.custom.homelab.enabledUsers.syncthing;
 
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
@@ -53,7 +53,7 @@ in
     homelabMounts.media.group
     homelabMounts.bphenriques.group
   ];
-  custom.fileSystems.homelab.mounts = {
+  custom.homelab.cifs.mounts = {
     media.systemd.dependentServices = [ "syncthing" ];
     bphenriques.systemd.dependentServices = [ "syncthing" ];
   };

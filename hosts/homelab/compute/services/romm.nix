@@ -1,7 +1,7 @@
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  homelabMounts = config.custom.homelab.cifs.mounts;
   groupsCfg = config.custom.homelab.groups;
 
   serviceCfg = cfg.services.romm;
@@ -58,19 +58,20 @@ in
     secrets = {
       gid = 970;  # Fixed GID for container access
       files = {
-        auth-secret-key = { rotatable = true; length = 64; };
+        auth-secret-key = { rotatable = true; bytes = 64; };
         db-password = { rotatable = false; };
       };
       systemd.dependentServices = [ "podman-romm" ];
     };
     oidc = {
       enable = true;
+      gid = 971;  # Fixed GID for container access
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
       systemd.dependentServices = [ "podman-romm" ];
     };
   };
 
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "podman-romm" ];
+  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
   services.mysql.ensureDatabases = [ db.name ];
@@ -165,8 +166,8 @@ in
 
       # Data
       "${configFile}:/romm/config/config.yml:ro"
-      "${config.custom.paths.media.gaming.emulation.roms}:/romm/library/roms:ro"
-      "${config.custom.paths.media.gaming.emulation.bios}:/romm/library/bios:ro"
+      "${config.custom.homelab.paths.media.gaming.emulation.roms}:/romm/library/roms:ro"
+      "${config.custom.homelab.paths.media.gaming.emulation.bios}:/romm/library/bios:ro"
     ];
 
     user = "${toString rommUser.uid}:${toString rommUser.gid}";

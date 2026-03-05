@@ -3,12 +3,6 @@
 { lib, serviceName, serviceConfig }:
 let
   credentialsBaseDir = "/run/homelab-oidc";
-
-  # Deterministic GID: base + hash offset (0-65535 range)
-  baseGid = 42000;
-  hashOffset = name: lib.fromHexString (builtins.substring 0 4 (builtins.hashString "sha256" name));
-  clientGid = name: baseGid + (hashOffset name);
-  clientGroup = name: "homelab-oidc-${name}";
 in
 { config, ... }: {
   options = {
@@ -33,15 +27,14 @@ in
     };
 
     gid = lib.mkOption {
-      type = lib.types.int;
-      default = clientGid serviceName;
-      readOnly = true;
-      description = "GID for this client's credentials group";
+      type = lib.types.nullOr lib.types.int;
+      default = null;
+      description = "Fixed GID for the credentials group (null = auto-assign)";
     };
 
     group = lib.mkOption {
       type = lib.types.str;
-      default = clientGroup serviceName;
+      default = "homelab-oidc-${serviceName}";
       readOnly = true;
       description = "Group name for this client's credentials";
     };

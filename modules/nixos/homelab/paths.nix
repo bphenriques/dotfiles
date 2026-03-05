@@ -2,10 +2,10 @@
 let
   inherit (lib) mkOption types;
   
-  cfg = config.custom.paths;
-  homelabCfg = config.custom.fileSystems.homelab;
+  cfg = config.custom.homelab.paths;
+  cifsCfg = config.custom.homelab.cifs;
 in {
-  options.custom.paths = {
+  options.custom.homelab.paths = {
     # Private Media - Not recoverable.
     bphenriques = {
       root = mkOption {
@@ -82,10 +82,10 @@ in {
     };
   };
 
-  config = lib.mkIf homelabCfg.enable {
-    custom.paths = {
-      bphenriques.root = lib.mkDefault homelabCfg.mounts.bphenriques.localMount;
-      media.root = lib.mkDefault homelabCfg.mounts.media.localMount;
+  config = lib.mkIf cifsCfg.enable {
+    custom.homelab.paths = {
+      bphenriques.root = lib.mkDefault cifsCfg.mounts.bphenriques.localMount;
+      media.root = lib.mkDefault cifsCfg.mounts.media.localMount;
     };
   };
 }

@@ -2,8 +2,8 @@
 let
   serviceCfg = config.custom.homelab.services.kavita;
   oidcCfg = config.custom.homelab.oidc;
-  pathsCfg = config.custom.paths;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  pathsCfg = config.custom.homelab.paths;
+  homelabMounts = config.custom.homelab.cifs.mounts;
 
   kavitaCfg = config.services.kavita;
 in
@@ -14,7 +14,7 @@ in
     port = 8097;
     secrets = {
       files = {
-        token-key = { rotatable = true; length = 64; };
+        token-key = { rotatable = true; bytes = 64; };
         admin-password = { rotatable = false; }; # TODO: admin-password could be removed if Kavita supports OIDC-only admin
       };
       systemd.dependentServices = [ "kavita" "kavita-configure" ];
@@ -34,7 +34,7 @@ in
     };
   };
 
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "kavita" ];
+  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "kavita" ];
 
   services.kavita = {
     enable = true;

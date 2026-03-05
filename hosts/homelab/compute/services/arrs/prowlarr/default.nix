@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.prowlarr;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  homelabMounts = config.custom.homelab.cifs.mounts;
 in
 {
   imports = [ ./configure.nix ];
@@ -27,7 +27,7 @@ in
     environmentFiles = [ serviceCfg.secrets.envFilePath ];
   };
 
-  custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "prowlarr" ];
+  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "prowlarr" ];
   systemd.services.prowlarr = {
     serviceConfig = {
       SupplementaryGroups = [ homelabMounts.media.group ];

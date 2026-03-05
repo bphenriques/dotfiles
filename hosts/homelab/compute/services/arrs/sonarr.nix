@@ -4,7 +4,7 @@ let
     name = "sonarr";
     port = 9097;
     description = "TV Tracker";
-    rootPath = config.custom.paths.media.tv;
+    rootPath = config.custom.homelab.paths.media.tv;
     categoryField = "tvCategory";
     forwardAuthGroup = config.custom.homelab.groups.admin;
   };

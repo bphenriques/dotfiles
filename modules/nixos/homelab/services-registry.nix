@@ -59,10 +59,16 @@ let
         description = "Port the service listens on";
       };
 
+      scheme = lib.mkOption {
+        type = lib.types.enum [ "http" "https" ];
+        default = "http";
+        description = "URL scheme for backend connection";
+      };
+
       url = lib.mkOption {
         type = lib.types.str;
-        default = "http://${config.host}:${toString config.port}";
-        description = "Full URL for proxying (derived from host and port)";
+        default = "${config.scheme}://${config.host}:${toString config.port}";
+        description = "Full URL for proxying (derived from scheme, host and port)";
       };
 
       # Routing (public)
@@ -91,10 +97,12 @@ let
           Independent of app-level SSO (OIDC) the service might use
         '';
 
+        # Values are actual group names from cfg.groups (not fixed strings "admin"/"users").
+        # This allows changing group names in one place (custom.homelab.groups).
         group = lib.mkOption {
           type = lib.types.enum [ cfg.groups.admin cfg.groups.users ];
           default = cfg.groups.admin;
-          description = "Group required to access this service via forwardAuth (admin or users)";
+          description = "Group required to access this service via forwardAuth (uses group names from custom.homelab.groups)";
         };
       };
 
@@ -107,9 +115,9 @@ let
         };
       };
 
-      # Per-service secrets (contract from _service-secrets-options.nix)
+      # Per-service secrets (contract from _secrets-schema.nix)
       secrets = lib.mkOption {
-        type = lib.types.submodule (import ./_service-secrets-options.nix {
+        type = lib.types.submodule (import ./_secrets-schema.nix {
           inherit lib;
           serviceName = name;
         });
@@ -117,9 +125,9 @@ let
         description = "Generated secrets for this service";
       };
 
-      # Per-service OIDC client (contract from _service-oidc-options.nix)
+      # Per-service OIDC client (contract from _oidc-schema.nix)
       oidc = lib.mkOption {
-        type = lib.types.submodule (import ./_service-oidc-options.nix {
+        type = lib.types.submodule (import ./_oidc-schema.nix {
           inherit lib;
           serviceName = name;
           serviceConfig = config;

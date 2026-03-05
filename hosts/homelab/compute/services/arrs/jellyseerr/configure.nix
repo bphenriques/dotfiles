@@ -20,7 +20,7 @@ let
       port = radarrCfg.port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.custom.paths.media.movies;
+      activeDirectory = config.custom.homelab.paths.media.movies;
       activeProfileName = mediaCfg.radarr.profiles.${mediaCfg.radarr.defaultProfile}.name;
       is4k = false;
       minimumAvailability = "released";
@@ -33,7 +33,7 @@ let
       port = sonarrCfg.port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.custom.paths.media.tv;
+      activeDirectory = config.custom.homelab.paths.media.tv;
       activeProfileName = mediaCfg.sonarr.profiles.${mediaCfg.sonarr.defaultProfile}.name;
       is4k = false;
       isDefault = true;

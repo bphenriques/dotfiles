@@ -4,7 +4,7 @@ let
     name = "radarr";
     port = 9098;
     description = "Movie Tracker";
-    rootPath = config.custom.paths.media.movies;
+    rootPath = config.custom.homelab.paths.media.movies;
     categoryField = "movieCategory";
     forwardAuthGroup = config.custom.homelab.groups.admin;
   };

@@ -9,10 +9,10 @@ in
     files = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
         options = {
-          length = lib.mkOption {
+          bytes = lib.mkOption {
             type = lib.types.int;
             default = 32;
-            description = "Length of the secret in bytes";
+            description = "Number of random bytes to generate (output file will be 2x chars due to hex encoding)";
           };
 
           rotatable = lib.mkOption {

@@ -3,8 +3,8 @@
 #
 { config, pkgs, lib, self, ... }:
 let
-  pathsCfg = config.custom.paths;
-  homelabMounts = config.custom.fileSystems.homelab.mounts;
+  pathsCfg = config.custom.homelab.paths;
+  homelabMounts = config.custom.homelab.cifs.mounts;
   serviceCfg = config.custom.homelab.services.immich;
 
   enabledUsers = config.custom.homelab.enabledUsers.immich;
@@ -41,7 +41,7 @@ in
   users.users.immich.extraGroups = lib.mapAttrsToList (username: _: homelabMounts."${username}".group) enabledUsers;
 
   # Register immich-server as dependent on each user's mount
-  custom.fileSystems.homelab.mounts = lib.mapAttrs' (username: _:
+  custom.homelab.cifs.mounts = lib.mapAttrs' (username: _:
     lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
   ) enabledUsers;
 
@@ -75,11 +75,11 @@ in
   assertions = [
     {
       assertion = lib.all (username: pathsCfg ? ${username}.photos) (lib.attrNames enabledUsers);
-      message = "Each enabled Immich user must have custom.paths.<username>.photos configured.";
+      message = "Each enabled Immich user must have custom.homelab.paths.<username>.photos configured.";
     }
     {
       assertion = lib.all (username: homelabMounts ? ${username}) (lib.attrNames enabledUsers);
-      message = "Each enabled Immich user must have a matching homelab mount (custom.fileSystems.homelab.mounts.<username>).";
+      message = "Each enabled Immich user must have a matching homelab mount (custom.homelab.cifs.mounts.<username>).";
     }
   ];
 }

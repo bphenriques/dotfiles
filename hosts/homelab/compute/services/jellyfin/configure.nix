@@ -1,7 +1,7 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.custom.homelab.services.jellyfin;
-  pathsCfg = config.custom.paths;
+  pathsCfg = config.custom.homelab.paths;
   oidcCfg = config.custom.homelab.oidc;
 
   adminUsername = "admin";

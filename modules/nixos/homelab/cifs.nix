@@ -2,13 +2,7 @@
 let
   inherit (lib) mkOption types;
 
-  cfg = config.custom.fileSystems.homelab;
-
-  # Generate a deterministic GID from the mount name (range 5000 to 5999). Unlikely to clash but may happen.
-  baseGid = 5000;
-  nameToGid = name:
-    let charSum = lib.foldl (acc: c: acc + lib.strings.charToInt c) 0 (lib.stringToCharacters name);
-    in baseGid + (lib.mod charSum 1000);
+  cfg = config.custom.homelab.cifs;
 
   # Convert a path to a systemd unit name (e.g., /mnt/homelab-bphenriques -> mnt-homelab\x2dbphenriques)
   pathToUnitName = path: utils.escapeSystemdPath (lib.removePrefix "/" path);
@@ -33,8 +27,7 @@ let
       };
       gid = mkOption {
         type = types.int;
-        default = nameToGid name;
-        description = "GID for the mount group (auto-generated from name)";
+        description = "GID for the mount group (required for CIFS mount options)";
       };
       systemd.automountUnit = mkOption {
         type = types.str;
@@ -60,13 +53,13 @@ let
           via users.users.<name>.extraGroups.
 
           Example:
-            custom.fileSystems.homelab.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
+            custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
         '';
       };
     };
   });
 in {
-  options.custom.fileSystems.homelab = {
+  options.custom.homelab.cifs = {
     enable = lib.mkEnableOption "Home-server storage";
 
     hostname = mkOption {
@@ -100,6 +93,16 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+
+    assertions = let
+       # Collision detection for GIDs
+       allGids = lib.mapAttrsToList (_: m: m.gid) cfg.mounts;
+       dupGids = lib.filter (gid: lib.count (g: g == gid) allGids > 1) (lib.unique allGids);
+     in [{
+      assertion = dupGids == [];
+      message = "Homelab mounts have duplicate gids: ${toString dupGids}";
+    }];
+
     environment.systemPackages = [ pkgs.cifs-utils ];
     
     sops = {

@@ -17,7 +17,7 @@ let
     secretsCfg = svc.secrets;
     filesList = lib.mapAttrsToList (name: file: {
       inherit name;
-      inherit (file) length path;
+      inherit (file) bytes path;
     }) secretsCfg.files;
     envVars = lib.mapAttrsToList (envVar: secretName: {
       inherit envVar;
@@ -37,7 +37,7 @@ let
     ${lib.concatMapStringsSep "\n" (file: ''
       if [ ! -f "${file.path}" ]; then
         echo "Generating secret: ${file.name}"
-        ${pkgs.openssl}/bin/openssl rand -hex ${toString file.length} > "${file.path}"
+        ${pkgs.openssl}/bin/openssl rand -hex ${toString file.bytes} > "${file.path}"
         chown root:"$group" "${file.path}"
         chmod 640 "${file.path}"
       fi
@@ -57,8 +57,16 @@ let
     echo "All secrets for ${serviceName} are ready"
   '';
 
+  # Collision detection for explicit GIDs
+  explicitGids = lib.filter (g: g != null) (lib.mapAttrsToList (_: svc: svc.secrets.gid) serviceSecrets);
+  dupGids = lib.filter (gid: lib.count (g: g == gid) explicitGids > 1) (lib.unique explicitGids);
 in {
   config = lib.mkIf (serviceSecrets != { }) {
+    assertions = [{
+      assertion = dupGids == [];
+      message = "Service secrets have duplicate explicit gids: ${toString dupGids}";
+    }];
+
     # Create groups for each service
     users.groups = lib.mapAttrs' (_: svc:
       lib.nameValuePair svc.secrets.group (lib.optionalAttrs (svc.secrets.gid != null) {

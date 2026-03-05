@@ -100,7 +100,22 @@ in
     allDependentServices = lib.concatLists (
       lib.mapAttrsToList (_: client: client.systemd.dependentServices) derivedClients
     );
+    # Collision detection for explicit GIDs
+    explicitGids = lib.filter (g: g != null) (lib.mapAttrsToList (_: c: c.gid) derivedClients);
+    dupGids = lib.filter (gid: lib.count (g: g == gid) explicitGids > 1) (lib.unique explicitGids);
   in {
+    assertions = [{
+      assertion = dupGids == [];
+      message = "OIDC clients have duplicate explicit gids: ${toString dupGids}";
+    }];
+
+    # Create groups for each OIDC client
+    users.groups = lib.mapAttrs' (_: client:
+      lib.nameValuePair client.group (lib.optionalAttrs (client.gid != null) {
+        gid = client.gid;
+      })
+    ) derivedClients;
+
     # Auto-wire systemd dependencies for services that depend on OIDC credentials
     systemd.services = lib.mkIf (provisionedTarget != null) (lib.mkMerge (
       lib.mapAttrsToList (_: client:

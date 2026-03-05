@@ -40,12 +40,12 @@ in
 
   # Homelab integration
   networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) shared.hosts;
-  custom.fileSystems.homelab = {
+  custom.homelab.cifs = {
     enable = true;
     hostname = shared.hosts.bruno-home-nas;
     mounts = {
-      bphenriques = { };
-      media = { };
+      bphenriques = { gid = 5000; };
+      media = { gid = 5001; };
     };
   };
 

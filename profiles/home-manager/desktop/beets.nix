@@ -3,8 +3,8 @@ let
   inherit (lib) foldl';
 
   # FIXME: Make this a more configurable setting.
-  musicDir = osConfig.custom.paths.media.music.root;
-  musicLibrary = osConfig.custom.paths.media.music.library;
+  musicDir = osConfig.custom.homelab.paths.media.music.root;
+  musicLibrary = osConfig.custom.homelab.paths.media.music.library;
 
   # Beets require absolute paths: https://github.com/beetbox/beets/issues/133
   # If needed:
@@ -70,7 +70,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       playlist = {
         auto = true;                        # Automatically remove/move items inside the playlists in case they move.
         relative_to = musicLibrary;
-        playlist_dir = osConfig.custom.paths.media.music.playlists;
+        playlist_dir = osConfig.custom.homelab.paths.media.music.playlists;
       };
       fetchart = {
         auto = true;
