@@ -55,9 +55,9 @@ in
       JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
       JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
-      OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # FIXME: This has nothing to do really.
+      OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # Validates non-local users exist in OIDC provider
     };
-    path = [ pkgs.nushell pkgs.openssl ];
+    path = [ pkgs.nushell ];
     preStart = ''
       # Create admin username file if missing (password is managed by homelab-secrets-jellyfin)
       if [ ! -f "${adminUsernameFile}" ]; then

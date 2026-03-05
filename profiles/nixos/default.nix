@@ -13,12 +13,7 @@
   # Allows: nix shell nixpkgs#hello, nix run nixpkgs#cowsay, etc.
   nix.registry.nixpkgs.flake = self.inputs.nixpkgs;
 
-  boot = {
-    tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
-    kernelParams = [
-      "boot.shell_on_fail" # allows for root shell if failure to boot
-    ];
-  };
+  boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
 
   # Localization
   time.timeZone = "Europe/Lisbon";

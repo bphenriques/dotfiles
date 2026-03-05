@@ -34,12 +34,12 @@ in
   systemd.services.couchdb.serviceConfig.RuntimeDirectory = "couchdb";
 
   # Generate admin.ini in secrets service (runs before couchdb)
-  systemd.services.homelab-secrets-couchdb.serviceConfig.ExecStartPost = pkgs.writeShellScript "generate-couchdb-admin-ini" ''
+  systemd.services.homelab-secrets-couchdb.serviceConfig.ExecStartPost = [ (pkgs.writeShellScript "generate-couchdb-admin-ini" ''
     cat > "${adminConfigFile}" <<EOF
 [admins]
 ${config.services.couchdb.adminUser} = $(cat "${serviceCfg.secrets.files.admin-password.path}")
 EOF
     chown root:${serviceCfg.secrets.group} "${adminConfigFile}"
     chmod 640 "${adminConfigFile}"
-  '';
+  '') ];
 }

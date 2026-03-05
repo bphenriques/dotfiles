@@ -26,7 +26,7 @@ def ensure_user [name: string, password_file: string] {
     409 => {
       let rev = (http get $url --user $admin_user --password $admin_pass)._rev
       let update = http put $url ($body | insert _rev $rev) --content-type application/json --user $admin_user --password $admin_pass --full --allow-errors
-      if $update.status != 201 {
+      if $update.status not-in [200, 201] {
         error make { msg: $"Failed to update user ($name): ($update.status) - ($update.body)" }
       }
     }

@@ -28,19 +28,26 @@
   };
   environment.systemPackages = [ pkgs.intel_gpu_top ]; # iGPU monitoring
 
+  # Bonding: only bond0 gets DHCP, physical interfaces stay silent
+  # Router DHCP reservation should use bond0's MAC (inherited from enp1s0)
+  networking.useDHCP = false;
   networking.bonds.bond0 = {
     interfaces = [ "enp1s0" "enp1s1" ];
     driverOptions.mode = "balance-alb";  # switch to 802.3ad after configuring on the switch (cleaner)
   };
+  networking.interfaces.bond0.useDHCP = true;
 
   # Power management
   powerManagement = {
     powertop.enable = true;            # Auto-tune power settings at boot
     cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
   };
+  services.thermald.enable = true;     # Intel thermal daemon — keeps temps in check under load
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)
     "btusb"      # Bluetooth USB
     "bluetooth"  # Bluetooth stack
+    "i8042"      # PS/2 keyboard controller
+    "serio"      # PS/2 serial I/O
   ];
 }

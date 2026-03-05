@@ -221,7 +221,7 @@ def configure_user_permissions [users: record] {
   let users_list = $all_users.body.results? | default []
   for entry in ($users | transpose key value) {
     let username = $entry.value.username
-    let user = $users_list | where { |u| ($u.jellyfinUsername? | default "") == $username } | first
+    let user = $users_list | where { |u| ($u.jellyfinUsername? | default "") == $username } | get 0?
     if $user == null {
       error make { msg: $"Failed to find user: ($username)" }
     }
@@ -250,7 +250,7 @@ def configure_user_permissions [users: record] {
     let user_id = $user.id
     let r = http put $"($base_url)/api/v1/user/($user_id)" { permissions: $desired_perms } --headers $headers --content-type application/json --full --allow-errors
     if $r.status not-in [200, 204] {
-      error make { msg: $"Failed to  update permissions for '($username)': ($r.status) - ($r.body)" }
+      error make { msg: $"Failed to update permissions for '($username)': ($r.status) - ($r.body)" }
     }
     print $"  Updated permissions for '($username)'"
   }

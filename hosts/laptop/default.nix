@@ -18,11 +18,9 @@ let
 
   sharedSpecialArgs = {
     self = self // {
-      lib.builders = self.lib.builders.${system};
       pkgs = self.packages.${system} // dotfiles-private.packages.${system};
-      settings = dotfiles-private.settings // {
-        headless = true;
-      };
+      lib.builders = self.lib.builders.${system};
+      settings = dotfiles-private.settings;
     };
   };
 

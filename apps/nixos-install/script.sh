@@ -45,6 +45,7 @@ remote_install() {
   local ssh_host="$3"
   local -a extraArgs=()
 
+  # Pre-flight check: requires local clone (remote runs use FLAKE_URL for actual install)
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 
@@ -82,6 +83,8 @@ local_install() {
   local host="$1"
   local bw_email="$2"
 
+  trap 'sudo rm -f /tmp/luks-interactive-password.key' EXIT
+
   unlock_bitwarden "$bw_email"
 
   info "Fetching SSH deploy key due to private Github flakes..."
@@ -115,9 +118,6 @@ local_install() {
 
   info "Installing NixOS..."
   sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
-
-  info "Cleaning up keys..."
-  sudo rm -f /tmp/luks-interactive-password.key
 
   success 'Done! Press any key to reboot. Press F12 if you need to select the right drive to boot'; read -r _;
   reboot

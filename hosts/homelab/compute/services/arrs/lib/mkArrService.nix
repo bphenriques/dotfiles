@@ -24,7 +24,7 @@
   forwardAuthGroup,    # Forward auth group (required)
 }:
 let
-  upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name;
+  upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name; # Capitalize first letter
   envPrefix = lib.toUpper name;
 
   serviceCfg = config.custom.homelab.services.${name};
@@ -94,8 +94,8 @@ in
     description = "Configure ${upperName} with declarative configuration";
     wantedBy = [ "multi-user.target" ];
     after = [ "${name}.service" "transmission.service" "recyclarr.service" ];
-    requires = [ "${name}.service" "recyclarr.service" ];
-    wants = [ "transmission.service" "recyclarr.service" ];
+    requires = [ "${name}.service" ];
+    wants = [ "transmission.service" "recyclarr.service" ]; # recyclarr is accessory — use wants, not requires
     partOf = [ "${name}.service" ];
     restartTriggers = [ settingsFile ./arr-configure.nu ];
     startLimitIntervalSec = 300;

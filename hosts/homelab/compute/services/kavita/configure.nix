@@ -29,7 +29,7 @@ let
       syncUserSettings = false;  # Roles managed via API, not OIDC claims
       defaultRoles = defaultUserRoles;
       defaultLibraries = publicLibraries;
-      autoLogin = true;
+      autoLogin = false;
       disablePasswordAuth = true;
     };
 
@@ -52,7 +52,7 @@ in
 
   systemd.services.kavita-configure = {
     description = "Configure Kavita OIDC and libraries";
-    wantedBy = [ "kavita.service" ];
+    wantedBy = [ "kavita.service" ]; # Unconventional but ensures configure runs when kavita starts
     after = [ "kavita.service" ];
     requires = [ "kavita.service" ];
     partOf = [ "kavita.service" ];

@@ -1,10 +1,6 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.cleanuparr;
-  sonarrCfg = config.custom.homelab.services.sonarr;
-  radarrCfg = config.custom.homelab.services.radarr;
-  transmissionCfg = config.custom.homelab.services.transmission;
-
   dataDir = "/var/lib/cleanuparr";
 
   cleanuparrUser = {
@@ -49,6 +45,8 @@ in
       TZ = config.time.timeZone;
     };
     volumes = [ "${dataDir}:/config" ];
+    # LinuxServer-style container: needs to drop privileges at startup via PUID/PGID.
+    # Requires no-new-privileges=false + caps to allow the entrypoint to setuid/chown.
     extraOptions = [
       "--network=host"
       "--memory=256m"

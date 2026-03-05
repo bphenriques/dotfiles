@@ -27,7 +27,7 @@ let
     ) enabledUsers);
   });
 
-  # FIXME: Do we really need this?
+  # Bind user photo directories into immich for external library imports
   photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
     let userPaths = pathsCfg.${username}.photos;
     in [

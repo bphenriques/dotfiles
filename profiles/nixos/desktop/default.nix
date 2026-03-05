@@ -12,6 +12,10 @@
     # ./sunshine.nix    # Still doesnt work.
   ];
 
+  boot.kernelParams = [
+    "boot.shell_on_fail" # allows for root shell if failure to boot
+  ];
+
   networking.networkmanager.enable = true;    # More complete package to manage connectivity. Suitable for desktop.
 
   # Ensure we have at least 5GiB always available. Less than that and my system gets unstable during builds.
