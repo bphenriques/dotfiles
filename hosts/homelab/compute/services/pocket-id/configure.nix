@@ -1,32 +1,21 @@
-# Pocket-ID OIDC Provisioning
-#
 # Provisions users, groups, and OIDC clients after Pocket-ID starts.
 # Credentials are written to /run/homelab-oidc/<client>/{id,secret}.
-
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab.oidc;
   provisionConfigFile = pkgs.writeText "oidc-provision-config.json" (builtins.toJSON cfg.provisionConfig);
   pocketIdCfg = config.custom.homelab.services.pocket-id;
+  script = self.lib.builders.writeNushellScript "oidc-provision" ./oidc-provision.nu;
 in
 {
-  assertions = [{
-    assertion = cfg.provisionConfig.users != [];
-    message = "At least one user must be enabled for Pocket-ID (services.pocket-id.enable = true)";
-  }];
-
   # Base directory for credentials (tmpfs via /run/)
   # 0755 allows services to traverse to their subdirectories (per-client dirs are 0750 with group ownership)
   systemd.tmpfiles.rules = [
     "d ${cfg.credentials.dir} 0755 root root -"
   ];
 
-  # Per-client groups are created by modules/nixos/homelab/oidc.nix
-
   custom.homelab.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
-  systemd.services.pocket-id-provision = let
-    script = self.lib.builders.writeNushellScript "oidc-provision" ./oidc-provision.nu;
-  in {
+  systemd.services.pocket-id-provision = {
     description = "Pocket-ID Provisioning";
     wantedBy = [ "pocket-id.service" ];
     after = [ "network-online.target" "pocket-id.service" ];
@@ -61,7 +50,7 @@ in
     script = ''nu ${script}'';
   };
 
-  # Manual invite script
+  # Manual re-invite script
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "pocket-id-invite" ''
       export POCKET_ID_URL="${pocketIdCfg.url}"

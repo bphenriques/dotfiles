@@ -1,18 +1,16 @@
 # Security Model:
 # - Access control is enforced SERVER-SIDE via nftables, not client-side AllowedIPs
+# - Full access is only permitted through users managed using Nix
+# - Restricted access by default for clients created manually
 # - All clients receive full AllowedIPs in their config (routing convenience only)
-# - Nix config is the single source of truth for access permissions:
-#   - fullAccess=true:  client can forward traffic to the entire network
-#   - fullAccess=false: client can only reach this server (forwarding blocked)
-# - Clients created via CLI (wg-manage add) are always restricted
 # - Client IPs are deterministic (hash of name) for stable firewall rules
-#
 
 # Troubleshoot
 # - Ensure port forwarding right port and UDP
 # - sudo wg show -> Check handshake
 # - Check for traffic: sudo tcpdump -ni any udp port 51820
-# - Lastly, check if the service's listen address is 0.0.0.0 (all interfaces)
+# - Check if the service's listen address is 0.0.0.0 (all interfaces)
+# - Check if the allowed ips include the internal network
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
@@ -69,15 +67,15 @@ let
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
   };
 
-  wgManagePkg = self.pkgs.wg-manage.override {
-    homepageUrl = cfg.services.homepage.publicUrl;
-    emailSubject = "🏠 Home Sweet (Remote) Home: WireGuard VPN key inside";
-    emailTemplateMd = ./email-template.md;
-  };
-
   wgManage = pkgs.writeShellApplication {
     name = "wg-manage";
-    runtimeInputs = [ wgManagePkg ];
+    runtimeInputs = [
+      (self.pkgs.wg-manage.override {
+        homepageUrl = cfg.services.homepage.publicUrl;
+        emailSubject = "🏠 Home Sweet (Remote) Home: WireGuard VPN key inside";
+        emailTemplateMd = ./email-template.md;
+      })
+    ];
     text = ''
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") wgEnv)}
       exec wg-manage-bin "$@"

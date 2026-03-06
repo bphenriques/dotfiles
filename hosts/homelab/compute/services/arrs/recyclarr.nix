@@ -49,6 +49,7 @@ in
     environment = {
       RECYCLARR_APP_DATA = appDataDir;
     };
+    # TODO: Use the templating.
     preStart = ''
       # Generate secrets.yml from API key files
       cat > "${secretsFile}" <<EOF

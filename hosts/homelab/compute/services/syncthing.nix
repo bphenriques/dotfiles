@@ -86,7 +86,7 @@ in
 
       gui = {
         theme = "dark";
-        insecureAdminAccess = true;
+        insecureAdminAccess = true; # FIXME: this is insecure as compromised services will be access this interface
       };
     };
   };

@@ -8,6 +8,7 @@ let
     categoryField = "tvCategory";
     forwardAuthGroup = config.custom.homelab.groups.admin;
   };
+
   profiles = {
     custom.homelab.media.sonarr = {
       qualityDefinitionTemplate = "sonarr-quality-definition-series";

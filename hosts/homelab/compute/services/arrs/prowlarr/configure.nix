@@ -5,7 +5,7 @@ let
   sonarrCfg = config.custom.homelab.services.sonarr;
 
   settings = {
-    # Indexers have the following fields:
+    # Indexers have these fields:
     # - name: Display name in Prowlarr
     # - definitionName: Internal name (find via Prowlarr UI or API: GET /api/v1/indexer/schema)
     # - fields: Optional fields (e.g., baseUrl, apiKey, username/password/cookie). Not required for public indexers.

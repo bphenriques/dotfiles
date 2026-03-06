@@ -1,8 +1,6 @@
 #!/usr/bin/env nu
 
-# Initializes Prowlarr declaratively via the API.
-#
-# Limitations:
+# Initializes Prowlarr declaratively via the API but:
 # - Only creates entities if missing;
 # - Won't reconcile whenever there is a config drift.
 

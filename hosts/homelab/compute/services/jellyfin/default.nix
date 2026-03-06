@@ -15,7 +15,6 @@ in
       files.admin-password = { rotatable = false; };
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
-    # TODO: https://gethomepage.dev/widgets/services/jellyfin/
     oidc = {
       enable = true;
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];

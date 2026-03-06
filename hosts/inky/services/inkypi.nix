@@ -1,0 +1,64 @@
+{ pkgs, ... }:
+{
+  # InkyPi dependencies
+  # InkyPi is installed imperatively due to mutable state (plugins, config)
+  # See: https://github.com/fatihak/InkyPi
+
+  environment.systemPackages = with pkgs; [
+    # Python environment
+    python3
+    python3Packages.pip
+    python3Packages.virtualenv
+
+    # Image processing dependencies for Inky Impression display
+    libtiff
+    openjpeg
+    freetype
+    libjpeg
+
+    # Build tools for Python packages
+    gcc
+    gnumake
+
+    # Git for cloning InkyPi
+    git
+  ];
+
+  # mDNS for local network discovery (inky.local)
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      domain = true;
+      workstation = true;
+    };
+  };
+
+  # Systemd service wrapper for InkyPi
+  # Activates only after manual installation at /opt/inkypi
+  systemd.services.inkypi = {
+    description = "InkyPi Display Service";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+
+    # Only start if InkyPi is installed
+    unitConfig = {
+      ConditionPathExists = "/opt/inkypi/server/server.py";
+    };
+
+    serviceConfig = {
+      Type = "simple";
+      WorkingDirectory = "/opt/inkypi";
+      ExecStart = "${pkgs.python3}/bin/python3 server/server.py";
+      Restart = "on-failure";
+      RestartSec = "10s";
+      User = "root";  # InkyPi needs SPI/GPIO access
+    };
+  };
+
+  # Firewall: InkyPi web interface
+  networking.firewall.allowedTCPPorts = [ 5000 ];
+}

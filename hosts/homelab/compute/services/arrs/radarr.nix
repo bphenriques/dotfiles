@@ -8,7 +8,7 @@ let
     categoryField = "movieCategory";
     forwardAuthGroup = config.custom.homelab.groups.admin;
   };
-  # TODO : https://gethomepage.dev/widgets/services/radarr/
+
   profiles = {
     custom.homelab.media.radarr = {
       qualityDefinitionTemplate = "radarr-quality-definition-movie";

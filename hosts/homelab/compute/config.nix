@@ -1,7 +1,4 @@
-{ config, pkgs, lib, ... }:
-let
-  shared = import ../../shared.nix;
-in
+{ config, pkgs, lib, self, ... }:
 {
   imports = [
     # Base
@@ -29,10 +26,10 @@ in
   };
 
   # Homelab integration
-  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) shared.networks.homelab.hosts;
+  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) self.shared.networks.homelab.hosts;
   custom.homelab.cifs = {
     enable = true;
-    hostname = shared.networks.homelab.hosts.bruno-home-nas;
+    hostname = self.shared.networks.homelab.hosts.bruno-home-nas;
     mounts = {
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };

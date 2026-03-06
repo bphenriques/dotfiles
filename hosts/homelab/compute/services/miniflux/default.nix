@@ -12,7 +12,6 @@ in
       enable = true;
       systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
     };
-    # TODO: https://gethomepage.dev/widgets/services/miniflux/
     integrations.homepage = {
       enable = true;
       category = "Media";
@@ -42,5 +41,5 @@ in
   systemd.services.miniflux.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
 
   # Fix start-limit issue - dbsetup needs to stay "active" after completion
-  systemd.services.miniflux-dbsetup.serviceConfig.RemainAfterExit = true;
+  # systemd.services.miniflux-dbsetup.serviceConfig.RemainAfterExit = true;
 }

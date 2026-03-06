@@ -1,6 +1,7 @@
 keys:
   - &laptop age1hw637g2a3kerd7jaqncxznrx67yeyfzyqg7cpwy3mekw9tsjt48sarxqn7
   - &homelabCompute age1sy7dpg3zaq6wjgraaqptf5g3kgnfcdgm59pv7gt04gap32344vtsx3h0xk
+  - &inky age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx # TODO: Replace with actual key after first boot
 creation_rules:
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
@@ -8,3 +9,6 @@ creation_rules:
   - path_regex: hosts/homelab/compute/secrets.yaml
     key_groups:
       - age: [ *homelabCompute ]
+  - path_regex: hosts/inky/secrets.yaml
+    key_groups:
+      - age: [ *inky ]

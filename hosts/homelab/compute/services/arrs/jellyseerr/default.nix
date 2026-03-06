@@ -15,7 +15,6 @@ in
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
 
-    # TODO: https://gethomepage.dev/widgets/services/jellyseerr/
     integrations.homepage = {
       enable = true;
       category = "Media";

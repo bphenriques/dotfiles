@@ -41,11 +41,10 @@ let
       { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ 0 ];   }
     ];
 
-    # Per-user overrides (for private library access). Example:
-    # users = [
-    #   { email = "user@example.com"; roles = defaultUserRoles; libraries = publicLibraries ++ [ "PrivateLib" ]; }
-    # ];
-    users = [];
+    # Per-user overrides (for private library access):
+    users = [
+      #{ email = "user@example.com"; roles = defaultUserRoles; libraries = publicLibraries ++ [ "PrivateLib" ]; }
+    ];
   });
 in
 {

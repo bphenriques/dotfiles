@@ -8,7 +8,6 @@ in
   custom.homelab.services.transmission = {
     port = 9091;
     forwardAuth.enable = true;
-    # https://gethomepage.dev/widgets/services/transmission/
     integrations.homepage = {
       enable = true;
       category = "Media";

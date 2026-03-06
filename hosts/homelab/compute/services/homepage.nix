@@ -1,8 +1,3 @@
-# Homepage Dashboard Configuration
-#
-# Host-specific settings for the homepage dashboard.
-# The actual homepage-dashboard service is configured by modules/nixos/homelab/homepage.nix
-#
 { self, ... }:
 let
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";

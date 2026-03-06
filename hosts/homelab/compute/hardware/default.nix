@@ -8,13 +8,13 @@
   services.fwupd.enable = true;                   # Updates firmwares: `fwupdmgr`.
 
   # Disk
-  services.fstrim.enable = true;       # Weekly TRIM for NVMe longevity
-  services.smartd.enable = true; # TODO check prometheus alerting once I introduce it
+  services.fstrim.enable = true;  # Weekly TRIM for NVMe longevity
+  services.smartd.enable = true;  # TODO check prometheus alerting once I introduce it
 
-  # RAM
+  # RAM: ~8GB on 32GB RAM - OOM safety net without NVMe wear
   zramSwap = {
     enable = true;
-    memoryPercent = 25;                # ~8GB on 32GB RAM - OOM safety net without NVMe wear
+    memoryPercent = 25;  #
     algorithm = "zstd";
   };
 
