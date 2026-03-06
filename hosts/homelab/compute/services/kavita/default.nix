@@ -40,23 +40,22 @@ in
     enable = true;
     tokenKeyFile = serviceCfg.secrets.files.token-key.path;
     settings.Port = serviceCfg.port;
-    # OIDC Authentication - credentials injected via preStart from OIDC provisioning
     settings.OpenIdConnectSettings = {
       Authority = oidcCfg.provider.url;
       ClientId = "@OIDC_CLIENT_ID@";
       Secret = "@OIDC_CLIENT_SECRET@";
     };
   };
-  systemd.services.kavita.serviceConfig = {
-    LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
-    BindPaths = [
-      "${pathsCfg.media.books.library}:/mnt/kavita/books"
-      "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
-      "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
-    ];
-  };
+
   systemd.services.kavita = {
-    # Inject OIDC credentials into appsettings.json after NixOS module writes it
+    serviceConfig = {
+      LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
+      BindPaths = [
+        "${pathsCfg.media.books.library}:/mnt/kavita/books"
+        "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
+        "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
+      ];
+    };
     preStart = lib.mkAfter ''
       ${pkgs.replace-secret}/bin/replace-secret '@OIDC_CLIENT_ID@' \
         "''${CREDENTIALS_DIRECTORY}/oidc-id" \
@@ -66,5 +65,6 @@ in
         '${kavitaCfg.dataDir}/config/appsettings.json'
     '';
   };
+
   users.users.kavita.extraGroups = [ homelabMounts.media.group ];
 }

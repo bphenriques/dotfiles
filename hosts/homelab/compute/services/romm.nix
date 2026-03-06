@@ -1,3 +1,6 @@
+# RomM - ROM Manager
+#
+# Uses host networking to reach MySQL on localhost.
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab;

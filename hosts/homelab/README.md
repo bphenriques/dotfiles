@@ -4,98 +4,67 @@ Self-hosted infrastructure running on low-power hardware.
 
 ## Hosts
 
-| Host | Hardware | Role |
-|------|----------|------|
-| [compute](./compute) | Beelink EQ14 (N150), 32GB RAM | NixOS server running services |
-| [storage](./storage) | Synology DS923+ | NAS for media and backups |
+| Host                 | Hardware                      | Role         |
+|----------------------|-------------------------------|--------------|
+| [compute](./compute) | Beelink EQ14 (N150), 32GB RAM | NixOS server |
+| [storage](./storage) | Synology DS923+               | NAS          |
 
 ## Architecture
 
 ```
-┌─────────────┐     ┌─────────────┐
-│   Clients   │────▶│  Wireguard  │
-└─────────────┘     └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Traefik   │
-                    │  (reverse   │
-                    │   proxy)    │
-                    └──────┬──────┘
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-       ┌──────▼──────┐ ┌───▼───┐ ┌──────▼──────┐
-       │  Pocket-ID  │ │ Apps  │ │   Storage   │
-       │   (OIDC)    │ │       │ │   (SAMBA)   │
-       └─────────────┘ └───────┘ └─────────────┘
+                        ┌───────────────────────────────────────┐
+                        │           Compute Server              │
+                        │                                       │
+Internet ──▶ Cloudflare ├──▶ Traefik ──┬──▶ Pocket-ID (OIDC)   │
+                        │      ▲       ├──▶ Jellyfin, Immich   │
+            Wireguard ──┼──────┘       ├──▶ Homepage           │
+            (VPN)       │              │                       │
+                        │              │   Storage (CIFS) ◀────┼───┐
+                        └──────────────┼───────────────────────┘   │
+                                       │                           │
+                                       └───────▶ NAS (external) ◀──┘
 ```
 
-## Stack
+- **Cloudflare**: DNS + HTTPS certificates via ACME DNS challenge
+- **Wireguard**: VPN for remote access
+- **Traefik**: Reverse proxy with TLS termination (routes to local and external hosts)
+- **Pocket-ID**: OIDC provider for SSO
+- **Tinyauth**: ForwardAuth middleware for services without native OIDC
+- **CIFS**: Services access NAS storage via CIFS mounts
 
-- **Reverse Proxy**: Traefik with automatic HTTPS
-- **Authentication**: Pocket-ID (OIDC provider). Tinyauth as forward auth when OIDC is not possible.
-- **DNS**: Cloudflare
-- **Remote Access**: Wireguard
-- **Secrets**: Dual approach (see below)
+## Adding a Service
 
-## Guidelines
-
-1. **Security first** - Passkeys, and minimal exposed ports.
-2. **3-2-1 backups** - Local + external drive + Backblaze
-3. **Declarative** - Everything defined in Nix
-
-There is balance to be made as this is a homelab setup that is only accessible through Wireguard.
-
-## Service Catalogue
-
-Services are registered via `custom.homelab.services.<name>` with all concerns colocated:
+Register in `custom.homelab.services.<name>`:
 
 ```nix
 custom.homelab.services.myapp = {
-  host = "127.0.0.1";  # local service (default)
   port = 8080;
-  
-  # Per-service secrets (generated at boot)
-  secrets = {
-    files.api-key = { rotatable = true; };
-    systemd.dependentServices = [ "myapp" ];
-  };
-  
-  # Per-service OIDC client
-  oidc = {
-    enable = true;
-    systemd.dependentServices = [ "myapp" ];
-  };
-  
-  # Integrations with external tools
-  integrations.homepage = {
-    enable = true;
-    category = "Media";
-    description = "My App";
-  };
-};
-
-# External service (on another host)
-custom.homelab.services.synology = {
-  host = "192.168.1.100";
-  port = 5000;
-  integrations.homepage = { enable = true; category = "Infrastructure"; description = "NAS"; };
+  secrets.files.api-key = { rotatable = true; };  # Runtime secret (generated at boot)
+  secrets.systemd.dependentServices = [ "myapp" ];
+  oidc.enable = true;
+  oidc.systemd.dependentServices = [ "myapp" ];
+  integrations.homepage = { enable = true; category = "Media"; description = "My App"; };
 };
 ```
 
-OIDC credentials are accessed via:
-1. **Direct file access** (preferred): `serviceCfg.oidc.idFile`/`secretFile` + `SupplementaryGroups`
-2. **Systemd credentials**: `serviceCfg.oidc.systemd.loadCredentials` for scripts
+**Secrets**: Use `secrets.files` for internal secrets (generated at boot, rotatable). Use SOPS for external/restorable
+secrets (encrypted in git).
 
-Cross-service dependencies work by extending another service's config:
+See [services-registry.nix](../../modules/nixos/homelab/services-registry.nix), [secrets.nix](../../modules/nixos/homelab/secrets.nix), [oidc.nix](../../modules/nixos/homelab/oidc.nix).
+
+## Adding a User
+
+Add to `custom.homelab.users.<name>`:
+
 ```nix
-# jellyseerr needs radarr's secrets
-custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "jellyseerr-configure" ];
+custom.homelab.users.alice = {
+  email = "alice@example.com";
+  firstName = "Alice";
+  lastName = "Smith";
+  services.immich.enable = true;
+  services.jellyfin.enable = true;
+  services.wireguard = { enable = true; devices = [{ name = "phone"; fullAccess = false; }]; };
+};
 ```
 
-## Secrets
-
-| Type | Use Case |
-|------|----------|
-| **SOPS** | External/restorable secrets (encrypted in git) |
-| **Runtime** | Internal secrets with easy rotation (delete + restart). See [secrets module](../../modules/nixos/homelab/secrets.nix) |
+See [users.nix](../../modules/nixos/homelab/users.nix).

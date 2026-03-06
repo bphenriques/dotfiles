@@ -22,7 +22,7 @@ let
         default = [ groupsCfg.users ];
         description = "Groups assigned to this user. If admin group is included, the user is marked as admin.";
       };
-      isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = builtins.elem groupsCfg.admin config.groups; };
+      isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = lib.elem groupsCfg.admin config.groups; };
 
       services = {
         pocket-id.enable = lib.mkEnableOption "Pocket-ID account for this user" // {

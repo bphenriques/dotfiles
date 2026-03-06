@@ -21,11 +21,7 @@ in
     "d ${cfg.credentials.dir} 0755 root root -"
   ];
 
-  # Per-client groups with deterministic GIDs
-  users.groups = lib.mkMerge (lib.mapAttrsToList (_: client: {
-    ${client.group} = { gid = client.gid; };
-  }) cfg.clients);
-
+  # Per-client groups are created by modules/nixos/homelab/oidc.nix
 
   custom.homelab.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
   systemd.services.pocket-id-provision = let

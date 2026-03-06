@@ -1,3 +1,7 @@
+# Cleanuparr - Queue cleanup for *arr services
+#
+# Uses host networking to reach *arr services on localhost.
+# LinuxServer-style container requires capabilities for entrypoint privilege drop.
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.cleanuparr;

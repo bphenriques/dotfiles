@@ -55,11 +55,11 @@ in
   config = {
     assertions = [
       {
-        assertion = cfg.radarr.profiles ? ${cfg.radarr.defaultProfile};
+        assertion = lib.hasAttr cfg.radarr.defaultProfile cfg.radarr.profiles;
         message = "Radarr defaultProfile '${cfg.radarr.defaultProfile}' must exist in profiles";
       }
       {
-        assertion = cfg.sonarr.profiles ? ${cfg.sonarr.defaultProfile};
+        assertion = lib.hasAttr cfg.sonarr.defaultProfile cfg.sonarr.profiles;
         message = "Sonarr defaultProfile '${cfg.sonarr.defaultProfile}' must exist in profiles";
       }
     ];

@@ -1,5 +1,9 @@
 # OIDC provider configuration and client provisioning.
 # Global provider config + derives clients from services.*.oidc.
+#
+# Client secrets are regenerated on every provision run (boot or config change).
+# This ensures credentials stay fresh and avoids drift. All OIDC-consuming services
+# must be listed in oidc.systemd.dependentServices to receive updated credentials.
 { lib, config, ... }:
 let
   homelabCfg = config.custom.homelab;

@@ -177,7 +177,7 @@ def sync_user_roles [library_map: record, headers: record] {
     }
 
     update_user $kavita_user $user_config.roles $user_library_ids $headers
-    print $"  Updated user ($kavita_user.username): roles=($user_config.roles), libraries=($user_config.libraries)"
+    print $"  Updated user ($kavita_user.userName): roles=($user_config.roles), libraries=($user_config.libraries)"
   }
 }
 

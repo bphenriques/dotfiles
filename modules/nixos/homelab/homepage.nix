@@ -53,7 +53,7 @@ let
     ) orderedCategories;
   in lib.flatten sections;
 
-  isAdminCategory = category: builtins.elem category adminCategories;
+  isAdminCategory = category: lib.elem category adminCategories;
 
   defaultSettings = {
     layout = [
