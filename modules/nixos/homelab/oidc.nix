@@ -68,7 +68,8 @@ in
       };
     };
 
-    # Read-only view of derived clients (from services.*.oidc)
+    # Read-only view of derived clients (from services.*.oidc).
+    # Structure follows _oidc-schema.nix; validation happens at service level in services-registry.nix.
     clients = lib.mkOption {
       type = lib.types.attrsOf lib.types.attrs;
       default = derivedClients;

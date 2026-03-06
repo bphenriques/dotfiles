@@ -26,7 +26,7 @@
       intel-vaapi-driver   # fallback
     ];
   };
-  environment.systemPackages = [ pkgs.intel_gpu_top ]; # iGPU monitoring
+  environment.systemPackages = [ pkgs.intel-gpu-tools ]; # iGPU monitoring (intel_gpu_top)
 
   # Bonding: only bond0 gets DHCP, physical interfaces stay silent
   # Router DHCP reservation should use bond0's MAC (inherited from enp1s0)

@@ -18,16 +18,17 @@
 
   custom.homelab = {
     enable = true;
-    domain = self.settings.hosts.compute.domain;
-    ingress.cloudflareEmail = self.settings.cloudflare.email;
+    domain = self.private.settings.hosts.compute.domain;
+    ingress.cloudflareEmail = self.private.settings.cloudflare.email;
 
     # Individual users whose information is kept private
-    users = self.settings.users // {
+    users = self.private.settings.users // {
       home = {
         email = "home@localhost";
         firstName = "Home";
         lastName = "User";
         services = {
+         pocket-id.enable = false; # ad-hoc
           jellyfin = {
             enable = true;
             passwordFile = config.sops.secrets."jellyfin/home/password".path;

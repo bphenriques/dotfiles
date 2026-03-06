@@ -83,7 +83,7 @@ def send_email [name: string, to: string] {
   let dir = $"($clients_dir)/($name)"
   let tmpdir = (mktemp --tmpdir -d | str trim)
   let qr = $"($tmpdir)/wireguard.png"
-  open --raw $"($dir)/client.conf" | qrencode -o $qr
+  open --raw $"($dir)/client.conf" | qrencode -s 6 -o $qr # double the size to make the QR code bigger
 
   # Template is pre-rendered HTML at build time; just substitute the name
   let body = (open --raw $template_file | str replace --all "{{NAME}}" $name)

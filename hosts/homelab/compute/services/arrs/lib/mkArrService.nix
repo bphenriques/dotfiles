@@ -24,7 +24,7 @@
   forwardAuthGroup,    # Forward auth group (required)
 }:
 let
-  upperName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name; # Capitalize first letter
+  upperName = lib.strings.concatImapStrings (i: c: if i == 1 then lib.toUpper c else c) (lib.stringToCharacters name);
   envPrefix = lib.toUpper name;
 
   serviceCfg = config.custom.homelab.services.${name};

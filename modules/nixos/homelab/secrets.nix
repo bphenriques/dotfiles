@@ -34,6 +34,8 @@ let
     chown root:"$group" "$secretsDir"
     chmod 750 "$secretsDir"
 
+    # Note: TOCTOU race between file check and write is acceptable for single-server homelab.
+    # For stricter environments, consider atomic writes (mktemp + mv).
     ${lib.concatMapStringsSep "\n" (file: ''
       if [ ! -f "${file.path}" ]; then
         echo "Generating secret: ${file.name}"
@@ -47,9 +49,9 @@ let
       # Generate environment file from secrets
       envFile="${secretsCfg.envFilePath}"
       echo "Generating env file: $envFile"
-      cat > "$envFile" <<EOF
-      ${lib.concatMapStringsSep "\n" (v: "${v.envVar}=$(cat \"${v.secretPath}\")") envVars}
-      EOF
+      cat > "$envFile" <<'EOF'
+${lib.concatMapStringsSep "\n" (v: "${v.envVar}=$(cat \"${v.secretPath}\")") envVars}
+EOF
       chown root:"$group" "$envFile"
       chmod 640 "$envFile"
     ''}

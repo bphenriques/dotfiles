@@ -22,8 +22,8 @@ let
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
   dns = "1.1.1.1";
-  endpoint = self.settings.services.wireguard.endpoint;
-  smtp = self.settings.smtp;
+  endpoint = self.private.settings.services.wireguard.endpoint;
+  smtp = self.private.settings.smtp;
 
   dataDir = "/var/lib/wireguard";
   serverKeyFile = "${dataDir}/server/private.key";
@@ -63,7 +63,7 @@ let
     WG_SERVER_IP = serverIp;
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
-    WG_SERVER_ALLOWED_IPS = clientSubnet;
+    WG_SERVER_ALLOWED_IPS = "${clientSubnet}, ${self.shared.networks.homelab.subnet}";
   } // lib.optionalAttrs (smtp.from != "") {
     WG_SMTP_FROM = smtp.from;
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;

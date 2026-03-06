@@ -85,11 +85,10 @@ in
   systemd.services.podman-tinyauth = {
     serviceConfig = {
       RuntimeDirectory = "tinyauth";
-      SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
+      LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
     };
     preStart = ''
-      # Generate OIDC client ID env file
-      echo "PROVIDERS_POCKETID_CLIENT_ID=$(cat ${serviceCfg.oidc.idFile})" > "${envFile}"
+      echo "PROVIDERS_POCKETID_CLIENT_ID=$(cat $CREDENTIALS_DIRECTORY/oidc-id)" > "${envFile}"
       chmod 600 "${envFile}"
     '';
   };

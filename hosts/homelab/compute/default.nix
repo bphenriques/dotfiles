@@ -18,9 +18,10 @@ let
 
   sharedSpecialArgs = {
     self = self // {
-      pkgs = self.packages.${system};
+      pkgs = self.packages.${system} // dotfiles-private.packages.${system};
       lib.builders = self.lib.builders.${system};
-      settings = dotfiles-private.settings;
+      private = dotfiles-private;
+      shared = import ../../shared.nix;
     };
   };
 

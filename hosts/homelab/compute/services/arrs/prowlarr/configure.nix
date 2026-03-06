@@ -9,7 +9,7 @@ let
     # - name: Display name in Prowlarr
     # - definitionName: Internal name (find via Prowlarr UI or API: GET /api/v1/indexer/schema)
     # - fields: Optional fields (e.g., baseUrl, apiKey, username/password/cookie). Not required for public indexers.
-    indexers = self.settings.services.prowlarr.indexers;
+    indexers = self.private.settings.services.prowlarr.indexers;
     applications = [
       {
         name = "Radarr";

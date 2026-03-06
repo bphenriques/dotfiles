@@ -40,7 +40,7 @@ nix_build() {
 }
 
 # Extracts host IP from hosts/shared.nix using nix eval
-get_host_ip() { nix eval --raw --file "${SHARED_HOSTS_CONFIGURATION}" "hosts.$1" || fatal "Could not find IP for host '$1'."; }
+get_host_ip() { nix eval --raw --file "${SHARED_HOSTS_CONFIGURATION}" "networks.homelab.hosts.$1" || fatal "Could not find IP for host '$1'."; }
 
 _nixos_build() { nix_build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel"; }
 _nixos_sync() {

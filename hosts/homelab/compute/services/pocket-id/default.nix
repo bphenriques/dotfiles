@@ -1,8 +1,10 @@
 { config, pkgs, lib, self, ... }:
 let
-  publicUrl = "https://auth.${self.settings.hosts.compute.domain}";
   serviceCfg = config.custom.homelab.services.pocket-id;
   port = 8094;
+  # Note: oidc.provider.url must be set before serviceCfg.publicUrl is available (circular dependency).
+  # This duplicates the subdomain logic but is required for OIDC provider bootstrap.
+  oidcProviderUrl = "https://auth.${self.private.settings.hosts.compute.domain}";
 in
 {
   imports = [ ./configure.nix ];
@@ -28,9 +30,9 @@ in
     oidc.provider = {
       displayName = "Pocket-ID";
       internalName = "PocketID";
-      url = publicUrl;
-      internalUrl = publicUrl;
-      discoveryEndpoint = "${publicUrl}/.well-known/openid-configuration";
+      url = oidcProviderUrl;
+      internalUrl = oidcProviderUrl;
+      discoveryEndpoint = "${oidcProviderUrl}/.well-known/openid-configuration";
       apiKeyFile = serviceCfg.secrets.files.api-key.path;
     };
   };
@@ -49,11 +51,11 @@ in
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
-      SMTP_HOST = self.settings.smtp.host;
-      SMTP_PORT = toString self.settings.smtp.port;
-      SMTP_FROM = self.settings.smtp.from;
-      SMTP_USER = self.settings.smtp.user;
-      SMTP_TLS = self.settings.smtp.tls;
+      SMTP_HOST = self.private.settings.smtp.host;
+      SMTP_PORT = toString self.private.settings.smtp.port;
+      SMTP_FROM = self.private.settings.smtp.from;
+      SMTP_USER = self.private.settings.smtp.user;
+      SMTP_TLS = self.private.settings.smtp.tls;
       SMTP_PASSWORD_FILE = config.sops.templates.pocket-id-smtp-password.path;
 
       # Invite only

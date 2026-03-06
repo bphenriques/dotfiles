@@ -13,7 +13,7 @@
         "homelab-bphenriques"
       ];
 
-    openssh.authorizedKeys.keys = self.settings.hosts.authorizedSSHKeys;
+    openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
   };
 
   home-manager.users.bphenriques = import ./home.nix;

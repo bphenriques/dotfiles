@@ -54,15 +54,6 @@ let
   in lib.flatten sections;
 
   isAdminCategory = category: builtins.elem category adminCategories;
-  mkLayoutEntry = category: {
-    "${category}" = {
-      tab = if isAdminCategory category then "Admin" else "Home";
-      style = if isAdminCategory category then "column" else "row";
-      columns = 4;
-      header = false;
-      useEqualHeights = true;
-    };
-  };
 
   defaultSettings = {
     layout = [

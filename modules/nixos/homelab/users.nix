@@ -26,7 +26,7 @@ let
 
       services = {
         pocket-id.enable = lib.mkEnableOption "Pocket-ID account for this user" // {
-          enable = true;
+          default = true;
         };
 
         immich.enable = lib.mkEnableOption "Immich account for this user";
