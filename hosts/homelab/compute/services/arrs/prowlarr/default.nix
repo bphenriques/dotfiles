@@ -10,7 +10,9 @@ in
     port = 9096;
     secrets = {
       files.api-key = { rotatable = true; };
-      envFile."PROWLARR__AUTH__APIKEY" = "api-key";
+      templates."prowlarr.env".content = ''
+        PROWLARR__AUTH__APIKEY=${serviceCfg.secrets.placeholder.api-key}
+      '';
       systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
     };
     forwardAuth.enable = true;
@@ -24,7 +26,7 @@ in
   services.prowlarr = {
     enable = true;
     settings.server.port = serviceCfg.port;
-    environmentFiles = [ serviceCfg.secrets.envFilePath ];
+    environmentFiles = [ serviceCfg.secrets.templates."prowlarr.env".path ];
   };
 
   custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "prowlarr" ];

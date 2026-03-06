@@ -1,7 +1,9 @@
-{ config, pkgs, lib, ... }:
+# CouchDB Datastore
+#
+# Used by: Obsidian LiveSync
+{ config, ... }:
 let
   serviceCfg = config.custom.homelab.services.couchdb;
-  adminConfigFile = "${serviceCfg.secrets.secretsDir}/admin.ini";
 in
 {
   imports = [ ./configure.nix ];
@@ -10,6 +12,10 @@ in
     port = 5984;
     secrets = {
       files.admin-password = { rotatable = false; };
+      templates."admin.ini".content = ''
+        [admins]
+        ${config.services.couchdb.adminUser} = ${serviceCfg.secrets.placeholder.admin-password}
+      '';
       systemd.dependentServices = [ "couchdb" "couchdb-configure" ];
     };
   };
@@ -17,7 +23,7 @@ in
   services.couchdb = {
     enable = true;
     port = serviceCfg.port;
-    extraConfigFiles = [ adminConfigFile ];
+    extraConfigFiles = [ serviceCfg.secrets.templates."admin.ini".path ];
     extraConfig = {
       couchdb.single_node = true;
       chttpd_auth_lockout.mode = "warn";
@@ -30,16 +36,5 @@ in
     };
   };
 
-  # CouchDB needs RuntimeDirectory for couchdb.uri file
   systemd.services.couchdb.serviceConfig.RuntimeDirectory = "couchdb";
-
-  # Generate admin.ini in secrets service (runs before couchdb)
-  systemd.services.homelab-secrets-couchdb.serviceConfig.ExecStartPost = [ (pkgs.writeShellScript "generate-couchdb-admin-ini" ''
-    cat > "${adminConfigFile}" <<EOF
-[admins]
-${config.services.couchdb.adminUser} = $(cat "${serviceCfg.secrets.files.admin-password.path}")
-EOF
-    chown root:${serviceCfg.secrets.group} "${adminConfigFile}"
-    chmod 640 "${adminConfigFile}"
-  '') ];
 }

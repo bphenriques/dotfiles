@@ -1,8 +1,14 @@
 # Per-service secrets contract (options only).
 # Imported by services-registry.nix, implemented by secrets.nix.
+#
+# Supports:
+# - files: Raw secret files (generated with openssl rand)
+# - templates: Derived files with placeholder substitution (similar to sops-nix)
+# - placeholder: Read-only attr providing placeholder strings for use in templates
 { lib, serviceName }:
 let
   secretsBaseDir = "/var/lib/homelab-secrets";
+  mkPlaceholder = name: "__HOMELAB_SECRET_${serviceName}_${name}__";
 in
 { config, ... }: {
   options = {
@@ -35,6 +41,36 @@ in
       description = "Secret files to generate for this service";
     };
 
+    placeholder = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = lib.mapAttrs (name: _: mkPlaceholder name) config.files;
+      readOnly = true;
+      description = "Placeholder strings for each secret file. Use in template content.";
+    };
+
+    templates = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
+        options = {
+          content = lib.mkOption {
+            type = lib.types.lines;
+            description = ''
+              Template content with placeholders. Use secrets.placeholder.<name> for substitution.
+              Placeholders are replaced at runtime using replace-secret.
+            '';
+          };
+
+          path = lib.mkOption {
+            type = lib.types.str;
+            default = "${secretsBaseDir}/${serviceName}/${name}";
+            readOnly = true;
+            description = "Path where the rendered template will be written";
+          };
+        };
+      }));
+      default = { };
+      description = "Template files derived from this service's secrets";
+    };
+
     group = lib.mkOption {
       type = lib.types.str;
       default = "homelab-secrets-${serviceName}";
@@ -62,24 +98,6 @@ in
         Systemd services that depend on this service's secrets.
         Automatically wires requires/after/partOf/SupplementaryGroups.
       '';
-    };
-
-    envFile = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
-      default = { };
-      example = { "RADARR__AUTH__APIKEY" = "api-key"; };
-      description = ''
-        Environment variables to generate from secrets.
-        Keys are env var names, values are secret file names from `files`.
-        Generated as ${secretsBaseDir}/${serviceName}/${serviceName}.env
-      '';
-    };
-
-    envFilePath = lib.mkOption {
-      type = lib.types.str;
-      default = "${secretsBaseDir}/${serviceName}/${serviceName}.env";
-      readOnly = true;
-      description = "Path to the generated environment file";
     };
   };
 }

@@ -53,7 +53,15 @@ in
     };
 
     systemd.services.traefik = {
-      serviceConfig.EnvironmentFile = config.sops.templates."traefik-cloudflare".path;
+      serviceConfig = {
+        EnvironmentFile = config.sops.templates."traefik-cloudflare".path;
+        Restart = "on-failure";
+        RestartSec = "10s";
+        RestartMaxDelaySec = "5min";
+        RestartSteps = 5;
+      };
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
       environment.CF_API_EMAIL = ingressCfg.cloudflareEmail;
     };
 
@@ -80,6 +88,7 @@ in
               }];
             };
 
+            # High timeouts required for Immich large file uploads
             transport.respondingTimeouts = {
               readTimeout = "300s";
               writeTimeout = "300s";

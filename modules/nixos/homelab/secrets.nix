@@ -1,7 +1,8 @@
-# Implements secret generation for services.
+# Implements secret generation and templating for services.
 # Consumes services.*.secrets defined in services-registry.nix.
 #
 # Generates secrets on first boot, stores in /var/lib/homelab-secrets/<service>/<file>.
+# Templates are rendered using replace-secret (similar to sops-nix).
 # Creates per-service Unix groups for isolation, auto-wires systemd dependencies.
 #
 # Rotation: sudo rm /var/lib/homelab-secrets/<service>/<file> && sudo systemctl restart homelab-secrets-<service>
@@ -9,21 +10,31 @@
 let
   cfg = config.custom.homelab;
 
-  # Extract services that have secrets defined
-  serviceSecrets = lib.filterAttrs (_: svc: svc.secrets.files != { }) cfg.services;
+  # Extract services that have secrets or templates defined
+  serviceSecrets = lib.filterAttrs (_: svc: 
+    svc.secrets.files != { } || svc.secrets.templates != { }
+  ) cfg.services;
+
+  # Placeholder format (must match _secrets-schema.nix)
+  mkPlaceholder = serviceName: secretName: "__HOMELAB_SECRET_${serviceName}_${secretName}__";
 
   # Helper to generate the shell script for a service's secrets
   mkGeneratorScript = serviceName: svc: let
     secretsCfg = svc.secrets;
+    
     filesList = lib.mapAttrsToList (name: file: {
       inherit name;
       inherit (file) bytes path;
     }) secretsCfg.files;
-    envVars = lib.mapAttrsToList (envVar: secretName: {
-      inherit envVar;
-      secretPath = secretsCfg.files.${secretName}.path;
-    }) secretsCfg.envFile;
-    hasEnvFile = secretsCfg.envFile != { };
+    
+    templatesList = lib.mapAttrsToList (name: tmpl: {
+      inherit name;
+      inherit (tmpl) path;
+      placeholder = mkPlaceholder serviceName;
+      srcPath = pkgs.writeText "homelab-template-${serviceName}-${name}" tmpl.content; # Content in nix store (safe - only placeholders, no secrets)
+    }) secretsCfg.templates;
+    
+    hasTemplates = templatesList != [ ];
   in pkgs.writeShellScript "generate-secrets-${serviceName}" ''
     set -euo pipefail
 
@@ -34,8 +45,7 @@ let
     chown root:"$group" "$secretsDir"
     chmod 750 "$secretsDir"
 
-    # Note: TOCTOU race between file check and write is acceptable for single-server homelab.
-    # For stricter environments, consider atomic writes (mktemp + mv).
+    # Generate raw secret files (only if missing)
     ${lib.concatMapStringsSep "\n" (file: ''
       if [ ! -f "${file.path}" ]; then
         echo "Generating secret: ${file.name}"
@@ -45,15 +55,18 @@ let
       fi
     '') filesList}
 
-    ${lib.optionalString hasEnvFile ''
-      # Generate environment file from secrets
-      envFile="${secretsCfg.envFilePath}"
-      echo "Generating env file: $envFile"
-      cat > "$envFile" <<'EOF'
-${lib.concatMapStringsSep "\n" (v: "${v.envVar}=$(cat \"${v.secretPath}\")") envVars}
-EOF
-      chown root:"$group" "$envFile"
-      chmod 640 "$envFile"
+    # Render templates (always re-rendered to pick up rotated secrets)
+    ${lib.optionalString hasTemplates ''
+      ${lib.concatMapStringsSep "\n" (tmpl: ''
+        echo "Rendering template: ${tmpl.name}"
+        install -m 640 -o root -g "$group" "${tmpl.srcPath}" "${tmpl.path}"
+        ${lib.concatMapStringsSep "\n" (file: ''
+          ${pkgs.replace-secret}/bin/replace-secret \
+            '${mkPlaceholder serviceName file.name}' \
+            '${file.path}' \
+            '${tmpl.path}'
+        '') filesList}
+      '') templatesList}
     ''}
 
     echo "All secrets for ${serviceName} are ready"

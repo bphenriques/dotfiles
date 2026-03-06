@@ -55,7 +55,9 @@ in
     };
     secrets = {
       files.api-key = { rotatable = true; };
-      envFile."${envPrefix}__AUTH__APIKEY" = "api-key";
+      templates."${name}.env".content = ''
+        ${envPrefix}__AUTH__APIKEY=${serviceCfg.secrets.placeholder.api-key}
+      '';
       systemd.dependentServices = [ name "${name}-configure" ];
     };
     integrations.homepage = {
@@ -69,7 +71,7 @@ in
   services.${name} = {
     enable = true;
     settings.server.port = serviceCfg.port;
-    environmentFiles = [ serviceCfg.secrets.envFilePath ];
+    environmentFiles = [ serviceCfg.secrets.templates."${name}.env".path ];
   };
 
   systemd.services.${name} = {

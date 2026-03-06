@@ -9,7 +9,9 @@ in
     port = 9099;
     secrets = {
       files.api-key = { rotatable = true; };
-      envFile.API_KEY = "api-key";
+      templates."jellyseerr.env".content = ''
+        API_KEY=${serviceCfg.secrets.placeholder.api-key}
+      '';
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
 
@@ -26,5 +28,5 @@ in
     port = serviceCfg.port;
   };
 
-  systemd.services.jellyseerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.envFilePath;
+  systemd.services.jellyseerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.templates."jellyseerr.env".path;
 }

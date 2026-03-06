@@ -14,6 +14,7 @@ let
   envFile = "/run/romm/romm.env";
 
   # Dedicated user for RomM container - member of media group for CIFS access
+  # GIDs 950 (user), 970 (secrets), 971 (oidc) are fixed for container supplementary group access
   rommUser = {
     name = "romm";
     uid = 950;
@@ -58,13 +59,14 @@ in
       category = "Media";
       description = "ROM Manager";
     };
+
     secrets = {
-      gid = 970;  # Fixed GID for container access
+      gid = 970; # Fixed GIDs required for container supplementary group access (--group-add). Group names are not possible.
       files = {
         auth-secret-key = { rotatable = true; bytes = 64; };
         db-password = { rotatable = false; };
       };
-      systemd.dependentServices = [ "podman-romm" ];
+      systemd.dependentServices = [ "podman-romm" "romm-db-setup" ];
     };
     oidc = {
       enable = true;
@@ -81,8 +83,8 @@ in
   systemd.services.romm-db-setup = {
     description = "Setup RomM MySQL user and password";
     wantedBy = [ "multi-user.target" ];
-    after = [ "mysql.service" "homelab-secrets-romm.service" ];
-    requires = [ "mysql.service" "homelab-secrets-romm.service" ];
+    after = [ "mysql.service" ];
+    requires = [ "mysql.service" ];
     before = [ "podman-romm.service" ];
     serviceConfig = {
       Type = "oneshot";
@@ -117,6 +119,7 @@ in
     "d ${dataDir}/assets    0750 ${rommUser.name} ${rommUser.group} -"
   ];
 
+  # TODO: Add health check when podman supports healthcheck restart policy
   virtualisation.oci-containers.containers.romm = {
     image = "rommapp/romm:4.7.0";
     autoStart = true;

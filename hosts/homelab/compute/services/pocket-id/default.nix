@@ -74,4 +74,14 @@ in
       content = config.sops.placeholder."smtp-password";
     };
   };
+
+  # NixOS module sets Restart = "always" and RestartSec = "10s"
+  systemd.services.pocket-id = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
+    };
+  };
 }

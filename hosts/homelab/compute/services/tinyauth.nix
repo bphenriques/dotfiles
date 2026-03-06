@@ -42,6 +42,7 @@ in
     "d ${dataDir} 0750 root root -"
   ];
 
+  # TODO: Add health check when podman supports healthcheck restart policy
   virtualisation.oci-containers.containers.tinyauth = {
     image = "ghcr.io/steveiliop56/tinyauth:v4.0.1";
     autoStart = true;

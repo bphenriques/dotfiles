@@ -33,7 +33,9 @@ let
     mkSendOnlyFolder "roms-${system}" "${pathsCfg.media.gaming.emulation.roms}/${system}" allSyncthingDevices
   )) romSystems);
 
-  bphenriquesFolders = {
+  # Per-user folders - hardcoded for now as paths.bphenriques is user-specific.
+  # TODO: Generalize when adding more users (requires per-user paths in paths.nix)
+  bphenriquesFolders = lib.optionalAttrs (syncthingUsers ? bphenriques) {
     bphenriques-phone-backup = mkSyncFolder "bphenriques-phone-backup" pathsCfg.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
     bphenriques-photos-inbox = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
   };

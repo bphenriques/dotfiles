@@ -3,8 +3,6 @@ let
   serviceCfg = config.custom.homelab.services.miniflux;
   oidcCfg = config.custom.homelab.oidc;
 
-  # Credentials file location (derived from secrets)
-  adminCredentialsFile = "${serviceCfg.secrets.secretsDir}/admin-credentials.env";
   adminUsernameFile = pkgs.writeText "miniflux-admin-username" "admin";
 
   userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
@@ -14,26 +12,20 @@ in
 {
   custom.homelab.services.miniflux.secrets = {
     files.admin-password = { rotatable = false; };
+    templates."admin-credentials.env".content = ''
+      ADMIN_USERNAME=admin
+      ADMIN_PASSWORD=${serviceCfg.secrets.placeholder.admin-password}
+    '';
     systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
   };
 
   services.miniflux = {
-    inherit adminCredentialsFile;
+    adminCredentialsFile = serviceCfg.secrets.templates."admin-credentials.env".path;
     config = {
       DISABLE_LOCAL_AUTH = 0;
       CREATE_ADMIN = true;
     };
   };
-
-  # Generate credentials file in secrets service (runs before miniflux)
-  systemd.services.homelab-secrets-miniflux.serviceConfig.ExecStartPost = pkgs.writeShellScript "generate-miniflux-credentials" ''
-    cat > "${adminCredentialsFile}" <<EOF
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=$(cat "${serviceCfg.secrets.files.admin-password.path}")
-EOF
-    chown root:${serviceCfg.secrets.group} "${adminCredentialsFile}"
-    chmod 640 "${adminCredentialsFile}"
-  '';
 
   systemd.services.miniflux-configure = {
     description = "Configure Miniflux users and settings";
