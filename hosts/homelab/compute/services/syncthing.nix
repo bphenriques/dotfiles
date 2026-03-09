@@ -1,5 +1,6 @@
 { config, lib, ... }:
 let
+  serviceCfg = config.custom.homelab.services.syncthing;
   pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.cifs.mounts;
   syncthingUsers = config.custom.homelab.enabledUsers.syncthing;
@@ -33,17 +34,17 @@ let
     mkSendOnlyFolder "roms-${system}" "${pathsCfg.media.gaming.emulation.roms}/${system}" allSyncthingDevices
   )) romSystems);
 
-  # Per-user folders - hardcoded for now as paths.bphenriques is user-specific.
-  # TODO: Generalize when adding more users (requires per-user paths in paths.nix)
+  # Per-user folders
   bphenriquesFolders = lib.optionalAttrs (syncthingUsers ? bphenriques) {
-    bphenriques-phone-backup = mkSyncFolder "bphenriques-phone-backup" pathsCfg.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
-    bphenriques-photos-inbox = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
+    "bphenriques-phone-backup" = mkSyncFolder "bphenriques-phone-backup" pathsCfg.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
+    "bphenriques-photos-inbox" = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
   };
 in
 {
   custom.homelab.services.syncthing = {
     port = 8384;
     forwardAuth.enable = true;
+    secrets.files.gui-password = { rotatable = true; };
     integrations.homepage = {
       enable = true;
       category = "Admin";
@@ -70,6 +71,7 @@ in
 
     openDefaultPorts = true;
     guiAddress = "127.0.0.1:8384";
+    guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
 
     settings = {
       devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { id = d.id; }) allSyncthingDevices);
@@ -86,7 +88,10 @@ in
 
       gui = {
         theme = "dark";
-        insecureAdminAccess = true; # FIXME: this is insecure as compromised services will be access this interface
+        insecureAdminAccess = false;
+        insecureSkipHostcheck = true; # Exposed through traefik
+        user = "admin";
+        # credentials provided through guiPasswordFile
       };
     };
   };

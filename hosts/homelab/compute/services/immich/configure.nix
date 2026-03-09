@@ -44,7 +44,7 @@ in
   systemd.services.immich-server.serviceConfig.BindPaths = photoBinds;
 
   systemd.services.immich-configure = {
-    description = "Configure Immich users and external libraries";
+    description = "Immich setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "immich-server.service" ];
     requires = [ "immich-server.service" ];

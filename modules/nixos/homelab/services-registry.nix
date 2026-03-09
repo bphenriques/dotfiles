@@ -90,6 +90,12 @@ let
         description = "Full public URL (derived from publicHost)";
       };
 
+      aliases = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Alternative subdomains";
+      };
+
       # Ingress-level authentication (Traefik forwardAuth)
       forwardAuth = {
         enable = lib.mkEnableOption ''

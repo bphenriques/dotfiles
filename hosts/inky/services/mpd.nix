@@ -10,7 +10,7 @@ in {
       audio_output = [{
         type = "alsa";
         name = "MAX98357A";
-        device = "hw:0,0";
+        device = "hw:sndrpihifiberry,0";
         mixer_type = "software";
       }];
     };

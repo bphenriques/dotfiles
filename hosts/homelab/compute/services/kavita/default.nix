@@ -42,8 +42,8 @@ in
     settings.Port = serviceCfg.port;
     settings.OpenIdConnectSettings = {
       Authority = oidcCfg.provider.url;
-      ClientId = "@OIDC_CLIENT_ID@";
-      Secret = "@OIDC_CLIENT_SECRET@";
+      ClientId = serviceCfg.oidc.id.placeholder;
+      Secret = serviceCfg.oidc.secret.placeholder;
     };
   };
 
@@ -57,10 +57,10 @@ in
       ];
     };
     preStart = lib.mkAfter ''
-      ${pkgs.replace-secret}/bin/replace-secret '@OIDC_CLIENT_ID@' \
+      ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.oidc.id.placeholder}' \
         "''${CREDENTIALS_DIRECTORY}/oidc-id" \
         '${kavitaCfg.dataDir}/config/appsettings.json'
-      ${pkgs.replace-secret}/bin/replace-secret '@OIDC_CLIENT_SECRET@' \
+      ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.oidc.secret.placeholder}' \
         "''${CREDENTIALS_DIRECTORY}/oidc-secret" \
         '${kavitaCfg.dataDir}/config/appsettings.json'
     '';

@@ -3,10 +3,41 @@
 { lib, serviceName, serviceConfig }:
 let
   credentialsBaseDir = "/run/homelab-oidc";
+  mkPlaceholder = field: "@HOMELAB_OIDC_${serviceName}_${field}@";
 in
 { config, ... }: {
   options = {
     enable = lib.mkEnableOption "OIDC client for this service";
+
+    id = {
+      file = lib.mkOption {
+        type = lib.types.str;
+        default = "${credentialsBaseDir}/${serviceName}/id";
+        readOnly = true;
+        description = "Path to the file containing the client ID";
+      };
+      placeholder = lib.mkOption {
+        type = lib.types.str;
+        default = mkPlaceholder "ID";
+        readOnly = true;
+        description = "Placeholder for client ID (use in config files, substituted at runtime)";
+      };
+    };
+
+    secret = {
+      file = lib.mkOption {
+        type = lib.types.str;
+        default = "${credentialsBaseDir}/${serviceName}/secret";
+        readOnly = true;
+        description = "Path to the file containing the client secret";
+      };
+      placeholder = lib.mkOption {
+        type = lib.types.str;
+        default = mkPlaceholder "SECRET";
+        readOnly = true;
+        description = "Placeholder for client secret (use in config files, substituted at runtime)";
+      };
+    };
 
     name = lib.mkOption {
       type = lib.types.str;
@@ -46,20 +77,6 @@ in
       description = "Directory containing this client's id and secret files";
     };
 
-    idFile = lib.mkOption {
-      type = lib.types.str;
-      default = "${credentialsBaseDir}/${serviceName}/id";
-      readOnly = true;
-      description = "Path to the file containing the client ID";
-    };
-
-    secretFile = lib.mkOption {
-      type = lib.types.str;
-      default = "${credentialsBaseDir}/${serviceName}/secret";
-      readOnly = true;
-      description = "Path to the file containing the client secret";
-    };
-
     systemd = {
       dependentServices = lib.mkOption {
         type = lib.types.listOf lib.types.str;
@@ -73,8 +90,8 @@ in
       loadCredentials = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [
-          "oidc-id:${config.idFile}"
-          "oidc-secret:${config.secretFile}"
+          "oidc-id:${config.id.file}"
+          "oidc-secret:${config.secret.file}"
         ];
         readOnly = true;
         description = "Ready-to-use LoadCredential entries for systemd services";

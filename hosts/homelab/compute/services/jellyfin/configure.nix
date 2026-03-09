@@ -36,7 +36,7 @@ in
   custom.homelab.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
 
   systemd.services.jellyfin-configure = {
-    description = "Configure Jellyfin with declarative configuration";
+    description = "Jellyfin setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyfin.service" ];
     requires = [ "jellyfin.service" ];

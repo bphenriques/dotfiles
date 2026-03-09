@@ -50,7 +50,7 @@ in
 {
 
   systemd.services.kavita-configure = {
-    description = "Configure Kavita OIDC and libraries";
+    description = "Kavita setup";
     wantedBy = [ "kavita.service" ]; # Unconventional but ensures configure runs when kavita starts
     after = [ "kavita.service" ];
     requires = [ "kavita.service" ];

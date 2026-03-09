@@ -54,7 +54,7 @@ in
   custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "jellyseerr-configure" ];
 
   systemd.services.jellyseerr-configure = {
-    description = "Configure Jellyseerr with declarative configuration";
+    description = "Jellyseerr setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyseerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
     requires = [ "jellyseerr.service" ];

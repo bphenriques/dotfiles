@@ -32,7 +32,7 @@ let
 in
 {
   systemd.services.prowlarr-configure = {
-    description = "Configure Prowlarr with declarative configuration";
+    description = "Prowlarr setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" ];
     requires = [ "prowlarr.service" ];

@@ -109,6 +109,9 @@ in {
       secrets."homelab/samba/username" = { };
       secrets."homelab/samba/password" = { };
       templates."homelab-samba-credentials" = {
+        owner = "root";
+        group = "root";
+        mode = "0400";
         content = ''
           username=${config.sops.placeholder."homelab/samba/username"}
           password=${config.sops.placeholder."homelab/samba/password"}
@@ -128,8 +131,15 @@ in {
           "gid=${toString mountCfg.gid}"
           "file_mode=0660"
           "dir_mode=0770"
+
+          # Security hardening:
+          "nosuid"    # Ignore SUID/SGID bits on executables. Prevents privilege escalation
+          "nodev"     # Ignore device files. Prevents creating fake /dev nodes on NAS that could be used to access hardware or bypass permissions.
+          "vers=3.0"  # Use SMB3 protocol with encryption support and better security.
+
           # Credentials
           "credentials=${cfg.credentialsPath}"
+
           # Automount: don't mount at boot, trigger on first access.
           # This avoids boot failures when network isn't fully ready yet.
           "_netdev"

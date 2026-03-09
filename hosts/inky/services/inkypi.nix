@@ -16,13 +16,22 @@
     freetype
     libjpeg
 
-    # Build tools for Python packages
+    # Build tools for Python packages (only needed during setup)
     gcc
     gnumake
 
     # Git for cloning InkyPi
     git
   ];
+
+  # Dedicated user for InkyPi with SPI/GPIO access
+  users.users.inkypi = {
+    isSystemUser = true;
+    group = "inkypi";
+    extraGroups = [ "spi" "gpio" ];
+    home = "/opt/inkypi";
+  };
+  users.groups.inkypi = {};
 
   # mDNS for local network discovery (inky.local)
   services.avahi = {
@@ -52,10 +61,14 @@
     serviceConfig = {
       Type = "simple";
       WorkingDirectory = "/opt/inkypi";
-      ExecStart = "${pkgs.python3}/bin/python3 server/server.py";
+      ExecStart = "/opt/inkypi/.venv/bin/python server/server.py";
       Restart = "on-failure";
       RestartSec = "10s";
-      User = "root";  # InkyPi needs SPI/GPIO access
+      User = "inkypi";
+      Group = "inkypi";
+      SupplementaryGroups = [ "spi" "gpio" ];
+      NoNewPrivileges = true;
+      PrivateTmp = true;
     };
   };
 

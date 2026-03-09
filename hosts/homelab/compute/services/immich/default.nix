@@ -49,8 +49,8 @@ in
       oauth = {
         enabled = true;
         issuerUrl = oidcCfg.provider.url;
-        clientId._secret = serviceCfg.oidc.idFile;
-        clientSecret._secret = serviceCfg.oidc.secretFile;
+        clientId._secret = serviceCfg.oidc.id.file;
+        clientSecret._secret = serviceCfg.oidc.secret.file;
         scope = "openid email profile";
         signingAlgorithm = "RS256";
         buttonText = "Login with ${oidcCfg.provider.displayName}";

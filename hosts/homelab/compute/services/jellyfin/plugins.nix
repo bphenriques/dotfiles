@@ -74,7 +74,7 @@ in
 
   # SSO plugin configuration service - runs after jellyfin-configure
   systemd.services.jellyfin-sso-configure = {
-    description = "Configure Jellyfin SSO plugin";
+    description = "Jellyfin SSO setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "jellyfin-configure.service" ];
     requires = [ "jellyfin-configure.service" ];
@@ -93,8 +93,8 @@ in
       JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
       JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       SSO_CONFIG_FILE = ssoConfigFile;
-      OIDC_CLIENT_ID_FILE = serviceCfg.oidc.idFile;
-      OIDC_CLIENT_SECRET_FILE = serviceCfg.oidc.secretFile;
+      OIDC_CLIENT_ID_FILE = serviceCfg.oidc.id.file;
+      OIDC_CLIENT_SECRET_FILE = serviceCfg.oidc.secret.file;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-sso-configure" ./sso-configure.nu}'';

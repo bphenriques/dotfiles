@@ -21,7 +21,7 @@ in
   ) enabledUsers;
 
   systemd.services.couchdb-configure = {
-    description = "Configure CouchDB databases and users";
+    description = "CouchDB setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "couchdb.service" ];
     requires = [ "couchdb.service" ];

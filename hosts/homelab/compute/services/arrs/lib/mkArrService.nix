@@ -93,7 +93,7 @@ in
   custom.homelab.cifs.mounts.media.systemd.dependentServices = [ name ];
 
   systemd.services."${name}-configure" = {
-    description = "Configure ${upperName} with declarative configuration";
+    description = "${upperName} setup";
     wantedBy = [ "multi-user.target" ];
     after = [ "${name}.service" "transmission.service" "recyclarr.service" ];
     requires = [ "${name}.service" ];

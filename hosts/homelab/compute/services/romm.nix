@@ -162,8 +162,8 @@ in
 
       # Secrets
       "${serviceCfg.secrets.files.db-password.path}:/run/secrets/db_password:ro"
-      "${serviceCfg.oidc.idFile}:/run/secrets/oidc_client_id:ro"
-      "${serviceCfg.oidc.secretFile}:/run/secrets/oidc_client_secret:ro"
+      "${serviceCfg.oidc.id.file}:/run/secrets/oidc_client_id:ro"
+      "${serviceCfg.oidc.secret.file}:/run/secrets/oidc_client_secret:ro"
       "${config.sops.secrets."romm/mobygames/api-key".path}:/run/secrets/mobygames_api_key:ro"
       "${config.sops.secrets."romm/screenscraper/user".path}:/run/secrets/screenscraper_user:ro"
       "${config.sops.secrets."romm/screenscraper/password".path}:/run/secrets/screenscraper_password:ro"

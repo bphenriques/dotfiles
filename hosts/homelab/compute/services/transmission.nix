@@ -23,6 +23,7 @@ in
       incomplete_dir_enabled = true;
       incomplete-dir = pathsCfg.media.downloads.incomplete;
       rpc-port = serviceCfg.port;
+      rpc-bind-address = "127.0.0.1";
       rpc-host-whitelist-enabled = true;
       rpc-host-whitelist = serviceCfg.publicHost;
       ratio-limit-enabled = true;
@@ -37,12 +38,10 @@ in
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
   custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "transmission" ];
 
-  systemd.services.transmission = {
-    serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "10s";
-      RestartMaxDelaySec = "5min";
-      RestartSteps = 5;
-    };
+  systemd.services.transmission.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+    RestartMaxDelaySec = "5min";
+    RestartSteps = 5;
   };
 }

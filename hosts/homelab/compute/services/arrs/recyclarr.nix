@@ -27,7 +27,7 @@ in
 {
   # Recyclarr runs as a systemd timer to periodically sync TRaSH guides
   systemd.services.recyclarr = {
-    description = "Sync TRaSH guides to Radarr/Sonarr via Recyclarr";
+    description = "Recyclarr sync";
     after = [ "radarr.service" "sonarr.service" ];
     wants = [ "radarr.service" "sonarr.service" ];
     serviceConfig = {

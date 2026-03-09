@@ -13,7 +13,7 @@
     ./tinyauth.nix
     ./transmission.nix
     ./wireguard
-    # TODO: collabora-online
+    ./opencloud.nix
   ];
 
   custom.homelab = {

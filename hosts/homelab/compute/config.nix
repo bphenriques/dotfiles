@@ -26,17 +26,17 @@
   };
 
   # Homelab integration
-  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) self.shared.networks.homelab.hosts;
+  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) self.shared.networks.main.hosts;
   custom.homelab.cifs = {
     enable = true;
-    hostname = self.shared.networks.homelab.hosts.bruno-home-nas;
+    hostname = self.shared.networks.main.hosts.bruno-home-nas;
     mounts = {
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
     };
   };
 
-  # Podman for containers (romm, tinyauth, cleanuparr)
+  # Podman for containers (tinyauth, cleanuparr, romm + romm-db)
   virtualisation = {
     podman.enable = true;
     oci-containers.backend = "podman";

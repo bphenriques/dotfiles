@@ -1,20 +1,26 @@
-# Consumes the service registry and configures Traefik routing.
-# Handles TLS certificates, HTTP->HTTPS redirection, and forwardAuth middleware.
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
   ingressCfg = cfg.ingress;
   registry = cfg.registry;
 
-  mkTraefikRoute = service: {
+  mkRouterConfig = service: host: {
+    rule = "Host(`${host}`)";
+    entryPoints = [ "websecure" ];
+    service = "${service.name}-svc";
+    middlewares = lib.optionals service.forwardAuth.enable [ "forwardAuth" ];
+  };
+
+  mkTraefikRoute = service: let
+    aliasRouters = lib.imap0 (i: alias: {
+      name = "${service.name}-alias-${toString i}";
+      value = mkRouterConfig service alias;
+    }) service.aliases;
+  in {
     http = {
-      routers."${service.name}" = {
-        rule = "Host(`${service.publicHost}`)";
-        entryPoints = [ "websecure" ];
-        service = "${service.name}-svc";
-      } // lib.optionalAttrs service.forwardAuth.enable {
-        middlewares = [ "forwardAuth" ];
-      };
+      routers = {
+        "${service.name}" = mkRouterConfig service service.publicHost;
+      } // lib.listToAttrs aliasRouters;
       services."${service.name}-svc".loadBalancer.servers = [{ url = service.url; }];
     };
   };
@@ -37,10 +43,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    networking.firewall = {
-      allowedTCPPorts = [ 80 443 ];
-      allowedUDPPorts = [ 443 ];
-    };
+    networking.firewall.allowedTCPPorts = [ 80 443 ];
 
     sops = {
       secrets.cloudflare_dns_api_token = { };

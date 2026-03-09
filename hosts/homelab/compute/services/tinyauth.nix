@@ -8,6 +8,7 @@ let
   envFile = "/run/tinyauth/env";
 in
 {
+  # TODO: Migrate to plain service https://github.com/NixOS/nixpkgs/pull/476356/changes
   custom.homelab = {
     services.tinyauth = {
       port = 3000;
@@ -61,7 +62,7 @@ in
     environmentFiles = [ envFile ];
     volumes = [
       "${dataDir}:/data"
-      "${serviceCfg.oidc.secretFile}:/run/secrets/client_secret:ro"
+      "${serviceCfg.oidc.secret.file}:/run/secrets/client_secret:ro"
     ];
     extraOptions = [
       "--group-add=${toString (config.users.groups.${serviceCfg.oidc.group}.gid)}"

@@ -16,7 +16,7 @@ in
 
   custom.homelab.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
   systemd.services.pocket-id-provision = {
-    description = "Pocket-ID Provisioning";
+    description = "Pocket-ID setup";
     wantedBy = [ "pocket-id.service" ];
     after = [ "network-online.target" "pocket-id.service" ];
     wants = [ "network-online.target" ];

@@ -28,7 +28,7 @@ in
   };
 
   systemd.services.miniflux-configure = {
-    description = "Configure Miniflux users and settings";
+    description = "Miniflux setup";
     wantedBy = [ "miniflux.service" ];
     after = [ "miniflux.service" ];
     requires = [ "miniflux.service" ];

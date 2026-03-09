@@ -14,12 +14,16 @@
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
-  
+
+  # Podman networks: default bridge uses 10.88.0.0/16, user-created networks
+  # use 10.89.0.0/16. Using /15 covers both ranges for container traffic.
+  podmanSubnet = "10.88.0.0/15";
+
   interface = "wg0";
   port = 51820;
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
-  dns = "1.1.1.1";
+  dns = self.shared.dns.cloudflare;
   endpoint = self.private.settings.services.wireguard.endpoint;
   smtp = self.private.settings.smtp;
 
@@ -61,7 +65,7 @@ let
     WG_SERVER_IP = serverIp;
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
-    WG_SERVER_ALLOWED_IPS = "${clientSubnet}, ${self.shared.networks.homelab.subnet}";
+    WG_SERVER_ALLOWED_IPS = "${clientSubnet}, ${self.shared.networks.main.subnet}";
   } // lib.optionalAttrs (smtp.from != "") {
     WG_SMTP_FROM = smtp.from;
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
@@ -90,7 +94,7 @@ in
   ];
 
   systemd.services.wireguard-keygen = {
-    description = "Generate WireGuard server keys";
+    description = "WireGuard keygen";
     wantedBy = [ "wireguard-${interface}.service" ];
     before = [ "wireguard-${interface}.service" ];
     after = [ "systemd-tmpfiles-setup.service" ];
@@ -110,7 +114,7 @@ in
   };
 
   systemd.services.wireguard-bootstrap = {
-    description = "Bootstrap WireGuard peers";
+    description = "WireGuard bootstrap";
     wantedBy = [ "multi-user.target" ];
     after = [ "wireguard-${interface}.service" ];
     requires = [ "wireguard-${interface}.service" ];
@@ -130,8 +134,9 @@ in
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
   # Firewall (forward chain only, not input):
-  # - Default: drop all forwarding (policy drop)
-  # - Allow LAN access only to fullAccess clients
+  # - Default: drop all forwarding (policy drop) - explicit deny-by-default
+  # - Allow Podman container traffic (uses iptables-nft for NAT, but our chain would block without this)
+  # - Allow fullAccess WireGuard clients to forward to LAN
   # - Restricted clients can still reach server services, just not forward to LAN
   # - No input chain restrictions needed: access control is managed through OIDC+ForwardAuth
   networking.nftables.enable = true;
@@ -139,12 +144,18 @@ in
     family = "inet";
     content = ''
       chain forward {
-        type filter hook forward priority 0; policy accept;
+        type filter hook forward priority 0; policy drop;
 
         # Allow established/related connections (return traffic)
         ct state established,related accept
 
-        # Allow fullAccess WireGuard clients to forward to network
+        # Allow Podman container traffic (bridge network).
+        # Podman adds NAT rules via iptables-nft, but with policy drop we must
+        # explicitly allow forwarding to/from container subnets.
+        ip saddr ${podmanSubnet} accept
+        ip daddr ${podmanSubnet} accept
+
+        # Allow fullAccess WireGuard clients to forward to LAN
         ${lib.concatMapStringsSep "\n        " (c: "iifname \"${interface}\" ip saddr ${c.ip} accept") fullAccessClients}
 
         # Drop all other WireGuard client forwarding (restricted clients can only reach server)

@@ -1,14 +1,52 @@
-{ self, ... }:
+{ config, lib, pkgs, self, ... }:
 let
+  cfg = config.custom.homelab;
+  serviceCfg = cfg.services.homepage;
+  generatedServices = cfg.homepage.generatedServices;
+
+  # Display configuration
+  categoryOrder = [ "Media" "Productivity" "Admin" "Infrastructure" "Development" ];
+  adminCategories = [ "Admin" "Infrastructure" ];
+
+  isAdminCategory = cat: lib.elem cat adminCategories;
+  displayCategory = cat: if isAdminCategory cat then "Admin" else "Home";
+
+  # Build services.yaml from generated services
+  servicesYaml = lib.pipe categoryOrder [
+    (lib.filter (cat: lib.hasAttr cat generatedServices))
+    (map (cat: { "${displayCategory cat}" = generatedServices.${cat}; }))
+    lib.flatten
+  ];
+
+  # Custom package with wallpaper/favicon
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";
   favicon = self.lib.builders.mkEmojiFavicon { } "homepage" "🏠";
+  customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
+    postInstall = (oldAttrs.postInstall or "") + ''
+      mkdir -p $out/share/homepage/public/images
+      ln -s ${wallpaper} $out/share/homepage/public/images/background.png
+      ln -s ${favicon} $out/share/homepage/public/images/favicon.ico
+    '';
+  });
 in
-
-# TODO turn this around and spin up homepage here.
 {
-  custom.homelab.homepage = {
+  custom.homelab.services.homepage = {
+    port = 3001;
+    forwardAuth.enable = false;
+    integrations.homepage = {
+      enable = true;
+      category = "Infrastructure";
+      description = "Dashboard";
+    };
+  };
+
+  services.homepage-dashboard = {
     enable = true;
-    inherit wallpaper favicon;
+    package = customPackage;
+    listenPort = serviceCfg.port;
+    allowedHosts = serviceCfg.publicHost;
+    services = servicesYaml;
+
     settings = {
       title = "Home";
       language = "en-GB";
@@ -18,12 +56,35 @@ in
       headerStyle = "clean";
       hideVersion = true;
       target = "_self";
+      background = "/images/background.png";
+      favicon = "/images/favicon.ico";
       quicklaunch = {
         searchDescriptions = true;
         hideInternetSearch = true;
         hideVisitURL = true;
       };
+      layout = [
+        {
+          "Home" = {
+            tab = "Home";
+            style = "row";
+            columns = 4;
+            header = false;
+            useEqualHeights = true;
+          };
+        }
+        {
+          "Admin" = {
+            tab = "Admin";
+            style = "column";
+            columns = 4;
+            header = false;
+            useEqualHeights = true;
+          };
+        }
+      ];
     };
+
     widgets = [
       {
         openmeteo = {
