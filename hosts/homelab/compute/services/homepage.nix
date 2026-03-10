@@ -11,12 +11,17 @@ let
   isAdminCategory = cat: lib.elem cat adminCategories;
   displayCategory = cat: if isAdminCategory cat then "Admin" else "Home";
 
-  # Build services.yaml from generated services
-  servicesYaml = lib.pipe categoryOrder [
-    (lib.filter (cat: lib.hasAttr cat generatedServices))
-    (map (cat: { "${displayCategory cat}" = generatedServices.${cat}; }))
-    lib.flatten
-  ];
+  # Build services.yaml from generated services, merging by display category
+  getServicesForCategories = cats: lib.concatLists (map (cat:
+    if lib.hasAttr cat generatedServices then generatedServices.${cat} else []
+  ) cats);
+
+  homeServices = getServicesForCategories (lib.filter (c: !isAdminCategory c) categoryOrder);
+  adminServicesYaml = getServicesForCategories (lib.filter isAdminCategory categoryOrder);
+
+  servicesYaml =
+    (lib.optional (homeServices != []) { "Home" = homeServices; })
+    ++ (lib.optional (adminServicesYaml != []) { "Admin" = adminServicesYaml; });
 
   # Custom package with wallpaper/favicon
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";

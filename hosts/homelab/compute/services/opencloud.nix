@@ -3,10 +3,30 @@ let
   cfg = config.custom.homelab;
   serviceCfg = cfg.services.opencloud;
   collaboraCfg = cfg.services.collabora;
+  wopiCfg = cfg.services.wopi;
   oidcCfg = cfg.oidc;
 
-  envFile = "/run/opencloud/env";
-  wopiPort = 9300;  # Internal WOPI endpoint (not routed via Traefik)
+  envFile = "/run/${serviceCfg.name}/env";
+
+  # CSP config to allow external OIDC provider and Collabora
+  oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.url;
+  cspConfig = pkgs.writeText "opencloud-csp.yaml" ''
+    directives:
+      connect-src:
+        - "'self'"
+        - "blob:"
+        - "${oidcCfg.provider.url}"
+        - "wss://${oidcHost}"
+        - "${collaboraCfg.publicUrl}"
+        - "wss://${collaboraCfg.publicHost}"
+      frame-src:
+        - "'self'"
+        - "${collaboraCfg.publicUrl}"
+      script-src:
+        - "'self'"
+        - "'unsafe-inline'"
+        - "'unsafe-eval'"
+  '';
 in
 {
   custom.homelab.services = {
@@ -26,12 +46,18 @@ in
             OC_MACHINE_AUTH_API_KEY=${serviceCfg.secrets.placeholder.machine-id}
           '';
         };
-        systemd.dependentServices = [ "opencloud-env" ];
+        systemd.dependentServices = [ "${serviceCfg.name}-env" ];
       };
       oidc = {
         enable = true;
-        callbackURLs = [ "${serviceCfg.publicUrl}/oidc-callback" ];
-        systemd.dependentServices = [ "opencloud-env" ];
+        pkce = true;  # Public client requires PKCE
+        callbackURLs = [
+          "${serviceCfg.publicUrl}/"
+          "${serviceCfg.publicUrl}/oidc-callback.html"
+          "${serviceCfg.publicUrl}/oidc-silent-redirect.html"
+          "${serviceCfg.publicUrl}/web-oidc-callback"
+        ];
+        systemd.dependentServices = [ "${serviceCfg.name}-env" ];
       };
       integrations.homepage = {
         enable = true;
@@ -40,12 +66,9 @@ in
       };
     };
 
-    collabora = {
-      port = 9980;
-      subdomain = "collabora";
-      # No OIDC (uses WOPI tokens), but require authenticated users at ingress
-      # forwardAuth.enable = true; TODO: Test this
-    };
+    # Both don't require additional security. uses WOPI tokens (collabora) or JWE (Wopi)
+    collabora.port = 9980;
+    wopi.port = 9300;
   };
 
   # TODO: Consider syncing /var/lib/opencloud to NAS for backup
@@ -53,85 +76,140 @@ in
   services.opencloud = {
     enable = true;
     url = serviceCfg.publicUrl;
-    address = "127.0.0.1";
+    address = serviceCfg.host;
     port = serviceCfg.port;
     environmentFile = envFile;
 
     environment = {
-      OC_ADD_RUN_SERVICES = "collaboration"; # Enable collaboration service for Collabora integration
-
       # External OIDC (Pocket-ID) - disable built-in IDP
       OC_OIDC_ISSUER = oidcCfg.provider.url;
       OC_EXCLUDE_RUN_SERVICES = "idp";
-      PROXY_AUTOPROVISION_ACCOUNTS = "true";
-      PROXY_USER_OIDC_CLAIM = "preferred_username";
-      PROXY_USER_CS3_CLAIM = "username";
+      OC_ADD_RUN_SERVICES = "collaboration";
 
-      # Collaboration/WOPI config (internal - server-to-server)
-      COLLABORATION_WOPI_SRC = "http://127.0.0.1:${toString wopiPort}";
-      COLLABORATION_APP_ADDR = collaboraCfg.publicUrl;
-      COLLABORATION_APP_NAME = "Collabora";
-      COLLABORATION_APP_PRODUCT = "Collabora";
+      PROXY_TLS = "false";  # TLS terminated at Traefik
+      OC_INSECURE = "true";
+      PROXY_CSP_CONFIG_FILE_LOCATION = toString cspConfig;
 
-      OC_INSECURE = "true"; # TLS terminated at Traefik
+      COLLABORATION_APP_PROOF_DISABLE = "true"; # Disable WOPI proof key verification (timestamp issues on same host)
+    };
+
+    # YAML-based configuration (preferred over environment variables)
+    settings = {
+      proxy = {
+        autoprovision_accounts = true;
+        oidc.rewrite_well_known = false;  # Disabled - causes hairpin NAT issues
+        user_oidc_claim = "preferred_username";
+        user_cs3_claim = "username";
+      };
+      # Point web client directly to OIDC provider
+      web.config.oidc = {
+        authority = oidcCfg.provider.url;
+        metadata_url = "${oidcCfg.provider.url}/.well-known/openid-configuration";
+        post_logout_redirect_uri = serviceCfg.publicUrl;
+        # client_id: set via WEB_OIDC_CLIENT_ID env var from environmentFile
+      };
+      graph.username_match = "none";
+      collaboration = {
+        wopi.wopisrc = wopiCfg.publicUrl; # External WOPI URL that Collabora uses to call back into OpenCloud. Must be routed through Traefik so Collabora can reach it
+        app = {
+          addr = collaboraCfg.url;
+          external_addr = collaboraCfg.publicUrl;
+          insecure = true;
+          name = "Collabora";
+          product = "Collabora";
+          proofkeys.disable = true;  # Disable WOPI proof verification
+        };
+      };
+      app-registry = {
+        mimetypes = [
+          {
+            mime_type = "application/vnd.oasis.opendocument.text";
+            extension = "odt";
+            name = "OpenDocument";
+            description = "OpenDocument text document";
+            default_app = "Collabora";
+            allow_creation = true;
+          }
+          {
+            mime_type = "application/vnd.oasis.opendocument.spreadsheet";
+            extension = "ods";
+            name = "OpenSpreadsheet";
+            description = "OpenDocument spreadsheet";
+            default_app = "Collabora";
+            allow_creation = true;
+          }
+          {
+            mime_type = "application/vnd.oasis.opendocument.presentation";
+            extension = "odp";
+            name = "OpenPresentation";
+            description = "OpenDocument presentation";
+            default_app = "Collabora";
+            allow_creation = true;
+          }
+        ];
+      };
     };
   };
 
-  # New service: creates /run/opencloud/env before opencloud services start
-  systemd.services.opencloud-env = {
-    description = "Prepare OpenCloud environment file";
+  systemd.services."${serviceCfg.name}-env" = {
+    description = "Prepare ${serviceCfg.name} environment file";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      User = "opencloud";
-      Group = "opencloud";
-      RuntimeDirectory = "opencloud";
+      User = serviceCfg.name;
+      Group = serviceCfg.name;
+      RuntimeDirectory = serviceCfg.name;
       RuntimeDirectoryMode = "0750";
       LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
     };
     script = ''
       set -euo pipefail
       cp ${serviceCfg.secrets.templates.env.path} ${envFile}
+      # Web client is public (no secret) - only needs client ID
       echo "WEB_OIDC_CLIENT_ID=$(cat "$CREDENTIALS_DIRECTORY/oidc-id")" >> ${envFile}
-      echo "WEB_OIDC_CLIENT_SECRET=$(cat "$CREDENTIALS_DIRECTORY/oidc-secret")" >> ${envFile}
       chmod 600 ${envFile}
     '';
   };
 
-  # Wire opencloud-init-config to depend on opencloud-env
-  systemd.services.opencloud-init-config = {
-    requires = [ "opencloud-env.service" ];
-    after = [ "opencloud-env.service" ];
+  # Wire opencloud services to depend on env file
+  systemd.services."${serviceCfg.name}-init-config" = {
+    requires = [ "${serviceCfg.name}-env.service" ];
+    after = [ "${serviceCfg.name}-env.service" ];
   };
 
-  # OpenCloud systemd service configuration
-  systemd.services.opencloud = {
-    requires = [ "opencloud-env.service" ];
-    after = [ "opencloud-env.service" ];
+  systemd.services.${serviceCfg.name} = {
+    requires = [ "${serviceCfg.name}-env.service" ];
+    after = [ "${serviceCfg.name}-env.service" ];
   };
 
-  # Collabora Online NixOS service
   services.collabora-online = {
     enable = true;
     port = collaboraCfg.port;
     settings = {
+      protocol = "http";
       ssl = {
         enable = false;
         termination = true;  # TLS terminated at Traefik
       };
+
+      # Protect encoded URLs from being decoded by intermediate proxies (Traefik)
+      # Required because OpenCloud embeds the full WOPI URL in the /cool/ path
+      hexify_embedded_urls = true;
+
       net = {
-        listen = "loopback";
+        listen = "any";
+        proto = "ipv4";
         post_allow.host = [ "::1" "127.0.0.1" ];
+        content_security_policy = "frame-ancestors https://${serviceCfg.publicHost};"; # Allow embedded in OpenCloud iframe
       };
       storage.wopi = {
         "@allow" = true;
-        host = [ "127.0.0.1:${toString wopiPort}" ];
+        host = [ wopiCfg.publicHost ]; # Must match the hostname in wopisrc (external WOPI URL)
       };
       server_name = collaboraCfg.publicHost;
     };
   };
-
   # Collabora requires OpenCloud (cannot function without it)
   systemd.services.coolwsd = {
     after = [ "opencloud.service" ];

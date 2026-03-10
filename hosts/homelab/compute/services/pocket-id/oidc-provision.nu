@@ -92,7 +92,7 @@ def provision_client [client: record, existing: list] {
     name: $client.name
     callbackURLs: $client.callbackURLs
     pkceEnabled: $client.pkce
-    isPublic: false
+    isPublic: $client.pkce  # PKCE clients are public (browser-based SPAs)
   }
 
   let client_id = if $found != null {
