@@ -65,12 +65,12 @@ in
       };
       oidc = {
         enable = true;
-        pkce = true;  # Public client requires PKCE
+        pkce = true;
         callbackURLs = [
           "${serviceCfg.publicUrl}/"
           "${serviceCfg.publicUrl}/oidc-callback.html"
           "${serviceCfg.publicUrl}/oidc-silent-redirect.html"
-          "${serviceCfg.publicUrl}/web-oidc-callback"
+          "${serviceCfg.publicUrl}/web-oidc-callback.html"
         ];
         systemd.dependentServices = [ "${serviceCfg.name}-env" ];
       };

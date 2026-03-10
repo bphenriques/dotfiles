@@ -89,7 +89,7 @@ in
       gui = {
         theme = "dark";
         insecureAdminAccess = false;
-        insecureSkipHostcheck = true; # Exposed through traefik
+        insecureSkipHostcheck = true;
         user = "admin";
         # credentials provided through guiPasswordFile
       };
