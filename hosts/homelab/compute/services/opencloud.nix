@@ -9,9 +9,25 @@ let
   envFile = "/run/${serviceCfg.name}/env";
 
   # CSP config to allow external OIDC provider and Collabora
+  # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
+  # Note: 'unsafe-eval' is required by the OpenCloud Web UI (Vue.js runtime compilation)
   oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.url;
   cspConfig = pkgs.writeText "opencloud-csp.yaml" ''
     directives:
+      default-src:
+        - "'self'"
+      script-src:
+        - "'self'"
+        - "'unsafe-eval'"
+      style-src:
+        - "'self'"
+        - "'unsafe-inline'"
+      font-src:
+        - "'self'"
+      img-src:
+        - "'self'"
+        - "blob:"
+        - "data:"
       connect-src:
         - "'self'"
         - "blob:"
@@ -21,11 +37,10 @@ let
         - "wss://${collaboraCfg.publicHost}"
       frame-src:
         - "'self'"
+        - "blob:"
         - "${collaboraCfg.publicUrl}"
-      script-src:
+      frame-ancestors:
         - "'self'"
-        - "'unsafe-inline'"
-        - "'unsafe-eval'"
   '';
 in
 {
