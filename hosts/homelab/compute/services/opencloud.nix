@@ -89,13 +89,8 @@ in
 
     settings = {
       proxy = {
-        http.tls = false;
-        autoprovision_accounts = true;
-        oidc = {
-          insecure = true;              # Allow http connections to OIDC provider (internal network)
-          rewrite_well_known = false;  # Disabled - causes hairpin NAT issues
-        };
-        user_oidc_claim = "preferred_username";
+        http.tls = false;                       # Managed by traefik
+        autoprovision_accounts = true;          # Users managed externally
         user_cs3_claim = "username";
         csp_config_file_location = toString cspConfig;
       };
@@ -106,14 +101,11 @@ in
         post_logout_redirect_uri = serviceCfg.publicUrl;
         # client_id: set via WEB_OIDC_CLIENT_ID env var from environmentFile
       };
-      graph.username_match = "none";
       collaboration = {
         wopi.wopisrc = wopiCfg.publicUrl; # External WOPI URL that Collabora uses to call back into OpenCloud. Must be routed through Traefik so Collabora can reach it
         app = {
           addr = collaboraCfg.url;
           external_addr = collaboraCfg.publicUrl;
-          insecure = true;
-          name = "Collabora";
           product = "Collabora";
           proofkeys.disable = true;  # Disable WOPI proof verification
         };
