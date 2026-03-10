@@ -82,24 +82,22 @@ in
 
     environment = {
       # External OIDC (Pocket-ID) - disable built-in IDP
-      OC_OIDC_ISSUER = oidcCfg.provider.url;
+      OC_OIDC_ISSUER = oidcCfg.provider.url; # Does not work when using the yaml based configuration
       OC_EXCLUDE_RUN_SERVICES = "idp";
       OC_ADD_RUN_SERVICES = "collaboration";
-
-      PROXY_TLS = "false";  # TLS terminated at Traefik
-      OC_INSECURE = "true";
-      PROXY_CSP_CONFIG_FILE_LOCATION = toString cspConfig;
-
-      COLLABORATION_APP_PROOF_DISABLE = "true"; # Disable WOPI proof key verification (timestamp issues on same host)
     };
 
-    # YAML-based configuration (preferred over environment variables)
     settings = {
       proxy = {
+        http.tls = false;
         autoprovision_accounts = true;
-        oidc.rewrite_well_known = false;  # Disabled - causes hairpin NAT issues
+        oidc = {
+          insecure = true;              # Allow http connections to OIDC provider (internal network)
+          rewrite_well_known = false;  # Disabled - causes hairpin NAT issues
+        };
         user_oidc_claim = "preferred_username";
         user_cs3_claim = "username";
+        csp_config_file_location = toString cspConfig;
       };
       # Point web client directly to OIDC provider
       web.config.oidc = {
