@@ -4,34 +4,41 @@ let
   
   cfg = config.custom.homelab.paths;
   smbCfg = config.custom.homelab.smb;
-in {
-  options.custom.homelab.paths = {
-    # Private Media - Not recoverable.
-    bphenriques = {
+
+  userPathsOpt = types.submodule ({ config, ... }: {
+    options = {
       root = mkOption {
         type = types.str;
-        description = "Base mount point for bphenriques storage";
+        description = "Base mount point for this user's storage";
       };
       backups = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/backups"; };
-        phone = mkOption { type = types.str; default = "${cfg.bphenriques.root}/backups/phone"; };
+        root = mkOption { type = types.str; default = "${config.root}/backups"; };
+        phone = mkOption { type = types.str; default = "${config.root}/backups/phone"; };
       };
       
       photos = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos"; };
-        library = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.bphenriques.root}/photos/inbox"; };
+        root = mkOption { type = types.str; default = "${config.root}/photos"; };
+        library = mkOption { type = types.str; default = "${config.root}/photos/library"; };
+        inbox = mkOption { type = types.str; default = "${config.root}/photos/inbox"; };
       };
       
       documents = {
-        root = mkOption { type = types.str; default = "${cfg.bphenriques.root}/documents"; };
-        consume = mkOption { type = types.str; default = "${cfg.bphenriques.root}/inbox/documents"; };
+        root = mkOption { type = types.str; default = "${config.root}/documents"; };
+        consume = mkOption { type = types.str; default = "${config.root}/inbox/documents"; };
       };
       
-      notes = mkOption { type = types.str; default = "${cfg.bphenriques.root}/notes"; };
-      private = mkOption { type = types.str; default = "${cfg.bphenriques.root}/private"; };
+      notes = mkOption { type = types.str; default = "${config.root}/notes"; };
+      private = mkOption { type = types.str; default = "${config.root}/private"; };
     };
-    
+  });
+in {
+  options.custom.homelab.paths = {
+    users = mkOption {
+      type = types.attrsOf userPathsOpt;
+      default = { };
+      description = "Per-user storage paths";
+    };
+
     # Shared Media - Painfully recoverable.
     media = {
       root = mkOption {
@@ -84,7 +91,6 @@ in {
 
   config = lib.mkIf smbCfg.enable {
     custom.homelab.paths = {
-      bphenriques.root = lib.mkDefault smbCfg.mounts.bphenriques.localMount;
       media.root = lib.mkDefault smbCfg.mounts.media.localMount;
     };
   };

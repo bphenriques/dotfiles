@@ -13,7 +13,7 @@
     # Temporary
     ../homelab/compute/datastores
     ../homelab/compute/services
-    #../homelab/compute/tasks
+    ../homelab/compute/tasks
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -47,6 +47,7 @@
       media = { gid = 5512; };
     };
   };
+  custom.homelab.paths.users.bphenriques.root = lib.mkDefault config.custom.homelab.smb.mounts.bphenriques.localMount;
 
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;

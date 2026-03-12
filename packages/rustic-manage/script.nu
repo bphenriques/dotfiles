@@ -3,10 +3,9 @@
 # Rustic backup management: backup and verify with ntfy notifications.
 #
 # Required env:
-#   RUSTIC_PROFILES    - Colon-separated profile paths (passed via -P)
 #   STATE_DIR          - State directory for runtime artifacts
 #   NTFY_URL           - ntfy topic URL
-#   NTFY_PASSWORD_FILE - Path to file containing ntfy admin password
+#   NTFY_TOKEN_FILE    - Path to file containing ntfy publisher token
 
 def require_env [name: string] {
   let val = ($env | get -o $name)
@@ -17,29 +16,24 @@ def require_env [name: string] {
   }
 }
 
-def rustic [...args: string] {
-  let profiles = require_env "RUSTIC_PROFILES" | split row ':' | each {|p| [-P $p] } | flatten
-  ^rustic ...$profiles ...$args
-}
-
 def notify [--title: string, --tags: string, --priority: string, body: string] {
   let url = require_env "NTFY_URL"
-  let password = open --raw (require_env "NTFY_PASSWORD_FILE") | str trim
+  let token = open --raw (require_env "NTFY_TOKEN_FILE") | str trim
 
-  mut headers = { Title: $title, Tags: $tags }
+  mut headers = { Title: $title, Tags: $tags, Authorization: $"Bearer ($token)", Markdown: "yes" }
   if $priority != null and ($priority | is-not-empty) {
     $headers = ($headers | insert Priority $priority)
   }
 
-  http post --user admin --password $password --headers $headers --content-type text/plain $url $body
+  http post --headers $headers --content-type text/plain $url $body
 }
 
 def notify-success [body: string] {
-  notify --title '✅ Backup OK' --tags white_check_mark $body
+  notify --title 'Backup OK' --tags white_check_mark $body
 }
 
 def notify-failure [body: string] {
-  notify --title '❌ Backup Failed' --tags x --priority high $body
+  notify --title 'Backup Failed' --tags x --priority high $body
 }
 
 # Run backup, prune old snapshots, and notify.
@@ -47,21 +41,27 @@ def "main backup" [] {
   let summary_file = $"(require_env 'STATE_DIR')/last-summary.txt"
 
   try {
+    let check = do { ^rustic snapshots --json } | complete
+    if $check.exit_code != 0 {
+      print "=== Initializing repository ==="
+      ^rustic init
+    }
+
     print "=== Running rustic backup ==="
-    let snapshot = rustic backup --json | from json
+    let snapshot = ^rustic backup --json | from json
     let s = $snapshot.summary
 
     let total = $s.total_bytes_processed | into filesize
     let added = $s.data_added_packed | into filesize
-    let summary = $"Processed: ($total) | Added: ($added)\nFiles: ($s.files_new) new, ($s.files_changed) changed"
+    let summary = $"**Processed:** ($total) | **Added:** ($added)\n**Files:** ($s.files_new) new, ($s.files_changed) changed"
     $summary | save --force $summary_file
 
     print "=== Pruning old snapshots ==="
-    rustic forget
+    ^rustic forget
 
-    notify-success $summary
+    try { notify-success $summary } catch {|e| print $"notify failed: ($e.msg)" }
   } catch {|err|
-    notify-failure $"Backup failed: ($err.msg)"
+    try { notify-failure $"Backup failed: ($err.msg)" } catch {|e| print $"notify failed: ($e.msg)" }
     error make { msg: $err.msg }
   }
 }
@@ -70,12 +70,12 @@ def "main backup" [] {
 def "main verify" [] {
   try {
     print "=== Checking repository integrity ==="
-    rustic check
+    ^rustic check
 
     print "=== Checking data integrity (500MB subset) ==="
-    rustic check --read-data --read-data-subset=500MB
+    ^rustic check "--read-data" "--read-data-subset=500MB"
   } catch {|err|
-    notify-failure $"Verification failed: ($err.msg)"
+    try { notify-failure $"Verification failed: ($err.msg)" } catch {|e| print $"notify failed: ($e.msg)" }
     error make { msg: $err.msg }
   }
 }

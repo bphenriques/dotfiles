@@ -21,6 +21,7 @@ in
       category = "Admin";
       description = "Manage *rr services";
     };
+    integrations.ntfy.topic = "admin";
   };
 
   services.prowlarr = {

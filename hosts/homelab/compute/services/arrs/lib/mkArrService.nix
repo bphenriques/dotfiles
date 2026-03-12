@@ -1,28 +1,28 @@
-# Creates a standardized *arr service (radarr/sonarr) configuration
+# Creates a standardized *arr service (radarr/sonarr) module
 #
 # Assumptions:
 # - Transmission is the only download client used
 # - config.custom.homelab.services.transmission.port is defined
 # - config.custom.homelab.media.${name}.profiles and defaultProfile exist
 #
-# Usage:
-#   mkArrService {
+# Usage (in imports):
+#   (import ./lib/mkArrService.nix {
 #     name = "radarr";
 #     port = 9098;
 #     description = "Movie Tracker";
-#     rootPath = config.custom.homelab.paths.media.movies;
+#     rootPath = config: config.custom.homelab.paths.media.movies;
 #     categoryField = "movieCategory";
-#     forwardAuthGroup = config.custom.homelab.groups.admin;
-#   }
-{ config, pkgs, lib, self }:
+#     forwardAuthGroup = config: config.custom.homelab.groups.admin;
+#   })
 {
   name,                # Service name (e.g., "radarr", "sonarr")
   port,                # Port number
   description,         # Dashboard description
-  rootPath,            # Media root folder path
+  rootPath,            # config -> str: Media root folder path
   categoryField,       # Download client category field ("movieCategory" or "tvCategory")
-  forwardAuthGroup,    # Forward auth group (required)
+  forwardAuthGroup,    # config -> str: Forward auth group
 }:
+{ config, pkgs, lib, self, ... }:
 let
   upperName = lib.strings.concatImapStrings (i: c: if i == 1 then lib.toUpper c else c) (lib.stringToCharacters name);
   envPrefix = lib.toUpper name;
@@ -30,10 +30,11 @@ let
   serviceCfg = config.custom.homelab.services.${name};
   mediaCfg = config.custom.homelab.media.${name};
   homelabMounts = config.custom.homelab.smb.mounts;
-
+  ntfyCfg = config.custom.homelab.services.ntfy;
+  ntfyTags = { radarr = "movie_camera"; sonarr = "tv"; }.${name} or name;
 
   settings = {
-    rootFolders = [{ path = rootPath; }];
+    rootFolders = [{ path = rootPath config; }];
     downloadClient = {
       inherit name;
       host = "127.0.0.1";
@@ -42,6 +43,11 @@ let
       category = name;
     };
     defaultQualityProfile = mediaCfg.profiles.${mediaCfg.defaultProfile}.name;
+    notification = {
+      serverUrl = ntfyCfg.url;
+      topic = serviceCfg.integrations.ntfy.topic;
+      tags = ntfyTags;
+    };
   };
 
   settingsFile = pkgs.writeText "${name}-config.json" (builtins.toJSON settings);
@@ -51,7 +57,7 @@ in
     inherit port;
     forwardAuth = {
       enable = true;
-      group = forwardAuthGroup;
+      group = forwardAuthGroup config;
     };
     secrets = {
       files.api-key = { rotatable = true; };
@@ -66,6 +72,7 @@ in
       inherit description;
       icon = "${name}.svg";
     };
+    integrations.ntfy.topic = "media";
   };
 
   services.${name} = {
@@ -91,13 +98,12 @@ in
 
   users.users.${name}.extraGroups = [ homelabMounts.media.group ];
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ name ];
-
   systemd.services."${name}-configure" = {
     description = "${upperName} setup";
     wantedBy = [ "multi-user.target" ];
-    after = [ "${name}.service" "transmission.service" "recyclarr.service" ];
+    after = [ "${name}.service" "transmission.service" "recyclarr.service" "ntfy-configure.service" ];
     requires = [ "${name}.service" ];
-    wants = [ "transmission.service" "recyclarr.service" ]; # recyclarr is accessory — use wants, not requires
+    wants = [ "transmission.service" "recyclarr.service" "ntfy-configure.service" ];
     partOf = [ "${name}.service" ];
     restartTriggers = [ settingsFile ./arr-configure.nu ];
     startLimitIntervalSec = 300;
@@ -114,6 +120,7 @@ in
       ARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       ARR_CONFIG_FILE = settingsFile;
       ARR_CATEGORY_FIELD = categoryField;
+      NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "arr-configure" ./arr-configure.nu}'';

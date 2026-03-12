@@ -34,7 +34,7 @@ in
 
   # TODO: Consider backup strategy for Immich data
   # Note: mediaLocation stores uploads, thumbnails, and transcodes locally for performance.
-  # External library support could reference paths.bphenriques.photos.library if needed.
+  # External library support could reference paths.users.bphenriques.photos.library if needed.
   services.immich = {
     enable = true;
     host = serviceCfg.host;

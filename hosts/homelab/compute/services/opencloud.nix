@@ -6,8 +6,6 @@ let
   wopiCfg = cfg.services.wopi;
   oidcCfg = cfg.oidc;
 
-  envFile = "/run/${serviceCfg.name}/env";
-
   # CSP config to allow external OIDC provider and Collabora
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
   # Note: 'unsafe-eval' is required by the OpenCloud Web UI (Vue.js runtime compilation)
@@ -42,9 +40,10 @@ in
             OC_JWT_SECRET=${serviceCfg.secrets.placeholder.jwt-secret}
             OC_TRANSFER_SECRET=${serviceCfg.secrets.placeholder.transfer-secret}
             OC_MACHINE_AUTH_API_KEY=${serviceCfg.secrets.placeholder.machine-id}
+            WEB_OIDC_CLIENT_ID=${serviceCfg.oidc.id.placeholder}
           '';
         };
-        systemd.dependentServices = [ "${serviceCfg.name}-env" ];
+        systemd.dependentServices = [ "opencloud-init-config" "opencloud" ];
       };
       oidc = {
         enable = true;
@@ -55,7 +54,6 @@ in
           "${serviceCfg.publicUrl}/oidc-silent-redirect.html"
           "${serviceCfg.publicUrl}/web-oidc-callback.html"
         ];
-        systemd.dependentServices = [ "${serviceCfg.name}-env" ];
       };
       integrations.homepage = {
         enable = true;
@@ -76,7 +74,7 @@ in
     url = serviceCfg.publicUrl;
     address = serviceCfg.host;
     port = serviceCfg.port;
-    environmentFile = envFile;
+    environmentFile = serviceCfg.secrets.templates.env.path;
 
     environment = {
       # External OIDC (Pocket-ID) - disable built-in IDP
@@ -137,38 +135,6 @@ in
         ];
       };
     };
-  };
-
-  systemd.services."${serviceCfg.name}-env" = {
-    description = "Prepare ${serviceCfg.name} environment file";
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      User = serviceCfg.name;
-      Group = serviceCfg.name;
-      RuntimeDirectory = serviceCfg.name;
-      RuntimeDirectoryMode = "0750";
-      LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
-    };
-    script = ''
-      set -euo pipefail
-      cp ${serviceCfg.secrets.templates.env.path} ${envFile}
-      # Web client is public (no secret) - only needs client ID
-      echo "WEB_OIDC_CLIENT_ID=$(cat "$CREDENTIALS_DIRECTORY/oidc-id")" >> ${envFile}
-      chmod 600 ${envFile}
-    '';
-  };
-
-  # Wire opencloud services to depend on env file
-  systemd.services."${serviceCfg.name}-init-config" = {
-    requires = [ "${serviceCfg.name}-env.service" ];
-    after = [ "${serviceCfg.name}-env.service" ];
-  };
-
-  systemd.services.${serviceCfg.name} = {
-    requires = [ "${serviceCfg.name}-env.service" ];
-    after = [ "${serviceCfg.name}-env.service" ];
   };
 
   services.collabora-online = {

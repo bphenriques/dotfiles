@@ -16,7 +16,7 @@ in
     };
     integrations.homepage = {
       enable = true;
-      category = "Admin";
+      category = "Media";
       description = "Home Automation";
     };
   };

@@ -35,6 +35,7 @@
       media = { gid = 5001; };
     };
   };
+  custom.homelab.paths.users.bphenriques.root = lib.mkDefault config.custom.homelab.smb.mounts.bphenriques.localMount;
 
   # Podman for containers (tinyauth, cleanuparr, romm + romm-db)
   virtualisation = {

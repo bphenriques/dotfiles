@@ -140,12 +140,11 @@ in {
           # Credentials
           "credentials=${cfg.credentialsPath}"
 
-          # Automount: don't mount at boot, trigger on first access.
-          # This avoids boot failures when network isn't fully ready yet.
+          # Automount: don't mount at boot, trigger on first access. This avoids boot failures when network isn't fully ready yet.
+          # No x-systemd.idle-timeout=15 as it is always on and negligible impact. Also need the mount to persist for cron jobs that depend on the mounts.
           "_netdev"
           "x-systemd.automount"
           "noauto"
-          "x-systemd.idle-timeout=15"
           "x-systemd.device-timeout=5s"
           "x-systemd.mount-timeout=5s"
         ];

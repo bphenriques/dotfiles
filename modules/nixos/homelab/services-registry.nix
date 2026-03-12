@@ -2,42 +2,6 @@
 let
   cfg = config.custom.homelab;
 
-  categoryType = lib.types.enum [
-    "Media"
-    "Admin"
-    "Productivity"
-    "Development"
-    "Infrastructure"
-  ];
-
-  mkHomepageOpts = serviceName: lib.types.submodule {
-    options = {
-      enable = lib.mkEnableOption "homepage entry for this service";
-
-      category = lib.mkOption {
-        type = categoryType;
-        description = "Homepage category/tab for this service";
-      };
-
-      description = lib.mkOption {
-        type = lib.types.str;
-        description = "Short description shown on homepage";
-      };
-
-      icon = lib.mkOption {
-        type = lib.types.str;
-        default = "${serviceName}.svg";
-        description = "Icon name from dashboard-icons (e.g. 'miniflux.svg')";
-      };
-
-      siteMonitor = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable health monitoring for this service";
-      };
-    };
-  };
-
   serviceOpt = lib.types.submodule ({ name, config, ... }: {
     options = {
       # Identity
@@ -115,9 +79,21 @@ let
       # Integrations with external tools
       integrations = {
         homepage = lib.mkOption {
-          type = lib.types.nullOr (mkHomepageOpts name);
+          type = lib.types.nullOr (lib.types.submodule (import ./_homepage-schema.nix {
+            inherit lib;
+            serviceName = name;
+          }));
           default = null;
           description = "Homepage dashboard integration";
+        };
+
+        ntfy = lib.mkOption {
+          type = lib.types.nullOr (lib.types.submodule (import ./_ntfy-schema.nix {
+            inherit lib;
+            serviceName = name;
+          }));
+          default = null;
+          description = "ntfy notification integration";
         };
       };
 
@@ -140,19 +116,20 @@ let
           default = [ ];
           description = "Systemd services this backup hook requires and orders after.";
         };
+      };
 
-        description = lib.mkOption {
-          type = lib.types.str;
-          default = "Pre-backup export for ${name}";
-          description = "Description for the systemd service.";
-        };
+      # Per-service Traefik middlewares (consumed by ingress.nix)
+      traefik.middlewares = lib.mkOption {
+        type = lib.types.attrsOf (lib.types.attrsOf lib.types.unspecified);
+        default = { };
+        description = "Extra Traefik middleware definitions to attach to this service's router";
       };
 
       # Per-service secrets (contract from _secrets-schema.nix)
       secrets = lib.mkOption {
         type = lib.types.submodule (import ./_secrets-schema.nix {
           inherit lib;
-          serviceName = name;
+          ownerName = name;
         });
         default = { };
         description = "Generated secrets for this service";
@@ -189,14 +166,13 @@ in
       '';
     };
 
-    # Read-only derived views for consumers
-    registry = {
-      allServices = lib.mkOption {
-        type = lib.types.listOf serviceOpt;
-        default = lib.attrValues cfg.services;
-        readOnly = true;
-        description = "All registered services as a list";
-      };
+    # Standalone secrets for non-service owners (e.g. timers, tasks)
+    secrets = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
+        imports = [ (import ./_secrets-schema.nix { inherit lib; ownerName = name; }) ];
+      }));
+      default = { };
+      description = "Secrets for non-service owners (timers, tasks, etc.)";
     };
 
   };

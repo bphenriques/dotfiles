@@ -1,14 +1,19 @@
-# Per-service secrets contract (options only).
-# Imported by services-registry.nix, implemented by secrets.nix.
+# Per-owner secrets contract (options only).
+# Imported by services-registry.nix (per-service) and secrets.nix (standalone).
 #
 # Supports:
 # - files: Raw secret files (generated with openssl rand)
 # - templates: Derived files with placeholder substitution (similar to sops-nix)
 # - placeholder: Read-only attr providing placeholder strings for use in templates
-{ lib, serviceName }:
+#
+# Templates support cross-owner and OIDC placeholders automatically:
+# - Use otherService.secrets.placeholder.<name> for cross-service secrets
+# - Use service.oidc.id.placeholder / service.oidc.secret.placeholder for OIDC
+# Dependencies are auto-detected from placeholder patterns in template content.
+{ lib, ownerName }:
 let
   secretsBaseDir = "/var/lib/homelab-secrets";
-  mkPlaceholder = name: "__HOMELAB_SECRET_${serviceName}_${name}__";
+  mkPlaceholder = name: "__HOMELAB_SECRET_${ownerName}_${name}__";
 in
 { config, ... }: {
   options = {
@@ -31,7 +36,7 @@ in
 
           path = lib.mkOption {
             type = lib.types.str;
-            default = "${secretsBaseDir}/${serviceName}/${name}";
+            default = "${secretsBaseDir}/${ownerName}/${name}";
             readOnly = true;
             description = "Path to the generated secret file";
           };
@@ -61,8 +66,7 @@ in
 
           path = lib.mkOption {
             type = lib.types.str;
-            default = "${secretsBaseDir}/${serviceName}/${name}";
-            readOnly = true;
+            default = "${secretsBaseDir}/${ownerName}/${name}";
             description = "Path where the rendered template will be written";
           };
         };
@@ -73,9 +77,9 @@ in
 
     group = lib.mkOption {
       type = lib.types.str;
-      default = "homelab-secrets-${serviceName}";
+      default = "homelab-secrets-${ownerName}";
       readOnly = true;
-      description = "Group name for accessing this service's secrets";
+      description = "Group name for accessing this owner's secrets";
     };
 
     gid = lib.mkOption {
@@ -86,9 +90,9 @@ in
 
     secretsDir = lib.mkOption {
       type = lib.types.str;
-      default = "${secretsBaseDir}/${serviceName}";
+      default = "${secretsBaseDir}/${ownerName}";
       readOnly = true;
-      description = "Directory containing this service's secrets";
+      description = "Directory containing this owner's secrets";
     };
 
     systemd.dependentServices = lib.mkOption {

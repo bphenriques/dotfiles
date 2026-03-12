@@ -3,7 +3,6 @@ let
   appDataDir = "/var/lib/recyclarr";
   radarrCfg = config.custom.homelab.services.radarr;
   sonarrCfg = config.custom.homelab.services.sonarr;
-  secretsFile = "${appDataDir}/secrets.yml";
 
   # Build recyclarr include templates from media settings
   mkIncludeTemplates = serviceCfg:
@@ -25,6 +24,17 @@ let
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
+  custom.homelab.secrets.recyclarr = {
+    templates."secrets.yml" = {
+      content = ''
+        movies_api_key: ${radarrCfg.secrets.placeholder.api-key}
+        tv_api_key: ${sonarrCfg.secrets.placeholder.api-key}
+      '';
+      path = "${appDataDir}/secrets.yml";
+    };
+    systemd.dependentServices = [ "recyclarr" ];
+  };
+
   # Recyclarr runs as a systemd timer to periodically sync TRaSH guides
   systemd.services.recyclarr = {
     description = "Recyclarr sync";
@@ -49,15 +59,6 @@ in
     environment = {
       RECYCLARR_APP_DATA = appDataDir;
     };
-    # Cross-service secrets: radarr/sonarr own these keys, so we can't use secrets.templates (same-service only)
-    preStart = ''
-      # Generate secrets.yml from API key files
-      cat > "${secretsFile}" <<EOF
-movies_api_key: $(cat "${radarrCfg.secrets.files.api-key.path}")
-tv_api_key: $(cat "${sonarrCfg.secrets.files.api-key.path}")
-EOF
-      chmod 600 "${secretsFile}"
-    '';
   };
 
   systemd.timers.recyclarr = {
@@ -68,8 +69,4 @@ EOF
       Persistent = true;
     };
   };
-
-  # Cross-service dependencies
-  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "recyclarr" ];
-  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "recyclarr" ];
 }

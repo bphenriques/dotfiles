@@ -9,7 +9,6 @@ let
   oidcCfg = cfg.oidc;
 
   dataDir = "/var/lib/romm";
-  envFile = "/run/romm/romm.env";
 
   # Dedicated user for RomM container - member of media group for SMB access
   # GIDs 950 (user), 970 (secrets), 971 (oidc) are fixed for container supplementary group access
@@ -65,6 +64,9 @@ in
         db-password = { rotatable = false; };
       };
       systemd.dependentServices = [ "podman-romm" "romm-db-setup" ];
+      templates.env.content = ''
+        ROMM_AUTH_SECRET_KEY=${serviceCfg.secrets.placeholder.auth-secret-key}
+      '';
     };
     oidc = {
       enable = true;
@@ -77,6 +79,7 @@ in
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
+  # Assumes NixOS default MySQL root auth: unix socket authentication (no password needed for local root).
   services.mysql.ensureDatabases = [ db.name ];
   systemd.services.romm-db-setup = {
     description = "Setup RomM MySQL user and password";
@@ -152,7 +155,7 @@ in
       OIDC_ROLE_VIEWER = groupsCfg.users;
     };
 
-    environmentFiles = [ envFile ];
+    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
 
     volumes = [
       # Setup
@@ -188,11 +191,6 @@ in
     requires = [ "romm-db-setup.service" ];
     after = [ "romm-db-setup.service" ];
     wants = [ "romm-db-setup.service" ];
-    serviceConfig.RuntimeDirectory = "romm";
-    preStart = ''
-      echo "ROMM_AUTH_SECRET_KEY=$(cat ${serviceCfg.secrets.files.auth-secret-key.path})" > "${envFile}"
-      chmod 600 "${envFile}"
-    '';
     restartTriggers = [ configFile ];
   };
 }

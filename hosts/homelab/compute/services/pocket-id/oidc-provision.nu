@@ -80,9 +80,11 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
 }
 
 def write_credential [path: string, content: string, group: string] {
-  $content | save --force $path
-  chmod 0640 $path
-  chown $"root:($group)" $path
+  let tmp = $"($path).tmp"
+  $content | save --force $tmp
+  chmod 0640 $tmp
+  chown $"root:($group)" $tmp
+  mv --force $tmp $path  # atomic rename
 }
 
 def provision_client [client: record, existing: list] {
@@ -162,8 +164,10 @@ def main [] {
 
   # Write users mapping file
   let users_file = $"($credentials_dir)/oidc-users.json"
-  $provisioned_users | to json | save --force $users_file
-  chmod 0644 $users_file
+  let users_tmp = $"($users_file).tmp"
+  $provisioned_users | to json | save --force $users_tmp
+  chmod 0644 $users_tmp
+  mv --force $users_tmp $users_file  # atomic rename
   print $"Wrote users mapping to ($users_file)"
 
   # Provision OIDC clients

@@ -2,13 +2,13 @@
 let
   cfg = config.custom.homelab;
   ingressCfg = cfg.ingress;
-  registry = cfg.registry;
 
   mkRouterConfig = service: host: {
     rule = "Host(`${host}`)";
     entryPoints = [ "websecure" ];
     service = "${service.name}-svc";
-    middlewares = lib.optionals service.forwardAuth.enable [ "forwardAuth" ];
+    middlewares = lib.optionals service.forwardAuth.enable [ "forwardAuth" ]
+      ++ lib.attrNames service.traefik.middlewares;
   };
 
   mkTraefikRoute = service: let
@@ -22,6 +22,7 @@ let
         "${service.name}" = mkRouterConfig service service.publicHost;
       } // lib.listToAttrs aliasRouters;
       services."${service.name}-svc".loadBalancer.servers = [{ url = service.url; }];
+      middlewares = service.traefik.middlewares;
     };
   };
 in
@@ -107,7 +108,7 @@ in
       };
 
       dynamicConfigOptions = let
-        routeConfigs = map mkTraefikRoute registry.allServices;
+        routeConfigs = map mkTraefikRoute (lib.attrValues cfg.services);
         routesConfig = lib.foldl' lib.recursiveUpdate { } routeConfigs;
         authMiddleware = lib.optionalAttrs ingressCfg.forwardAuth.enable {
           http.middlewares.forwardAuth.forwardAuth = {

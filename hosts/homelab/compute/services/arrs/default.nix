@@ -1,17 +1,16 @@
 _: {
   imports = [
+    # Schema
+    ./media.nix
+
     # Core
-    ./sonarr.nix
-    ./radarr.nix
+    ./sonarr
+    ./radarr
     ./prowlarr
     ./jellyseerr
 
     # Quality of life
     ./cleanuparr.nix
     ./recyclarr.nix
-
-    # Backup hooks
-    ./sonarr-backup.nix
-    ./radarr-backup.nix
   ];
 }

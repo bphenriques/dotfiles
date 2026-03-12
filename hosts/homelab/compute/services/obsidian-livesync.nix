@@ -27,17 +27,13 @@ in
     };
   };
 
-  # Add CORS middleware for Traefik (required for Obsidian Live Sync)
-  services.traefik.dynamicConfigOptions.http = {
-    middlewares.couchdb-cors.headers = {
-      accessControlAllowMethods = cors.methods;
-      accessControlAllowHeaders = cors.headers;
-      accessControlAllowOriginList = cors.origins;
-      accessControlMaxAge = cors.maxAge;
-      accessControlAllowCredentials = cors.credentials;
-      addVaryHeader = true;
-    };
-
-    routers.couchdb.middlewares = [ "couchdb-cors" ];
+  # CORS middleware for Traefik (required for Obsidian Live Sync)
+  custom.homelab.services.couchdb.traefik.middlewares.couchdb-cors.headers = {
+    accessControlAllowMethods = cors.methods;
+    accessControlAllowHeaders = cors.headers;
+    accessControlAllowOriginList = cors.origins;
+    accessControlMaxAge = cors.maxAge;
+    accessControlAllowCredentials = cors.credentials;
+    addVaryHeader = true;
   };
 }

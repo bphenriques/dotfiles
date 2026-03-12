@@ -9,7 +9,6 @@ let
   adminCategories = [ "Admin" "Infrastructure" ];
 
   isAdminCategory = cat: lib.elem cat adminCategories;
-  displayCategory = cat: if isAdminCategory cat then "Admin" else "Home";
 
   # Build services.yaml from generated services, merging by display category
   getServicesForCategories = cats: lib.concatLists (map (cat:
@@ -84,13 +83,21 @@ in
 
     widgets = [
       {
+        resources = {
+          cpu = true;
+          memory = true;
+          disk = "/";
+          label = "System";
+        };
+      }
+      {
         openmeteo = {
           label = "Lisbon";
           latitude = 38.736946;
           longitude = -9.142685;
           timezone = "Europe/Lisbon";
           units = "metric";
-          cache = 30;
+          cache = 300;
         };
       }
     ];

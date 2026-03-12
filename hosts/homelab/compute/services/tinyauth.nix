@@ -5,7 +5,6 @@ let
   serviceCfg = cfg.services.tinyauth;
 
   dataDir = "/var/lib/tinyauth";
-  envFile = "/run/tinyauth/env";
 in
 {
   # TODO: Migrate to plain service https://github.com/NixOS/nixpkgs/pull/476356/changes
@@ -15,12 +14,13 @@ in
       oidc = {
         enable = true;
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
-        systemd.dependentServices = [ "podman-tinyauth" ];
+        systemd.dependentServices = [ "podman-tinyauth" ]; # Volume-mounts OIDC secret file directly
       };
-      integrations.homepage = {
-        enable = true;
-        category = "Admin";
-        description = "Auth Proxy";
+      secrets = {
+        templates.env.content = ''
+          TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${serviceCfg.oidc.id.placeholder}
+        '';
+        systemd.dependentServices = [ "podman-tinyauth" ];
       };
     };
 
@@ -59,7 +59,7 @@ in
         value = svc.forwardAuth.group;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );
-    environmentFiles = [ envFile ];
+    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
     volumes = [
       "${dataDir}:/data"
       "${serviceCfg.oidc.secret.file}:/run/secrets/client_secret:ro"
@@ -70,15 +70,4 @@ in
     ];
   };
 
-  # Unfortunately required as we can't pass the id as plain file (not that it is a secret)
-  systemd.services.podman-tinyauth = {
-    serviceConfig = {
-      RuntimeDirectory = "tinyauth";
-      LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
-    };
-    preStart = ''
-      echo "TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=$(cat $CREDENTIALS_DIRECTORY/oidc-id)" > "${envFile}"
-      chmod 600 "${envFile}"
-    '';
-  };
 }

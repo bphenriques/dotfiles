@@ -3,6 +3,7 @@ let
   serviceCfg = config.custom.homelab.services.prowlarr;
   radarrCfg = config.custom.homelab.services.radarr;
   sonarrCfg = config.custom.homelab.services.sonarr;
+  ntfyCfg = config.custom.homelab.services.ntfy;
 
   settings = {
     # Indexers have these fields:
@@ -26,6 +27,11 @@ let
         prowlarrUrl = serviceCfg.url;
       }
     ];
+    notification = {
+      serverUrl = ntfyCfg.url;
+      topic = serviceCfg.integrations.ntfy.topic;
+      tags = "mag";
+    };
   };
 
   settingsFile = pkgs.writeText "prowlarr-config.json" (builtins.toJSON settings);
@@ -34,9 +40,9 @@ in
   systemd.services.prowlarr-configure = {
     description = "Prowlarr setup";
     wantedBy = [ "multi-user.target" ];
-    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" ];
+    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
     requires = [ "prowlarr.service" ];
-    wants = [ "radarr-configure.service" "sonarr-configure.service" ];
+    wants = [ "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
     partOf = [ "prowlarr.service" ];
     restartTriggers = [ settingsFile ./prowlarr-configure.nu ];
     startLimitIntervalSec = 300;
@@ -53,6 +59,7 @@ in
       PROWLARR_CONFIG_FILE = settingsFile;
       RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
       SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;
+      NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-configure" ./prowlarr-configure.nu}'';

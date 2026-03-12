@@ -3,7 +3,7 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   mounts = {
-    nasPrivate = osConfig.custom.homelab.paths.bphenriques.root;
+    nasPrivate = osConfig.custom.homelab.paths.users.bphenriques.root;
     nasMedia = osConfig.custom.homelab.paths.media.root;
   };
 in

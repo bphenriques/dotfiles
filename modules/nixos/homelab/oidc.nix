@@ -109,10 +109,16 @@ in
     explicitGids = lib.filter (g: g != null) (lib.mapAttrsToList (_: c: c.gid) derivedClients);
     dupGids = lib.filter (gid: lib.count (g: g == gid) explicitGids > 1) (lib.unique explicitGids);
   in {
-    assertions = [{
-      assertion = dupGids == [];
-      message = "OIDC clients have duplicate explicit gids: ${toString dupGids}";
-    }];
+    assertions = [
+      {
+        assertion = dupGids == [];
+        message = "OIDC clients have duplicate explicit gids: ${toString dupGids}";
+      }
+      {
+        assertion = provisionedTarget != null || allDependentServices == [];
+        message = "custom.homelab.oidc.systemd.provisionedTarget must be set when OIDC clients have dependentServices configured. Without it, systemd ordering is silently skipped.";
+      }
+    ];
 
     # Create groups for each OIDC client
     users.groups = lib.mapAttrs' (_: client:
@@ -134,8 +140,5 @@ in
         }) client.systemd.dependentServices)
       ) derivedClients
     ));
-
-    warnings = lib.optional (provisionedTarget == null && allDependentServices != [ ])
-      "custom.homelab.oidc.systemd.provisionedTarget is not set but OIDC clients have dependentServices configured.";
   });
 }

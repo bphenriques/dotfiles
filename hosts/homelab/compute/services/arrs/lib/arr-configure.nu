@@ -8,12 +8,14 @@
 #   ARR_API_KEY_FILE  - Path to API key file
 #   ARR_CONFIG_FILE   - Path to JSON config file
 #   ARR_CATEGORY_FIELD - Download client category field ("movieCategory" or "tvCategory")
+#   NTFY_TOKEN_FILE    - Path to ntfy publisher token file
 
 let arr_name = $env.ARR_NAME
 let base_url = $env.ARR_URL
 let api_key = open $env.ARR_API_KEY_FILE | str trim
 let config = open $env.ARR_CONFIG_FILE
 let category_field = $env.ARR_CATEGORY_FIELD
+let ntfy_token = open $env.NTFY_TOKEN_FILE | str trim
 let headers = [X-Api-Key $api_key]
 
 def wait_ready [] {
@@ -129,12 +131,70 @@ def ensure_download_client [] {
   print $"  Created download client: ($dc.name)"
 }
 
+def ensure_notification [] {
+  print "Configuring ntfy notification..."
+  let existing = http get $"($base_url)/api/v3/notification" --headers $headers --full --allow-errors
+  if $existing.status != 200 {
+    error make { msg: $"Failed to get notifications: ($existing.status) - ($existing.body)" }
+  }
+
+  let notification_name = "ntfy"
+  let existing_names = ($existing.body | default [] | get -o name | default [])
+  if $notification_name in $existing_names {
+    print $"  Notification exists: ($notification_name)"
+    return
+  }
+
+  let schemas = http get $"($base_url)/api/v3/notification/schema" --headers $headers --full --allow-errors
+  if $schemas.status != 200 {
+    error make { msg: $"Failed to get notification schemas: ($schemas.status)" }
+  }
+
+  let ntfy_schema = ($schemas.body | where implementation == "Ntfy" | get 0?)
+  if $ntfy_schema == null {
+    error make { msg: "Ntfy notification schema not found" }
+  }
+
+  let ntfy_config = $config | get notification
+  let fields = $ntfy_schema.fields | each { |f|
+    match $f.name {
+      "serverUrl" => ($f | upsert value $ntfy_config.serverUrl)
+      "accessToken" => ($f | upsert value $ntfy_token)
+      "topics" => ($f | upsert value $ntfy_config.topic)
+      "tags" => ($f | upsert value ($ntfy_config | get -o tags | default ""))
+      _ => $f
+    }
+  }
+
+  let payload = {
+    name: $notification_name
+    enable: true
+    fields: $fields
+    implementationName: "Ntfy"
+    implementation: "Ntfy"
+    configContract: "NtfySettings"
+    onDownload: true
+    onUpgrade: true
+    onGrab: false
+    onRename: false
+    onHealthIssue: false
+    onApplicationUpdate: false
+  }
+
+  let r = http post $"($base_url)/api/v3/notification" $payload --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 201] {
+    error make { msg: $"Failed to create notification ($notification_name): ($r.status) - ($r.body)" }
+  }
+  print $"  Created notification: ($notification_name)"
+}
+
 def main [] {
   wait_ready
   print $"($arr_name) is ready"
 
   ensure_root_folders
   ensure_download_client
+  ensure_notification
 
   print $"($arr_name) initialization complete"
 }

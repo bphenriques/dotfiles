@@ -1,14 +1,16 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.custom.homelab.tasks.backup;
+  cfg = config.custom.homelab.backup;
   homelabCfg = config.custom.homelab;
 
   stateDir = "/var/lib/homelab-backup";
-  cacheDir = "${stateDir}/cache";
-  configDir = "${stateDir}/config";
+  extrasDir = "${stateDir}/src/extras";
+
+  ntfyCfg = config.custom.homelab.services.ntfy;
 
   tomlFormat = pkgs.formats.toml { };
   rusticProfile = tomlFormat.generate "homelab.toml" {
+    global.use-profiles = ["secrets"];
     repository = {
       repository = "opendal:b2";
       password-file = config.sops.secrets."backup/rustic/password".path;
@@ -35,46 +37,38 @@ let
     };
   };
 
-  # rustic -P expects paths without the .toml extension (it appends .toml itself)
-  secretsProfilePath = lib.removeSuffix ".toml" config.sops.templates."homelab-backup-secrets.toml".path;
-  ntfyCfg = config.custom.homelab.services.ntfy;
-
   rusticManage = "${cfg.package}/bin/rustic-manage-bin";
   rusticManageEnv = {
-    RUSTIC_CACHE_DIR = cacheDir;
-    RUSTIC_PROFILES = "${configDir}/homelab:${secretsProfilePath}";
     STATE_DIR = stateDir;
-    NTFY_URL = "${ntfyCfg.url}/backups";
-    NTFY_PASSWORD_FILE = ntfyCfg.secrets.files.admin-password.path;
+    NTFY_URL = "${ntfyCfg.url}/${cfg.integrations.ntfy.topic}";
+    NTFY_TOKEN_FILE = cfg.integrations.ntfy.tokenFile;
   };
 
   # Services that have a backup script defined
   servicesWithBackup = lib.filterAttrs (_: svc: svc.backup.script != null) homelabCfg.services;
+
   serviceHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") servicesWithBackup;
-
-  # Standalone hooks (e.g. github) not tied to a homelab service
   standaloneHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") cfg.hooks;
-
   allHookServiceNames = serviceHookNames ++ standaloneHookNames;
 in
 {
-  options.custom.homelab.tasks.backup = {
-    enable = lib.mkEnableOption "rustic backup to Backblaze B2";
-
+  options.custom.homelab.backup = {
     package = lib.mkOption {
-      type = lib.types.package;
+      type = lib.types.nullOr lib.types.package;
+      default = null;
       description = "The rustic-manage package to use.";
     };
 
     src = lib.mkOption {
       type = lib.types.str;
       default = "${stateDir}/src";
+      readOnly = true;
       description = "Working directory root assembled for backup.";
     };
 
     extrasDir = lib.mkOption {
       type = lib.types.str;
-      default = "${stateDir}/src/extras";
+      default = extrasDir;
       readOnly = true;
       description = "Directory for extra files to include in the backup. Populate via service backup hooks.";
     };
@@ -89,10 +83,6 @@ in
     hooks = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
         options = {
-          description = lib.mkOption {
-            type = lib.types.str;
-            default = "Pre-backup hook: ${name}";
-          };
           script = lib.mkOption { type = lib.types.path; };
           after = lib.mkOption {
             type = lib.types.listOf lib.types.str;
@@ -119,9 +109,20 @@ in
       default = "Sun *-*-* 05:00:00";
       description = "systemd OnCalendar schedule for the weekly verification timer.";
     };
+
+    integrations.ntfy = lib.mkOption {
+      type = lib.types.submodule (import ./_ntfy-schema.nix {
+        inherit lib;
+        serviceName = "backup";
+      });
+      description = "ntfy notification integration for backup tasks";
+    };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (cfg.package != null) {
+    custom.homelab.ntfy.extraPublishers.backup = {
+      inherit (cfg.integrations.ntfy) topic tokenFile;
+    };
     sops = {
       secrets."backup/b2/bucket" = { };
       secrets."backup/b2/bucket_id" = { };
@@ -142,16 +143,12 @@ in
       };
     };
 
-    custom.homelab.services.ntfy.secrets.systemd.dependentServices = [
-      "homelab-backup"
-      "homelab-backup-verify"
-    ];
-
     systemd.services = let
-      mkHookService = name: { description, script, after, environment }: lib.nameValuePair "homelab-backup-${name}" {
-        inherit description environment;
+      mkHookService = name: { script, after, environment }: lib.nameValuePair "homelab-backup-${name}" {
+        inherit environment;
+        description = "Pre-backup hook: ${name}";
         after = [ "network-online.target" ] ++ after;
-        wants = [ "network-online.target" ] ++ after;
+        wants = [ "network-online.target" ];
         path = [ pkgs.coreutils pkgs.curl ];
         serviceConfig = {
           Type = "oneshot";
@@ -169,6 +166,8 @@ in
 
       hardenedServiceConfig = {
         Type = "oneshot";
+        User = "root";
+        Group = "root";
         ProtectSystem = "strict";
         ProtectHome = true;
         PrivateTmp = true;
@@ -180,13 +179,14 @@ in
     in serviceHooks // standaloneHooks // {
       homelab-backup = {
         description = "Homelab backup (Backblaze B2)";
-        after = [ "network-online.target" "remote-fs.target" ] ++ allHookServiceNames;
-        wants = [ "network-online.target" ];
+        after = [ "network-online.target" "remote-fs.target" "ntfy-configure.service" ] ++ allHookServiceNames;
+        wants = [ "network-online.target" "ntfy-configure.service" ];
         requires = allHookServiceNames;
         unitConfig.RequiresMountsFor = lib.attrValues cfg.bindings;
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
-          ExecStart = "${rusticManage} backup";
+          ExecStart = "${pkgs.util-linux}/bin/flock -w 21600 ${stateDir}/lock ${rusticManage} backup";
+          TimeoutStartSec = "6h";
           StateDirectory = "homelab-backup";
           ReadWritePaths = [ stateDir ];
           BindReadOnlyPaths = lib.mapAttrsToList (dst: src: "${src}:${cfg.src}${dst}") cfg.bindings;
@@ -194,11 +194,12 @@ in
       };
       homelab-backup-verify = {
         description = "Homelab backup verification (Backblaze B2)";
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
+        after = [ "network-online.target" "ntfy-configure.service" ];
+        wants = [ "network-online.target" "ntfy-configure.service" ];
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
-          ExecStart = "${rusticManage} verify";
+          ExecStart = "${pkgs.util-linux}/bin/flock -w 10800 ${stateDir}/lock ${rusticManage} verify";
+          TimeoutStartSec = "3h";
           StateDirectory = "homelab-backup";
           ReadWritePaths = [ stateDir ];
         };
@@ -208,9 +209,9 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.src} 0750 root root -"
       "d ${cfg.extrasDir} 0750 root root -"
-      "d ${cacheDir} 0750 root root -"
-      "d ${configDir} 0750 root root -"
-      "L+ ${configDir}/homelab.toml - - - - ${rusticProfile}"
+      "d /etc/rustic 0755 root root -"
+      "L+ /etc/rustic/rustic.toml - - - - ${rusticProfile}"
+      "L+ /etc/rustic/secrets.toml - - - - ${config.sops.templates."homelab-backup-secrets.toml".path}"
     ]
     ++ lib.mapAttrsToList (dst: _: "d ${cfg.src}${dst} 0750 root root -") cfg.bindings;
 

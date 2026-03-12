@@ -17,7 +17,7 @@ let
     users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) enabledUsers;
 
     libraries = lib.concatLists (lib.mapAttrsToList (username: u:
-      let userPaths = pathsCfg.${username}.photos;
+      let userPaths = pathsCfg.users.${username}.photos;
       in [
         { name = "${username}-library"; ownerEmail = u.email; importPaths = [ userPaths.library ]; exclusionPatterns = [ ]; }
         { name = "${username}-inbox"; ownerEmail = u.email; importPaths = [ userPaths.inbox ]; exclusionPatterns = [ ]; }
@@ -27,7 +27,7 @@ let
 
   # Bind user photo directories into immich for external library imports
   photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
-    let userPaths = pathsCfg.${username}.photos;
+    let userPaths = pathsCfg.users.${username}.photos;
     in [
       "${userPaths.library}:/mnt/immich/${username}"
       "${userPaths.inbox}:/mnt/immich/${username}-inbox"
@@ -70,8 +70,8 @@ in
 
   assertions = [
     {
-      assertion = lib.all (username: pathsCfg ? ${username}.photos) (lib.attrNames enabledUsers);
-      message = "Each enabled Immich user must have custom.homelab.paths.<username>.photos configured.";
+      assertion = lib.all (username: pathsCfg.users ? ${username}) (lib.attrNames enabledUsers);
+      message = "Each enabled Immich user must have custom.homelab.paths.users.<username>.photos configured.";
     }
     {
       assertion = lib.all (username: homelabMounts ? ${username}) (lib.attrNames enabledUsers);

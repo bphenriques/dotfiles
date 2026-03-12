@@ -3,6 +3,15 @@ let
   serviceCfg = config.custom.homelab.services.transmission;
   pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.smb.mounts;
+  ntfyCfg = config.custom.homelab.services.ntfy;
+  ntfyNotify = { title, tags }: pkgs.writeShellScript "torrent-notify" ''
+    ${pkgs.curl}/bin/curl -s \
+      -H "Authorization: Bearer $(cat ${serviceCfg.integrations.ntfy.tokenFile})" \
+      -H "Title: ${title}" \
+      -H "Tags: ${tags}" \
+      -d "$TR_TORRENT_NAME" \
+      "${ntfyCfg.url}/${serviceCfg.integrations.ntfy.topic}"
+  '';
 in
 {
   custom.homelab.services.transmission = {
@@ -13,6 +22,7 @@ in
       category = "Media";
       description = "Torrent Client";
     };
+    integrations.ntfy.topic = "download";
   };
 
   services.transmission = {
@@ -31,8 +41,11 @@ in
       idle_seeding_limit_enabled = true;
       idle_seeding_limit = 1;
       umask = 2;
+      script-torrent-added-enabled = true;
+      script-torrent-added-filename = toString (ntfyNotify { title = "Download Started"; tags = "arrow_down"; });
+      script-torrent-done-enabled = true;
+      script-torrent-done-filename = toString (ntfyNotify { title = "Download Complete"; tags = "white_check_mark"; });
     };
-    webHome = pkgs.flood-for-transmission;
   };
 
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
@@ -43,5 +56,6 @@ in
     RestartSec = "10s";
     RestartMaxDelaySec = "5min";
     RestartSteps = 5;
+    BindReadOnlyPaths = [ serviceCfg.integrations.ntfy.tokenFile ];
   };
 }

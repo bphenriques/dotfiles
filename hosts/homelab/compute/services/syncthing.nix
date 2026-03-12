@@ -36,8 +36,8 @@ let
 
   # Per-user folders
   bphenriquesFolders = lib.optionalAttrs (syncthingUsers ? bphenriques) {
-    "bphenriques-phone-backup" = mkSyncFolder "bphenriques-phone-backup" pathsCfg.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
-    "bphenriques-photos-inbox" = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
+    "bphenriques-phone-backup" = mkSyncFolder "bphenriques-phone-backup" pathsCfg.users.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
+    "bphenriques-photos-inbox" = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.users.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
   };
 in
 {

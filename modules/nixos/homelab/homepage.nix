@@ -4,7 +4,7 @@ let
 
   homepageServices = lib.filter
     (s: s.integrations.homepage != null && s.integrations.homepage.enable)
-    cfg.registry.allServices;
+    (lib.attrValues cfg.services);
 
   mkServiceEntry = service: {
     "${service.name}" = {

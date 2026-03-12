@@ -1,7 +1,7 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.miniflux;
-  backupCfg = config.custom.homelab.tasks.backup;
+  backupCfg = config.custom.homelab.backup;
 in
 {
   custom.homelab.services.miniflux.backup = {
