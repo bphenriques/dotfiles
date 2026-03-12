@@ -26,28 +26,28 @@ in
     music     = "${config.home.homeDirectory}/music";
     download  = "${config.home.homeDirectory}/downloads";
 
-    extraConfig.XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
-    extraConfig.XDG_RECORDINGS_DIR = "${config.home.homeDirectory}/recordings";
+    extraConfig.SCREENSHOTS = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
+    extraConfig.RECORDINGS = "${config.home.homeDirectory}/recordings";
   };
 
   # https://www.mankier.com/5/tmpfiles.d
   systemd.user.tmpfiles.rules = [
     # Create default directories
-    "d ${config.xdg.userDirs.desktop}                         - - - -"
-    "d ${config.xdg.userDirs.pictures}                        - - - -"
-    "d ${config.xdg.userDirs.music}                           - - - -"
-    "d ${config.xdg.userDirs.download}                        - - - -"
-    "d ${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR} - - - -"
-    "d ${config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR}  - - - -"
+    "d ${config.xdg.userDirs.desktop}     - - - -"
+    "d ${config.xdg.userDirs.pictures}    - - - -"
+    "d ${config.xdg.userDirs.music}       - - - -"
+    "d ${config.xdg.userDirs.download}    - - - -"
+    "d ${config.xdg.userDirs.extraConfig.SCREENSHOTS} - - - -"
+    "d ${config.xdg.userDirs.extraConfig.RECORDINGS}  - - - -"
 
     # Note: avoiding mounting directy to avoid slowing down access to $HOME in-case I am offline.
-    "L ${config.xdg.userDirs.pictures}/nas                    - - - - ${mounts.nasPrivate}/photos"
-    "L ${config.xdg.userDirs.music}/nas                       - - - - ${mounts.nasMedia}/music"
+    "L ${config.xdg.userDirs.pictures}/nas  - - - - ${mounts.nasPrivate}/photos"
+    "L ${config.xdg.userDirs.music}/nas     - - - - ${mounts.nasMedia}/music"
   ];
 
   gtk.gtk3.bookmarks = [
-    "file://${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}"
-    "file://${config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR}"
+    "file://${config.xdg.userDirs.extraConfig.SCREENSHOTS}"
+    "file://${config.xdg.userDirs.extraConfig.RECORDINGS}"
 
     # Samba mounts
     "file://${mounts.nasPrivate}"
@@ -55,8 +55,8 @@ in
   ];
 
   custom.dotfiles.enable = true;
-  custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR;
-  custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
+  custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.SCREENSHOTS;
+  custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.RECORDINGS;
   custom.programs.file-explorer = {
     enable = true;
     bookmarks = [

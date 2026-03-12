@@ -8,7 +8,7 @@
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
-      ++ lib.optionals config.custom.homelab.cifs.enable [
+      ++ lib.optionals config.custom.homelab.smb.enable [
         "homelab-media"
         "homelab-bphenriques"
       ];

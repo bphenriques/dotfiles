@@ -49,7 +49,7 @@ in
     environment = {
       RECYCLARR_APP_DATA = appDataDir;
     };
-    # TODO: Use the templating.
+    # Cross-service secrets: radarr/sonarr own these keys, so we can't use secrets.templates (same-service only)
     preStart = ''
       # Generate secrets.yml from API key files
       cat > "${secretsFile}" <<EOF

@@ -21,11 +21,11 @@ lib.mkIf pkgs.stdenv.isLinux {
       screenshot-format = "png";
       screenshot-high-bit-depth = "yes";    # Same output bitdepth as the video
       screenshot-png-compression = "2";     # Not to high, not too low.
-      screenshot-directory = "${config.xdg.userDirs.extraConfig.XDG_SCREENSHOTS_DIR}";
+      screenshot-directory = "${config.xdg.userDirs.extraConfig.SCREENSHOTS}";
       screenshot-template = "video-%f-%wH.%wM.%wS.%wT-#%#00n";
 
       # Subtitles
-      slang = "eng,en,enUS,en-US,por,pt";   # Preferred langauge for subtitles
+      slang = "eng,en,enUS,en-US,por,pt";   # Preferred language for subtitles
       demuxer-mkv-subtitle-preroll = "yes"; # Try to force subtitles to show while seeking
       subs-with-matching-audio = "yes";     # Makes it easier for me to follow what is happening.
       sub-fix-timing = "yes";               # Remove minor gaps or overlaps between subtitles
@@ -57,12 +57,12 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
 
     scripts = [
-      pkgs.mpvScripts.uosc            # Custom UI with subtitles downloaded bundled in
-      pkgs.mpvScripts.thumbfast       # Generate thumbnails while seeking
-      pkgs.mpvScripts.dynamic-crop    # Delete hard-coded blackbars on-the-fly. Use SHIFT+C.
-      pkgs.mpvScripts.vr-reversal     # Play 360 video. See https://github.com/dfaker/VR-reversal
-      pkgs.mpvScripts.mpris           # Control using media keys
-      pkgs.mpvScripts.mpv-cheatsheet  # Show some mappings by pressing '?'
+      pkgs.mpvScripts.uosc                # Custom UI with subtitles downloaded bundled in
+      pkgs.mpvScripts.thumbfast           # Generate thumbnails while seeking
+      pkgs.mpvScripts.dynamic-crop        # Delete hard-coded blackbars on-the-fly. Use SHIFT+C.
+      pkgs.mpvScripts.vr-reversal         # Play 360 video. See https://github.com/dfaker/VR-reversal
+      pkgs.mpvScripts.mpris               # Control using media keys
+      pkgs.mpvScripts.mpv-cheatsheet-ng   # Show some mappings by pressing '?'
     ];
 
     scriptOpts = {

@@ -29,7 +29,7 @@ let
 
   serviceCfg = config.custom.homelab.services.${name};
   mediaCfg = config.custom.homelab.media.${name};
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
 
 
   settings = {
@@ -90,7 +90,7 @@ in
   };
 
   users.users.${name}.extraGroups = [ homelabMounts.media.group ];
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ name ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ name ];
 
   systemd.services."${name}-configure" = {
     description = "${upperName} setup";

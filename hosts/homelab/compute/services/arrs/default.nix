@@ -9,5 +9,9 @@ _: {
     # Quality of life
     ./cleanuparr.nix
     ./recyclarr.nix
+
+    # Backup hooks
+    ./sonarr-backup.nix
+    ./radarr-backup.nix
   ];
 }

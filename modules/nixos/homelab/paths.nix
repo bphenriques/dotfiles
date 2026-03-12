@@ -3,7 +3,7 @@ let
   inherit (lib) mkOption types;
   
   cfg = config.custom.homelab.paths;
-  cifsCfg = config.custom.homelab.cifs;
+  smbCfg = config.custom.homelab.smb;
 in {
   options.custom.homelab.paths = {
     # Private Media - Not recoverable.
@@ -82,10 +82,10 @@ in {
     };
   };
 
-  config = lib.mkIf cifsCfg.enable {
+  config = lib.mkIf smbCfg.enable {
     custom.homelab.paths = {
-      bphenriques.root = lib.mkDefault cifsCfg.mounts.bphenriques.localMount;
-      media.root = lib.mkDefault cifsCfg.mounts.media.localMount;
+      bphenriques.root = lib.mkDefault smbCfg.mounts.bphenriques.localMount;
+      media.root = lib.mkDefault smbCfg.mounts.media.localMount;
     };
   };
 }

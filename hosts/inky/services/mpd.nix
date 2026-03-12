@@ -16,9 +16,9 @@ in {
     };
   };
 
-  # MPD needs access to CIFS mount
-  users.users.mpd.extraGroups = [ config.custom.homelab.cifs.mounts.media.group ];
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "mpd" ];
+  # MPD needs access to SMB mount
+  users.users.mpd.extraGroups = [ config.custom.homelab.smb.mounts.media.group ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "mpd" ];
 
   # Allow MPD control from network
   networking.firewall.allowedTCPPorts = [ 6600 ];

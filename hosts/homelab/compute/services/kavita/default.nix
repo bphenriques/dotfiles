@@ -3,7 +3,7 @@ let
   serviceCfg = config.custom.homelab.services.kavita;
   oidcCfg = config.custom.homelab.oidc;
   pathsCfg = config.custom.homelab.paths;
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
 
   kavitaCfg = config.services.kavita;
 in
@@ -34,7 +34,7 @@ in
     };
   };
 
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "kavita" ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "kavita" ];
 
   services.kavita = {
     enable = true;

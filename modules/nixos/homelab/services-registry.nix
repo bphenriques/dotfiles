@@ -121,6 +121,33 @@ let
         };
       };
 
+      # Pre-backup hook (consumed by backup.nix)
+      backup = {
+        script = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "Script to run before backup. Should write output to the directory specified by OUTPUT_DIR env var.";
+        };
+
+        environment = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          default = { };
+          description = "Environment variables passed to the backup script.";
+        };
+
+        after = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Systemd services this backup hook requires and orders after.";
+        };
+
+        description = lib.mkOption {
+          type = lib.types.str;
+          default = "Pre-backup export for ${name}";
+          description = "Description for the systemd service.";
+        };
+      };
+
       # Per-service secrets (contract from _secrets-schema.nix)
       secrets = lib.mkOption {
         type = lib.types.submodule (import ./_secrets-schema.nix {

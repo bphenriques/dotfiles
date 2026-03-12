@@ -2,7 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.transmission;
   pathsCfg = config.custom.homelab.paths;
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
 in
 {
   custom.homelab.services.transmission = {
@@ -36,7 +36,7 @@ in
   };
 
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "transmission" ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "transmission" ];
 
   systemd.services.transmission.serviceConfig = {
     Restart = "on-failure";

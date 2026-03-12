@@ -2,7 +2,7 @@
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab;
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
   groupsCfg = config.custom.homelab.groups;
 
   serviceCfg = cfg.services.romm;
@@ -11,7 +11,7 @@ let
   dataDir = "/var/lib/romm";
   envFile = "/run/romm/romm.env";
 
-  # Dedicated user for RomM container - member of media group for CIFS access
+  # Dedicated user for RomM container - member of media group for SMB access
   # GIDs 950 (user), 970 (secrets), 971 (oidc) are fixed for container supplementary group access
   rommUser = {
     name = "romm";
@@ -74,7 +74,7 @@ in
     };
   };
 
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "podman-romm" ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
   services.mysql.ensureDatabases = [ db.name ];

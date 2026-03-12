@@ -1,4 +1,5 @@
 { config, pkgs, lib, self, ... }:
+# TODO: Fuzzel supports message now
 {
   imports = [
     ./hardware
@@ -12,6 +13,7 @@
     # Temporary
     ../homelab/compute/datastores
     ../homelab/compute/services
+    #../homelab/compute/tasks
   ];
 
   networking.hostName = "bphenriques-laptop";
@@ -37,7 +39,7 @@
 
   # Homelab integration
   networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) self.shared.networks.main.hosts;
-  custom.homelab.cifs = {
+  custom.homelab.smb = {
     enable = true;
     hostname = self.shared.networks.main.hosts.bruno-home-nas;
     mounts = {

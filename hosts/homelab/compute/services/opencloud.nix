@@ -12,36 +12,19 @@ let
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
   # Note: 'unsafe-eval' is required by the OpenCloud Web UI (Vue.js runtime compilation)
   oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.url;
-  cspConfig = pkgs.writeText "opencloud-csp.yaml" ''
-    directives:
-      default-src:
-        - "'self'"
-      script-src:
-        - "'self'"
-        - "'unsafe-eval'"
-      style-src:
-        - "'self'"
-        - "'unsafe-inline'"
-      font-src:
-        - "'self'"
-      img-src:
-        - "'self'"
-        - "blob:"
-        - "data:"
-      connect-src:
-        - "'self'"
-        - "blob:"
-        - "${oidcCfg.provider.url}"
-        - "wss://${oidcHost}"
-        - "${collaboraCfg.publicUrl}"
-        - "wss://${collaboraCfg.publicHost}"
-      frame-src:
-        - "'self'"
-        - "blob:"
-        - "${collaboraCfg.publicUrl}"
-      frame-ancestors:
-        - "'self'"
-  '';
+  yamlFormat = pkgs.formats.yaml { };
+  cspConfig = yamlFormat.generate "opencloud-csp.yaml" {
+    directives = {
+      default-src  = [ "'self'" ];
+      script-src   = [ "'self'" "'unsafe-eval'" ];
+      style-src    = [ "'self'" "'unsafe-inline'" ];
+      font-src     = [ "'self'" ];
+      img-src      = [ "'self'" "blob:" "data:" ];
+      connect-src  = [ "'self'" "blob:" oidcCfg.provider.url "wss://${oidcHost}" collaboraCfg.publicUrl "wss://${collaboraCfg.publicHost}" ];
+      frame-src    = [ "'self'" "blob:" collaboraCfg.publicUrl ];
+      frame-ancestors = [ "'self'" ];
+    };
+  };
 in
 {
   custom.homelab.services = {

@@ -46,7 +46,7 @@ in
     };
     volumes = [ "${dataDir}:/config" ];
     # LinuxServer-style container: needs to drop privileges at startup via PUID/PGID.
-    # Requires no-new-privileges=false + caps to allow the entrypoint to setuid/chown.
+    # Requires no-new-privileges=false + minimal caps for the entrypoint to setuid/chown.
     extraOptions = [
       "--network=host"
       "--memory=256m"
@@ -54,8 +54,6 @@ in
       "--cap-add=CHOWN"
       "--cap-add=SETUID"
       "--cap-add=SETGID"
-      "--cap-add=DAC_OVERRIDE"
-      "--cap-add=FOWNER"
     ];
   };
 

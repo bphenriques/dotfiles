@@ -2,7 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.syncthing;
   pathsCfg = config.custom.homelab.paths;
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
   syncthingUsers = config.custom.homelab.enabledUsers.syncthing;
 
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
@@ -56,7 +56,7 @@ in
     homelabMounts.media.group
     homelabMounts.bphenriques.group
   ];
-  custom.homelab.cifs.mounts = {
+  custom.homelab.smb.mounts = {
     media.systemd.dependentServices = [ "syncthing" ];
     bphenriques.systemd.dependentServices = [ "syncthing" ];
   };

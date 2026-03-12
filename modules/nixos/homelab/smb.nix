@@ -2,12 +2,12 @@
 let
   inherit (lib) mkOption types;
 
-  cfg = config.custom.homelab.cifs;
+  cfg = config.custom.homelab.smb;
 
   # Convert a path to a systemd unit name (e.g., /mnt/homelab-bphenriques -> mnt-homelab\x2dbphenriques)
   pathToUnitName = path: utils.escapeSystemdPath (lib.removePrefix "/" path);
 
-  cifsCfg = types.submodule ({ name, config, ... }: {
+  smbMountCfg = types.submodule ({ name, config, ... }: {
     options = {
       localMount = mkOption {
         type = types.str;
@@ -27,7 +27,7 @@ let
       };
       gid = mkOption {
         type = types.int;
-        description = "GID for the mount group (required for CIFS mount options)";
+        description = "GID for the mount group (required for SMB mount options)";
       };
       systemd.automountUnit = mkOption {
         type = types.str;
@@ -53,13 +53,13 @@ let
           via users.users.<name>.extraGroups.
 
           Example:
-            custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
+            custom.homelab.smb.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
         '';
       };
     };
   });
 in {
-  options.custom.homelab.cifs = {
+  options.custom.homelab.smb = {
     enable = lib.mkEnableOption "Home-server storage";
 
     hostname = mkOption {
@@ -75,12 +75,12 @@ in {
     credentialsPath = mkOption {
       type = types.str;
       default = config.sops.templates."homelab-samba-credentials".path;
-      description = "Path to the CIFS credentials file";
+      description = "Path to the SMB credentials file";
       readOnly = true;
     };
     
     mounts = mkOption {
-      type = types.attrsOf cifsCfg;
+      type = types.attrsOf smbMountCfg;
       default = {};
       description = "Attributes where the key is the remote root folder to configure";
       example = lib.literalExpression ''

@@ -5,7 +5,7 @@
     isNormalUser = true;
     uid = 1000;
     hashedPasswordFile = config.sops.secrets."users/bphenriques/password".path;
-    extraGroups = [ "wheel" ] ++ lib.optionals config.custom.homelab.cifs.enable [
+    extraGroups = [ "wheel" ] ++ lib.optionals config.custom.homelab.smb.enable [
       "homelab-media"
       "homelab-bphenriques"
     ];

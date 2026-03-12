@@ -27,7 +27,7 @@
 
   # Homelab integration
   networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) self.shared.networks.main.hosts;
-  custom.homelab.cifs = {
+  custom.homelab.smb = {
     enable = true;
     hostname = self.shared.networks.main.hosts.bruno-home-nas;
     mounts = {

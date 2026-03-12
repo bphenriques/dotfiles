@@ -4,7 +4,7 @@ let
   oidcCfg = config.custom.homelab.oidc;
 in
 {
-  imports = [ ./configure.nix ];
+  imports = [ ./configure.nix ./backup.nix ];
 
   custom.homelab.services.miniflux = {
     port = 8081;

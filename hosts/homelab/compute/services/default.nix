@@ -12,8 +12,10 @@
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
+    ./ntfy
     ./wireguard
     ./opencloud.nix
+    ./home-assistant.nix
   ];
 
   custom.homelab = {

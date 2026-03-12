@@ -35,15 +35,7 @@ let
   });
 in
 {
-  custom.homelab.services.homepage = {
-    port = 3001;
-    forwardAuth.enable = false;
-    integrations.homepage = {
-      enable = true;
-      category = "Infrastructure";
-      description = "Dashboard";
-    };
-  };
+  custom.homelab.services.homepage.port = 3001;
 
   services.homepage-dashboard = {
     enable = true;

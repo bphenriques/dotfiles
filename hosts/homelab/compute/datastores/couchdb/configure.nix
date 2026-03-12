@@ -27,13 +27,14 @@ in
     requires = [ "couchdb.service" ];
     partOf = [ "couchdb.service" ];
     restartTriggers = [ ./couchdb-configure.nu ];
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
       User = config.services.couchdb.user;    # Ensure it is not root.
       Group = config.services.couchdb.group;
       Restart = "on-failure";
       RestartSec = 10;
-      StartLimitBurst = 3;
     };
     environment = {
       COUCHDB_URL = serviceCfg.url;

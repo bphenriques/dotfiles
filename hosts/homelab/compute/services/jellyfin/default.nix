@@ -1,7 +1,7 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.jellyfin;
-  homelabMounts = config.custom.homelab.cifs.mounts;
+  homelabMounts = config.custom.homelab.smb.mounts;
 in
 {
   imports = [
@@ -29,12 +29,12 @@ in
 
   services.jellyfin.enable = true;
   users.users.jellyfin.extraGroups = [ homelabMounts.media.group "video" "render" ];
-  custom.homelab.cifs.mounts.media.systemd.dependentServices = [ "jellyfin" ];
+  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "jellyfin" ];
 
   assertions = [
     {
       assertion = homelabMounts ? media;
-      message = "Jellyfin requires custom.homelab.cifs.mounts.media to be configured.";
+      message = "Jellyfin requires custom.homelab.smb.mounts.media to be configured.";
     }
   ];
 }

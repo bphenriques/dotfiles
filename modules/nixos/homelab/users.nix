@@ -155,7 +155,7 @@ in
     jellyseerrUsers = lib.attrValues config.custom.homelab.enabledUsers.jellyseerr;
   in [
     {
-      assertion = config.custom.homelab.enabledUsers.pocket-id != [];
+      assertion = config.custom.homelab.enabledUsers.pocket-id != {};
       message = "At least one user must be enabled for Pocket-ID (services.pocket-id.enable = true)";
     }
     {

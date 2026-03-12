@@ -29,6 +29,7 @@ let
       screenshot = pkgs.callPackage ./screenshot { };
       mpc-plus = pkgs.callPackage ./mpc-plus { };
       wg-manage = pkgs.callPackage ./wg-manage { };
+      rustic-manage = pkgs.callPackage ./rustic-manage { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

@@ -19,7 +19,7 @@ Internet ──▶ Cloudflare ├──▶ Traefik ──┬──▶ Pocket-ID 
                         │      ▲       ├──▶ Jellyfin, Immich   │
             Wireguard ──┼──────┘       ├──▶ Homepage           │
             (VPN)       │              │                       │
-                        │              │   Storage (CIFS) ◀────┼───┐
+                        │              │   Storage (SMB) ◀─────┼───┐
                         └──────────────┼───────────────────────┘   │
                                        │                           │
                                        └───────▶ NAS (external) ◀──┘
@@ -30,7 +30,7 @@ Internet ──▶ Cloudflare ├──▶ Traefik ──┬──▶ Pocket-ID 
 - **Traefik**: Reverse proxy with TLS termination (routes to local and external hosts)
 - **Pocket-ID**: OIDC provider for SSO
 - **Tinyauth**: ForwardAuth middleware for services without native OIDC
-- **CIFS**: Services access NAS storage via CIFS mounts
+- **SMB**: Services access NAS storage via SMB mounts
 
 ## Adding a Service
 

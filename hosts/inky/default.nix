@@ -12,7 +12,7 @@ let
 
   # Only include modules needed for inky (not all homelab services)
   nixosModules = [
-    self.nixosModules.homelab-cifs
+    self.nixosModules.homelab-smb
     self.nixosModules.homelab-paths
     sops-nix.nixosModules.sops
     home-manager.nixosModules.home-manager
