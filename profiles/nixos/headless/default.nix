@@ -3,6 +3,9 @@
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
+  # Allow remote deployment via `nixos-rebuild --target-host root@...`
+  users.users.root.openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
+
   # Prevent accidental suspend/hibernate on headless server
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";
