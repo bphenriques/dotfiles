@@ -160,7 +160,7 @@ let
 
     templatesList = lib.mapAttrsToList (name: tmpl: {
       inherit name;
-      inherit (tmpl) path;
+      inherit (tmpl) path content;
       srcPath = pkgs.writeText "homelab-template-${ownerName}-${name}" tmpl.content;
     }) ownerCfg.templates;
 
@@ -188,7 +188,7 @@ let
     # Render templates (always re-rendered to pick up rotated secrets)
     ${lib.optionalString hasTemplates ''
       ${lib.concatMapStringsSep "\n" (tmpl: let
-        relevantVars = lib.filterAttrs (placeholder: _: lib.hasInfix placeholder (builtins.readFile tmpl.srcPath)) allVars;
+        relevantVars = lib.filterAttrs (placeholder: _: lib.hasInfix placeholder tmpl.content) allVars;
       in ''
         echo "Rendering template: ${tmpl.name}"
         mkdir -p "$(dirname '${tmpl.path}')"
