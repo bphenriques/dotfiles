@@ -33,9 +33,22 @@
   networking.useDHCP = false;
   networking.bonds.bond0 = {
     interfaces = [ "enp1s0" "enp2s0" ];
-    driverOptions.mode = "active-backup";  # switch to 802.3ad after configuring on the switch (cleaner)
+    driverOptions = {
+      mode = "active-backup";
+      primary = "enp1s0";
+    };
   };
   networking.interfaces.bond0.useDHCP = true;
+
+  # Prevent dhcpcd from falling back to a 169.254.x.x link-local address when DHCP is slow.
+  # Without this, dhcpcd settles on link-local if the bond isn't ready yet and won't retry DHCP.
+  networking.dhcpcd.extraConfig = "noipv4ll";
+
+  # Wait for bond0 carrier before starting dhcpcd (bond takes a moment to come up at boot)
+  systemd.services.dhcpcd = {
+    after = [ "sys-subsystem-net-devices-bond0.device" ];
+    wants = [ "sys-subsystem-net-devices-bond0.device" ];
+  };
 
   # Power management
   powerManagement = {
