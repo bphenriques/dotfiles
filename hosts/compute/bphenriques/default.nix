@@ -13,5 +13,8 @@
     openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
   };
 
+  # Allow remote deployment via `nixos-rebuild --target-host root@...`
+  users.users.root.openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
+
   home-manager.users.bphenriques = import ./home.nix;
 }

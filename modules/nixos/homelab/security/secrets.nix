@@ -187,7 +187,9 @@ let
 
     # Render templates (always re-rendered to pick up rotated secrets)
     ${lib.optionalString hasTemplates ''
-      ${lib.concatMapStringsSep "\n" (tmpl: ''
+      ${lib.concatMapStringsSep "\n" (tmpl: let
+        relevantVars = lib.filterAttrs (placeholder: _: lib.hasInfix placeholder (builtins.readFile tmpl.srcPath)) allVars;
+      in ''
         echo "Rendering template: ${tmpl.name}"
         mkdir -p "$(dirname '${tmpl.path}')"
         install -m 640 -o root -g "$group" "${tmpl.srcPath}" "${tmpl.path}"
@@ -196,7 +198,7 @@ let
             '${placeholder}' \
             '${filePath}' \
             '${tmpl.path}'
-        '') allVars)}
+        '') relevantVars)}
         if ${pkgs.gnugrep}/bin/grep -qE '__HOMELAB_SECRET_|@HOMELAB_OIDC_' '${tmpl.path}'; then
           echo "ERROR: unreplaced placeholders in ${tmpl.path}" >&2
           exit 1
