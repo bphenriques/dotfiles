@@ -4,8 +4,7 @@
   users.users.bphenriques = {
     isNormalUser = true;
     uid = 1000;
-    password = "password"; #temporary while I troubleshoot
-    #hashedPasswordFile = config.sops.secrets."users/bphenriques/password".path;
+    hashedPasswordFile = config.sops.secrets."users/bphenriques/password".path;
     extraGroups = [ "wheel" ] ++ lib.optionals config.custom.homelab.smb.enable [
       "homelab-media"
       "homelab-bphenriques"

@@ -18,7 +18,6 @@
   networking.hostName = "compute";
   boot = {
     kernelPackages = pkgs.linuxPackages_6_18;
-    kernelParams = [ "systemd.debug_shell=1" ]; # TODO: remove after debugging
     loader.systemd-boot = {
       enable = true;
       editor = false;

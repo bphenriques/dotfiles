@@ -2,8 +2,6 @@
 set -euo pipefail
 
 fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
-info()    { printf '[ .. ] %s\n' "$1"; }
-success() { printf '[ OK ] %s\n' "$1"; }
 
 bw_get_item_field() { bw get item "$1" | jq -e --arg FIELD "$2" --raw-output '.fields[] | select(.name == $FIELD) | .value'; }
 
@@ -44,7 +42,7 @@ init_host() {
     fatal "Bitwarden item '$item_name' already exists. Delete it first or use a different host name."
   fi
   
-  info "Generating SOPS age key..."
+  # Generate SOPS age key
   local tmpdir
   tmpdir="$(mktemp -d)"
   trap 'rm -rf "$tmpdir"' EXIT
@@ -56,12 +54,10 @@ init_host() {
 
   local luks_password=""
   if [ "$with_luks" = "--luks" ]; then
-    info "Generating LUKS password..."
     luks_password="$(openssl rand -base64 32)"
     fields=$(echo "$fields" | jq --arg luks "$luks_password" '. += [{name: "luks-interactive-password", value: $luks, type: 1}]')
   fi
   
-  info "Creating Bitwarden item '$item_name'..."
   local item_json
   item_json=$(jq -n \
     --arg name "$item_name" \
@@ -71,8 +67,6 @@ init_host() {
   echo "$item_json" | bw encode | bw create item > /dev/null
   bw sync > /dev/null
   
-  success "Created Bitwarden item: $item_name"
-  echo ""
   echo "SOPS public key: $(age-keygen -y "$tmpdir/age.key")"
   if [ -n "$luks_password" ]; then
     echo "LUKS password: Check field 'luks-interactive-password' in Bitwarden"
@@ -118,7 +112,6 @@ EOF
 
 unlock_bitwarden() {
   local bw_email="$1"
-  info "Unlocking Bitwarden account (${bw_email})..."
   BW_SESSION="$(bw-session session "$bw_email")"
   export BW_SESSION
 }
