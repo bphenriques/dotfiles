@@ -35,20 +35,22 @@
 
 ## Install remotely
 
-1. Boot onto the NixOS installer (see previous section). Set `nixos`'s password using `passwd` and get its IP. 
+1. Boot onto the NixOS installer (see previous section). Set `nixos`'s password using `passwd` and get its IP (`ip addr`). You likely already have added a static IP. 
 2. On a NixOS source machine run:
     ```shell
-    HOST=laptop
-    TARGET_IP=192.168.68.58
-    BITWARDEN_EMAIL=me@me.com
-    nix run github:bphenriques/dotfiles#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
+    export FLAKE_URL="github:bphenriques/dotfiles/$(git branch --show-current)"
+    HOST=compute
+    TARGET_IP=192.168.1.196
+    BITWARDEN_EMAIL=email
+    nix run $FLAKE_URL#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
     ```
 
 3. (if workstation) Once the new machine reboots, run the post-installation setup:
     ```shell
+    export FLAKE_URL="github:bphenriques/dotfiles/$(git branch --show-current)"
     HOST=laptop
     BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#desktop-post-install -- "$HOST" "$BITWARDEN_EMAIL"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' $FLAKE_URL#desktop-post-install -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 # Misc

@@ -5,7 +5,6 @@ fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
 info()    { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }
 
-normalize_host() { tr '/' '-' <<<"$1"; } # Convert host path to Bitwarden-safe name: homelab/compute to homelab-compute
 bw_get_item_field() { bw get item "$1" | jq -e --arg FIELD "$2" --raw-output '.fields[] | select(.name == $FIELD) | .value'; }
 
 fetch() {
@@ -22,14 +21,12 @@ fetch() {
 
   # All other secrets require a host
   test -z "$host" && fatal "host argument not provided"
-  local normalized_host
-  normalized_host="$(normalize_host "$host")"
 
   case "$secret_type" in
-    sops-secret)      bw_get_item_field "system-nixos-${normalized_host}" "sops-private" ;;
-    luks-key)         bw_get_item_field "system-nixos-${normalized_host}" "luks-interactive-password" ;;
-    ssh-private-key)  bw get item "ssh-key-nixos-${normalized_host}" | jq -re '.sshKey.privateKey' ;;
-    sops-private-key) bw_get_item_field "system-nixos-${normalized_host}" "sops-private" ;;
+    sops-secret)      bw_get_item_field "system-nixos-${host}" "sops-private" ;;
+    luks-key)         bw_get_item_field "system-nixos-${host}" "luks-interactive-password" ;;
+    ssh-private-key)  bw get item "ssh-key-nixos-${host}" | jq -re '.sshKey.privateKey' ;;
+    sops-private-key) bw_get_item_field "system-nixos-${host}" "sops-private" ;;
     *)                fatal "Unknown secret type: $secret_type" ;;
   esac
 }
@@ -40,7 +37,7 @@ init_host() {
   test -z "$host" && fatal "host argument not provided"
   
   local item_name
-  item_name="system-nixos-$(normalize_host "$host")"
+  item_name="system-nixos-$host"
   
   # Check if item already exists
   if bw get item "$item_name" > /dev/null 2>&1; then

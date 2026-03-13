@@ -11,9 +11,9 @@
     ./bphenriques
 
     # Temporary
-    ../homelab/compute/datastores
-    ../homelab/compute/services
-    ../homelab/compute/tasks
+    ../compute/datastores
+    ../compute/services
+    ../compute/tasks
   ];
 
   networking.hostName = "bphenriques-laptop";

@@ -65,7 +65,7 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      nixosConfigurations.compute = import ./hosts/homelab/compute inputs;
+      nixosConfigurations.compute = import ./hosts/compute inputs;
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
       nixosConfigurations.inky = import ./hosts/inky inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
