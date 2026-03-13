@@ -7,8 +7,8 @@
     ./datastores
     ./services
     ./tasks
-    ../../../profiles/nixos
-    ../../../profiles/nixos/headless
+    ../../profiles/nixos
+    ../../profiles/nixos/headless
 
     # Users
     ./bphenriques

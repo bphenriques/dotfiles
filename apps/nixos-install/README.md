@@ -41,7 +41,7 @@
     export FLAKE_URL="github:bphenriques/dotfiles/$(git branch --show-current)"
     HOST=compute
     TARGET_IP=192.168.1.196
-    BITWARDEN_EMAIL=email
+    BITWARDEN_EMAIL=me.com
     nix run $FLAKE_URL#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
     ```
 
