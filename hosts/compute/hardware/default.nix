@@ -32,7 +32,7 @@
   # Router DHCP reservation should use bond0's MAC (inherited from enp1s0)
   networking.useDHCP = false;
   networking.bonds.bond0 = {
-    interfaces = [ "enp1s0" "enp1s1" ];
+    interfaces = [ "enp1s0" "enp2s0" ];
     driverOptions.mode = "balance-alb";  # switch to 802.3ad after configuring on the switch (cleaner)
   };
   networking.interfaces.bond0.useDHCP = true;

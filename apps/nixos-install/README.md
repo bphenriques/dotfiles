@@ -41,16 +41,16 @@
     export FLAKE_URL="github:bphenriques/dotfiles/$(git branch --show-current)"
     HOST=compute
     TARGET_IP=192.168.1.196
-    BITWARDEN_EMAIL=me.com
-    nix run $FLAKE_URL#nixos-install -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
+    BITWARDEN_EMAIL="$(cat /tmp/email)"
+    nix run $FLAKE_URL#nixos-install --refresh -- remote "$HOST" "$BITWARDEN_EMAIL" "nixos@$TARGET_IP"
     ```
 
 3. (if workstation) Once the new machine reboots, run the post-installation setup:
     ```shell
     export FLAKE_URL="github:bphenriques/dotfiles/$(git branch --show-current)"
     HOST=laptop
-    BITWARDEN_EMAIL=me@me.com
-    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' $FLAKE_URL#desktop-post-install -- "$HOST" "$BITWARDEN_EMAIL"
+    BITWARDEN_EMAIL="$(cat /tmp/email)"
+    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' $FLAKE_URL#desktop-post-install --refresh -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
 # Misc
