@@ -11,6 +11,7 @@ let
         type = types.str;
         description = "Base mount point for this user's storage";
       };
+
       backups = {
         root = mkOption { type = types.str; default = "${config.root}/backups"; };
         phone = mkOption { type = types.str; default = "${config.root}/backups/phone"; };
@@ -45,6 +46,7 @@ in {
         type = types.str;
         description = "Base mount point for media storage";
       };
+
       music = {
         root = mkOption { type = types.str; default = "${cfg.media.root}/music"; };
         library = mkOption { type = types.str; default = "${cfg.media.root}/music/library"; };

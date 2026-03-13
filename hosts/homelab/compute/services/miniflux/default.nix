@@ -7,16 +7,16 @@ in
   imports = [ ./configure.nix ./backup.nix ];
 
   custom.homelab.services.miniflux = {
+    description = "RSS Server";
+    version = config.services.miniflux.package.version;
+    homepage = config.services.miniflux.package.meta.homepage;
+    category = "General";
     port = 8081;
     oidc = {
       enable = true;
       systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
     };
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "RSS Server";
-    };
+    integrations.homepage.enable = true;
   };
 
   services.miniflux = {

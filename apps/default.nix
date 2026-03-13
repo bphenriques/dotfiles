@@ -10,7 +10,9 @@ let
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
-    });
+      host-secrets = pkgs.callPackage ./host-secrets { };
+      service-catalogue = pkgs.callPackage ./service-catalogue { };
+      });
 
   linux = forLinuxSystems (system:
     let
@@ -25,6 +27,6 @@ let
       pkgs = nixpkgs.legacyPackages.${system};
       selfPkgs = self.packages.${system};
     in pkgsToApps {
-      darwin-install = pkgs.callPackage { inherit selfPkgs; };
+      darwin-install = pkgs.callPackage ./darwin-install { inherit selfPkgs; };
     });
 in mergeAllSystems [ crossPlatform linux darwin ]

@@ -15,13 +15,14 @@ let
 in
 {
   custom.homelab.services.transmission = {
+    description = "Torrent Client";
+    version = config.services.transmission.package.version;
+    homepage = config.services.transmission.package.meta.homepage;
+    category = "Media";
     port = 9091;
     forwardAuth.enable = true;
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "Torrent Client";
-    };
+    integrations.homepage.enable = true;
+    integrations.ntfy.enable = true;
     integrations.ntfy.topic = "download";
   };
 

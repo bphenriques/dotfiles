@@ -6,12 +6,12 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.ntfy = {
+    description = "Push Notifications";
+    version = config.services.ntfy-sh.package.version;
+    homepage = config.services.ntfy-sh.package.meta.homepage;
+    category = "Monitoring";
     port = 2586;
-    integrations.homepage = {
-      enable = true;
-      category = "Admin";
-      description = "Push Notifications";
-    };
+    integrations.homepage.enable = true;
   };
 
   services.ntfy-sh = {

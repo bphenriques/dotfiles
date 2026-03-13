@@ -10,14 +10,20 @@ let
     backups  = { public = false; };
   };
 
-  # Derive publishers from services with ntfy integration
-  ntfyServices = lib.filterAttrs (_: s: s.integrations.ntfy != null) homelabCfg.services;
+  # Derive publishers from services and tasks with ntfy integration
+  ntfyServices = lib.filterAttrs (_: s: s.integrations.ntfy.enable) homelabCfg.services;
   servicePublishers = lib.mapAttrs (name: s: {
     inherit (s.integrations.ntfy) topic tokenFile;
     owner = name;
   }) ntfyServices;
 
-  allPublishers = servicePublishers // homelabCfg.ntfy.extraPublishers;
+  ntfyTasks = lib.filterAttrs (_: t: t.integrations.ntfy.enable) homelabCfg.tasks;
+  taskPublishers = lib.mapAttrs (name: t: {
+    inherit (t.integrations.ntfy) topic tokenFile;
+    owner = name;
+  }) ntfyTasks;
+
+  allPublishers = servicePublishers // taskPublishers;
   allTopics = lib.unique (lib.mapAttrsToList (_: p: p.topic) allPublishers);
 
   configFile = pkgs.writeText "ntfy-configure.json" (builtins.toJSON {
@@ -26,18 +32,6 @@ let
   });
 in
 {
-  options.custom.homelab.ntfy.extraPublishers = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options = {
-        topic = lib.mkOption { type = lib.types.str; };
-        tokenFile = lib.mkOption { type = lib.types.str; };
-        owner = lib.mkOption { type = lib.types.str; default = "root"; };
-      };
-    });
-    default = { };
-    description = "Non-service publishers (e.g. backup tasks). Merged with service-derived publishers.";
-  };
-
   config = {
     assertions = let
       unknownTopics = lib.filter (t: !(builtins.hasAttr t topics)) allTopics;

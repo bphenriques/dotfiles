@@ -54,7 +54,10 @@ let
 in
 {
   custom.homelab.services.${name} = {
-    inherit port;
+    inherit port description;
+    version = config.services.${name}.package.version;
+    homepage = config.services.${name}.package.meta.homepage;
+    category = "Media";
     forwardAuth = {
       enable = true;
       group = forwardAuthGroup config;
@@ -66,12 +69,8 @@ in
       '';
       systemd.dependentServices = [ name "${name}-configure" ];
     };
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      inherit description;
-      icon = "${name}.svg";
-    };
+    integrations.homepage.enable = true;
+    integrations.ntfy.enable = true;
     integrations.ntfy.topic = "media";
   };
 

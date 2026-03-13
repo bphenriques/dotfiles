@@ -10,6 +10,10 @@ in
   ];
 
   custom.homelab.services.jellyfin = {
+    description = "Media Player";
+    version = config.services.jellyfin.package.version;
+    homepage = config.services.jellyfin.package.meta.homepage;
+    category = "Media";
     port = 8096;
     secrets = {
       files.admin-password = { rotatable = false; };
@@ -20,11 +24,7 @@ in
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "Media Player";
-    };
+    integrations.homepage.enable = true;
   };
 
   services.jellyfin.enable = true;

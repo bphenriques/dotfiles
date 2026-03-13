@@ -2,13 +2,33 @@
 let
   cfg = config.custom.homelab;
 
-  serviceOpt = lib.types.submodule ({ name, config, ... }: {
+  baseServiceModule = { name, config, ... }: {
     options = {
-      # Identity
       name = lib.mkOption {
         type = lib.types.str;
         default = name;
         description = "Service identifier (defaults to attribute name)";
+      };
+
+      # Service metadata
+      category = lib.mkOption {
+        type = lib.types.str;
+        description = "Service category (e.g., Media, Admin, Infrastructure)";
+      };
+
+      description = lib.mkOption {
+        type = lib.types.str;
+        description = "Short description of the service";
+      };
+
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "Service version (e.g. '4.7.0')";
+      };
+
+      homepage = lib.mkOption {
+        type = lib.types.str;
+        description = "Upstream project URL";
       };
 
       # Routing (backend)
@@ -76,27 +96,6 @@ let
         };
       };
 
-      # Integrations with external tools
-      integrations = {
-        homepage = lib.mkOption {
-          type = lib.types.nullOr (lib.types.submodule (import ./_homepage-schema.nix {
-            inherit lib;
-            serviceName = name;
-          }));
-          default = null;
-          description = "Homepage dashboard integration";
-        };
-
-        ntfy = lib.mkOption {
-          type = lib.types.nullOr (lib.types.submodule (import ./_ntfy-schema.nix {
-            inherit lib;
-            serviceName = name;
-          }));
-          default = null;
-          description = "ntfy notification integration";
-        };
-      };
-
       # Pre-backup hook (consumed by backup.nix)
       backup = {
         script = lib.mkOption {
@@ -124,33 +123,19 @@ let
         default = { };
         description = "Extra Traefik middleware definitions to attach to this service's router";
       };
-
-      # Per-service secrets (contract from _secrets-schema.nix)
-      secrets = lib.mkOption {
-        type = lib.types.submodule (import ./_secrets-schema.nix {
-          inherit lib;
-          ownerName = name;
-        });
-        default = { };
-        description = "Generated secrets for this service";
-      };
-
-      # Per-service OIDC client (contract from _oidc-schema.nix)
-      oidc = lib.mkOption {
-        type = lib.types.submodule (import ./_oidc-schema.nix {
-          inherit lib;
-          serviceName = name;
-          serviceConfig = config;
-        });
-        default = { };
-        description = "OIDC client configuration for this service";
-      };
     };
-  });
+  };
 in
 {
   options.custom.homelab = {
     enable = lib.mkEnableOption "home-server services";
+
+    # Internal extension point for per-service options (e.g., integrations).
+    _serviceOptionExtensions = lib.mkOption {
+      type = lib.types.listOf lib.types.deferredModule;
+      default = [ ];
+      internal = true;
+    };
 
     domain = lib.mkOption {
       type = lib.types.str;
@@ -158,21 +143,15 @@ in
     };
 
     services = lib.mkOption {
-      type = lib.types.attrsOf serviceOpt;
+      type = lib.types.attrsOf (lib.types.submoduleWith {
+        modules = [ baseServiceModule ] ++ cfg._serviceOptionExtensions;
+      });
       default = { };
       description = ''
-        Registry of HTTP services: routing, secrets, OIDC, and integrations.
+        Registry of HTTP services: routing and shared defaults.
+        Integrations and security concerns extend this via internal extension hooks.
         Each service gets a subdomain under the base domain.
       '';
-    };
-
-    # Standalone secrets for non-service owners (e.g. timers, tasks)
-    secrets = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
-        imports = [ (import ./_secrets-schema.nix { inherit lib; ownerName = name; }) ];
-      }));
-      default = { };
-      description = "Secrets for non-service owners (timers, tasks, etc.)";
     };
 
   };
@@ -180,12 +159,20 @@ in
   config = lib.mkIf cfg.enable {
     assertions = let
       allServices = lib.attrValues cfg.services;
+
       urls = map (s: s.url) allServices;
-      duplicates = lib.filter (url: lib.count (u: u == url) urls > 1) (lib.unique urls);
+      dupUrls = lib.filter (url: lib.count (u: u == url) urls > 1) (lib.unique urls);
+
+      allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) allServices;
+      dupHosts = lib.filter (h: lib.count (x: x == h) allHosts > 1) (lib.unique allHosts);
     in [
       {
-        assertion = duplicates == [ ];
-        message = "Service URLs must be unique. Conflicting: ${toString duplicates}";
+        assertion = dupUrls == [ ];
+        message = "Service URLs must be unique. Conflicting: ${toString dupUrls}";
+      }
+      {
+        assertion = dupHosts == [ ];
+        message = "Service public hosts and aliases must be unique. Conflicting: ${toString dupHosts}";
       }
     ];
   };

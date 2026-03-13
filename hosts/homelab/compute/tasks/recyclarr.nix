@@ -24,7 +24,7 @@ let
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
-  custom.homelab.secrets.recyclarr = {
+  custom.homelab.tasks.recyclarr.secrets = {
     templates."secrets.yml" = {
       content = ''
         movies_api_key: ${radarrCfg.secrets.placeholder.api-key}

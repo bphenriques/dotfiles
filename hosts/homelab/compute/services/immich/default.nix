@@ -7,13 +7,12 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.immich = {
+    description = "Photo & Video Gallery";
+    version = config.services.immich.package.version;
+    homepage = config.services.immich.package.meta.homepage;
+    category = "Media";
     port = 2283;
     subdomain = "photos";
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "Photo & Video Gallery";
-    };
 
     # TODO: admin-password could be removed if Immich supports OIDC-only admin
     secrets = {
@@ -30,6 +29,8 @@ in
       ];
       systemd.dependentServices = [ "immich-server" ];
     };
+
+    integrations.homepage.enable = true;
   };
 
   # TODO: Consider backup strategy for Immich data

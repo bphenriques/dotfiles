@@ -7,6 +7,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.prowlarr = {
+    description = "Manage *rr services";
+    version = config.services.prowlarr.package.version;
+    homepage = config.services.prowlarr.package.meta.homepage;
+    category = "Media";
     port = 9096;
     secrets = {
       files.api-key = { rotatable = true; };
@@ -16,11 +20,8 @@ in
       systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
     };
     forwardAuth.enable = true;
-    integrations.homepage = {
-      enable = true;
-      category = "Admin";
-      description = "Manage *rr services";
-    };
+    integrations.homepage.enable = true;
+    integrations.ntfy.enable = true;
     integrations.ntfy.topic = "admin";
   };
 

@@ -7,6 +7,7 @@ let
   extrasDir = "${stateDir}/src/extras";
 
   ntfyCfg = config.custom.homelab.services.ntfy;
+  backupTaskCfg = config.custom.homelab.tasks.backup;
 
   tomlFormat = pkgs.formats.toml { };
   rusticProfile = tomlFormat.generate "homelab.toml" {
@@ -40,8 +41,8 @@ let
   rusticManage = "${cfg.package}/bin/rustic-manage-bin";
   rusticManageEnv = {
     STATE_DIR = stateDir;
-    NTFY_URL = "${ntfyCfg.url}/${cfg.integrations.ntfy.topic}";
-    NTFY_TOKEN_FILE = cfg.integrations.ntfy.tokenFile;
+    NTFY_URL = "${ntfyCfg.url}/${backupTaskCfg.integrations.ntfy.topic}";
+    NTFY_TOKEN_FILE = backupTaskCfg.integrations.ntfy.tokenFile;
   };
 
   # Services that have a backup script defined
@@ -98,7 +99,7 @@ in
       description = "Standalone pre-backup hooks not tied to a homelab service (e.g. GitHub).";
     };
 
-    schedule = lib.mkOption {
+    backupSchedule = lib.mkOption {
       type = lib.types.str;
       default = "*-*-* 03:00:00";
       description = "systemd OnCalendar schedule for the backup timer.";
@@ -109,20 +110,9 @@ in
       default = "Sun *-*-* 05:00:00";
       description = "systemd OnCalendar schedule for the weekly verification timer.";
     };
-
-    integrations.ntfy = lib.mkOption {
-      type = lib.types.submodule (import ./_ntfy-schema.nix {
-        inherit lib;
-        serviceName = "backup";
-      });
-      description = "ntfy notification integration for backup tasks";
-    };
   };
 
   config = lib.mkIf (cfg.package != null) {
-    custom.homelab.ntfy.extraPublishers.backup = {
-      inherit (cfg.integrations.ntfy) topic tokenFile;
-    };
     sops = {
       secrets."backup/b2/bucket" = { };
       secrets."backup/b2/bucket_id" = { };
@@ -218,7 +208,7 @@ in
     systemd.timers.homelab-backup = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = cfg.schedule;
+        OnCalendar = cfg.backupSchedule;
         RandomizedDelaySec = "1h";
         Persistent = true;
       };

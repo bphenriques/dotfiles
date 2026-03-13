@@ -4,7 +4,7 @@ let
   homelabMounts = config.custom.homelab.smb.mounts;
   serviceCfg = config.custom.homelab.services.immich;
 
-  enabledUsers = config.custom.homelab.enabledUsers.immich;
+  enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.homelab.users;
 
   # TODO: admin could be removed if Immich supports OIDC-only admin
   # TODO: Sync the OIDC user files for tighter SSO integration (not implemented).

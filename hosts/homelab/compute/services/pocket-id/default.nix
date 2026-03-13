@@ -8,6 +8,10 @@ in
 
   custom.homelab = {
     services.pocket-id = {
+      description = "OIDC Provider";
+      version = config.services.pocket-id.package.version;
+      homepage = config.services.pocket-id.package.meta.homepage;
+      category = "Infrastructure";
       subdomain = "auth";
       port = port;
       secrets = {
@@ -17,11 +21,8 @@ in
         };
         systemd.dependentServices = [ "pocket-id" ];
       };
-      integrations.homepage = {
-        enable = true;
-        category = "Infrastructure";
-        description = "OIDC Provider";
-      };
+      integrations.homepage.enable = true;
+      integrations.catalogue.displayName = "Pocket ID";
     };
 
     oidc.provider = {

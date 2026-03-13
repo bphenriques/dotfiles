@@ -3,7 +3,7 @@ let
   serviceCfg = config.custom.homelab.services.syncthing;
   pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.smb.mounts;
-  syncthingUsers = config.custom.homelab.enabledUsers.syncthing;
+  syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.custom.homelab.users;
 
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
@@ -42,14 +42,14 @@ let
 in
 {
   custom.homelab.services.syncthing = {
+    description = "File Sync";
+    version = config.services.syncthing.package.version;
+    homepage = config.services.syncthing.package.meta.homepage;
+    category = "General";
     port = 8384;
     forwardAuth.enable = true;
     secrets.files.gui-password = { rotatable = true; };
-    integrations.homepage = {
-      enable = true;
-      category = "Admin";
-      description = "File Sync";
-    };
+    integrations.homepage.enable = true;
   };
 
   users.users.syncthing.extraGroups = [
@@ -89,6 +89,7 @@ in
       gui = {
         theme = "dark";
         insecureAdminAccess = false;
+        # Intentionally enabled: when exposed behind Traefik + public hostnames, Syncthing GUI host checks fail.
         insecureSkipHostcheck = true;
         user = "admin";
         # credentials provided through guiPasswordFile

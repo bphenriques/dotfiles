@@ -11,6 +11,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.kavita = {
+    description = "Book Server";
+    version = config.services.kavita.package.version;
+    homepage = config.services.kavita.package.meta.homepage;
+    category = "Media";
     port = 8097;
     secrets = {
       files = {
@@ -27,11 +31,7 @@ in
       ];
       systemd.dependentServices = [ "kavita" ];
     };
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "Book Server";
-    };
+    integrations.homepage.enable = true;
   };
 
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ "kavita" ];

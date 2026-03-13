@@ -1,7 +1,7 @@
 { lib }:
 let
-  inherit (builtins) baseNameOf listToAttrs;
-  inherit (lib) removeSuffix map nameValuePair filter genAttrs mergeAttrsList;
+  inherit (builtins) baseNameOf listToAttrs toString;
+  inherit (lib) removeSuffix map nameValuePair filter genAttrs mergeAttrsList splitString concatStringsSep removePrefix any hasInfix;
   inherit (lib.filesystem) listFilesRecursive;
 in
 rec {
@@ -11,15 +11,18 @@ rec {
 
   mergeAllSystems = attrs: forAllSystems (system: mergeAttrsList (map (attrs: attrs.${system} or { }) attrs));
 
-  # Generates a attr with { "{dir}-{filename}" = {file-path}; }
+  # Generates an attrset { "path-like-name" = <module-path>; } from .nix files.
+  # Skips default modules and internal implementation folders.
   readModulesAttrs = dir:
     let
-      isNixModule = path:
-        let name = baseNameOf path;
-        in lib.hasSuffix ".nix" name
-           && name != "default.nix"
-           && !lib.hasPrefix "_" name;  # Skip files starting with underscore
-      targetFiles = filter isNixModule (listFilesRecursive dir);
-      toModuleName = path: (baseNameOf (dirOf path)) + "-" + (removeSuffix ".nix" (baseNameOf path));
-    in listToAttrs (map (path: nameValuePair (toModuleName path) path) targetFiles);
+      rootPath = toString dir;
+      ignoredDirs = [ "/schemas/" "/internal/" "/lib/" ];
+      relPath = path: removePrefix "${rootPath}/" (toString path);
+      isExportedModule = path: let
+        rel = relPath path;
+        fileName = baseNameOf rel;
+      in lib.hasSuffix ".nix" fileName && fileName != "default.nix" && !(any (dirName: hasInfix dirName "/${rel}") ignoredDirs);
+      toModuleName = path: removeSuffix ".nix" (concatStringsSep "-" (splitString "/" (relPath path)));
+    in
+      listToAttrs (map (path: nameValuePair (toModuleName path) path) (filter isExportedModule (listFilesRecursive dir)));
 }

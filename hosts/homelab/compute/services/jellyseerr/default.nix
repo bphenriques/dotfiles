@@ -6,6 +6,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.jellyseerr = {
+    category = "Media";
+    description = "TV / Movie Finder";
+    version = config.services.jellyseerr.package.version;
+    homepage = config.services.jellyseerr.package.meta.homepage;
     port = 9099;
     secrets = {
       files.api-key = { rotatable = true; };
@@ -14,12 +18,7 @@ in
       '';
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
-
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "TV / Movie Finder";
-    };
+    integrations.homepage.enable = true;
   };
 
   services.jellyseerr = {

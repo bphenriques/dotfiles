@@ -50,12 +50,11 @@ in
   };
 
   custom.homelab.services.romm = {
+    description = "ROM Manager";
+    version = "4.7.0";
+    homepage = "https://github.com/rommapp/romm";
+    category = "Media";
     port = 8095;
-    integrations.homepage = {
-      enable = true;
-      category = "Media";
-      description = "ROM Manager";
-    };
 
     secrets = {
       gid = 970; # Fixed GIDs required for container supplementary group access (--group-add). Group names are not possible.
@@ -74,6 +73,7 @@ in
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
       systemd.dependentServices = [ "podman-romm" ];
     };
+    integrations.homepage.enable = true;
   };
 
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ "podman-romm" ];

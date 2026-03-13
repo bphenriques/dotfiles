@@ -4,12 +4,12 @@
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   # Prevent accidental suspend/hibernate on headless server
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=no
-    AllowHibernation=no
-    AllowHybridSleep=no
-    AllowSuspendThenHibernate=no
-  '';
+  systemd.sleep.settings.Sleep = {
+    AllowSuspend = "no";
+    AllowHibernation = "no";
+    AllowHybridSleep = "no";
+    AllowSuspendThenHibernate = "no";
+  };
 
   networking.useDHCP = false;
   networking.firewall.enable = true;

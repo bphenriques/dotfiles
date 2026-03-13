@@ -30,6 +30,7 @@ Internet ──▶ Cloudflare ├──▶ Traefik ──┬──▶ Pocket-ID 
 - **Traefik**: Reverse proxy with TLS termination (routes to local and external hosts)
 - **Pocket-ID**: OIDC provider for SSO
 - **Tinyauth**: ForwardAuth middleware for services without native OIDC
+- **Collabora/WOPI**: Must be publicly reachable through Traefik for OpenCloud document editing callbacks
 - **SMB**: Services access NAS storage via SMB mounts
 
 ## Adding a Service
@@ -42,7 +43,9 @@ custom.homelab.services.myapp = {
   secrets.files.api-key = { rotatable = true; };
   secrets.systemd.dependentServices = [ "myapp" ];
   oidc.enable = true;
-  integrations.homepage = { enable = true; category = "Media"; description = "My App"; };
+  category = "Media";
+  description = "My App";
+  integrations.homepage.enable = true;
 };
 ```
 
@@ -82,6 +85,14 @@ custom.homelab.secrets.mytask = {
 **Rotation**: `sudo rm /var/lib/homelab-secrets/<owner>/<file> && sudo systemctl restart homelab-secrets-<owner>`
 
 See [_secrets-schema.nix](../../modules/nixos/homelab/_secrets-schema.nix), [secrets.nix](../../modules/nixos/homelab/secrets.nix).
+
+## Required SOPS Secrets Per Host
+
+Print a bootstrap YAML example to stdout (redirect it to a file if needed):
+
+```bash
+nix run .#host-secrets -- compute > hosts/homelab/compute/secrets.yaml
+```
 
 ## Adding a User
 

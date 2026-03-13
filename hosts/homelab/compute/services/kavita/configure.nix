@@ -48,7 +48,6 @@ let
   });
 in
 {
-
   systemd.services.kavita-configure = {
     description = "Kavita setup";
     wantedBy = [ "kavita.service" ]; # Unconventional but ensures configure runs when kavita starts

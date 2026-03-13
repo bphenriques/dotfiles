@@ -2,7 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.couchdb;
 
-  enabledUsers = config.custom.homelab.enabledUsers.couchdb;
+  enabledUsers = lib.filterAttrs (_: u: u.services.couchdb.enable) config.custom.homelab.users;
   settings = {
     users = lib.mapAttrsToList (_: u: {
       name = u.username;

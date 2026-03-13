@@ -2,12 +2,13 @@
 let
   serviceCfg = config.custom.homelab.services.miniflux;
   oidcCfg = config.custom.homelab.oidc;
+  enabledUsers = lib.filterAttrs (_: u: u.services.miniflux.enable) config.custom.homelab.users;
 
   adminUsernameFile = pkgs.writeText "miniflux-admin-username" "admin";
 
   userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
     { username = u.username; } // u.services.miniflux.settings
-  ) config.custom.homelab.enabledUsers.miniflux));
+  ) enabledUsers));
 in
 {
   custom.homelab.services.miniflux.secrets = {

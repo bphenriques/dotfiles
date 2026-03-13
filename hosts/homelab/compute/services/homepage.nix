@@ -4,19 +4,20 @@ let
   serviceCfg = cfg.services.homepage;
   generatedServices = cfg.homepage.generatedServices;
 
-  # Display configuration
-  categoryOrder = [ "Media" "Productivity" "Admin" "Infrastructure" "Development" ];
-  adminCategories = [ "Admin" "Infrastructure" ];
-
+  # Display order and tab assignment
+  categoryOrder = [ "General" "Media" "Monitoring" "Administration" ];
+  adminCategories = [ "Monitoring" "Administration" ];
   isAdminCategory = cat: lib.elem cat adminCategories;
 
-  # Build services.yaml from generated services, merging by display category
-  getServicesForCategories = cats: lib.concatLists (map (cat:
-    if lib.hasAttr cat generatedServices then generatedServices.${cat} else []
-  ) cats);
+  # Order categories: explicit order first, then any unlisted ones
+  allCategories = let
+    known = lib.filter (c: lib.hasAttr c generatedServices) categoryOrder;
+    extra = lib.filter (c: !lib.elem c categoryOrder) (lib.attrNames generatedServices);
+  in known ++ extra;
+  getServices = cats: lib.concatLists (map (cat: generatedServices.${cat} or []) cats);
 
-  homeServices = getServicesForCategories (lib.filter (c: !isAdminCategory c) categoryOrder);
-  adminServicesYaml = getServicesForCategories (lib.filter isAdminCategory categoryOrder);
+  homeServices = getServices (lib.filter (c: !isAdminCategory c) allCategories);
+  adminServicesYaml = getServices (lib.filter isAdminCategory allCategories);
 
   servicesYaml =
     (lib.optional (homeServices != []) { "Home" = homeServices; })
@@ -34,7 +35,13 @@ let
   });
 in
 {
-  custom.homelab.services.homepage.port = 3001;
+  custom.homelab.services.homepage = {
+    description = "Dashboard";
+    version = config.services.homepage-dashboard.package.version;
+    homepage = config.services.homepage-dashboard.package.meta.homepage;
+    category = "Infrastructure";
+    port = 3001;
+  };
 
   services.homepage-dashboard = {
     enable = true;

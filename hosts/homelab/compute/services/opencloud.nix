@@ -8,7 +8,7 @@ let
 
   # CSP config to allow external OIDC provider and Collabora
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
-  # Note: 'unsafe-eval' is required by the OpenCloud Web UI (Vue.js runtime compilation)
+  # Note: 'unsafe-eval'/'unsafe-inline' are intentionally enabled because OpenCloud Web UI breaks without them.
   oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.url;
   yamlFormat = pkgs.formats.yaml { };
   cspConfig = yamlFormat.generate "opencloud-csp.yaml" {
@@ -27,6 +27,10 @@ in
 {
   custom.homelab.services = {
     opencloud = {
+      description = "Cloud Storage & Office";
+      version = config.services.opencloud.package.version;
+      homepage = config.services.opencloud.package.meta.homepage;
+      category = "General";
       port = 9200;
       subdomain = "cloud";
       secrets = {
@@ -55,16 +59,14 @@ in
           "${serviceCfg.publicUrl}/web-oidc-callback.html"
         ];
       };
-      integrations.homepage = {
-        enable = true;
-        category = "Productivity";
-        description = "Cloud Storage & Office";
-      };
+      integrations.homepage.enable = true;
+      integrations.catalogue.displayName = "OpenCloud";
     };
 
-    # Both don't require additional security. uses WOPI tokens (collabora) or JWE (Wopi)
-    collabora.port = 9980;
-    wopi.port = 9300;
+    # Must be publicly reachable (routed by Traefik) for OpenCloud collaboration flow.
+    # OpenCloud sends clients to Collabora, and Collabora calls back into WOPI using public URLs.
+    collabora = { port = 9980; category = "Infrastructure"; description = "Online Office"; version = config.services.collabora-online.package.version; homepage = config.services.collabora-online.package.meta.homepage; integrations.catalogue.enable = false; };
+    wopi = { port = 9300; category = "Infrastructure"; description = "Office Bridge"; version = config.services.opencloud.package.version; homepage = config.services.opencloud.package.meta.homepage; integrations.catalogue.enable = false; };
   };
 
   # TODO: Consider syncing /var/lib/opencloud to NAS for backup
@@ -103,6 +105,7 @@ in
           addr = collaboraCfg.url;
           external_addr = collaboraCfg.publicUrl;
           product = "Collabora";
+          # Intentionally disabled: proof-key verification currently breaks this setup.
           proofkeys.disable = true;  # Disable WOPI proof verification
         };
       };

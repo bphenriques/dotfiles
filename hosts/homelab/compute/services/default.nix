@@ -1,11 +1,15 @@
 { self, config, ...}: {
   imports = [
-    ./arrs
+    ./radarr
+    ./sonarr
     ./immich
     ./jellyfin
     ./kavita
     ./miniflux
     ./pocket-id
+    ./jellyseerr
+    ./prowlarr
+    ./cleanuparr.nix
     ./romm.nix
     ./homepage.nix
     ./obsidian-livesync.nix
@@ -30,7 +34,7 @@
         firstName = "Home";
         lastName = "User";
         services = {
-         pocket-id.enable = false; # ad-hoc
+          oidc.enable = false; # ad-hoc user, no OIDC account
           jellyfin = {
             enable = true;
             passwordFile = config.sops.secrets."jellyfin/home/password".path;

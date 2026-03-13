@@ -5,6 +5,7 @@ let
   sonarrCfg = config.custom.homelab.services.sonarr;
   jellyfinCfg = config.custom.homelab.services.jellyfin;
   mediaCfg = config.custom.homelab.media;
+  jellyseerrUsers = lib.filterAttrs (_: u: u.services.jellyseerr.enable) config.custom.homelab.users;
 
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;
@@ -42,7 +43,7 @@ let
     users = lib.mapAttrs (_: user: {
       inherit (user) username;
       inherit (user.services.jellyseerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
-    }) config.custom.homelab.enabledUsers.jellyseerr;
+    }) jellyseerrUsers;
   };
 
   initConfigFile = pkgs.writeText "jellyseerr-config.json" (builtins.toJSON initConfig);
@@ -81,4 +82,16 @@ in
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "jellyseerr-configure" ./jellyseerr-configure.nu}'';
   };
+
+  assertions = [
+    {
+      assertion = lib.all (u: u.services.jellyfin.enable) (lib.attrValues jellyseerrUsers);
+      message = "All Jellyseerr users must have jellyfin.enable = true.";
+    }
+    {
+      # FIXME: Remove once Jellyseerr supports OIDC
+      assertion = lib.all (u: u.services.jellyfin.passwordFile != null) (lib.attrValues jellyseerrUsers);
+      message = "All Jellyseerr users must have a Jellyfin passwordFile until Jellyseerr supports OIDC.";
+    }
+  ];
 }

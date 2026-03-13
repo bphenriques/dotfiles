@@ -12,13 +12,13 @@ let
 in
 {
   custom.homelab.services.cleanuparr = {
+    description = "Queue Cleanup";
+    version = "2.4.7";
+    homepage = "https://github.com/cleanuparr/cleanuparr";
+    category = "Administration";
     port = 11011;
     forwardAuth.enable = true;
-    integrations.homepage = {
-      enable = true;
-      category = "Admin";
-      description = "Queue Cleanup";
-    };
+    integrations.homepage.enable = true;
   };
 
   users.groups.${cleanuparrUser.group} = { gid = cleanuparrUser.gid; };

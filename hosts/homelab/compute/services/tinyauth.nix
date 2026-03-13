@@ -1,26 +1,27 @@
-{ config, pkgs, lib, ... }:
+{ config, lib, ... }:
 let
   cfg = config.custom.homelab;
   oidcCfg = cfg.oidc;
   serviceCfg = cfg.services.tinyauth;
-
-  dataDir = "/var/lib/tinyauth";
 in
 {
-  # TODO: Migrate to plain service https://github.com/NixOS/nixpkgs/pull/476356/changes
   custom.homelab = {
     services.tinyauth = {
+      description = "ForwardAuth Gateway";
+      category = "Infrastructure";
+      version = config.services.tinyauth.package.version;
+      homepage = config.services.tinyauth.package.meta.homepage;
       port = 3000;
       oidc = {
         enable = true;
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
-        systemd.dependentServices = [ "podman-tinyauth" ]; # Volume-mounts OIDC secret file directly
+        systemd.dependentServices = [ "tinyauth" ];
       };
       secrets = {
         templates.env.content = ''
           TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${serviceCfg.oidc.id.placeholder}
         '';
-        systemd.dependentServices = [ "podman-tinyauth" ];
+        systemd.dependentServices = [ "tinyauth" ];
       };
     };
 
@@ -30,44 +31,32 @@ in
     };
   };
 
-  systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 root root -"
-  ];
-
-  # TODO: Add health check when podman supports healthcheck restart policy
-  virtualisation.oci-containers.containers.tinyauth = {
-    image = "ghcr.io/steveiliop56/tinyauth:v5.0.1";
-    autoStart = true;
-    ports = [ "${serviceCfg.host}:${toString serviceCfg.port}:3000" ];
-    environment = {
-      TINYAUTH_APPURL = serviceCfg.publicUrl;
-      TINYAUTH_ANALYTICS_ENABLED = "false";
-      TINYAUTH_AUTH_SECURECOOKIE = "true";
-      TINYAUTH_LOG_LEVEL = "info";
+  services.tinyauth = {
+    enable = true;
+    environmentFile = serviceCfg.secrets.templates.env.path;
+    settings = {
+      APPURL = serviceCfg.publicUrl;
+      SERVER_ADDRESS = serviceCfg.host;
+      SERVER_PORT = serviceCfg.port;
+      ANALYTICS_ENABLED = false;
+      AUTH_SECURECOOKIE = true;
+      LOG_LEVEL = "info";
 
       # Pocket-ID OIDC configuration
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_NAME = oidcCfg.provider.displayName;
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_AUTHURL = "${oidcCfg.provider.url}/authorize";
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_TOKENURL = "${oidcCfg.provider.url}/api/oidc/token";
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_USERINFOURL = "${oidcCfg.provider.url}/api/oidc/userinfo";
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_REDIRECTURL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_SCOPES = "openid profile email groups";
-      TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = "/run/secrets/client_secret";
+      OAUTH_PROVIDERS_POCKETID_NAME = oidcCfg.provider.displayName;
+      OAUTH_PROVIDERS_POCKETID_AUTHURL = "${oidcCfg.provider.url}/authorize";
+      OAUTH_PROVIDERS_POCKETID_TOKENURL = "${oidcCfg.provider.url}/api/oidc/token";
+      OAUTH_PROVIDERS_POCKETID_USERINFOURL = "${oidcCfg.provider.url}/api/oidc/userinfo";
+      OAUTH_PROVIDERS_POCKETID_REDIRECTURL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
+      OAUTH_PROVIDERS_POCKETID_SCOPES = "openid profile email groups";
+      OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file;
     } // lib.listToAttrs (
       lib.mapAttrsToList (name: svc: {
-        name = "TINYAUTH_APPS_${lib.toUpper name}_OAUTH_GROUPS"; # ACLs
+        name = "APPS_${lib.toUpper name}_OAUTH_GROUPS";
         value = svc.forwardAuth.group;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );
-    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
-    volumes = [
-      "${dataDir}:/data"
-      "${serviceCfg.oidc.secret.file}:/run/secrets/client_secret:ro"
-    ];
-    extraOptions = [
-      "--group-add=${toString (config.users.groups.${serviceCfg.oidc.group}.gid)}"
-      "--memory=256m"
-    ];
   };
 
+  systemd.services.tinyauth.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
 }

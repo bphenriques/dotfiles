@@ -3,8 +3,12 @@ let
   paths = config.custom.homelab.paths;
 in
 {
+  custom.homelab.tasks.backup.integrations.ntfy = {
+    enable = true;
+    topic = "backups";
+  };
+
   custom.homelab.backup = {
-    integrations.ntfy.topic = "backups";
     package = self.pkgs.rustic-manage;
     bindings = {
       "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;

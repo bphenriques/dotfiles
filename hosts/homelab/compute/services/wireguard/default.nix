@@ -14,6 +14,7 @@
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
+  enabledUsers = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg.users;
 
   # Podman networks: default bridge uses 10.88.0.0/16, user-created networks
   # use 10.89.0.0/16. Using /15 covers both ranges for container traffic.
@@ -51,7 +52,7 @@ let
         email = u.email;
         fullAccess = d.fullAccess;
       }) u.services.wireguard.devices)
-      cfg.enabledUsers.wireguard
+      enabledUsers
   );
 
   fullAccessClients = builtins.filter (c: c.fullAccess) clients;

@@ -9,7 +9,12 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.couchdb = {
+    integrations.catalogue.displayName = "CouchDB";
     port = 5984;
+    category = "Infrastructure";
+    description = "Document Database";
+    version = config.services.couchdb.package.version;
+    homepage = config.services.couchdb.package.meta.homepage;
     secrets = {
       files.admin-password = { rotatable = false; };
       templates."admin.ini".content = ''

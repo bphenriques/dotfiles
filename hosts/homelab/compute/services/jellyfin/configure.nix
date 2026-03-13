@@ -3,6 +3,7 @@ let
   serviceCfg = config.custom.homelab.services.jellyfin;
   pathsCfg = config.custom.homelab.paths;
   oidcCfg = config.custom.homelab.oidc;
+  enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.homelab.users;
 
   adminUsername = "admin";
   adminUsernameFile = "${serviceCfg.secrets.secretsDir}/admin-username";
@@ -27,7 +28,7 @@ let
       };
     } // lib.optionalAttrs (u.services.jellyfin ? passwordFile) {
       passwordFile = u.services.jellyfin.passwordFile;
-    }) config.custom.homelab.enabledUsers.jellyfin;
+    }) enabledUsers;
   };
 
   jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
