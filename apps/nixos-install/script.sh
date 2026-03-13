@@ -72,7 +72,7 @@ remote_install() {
     extraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   fi
 
-  nixos-anywhere --flake "${FLAKE_URL}#${host}" --target-host "${ssh_host}" --extra-files "$post_format_files" "${extraArgs[@]}"
+  nixos-anywhere --flake "${FLAKE_URL}#${host}" --target-host "${ssh_host}" --ssh-option "IdentitiesOnly=yes" --extra-files "$post_format_files" "${extraArgs[@]}"
 
   rm -r "${luks_files}"
   rm -r "${post_format_files}"
