@@ -29,6 +29,7 @@ let
     lib.mapAttrsToList
       (_: u: map (d: {
         name = "${u.username}-${d.name}";
+        device = d.name;
         ip = d.ip;
         email = u.email;
         fullAccess = d.fullAccess;
@@ -43,11 +44,12 @@ let
   wgEnv = {
     WG_DATA_DIR = dataDir;
     WG_INTERFACE = interface;
+    WG_HOMELAB_NAME = "bphenriques-homelab";
     WG_SERVER_ENDPOINT = "${endpoint}:${toString port}";
     WG_SERVER_IP = serverIp;
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
-    WG_SERVER_ALLOWED_IPS = "${clientSubnet}, ${self.shared.networks.main.subnet}";
+    WG_SERVER_ALLOWED_IPS = "${clientSubnet},${self.shared.networks.main.subnet}";
   } // lib.optionalAttrs (smtp.from != "") {
     WG_SMTP_FROM = smtp.from;
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
