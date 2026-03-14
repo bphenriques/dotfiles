@@ -117,8 +117,9 @@ in
   systemd.services.wireguard-bootstrap = {
     description = "WireGuard bootstrap";
     wantedBy = [ "multi-user.target" ];
-    after = [ "wireguard-${interface}.service" ];
+    after = [ "wireguard-${interface}.service" "network-online.target" ];  # network-online: required to send email onboard setup guides
     requires = [ "wireguard-${interface}.service" ];
+    wants = [ "network-online.target" ];
     restartTriggers = [ clientsJson ];
     path = [ wgManage ];
     serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };

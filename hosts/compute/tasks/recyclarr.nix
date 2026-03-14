@@ -38,6 +38,7 @@ in
   # Recyclarr runs as a systemd timer to periodically sync TRaSH guides
   systemd.services.recyclarr = {
     description = "Recyclarr sync";
+    wantedBy = [ "multi-user.target" ];  # Required on boot: once radarr and sonarr are up
     after = [ "radarr.service" "sonarr.service" ];
     wants = [ "radarr.service" "sonarr.service" ];
     serviceConfig = {

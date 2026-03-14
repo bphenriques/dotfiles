@@ -60,6 +60,7 @@ in
         ];
       };
       integrations.homepage.enable = true;
+      integrations.homepage.icon = "open-cloud.svg";
       integrations.catalogue.displayName = "OpenCloud";
     };
 

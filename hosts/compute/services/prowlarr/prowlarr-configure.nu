@@ -55,6 +55,7 @@ def ensure_indexers [] {
 
   let app_profile_id = get_default_app_profile_id
 
+  mut failed = []
   for idx in $indexers {
     if $idx.name in $existing_names {
       print $"  Indexer exists: ($idx.name)"
@@ -84,9 +85,15 @@ def ensure_indexers [] {
 
     let r = http post $"($base_url)/api/v1/indexer" $payload --headers $headers --content-type application/json --full --allow-errors
     if $r.status not-in [200, 201] {
-      error make { msg: $"Failed to create indexer ($idx.name): ($r.status) - ($r.body)" }
+      print $"  Warning: Failed to create indexer ($idx.name): ($r.status) - ($r.body)"
+      $failed = ($failed | append $idx.name)
+    } else {
+      print $"  Created indexer: ($idx.name)"
     }
-    print $"  Created indexer: ($idx.name)"
+  }
+
+  if ($failed | is-not-empty) {
+    error make { msg: $"Failed to create indexers: ($failed | str join ', ')" }
   }
 }
 
@@ -221,9 +228,9 @@ def main [] {
   wait_ready
   print "Prowlarr is ready"
 
-  ensure_indexers
   ensure_applications
   ensure_notification
+  ensure_indexers
 
   print "Prowlarr initialization complete"
 }

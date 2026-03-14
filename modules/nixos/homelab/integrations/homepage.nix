@@ -9,8 +9,9 @@ let
   mkServiceEntry = service:
     {
       "${service.name}" = {
-        href = service.publicUrl;
         inherit (service) description;
+        href = service.publicUrl;
+        siteMonitor = service.publicUrl;
       } // lib.optionalAttrs (service.integrations.homepage.icon != null) {
         icon = service.integrations.homepage.icon;
       } // service.integrations.homepage.extraConfig;

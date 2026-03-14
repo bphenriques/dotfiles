@@ -19,6 +19,7 @@ in
     port = 11011;
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
+    integrations.homepage.icon = "cleanuparr.png";
   };
 
   users.groups.${cleanuparrUser.group} = { gid = cleanuparrUser.gid; };
@@ -29,7 +30,7 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 ${cleanuparrUser.name} ${cleanuparrUser.group} -"
+    "d ${dataDir} 0755 ${cleanuparrUser.name} ${cleanuparrUser.group} -"
   ];
 
   virtualisation.oci-containers.containers.cleanuparr = {
