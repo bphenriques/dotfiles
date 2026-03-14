@@ -1,6 +1,13 @@
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
+  categoryType = lib.types.enum [
+    "General"
+    "Media"
+    "Monitoring"
+    "Administration"
+    "Infrastructure"
+  ];
 
   baseServiceModule = { name, config, ... }: {
     options = {
@@ -12,8 +19,8 @@ let
 
       # Service metadata
       category = lib.mkOption {
-        type = lib.types.str;
-        description = "Service category (e.g., Media, Admin, Infrastructure)";
+        type = categoryType;
+        description = "Service category used by generated catalogue/homepage views";
       };
 
       description = lib.mkOption {

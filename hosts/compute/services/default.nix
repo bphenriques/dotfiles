@@ -12,7 +12,7 @@
     ./cleanuparr.nix
     ./romm.nix
     ./homepage.nix
-    ./obsidian-livesync.nix
+    ./obsidian-livesync
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix

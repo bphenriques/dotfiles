@@ -49,7 +49,7 @@ custom.homelab.services.myapp = {
 };
 ```
 
-See [services-registry.nix](../../modules/nixos/homelab/services-registry.nix), [oidc.nix](../../modules/nixos/homelab/oidc.nix).
+See [services-registry.nix](../../modules/nixos/homelab/services-registry.nix), [security/oidc.nix](../../modules/nixos/homelab/security/oidc.nix).
 
 ## Secrets
 
@@ -84,7 +84,7 @@ custom.homelab.secrets.mytask = {
 
 **Rotation**: `sudo rm /var/lib/homelab-secrets/<owner>/<file> && sudo systemctl restart homelab-secrets-<owner>`
 
-See [_secrets-schema.nix](../../modules/nixos/homelab/_secrets-schema.nix), [secrets.nix](../../modules/nixos/homelab/secrets.nix).
+See [security/secrets.nix](../../modules/nixos/homelab/security/secrets.nix).
 
 ## Required SOPS Secrets Per Host
 

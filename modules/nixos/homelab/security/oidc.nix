@@ -146,11 +146,6 @@ in
         description = "Public URL of the OIDC provider";
       };
 
-      internalUrl = lib.mkOption {
-        type = lib.types.str;
-        description = "Internal URL of the OIDC provider";
-      };
-
       discoveryEndpoint = lib.mkOption {
         type = lib.types.str;
         description = "OIDC discovery endpoint URL";

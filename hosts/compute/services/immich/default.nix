@@ -13,6 +13,12 @@ in
     category = "Media";
     port = 2283;
     subdomain = "photos";
+    traefik.middlewares.immich-upload.buffering = {
+      # Immich needs larger request buffering for big uploads; keep this scoped
+      # to Immich instead of increasing ingress limits globally.
+      maxRequestBodyBytes = 2147483648;
+      memRequestBodyBytes = 16777216;
+    };
 
     # TODO: admin-password could be removed if Immich supports OIDC-only admin
     secrets = {

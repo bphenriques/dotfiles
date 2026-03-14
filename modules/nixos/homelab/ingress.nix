@@ -91,12 +91,6 @@ in
                 sans = [ "*.${cfg.domain}" ];
               }];
             };
-
-            # High timeouts required for Immich large file uploads
-            transport.respondingTimeouts = {
-              readTimeout = "300s";
-              writeTimeout = "300s";
-            };
           };
         };
 

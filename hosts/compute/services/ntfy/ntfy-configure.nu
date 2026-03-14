@@ -66,7 +66,10 @@ def setup_publishers [] {
   }
 }
 
-# Does not detect whenever a user gets deleted.
+# Cleanup is intentionally one-way for now.
+# If a publisher is removed from Nix config, this script does not delete the
+# corresponding ntfy user/token automatically to avoid accidental lockouts.
+# TODO: add opt-in stale user cleanup mode once we have a safe migration path.
 
 def main [] {
   setup_admin

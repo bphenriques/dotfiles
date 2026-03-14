@@ -89,8 +89,7 @@ in
       gui = {
         theme = "dark";
         insecureAdminAccess = false;
-        # Intentionally enabled: when exposed behind Traefik + public hostnames, Syncthing GUI host checks fail.
-        insecureSkipHostcheck = true;
+        insecureSkipHostcheck = true; # Access is constrained by VPN + forwardAuth. Disabling makes syncthing fail.
         user = "admin";
         # credentials provided through guiPasswordFile
       };

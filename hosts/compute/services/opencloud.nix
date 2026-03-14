@@ -62,6 +62,9 @@ in
       integrations.homepage.enable = true;
       integrations.homepage.icon = "open-cloud.svg";
       integrations.catalogue.displayName = "OpenCloud";
+
+      # TODO: Backup OpenCloud state under /var/lib/opencloud.
+      # This should include both persisted user content and configuration data.
     };
 
     # Must be publicly reachable (routed by Traefik) for OpenCloud collaboration flow.
@@ -118,8 +121,8 @@ in
           addr = collaboraCfg.url;
           external_addr = collaboraCfg.publicUrl;
           product = "Collabora";
-          # Intentionally disabled: proof-key verification currently breaks this setup.
-          proofkeys.disable = true;  # Disable WOPI proof verification
+          # Intentionally disabled: proof-key verification currently breaks this setup. WOPI endpoint is private and not exposed publicly.
+          proofkeys.disable = true;
         };
       };
       app-registry = {

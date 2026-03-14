@@ -41,5 +41,5 @@ in
   systemd.services.miniflux.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
 
   # Fix start-limit issue - dbsetup needs to stay "active" after completion
-  # systemd.services.miniflux-dbsetup.serviceConfig.RemainAfterExit = true;
+  systemd.services.miniflux-dbsetup.serviceConfig.RemainAfterExit = true;
 }
