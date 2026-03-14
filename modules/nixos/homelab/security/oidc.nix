@@ -261,10 +261,6 @@ in
     in {
       assertions = [
         {
-          assertion = enabledUsers != { };
-          message = "At least one user must be enabled for OIDC (services.oidc.enable = true)";
-        }
-        {
           assertion = dupGids == [];
           message = "OIDC clients have duplicate explicit gids: ${toString dupGids}";
         }

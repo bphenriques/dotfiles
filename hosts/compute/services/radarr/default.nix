@@ -16,9 +16,8 @@
   # See: https://trash-guides.info/
   custom.homelab.media.radarr = {
     qualityDefinitionTemplate = "radarr-quality-definition-movie";
-    defaultProfile = "hd";
     profiles = {
-      hd = {
+      default = {
         name = "HD Bluray + WEB";
         recyclarrTemplates = [
           "radarr-quality-definition-movie"

@@ -13,9 +13,8 @@
 
   custom.homelab.media.sonarr = {
     qualityDefinitionTemplate = "sonarr-quality-definition-series";
-    defaultProfile = "hd";
     profiles = {
-      hd = {
+      default = {
         name = "WEB-1080p";
         recyclarrTemplates = [
           "sonarr-quality-definition-series"

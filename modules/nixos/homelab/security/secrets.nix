@@ -247,22 +247,17 @@ in {
     }
 
     (lib.mkIf (allOwners != { }) {
-      assertions = [
+      assertions = let
+        ownerSources = lib.concatMap (owners: lib.attrNames owners) [ serviceOwners taskOwners standaloneOwners ];
+        dupNames = lib.filter (n: lib.count (x: x == n) ownerSources > 1) (lib.unique ownerSources);
+      in [
         {
           assertion = dupGids == [];
           message = "Service secrets have duplicate explicit gids: ${toString dupGids}";
         }
         {
-          assertion = lib.intersectAttrs serviceOwners standaloneOwners == { };
-          message = "Standalone secrets collide with service secrets: ${toString (lib.attrNames (lib.intersectAttrs serviceOwners standaloneOwners))}";
-        }
-        {
-          assertion = lib.intersectAttrs serviceOwners taskOwners == { };
-          message = "Task secrets collide with service secrets: ${toString (lib.attrNames (lib.intersectAttrs serviceOwners taskOwners))}";
-        }
-        {
-          assertion = lib.intersectAttrs taskOwners standaloneOwners == { };
-          message = "Standalone secrets collide with task secrets: ${toString (lib.attrNames (lib.intersectAttrs taskOwners standaloneOwners))}";
+          assertion = dupNames == [];
+          message = "Secret owner name collision across services/tasks/standalone: ${toString dupNames}";
         }
       ];
 

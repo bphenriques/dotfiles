@@ -167,16 +167,9 @@ in
     assertions = let
       allServices = lib.attrValues cfg.services;
 
-      urls = map (s: s.url) allServices;
-      dupUrls = lib.filter (url: lib.count (u: u == url) urls > 1) (lib.unique urls);
-
       allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) allServices;
       dupHosts = lib.filter (h: lib.count (x: x == h) allHosts > 1) (lib.unique allHosts);
     in [
-      {
-        assertion = dupUrls == [ ];
-        message = "Service URLs must be unique. Conflicting: ${toString dupUrls}";
-      }
       {
         assertion = dupHosts == [ ];
         message = "Service public hosts and aliases must be unique. Conflicting: ${toString dupHosts}";

@@ -5,6 +5,7 @@ let
   serviceCfg = config.custom.homelab.services.immich;
 
   enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.homelab.users;
+  usersWithMounts = lib.filterAttrs (username: _: homelabMounts ? ${username}) enabledUsers;
 
   # TODO: admin could be removed if Immich supports OIDC-only admin
   # TODO: Sync the OIDC user files for tighter SSO integration (not implemented).
@@ -22,7 +23,7 @@ let
         { name = "${username}-library"; ownerEmail = u.email; importPaths = [ userPaths.library ]; exclusionPatterns = [ ]; }
         { name = "${username}-inbox"; ownerEmail = u.email; importPaths = [ userPaths.inbox ]; exclusionPatterns = [ ]; }
       ]
-    ) enabledUsers);
+    ) usersWithMounts);
   });
 
   # Bind user photo directories into immich for external library imports
@@ -32,11 +33,11 @@ let
       "${userPaths.library}:/mnt/immich/${username}"
       "${userPaths.inbox}:/mnt/immich/${username}-inbox"
     ]
-  ) enabledUsers);
+  ) usersWithMounts);
 in
 {
   # Ensure immich has access to the mounted directories and is set as dependant
-  users.users.immich.extraGroups = lib.mapAttrsToList (username: _: homelabMounts."${username}".group) enabledUsers;
+  users.users.immich.extraGroups = lib.mapAttrsToList (username: _: homelabMounts.${username}.group) usersWithMounts;
   custom.homelab.smb.mounts = lib.mapAttrs' (username: _:
     lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
   ) enabledUsers;
@@ -68,14 +69,10 @@ in
     script = ''nu ${self.lib.builders.writeNushellScript "immich-configure" ./immich-configure.nu}'';
   };
 
-  assertions = [
-    {
-      assertion = lib.all (username: pathsCfg.users ? ${username}) (lib.attrNames enabledUsers);
-      message = "Each enabled Immich user must have custom.homelab.paths.users.<username>.photos configured.";
-    }
-    {
-      assertion = lib.all (username: homelabMounts ? ${username}) (lib.attrNames enabledUsers);
-      message = "Each enabled Immich user must have a matching homelab mount (custom.homelab.smb.mounts.<username>).";
-    }
-  ];
+  assertions = let
+    missingMounts = lib.filter (u: !(homelabMounts ? ${u})) (lib.attrNames enabledUsers);
+  in [{
+    assertion = missingMounts == [];
+    message = "Immich-enabled users missing SMB mounts: ${toString missingMounts}";
+  }];
 }

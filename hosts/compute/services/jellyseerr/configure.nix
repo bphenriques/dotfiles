@@ -22,7 +22,7 @@ let
       useSsl = false;
       baseUrl = "";
       activeDirectory = config.custom.homelab.paths.media.movies;
-      activeProfileName = mediaCfg.radarr.profiles.${mediaCfg.radarr.defaultProfile}.name;
+      activeProfileName = mediaCfg.radarr.profiles.default.name;
       is4k = false;
       minimumAvailability = "released";
       isDefault = true;
@@ -35,7 +35,7 @@ let
       useSsl = false;
       baseUrl = "";
       activeDirectory = config.custom.homelab.paths.media.tv;
-      activeProfileName = mediaCfg.sonarr.profiles.${mediaCfg.sonarr.defaultProfile}.name;
+      activeProfileName = mediaCfg.sonarr.profiles.default.name;
       is4k = false;
       isDefault = true;
       externalUrl = sonarrCfg.publicUrl;
@@ -84,10 +84,6 @@ in
   };
 
   assertions = [
-    {
-      assertion = lib.all (u: u.services.jellyfin.enable) (lib.attrValues jellyseerrUsers);
-      message = "All Jellyseerr users must have jellyfin.enable = true.";
-    }
     {
       # FIXME: Remove once Jellyseerr supports OIDC
       assertion = lib.all (u: u.services.jellyfin.passwordFile != null) (lib.attrValues jellyseerrUsers);

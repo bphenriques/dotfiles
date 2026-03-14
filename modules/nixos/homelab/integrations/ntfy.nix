@@ -1,6 +1,14 @@
-{ lib, ... }:
+{ lib, config, ... }:
 let
   tokenDir = "/var/lib/homelab-secrets/ntfy-publishers";
+  cfg = config.custom.homelab.ntfy;
+
+  defaultTopics = {
+    media.public = true;
+    download.public = false;
+    admin.public = false;
+    backups.public = false;
+  };
 
   mkNtfyIntegration = name: {
     options.integrations.ntfy = lib.mkOption {
@@ -9,7 +17,7 @@ let
           enable = lib.mkEnableOption "ntfy notifications";
 
           topic = lib.mkOption {
-            type = lib.types.str;
+            type = lib.types.enum (lib.attrNames cfg.topics);
             description = "Notification topic this service/task publishes to";
           };
 
@@ -27,6 +35,18 @@ let
   };
 in
 {
+  options.custom.homelab.ntfy.topics = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.public = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether the topic can be published without authentication";
+      };
+    });
+    default = defaultTopics;
+    description = "Known ntfy topics and visibility settings";
+  };
+
   config.custom.homelab._serviceOptionExtensions = [
     ({ name, ... }: mkNtfyIntegration name)
   ];

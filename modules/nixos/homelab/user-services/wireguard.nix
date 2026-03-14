@@ -8,6 +8,10 @@
           type = lib.types.listOf (lib.types.submodule {
             options = {
               name = lib.mkOption { type = lib.types.str; description = "Device name (e.g., phone, laptop)"; };
+              ip = lib.mkOption {
+                type = lib.types.str;
+                description = "Static WireGuard client IP (e.g., 10.100.0.42)";
+              };
               fullAccess = lib.mkOption {
                 type = lib.types.bool;
                 default = false;

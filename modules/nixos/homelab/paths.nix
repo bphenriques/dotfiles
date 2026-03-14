@@ -94,6 +94,9 @@ in {
   config = lib.mkIf smbCfg.enable {
     custom.homelab.paths = {
       media.root = lib.mkDefault smbCfg.mounts.media.localMount;
+      users = lib.mapAttrs
+        (_: m: { root = lib.mkDefault m.localMount; })
+        (lib.removeAttrs smbCfg.mounts [ "media" ]);
     };
   };
 }

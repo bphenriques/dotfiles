@@ -3,7 +3,7 @@
 # Assumptions:
 # - Transmission is the only download client used
 # - config.custom.homelab.services.transmission.port is defined
-# - config.custom.homelab.media.${name}.profiles and defaultProfile exist
+# - config.custom.homelab.media.${name}.profiles.default exists
 #
 # Usage (in imports):
 #   (import ./lib/mkArrService.nix {
@@ -42,7 +42,7 @@ let
       urlBase = "/transmission/";
       category = name;
     };
-    defaultQualityProfile = mediaCfg.profiles.${mediaCfg.defaultProfile}.name;
+    defaultQualityProfile = mediaCfg.profiles.default.name;
     notification = {
       serverUrl = ntfyCfg.url;
       topic = serviceCfg.integrations.ntfy.topic;

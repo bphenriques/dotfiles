@@ -2,13 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.ntfy;
   homelabCfg = config.custom.homelab;
-
-  topics = {
-    media    = { public = true; };
-    download = { public = false; };
-    admin    = { public = false; };
-    backups  = { public = false; };
-  };
+  topics = homelabCfg.ntfy.topics;
 
   # Derive publishers from services and tasks with ntfy integration
   ntfyServices = lib.filterAttrs (_: s: s.integrations.ntfy.enable) homelabCfg.services;
@@ -24,7 +18,6 @@ let
   }) ntfyTasks;
 
   allPublishers = servicePublishers // taskPublishers;
-  allTopics = lib.unique (lib.mapAttrsToList (_: p: p.topic) allPublishers);
 
   configFile = pkgs.writeText "ntfy-configure.json" (builtins.toJSON {
     publicTopics = lib.attrNames (lib.filterAttrs (_: t: t.public) topics);
@@ -33,13 +26,6 @@ let
 in
 {
   config = {
-    assertions = let
-      unknownTopics = lib.filter (t: !(builtins.hasAttr t topics)) allTopics;
-    in [{
-      assertion = unknownTopics == [];
-      message = "ntfy: unknown topics referenced by publishers: ${toString unknownTopics}. Known: ${toString (lib.attrNames topics)}";
-    }];
-
     custom.homelab.services.ntfy.secrets = {
       files.admin-password = { rotatable = true; };
       systemd.dependentServices = [ "ntfy-sh" "ntfy-configure" ];

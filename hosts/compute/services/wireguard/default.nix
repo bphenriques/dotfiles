@@ -1,16 +1,7 @@
 # Security Model:
 # - Access control is enforced SERVER-SIDE via nftables, not client-side AllowedIPs
-# - Full access is only permitted through users managed using Nix
-# - Restricted access by default for clients created manually
-# - All clients receive full AllowedIPs in their config (routing convenience only)
-# - Client IPs are deterministic (hash of name) for stable firewall rules
-
-# Troubleshoot
-# - Ensure port forwarding right port and UDP
-# - sudo wg show -> Check handshake
-# - Check for traffic: sudo tcpdump -ni any udp port 51820
-# - Check if the service's listen address is 0.0.0.0 (all interfaces)
-# - Check if the allowed ips include the internal network
+# - Full access is only permitted through users managed using Nix. Manual users have restricted access.
+# - Client IPs are explicitly assigned per device for stable firewall rules
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
@@ -34,21 +25,11 @@ let
 
   serverIp = lib.head (lib.splitString "/" address);
 
-  # Deterministic IP from client name hash: .1 = server, .2-.9 = CLI ad-hoc (via next_ip), .10-.254 = Nix-managed
-  clientIp = name: let
-    nixClientIpStart = 10;
-    nixClientIpEnd = 254;
-    hash = builtins.hashString "sha256" name;
-    nixClientIpRange = nixClientIpEnd - nixClientIpStart + 1;  # 245 addresses
-    octet = lib.mod (lib.fromHexString (builtins.substring 0 8 hash)) nixClientIpRange + nixClientIpStart;
-    subnetPrefix = lib.concatStringsSep "." (lib.take 3 (lib.splitString "." serverIp));
-  in "${subnetPrefix}.${toString octet}";
-
   clients = lib.concatLists (
     lib.mapAttrsToList
-      (_: u: map (d: let name = "${u.username}-${d.name}"; in {
-        inherit name;
-        ip = clientIp name;
+      (_: u: map (d: {
+        name = "${u.username}-${d.name}";
+        ip = d.ip;
         email = u.email;
         fullAccess = d.fullAccess;
       }) u.services.wireguard.devices)

@@ -47,8 +47,6 @@
       media = { gid = 5512; };
     };
   };
-  custom.homelab.paths.users.bphenriques.root = lib.mkDefault config.custom.homelab.smb.mounts.bphenriques.localMount;
-
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

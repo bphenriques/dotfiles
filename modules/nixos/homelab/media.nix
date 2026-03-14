@@ -1,7 +1,5 @@
-{ lib, config, ... }:
+{ lib, ... }:
 let
-  cfg = config.custom.homelab.media;
-
   # Quality profile definition
   qualityProfileOpt = lib.types.submodule {
     options = {
@@ -16,6 +14,15 @@ let
     };
   };
 
+  # Profiles must always define a `default` entry.
+  profilesOpt = lib.types.submodule {
+    freeformType = lib.types.attrsOf qualityProfileOpt;
+    options.default = lib.mkOption {
+      type = qualityProfileOpt;
+      description = "Default quality profile used by service setup";
+    };
+  };
+
   # Service-specific settings (radarr, sonarr)
   mediaServiceOpt = lib.types.submodule {
     options = {
@@ -24,12 +31,8 @@ let
         description = "Recyclarr quality definition template";
       };
       profiles = lib.mkOption {
-        type = lib.types.attrsOf qualityProfileOpt;
+        type = profilesOpt;
         description = "Available quality profiles";
-      };
-      defaultProfile = lib.mkOption {
-        type = lib.types.str;
-        description = "Default quality profile name (must match a profile in profiles)";
       };
     };
   };
@@ -50,18 +53,5 @@ in
       type = mediaServiceOpt;
       description = "Sonarr quality profile settings";
     };
-  };
-
-  config = {
-    assertions = [
-      {
-        assertion = lib.hasAttr cfg.radarr.defaultProfile cfg.radarr.profiles;
-        message = "Radarr defaultProfile '${cfg.radarr.defaultProfile}' must exist in profiles";
-      }
-      {
-        assertion = lib.hasAttr cfg.sonarr.defaultProfile cfg.sonarr.profiles;
-        message = "Sonarr defaultProfile '${cfg.sonarr.defaultProfile}' must exist in profiles";
-      }
-    ];
   };
 }
