@@ -66,11 +66,23 @@ in
 
     # Must be publicly reachable (routed by Traefik) for OpenCloud collaboration flow.
     # OpenCloud sends clients to Collabora, and Collabora calls back into WOPI using public URLs.
-    collabora = { port = 9980; category = "Infrastructure"; description = "Online Office"; version = config.services.collabora-online.package.version; homepage = config.services.collabora-online.package.meta.homepage; integrations.catalogue.enable = false; };
-    wopi = { port = 9300; category = "Infrastructure"; description = "Office Bridge"; version = config.services.opencloud.package.version; homepage = config.services.opencloud.package.meta.homepage; integrations.catalogue.enable = false; };
+    collabora = {
+      port = 9980;
+      description = "Online Office";
+      category = "Infrastructure";
+      version = config.services.collabora-online.package.version;
+      homepage = config.services.collabora-online.package.meta.homepage;
+      integrations.catalogue.enable = false;
+    };
+    wopi = {
+      port = 9300;
+      description = "Office Bridge";
+      category = "Infrastructure";
+      version = config.services.opencloud.package.version;
+      homepage = config.services.opencloud.package.meta.homepage;
+      integrations.catalogue.enable = false;
+    };
   };
-
-  # TODO: Consider syncing /var/lib/opencloud to NAS for backup
 
   services.opencloud = {
     enable = true;

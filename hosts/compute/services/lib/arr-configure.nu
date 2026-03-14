@@ -79,12 +79,17 @@ def ensure_download_client [] {
     error make { msg: $"Failed to get download clients: ($existing.status) - ($existing.body)" }
   }
 
-  let existing_names = ($existing.body | default [] | get -o name | default [])
-
+  let existing_clients = ($existing.body | default [])
   let dc = $config | get downloadClient
-  if $dc.name in $existing_names {
-    print $"  Download client exists: ($dc.name)"
-    return
+
+  # Disable other Transmission clients that don't match our configured name
+  let stale_clients = ($existing_clients | where implementation == "Transmission" | where name != $dc.name | where enable == true)
+  for client in $stale_clients {
+    print $"  Disabling stale download client: ($client.name)"
+    let r = http put $"($base_url)/api/v3/downloadclient/($client.id)" ($client | merge { enable: false }) --headers $headers --content-type application/json --full --allow-errors
+    if $r.status != 202 {
+      error make { msg: $"Failed to disable download client ($client.name): ($r.status) - ($r.body)" }
+    }
   }
 
   let schemas = http get $"($base_url)/api/v3/downloadclient/schema" --headers $headers --full --allow-errors
@@ -124,11 +129,21 @@ def ensure_download_client [] {
     configContract: "TransmissionSettings"
   }
 
-  let r = http post $"($base_url)/api/v3/downloadclient" $payload --headers $headers --content-type application/json --full --allow-errors
-  if $r.status not-in [200, 201] {
-    error make { msg: $"Failed to create download client ($dc.name): ($r.status) - ($r.body)" }
+  # Update if exists, create otherwise
+  let existing_client = ($existing_clients | where name == $dc.name | get 0?)
+  if $existing_client != null {
+    let r = http put $"($base_url)/api/v3/downloadclient/($existing_client.id)" ($payload | merge { id: $existing_client.id }) --headers $headers --content-type application/json --full --allow-errors
+    if $r.status != 202 {
+      error make { msg: $"Failed to update download client ($dc.name): ($r.status) - ($r.body)" }
+    }
+    print $"  Updated download client: ($dc.name)"
+  } else {
+    let r = http post $"($base_url)/api/v3/downloadclient" $payload --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201] {
+      error make { msg: $"Failed to create download client ($dc.name): ($r.status) - ($r.body)" }
+    }
+    print $"  Created download client: ($dc.name)"
   }
-  print $"  Created download client: ($dc.name)"
 }
 
 def ensure_notification [] {

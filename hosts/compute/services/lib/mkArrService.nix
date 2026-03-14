@@ -36,7 +36,7 @@ let
   settings = {
     rootFolders = [{ path = rootPath config; }];
     downloadClient = {
-      inherit name;
+      name = "Transmission";
       host = "127.0.0.1";
       port = config.custom.homelab.services.transmission.port;
       urlBase = "/transmission/";
