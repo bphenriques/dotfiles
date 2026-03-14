@@ -8,8 +8,8 @@ Your WireGuard VPN client '`{{NAME}}`' is ready. This gives you secure remote ac
    - **Desktop**: [wireguard.com/install](https://www.wireguard.com/install/)
 
 2. Import the configuration:
-   - **Mobile**: Open the app and scan the attached QR code, or import the '`.conf`' file
-   - **Desktop**: Import the attached '`.conf`' file
+   - **Mobile**: Open the app and scan the attached QR code, or import the configuration file
+   - **Desktop**: Import the attached configuration file
 
 3. **And you're done!** Turn off your home Wi-fi, enable mobile data, and now you should be able to access: {{HOMEPAGE_URL}}
 

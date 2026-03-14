@@ -13,7 +13,7 @@ Grab the app for your device:
 ### Step 2: Import Your Config
 
 - **Mobile**: Open WireGuard, tap ➕, and scan the attached QR code
-- **Desktop**: Import the attached `.conf` file
+- **Desktop**: Import the attached configuration file
 
 ### Step 3: Connect & Enjoy! 🎉
 
