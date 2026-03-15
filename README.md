@@ -14,11 +14,11 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 
 ## Hosts
 
-| Host | Platform | Description |
-|------|----------|-------------|
-| [homelab](./hosts/homelab) | NixOS + Synology | Self-hosted infrastructure |
-| [laptop](./hosts/laptop) | NixOS | Personal workstation |
-| [work-macos](./hosts/work-macos) | Darwin | Work MacBook |
+| Host | Platform | Description                                                           |
+|------|----------|-----------------------------------------------------------------------|
+| [compute](./hosts/compute) | NixOS | Self-hosted homelab (service registry, OIDC SSO, secret provisioning) |
+| [laptop](./hosts/laptop) | NixOS | Personal workstation                                                  |
+| [work-macos](./hosts/work-macos) | Darwin | Work MacBook                                                          |
 
 ## Nix Stack
 

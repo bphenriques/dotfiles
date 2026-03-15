@@ -2,8 +2,8 @@
 
 # WireGuard client management (IPv4 only)
 #
-# Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_SERVER_IP, WG_CLIENT_SUBNET, WG_CLIENT_DNS
-# Optional env: WG_HOMELAB_NAME (defaults to hostname), WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
+# Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_SERVER_IP, WG_CLIENT_SUBNET, WG_CLIENT_DNS, WG_HOMELAB_NAME
+# Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
 # Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE, WG_EMAIL_SUBJECT
 
 def require_env [name: string] {
@@ -21,7 +21,7 @@ let endpoint = require_env "WG_SERVER_ENDPOINT"
 let server_ip = require_env "WG_SERVER_IP"
 let client_subnet = require_env "WG_CLIENT_SUBNET"
 let client_dns = require_env "WG_CLIENT_DNS"
-let homelab_name = $env.WG_HOMELAB_NAME? | default (hostname | str trim)
+let homelab_name = require_env "WG_HOMELAB_NAME"
 let allowed_ips_full = $env.WG_SERVER_ALLOWED_IPS? | default $client_subnet
 let clients_dir = $"($data_dir)/clients"
 let server_pubkey_file = $"($data_dir)/server/public.key"
@@ -194,19 +194,13 @@ def "main bootstrap" [config_file: path] {
   # Create clients from config (skips existing)
   for entry in (open $config_file) {
     let dir = $"($clients_dir)/($entry.name)"
-    let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
-    let device = $entry.device? | if ($in == null or ($in | is-empty)) { null } else { $in }
-
     if ($dir | path exists) {
-      # Backfill device into existing meta.json
-      let meta = open $"($dir)/meta.json"
-      if ($meta.device? == null) {
-        $meta | insert device ($device | default $entry.name) | save -f $"($dir)/meta.json"
-        print $"Updated '($entry.name)' meta"
-      }
+      print $"Skipping '($entry.name)'"
       continue
     }
 
+    let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
+    let device = $entry.device? | if ($in == null or ($in | is-empty)) { null } else { $in }
     create_client $entry.name --ip $entry.ip --email $email --device $device
     if $email != null { send_email $entry.name $email }
   }

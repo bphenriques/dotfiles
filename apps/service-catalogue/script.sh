@@ -9,6 +9,8 @@ usage() {
 [[ $# -eq 1 ]] || usage
 
 host="$1"
+echo "> **Auto-generated** from the NixOS service registry (\`nix run .#service-catalogue -- ${host}\`). Do not edit manually."
+echo ""
 nix eval --impure --json --expr "
   let
     flake = builtins.getFlake (toString ./.);
