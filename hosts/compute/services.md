@@ -1,3 +1,5 @@
+> **Auto-generated** from the NixOS service registry (`nix run .#service-catalogue -- compute`). Do not edit manually.
+
 ### General
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
