@@ -31,6 +31,7 @@ in
       ];
       systemd.dependentServices = [ "kavita" ];
     };
+    healthcheck.path = "/api/health";
     integrations.homepage.enable = true;
   };
 

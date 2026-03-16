@@ -32,6 +32,7 @@ in
     description = "Document Database";
     version = config.services.couchdb.package.version;
     homepage = config.services.couchdb.package.meta.homepage;
+    healthcheck.path = "/_up";
     secrets = {
       files.admin-password = { rotatable = false; };
       templates."admin.ini".content = ''

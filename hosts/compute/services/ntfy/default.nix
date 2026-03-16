@@ -11,6 +11,7 @@ in
     homepage = config.services.ntfy-sh.package.meta.homepage;
     category = "Monitoring";
     port = 2586;
+    healthcheck.path = "/v1/health";
     integrations.homepage.enable = true;
   };
 

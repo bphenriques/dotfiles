@@ -19,6 +19,7 @@ in
       '';
       systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
     };
+    healthcheck.path = "/ping";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.ntfy.enable = true;

@@ -145,6 +145,46 @@ def "main list" [] {
   }
 }
 
+def "main status" [] {
+  let clients = list_clients
+  if ($clients | is-empty) { print "No clients"; return }
+
+  # Build pub_key -> handshake_epoch dictionary for O(1) lookups
+  let peer_map = (
+    try { wg show $interface dump } catch { "" }
+    | lines | skip 1
+    | where {|l| ($l | str trim) != "" }
+    | reduce -f {} {|line, acc|
+        let f = ($line | split row "\t")
+        let pk = ($f | get -o 0 | default "")
+        if $pk == "" { $acc } else {
+          $acc | insert $pk ($f | get -o 4 | default "0" | into int)
+        }
+      }
+  )
+
+  let now = ((date now | into int) // 1_000_000_000)
+
+  # PersistentKeepalive = 25s → WireGuard re-handshakes ~every 2min.
+  # 3min window gives 1min slack before marking inactive.
+  let active_threshold = 180
+
+  $clients | each {|c|
+    let hs = ($peer_map | get -o $c.pub_key | default 0)
+    let ago = if $hs > 0 { [($now - $hs) 0] | math max } else { null }
+
+    let handshake = if $ago == null { "never"
+      } else if $ago < 60 { $"($ago)s ago"
+      } else if $ago < 3600 { $"($ago // 60)m ago"
+      } else if $ago < 86400 { $"($ago // 3600)h ago"
+      } else { $"($ago // 86400)d ago" }
+
+    let status = if $ago != null and $ago < $active_threshold { "●" } else { "○" }
+
+    { status: $status, name: $c.name, ip: $c.ip, handshake: $handshake }
+  }
+}
+
 def "main show" [name: string] {
   show_qr $name
 }
@@ -224,6 +264,7 @@ def main [] {
   print "wg-manage - WireGuard client management
 
   list                   List clients
+  status                 Show connection status of all clients
   add <name> [email] [--device]  Add client (restricted access, email/device optional)
   show <name>            Show QR code for client
   email <name>           Send config email (client must have email)

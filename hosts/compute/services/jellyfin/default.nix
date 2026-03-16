@@ -24,6 +24,7 @@ in
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
+    healthcheck.path = "/health";
     integrations.homepage.enable = true;
   };
 

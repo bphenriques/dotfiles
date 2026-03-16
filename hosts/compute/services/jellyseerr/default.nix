@@ -18,6 +18,7 @@ in
       '';
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
+    healthcheck.path = "/api/v1/status";
     integrations.homepage.enable = true;
   };
 

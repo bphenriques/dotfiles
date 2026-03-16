@@ -20,6 +20,7 @@ in
     homepage = config.services.transmission.package.meta.homepage;
     category = "Media";
     port = 9091;
+    healthcheck.path = "/transmission/web/";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.ntfy.enable = true;

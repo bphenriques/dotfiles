@@ -21,6 +21,7 @@ in
         };
         systemd.dependentServices = [ "pocket-id" ];
       };
+      healthcheck.path = "/health";
       integrations.homepage.enable = true;
       integrations.catalogue.displayName = "Pocket ID";
     };

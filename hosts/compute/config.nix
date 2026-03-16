@@ -6,6 +6,7 @@
     ./disko.nix
     ./datastores
     ./services
+    ./monitoring
     ./tasks
     ../../profiles/nixos
     ../../profiles/nixos/headless

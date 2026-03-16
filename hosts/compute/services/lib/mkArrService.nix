@@ -69,6 +69,7 @@ in
       '';
       systemd.dependentServices = [ name "${name}-configure" ];
     };
+    healthcheck.path = "/ping";
     integrations.homepage.enable = true;
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "media";

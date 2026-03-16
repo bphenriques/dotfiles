@@ -10,14 +10,26 @@ let
     {
       "${service.name}" = {
         inherit (service) description;
+      } // lib.optionalAttrs service.ingress.enable {
         href = service.publicUrl;
-        siteMonitor = service.publicUrl;
+        siteMonitor = "${service.publicUrl}${service.healthcheck.path}";
       } // lib.optionalAttrs (service.integrations.homepage.icon != null) {
         icon = service.integrations.homepage.icon;
       } // service.integrations.homepage.extraConfig;
     };
 
+  mkExternalEntry = entry:
+    {
+      "${entry.name}" = {
+        inherit (entry) description;
+        href = entry.url;
+      } // lib.optionalAttrs (entry.icon != null) {
+        icon = entry.icon;
+      };
+    };
+
   servicesByCategory = lib.groupBy (s: s.category) homepageServices;
+  externalByCategory = lib.groupBy (e: e.category) (lib.attrValues cfg.external);
 in
 {
   config.custom.homelab._serviceOptionExtensions = [
@@ -48,7 +60,10 @@ in
 
   options.custom.homelab.homepage.generatedServices = lib.mkOption {
     type = lib.types.attrsOf (lib.types.listOf lib.types.anything);
-    default = lib.mapAttrs (_: svcs: map mkServiceEntry svcs) servicesByCategory;
+    default = let
+      services = lib.mapAttrs (_: svcs: map mkServiceEntry svcs) servicesByCategory;
+      external = lib.mapAttrs (_: entries: map mkExternalEntry entries) externalByCategory;
+    in lib.zipAttrsWith (_: lib.concatLists) [ services external ];
     readOnly = true;
     description = "Auto-generated homepage services grouped by category (read-only)";
   };

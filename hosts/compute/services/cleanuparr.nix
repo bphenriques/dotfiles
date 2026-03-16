@@ -17,6 +17,7 @@ in
     homepage = "https://github.com/cleanuparr/cleanuparr";
     category = "Administration";
     port = 11011;
+    healthcheck.path = "/api/health";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.homepage.icon = "cleanuparr.png";

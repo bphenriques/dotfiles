@@ -47,6 +47,7 @@ in
     homepage = config.services.syncthing.package.meta.homepage;
     category = "General";
     port = 8384;
+    healthcheck.path = "/rest/noauth/health";
     forwardAuth.enable = true;
     secrets.files.gui-password = { rotatable = true; };
     integrations.homepage.enable = true;

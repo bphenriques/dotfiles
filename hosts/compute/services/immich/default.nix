@@ -36,6 +36,7 @@ in
       systemd.dependentServices = [ "immich-server" ];
     };
 
+    healthcheck.path = "/api/server/ping";
     integrations.homepage.enable = true;
   };
 

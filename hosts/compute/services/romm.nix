@@ -73,6 +73,7 @@ in
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
       systemd.dependentServices = [ "podman-romm" ];
     };
+    healthcheck.path = "/api/heartbeat";
     integrations.homepage.enable = true;
   };
 

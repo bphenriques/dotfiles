@@ -76,6 +76,7 @@ in
       version = config.services.collabora-online.package.version;
       homepage = config.services.collabora-online.package.meta.homepage;
       integrations.catalogue.enable = false;
+      integrations.monitoring.enable = false; # Internal service, no unauthenticated health endpoint
     };
     wopi = {
       port = 9300;
@@ -84,6 +85,7 @@ in
       version = config.services.opencloud.package.version;
       homepage = config.services.opencloud.package.meta.homepage;
       integrations.catalogue.enable = false;
+      integrations.monitoring.enable = false; # Internal bridge, no health endpoint
     };
   };
 

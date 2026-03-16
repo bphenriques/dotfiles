@@ -1,4 +1,8 @@
-{ self, config, ...}: {
+{ self, config, ...}:
+let
+  hosts = self.shared.networks.main.hosts;
+in
+{
   imports = [
     ./radarr
     ./sonarr
@@ -26,6 +30,26 @@
     enable = true;
     domain = self.private.settings.hosts.compute.domain;
     ingress.cloudflareEmail = self.private.settings.cloudflare.email;
+
+    external = {
+      synology = {
+        description = "NAS";
+        category = "Administration";
+        url = "http://${hosts.bruno-home-nas}:5000";
+        icon = "synology-dsm.svg";
+      };
+      inky = {
+        description = "E-Ink Display";
+        category = "Media";
+        url = "http://${hosts.inky}:5000";
+      };
+      jetkvm = {
+        description = "Remote KVM";
+        category = "Administration";
+        url = "http://${hosts.jetkvm}";
+        icon = "jetkvm.svg";
+      };
+    };
 
     # Individual users whose information is kept private
     users = self.private.settings.users // {

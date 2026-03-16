@@ -9,7 +9,7 @@
 
   # Disk
   services.fstrim.enable = true;  # Weekly TRIM for NVMe longevity
-  services.smartd.enable = true;  # TODO check prometheus alerting once I introduce it
+  services.smartd.enable = true;  # Disk health — alerts via smartctl_exporter + Prometheus (see ../monitoring/)
 
   # RAM: ~8GB on 32GB RAM - OOM safety net without NVMe wear
   zramSwap = {

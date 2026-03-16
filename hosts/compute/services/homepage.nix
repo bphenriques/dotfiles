@@ -93,7 +93,11 @@ in
         resources = {
           cpu = true;
           memory = true;
+          cputemp = true;
+          tempmin = 30;
+          tempmax = 105;
           disk = "/";
+          units = "metric";
           label = "System";
         };
       }
@@ -109,4 +113,5 @@ in
       }
     ];
   };
+
 }

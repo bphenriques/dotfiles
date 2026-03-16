@@ -18,6 +18,7 @@ in
       enable = true;
       group = config.custom.homelab.groups.users;
     };
+    healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
     integrations.catalogue.displayName = "Home Assistant";
   };

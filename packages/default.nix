@@ -25,6 +25,7 @@ let
       niri-window-dmenu = pkgs.callPackage ./niri-window-dmenu { };
       niri-keyboard-layout = pkgs.callPackage ./niri-keyboard-layout { };
       swww-util = pkgs.callPackage ./swww-util { };
+      test-alerts = pkgs.callPackage ./test-alerts { };
       screen-recorder = pkgs.callPackage ./screen-recorder { };
       screenshot = pkgs.callPackage ./screenshot { };
       mpc-plus = pkgs.callPackage ./mpc-plus { };

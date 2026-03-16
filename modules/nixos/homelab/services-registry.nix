@@ -62,6 +62,20 @@ let
         description = "Full URL for proxying (derived from scheme, host and port)";
       };
 
+      # Health check
+      healthcheck.path = lib.mkOption {
+        type = lib.types.str;
+        default = "/";
+        description = "Path for health checks (used by monitoring and homepage)";
+      };
+
+      healthcheck.url = lib.mkOption {
+        type = lib.types.str;
+        default = "${config.scheme}://${config.host}:${toString config.port}${config.healthcheck.path}";
+        readOnly = true;
+        description = "Full health check URL (derived from service URL and healthcheck path)";
+      };
+
       # Routing (public)
       subdomain = lib.mkOption {
         type = lib.types.str;
@@ -86,6 +100,9 @@ let
         default = [ ];
         description = "Alternative subdomains";
       };
+
+      # Ingress
+      ingress.enable = lib.mkEnableOption "Traefik ingress route for this service" // { default = true; };
 
       # Ingress-level authentication (Traefik forwardAuth)
       forwardAuth = {
@@ -155,19 +172,54 @@ in
       });
       default = { };
       description = ''
-        Registry of HTTP services: routing and shared defaults.
+        Registry of homelab services: routing, metadata, and integrations.
+        HTTP ingress is optional (controlled via ingress.enable).
         Integrations and security concerns extend this via internal extension hooks.
-        Each service gets a subdomain under the base domain.
       '';
+    };
+
+    external = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
+        options = {
+          name = lib.mkOption {
+            type = lib.types.str;
+            default = name;
+            description = "Entry identifier (defaults to attribute name)";
+          };
+
+          description = lib.mkOption {
+            type = lib.types.str;
+            description = "Short description";
+          };
+
+          category = lib.mkOption {
+            type = categoryType;
+            description = "Category for homepage grouping";
+          };
+
+          url = lib.mkOption {
+            type = lib.types.str;
+            description = "Direct URL to the external service";
+          };
+
+          icon = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = "${name}.svg";
+            description = "Icon name from dashboard-icons";
+          };
+        };
+      }));
+      default = { };
+      description = "External services not managed by this host (shown on homepage dashboard)";
     };
 
   };
 
   config = lib.mkIf cfg.enable {
     assertions = let
-      allServices = lib.attrValues cfg.services;
+      ingressServices = lib.filter (s: s.ingress.enable) (lib.attrValues cfg.services);
 
-      allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) allServices;
+      allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) ingressServices;
       dupHosts = lib.filter (h: lib.count (x: x == h) allHosts > 1) (lib.unique allHosts);
     in [
       {

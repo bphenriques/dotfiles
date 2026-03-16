@@ -102,7 +102,7 @@ in
       };
 
       dynamicConfigOptions = let
-        routeConfigs = map mkTraefikRoute (lib.attrValues cfg.services);
+        routeConfigs = map mkTraefikRoute (lib.filter (s: s.ingress.enable) (lib.attrValues cfg.services));
         routesConfig = lib.foldl' lib.recursiveUpdate { } routeConfigs;
         authMiddleware = lib.optionalAttrs ingressCfg.forwardAuth.enable {
           http.middlewares.forwardAuth.forwardAuth = {
