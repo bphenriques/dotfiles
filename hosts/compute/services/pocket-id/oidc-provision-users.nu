@@ -1,10 +1,10 @@
 #!/usr/bin/env nu
-# Provisions Pocket-ID: users, groups, and OIDC clients.
+# Provisions Pocket-ID users and groups.
 #
 # Environment variables:
 #   POCKET_ID_URL - Pocket-ID base URL
 #   POCKET_ID_API_KEY_FILE - Path to file containing API key
-#   OIDC_CONFIG_FILE - Path to JSON config with users, groups, and clients
+#   OIDC_CONFIG_FILE - Path to JSON config with users and groups
 #   OIDC_CREDENTIALS_DIR - Base directory for OIDC credentials (e.g., /run/homelab-oidc)
 
 const PAGINATION_LIMIT = 100
@@ -79,69 +79,6 @@ def ensure_user [user: record, group_ids: list<string>, existing: list] {
   { username: $user.username, id: $user_id }
 }
 
-def write_credential [path: string, content: string, group: string] {
-  let tmp = $"($path).tmp"
-  $content | save --force $tmp
-  chmod 0640 $tmp
-  chown $"root:($group)" $tmp
-  mv --force $tmp $path  # atomic rename
-}
-
-def provision_client [client: record, existing: list] {
-  let found = $existing | where name == $client.name | get 0?
-
-  let desired = {
-    name: $client.name
-    callbackURLs: $client.callbackURLs
-    pkceEnabled: $client.pkce
-    isPublic: $client.pkce  # PKCE clients are public (browser-based SPAs)
-  }
-
-  let client_id = if $found != null {
-    let dominated_fields = $desired | columns
-    let current = $found | select ...$dominated_fields
-
-    if $current != $desired {
-      let r = http put $"($base_url)/api/oidc/clients/($found.id)" $desired --headers $headers --content-type application/json --full --allow-errors
-      if $r.status != 200 {
-        error make { msg: $"Failed to update OIDC client ($client.name): ($r.status) - ($r.body)" }
-      }
-      print $"  Updated OIDC client config: ($client.name)"
-    } else {
-      print $"  OIDC client config up-to-date: ($client.name)"
-    }
-    $found.id
-  } else {
-    let r = http post $"($base_url)/api/oidc/clients" $desired --headers $headers --content-type application/json --full --allow-errors
-    if $r.status != 201 {
-      error make { msg: $"Failed to create OIDC client ($client.name): ($r.status) - ($r.body)" }
-    }
-    print $"  Created OIDC client: ($client.name)"
-    $r.body.id
-  }
-
-  # Always regenerate secret (rotation on every provision)
-  let secret_r = http post $"($base_url)/api/oidc/clients/($client_id)/secret" "" --headers $headers --content-type application/json --full --allow-errors
-  if $secret_r.status != 200 {
-    error make { msg: $"Failed to generate secret for OIDC client ($client.name): ($secret_r.status) - ($secret_r.body)" }
-  }
-  let client_secret = $secret_r.body.secret
-  print $"  Generated new secret for: ($client.name)"
-
-  # Write credentials with proper permissions
-  let client_dir = $"($credentials_dir)/($client.name)"
-  let client_group = $"homelab-oidc-($client.name)"
-
-  mkdir $client_dir
-  chmod 0750 $client_dir
-  chown $"root:($client_group)" $client_dir
-
-  write_credential $"($client_dir)/id" $client_id $client_group
-  write_credential $"($client_dir)/secret" $client_secret $client_group
-
-  print $"  Wrote credentials to ($client_dir)"
-}
-
 def main [] {
   wait_ready
   print "Pocket ID is ready"
@@ -170,17 +107,5 @@ def main [] {
   mv --force $users_tmp $users_file  # atomic rename
   print $"Wrote users mapping to ($users_file)"
 
-  # Provision OIDC clients
-  if ($config.clients | is-empty) {
-    print "No OIDC clients configured"
-  } else {
-    print "Provisioning OIDC clients..."
-    let existing_clients = get_all "oidc/clients"
-    for client in $config.clients {
-      print $"Processing client: ($client.name)"
-      provision_client $client $existing_clients
-    }
-  }
-
-  print "Pocket ID provisioning complete"
+  print "Pocket ID base provisioning complete"
 }

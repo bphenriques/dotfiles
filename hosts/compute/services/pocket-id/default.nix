@@ -4,7 +4,7 @@ let
   port = 8094;
 in
 {
-  imports = [ ./configure.nix ];
+  imports = [ ./configure-users.nix ./provision-clients.nix ];
 
   custom.homelab = {
     services.pocket-id = {

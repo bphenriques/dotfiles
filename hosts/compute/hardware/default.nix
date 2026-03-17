@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, self, config, ... }:
 {
   imports = [
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
@@ -55,6 +55,23 @@
     powertop.enable = true;            # Auto-tune power settings at boot
     cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
   };
+
+  # UPS monitoring (NUT netclient).
+  # Credentials: update `cat /etc/ups/upsd.users` on the Synology NAS and restart `synosystemctl restart ups-usb`
+  power.ups = {
+    enable = true;
+    mode = "netclient";
+    upsmon.monitor.synology = {
+      system = "ups@${self.shared.networks.main.hosts.bruno-home-nas}";
+      powerValue = 1;
+      user = "compute";
+      passwordFile = config.sops.secrets."upsmon/password".path;
+      type = "secondary";
+    };
+  };
+  sops.secrets."upsmon/password" = { };
+
+  # Misc
   services.thermald.enable = true;     # Intel thermal daemon — keeps temps in check under load
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)

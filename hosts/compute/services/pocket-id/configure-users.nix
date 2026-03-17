@@ -1,11 +1,14 @@
-# Provisions users, groups, and OIDC clients after Pocket-ID starts.
-# Credentials are written to /run/homelab-oidc/<client>/{id,secret}.
+# Provisions Pocket-ID users and groups after Pocket-ID starts.
+# Writes user mapping to /run/homelab-oidc/oidc-users.json.
+# Also provides manual re-invite script.
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab.oidc;
-  provisionConfigFile = pkgs.writeText "oidc-provision-config.json" (builtins.toJSON cfg.provisionConfig);
   pocketIdCfg = config.custom.homelab.services.pocket-id;
-  script = self.lib.builders.writeNushellScript "oidc-provision" ./oidc-provision.nu;
+
+  configFile = pkgs.writeText "oidc-provision-users-config.json" (builtins.toJSON {
+    inherit (cfg.provisionConfig) users groups;
+  });
 in
 {
   # Base directory for credentials (tmpfs via /run/)
@@ -14,25 +17,24 @@ in
     "d ${cfg.credentials.dir} 0755 root root -"
   ];
 
-  custom.homelab.oidc.systemd.provisionedTarget = "pocket-id-provision.service";
-  systemd.services.pocket-id-provision = {
-    description = "Pocket-ID setup";
+  custom.homelab.oidc.systemd.baseProvisionUnit = "pocket-id-provision-base.service";
+
+  systemd.services.pocket-id-provision-base = {
+    description = "Pocket-ID users and groups provisioning";
     wantedBy = [ "pocket-id.service" ];
     after = [ "network-online.target" "pocket-id.service" ];
     wants = [ "network-online.target" ];
     requires = [ "pocket-id.service" ];
     partOf = [ "pocket-id.service" ];
-    restartTriggers = [ provisionConfigFile ./oidc-provision.nu ];
+    restartTriggers = [ configFile ./oidc-provision-users.nu ];
     startLimitIntervalSec = 300;
     startLimitBurst = 3;
-
     environment = {
       POCKET_ID_URL = pocketIdCfg.url;
       POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
-      OIDC_CONFIG_FILE = toString provisionConfigFile;
+      OIDC_CONFIG_FILE = toString configFile;
       OIDC_CREDENTIALS_DIR = cfg.credentials.dir;
     };
-
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -45,9 +47,8 @@ in
       NoNewPrivileges = true;
       RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
     };
-
     path = [ pkgs.nushell ];
-    script = ''nu ${script}'';
+    script = ''nu ${self.lib.builders.writeNushellScript "oidc-provision-users" ./oidc-provision-users.nu}'';
   };
 
   # Manual re-invite script

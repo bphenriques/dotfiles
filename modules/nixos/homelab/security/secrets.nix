@@ -146,10 +146,13 @@ let
         (lib.attrValues ownerCfg.templates)
     ) (lib.attrNames allOwners);
 
-  # Auto-detect OIDC dependency from placeholder patterns in template content
-  needsOidc = ownerCfg:
-    lib.any (tmpl: lib.hasInfix "@HOMELAB_OIDC_" tmpl.content)
-      (lib.attrValues ownerCfg.templates);
+  # Auto-detect which OIDC clients are referenced in template content (by placeholder patterns)
+  oidcClientNames = lib.attrNames (lib.filterAttrs (_: svc: svc.oidc.enable) cfg.services);
+  oidcClientDeps = ownerCfg:
+    lib.filter (clientName:
+      lib.any (tmpl: lib.hasInfix "@HOMELAB_OIDC_${clientName}_" tmpl.content)
+        (lib.attrValues ownerCfg.templates)
+    ) oidcClientNames;
 
   # Helper to generate the shell script for an owner's secrets
   mkGeneratorScript = ownerName: ownerCfg: let
@@ -213,7 +216,9 @@ let
   explicitGids = lib.filter (g: g != null) (lib.mapAttrsToList (_: owner: owner.gid) allOwners);
   dupGids = lib.filter (gid: lib.count (g: g == gid) explicitGids > 1) (lib.unique explicitGids);
 
-  oidcProvisionedTarget = cfg.oidc.systemd.provisionedTarget;
+  oidcBaseUnit = cfg.oidc.systemd.baseProvisionUnit;
+  oidcClientUnitPrefix = cfg.oidc.systemd.clientProvisionUnitPrefix;
+  mkOidcClientUnit = name: "${oidcClientUnitPrefix}${name}.service";
 in {
   options.custom.homelab.secrets = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
@@ -276,13 +281,13 @@ in {
 
             after =
               (map (dep: "homelab-secrets-${dep}.service") (crossDeps name owner))
-              ++ lib.optional (needsOidc owner && oidcProvisionedTarget != null) oidcProvisionedTarget;
+              ++ lib.optionals (oidcBaseUnit != null) (map mkOidcClientUnit (oidcClientDeps owner));
             requires =
               (map (dep: "homelab-secrets-${dep}.service") (crossDeps name owner))
-              ++ lib.optional (needsOidc owner && oidcProvisionedTarget != null) oidcProvisionedTarget;
+              ++ lib.optionals (oidcBaseUnit != null) (map mkOidcClientUnit (oidcClientDeps owner));
             partOf =
               (map (dep: "homelab-secrets-${dep}.service") (crossDeps name owner))
-              ++ lib.optional (needsOidc owner && oidcProvisionedTarget != null) oidcProvisionedTarget;
+              ++ lib.optionals (oidcBaseUnit != null) (map mkOidcClientUnit (oidcClientDeps owner));
 
             serviceConfig = {
               Type = "oneshot";

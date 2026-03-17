@@ -1,6 +1,7 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.jellyfin;
+  pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.smb.mounts;
 in
 {
@@ -31,6 +32,8 @@ in
   services.jellyfin.enable = true;
   users.users.jellyfin.extraGroups = [ homelabMounts.media.group "video" "render" ];
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ "jellyfin" ];
+
+  systemd.services.jellyfin.serviceConfig.BindReadOnlyPaths = [ pathsCfg.media.music.library ];
 
   assertions = [
     {

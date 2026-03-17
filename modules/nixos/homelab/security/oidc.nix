@@ -220,10 +220,18 @@ in
       description = "Provisioning config derived from OIDC-enabled users and services (read-only)";
     };
 
-    systemd.provisionedTarget = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = "Systemd unit indicating OIDC credentials are ready";
+    systemd = {
+      baseProvisionUnit = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Systemd unit for base OIDC provisioning (users/groups)";
+      };
+
+      clientProvisionUnitPrefix = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Prefix for per-client provisioning unit names (e.g. 'pocket-id-provision-client-' yields 'pocket-id-provision-client-<name>.service')";
+      };
     };
   };
 
@@ -252,10 +260,10 @@ in
     }
 
     (lib.mkIf (derivedClients != { }) (let
-      provisionedTarget = cfg.systemd.provisionedTarget;
       allDependentServices = lib.concatLists (
         lib.mapAttrsToList (_: client: client.systemd.dependentServices) derivedClients
       );
+      hasProvisionUnits = cfg.systemd.baseProvisionUnit != null;
       explicitGids = lib.filter (g: g != null) (lib.mapAttrsToList (_: c: c.gid) derivedClients);
       dupGids = lib.filter (gid: lib.count (g: g == gid) explicitGids > 1) (lib.unique explicitGids);
     in {
@@ -265,8 +273,8 @@ in
           message = "OIDC clients have duplicate explicit gids: ${toString dupGids}";
         }
         {
-          assertion = provisionedTarget != null || allDependentServices == [];
-          message = "custom.homelab.oidc.systemd.provisionedTarget must be set when OIDC clients have dependentServices configured. Without it, systemd ordering is silently skipped.";
+          assertion = hasProvisionUnits || allDependentServices == [];
+          message = "custom.homelab.oidc.systemd.baseProvisionUnit must be set when OIDC clients have dependentServices configured. Without it, systemd ordering is silently skipped.";
         }
       ];
 
@@ -276,14 +284,17 @@ in
         })
       ) derivedClients;
 
-      systemd.services = lib.mkIf (provisionedTarget != null) (lib.mkMerge (
-        lib.mapAttrsToList (_: client:
+      # Wire each client's dependent services to that client's provision unit
+      systemd.services = lib.mkIf hasProvisionUnits (lib.mkMerge (
+        lib.mapAttrsToList (name: client: let
+          clientProvisionUnit = "${cfg.systemd.clientProvisionUnitPrefix}${name}.service";
+        in
           lib.listToAttrs (map (svcName: {
             name = svcName;
             value = {
-              requires = [ provisionedTarget ];
-              after = [ provisionedTarget ];
-              partOf = [ provisionedTarget ];
+              requires = [ clientProvisionUnit ];
+              after = [ clientProvisionUnit ];
+              partOf = [ clientProvisionUnit ];
             };
           }) client.systemd.dependentServices)
         ) derivedClients

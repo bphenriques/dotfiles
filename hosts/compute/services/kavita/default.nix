@@ -51,7 +51,7 @@ in
   systemd.services.kavita = {
     serviceConfig = {
       LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
-      BindPaths = [
+      BindReadOnlyPaths = [
         "${pathsCfg.media.books.library}:/mnt/kavita/books"
         "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
         "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
