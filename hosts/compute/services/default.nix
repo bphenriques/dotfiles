@@ -42,6 +42,7 @@ in
         description = "E-Ink Display";
         category = "Media";
         url = "http://${hosts.inky}:5000";
+        tab = "Admin";
       };
       jetkvm = {
         description = "Remote KVM";

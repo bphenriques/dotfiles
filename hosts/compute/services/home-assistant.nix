@@ -45,7 +45,7 @@ in
       homeassistant = {
         name = "Home";
         unit_system = "metric";
-        time_zone = "Europe/Lisbon";
+        time_zone = config.time.timeZone;
         latitude = 38.736946;
         longitude = -9.142685;
       };

@@ -22,6 +22,7 @@ in
     healthcheck.path = "/ping";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Admin";
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "admin";
   };

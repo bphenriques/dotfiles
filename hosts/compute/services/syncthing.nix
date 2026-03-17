@@ -51,6 +51,7 @@ in
     forwardAuth.enable = true;
     secrets.files.gui-password = { rotatable = true; };
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Admin";
   };
 
   users.users.syncthing.extraGroups = [

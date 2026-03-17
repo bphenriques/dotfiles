@@ -9,11 +9,6 @@
 
     # Users
     ./bphenriques
-
-    # Temporary
-    ../compute/datastores
-    ../compute/services
-    ../compute/tasks
   ];
 
   networking.hostName = "bphenriques-laptop";

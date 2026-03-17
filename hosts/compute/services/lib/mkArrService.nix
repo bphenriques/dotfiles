@@ -71,6 +71,13 @@ in
     };
     healthcheck.path = "/ping";
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Admin";
+    integrations.homepage.extraConfig.widget = {
+      type = name;
+      url = serviceCfg.url;
+      key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
+      fields = []; # Omit all fields because we already have the calendar view
+    };
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "media";
   };

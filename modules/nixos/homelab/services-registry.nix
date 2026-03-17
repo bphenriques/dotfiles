@@ -179,7 +179,7 @@ in
     };
 
     external = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
+      type = lib.types.attrsOf (lib.types.submodule ({ name, config, ... }: {
         options = {
           name = lib.mkOption {
             type = lib.types.str;
@@ -200,6 +200,12 @@ in
           url = lib.mkOption {
             type = lib.types.str;
             description = "Direct URL to the external service";
+          };
+
+          tab = lib.mkOption {
+            type = lib.types.enum [ "Home" "Admin" ];
+            default = if lib.elem config.category [ "Monitoring" "Administration" ] then "Admin" else "Home";
+            description = "Homepage tab to display this entry on";
           };
 
           icon = lib.mkOption {

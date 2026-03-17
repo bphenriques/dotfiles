@@ -2,6 +2,9 @@
 let
   cfg = config.custom.homelab;
 
+  adminCategories = [ "Monitoring" "Administration" ];
+  defaultTab = category: if lib.elem category adminCategories then "Admin" else "Home";
+
   homepageServices = lib.filter
     (s: s.integrations.homepage.enable)
     (lib.attrValues cfg.services);
@@ -28,16 +31,30 @@ let
       };
     };
 
-  servicesByCategory = lib.groupBy (s: s.category) homepageServices;
-  externalByCategory = lib.groupBy (e: e.category) (lib.attrValues cfg.external);
+  # Group by tab, then by category within each tab
+  servicesByTab = lib.groupBy (s: s.integrations.homepage.tab) homepageServices;
+  externalsByTab = lib.groupBy (e: e.tab) (lib.attrValues cfg.external);
+
+  mkTabServices = tab: let
+    svcs = servicesByTab.${tab} or [];
+    exts = externalsByTab.${tab} or [];
+    servicesByCategory = lib.mapAttrs (_: ss: map mkServiceEntry ss) (lib.groupBy (s: s.category) svcs);
+    externalByCategory = lib.mapAttrs (_: es: map mkExternalEntry es) (lib.groupBy (e: e.category) exts);
+  in lib.zipAttrsWith (_: lib.concatLists) [ servicesByCategory externalByCategory ];
 in
 {
   config.custom.homelab._serviceOptionExtensions = [
-    ({ name, ... }: {
+    ({ name, config, ... }: {
       options.integrations.homepage = lib.mkOption {
         type = lib.types.submodule {
           options = {
             enable = lib.mkEnableOption "homepage entry for this service";
+
+            tab = lib.mkOption {
+              type = lib.types.enum [ "Home" "Admin" ];
+              default = defaultTab config.category;
+              description = "Homepage tab to display this service on";
+            };
 
             icon = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
@@ -59,12 +76,12 @@ in
   ];
 
   options.custom.homelab.homepage.generatedServices = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.listOf lib.types.anything);
-    default = let
-      services = lib.mapAttrs (_: svcs: map mkServiceEntry svcs) servicesByCategory;
-      external = lib.mapAttrs (_: entries: map mkExternalEntry entries) externalByCategory;
-    in lib.zipAttrsWith (_: lib.concatLists) [ services external ];
+    type = lib.types.attrsOf (lib.types.attrsOf (lib.types.listOf lib.types.anything));
+    default = {
+      Home = mkTabServices "Home";
+      Admin = mkTabServices "Admin";
+    };
     readOnly = true;
-    description = "Auto-generated homepage services grouped by category (read-only)";
+    description = "Auto-generated homepage services grouped by tab and category (read-only)";
   };
 }

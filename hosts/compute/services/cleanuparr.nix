@@ -15,11 +15,12 @@ in
     description = "Queue Cleanup";
     version = "2.4.7";
     homepage = "https://github.com/cleanuparr/cleanuparr";
-    category = "Administration";
+    category = "Media";
     port = 11011;
     healthcheck.path = "/api/health";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Admin";
     integrations.homepage.icon = "cleanuparr.png";
   };
 

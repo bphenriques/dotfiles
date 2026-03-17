@@ -11,7 +11,7 @@ in
       description = "OIDC Provider";
       version = config.services.pocket-id.package.version;
       homepage = config.services.pocket-id.package.meta.homepage;
-      category = "Infrastructure";
+      category = "Administration";
       subdomain = "auth";
       port = port;
       secrets = {
