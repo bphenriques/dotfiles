@@ -22,7 +22,7 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
                                   SMB mounts
 ```
 
-- **Cloudflare**: DNS (records point to internal IP; not proxied) + ACME DNS-01 for certificate issuance (Traefik terminates TLS locally)
+- **[Cloudflare](../infrastructure.md)**: DNS (records point to internal IP; not proxied) + ACME DNS-01 for certificate issuance (Traefik terminates TLS locally)
 - **Traefik**: Reverse proxy; only externally reachable entry point alongside Wireguard
 - **Pocket-ID**: OIDC provider with passkey authentication
 - **Tinyauth**: ForwardAuth middleware for services without native OIDC

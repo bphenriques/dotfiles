@@ -15,10 +15,18 @@ let
       { Name = "TV Shows";  CollectionType = "tvshows"; Locations = [ pathsCfg.media.tv ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; }
       { Name = "Music";     CollectionType = "music";   Locations = [ pathsCfg.media.music.library ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = false; }
     ];
-    trickplayConfig = {
+    # Encoding / transcoding settings (merged into /System/Configuration/encoding via API)
+    encodingConfig = {
+      HardwareAccelerationType = "qsv";
       EnableHwAcceleration = true;
       EnableHwEncoding = true;
       EnableHwDecoding = true;
+      # N150 (Alder Lake-N) only has the low-power fixed-function encoder — these must be enabled.
+      EnableIntelLowPowerH264HwEncoder = true;
+      EnableIntelLowPowerHevcHwEncoder = true;
+      # HDR→SDR tonemapping: requires intel-compute-runtime (OpenCL) in hardware.graphics.extraPackages.
+      # EnableTonemapping = true;
+      # TonemappingAlgorithm = "bt2390";
     };
     userConfigs = lib.mapAttrsToList (_: u: {
       username = u.username;

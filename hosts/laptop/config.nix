@@ -13,6 +13,10 @@
 
   networking.hostName = "bphenriques-laptop";
 
+  services.unifi.enable = true;
+  services.unifi.unifiPackage = pkgs.unifi;
+  services.unifi.mongodbPackage = pkgs.mongodb-7_0;
+
   boot = {
     kernelPackages = pkgs.linuxPackages_6_18;
 

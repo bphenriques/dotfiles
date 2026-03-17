@@ -11,6 +11,7 @@
     main = {
       subnet = "192.168.1.0/24";
       hosts = {
+        laptop = "192.168.1.121";
         bruno-home-nas = "192.168.1.192";
         compute = "192.168.1.196";        # First one from link aggregation
         inky = "192.168.1.197";           # Raspberry Pi Zero 2W - assign via DHCP reservation

@@ -13,6 +13,7 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
+| [cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.4.7 | `cleanuparr` | 11011 | ForwardAuth | admin |
 | [immich](https://immich.app/) | Photo & Video Gallery | 2.5.6 | `photos` | 2283 | OIDC | users |
 | [jellyfin](https://jellyfin.org/) | Media Player | 10.11.6 | `jellyfin` | 8096 | OIDC | users |
 | [jellyseerr](https://github.com/Fallenbagel/jellyseerr) | TV / Movie Finder | 2.7.3 | `jellyseerr` | 9099 | — | — |
@@ -27,13 +28,16 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
+| [alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) | Alert Routing | 0.31.1 | `alertmanager` | 9093 | ForwardAuth | admin |
 | [ntfy](https://ntfy.sh) | Push Notifications | 2.17.0 | `ntfy` | 2586 | — | — |
+| [prometheus](https://prometheus.io) | Metrics | 3.10.0 | `prometheus` | 9090 | ForwardAuth | admin |
 
 ### Administration
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
-| [cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.4.7 | `cleanuparr` | 11011 | ForwardAuth | admin |
+| [Pocket ID](https://pocket-id.org) | OIDC Provider | 2.3.0 | `auth` | 8094 | — | — |
+| [wireguard](https://www.wireguard.com/) | VPN | 1.0 | `wireguard` | 51820 | — | — |
 
 ### Infrastructure
 
@@ -41,6 +45,5 @@
 |------|-------------|---------|-----------|---------------|------|-------|
 | [CouchDB](https://couchdb.apache.org) | Document Database | 3.5.1 | `couchdb` | 5984 | — | — |
 | [homepage](https://gethomepage.dev) | Dashboard | 1.10.1 | `homepage` | 3001 | — | — |
-| [Pocket ID](https://pocket-id.org) | OIDC Provider | 2.3.0 | `auth` | 8094 | — | — |
 | [tinyauth](https://tinyauth.app) | ForwardAuth Gateway | 5.0.1 | `tinyauth` | 3000 | OIDC | users |
 

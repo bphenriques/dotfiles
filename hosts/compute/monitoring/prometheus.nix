@@ -1,12 +1,12 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.prometheus;
 in
 {
   custom.homelab.services.prometheus = {
     description = "Metrics";
-    version = config.services.prometheus.package.version;
-    homepage = config.services.prometheus.package.homepage;
+    version = pkgs.prometheus.version;
+    homepage = pkgs.prometheus.meta.homepage;
     category = "Monitoring";
     port = 9090;
     healthcheck.path = "/-/healthy";

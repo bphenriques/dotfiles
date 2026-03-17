@@ -72,14 +72,14 @@ def ensure_server_name [headers: list] {
   print $"  Server name set to: ($config.serverName)"
 }
 
-def ensure_trickplay [headers: list] {
-  print "Configuring trickplay..."
+def ensure_encoding [headers: list] {
+  print "Configuring encoding/transcoding..."
   let current = http get $"($base_url)/System/Configuration/encoding" --headers $headers --full --allow-errors
   if $current.status != 200 { error make { msg: $"Failed to get encoding config: ($current.status)" } }
   
-  let r = http post $"($base_url)/System/Configuration/encoding" ($current.body | merge $config.trickplayConfig) --content-type application/json --headers $headers --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to configure trickplay: ($r.status)" } }
-  print "  Trickplay configured"
+  let r = http post $"($base_url)/System/Configuration/encoding" ($current.body | merge $config.encodingConfig) --content-type application/json --headers $headers --full --allow-errors
+  if $r.status != 204 { error make { msg: $"Failed to configure encoding: ($r.status)" } }
+  print "  Encoding configured"
 }
 
 def ensure_libraries [headers: list] {
@@ -166,7 +166,7 @@ def main [] {
 
   let auth = authenticate
   ensure_server_name $auth.headers
-  ensure_trickplay $auth.headers
+  ensure_encoding $auth.headers
   ensure_libraries $auth.headers
   ensure_users $auth.headers $config.userConfigs
 
