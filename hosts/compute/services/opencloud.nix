@@ -105,6 +105,7 @@ in
       OC_OIDC_ISSUER = oidcCfg.provider.issuerUrl; # Does not work when using the yaml based configuration
       OC_EXCLUDE_RUN_SERVICES = "idp";
       OC_ADD_RUN_SERVICES = "collaboration";
+      PROXY_AUTOPROVISION_ACCOUNTS = "true";
     };
 
     settings = {
@@ -112,6 +113,7 @@ in
         http.tls = false;                       # Managed by traefik
         autoprovision_accounts = true;          # Users managed externally
         user_cs3_claim = "username";
+        oidc_rewrite_wellknown = false;
         csp_config_file_location = toString cspConfig;
       };
       # Point web client directly to OIDC provider
@@ -121,6 +123,7 @@ in
         post_logout_redirect_uri = serviceCfg.publicUrl;
         # client_id: set via WEB_OIDC_CLIENT_ID env var from environmentFile
       };
+      graph.username_match = "none";
       collaboration = {
         wopi.wopisrc = wopiCfg.publicUrl; # External WOPI URL that Collabora uses to call back into OpenCloud. Must be routed through Traefik so Collabora can reach it
         app = {
