@@ -24,11 +24,10 @@ in
     ./wireguard
     ./opencloud.nix
     ./home-assistant.nix
+    ./radicale
+    ./tandoor-recipes
 
     # TODO:
-    # - Recipes
-    # - Calendar
-    # - pdf tool
     # - screenshot homepage
     # - fix prowlarr indexers
   ];
@@ -55,7 +54,6 @@ in
         description = "Remote KVM";
         category = "Administration";
         url = "http://${hosts.jetkvm}";
-        icon = "jetkvm.svg";
       };
     };
 

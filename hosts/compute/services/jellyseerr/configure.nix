@@ -56,7 +56,7 @@ in
 
   systemd.services.jellyseerr-configure = {
     description = "Jellyseerr setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "jellyseerr.service" ];
     after = [ "jellyseerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
     requires = [ "jellyseerr.service" ];
     wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
