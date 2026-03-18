@@ -29,6 +29,7 @@ in
         "${serviceCfg.publicUrl}/signin-oidc"
         "${serviceCfg.publicUrl}/signout-callback-oidc"
       ];
+      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "kavita" ];
     };
     healthcheck.path = "/api/health";

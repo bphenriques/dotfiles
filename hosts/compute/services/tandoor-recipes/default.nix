@@ -36,6 +36,7 @@ in
     };
     oidc = {
       enable = true;
+      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "tandoor-recipes" ];
     };
     integrations.homepage.enable = true;

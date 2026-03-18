@@ -80,19 +80,6 @@ in
     port = port;
     ingress.enable = false;
     integrations.monitoring.enable = false;
-    integrations.homepage = {
-      enable = true;
-      extraConfig.widget = {
-        type = "prometheusmetric";
-        url = prometheusCfg.url;
-        refreshInterval = 60000;
-        metrics = [{
-          label = "Connected";
-          query = ''count by(instance) (wireguard_latest_handshake_seconds{job="wireguard"} > (time() - 180)) or vector(0)'';
-          format.type = "number";
-        }];
-      };
-    };
   };
 
   systemd.tmpfiles.rules = [

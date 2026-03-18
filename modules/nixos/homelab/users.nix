@@ -32,6 +32,12 @@ in
         default = "users";
         description = "Name of the users group";
       };
+
+      guests = lib.mkOption {
+        type = lib.types.str;
+        default = "guests";
+        description = "Name of the guests group";
+      };
     };
 
     _userOptionExtensions = lib.mkOption {

@@ -111,12 +111,13 @@ let
           Independent of app-level SSO (OIDC) the service might use
         '';
 
-        # Values are actual group names from cfg.groups (not fixed strings "admin"/"users").
-        # This allows changing group names in one place (custom.homelab.groups).
-        group = lib.mkOption {
-          type = lib.types.enum [ cfg.groups.admin cfg.groups.users ];
-          default = cfg.groups.admin;
-          description = "Group required to access this service via forwardAuth (uses group names from custom.homelab.groups)";
+        groups = lib.mkOption {
+          type = lib.types.either
+            (lib.types.enum (lib.attrValues cfg.groups))
+            (lib.types.listOf (lib.types.enum (lib.attrValues cfg.groups)));
+          apply = v: if builtins.isList v then v else [ v ];
+          default = [ cfg.groups.admin ];
+          description = "Groups allowed to access via forwardAuth (OR semantics). Accepts a single group or a list.";
         };
       };
 
@@ -227,10 +228,20 @@ in
 
       allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) ingressServices;
       dupHosts = lib.filter (h: lib.count (x: x == h) allHosts > 1) (lib.unique allHosts);
+
+      dualAuthServices = lib.filter
+        (s: (lib.attrByPath [ "oidc" "enable" ] false s) && s.forwardAuth.enable)
+        (lib.attrValues cfg.services);
     in [
       {
         assertion = dupHosts == [ ];
         message = "Service public hosts and aliases must be unique. Conflicting: ${toString dupHosts}";
+      }
+      {
+        assertion = dualAuthServices == [ ];
+        message = "Services must not enable both OIDC and forwardAuth. Offending: ${
+          lib.concatMapStringsSep ", " (s: s.name) dualAuthServices
+        }";
       }
     ];
   };

@@ -1,6 +1,6 @@
 # Provisions Pocket-ID users and groups after Pocket-ID starts.
 # Writes user mapping to /run/homelab-oidc/oidc-users.json.
-# Also provides manual re-invite script.
+# Also provides pocket-id-manage CLI for guest management.
 { config, pkgs, lib, self, ... }:
 let
   cfg = config.custom.homelab.oidc;
@@ -9,6 +9,13 @@ let
   configFile = pkgs.writeText "oidc-provision-users-config.json" (builtins.toJSON {
     inherit (cfg.provisionConfig) users groups;
   });
+
+  pocketIdManage = pkgs.writeShellScriptBin "pocket-id-manage" ''
+    export POCKET_ID_URL="${pocketIdCfg.url}"
+    export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
+    export POCKET_ID_GUESTS_GROUP="${config.custom.homelab.groups.guests}"
+    exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-manage" ./pocket-id-manage.nu} "$@"
+  '';
 in
 {
   # Base directory for credentials (tmpfs via /run/)
@@ -26,12 +33,10 @@ in
     wants = [ "network-online.target" ];
     requires = [ "pocket-id.service" ];
     partOf = [ "pocket-id.service" ];
-    restartTriggers = [ configFile ./oidc-provision-users.nu ];
+    restartTriggers = [ configFile ];
     startLimitIntervalSec = 300;
     startLimitBurst = 3;
     environment = {
-      POCKET_ID_URL = pocketIdCfg.url;
-      POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
       OIDC_CONFIG_FILE = toString configFile;
       OIDC_CREDENTIALS_DIR = cfg.credentials.dir;
     };
@@ -47,16 +52,9 @@ in
       NoNewPrivileges = true;
       RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
     };
-    path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "oidc-provision-users" ./oidc-provision-users.nu}'';
+    path = [ pocketIdManage ];
+    script = ''pocket-id-manage provision-users'';
   };
 
-  # Manual re-invite script
-  environment.systemPackages = [
-    (pkgs.writeShellScriptBin "pocket-id-invite" ''
-      export POCKET_ID_URL="${pocketIdCfg.url}"
-      export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
-      exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-invite" ./pocket-id-invite.nu} "$@"
-    '')
-  ];
+  environment.systemPackages = [ pocketIdManage ];
 }

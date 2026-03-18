@@ -62,6 +62,7 @@ in
           "${serviceCfg.publicUrl}/oidc-silent-redirect.html"
           "${serviceCfg.publicUrl}/web-oidc-callback.html"
         ];
+        allowedGroups = with cfg.groups; [ admin ];
       };
       integrations.homepage.enable = true;
       integrations.homepage.icon = "open-cloud.svg";

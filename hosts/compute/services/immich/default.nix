@@ -26,6 +26,7 @@ in
         "${serviceCfg.publicUrl}/user-settings"
         "app.immich:///oauth-callback"
       ];
+      allowedGroups = with config.custom.homelab.groups; [ admin ];
       systemd.dependentServices = [ "immich-server" ];
     };
 

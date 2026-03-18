@@ -14,6 +14,7 @@ in
     port = 8081;
     oidc = {
       enable = true;
+      allowedGroups = with config.custom.homelab.groups; [ admin ];
       systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
     };
     healthcheck.path = "/healthcheck";

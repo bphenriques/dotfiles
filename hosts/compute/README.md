@@ -46,12 +46,12 @@ This design fits my small-scale homelab and is not meant to be an enterprise env
 reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenance ops as this is not another job.
 
 - **Service registry**: [`custom.homelab.services.*`](../../modules/nixos/homelab/services-registry.nix): routing, auth, secrets, and integrations from a single declaration
-- **Layered access control**: OIDC SSO where supported, [`ForwardAuth`](../../modules/nixos/homelab/ingress.nix) fallback where not
+- **[Layered access control](#access-control)**: Three tiers (`admin`, `users`, `guests`) enforced via OIDC per-client group restriction or ForwardAuth, never both on the same service
 - **Secret provisioning** with per-service group isolation and systemd ordering:
   - **OIDC Clients** [provisioned from declarations](../../modules/nixos/homelab/security/oidc.nix)
   - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/secrets.nix)
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
-- **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to
+- **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
 - **[Central Backup timer](../../modules/nixos/homelab/backup.nix)**: supports pre-backup hooks for customizations
 
 ## Miniflux Example
@@ -70,6 +70,7 @@ custom.homelab.services.miniflux = {
   healthcheck.path = "/healthcheck";
   oidc = {
     enable = true;
+    allowedGroups = with config.custom.homelab.groups; [ admin ];
     systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
   };
   integrations.homepage.enable = true;
@@ -136,4 +137,52 @@ custom.homelab.users.alice = {
   services.jellyfin.enable = true;
   services.miniflux.enable = true;
 };
+```
+
+## Access Control
+
+Three tiers of access, each enforced at one of two layers (never both on the same service):
+
+| Tier | Group | Intended for | Example access |
+|------|-------|-------------|----------------|
+| Admin | `admin` | Homelab owner | Everything |
+| Users | `users` | Family | Media, recipes, photos — not admin tools |
+| Guests | `guests` | Friends, colleagues | Romm only (viewer) |
+
+### Enforcement layers
+
+- **OIDC [per-client group restriction](../../modules/nixos/homelab/security/oidc.nix)**: Pocket-ID rejects authentication at the provider level if the user's group isn't in the client's `allowedGroups`. No forwardAuth needed — guests can't even start an auth flow for services they're not allowed to use.
+- **[ForwardAuth](../../modules/nixos/homelab/ingress.nix)** (via Tinyauth): For services without native OIDC (Home Assistant, *arr stack, Syncthing, etc.), Traefik's forwardAuth middleware gates access by group.
+
+An assertion prevents accidentally enabling both on the same service.
+
+### Per-service access
+
+```nix
+# OIDC-native: guests can view ROMs, family can edit, admin has full control
+custom.homelab.services.romm.oidc.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
+
+# OIDC-native: family and admin only
+custom.homelab.services.immich.oidc.allowedGroups = with config.custom.homelab.groups; [ users admin ];
+
+# ForwardAuth: admin only
+custom.homelab.services.home-assistant.forwardAuth.groups = [ config.custom.homelab.groups.admin ];
+```
+
+### Guest management
+
+Guests are managed imperatively via `pocket-id-manage` (no Nix rebuild needed):
+
+```bash
+# Invite a guest (creates Pocket-ID account + sends passkey setup email)
+pocket-id-manage guest invite colleague@work.com --firstName John --lastName Doe
+
+# Provision VPN access separately
+wg-manage add john colleague@work.com
+
+# Remove a guest (only deletes users in the guests group)
+pocket-id-manage guest remove john
+
+# Resend invite to any user (family or guest)
+pocket-id-manage reinvite alice
 ```

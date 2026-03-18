@@ -15,6 +15,7 @@ in
       oidc = {
         enable = true;
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
+        allowedGroups = with cfg.groups; [ users admin ];
         systemd.dependentServices = [ "tinyauth" ];
       };
       secrets = {
@@ -53,7 +54,7 @@ in
     } // lib.listToAttrs (
       lib.mapAttrsToList (name: svc: {
         name = "APPS_${lib.toUpper name}_OAUTH_GROUPS";
-        value = svc.forwardAuth.group;
+        value = lib.concatStringsSep "," svc.forwardAuth.groups;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );
   };

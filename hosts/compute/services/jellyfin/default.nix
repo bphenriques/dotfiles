@@ -23,6 +23,7 @@ in
     oidc = {
       enable = true;
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
     healthcheck.path = "/health";

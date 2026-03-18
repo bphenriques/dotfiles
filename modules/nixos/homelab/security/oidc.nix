@@ -1,9 +1,9 @@
 # OIDC provider configuration and client provisioning.
 # Global provider config + derives clients from services.*.oidc.
 #
-# Client secrets are regenerated on every provision run (boot or config change).
-# This ensures credentials stay fresh and avoids drift. All OIDC-consuming services
-# must be listed in oidc.systemd.dependentServices to receive updated credentials.
+# Client secrets are generated on first provision or when credentials are missing/stale.
+# All OIDC-consuming services must be listed in oidc.systemd.dependentServices to
+# receive updated credentials.
 { lib, config, ... }:
 let
   homelabCfg = config.custom.homelab;
@@ -72,6 +72,12 @@ let
         description = "Fixed GID for the credentials group (null = auto-assign)";
       };
 
+      allowedGroups = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Pocket-ID groups allowed to authenticate via this OIDC client (empty = unrestricted)";
+      };
+
       group = lib.mkOption {
         type = lib.types.str;
         default = "homelab-oidc-${serviceName}";
@@ -126,7 +132,10 @@ let
   enabledUsers = lib.filterAttrs (_: u: u.services.oidc.enable) homelabCfg.users;
 
   # Derive groups from user memberships
-  allGroups = lib.unique (lib.concatLists (lib.mapAttrsToList (_: u: u.groups) enabledUsers));
+  allGroups = lib.unique (
+    (lib.attrValues homelabCfg.groups)
+    ++ lib.concatLists (lib.mapAttrsToList (_: u: u.groups) enabledUsers)
+  );
 in
 {
   options.custom.homelab.oidc = {
@@ -201,6 +210,7 @@ in
                 name = lib.mkOption { type = lib.types.str; };
                 callbackURLs = lib.mkOption { type = lib.types.listOf lib.types.str; };
                 pkce = lib.mkOption { type = lib.types.bool; };
+                allowedGroups = lib.mkOption { type = lib.types.listOf lib.types.str; };
               };
             });
           };
@@ -210,7 +220,7 @@ in
       default = {
         users = lib.mapAttrsToList (_: u: { inherit (u) username email firstName lastName isAdmin groups; }) enabledUsers;
         groups = map (name: { inherit name; }) allGroups;
-        clients = lib.mapAttrsToList (_: client: { inherit (client) name callbackURLs pkce; }) derivedClients;
+        clients = lib.mapAttrsToList (_: client: { inherit (client) name callbackURLs pkce allowedGroups; }) derivedClients;
       };
       description = "Provisioning config derived from OIDC-enabled users and services (read-only)";
     };

@@ -9,8 +9,14 @@ let
 
   mkClientConfigFile = name: client:
     pkgs.writeText "oidc-client-config-${name}.json" (builtins.toJSON {
-      inherit (client) name callbackURLs pkce;
+      inherit (client) name callbackURLs pkce allowedGroups;
     });
+
+  pocketIdManage = pkgs.writeShellScriptBin "pocket-id-manage" ''
+    export POCKET_ID_URL="${pocketIdCfg.url}"
+    export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
+    exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-manage" ./pocket-id-manage.nu} "$@"
+  '';
 in
 {
   custom.homelab.oidc.systemd.clientProvisionUnitPrefix = "pocket-id-provision-client-";
@@ -24,12 +30,10 @@ in
     wants = [ "network-online.target" ];
     requires = [ "pocket-id.service" "${baseServiceName}.service" ];
     partOf = [ "pocket-id.service" ];
-    restartTriggers = [ clientConfigFile ./oidc-provision-client.nu ];
+    restartTriggers = [ clientConfigFile ];
     startLimitIntervalSec = 300;
     startLimitBurst = 3;
     environment = {
-      POCKET_ID_URL = pocketIdCfg.url;
-      POCKET_ID_API_KEY_FILE = cfg.provider.apiKeyFile;
       OIDC_CLIENT_CONFIG_FILE = toString clientConfigFile;
       OIDC_CREDENTIALS_DIR = cfg.credentials.dir;
     };
@@ -45,7 +49,7 @@ in
       NoNewPrivileges = true;
       RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
     };
-    path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "oidc-provision-client" ./oidc-provision-client.nu}'';
+    path = [ pocketIdManage ];
+    script = ''pocket-id-manage provision-client'';
   }) cfg.clients;
 }

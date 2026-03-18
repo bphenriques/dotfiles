@@ -24,7 +24,7 @@ in
     subdomain = "radicale";
     forwardAuth = {
       enable = true;
-      group = config.custom.homelab.groups.admin;
+      groups = [ config.custom.homelab.groups.admin ];
     };
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";

@@ -16,7 +16,7 @@ in
     subdomain = "home";
     forwardAuth = {
       enable = true;
-      group = config.custom.homelab.groups.users;
+      groups = [ config.custom.homelab.groups.admin ];
     };
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;

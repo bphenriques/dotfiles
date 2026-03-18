@@ -60,7 +60,7 @@ in
     category = "Media";
     forwardAuth = {
       enable = true;
-      group = forwardAuthGroup config;
+      groups = [ (forwardAuthGroup config) ];
     };
     secrets = {
       files.api-key = { rotatable = true; };

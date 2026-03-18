@@ -71,6 +71,7 @@ in
       enable = true;
       gid = 971;  # Fixed GID for container access
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
+      allowedGroups = with cfg.groups; [ guests users admin ];
       systemd.dependentServices = [ "podman-romm" ];
     };
     healthcheck.path = "/api/heartbeat";
@@ -152,8 +153,8 @@ in
       OIDC_CLIENT_SECRET_FILE = "/run/secrets/oidc_client_secret";
       OIDC_CLAIM_ROLES = "groups";
       OIDC_ROLE_ADMIN = groupsCfg.admin;
-      OIDC_ROLE_EDITOR = groupsCfg.admin;
-      OIDC_ROLE_VIEWER = groupsCfg.users;
+      OIDC_ROLE_EDITOR = groupsCfg.users;
+      OIDC_ROLE_VIEWER = groupsCfg.guests;
     };
 
     environmentFiles = [ serviceCfg.secrets.templates.env.path ];
