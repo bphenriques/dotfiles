@@ -29,8 +29,7 @@ in
     oidc.provider = {
       displayName = "Pocket-ID";
       internalName = "PocketID";
-      url = serviceCfg.publicUrl;
-      discoveryEndpoint = "${serviceCfg.publicUrl}/.well-known/openid-configuration";
+      issuerUrl = serviceCfg.publicUrl;
       apiKeyFile = serviceCfg.secrets.files.api-key.path;
     };
   };

@@ -71,7 +71,7 @@ in
     overrideDevices = true;
     overrideFolders = true;
 
-    openDefaultPorts = true;
+    openDefaultPorts = false;
     guiAddress = "127.0.0.1:8384";
     guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
 

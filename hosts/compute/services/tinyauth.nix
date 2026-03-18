@@ -44,9 +44,9 @@ in
 
       # Pocket-ID OIDC configuration
       OAUTH_PROVIDERS_POCKETID_NAME = oidcCfg.provider.displayName;
-      OAUTH_PROVIDERS_POCKETID_AUTHURL = "${oidcCfg.provider.url}/authorize";
-      OAUTH_PROVIDERS_POCKETID_TOKENURL = "${oidcCfg.provider.url}/api/oidc/token";
-      OAUTH_PROVIDERS_POCKETID_USERINFOURL = "${oidcCfg.provider.url}/api/oidc/userinfo";
+      OAUTH_PROVIDERS_POCKETID_AUTHURL = "${oidcCfg.provider.issuerUrl}/authorize";
+      OAUTH_PROVIDERS_POCKETID_TOKENURL = "${oidcCfg.provider.issuerUrl}/api/oidc/token";
+      OAUTH_PROVIDERS_POCKETID_USERINFOURL = "${oidcCfg.provider.issuerUrl}/api/oidc/userinfo";
       OAUTH_PROVIDERS_POCKETID_REDIRECTURL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
       OAUTH_PROVIDERS_POCKETID_SCOPES = "openid profile email groups";
       OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file;

@@ -19,7 +19,7 @@ let
         enable = true;
         listenAddress = "127.0.0.1";
         port = 9101; # 9100 is taken by OpenCloud's built-in metrics
-        enabledCollectors = [ "hwmon" "systemd" "thermal_zone" ];
+        enabledCollectors = [ "hwmon" "rapl" "systemd" "thermal_zone" ]; # rapl: power consumption via Intel RAPL (MSR)
       };
       scrapeConfigs = [{
         job_name = "node";
@@ -259,4 +259,9 @@ in
       })
     ];
   };
+
+  # /sys/class/powercap/intel-rapl/energy_uj is root-only; grant read access to the node exporter
+  # https://github.com/prometheus/node_exporter/issues/2691
+  systemd.services.prometheus-node-exporter.serviceConfig.CapabilityBoundingSet = [ "CAP_DAC_READ_SEARCH" ];
+  systemd.services.prometheus-node-exporter.serviceConfig.AmbientCapabilities = [ "CAP_DAC_READ_SEARCH" ];
 }

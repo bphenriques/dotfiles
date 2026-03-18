@@ -13,13 +13,6 @@ in
     category = "Media";
     port = 2283;
     subdomain = "photos";
-    traefik.middlewares.immich-upload.buffering = {
-      # Immich needs larger request buffering for big uploads; keep this scoped
-      # to Immich instead of increasing ingress limits globally.
-      maxRequestBodyBytes = 2147483648;
-      memRequestBodyBytes = 16777216;
-    };
-
     # TODO: admin-password could be removed if Immich supports OIDC-only admin
     secrets = {
       files.admin-password = { rotatable = false; };
@@ -48,7 +41,7 @@ in
     host = serviceCfg.host;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
-    accelerationDevices = null;
+    accelerationDevices = [ "/dev/dri/renderD128" ];
 
     settings = {
       server.externalDomain = serviceCfg.publicUrl;
@@ -56,7 +49,7 @@ in
 
       oauth = {
         enabled = true;
-        issuerUrl = oidcCfg.provider.url;
+        issuerUrl = oidcCfg.provider.issuerUrl;
         clientId._secret = serviceCfg.oidc.id.file;
         clientSecret._secret = serviceCfg.oidc.secret.file;
         scope = "openid email profile";
@@ -68,6 +61,12 @@ in
       passwordLogin.enabled = true;
       library.watch.enabled = true;
 
+      ffmpeg = {
+        accel = "qsv";
+        acceptedVideoCodecs = [ "h264" "hevc" ];
+        preferredHwDevice = "/dev/dri/renderD128";
+      };
+
       storageTemplate = {
         enabled = true;
         hashVerificationEnabled = true;
@@ -77,4 +76,5 @@ in
   };
 
   systemd.services.immich-server.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups ++ [ "video" "render" ];
+  systemd.services.immich-server.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
 }

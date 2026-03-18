@@ -141,14 +141,9 @@ in
         description = "Internal name for URLs and identifiers";
       };
 
-      url = lib.mkOption {
+      issuerUrl = lib.mkOption {
         type = lib.types.str;
-        description = "Public URL of the OIDC provider";
-      };
-
-      discoveryEndpoint = lib.mkOption {
-        type = lib.types.str;
-        description = "OIDC discovery endpoint URL";
+        description = "OIDC issuer URL (e.g. https://auth.example.com)";
       };
 
       apiKeyFile = lib.mkOption {

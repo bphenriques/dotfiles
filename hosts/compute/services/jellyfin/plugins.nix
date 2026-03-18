@@ -3,7 +3,7 @@ let
   serviceCfg = config.custom.homelab.services.jellyfin;
   oidcCfg = config.custom.homelab.oidc;
 
-  adminUsernameFile = "${serviceCfg.secrets.secretsDir}/admin-username";
+  adminUsernameFile = pkgs.writeText "jellyfin-admin-username" "admin";
 
   themeCSS = ''@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");'';
   plugins = {
@@ -36,7 +36,7 @@ let
   ssoConfig = {
     enabled = true;
     providerName = oidcCfg.provider.internalName;
-    oidEndpoint = oidcCfg.provider.url;
+    oidEndpoint = oidcCfg.provider.issuerUrl;
     oidClientId = "__OIDC_CLIENT_ID__";
     oidSecret = "__OIDC_CLIENT_SECRET__";
     enableAuthorization = true;

@@ -29,6 +29,4 @@ in
       evaluation_interval = "60s";
     };
   };
-
-
 }

@@ -42,7 +42,7 @@ in
     tokenKeyFile = serviceCfg.secrets.files.token-key.path;
     settings.Port = serviceCfg.port;
     settings.OpenIdConnectSettings = {
-      Authority = oidcCfg.provider.url;
+      Authority = oidcCfg.provider.issuerUrl;
       ClientId = serviceCfg.oidc.id.placeholder;
       Secret = serviceCfg.oidc.secret.placeholder;
     };

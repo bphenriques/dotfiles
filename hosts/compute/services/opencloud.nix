@@ -8,8 +8,12 @@ let
 
   # CSP config to allow external OIDC provider and Collabora
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
-  # Note: 'unsafe-eval'/'unsafe-inline' are intentionally enabled because OpenCloud Web UI breaks without them.
-  oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.url;
+  #
+  # Security exceptions:
+  # - 'unsafe-eval'/'unsafe-inline': required by OpenCloud Web UI (fails to render without them)
+  # - proofkeys.disable (below): WOPI proof-key verification breaks Collabora ↔ OpenCloud flow;
+  #   compensated by WOPI endpoint being internal-only (not publicly exposed)
+  oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.issuerUrl;
   yamlFormat = pkgs.formats.yaml { };
   cspConfig = yamlFormat.generate "opencloud-csp.yaml" {
     directives = {
@@ -18,7 +22,7 @@ let
       style-src    = [ "'self'" "'unsafe-inline'" ];
       font-src     = [ "'self'" ];
       img-src      = [ "'self'" "blob:" "data:" ];
-      connect-src  = [ "'self'" "blob:" oidcCfg.provider.url "wss://${oidcHost}" collaboraCfg.publicUrl "wss://${collaboraCfg.publicHost}" ];
+      connect-src  = [ "'self'" "blob:" oidcCfg.provider.issuerUrl "wss://${oidcHost}" collaboraCfg.publicUrl "wss://${collaboraCfg.publicHost}" ];
       frame-src    = [ "'self'" "blob:" collaboraCfg.publicUrl ];
       frame-ancestors = [ "'self'" ];
     };
@@ -98,7 +102,7 @@ in
 
     environment = {
       # External OIDC (Pocket-ID) - disable built-in IDP
-      OC_OIDC_ISSUER = oidcCfg.provider.url; # Does not work when using the yaml based configuration
+      OC_OIDC_ISSUER = oidcCfg.provider.issuerUrl; # Does not work when using the yaml based configuration
       OC_EXCLUDE_RUN_SERVICES = "idp";
       OC_ADD_RUN_SERVICES = "collaboration";
     };
@@ -112,8 +116,8 @@ in
       };
       # Point web client directly to OIDC provider
       web.config.oidc = {
-        authority = oidcCfg.provider.url;
-        metadata_url = "${oidcCfg.provider.url}/.well-known/openid-configuration";
+        authority = oidcCfg.provider.issuerUrl;
+        metadata_url = "${oidcCfg.provider.issuerUrl}/.well-known/openid-configuration";
         post_logout_redirect_uri = serviceCfg.publicUrl;
         # client_id: set via WEB_OIDC_CLIENT_ID env var from environmentFile
       };
@@ -123,8 +127,7 @@ in
           addr = collaboraCfg.url;
           external_addr = collaboraCfg.publicUrl;
           product = "Collabora";
-          # Intentionally disabled: proof-key verification currently breaks this setup. WOPI endpoint is private and not exposed publicly.
-          proofkeys.disable = true;
+          proofkeys.disable = true; # See security exceptions comment at top of file
         };
       };
       app-registry = {
@@ -186,8 +189,14 @@ in
     };
   };
   # Collabora requires OpenCloud (cannot function without it)
+  # Hardened: processes untrusted documents, no access to NAS/host data needed
   systemd.services.coolwsd = {
     after = [ "opencloud.service" ];
     requires = [ "opencloud.service" ];
+    serviceConfig = {
+      ProtectHome = true;
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+    };
   };
 }

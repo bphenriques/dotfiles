@@ -55,10 +55,20 @@ def complete_startup_wizard [] {
 
 def authenticate []: nothing -> record<headers: list> {
   print $"Authenticating as: ($admin_username)"
-  let r = http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers [Authorization "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""] --full --allow-errors
-  if $r.status != 200 { error make { msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)" } }
-  
-  { headers: [Authorization $"MediaBrowser Token=\"($r.body.AccessToken)\""] }
+  let auth_headers = [Authorization "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""]
+  mut token = null
+  for attempt in 1..30 {
+    let r = try {
+      http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers $auth_headers --max-time 5sec --full --allow-errors
+    } catch {
+      print $"  Connection failed, retrying... ($attempt)"; sleep 2sec; continue
+    }
+    if $r.status == 200 { $token = $r.body.AccessToken; break }
+    if $r.status == 503 { print $"  Server still loading, retrying... ($attempt)"; sleep 2sec; continue }
+    error make { msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)" }
+  }
+  if $token == null { error make { msg: "Failed to authenticate after 30 attempts" } }
+  { headers: [Authorization $"MediaBrowser Token=\"($token)\""] }
 }
 
 def ensure_server_name [headers: list] {
@@ -82,23 +92,51 @@ def ensure_encoding [headers: list] {
   print "  Encoding configured"
 }
 
+def ensure_trickplay [headers: list] {
+  print "Configuring trickplay..."
+  let current = http get $"($base_url)/System/Configuration" --headers $headers --full --allow-errors
+  if $current.status != 200 { error make { msg: $"Failed to get system config: ($current.status)" } }
+  
+  let updated = $current.body | update TrickplayOptions ($current.body.TrickplayOptions | merge $config.trickplayOptions)
+  let r = http post $"($base_url)/System/Configuration" $updated --content-type application/json --headers $headers --full --allow-errors
+  if $r.status != 204 { error make { msg: $"Failed to configure trickplay: ($r.status)" } }
+  print "  Trickplay configured"
+}
+
+def library_options [lib: record] {
+  {
+    EnableRealtimeMonitor: $lib.EnableRealtimeMonitor
+    ExtractTrickplayImagesDuringLibraryScan: $lib.ExtractTrickplayImagesDuringLibraryScan
+    EnableChapterImageExtraction: $lib.EnableChapterImageExtraction
+  }
+}
+
 def ensure_libraries [headers: list] {
   print "Configuring libraries..."
   let existing = http get $"($base_url)/Library/VirtualFolders" --headers $headers --full --allow-errors
   if $existing.status != 200 { error make { msg: $"Failed to get libraries: ($existing.status)" } }
   for lib in $config.libraries {
+    let desired_options = library_options $lib
     if $lib.Name in ($existing.body | get Name) {
-      print $"  Library exists: ($lib.Name)"
+      let current = $existing.body | where Name == $lib.Name | first
+      let lo = $current.LibraryOptions
+      let current_options = {
+        EnableRealtimeMonitor: ($lo.EnableRealtimeMonitor? | default false)
+        ExtractTrickplayImagesDuringLibraryScan: ($lo.ExtractTrickplayImagesDuringLibraryScan? | default false)
+        EnableChapterImageExtraction: ($lo.EnableChapterImageExtraction? | default false)
+      }
+      if $current_options == $desired_options {
+        print $"  Library up-to-date: ($lib.Name)"
+      } else {
+        let updated = $lo | merge $desired_options
+        let r = http post $"($base_url)/Library/VirtualFolders/LibraryOptions" { Id: $current.ItemId, LibraryOptions: $updated } --content-type application/json --headers $headers --full --allow-errors
+        if $r.status != 204 { error make { msg: $"Failed to update library ($lib.Name): ($r.status)" } }
+        print $"  Updated library options: ($lib.Name)"
+      }
     } else {
       let paths = $lib.Locations | each { |p| $"&paths=($p | url encode)" } | str join ""
       let url = $"($base_url)/Library/VirtualFolders?name=($lib.Name | url encode)&collectionType=($lib.CollectionType)($paths)&refreshLibrary=false"
-      let body = {
-        LibraryOptions: {
-          EnableRealtimeMonitor: $lib.EnableRealtimeMonitor
-          ExtractTrickplayImagesDuringLibraryScan: $lib.ExtractTrickplayImagesDuringLibraryScan
-        }
-      }
-      let r = http post $url $body --content-type application/json --headers $headers --full --allow-errors
+      let r = http post $url { LibraryOptions: $desired_options } --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 204 { error make { msg: $"Failed to create library ($lib.Name): ($r.status)" } }
       print $"  Created library: ($lib.Name)"
     }
@@ -167,6 +205,7 @@ def main [] {
   let auth = authenticate
   ensure_server_name $auth.headers
   ensure_encoding $auth.headers
+  ensure_trickplay $auth.headers
   ensure_libraries $auth.headers
   ensure_users $auth.headers $config.userConfigs
 

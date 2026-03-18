@@ -1,7 +1,6 @@
 { config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.prowlarr;
-  homelabMounts = config.custom.homelab.smb.mounts;
 in
 {
   imports = [ ./configure.nix ];
@@ -33,10 +32,9 @@ in
     environmentFiles = [ serviceCfg.secrets.templates."prowlarr.env".path ];
   };
 
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "prowlarr" ];
+  # Prowlarr is an indexer manager — it talks to APIs, not the filesystem. No media mount needed.
   systemd.services.prowlarr = {
     serviceConfig = {
-      SupplementaryGroups = [ homelabMounts.media.group ];
       Restart = "on-failure";
       RestartSec = "10s";
       RestartMaxDelaySec = "5min";

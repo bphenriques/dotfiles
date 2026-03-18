@@ -74,7 +74,7 @@ in
       JELLYSEERR_URL = serviceCfg.url;
       JELLYSEERR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
       JELLYSEERR_CONFIG_FILE = initConfigFile;
-      JELLYFIN_ADMIN_USERNAME_FILE = "${jellyfinCfg.secrets.secretsDir}/admin-username";
+      JELLYFIN_ADMIN_USERNAME_FILE = pkgs.writeText "jellyfin-admin-username" "admin";
       JELLYFIN_ADMIN_PASSWORD_FILE = jellyfinCfg.secrets.files.admin-password.path;
       RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
       SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;

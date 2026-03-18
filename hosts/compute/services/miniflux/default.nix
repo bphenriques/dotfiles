@@ -32,7 +32,7 @@ in
       OAUTH2_USER_CREATION = 1;
       OAUTH2_PROVIDER = "oidc";
       OAUTH2_REDIRECT_URL = builtins.head serviceCfg.oidc.callbackURLs;
-      OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.url;
+      OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.issuerUrl;
       OAUTH2_OIDC_PROVIDER_NAME = oidcCfg.provider.displayName;
       OAUTH2_CLIENT_ID_FILE = serviceCfg.oidc.id.file;
       OAUTH2_CLIENT_SECRET_FILE = serviceCfg.oidc.secret.file;

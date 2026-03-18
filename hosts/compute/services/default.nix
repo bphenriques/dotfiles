@@ -24,6 +24,15 @@ in
     ./wireguard
     ./opencloud.nix
     ./home-assistant.nix
+
+    # TODO:
+    # - Recipes
+    # - Calendar
+    # - pdf tool
+    # - screenshot homepage
+    # - fix prowlarr indexers
+    # - fix recyclarr
+    # - corrigir opencloud
   ];
 
   custom.homelab = {

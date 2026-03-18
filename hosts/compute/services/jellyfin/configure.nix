@@ -5,15 +5,14 @@ let
   oidcCfg = config.custom.homelab.oidc;
   enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.homelab.users;
 
-  adminUsername = "admin";
-  adminUsernameFile = "${serviceCfg.secrets.secretsDir}/admin-username";
+  adminUsernameFile = pkgs.writeText "jellyfin-admin-username" "admin";
 
   jellyfinConfig = {
     serverName = "Jellyfin";
     libraries = [
-      { Name = "Movies";    CollectionType = "movies";  Locations = [ pathsCfg.media.movies ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; }
-      { Name = "TV Shows";  CollectionType = "tvshows"; Locations = [ pathsCfg.media.tv ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; }
-      { Name = "Music";     CollectionType = "music";   Locations = [ pathsCfg.media.music.library ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = false; }
+      { Name = "Movies";    CollectionType = "movies";  Locations = [ pathsCfg.media.movies ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; EnableChapterImageExtraction = true; }
+      { Name = "TV Shows";  CollectionType = "tvshows"; Locations = [ pathsCfg.media.tv ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; EnableChapterImageExtraction = true; }
+      { Name = "Music";     CollectionType = "music";   Locations = [ pathsCfg.media.music.library ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = false; EnableChapterImageExtraction = false; }
     ];
     # Encoding / transcoding settings (merged into /System/Configuration/encoding via API)
     encodingConfig = {
@@ -27,6 +26,13 @@ let
       # HDR→SDR tonemapping: requires intel-compute-runtime (OpenCL) in hardware.graphics.extraPackages.
       # EnableTonemapping = true;
       # TonemappingAlgorithm = "bt2390";
+    };
+    # Trickplay settings (merged into /System/Configuration TrickplayOptions via API)
+    trickplayOptions = {
+      EnableHwAcceleration = true;
+      EnableHwEncoding = true;
+      ScanBehavior = "NonBlocking";
+      ProcessPriority = "BelowNormal";
     };
     userConfigs = lib.mapAttrsToList (_: u: {
       username = u.username;
@@ -42,7 +48,7 @@ let
   jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
 in
 {
-  custom.homelab.media.jellyfin.serverId = jellyfinConfig.serverName; # FIXME: is it serverName?
+  custom.homelab.media.jellyfin.serverId = jellyfinConfig.serverName;
 
   systemd.services.jellyfin-configure = {
     description = "Jellyfin setup";
@@ -67,14 +73,6 @@ in
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # Validates non-local users exist in OIDC provider
     };
     path = [ pkgs.nushell ];
-    preStart = ''
-      # Create admin username file if missing (password is managed by homelab-secrets-jellyfin)
-      if [ ! -f "${adminUsernameFile}" ]; then
-        echo "${adminUsername}" > "${adminUsernameFile}"
-        chown root:${serviceCfg.secrets.group} "${adminUsernameFile}"
-        chmod 640 "${adminUsernameFile}"
-      fi
-    '';
     script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-configure" ./jellyfin-configure.nu}'';
   };
 }

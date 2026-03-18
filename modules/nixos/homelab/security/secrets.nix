@@ -178,14 +178,14 @@ let
     chown root:"$group" "$secretsDir"
     chmod 750 "$secretsDir"
 
-    # Generate raw secret files (only if missing)
+    # Generate raw secret files (only if missing), always enforce ownership
     ${lib.concatMapStringsSep "\n" (file: ''
       if [ ! -f "${file.path}" ]; then
         echo "Generating secret: ${file.name}"
         ${pkgs.openssl}/bin/openssl rand -hex ${toString file.bytes} > "${file.path}"
-        chown root:"$group" "${file.path}"
-        chmod 640 "${file.path}"
       fi
+      chown root:"$group" "${file.path}"
+      chmod 640 "${file.path}"
     '') filesList}
 
     # Render templates (always re-rendered to pick up rotated secrets)
@@ -272,6 +272,11 @@ in {
         })
       ) allOwners;
 
+      # Pre-create secrets directories so ProtectSystem=strict + ReadWritePaths works on first boot
+      systemd.tmpfiles.rules = lib.mapAttrsToList (_: owner:
+        "d ${owner.secretsDir} 0750 root ${owner.group} -"
+      ) allOwners;
+
       systemd.services = lib.mkMerge [
         (lib.mapAttrs' (name: owner:
           lib.nameValuePair "homelab-secrets-${name}" {
@@ -293,6 +298,13 @@ in {
               Type = "oneshot";
               RemainAfterExit = true;
               ExecStart = mkGeneratorScript name owner;
+              UMask = "0077";
+              ProtectSystem = "strict";
+              ReadWritePaths = [ owner.secretsDir ]
+                ++ lib.unique (map (tmpl: builtins.dirOf tmpl.path) (lib.attrValues owner.templates));
+              ProtectHome = true;
+              PrivateTmp = true;
+              NoNewPrivileges = true;
             };
           }
         ) allOwners)

@@ -44,6 +44,17 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = let
+      forwardAuthServices = lib.filter (s: s.forwardAuth.enable && s.ingress.enable) (lib.attrValues cfg.services);
+    in [
+      {
+        assertion = forwardAuthServices == [ ] || ingressCfg.forwardAuth.enable;
+        message = "Services have forwardAuth enabled but custom.homelab.ingress.forwardAuth.enable is false: ${
+          lib.concatMapStringsSep ", " (s: s.name) forwardAuthServices
+        }. Traefik would silently skip auth for these services.";
+      }
+    ];
+
     networking.firewall.allowedTCPPorts = [ 80 443 ];
 
     sops = {
@@ -84,6 +95,16 @@ in
 
           websecure = {
             address = "0.0.0.0:443";
+
+            # Immich requires longer timeouts for large photo/video uploads; without this, Traefik's
+            # default 60s readTimeout causes uploads to fail with HTTP 499 after 1 minute.
+            # Ref: https://docs.immich.app/administration/reverse-proxy (Traefik section)
+            # Note: this is entrypoint-scoped (Traefik has no per-router timeout), so it affects all
+            # services. Acceptable in a homelab with limited concurrent users.
+            transport.respondingTimeouts = {
+              readTimeout = "600s";
+              idleTimeout = "600s";
+            };
             http.tls = {
               certResolver = "default";
               domains = [{

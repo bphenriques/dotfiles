@@ -81,7 +81,7 @@ OIDC credentials are consumed via files to ensure we do not leak secrets to Nix 
 services.miniflux.config = {
   OAUTH2_CLIENT_ID_FILE     = serviceCfg.oidc.id.file;
   OAUTH2_CLIENT_SECRET_FILE = serviceCfg.oidc.secret.file;
-  OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.url;
+  OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.issuerUrl;
 };
 ```
 

@@ -57,14 +57,10 @@ def ensure_sso [api_key: string] {
   if $r.status == 404 { error make { msg: "SSO plugin not installed" } }
   if $r.status != 200 { error make { msg: $"Failed to query SSO providers: ($r.status)" } }
   
-  if ($r.body | default {} | get -o $provider_name | is-not-empty) {
-    print $"  SSO provider ($provider_name) already configured"
-    return
-  }
-  
+  # OID/Add creates or overwrites the provider config
   let sso_config = $config.ssoConfig | update oidClientId $oidc_client_id | update oidSecret $oidc_client_secret
-  let create = http post $"($base_url)/sso/OID/Add/($provider_name | url encode)?api_key=($api_key)" $sso_config --content-type application/json --full --allow-errors
-  if $create.status not-in [200, 204] { error make { msg: $"Failed to configure SSO provider ($provider_name): ($create.status)" } }
+  let r2 = http post $"($base_url)/sso/OID/Add/($provider_name | url encode)?api_key=($api_key)" $sso_config --content-type application/json --full --allow-errors
+  if $r2.status not-in [200, 204] { error make { msg: $"Failed to configure SSO provider ($provider_name): ($r2.status)" } }
   print $"  SSO provider ($provider_name) configured"
 }
 

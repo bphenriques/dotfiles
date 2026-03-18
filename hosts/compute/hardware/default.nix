@@ -22,8 +22,9 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-media-driver   # primary VAAPI driver (iHD)
-      intel-vaapi-driver   # fallback
+      intel-media-driver   # VAAPI driver (iHD) — only driver supporting Alder Lake-N
+      vpl-gpu-rt           # oneVPL GPU runtime (required for QSV)
+      # intel-vaapi-driver # legacy i965 driver — does not support Alder Lake-N
     ];
   };
   environment.systemPackages = [ pkgs.intel-gpu-tools ]; # iGPU monitoring (intel_gpu_top)

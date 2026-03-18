@@ -147,7 +147,7 @@ in
       OIDC_ENABLED = "true";
       OIDC_PROVIDER = oidcCfg.provider.displayName;
       OIDC_REDIRECT_URI = builtins.head serviceCfg.oidc.callbackURLs;
-      OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.url;
+      OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.issuerUrl;
       OIDC_CLIENT_ID_FILE = "/run/secrets/oidc_client_id";
       OIDC_CLIENT_SECRET_FILE = "/run/secrets/oidc_client_secret";
       OIDC_CLAIM_ROLES = "groups";
