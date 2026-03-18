@@ -157,24 +157,32 @@ in
       };
     })
 
-    # --- Network ---
-    (mkRow { id = 12; title = "Network"; gridPos = { x = 0; y = 31; w = fullW; h = 1; }; })
-    (mkStat {
+    # --- Network & Traffic ---
+    (mkRow { id = 12; title = "Network & Traffic"; gridPos = { x = 0; y = 31; w = fullW; h = 1; }; })
+    (mkPanel {
       id = 13;
-      title = "WireGuard Peers";
-      expr = ''count(time() - wireguard_latest_handshake_seconds < 180)'';
+      title = "WireGuard Connected Peers";
+      expr = ''sum((time() - wireguard_latest_handshake_seconds) < bool 180)'';
       legend = "connected";
-      gridPos = { x = 0; y = 32; w = 6; h = 4; };
+      gridPos = { x = 0; y = 32; inherit w h; };
     })
     (mkPanel {
       id = 14;
-      title = "Network Traffic";
+      title = "Network Bandwidth";
       expr = [
-        { expr = ''rate(node_network_receive_bytes_total{device!~"lo|veth.*|br-.*|docker.*"}[5m])''; legend = "{{device}} rx"; }
-        { expr = ''- rate(node_network_transmit_bytes_total{device!~"lo|veth.*|br-.*|docker.*"}[5m])''; legend = "{{device}} tx"; }
+        { expr = ''sum(rate(node_network_receive_bytes_total{device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "RX"; }
+        { expr = ''sum(rate(node_network_transmit_bytes_total{device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "TX"; }
       ];
       unit = "Bps";
-      gridPos = { x = 6; y = 32; w = 18; inherit h; };
+      gridPos = { x = w; y = 32; inherit w h; };
+    })
+    (mkPanel {
+      id = 15;
+      title = "Top Services by Request Rate";
+      expr = ''topk(10, sum by (service) (rate(traefik_service_requests_total[5m])))'';
+      legend = "{{service}}";
+      unit = "reqps";
+      gridPos = { x = 0; y = 40; w = fullW; inherit h; };
     })
   ];
 }

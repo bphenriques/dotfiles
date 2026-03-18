@@ -154,19 +154,6 @@ in
       serviceHooks = lib.mapAttrs' (name: svc: mkHookService name svc.backup) servicesWithBackup;
       standaloneHooks = lib.mapAttrs' (name: hook: mkHookService name hook) cfg.hooks;
 
-      notifyTimeoutScript = pkgs.writeShellScript "backup-notify-timeout" ''
-        if [ "''${SERVICE_RESULT:-}" = "timeout" ]; then
-          NTFY_TOKEN="$(tr -d '\n' < "$NTFY_TOKEN_FILE")"
-          ${pkgs.curl}/bin/curl -fsS --max-time 10 \
-            -H "Authorization: Bearer $NTFY_TOKEN" \
-            -H "Title: Backup Failed" \
-            -H "Tags: x" \
-            -H "Priority: high" \
-            -d "$1 timed out" \
-            "$NTFY_URL" || true
-        fi
-      '';
-
       hardenedServiceConfig = {
         Type = "oneshot";
         User = "root";
@@ -189,7 +176,6 @@ in
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
           ExecStart = "${pkgs.util-linux}/bin/flock -w 21600 ${stateDir}/lock ${rusticManage} backup";
-          ExecStopPost = "${notifyTimeoutScript} Backup";
           TimeoutStartSec = "6h";
           StateDirectory = "homelab-backup";
           ReadWritePaths = [ stateDir ];
@@ -203,7 +189,6 @@ in
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
           ExecStart = "${pkgs.util-linux}/bin/flock -w 10800 ${stateDir}/lock ${rusticManage} verify";
-          ExecStopPost = "${notifyTimeoutScript} Verification";
           TimeoutStartSec = "3h";
           StateDirectory = "homelab-backup";
           ReadWritePaths = [ stateDir ];

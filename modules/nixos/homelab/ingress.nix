@@ -33,6 +33,12 @@ in
       description = "Cloudflare account email for DNS challenge and ACME registration";
     };
 
+    metricsPort = lib.mkOption {
+      type = lib.types.port;
+      default = 8082;
+      description = "Port for Traefik's Prometheus metrics endpoint (localhost only)";
+    };
+
     forwardAuth = {
       enable = lib.mkEnableOption "forwardAuth middleware";
 
@@ -113,6 +119,13 @@ in
               }];
             };
           };
+        };
+
+        entryPoints.metrics.address = "127.0.0.1:${toString ingressCfg.metricsPort}";
+        metrics.prometheus = {
+          entryPoint = "metrics";
+          addRoutersLabels = true;
+          addServicesLabels = true;
         };
 
         certificatesResolvers.default.acme = {

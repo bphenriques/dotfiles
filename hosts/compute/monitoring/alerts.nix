@@ -10,7 +10,6 @@ let
   # Each scope groups its exporter, scrape config, and alert rules.
   # Out of scope:
   # - mysql as it only serves no-critical services.
-  # - traefik: no need just yet. It is enough testing the availability of the public URL.
   scopes = [
     # System metrics: CPU, RAM, disk, temperature, network
     {
@@ -203,6 +202,20 @@ let
           }
         ];
       }];
+    }
+
+    # Traefik request metrics (scrape only, no alerts)
+    {
+      enable = true;
+      exporters = { };
+      scrapeConfigs = [{
+        job_name = "traefik";
+        static_configs = [{
+          targets = [ "127.0.0.1:${toString cfg.ingress.metricsPort}" ];
+          labels.instance = hostname;
+        }];
+      }];
+      rules = [];
     }
 
     # WireGuard peer metrics (scrape only, no alerts)

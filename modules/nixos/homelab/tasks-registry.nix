@@ -9,6 +9,12 @@ let
         default = name;
         description = "Task identifier (defaults to attribute name)";
       };
+
+      systemdServices = lib.mkOption {
+        type = lib.types.coercedTo lib.types.str (s: [ s ]) (lib.types.listOf lib.types.str);
+        default = [ ];
+        description = "Systemd service name(s) managed by this task. Used by integrations to inject behavior.";
+      };
     };
   };
 in

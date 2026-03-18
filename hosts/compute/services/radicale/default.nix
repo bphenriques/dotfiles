@@ -6,7 +6,6 @@ let
   usernames = builtins.attrNames (lib.filterAttrs (_: u: u.services.radicale.enable) config.custom.homelab.users);
 
   htpasswdFile = "/var/lib/radicale/users";
-
   configFile = pkgs.writeText "radicale-configure.json" (builtins.toJSON {
     inherit htpasswdFile;
     users = lib.listToAttrs (map (uname: {
@@ -49,8 +48,7 @@ in
     };
   };
 
-  # CalDAV/CardDAV endpoint without forwardAuth (for DAVx5, Thunderbird, etc.)
-  # Uses Radicale's own htpasswd auth instead.
+  # CalDAV/CardDAV endpoint without forwardAuth for regular sync. Uses Radicale's own htpasswd auth instead.
   services.traefik.dynamicConfigOptions.http = {
     routers.radicale-dav = {
       rule = "Host(`dav.${config.custom.homelab.domain}`)";

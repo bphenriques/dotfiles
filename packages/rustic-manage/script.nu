@@ -1,11 +1,11 @@
 #!/usr/bin/env nu
 
-# Rustic backup management: backup and verify with ntfy notifications.
+# Rustic backup management: backup and verify.
 #
 # Required env:
 #   STATE_DIR          - State directory for runtime artifacts
-#   NTFY_URL           - ntfy topic URL
-#   NTFY_TOKEN_FILE    - Path to file containing ntfy publisher token
+#   NTFY_URL           - ntfy topic URL (success notifications)
+#   NTFY_TOKEN_FILE    - Path to file containing ntfy publisher token (success notifications)
 
 def require_env [name: string] {
   let val = ($env | get -o $name)
@@ -32,52 +32,38 @@ def notify-success [body: string] {
   notify --title 'Backup OK' --tags white_check_mark $body
 }
 
-def notify-failure [body: string] {
-  notify --title 'Backup Failed' --tags x --priority high $body
-}
-
 # Run backup, prune old snapshots, and notify.
 def "main backup" [] {
   let summary_file = $"(require_env 'STATE_DIR')/last-summary.txt"
 
-  try {
-    let check = do { ^rustic snapshots --json } | complete
-    if $check.exit_code != 0 {
-      print "=== Initializing repository ==="
-      ^rustic init
-    }
-
-    print "=== Running rustic backup ==="
-    let snapshot = ^rustic backup --json | from json
-    let s = $snapshot.summary
-
-    let total = $s.total_bytes_processed | into filesize
-    let added = $s.data_added_packed | into filesize
-    let summary = $"**Processed:** ($total) | **Added:** ($added)\n**Files:** ($s.files_new) new, ($s.files_changed) changed"
-    $summary | save --force $summary_file
-
-    print "=== Pruning old snapshots ==="
-    ^rustic forget
-
-    try { notify-success $summary } catch {|e| print $"notify failed: ($e.msg)" }
-  } catch {|err|
-    try { notify-failure $"Backup failed: ($err.msg)" } catch {|e| print $"notify failed: ($e.msg)" }
-    error make { msg: $err.msg }
+  let check = do { ^rustic snapshots --json } | complete
+  if $check.exit_code != 0 {
+    print "=== Initializing repository ==="
+    ^rustic init
   }
+
+  print "=== Running rustic backup ==="
+  let snapshot = ^rustic backup --json | from json
+  let s = $snapshot.summary
+
+  let total = $s.total_bytes_processed | into filesize
+  let added = $s.data_added_packed | into filesize
+  let summary = $"**Processed:** ($total) | **Added:** ($added)\n**Files:** ($s.files_new) new, ($s.files_changed) changed"
+  $summary | save --force $summary_file
+
+  print "=== Pruning old snapshots ==="
+  ^rustic forget
+
+  try { notify-success $summary } catch {|e| print $"notify failed: ($e.msg)" }
 }
 
-# Check repository and data integrity, and notify on failure.
+# Check repository and data integrity.
 def "main verify" [] {
-  try {
-    print "=== Checking repository integrity ==="
-    ^rustic check
+  print "=== Checking repository integrity ==="
+  ^rustic check
 
-    print "=== Checking data integrity (500MB subset) ==="
-    ^rustic check "--read-data" "--read-data-subset=500MB"
-  } catch {|err|
-    try { notify-failure $"Verification failed: ($err.msg)" } catch {|e| print $"notify failed: ($e.msg)" }
-    error make { msg: $err.msg }
-  }
+  print "=== Checking data integrity (500MB subset) ==="
+  ^rustic check "--read-data" "--read-data-subset=500MB"
 }
 
 def main [] {

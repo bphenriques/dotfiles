@@ -39,6 +39,7 @@ in
       systemd.dependentServices = [ "tandoor-recipes" ];
     };
     integrations.homepage.enable = true;
+    integrations.homepage.icon = "tandoor-recipes.svg";
     integrations.catalogue.displayName = "Tandoor";
   };
 

@@ -3,9 +3,12 @@ let
   paths = config.custom.homelab.paths;
 in
 {
-  custom.homelab.tasks.backup.integrations.ntfy = {
-    enable = true;
-    topic = "backups";
+  custom.homelab.tasks.backup = {
+    systemdServices = [ "homelab-backup" "homelab-backup-verify" ];
+    integrations.ntfy = {
+      enable = true;
+      topic = "backups";
+    };
   };
 
   custom.homelab.backup = {

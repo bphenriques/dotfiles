@@ -35,22 +35,6 @@
       '';
     in toString derivation; # only care about the path to the png file
 
-  # Generate a favicon from an emoji character using pango (handles color emoji)
-  mkEmojiFavicon = { size ? 48 }: name: emoji:
-    let
-      fontSize = size * 1;
-      derivation = pkgs.runCommand "${name}2-favicon.ico" {
-        nativeBuildInputs = [ pkgs.imagemagick pkgs.pango ];
-        FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = [ pkgs.noto-fonts-color-emoji ]; };
-      } ''
-        export XDG_CACHE_HOME="$(mktemp -d)"
-        ${lib.getExe pkgs.imagemagick} -background none \
-          pango:"<span size='${toString fontSize}'>${emoji}</span>" \
-          -gravity center -extent ${toString size}x${toString size} \
-          ico:$out
-      '';
-    in toString derivation;
-
   writeNushellScript = name: src:
     pkgs.runCommand "${name}-checked" { } ''
       ${lib.getExe pkgs.nushell} --no-config-file --commands 'if not (nu-check "${src}") { exit 1 }'

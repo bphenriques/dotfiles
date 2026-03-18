@@ -7,7 +7,9 @@
 | [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.2.3 | `home` | 8123 | ForwardAuth | users |
 | [miniflux](https://miniflux.app/) | RSS Server | 2.2.17 | `miniflux` | 8081 | OIDC | users |
 | [OpenCloud](https://github.com/opencloud-eu/opencloud) | Cloud Storage & Office | 5.1.0 | `cloud` | 9200 | OIDC | users |
+| [Radicale](https://radicale.org/v3.html) | CalDAV & CardDAV | 3.6.1 | `radicale` | 5232 | ForwardAuth | admin |
 | [syncthing](https://syncthing.net/) | File Sync | 2.0.12 | `syncthing` | 8384 | ForwardAuth | admin |
+| [Tandoor](https://tandoor.dev/) | Recipe Manager | 2.3.6 | `recipes` | 9092 | OIDC | users |
 
 ### Media
 
@@ -29,6 +31,7 @@
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
 | [alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) | Alert Routing | 0.31.1 | `alertmanager` | 9093 | ForwardAuth | admin |
+| [grafana](https://grafana.com) | Dashboards | 12.4.0 | `grafana` | 3010 | ForwardAuth | admin |
 | [ntfy](https://ntfy.sh) | Push Notifications | 2.17.0 | `ntfy` | 2586 | — | — |
 | [prometheus](https://prometheus.io) | Metrics | 3.10.0 | `prometheus` | 9090 | ForwardAuth | admin |
 

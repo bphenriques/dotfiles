@@ -15,7 +15,7 @@ in
     ./prowlarr
     ./cleanuparr.nix
     ./romm.nix
-    ./homepage.nix
+    ./homepage
     ./obsidian-livesync
     ./syncthing.nix
     ./tinyauth.nix
@@ -26,10 +26,6 @@ in
     ./home-assistant.nix
     ./radicale
     ./tandoor-recipes
-
-    # TODO:
-    # - screenshot homepage
-    # - fix prowlarr indexers
   ];
 
   custom.homelab = {

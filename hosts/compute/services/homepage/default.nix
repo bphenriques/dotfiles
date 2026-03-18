@@ -56,12 +56,12 @@ let
 
   # Custom package with wallpaper/favicon
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";
-  favicon = self.lib.builders.mkEmojiFavicon { } "homepage" "🏠";
+  favicon = ./compass.svg;
   customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
     postInstall = (oldAttrs.postInstall or "") + ''
       mkdir -p $out/share/homepage/public/images
       ln -s ${wallpaper} $out/share/homepage/public/images/background.png
-      ln -s ${favicon} $out/share/homepage/public/images/favicon.ico
+      ln -s ${favicon} $out/share/homepage/public/images/favicon.svg
     '';
   });
 in
@@ -98,7 +98,7 @@ in
       hideVersion = true;
       target = "_self";
       background = "/images/background.png";
-      favicon = "/images/favicon.ico";
+      favicon = "/images/favicon.svg";
       quicklaunch = {
         searchDescriptions = true;
         hideInternetSearch = true;
