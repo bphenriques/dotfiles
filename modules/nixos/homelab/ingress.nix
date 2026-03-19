@@ -143,9 +143,10 @@ in
             address = "${ingressCfg.forwardAuth.url}/api/auth/traefik";
             trustForwardHeader = true;
             authResponseHeaders = [
-              "X-Forwarded-User"
-              "X-Forwarded-Groups"
-              "X-Forwarded-Email"
+              "Remote-User"
+              "Remote-Email"
+              "Remote-Groups"
+              "Remote-Name"
             ];
           };
         };

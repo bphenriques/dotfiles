@@ -34,6 +34,7 @@
     mounts = {
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
+      shared = { gid = 5002; };
     };
   };
   virtualisation = {

@@ -26,6 +26,7 @@ in
     ./home-assistant.nix
     ./radicale
     ./tandoor-recipes
+    ./filebrowser
   ];
 
   custom.homelab = {
