@@ -1,16 +1,20 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.sonarr;
   backupCfg = config.custom.homelab.backup;
 in
 {
-  custom.homelab.services.sonarr.backup = {
-    script = ./backup.sh;
-    environment = {
-      ARR_URL = serviceCfg.url;
-      ARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
-      OUTPUT_DIR = "${backupCfg.extrasDir}/sonarr";
-    };
+  custom.homelab.services.sonarr.backup.package = pkgs.writeShellApplication {
+    name = "backup-sonarr";
+    runtimeInputs = [ pkgs.curl ];
+    text = ''
+      export ARR_URL="${serviceCfg.url}"
+      export ARR_API_KEY_FILE="${serviceCfg.secrets.files.api-key.path}"
+      export OUTPUT_DIR="${backupCfg.extrasDir}/sonarr"
+
+      # shellcheck disable=SC1091
+      source ${./backup.sh}
+    '';
   };
 
   custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "homelab-backup-sonarr" ];

@@ -66,6 +66,7 @@ let
   });
 in
 {
+  # Does not require authentication as it just aggregates links and runs health checks behind the scenes.
   custom.homelab.services.homepage = {
     description = "Dashboard";
     version = config.services.homepage-dashboard.package.version;

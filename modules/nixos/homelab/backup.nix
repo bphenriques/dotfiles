@@ -46,7 +46,7 @@ let
   };
 
   # Services that have a backup script defined
-  servicesWithBackup = lib.filterAttrs (_: svc: svc.backup.script != null) homelabCfg.services;
+  servicesWithBackup = lib.filterAttrs (_: svc: svc.backup.package != null) homelabCfg.services;
 
   serviceHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") servicesWithBackup;
   standaloneHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") cfg.hooks;
@@ -54,9 +54,10 @@ let
 in
 {
   options.custom.homelab.backup = {
+    enable = lib.mkEnableOption "homelab backup to Backblaze B2";
+
     package = lib.mkOption {
-      type = lib.types.nullOr lib.types.package;
-      default = null;
+      type = lib.types.package;
       description = "The rustic-manage package to use.";
     };
 
@@ -84,14 +85,13 @@ in
     hooks = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
         options = {
-          script = lib.mkOption { type = lib.types.path; };
+          package = lib.mkOption {
+            type = lib.types.package;
+            description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies.";
+          };
           after = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [ ];
-          };
-          environment = lib.mkOption {
-            type = lib.types.attrsOf lib.types.str;
-            default = { };
           };
         };
       }));
@@ -112,7 +112,7 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.package != null) {
+  config = lib.mkIf cfg.enable {
     sops = {
       secrets."backup/b2/bucket" = { };
       secrets."backup/b2/bucket_id" = { };
@@ -134,15 +134,13 @@ in
     };
 
     systemd.services = let
-      mkHookService = name: { script, after, environment }: lib.nameValuePair "homelab-backup-${name}" {
-        inherit environment;
+      mkHookService = name: { package, after, ... }: lib.nameValuePair "homelab-backup-${name}" {
         description = "Pre-backup hook: ${name}";
         after = [ "network-online.target" ] ++ after;
         wants = [ "network-online.target" ];
-        path = [ pkgs.coreutils pkgs.curl ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "${pkgs.bash}/bin/bash ${script}";
+          ExecStart = lib.getExe package;
           ReadWritePaths = [ cfg.extrasDir ];
           ProtectSystem = "strict";
           ProtectHome = true;

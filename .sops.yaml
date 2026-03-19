@@ -6,7 +6,7 @@ creation_rules:
   - path_regex: hosts/laptop/secrets.yaml
     key_groups:
       - age: [ *laptop ]
-  - path_regex: hosts/homelab/compute/secrets.yaml
+  - path_regex: hosts/compute/secrets.yaml
     key_groups:
       - age: [ *homelabCompute ]
   - path_regex: hosts/inky/secrets.yaml

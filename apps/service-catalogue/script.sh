@@ -31,7 +31,7 @@ nix eval --impure --json --expr "
   def sanitize: tostring | gsub("\\|"; "\\\\|");
 
   def row:
-    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) | \(.scope // "—") |";
+    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) | \(if .scope then (.scope | join(", ")) else "—" end) |";
 
   ["General", "Media", "Monitoring", "Administration"] as $order |
   ($order | to_entries | map({(.value): .key}) | add // {}) as $idx |

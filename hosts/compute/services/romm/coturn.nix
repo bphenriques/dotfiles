@@ -13,7 +13,7 @@ in
 {
   custom.homelab.services.coturn = {
     description = "STUN/TURN Server";
-    version = config.services.coturn.package.version;
+    version = "4.9.0";
     homepage = "https://github.com/coturn/coturn";
     category = "Media";
     port = listenPort;

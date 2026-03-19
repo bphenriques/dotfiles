@@ -123,16 +123,10 @@ let
 
       # Pre-backup hook (consumed by backup.nix)
       backup = {
-        script = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
+        package = lib.mkOption {
+          type = lib.types.nullOr lib.types.package;
           default = null;
-          description = "Script to run before backup. Should write output to the directory specified by OUTPUT_DIR env var.";
-        };
-
-        environment = lib.mkOption {
-          type = lib.types.attrsOf lib.types.str;
-          default = { };
-          description = "Environment variables passed to the backup script.";
+          description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies.";
         };
 
         after = lib.mkOption {

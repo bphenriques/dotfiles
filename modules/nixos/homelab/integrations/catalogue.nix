@@ -13,8 +13,8 @@ let
       displayName = service.integrations.catalogue.displayName;
       auth = { oidc = hasOidc; forwardAuth = hasForwardAuth; };
       scope =
-        if hasForwardAuth then service.forwardAuth.group
-        else if hasOidc then cfg.groups.users
+        if hasForwardAuth then service.forwardAuth.groups
+        else if hasOidc then [ cfg.groups.users ]
         else null;
     };
 in

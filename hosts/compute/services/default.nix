@@ -22,7 +22,7 @@ in
     ./transmission.nix
     ./ntfy
     ./wireguard
-    ./opencloud.nix
+    ./opencloud
     ./home-assistant.nix
     ./radicale
     ./tandoor-recipes

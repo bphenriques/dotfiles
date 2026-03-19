@@ -50,10 +50,10 @@ in
       OAUTH_PROVIDERS_POCKETID_USERINFOURL = "${oidcCfg.provider.issuerUrl}/api/oidc/userinfo";
       OAUTH_PROVIDERS_POCKETID_REDIRECTURL = "${serviceCfg.publicUrl}/api/oauth/callback/pocketid";
       OAUTH_PROVIDERS_POCKETID_SCOPES = "openid profile email groups";
-      OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file;
+      OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file; # Client ID uses placeholder (no _FILE support); secret uses native file ref
     } // lib.listToAttrs (
       lib.mapAttrsToList (name: svc: {
-        name = "APPS_${lib.toUpper name}_OAUTH_GROUPS";
+        name = "APPS_${lib.toUpper name}_OAUTH_GROUPS"; # FIXME: service names with hyphens produce invalid env var names (e.g., home-assistant → APPS_HOME-ASSISTANT_...)
         value = lib.concatStringsSep "," svc.forwardAuth.groups;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );

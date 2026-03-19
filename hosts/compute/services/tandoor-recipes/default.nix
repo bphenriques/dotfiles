@@ -5,7 +5,7 @@ let
   pkg = config.services.tandoor-recipes.package;
 in
 {
-  imports = [ ./setup.nix ];
+  imports = [ ./setup.nix ./backup.nix ];
 
   custom.homelab.services.tandoor = {
     description = "Recipe Manager";

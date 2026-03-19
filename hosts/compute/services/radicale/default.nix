@@ -40,10 +40,15 @@ in
     };
 
     backup = {
-      script = ./backup.sh;
-      environment = {
-        RADICALE_DATA = "/var/lib/radicale/collections";
-        OUTPUT_DIR = "${backupCfg.extrasDir}/radicale";
+      package = pkgs.writeShellApplication {
+        name = "backup-radicale";
+        text = ''
+          export RADICALE_DATA="/var/lib/radicale/collections"
+          export OUTPUT_DIR="${backupCfg.extrasDir}/radicale"
+
+          # shellcheck disable=SC1091
+          source ${./backup.sh}
+        '';
       };
       after = [ "radicale.service" ];
     };

@@ -32,7 +32,7 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 - **Tinyauth**: ForwardAuth middleware for services without native OIDC
 - **Wireguard**: VPN for remote access
 - **SMB**: Services access [NAS](../storage) storage via SMB mounts
-- **Backblaze B2**: Off-site encrypted backups via [rustic](https://github.com/rustic-rs/rustic) (daily backup, weekly verification)
+- **Backblaze B2**: Off-site encrypted backups via [rustic](https://github.com/rustic-rs/rustic) (daily backup, weekly verification). Recovery _should_ be documented.
 - **Prometheus + Alertmanager**: Metrics, HTTP probes, and alerting.
 - **[ntfy](https://ntfy.sh)** — Push notifications for system alerts and service events
 
@@ -52,7 +52,6 @@ reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenan
   - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/secrets.nix)
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
 - **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
-- **[Central Backup timer](../../modules/nixos/homelab/backup.nix)**: supports pre-backup hooks for customizations
 
 ## Miniflux Example
 
@@ -112,15 +111,17 @@ sudo rm /var/lib/homelab-secrets/miniflux/admin-password && sudo systemctl resta
 
 ### Backup
 
-Pre-backup hook that exports data before the nightly run:
+Backups hooks are regular Nix packages:
 ```nix
-custom.homelab.services.miniflux.backup = {
-  script = ./backup.sh;
-  environment = {
-    MINIFLUX_URL = serviceCfg.url;
-    MINIFLUX_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
-    OUTPUT_DIR = "${backupCfg.extrasDir}/miniflux";
-  };
+custom.homelab.services.miniflux.backup.package = pkgs.writeShellApplication {
+  name = "backup-miniflux";
+  runtimeInputs = [ pkgs.curl ];
+  text = ''
+    export MINIFLUX_URL="${serviceCfg.url}"
+    export MINIFLUX_ADMIN_PASSWORD_FILE="${serviceCfg.secrets.files.admin-password.path}"
+    export OUTPUT_DIR="${backupCfg.extrasDir}/miniflux"
+    source ${./backup.sh}
+  '';
 };
 ```
 
@@ -141,48 +142,17 @@ custom.homelab.users.alice = {
 
 ## Access Control
 
-Three tiers of access, each enforced at one of two layers (never both on the same service):
+Access control is enforced through OIDC [per-client group restriction](../../modules/nixos/homelab/security/oidc.nix) at the service level or through `ForwardAuth` middleware.
 
 | Tier | Group | Intended for | Example access |
 |------|-------|-------------|----------------|
 | Admin | `admin` | Homelab owner | Everything |
-| Users | `users` | Family | Media, recipes, photos — not admin tools |
+| Users | `users` | Family | Media, recipes |
 | Guests | `guests` | Friends, colleagues | Romm only (viewer) |
 
-### Enforcement layers
-
-- **OIDC [per-client group restriction](../../modules/nixos/homelab/security/oidc.nix)**: Pocket-ID rejects authentication at the provider level if the user's group isn't in the client's `allowedGroups`. No forwardAuth needed — guests can't even start an auth flow for services they're not allowed to use.
-- **[ForwardAuth](../../modules/nixos/homelab/ingress.nix)** (via Tinyauth): For services without native OIDC (Home Assistant, *arr stack, Syncthing, etc.), Traefik's forwardAuth middleware gates access by group.
-
-An assertion prevents accidentally enabling both on the same service.
-
-### Per-service access
-
-```nix
-# OIDC-native: guests can view ROMs, family can edit, admin has full control
-custom.homelab.services.romm.oidc.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
-
-# OIDC-native: family and admin only
-custom.homelab.services.immich.oidc.allowedGroups = with config.custom.homelab.groups; [ users admin ];
-
-# ForwardAuth: admin only
-custom.homelab.services.home-assistant.forwardAuth.groups = [ config.custom.homelab.groups.admin ];
-```
-
-### Guest management
-
-Guests are managed imperatively via `pocket-id-manage` (no Nix rebuild needed):
+Guests are managed imperatively via `pocket-id-manage` to keep things simpler:
 
 ```bash
-# Invite a guest (creates Pocket-ID account + sends passkey setup email)
-pocket-id-manage guest invite colleague@work.com --firstName John --lastName Doe
-
-# Provision VPN access separately
+pocket-id-manage guest invite someone@work.com --firstName John --lastName Doe
 wg-manage add john colleague@work.com
-
-# Remove a guest (only deletes users in the guests group)
-pocket-id-manage guest remove john
-
-# Resend invite to any user (family or guest)
-pocket-id-manage reinvite alice
 ```

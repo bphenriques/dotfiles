@@ -178,7 +178,7 @@ in
     };
 
     clients = lib.mkOption {
-      type = lib.types.attrsOf lib.types.attrs;
+      type = lib.types.attrsOf lib.types.attrs; # Typed via mkServiceOidcSchema; re-declared as attrs since submodule is context-dependent
       default = derivedClients;
       readOnly = true;
       description = "Derived OIDC client configs keyed by service name (read-only)";

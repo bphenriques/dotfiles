@@ -12,6 +12,7 @@ in
   };
 
   custom.homelab.backup = {
+    enable = true;
     package = self.pkgs.rustic-manage;
     bindings = {
       "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;

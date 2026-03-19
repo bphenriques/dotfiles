@@ -4,7 +4,8 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
-| [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.2.3 | `home` | 8123 | ForwardAuth | users |
+| [filebrowser](https://filebrowser.org) | File Browser | 2.57.1 | `files` | 8085 | ForwardAuth | users, admin |
+| [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.2.3 | `home` | 8123 | ForwardAuth | admin |
 | [miniflux](https://miniflux.app/) | RSS Server | 2.2.17 | `miniflux` | 8081 | OIDC | users |
 | [OpenCloud](https://github.com/opencloud-eu/opencloud) | Cloud Storage & Office | 5.1.0 | `cloud` | 9200 | OIDC | users |
 | [Radicale](https://radicale.org/v3.html) | CalDAV & CardDAV | 3.6.1 | `radicale` | 5232 | ForwardAuth | admin |
@@ -16,6 +17,7 @@
 | Name | Description | Version | Subdomain | Internal Port | Auth | Scope |
 |------|-------------|---------|-----------|---------------|------|-------|
 | [cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.4.7 | `cleanuparr` | 11011 | ForwardAuth | admin |
+| [coturn](https://github.com/coturn/coturn) | STUN/TURN Server | 4.9.0 | `coturn` | 3478 | — | — |
 | [immich](https://immich.app/) | Photo & Video Gallery | 2.5.6 | `photos` | 2283 | OIDC | users |
 | [jellyfin](https://jellyfin.org/) | Media Player | 10.11.6 | `jellyfin` | 8096 | OIDC | users |
 | [jellyseerr](https://github.com/Fallenbagel/jellyseerr) | TV / Movie Finder | 2.7.3 | `jellyseerr` | 9099 | — | — |

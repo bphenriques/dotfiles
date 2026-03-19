@@ -31,16 +31,6 @@ let
       [{ inherit datasource; refId = "A"; inherit expr; legendFormat = args.legend or ""; }];
   };
 
-  mkStat = { id, title, expr, unit ? "short", gridPos, thresholds ? null, ... }@args: {
-    inherit id title gridPos datasource;
-    type = "stat";
-    fieldConfig.defaults = {
-      inherit unit;
-    } // (if thresholds != null then { inherit thresholds; } else {});
-    targets = [{ inherit datasource; refId = "A"; inherit expr; legendFormat = args.legend or ""; }];
-    options.reduceOptions = { calcs = [ "lastNotNull" ]; fields = ""; values = false; };
-  };
-
   mkRow = { id, title, gridPos }: {
     inherit id title gridPos;
     type = "row";
@@ -152,37 +142,5 @@ in
       gridPos = { x = w; y = 35; inherit w h; };
     })
 
-    # --- NVMe Health ---
-    (mkRow { id = 13; title = "NVMe Health"; gridPos = { x = 0; y = 43; w = fullW; h = 1; }; })
-    (mkStat {
-      id = 14;
-      title = "SMART Status";
-      expr = "smartctl_device_smart_status";
-      legend = "{{device}}";
-      gridPos = { x = 0; y = 44; inherit w; h = 4; };
-      thresholds = {
-        mode = "absolute";
-        steps = [
-          { color = "red"; value = null; }
-          { color = "green"; value = 1; }
-        ];
-      };
-    })
-    (mkStat {
-      id = 15;
-      title = "Wear Level %";
-      expr = "smartctl_device_percentage_used";
-      legend = "{{device}}";
-      unit = "percent";
-      gridPos = { x = w; y = 44; inherit w; h = 4; };
-      thresholds = {
-        mode = "absolute";
-        steps = [
-          { color = "green"; value = null; }
-          { color = "yellow"; value = 50; }
-          { color = "red"; value = 80; }
-        ];
-      };
-    })
   ];
 }

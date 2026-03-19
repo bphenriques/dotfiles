@@ -5,14 +5,16 @@ let
   collaboraCfg = cfg.services.collabora;
   wopiCfg = cfg.services.wopi;
   oidcCfg = cfg.oidc;
+  backupCfg = cfg.backup;
 
   # CSP config to allow external OIDC provider and Collabora
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
   #
   # Security exceptions:
   # - 'unsafe-eval'/'unsafe-inline': required by OpenCloud Web UI (fails to render without them)
-  # - proofkeys.disable (below): WOPI proof-key verification breaks Collabora ↔ OpenCloud flow;
-  #   compensated by WOPI endpoint being internal-only (not publicly exposed)
+  # - proofkeys.disable (below): WOPI proof-key verification breaks Collabora ↔ OpenCloud flow.
+  #   WOPI is publicly routable (Collabora calls back via public URL), but access is limited to
+  #   authenticated users via OpenCloud's own auth. Accepted risk for homelab use.
   oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.issuerUrl;
   yamlFormat = pkgs.formats.yaml { };
   cspConfig = yamlFormat.generate "opencloud-csp.yaml" {
@@ -68,8 +70,20 @@ in
       integrations.homepage.icon = "open-cloud.svg";
       integrations.catalogue.displayName = "OpenCloud";
 
-      # TODO: Backup OpenCloud state under /var/lib/opencloud.
-      # This should include both persisted user content and configuration data.
+      backup = {
+        package = pkgs.writeShellApplication {
+          name = "backup-opencloud";
+          runtimeInputs = [ pkgs.rsync pkgs.systemd ];
+          text = ''
+            export DATA_DIR="/var/lib/opencloud"
+            export OUTPUT_DIR="${backupCfg.extrasDir}/opencloud"
+
+            # shellcheck disable=SC1091
+            source ${./backup.sh}
+          '';
+        };
+        after = [ "opencloud.service" ];
+      };
     };
 
     # Must be publicly reachable (routed by Traefik) for OpenCloud collaboration flow.

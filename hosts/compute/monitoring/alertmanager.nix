@@ -44,7 +44,7 @@ in
         receivers = [{
           name = "ntfy";
           webhook_configs = [{
-            url = "${ntfyCfg.url}/admin?template=alertmanager"; # ntfy has a built-in `alertmanager` template
+            url = "${ntfyCfg.url}/${serviceCfg.integrations.ntfy.topic}?template=alertmanager";
             send_resolved = true;
             http_config.authorization = {
               type = "Bearer";
