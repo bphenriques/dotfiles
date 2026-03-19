@@ -14,7 +14,7 @@ in
     ./jellyseerr
     ./prowlarr
     ./cleanuparr.nix
-    ./romm.nix
+    ./romm
     ./homepage
     ./obsidian-livesync
     ./syncthing.nix

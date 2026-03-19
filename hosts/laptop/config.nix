@@ -42,6 +42,7 @@
       media = { gid = 5512; };
     };
   };
+
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

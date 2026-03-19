@@ -42,6 +42,7 @@ in
     integrations.homepage.enable = true;
     integrations.homepage.icon = "tandoor-recipes.svg";
     integrations.catalogue.displayName = "Tandoor";
+    healthcheck.path = "/accounts/login/";
   };
 
   services.tandoor-recipes = {

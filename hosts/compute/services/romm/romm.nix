@@ -32,13 +32,34 @@ let
         extensions = [ "stfolder" ];
         names = [ ".stignore" ];
       };
-      multi_file.names = [ ".stfolder" ]; # syncthing
+      multi_file.names = [
+        ".stfolder"
+        ".idea"
+      ];
     };
     system.platforms = {
       megadrive = "genesis";
       dreamcast = "dc";
       fbneo = "arcade";
       pico8 = "pico";
+      gc = "ngc";
+    };
+
+    # Works somewhat but the display is buggy and laggy and only works Chrome<->Chrome. I do not recommend yet.
+    emulatorjs.netplay = {
+      enabled = true;
+      ice_servers =
+        let
+          port = toString config.services.coturn.listening-port;
+          lanIP = self.shared.networks.main.hosts.compute;
+          wgIP = "10.100.0.1";
+          turnCreds = { username = "romm"; credential = "romm-netplay"; };
+        in [
+          { urls = "stun:${lanIP}:${port}"; }
+          ({ urls = "turn:${lanIP}:${port}?transport=udp"; } // turnCreds)
+          { urls = "stun:${wgIP}:${port}"; }
+          ({ urls = "turn:${wgIP}:${port}?transport=udp"; } // turnCreds)
+        ];
     };
   };
 in

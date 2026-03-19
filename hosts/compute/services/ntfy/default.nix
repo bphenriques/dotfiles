@@ -12,10 +12,6 @@ in
     category = "Monitoring";
     port = 2586;
     healthcheck.path = "/v1/health";
-    forwardAuth = {
-      enable = true;
-      groups = with config.custom.homelab.groups; [ users admin ];
-    };
     integrations.homepage.enable = true;
   };
 

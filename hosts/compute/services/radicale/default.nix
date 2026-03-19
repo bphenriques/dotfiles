@@ -29,6 +29,7 @@ in
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
     integrations.catalogue.displayName = "Radicale";
+    healthcheck.path = "/.web/";
 
     secrets = {
       files = lib.listToAttrs (map (uname: {

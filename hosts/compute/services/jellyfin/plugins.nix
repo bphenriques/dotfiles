@@ -16,6 +16,16 @@ let
         stripRoot = false;
       };
     };
+    # Post-deploy: configure API credentials in Jellyfin UI → Dashboard → Plugins → Open Subtitles
+    opensubtitles = {
+      name = "Open Subtitles";
+      version = "23.0.0.0";
+      src = pkgs.fetchzip {
+        url = "https://repo.jellyfin.org/releases/plugin/open-subtitles/open-subtitles_23.0.0.0.zip";
+        hash = "sha256-+5gwpkZliE5Kb3JKqcUDAAZDZ0UXNue4NkUgdn0fYMA=";
+        stripRoot = false;
+      };
+    };
   };
 
   # SSO plugin configuration
@@ -57,12 +67,18 @@ in
 {
   systemd.services.jellyfin.serviceConfig.ExecStartPre = let
     installPlugin = plugin: ''
+      # Remove old versions of this plugin (avoids duplicate loads after upgrades)
+      find "/var/lib/jellyfin/plugins" -maxdepth 1 -name "${plugin.name}_*" -not -name "${plugin.name}_${plugin.version}" -exec rm -rf {} +
+
       pluginDir="/var/lib/jellyfin/plugins/${plugin.name}_${plugin.version}"
-      if [ ! -f "$pluginDir/.installed" ]; then
+      marker="$pluginDir/.installed-src"
+
+      # Reinstall if missing or if the Nix store path changed (hash bump, repack, etc.)
+      if [ ! -f "$marker" ] || [ "$(cat "$marker")" != "${plugin.src}" ]; then
         rm -rf "$pluginDir"
         mkdir -p "$pluginDir"
-        cp -r ${plugin.src}/* "$pluginDir/"
-        touch "$pluginDir/.installed"
+        cp -r ${plugin.src}/. "$pluginDir/"
+        echo "${plugin.src}" > "$marker"
       fi
     '';
     installScript = pkgs.writeShellScript "jellyfin-install-plugins" ''
