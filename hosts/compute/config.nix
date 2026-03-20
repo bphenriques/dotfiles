@@ -48,7 +48,7 @@
   };
 
   # Secrets
-  sops.defaultSopsFile = ./secrets.yaml;
+  sops.defaultSopsFile = self.private.hosts.compute.sopsSecretsFile;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
 
   # Users

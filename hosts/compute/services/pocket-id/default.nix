@@ -1,6 +1,7 @@
-{ config, pkgs, lib, self, ... }:
+{ config, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.pocket-id;
+  smtpCfg = config.custom.homelab.smtp;
   port = 8094;
 in
 {
@@ -49,11 +50,11 @@ in
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration
-      SMTP_HOST = self.private.settings.smtp.host;
-      SMTP_PORT = toString self.private.settings.smtp.port;
-      SMTP_FROM = self.private.settings.smtp.from;
-      SMTP_USER = self.private.settings.smtp.user;
-      SMTP_TLS = self.private.settings.smtp.tls;
+      SMTP_HOST = smtpCfg.host;
+      SMTP_PORT = toString smtpCfg.port;
+      SMTP_FROM = smtpCfg.from;
+      SMTP_USER = smtpCfg.user;
+      SMTP_TLS = smtpCfg.tls;
       SMTP_PASSWORD_FILE = config.sops.templates.pocket-id-smtp-password.path;
 
       # Invite only
@@ -65,11 +66,8 @@ in
     };
   };
 
-  sops = {
-    secrets."smtp-password" = { };
-    templates."pocket-id-smtp-password" = {
-      owner = config.services.pocket-id.user;
-      content = config.sops.placeholder."smtp-password";
-    };
+  sops.templates."pocket-id-smtp-password" = {
+    owner = config.services.pocket-id.user;
+    content = config.sops.placeholder."smtp-password";
   };
 }

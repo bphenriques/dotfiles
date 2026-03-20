@@ -30,6 +30,8 @@ Layout:
 - [`lib/`](./lib) — custom helpers and builders
 - [`apps/`](./apps) — runnable scripts (installation, post-install)
 
+> **Note:** A companion private repository (`dotfiles-private`) is used as a flake input for [sensitive configuration](#sensitive-configuration).
+
 Key dependencies:
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
 - [`stylix`](https://github.com/danth/stylix) for consistent theming
@@ -37,6 +39,41 @@ Key dependencies:
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
+
+## Sensitive Configuration
+
+I use a companion private `dotfiles-private` repository as a flake input for private configuration either because:
+- I do not want to expose private information such as public domain, user definitions, and SMTP settings.
+- I do not want to overexpose my sops encrypted file. The encrypted files and `.sops.yaml` live in `dotfiles-private`.
+
+At build time, `dotfiles-private` outputs will be available under `self.private`.
+
+For reference, the structure of my `dotfiles-private`:
+```
+.
+├── flake.lock
+├── flake.nix
+├── hosts
+│   ├── compute
+│   │   ├── default.nix
+│   │   ├── secrets.yaml    <- Encrypted
+│   │   ├── settings.nix
+│   │   └── users
+│   │       ├── bphenriques.nix
+│   │       └── johndoe.nix
+│   └── laptop
+│       ├── default.nix
+│       └── secrets.yaml    <- Encrypted
+├── packages
+│   └── wallpapers
+│       ├── default.nix
+│       └── src
+│           ├── beach-night-sky.jpg
+│           ├── ...
+│           └── watch-tower.png
+├── README.md
+└── shell.nix               <- With sops package inside
+```
 
 ## Flake Outputs
 

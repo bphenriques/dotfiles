@@ -32,8 +32,11 @@ in
 
   custom.homelab = {
     enable = true;
-    domain = self.private.settings.hosts.compute.domain;
-    ingress.cloudflareEmail = self.private.settings.cloudflare.email;
+    domain = self.private.hosts.compute.settings.domain;
+    ingress.cloudflareEmail = self.private.hosts.compute.settings.cloudflare.email;
+    smtp = self.private.hosts.compute.settings.smtp // {
+      passwordFile = config.sops.secrets."smtp-password".path;
+    };
 
     external = {
       synology = {
@@ -56,7 +59,7 @@ in
     };
 
     # Individual users whose information is kept private
-    users = self.private.settings.users // {
+    users = self.private.hosts.compute.settings.users // {
       home = {
         email = "home@localhost";
         firstName = "Home";
@@ -114,6 +117,7 @@ in
     };
   };
 
+  sops.secrets."smtp-password" = { };
   sops.secrets."jellyfin/home/password" = { };
   sops.secrets."guest/password" = { };
 }

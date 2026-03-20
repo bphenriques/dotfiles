@@ -26,7 +26,7 @@ in
             name = oidcCfg.provider.displayName;
             client_id = serviceCfg.oidc.id.placeholder;
             secret = serviceCfg.oidc.secret.placeholder;
-            settings.server_url = "${oidcCfg.provider.issuerUrl}/.well-known/openid-configuration";
+            settings.server_url = oidcCfg.provider.issuerUrl;
           }];
         };
       };
@@ -35,6 +35,7 @@ in
     access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
     oidc = {
       enable = true;
+      callbackURLs = [ "${serviceCfg.publicUrl}/accounts/oidc/${oidcCfg.provider.internalName}/login/callback/" ];
       systemd.dependentServices = [ "tandoor-recipes" ];
     };
     integrations.homepage.enable = true;

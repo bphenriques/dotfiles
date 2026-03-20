@@ -16,8 +16,8 @@ let
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
   dns = self.shared.dns.cloudflare;
-  endpoint = self.private.settings.services.wireguard.endpoint;
-  smtp = self.private.settings.smtp;
+  endpoint = self.private.hosts.compute.settings.services.wireguard.endpoint;
+  smtpCfg = config.custom.homelab.smtp;
 
   dataDir = "/var/lib/wireguard";
   serverKeyFile = "${dataDir}/server/private.key";
@@ -50,8 +50,8 @@ let
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
     WG_SERVER_ALLOWED_IPS = "${clientSubnet},${self.shared.networks.main.subnet}";
-  } // lib.optionalAttrs (smtp.from != "") {
-    WG_SMTP_FROM = smtp.from;
+  } // lib.optionalAttrs (smtpCfg.from != "") {
+    WG_SMTP_FROM = smtpCfg.from;
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
   };
 
@@ -160,9 +160,9 @@ in
     '';
   };
 
-  sops = {
-    secrets."smtp-password" = { };
-    templates."wireguard-smtp-url".content = "smtp://${smtp.user}:${config.sops.placeholder."smtp-password"}@${smtp.host}:${toString smtp.port}";
+  sops.templates."wireguard-smtp-url" = {
+    owner = "root";
+    content = "smtp://${smtpCfg.user}:${config.sops.placeholder."smtp-password"}@${smtpCfg.host}:${toString smtpCfg.port}";
   };
 
   assertions = let
