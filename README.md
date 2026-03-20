@@ -75,6 +75,8 @@ For reference, the structure of my `dotfiles-private`:
 └── shell.nix               <- With sops package inside
 ```
 
+For reference, [`hosts-secrets`](./apps/host-secrets) is a utility function that I use to generate the secrets file.
+
 ## Flake Outputs
 
 ```
