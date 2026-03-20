@@ -13,10 +13,10 @@ let
 in
 {
   custom.homelab.services.grafana = {
-    description = "Dashboards";
-    version = pkgs.grafana.version;
-    homepage = pkgs.grafana.meta.homepage;
-    category = "Monitoring";
+    metadata.description = "Dashboards";
+    metadata.version = pkgs.grafana.version;
+    metadata.homepage = pkgs.grafana.meta.homepage;
+    metadata.category = "Monitoring";
     port = 3010;
     secrets = {
       files.secret-key.rotatable = true;

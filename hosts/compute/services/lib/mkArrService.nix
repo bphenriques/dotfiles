@@ -54,14 +54,13 @@ let
 in
 {
   custom.homelab.services.${name} = {
-    inherit port description;
-    version = config.services.${name}.package.version;
-    homepage = config.services.${name}.package.meta.homepage;
-    category = "Media";
-    forwardAuth = {
-      enable = true;
-      groups = [ (forwardAuthGroup config) ];
-    };
+    inherit port;
+    metadata.description = description;
+    metadata.version = config.services.${name}.package.version;
+    metadata.homepage = config.services.${name}.package.meta.homepage;
+    metadata.category = "Media";
+    access.allowedGroups = [ (forwardAuthGroup config) ];
+    forwardAuth.enable = true;
     secrets = {
       files.api-key = { rotatable = true; };
       templates."${name}.env".content = ''

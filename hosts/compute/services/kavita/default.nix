@@ -11,10 +11,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.kavita = {
-    description = "Book Server";
-    version = config.services.kavita.package.version;
-    homepage = config.services.kavita.package.meta.homepage;
-    category = "Media";
+    metadata.description = "Book Server";
+    metadata.version = config.services.kavita.package.version;
+    metadata.homepage = config.services.kavita.package.meta.homepage;
+    metadata.category = "Media";
     port = 8097;
     secrets = {
       files = {
@@ -23,13 +23,13 @@ in
       };
       systemd.dependentServices = [ "kavita" "kavita-configure" ];
     };
+    access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
     oidc = {
       enable = true;
       callbackURLs = [
         "${serviceCfg.publicUrl}/signin-oidc"
         "${serviceCfg.publicUrl}/signout-callback-oidc"
       ];
-      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "kavita" ];
     };
     healthcheck.path = "/api/health";

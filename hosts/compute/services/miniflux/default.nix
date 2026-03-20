@@ -7,14 +7,14 @@ in
   imports = [ ./configure.nix ./backup.nix ];
 
   custom.homelab.services.miniflux = {
-    description = "RSS Server";
-    version = config.services.miniflux.package.version;
-    homepage = config.services.miniflux.package.meta.homepage;
-    category = "General";
+    metadata.description = "RSS Server";
+    metadata.version = config.services.miniflux.package.version;
+    metadata.homepage = config.services.miniflux.package.meta.homepage;
+    metadata.category = "General";
     port = 8081;
+    access.allowedGroups = with config.custom.homelab.groups; [ admin ];
     oidc = {
       enable = true;
-      allowedGroups = with config.custom.homelab.groups; [ admin ];
       systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
     };
     healthcheck.path = "/healthcheck";

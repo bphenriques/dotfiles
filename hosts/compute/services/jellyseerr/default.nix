@@ -1,16 +1,17 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.jellyseerr;
+  jellyfinCfg = config.custom.homelab.services.jellyfin;
 in
 {
   imports = [ ./configure.nix ];
 
   # Auth is delegated to Jellyfin (users sign in via Jellyfin credentials, not direct OIDC/forwardAuth)
   custom.homelab.services.jellyseerr = {
-    category = "Media";
-    description = "TV / Movie Finder";
-    version = config.services.jellyseerr.package.version;
-    homepage = config.services.jellyseerr.package.meta.homepage;
+    metadata.category = "Media";
+    metadata.description = "TV / Movie Finder";
+    metadata.version = config.services.jellyseerr.package.version;
+    metadata.homepage = config.services.jellyseerr.package.meta.homepage;
     port = 9099;
     secrets = {
       files.api-key = { rotatable = true; };
@@ -19,7 +20,6 @@ in
       '';
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
-    scope = "family"; # auth delegated to Jellyfin
     healthcheck.path = "/api/v1/status";
     integrations.homepage.enable = true;
   };

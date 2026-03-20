@@ -157,8 +157,7 @@ in {
         lib.listToAttrs (map (svcName: {
           name = svcName;
           value = {
-            requires = [ mountCfg.systemd.automountUnit ];
-            after = [ mountCfg.systemd.automountUnit ];
+            unitConfig.RequiresMountsFor = [ mountCfg.localMount ];
 
             # Retry with delays if mount isn't ready yet (network filesystem race at boot)
             serviceConfig = {

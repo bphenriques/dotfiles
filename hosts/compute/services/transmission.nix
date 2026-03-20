@@ -15,12 +15,13 @@ let
 in
 {
   custom.homelab.services.transmission = {
-    description = "Torrent Client";
-    version = config.services.transmission.package.version;
-    homepage = config.services.transmission.package.meta.homepage;
-    category = "Media";
+    metadata.description = "Torrent Client";
+    metadata.version = config.services.transmission.package.version;
+    metadata.homepage = config.services.transmission.package.meta.homepage;
+    metadata.category = "Media";
     port = 9091;
     healthcheck.path = "/transmission/web/";
+    access.allowedGroups = [ config.custom.homelab.groups.admin ];
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";

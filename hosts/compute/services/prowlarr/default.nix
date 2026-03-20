@@ -6,10 +6,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.prowlarr = {
-    description = "Manage *rr services";
-    version = config.services.prowlarr.package.version;
-    homepage = config.services.prowlarr.package.meta.homepage;
-    category = "Media";
+    metadata.description = "Manage *rr services";
+    metadata.version = config.services.prowlarr.package.version;
+    metadata.homepage = config.services.prowlarr.package.meta.homepage;
+    metadata.category = "Media";
     port = 9096;
     secrets = {
       files.api-key = { rotatable = true; };
@@ -19,6 +19,7 @@ in
       systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
     };
     healthcheck.path = "/ping";
+    access.allowedGroups = [ config.custom.homelab.groups.admin ];
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";

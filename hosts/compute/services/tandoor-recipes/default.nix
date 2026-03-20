@@ -8,13 +8,11 @@ in
   imports = [ ./setup.nix ./backup.nix ];
 
   custom.homelab.services.tandoor = {
-    description = "Recipe Manager";
-    version = pkg.version;
-    homepage = pkg.meta.homepage;
-    category = "General";
+    metadata.description = "Recipe Manager";
+    metadata.version = pkg.version;
+    metadata.homepage = pkg.meta.homepage;
+    metadata.category = "General";
     port = 9092;
-    subdomain = "recipes";
-    aliases = [ "tandoor" ];
     secrets = {
       files.secret-key = { rotatable = true; bytes = 50; };
       templates.env.content = ''
@@ -34,9 +32,9 @@ in
       };
       systemd.dependentServices = [ "tandoor-recipes" "tandoor-recipes-superuser" ];
     };
+    access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
     oidc = {
       enable = true;
-      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "tandoor-recipes" ];
     };
     integrations.homepage.enable = true;

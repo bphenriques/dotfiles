@@ -10,16 +10,14 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.filebrowser = {
-    description = "File Browser";
-    version = pkgs.filebrowser.version;
-    homepage = pkgs.filebrowser.meta.homepage;
-    category = "General";
+    metadata.description = "File Browser";
+    metadata.version = pkgs.filebrowser.version;
+    metadata.homepage = pkgs.filebrowser.meta.homepage;
+    metadata.category = "General";
     port = 8085;
     subdomain = "files";
-    forwardAuth = {
-      enable = true;
-      groups = with cfg.groups; [ users admin ];
-    };
+    access.allowedGroups = with cfg.groups; [ guests users admin ];
+    forwardAuth.enable = true;
     integrations.homepage.enable = true;
 
     # Upload size limit (4GB). A protection on top of Synology quota

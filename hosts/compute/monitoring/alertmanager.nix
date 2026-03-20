@@ -5,10 +5,10 @@ let
 in
 {
   custom.homelab.services.alertmanager = {
-    description = "Alert Routing";
-    version = config.services.prometheus.alertmanager.package.version;
-    homepage = "https://prometheus.io/docs/alerting/latest/alertmanager/";
-    category = "Monitoring";
+    metadata.description = "Alert Routing";
+    metadata.version = config.services.prometheus.alertmanager.package.version;
+    metadata.homepage = "https://prometheus.io/docs/alerting/latest/alertmanager/";
+    metadata.category = "Monitoring";
     port = 9093;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;

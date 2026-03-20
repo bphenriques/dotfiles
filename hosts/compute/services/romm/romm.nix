@@ -71,10 +71,10 @@ in
   };
 
   custom.homelab.services.romm = {
-    description = "ROM Manager";
-    version = "4.7.0";
-    homepage = "https://github.com/rommapp/romm";
-    category = "Media";
+    metadata.description = "ROM Manager";
+    metadata.version = "4.7.0";
+    metadata.homepage = "https://github.com/rommapp/romm";
+    metadata.category = "Media";
     port = 8095;
 
     secrets = {
@@ -88,11 +88,11 @@ in
         ROMM_AUTH_SECRET_KEY=${serviceCfg.secrets.placeholder.auth-secret-key}
       '';
     };
+    access.allowedGroups = with cfg.groups; [ guests users admin ];
     oidc = {
       enable = true;
       gid = 971;  # Fixed GID for container access
       callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
-      allowedGroups = with cfg.groups; [ guests users admin ];
       systemd.dependentServices = [ "podman-romm" ];
     };
     healthcheck.path = "/api/heartbeat";

@@ -72,12 +72,6 @@ let
         description = "Fixed GID for the credentials group (null = auto-assign)";
       };
 
-      allowedGroups = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Pocket-ID groups allowed to authenticate via this OIDC client (empty = unrestricted)";
-      };
-
       group = lib.mkOption {
         type = lib.types.str;
         default = "homelab-oidc-${serviceName}";
@@ -126,7 +120,7 @@ let
   oidcServices = lib.filterAttrs (_: svc: svc.oidc.enable) homelabCfg.services;
 
   # Derive clients from services
-  derivedClients = lib.mapAttrs (_: svc: svc.oidc) oidcServices;
+  derivedClients = lib.mapAttrs (_: svc: svc.oidc // { allowedGroups = svc.access.allowedGroups; }) oidcServices;
 
   # Users enabled for OIDC
   enabledUsers = lib.filterAttrs (_: u: u.services.oidc.enable) homelabCfg.users;
@@ -178,7 +172,7 @@ in
     };
 
     clients = lib.mkOption {
-      type = lib.types.attrsOf lib.types.attrs; # Typed via mkServiceOidcSchema; re-declared as attrs since submodule is context-dependent
+      type = lib.types.attrsOf lib.types.anything; # Authoritative schema lives under services.<name>.oidc; this is a derived read-only view
       default = derivedClients;
       readOnly = true;
       description = "Derived OIDC client configs keyed by service name (read-only)";

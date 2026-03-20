@@ -7,10 +7,10 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.immich = {
-    description = "Photo & Video Gallery";
-    version = config.services.immich.package.version;
-    homepage = config.services.immich.package.meta.homepage;
-    category = "Media";
+    metadata.description = "Photo & Video Gallery";
+    metadata.version = config.services.immich.package.version;
+    metadata.homepage = config.services.immich.package.meta.homepage;
+    metadata.category = "Media";
     port = 2283;
     subdomain = "photos";
     # TODO: admin-password could be removed if Immich supports OIDC-only admin
@@ -19,6 +19,7 @@ in
       systemd.dependentServices = [ "immich-configure" ];
     };
 
+    access.allowedGroups = with config.custom.homelab.groups; [ admin ];
     oidc = {
       enable = true;
       callbackURLs = [
@@ -26,7 +27,6 @@ in
         "${serviceCfg.publicUrl}/user-settings"
         "app.immich:///oauth-callback"
       ];
-      allowedGroups = with config.custom.homelab.groups; [ admin ];
       systemd.dependentServices = [ "immich-server" ];
     };
 

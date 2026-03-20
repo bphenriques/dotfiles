@@ -28,10 +28,10 @@ in
   custom.homelab.services.couchdb = {
     integrations.catalogue.displayName = "CouchDB";
     port = 5984;
-    category = "Infrastructure";
-    description = "Document Database";
-    version = config.services.couchdb.package.version;
-    homepage = config.services.couchdb.package.meta.homepage;
+    metadata.category = "Infrastructure";
+    metadata.description = "Document Database";
+    metadata.version = config.services.couchdb.package.version;
+    metadata.homepage = config.services.couchdb.package.meta.homepage;
     healthcheck.path = "/_up";
     secrets = {
       files.admin-password = { rotatable = false; };

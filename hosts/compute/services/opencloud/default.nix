@@ -33,10 +33,10 @@ in
 {
   custom.homelab.services = {
     opencloud = {
-      description = "Cloud Storage & Office";
-      version = config.services.opencloud.package.version;
-      homepage = config.services.opencloud.package.meta.homepage;
-      category = "General";
+      metadata.description = "Cloud Storage & Office";
+      metadata.version = config.services.opencloud.package.version;
+      metadata.homepage = config.services.opencloud.package.meta.homepage;
+      metadata.category = "General";
       port = 9200;
       subdomain = "cloud";
       secrets = {
@@ -55,6 +55,7 @@ in
         };
         systemd.dependentServices = [ "opencloud-init-config" "opencloud" ];
       };
+      access.allowedGroups = with cfg.groups; [ admin ];
       oidc = {
         enable = true;
         pkce = true;
@@ -64,7 +65,6 @@ in
           "${serviceCfg.publicUrl}/oidc-silent-redirect.html"
           "${serviceCfg.publicUrl}/web-oidc-callback.html"
         ];
-        allowedGroups = with cfg.groups; [ admin ];
       };
       integrations.homepage.enable = true;
       integrations.homepage.icon = "open-cloud.svg";
@@ -90,19 +90,19 @@ in
     # OpenCloud sends clients to Collabora, and Collabora calls back into WOPI using public URLs.
     collabora = {
       port = 9980;
-      description = "Online Office";
-      category = "Infrastructure";
-      version = config.services.collabora-online.package.version;
-      homepage = config.services.collabora-online.package.meta.homepage;
+      metadata.description = "Online Office";
+      metadata.category = "Infrastructure";
+      metadata.version = config.services.collabora-online.package.version;
+      metadata.homepage = config.services.collabora-online.package.meta.homepage;
       integrations.catalogue.enable = false;
       integrations.monitoring.enable = false; # Internal service, no unauthenticated health endpoint
     };
     wopi = {
       port = 9300;
-      description = "Office Bridge";
-      category = "Infrastructure";
-      version = config.services.opencloud.package.version;
-      homepage = config.services.opencloud.package.meta.homepage;
+      metadata.description = "Office Bridge";
+      metadata.category = "Infrastructure";
+      metadata.version = config.services.opencloud.package.version;
+      metadata.homepage = config.services.opencloud.package.meta.homepage;
       integrations.catalogue.enable = false;
       integrations.monitoring.enable = false; # Internal bridge, no health endpoint
     };

@@ -11,19 +11,19 @@ in
   ];
 
   custom.homelab.services.jellyfin = {
-    description = "Media Player";
-    version = config.services.jellyfin.package.version;
-    homepage = config.services.jellyfin.package.meta.homepage;
-    category = "Media";
+    metadata.description = "Media Player";
+    metadata.version = config.services.jellyfin.package.version;
+    metadata.homepage = config.services.jellyfin.package.meta.homepage;
+    metadata.category = "Media";
     port = 8096;
     secrets = {
       files.admin-password = { rotatable = false; };
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
+    access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
     oidc = {
       enable = true;
       callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
-      allowedGroups = with config.custom.homelab.groups; [ users admin ];
       systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
     };
     healthcheck.path = "/health";

@@ -17,25 +17,31 @@ let
         description = "Service identifier (defaults to attribute name)";
       };
 
-      # Service metadata
-      category = lib.mkOption {
-        type = categoryType;
-        description = "Service category used by generated catalogue/homepage views";
-      };
+      metadata = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            description = lib.mkOption {
+              type = lib.types.str;
+              description = "Short description of the service";
+            };
 
-      description = lib.mkOption {
-        type = lib.types.str;
-        description = "Short description of the service";
-      };
+            category = lib.mkOption {
+              type = categoryType;
+              description = "Service category for catalogue and homepage grouping";
+            };
 
-      version = lib.mkOption {
-        type = lib.types.str;
-        description = "Service version (e.g. '4.7.0')";
-      };
+            version = lib.mkOption {
+              type = lib.types.str;
+              description = "Service version (e.g. '4.7.0')";
+            };
 
-      homepage = lib.mkOption {
-        type = lib.types.str;
-        description = "Upstream project URL";
+            homepage = lib.mkOption {
+              type = lib.types.str;
+              description = "Upstream project URL";
+            };
+          };
+        };
+        description = "Service metadata: description, category, version, and upstream homepage";
       };
 
       # Routing (backend)
@@ -71,9 +77,9 @@ let
 
       healthcheck.url = lib.mkOption {
         type = lib.types.str;
-        default = "${config.scheme}://${config.host}:${toString config.port}${config.healthcheck.path}";
+        default = "${config.url}${config.healthcheck.path}";
         readOnly = true;
-        description = "Full health check URL (derived from service URL and healthcheck path)";
+        description = "Full health check URL (derived from url and healthcheck path)";
       };
 
       # Routing (public)
@@ -104,22 +110,15 @@ let
       # Ingress
       ingress.enable = lib.mkEnableOption "Traefik ingress route for this service" // { default = true; };
 
-      # Ingress-level authentication (Traefik forwardAuth)
-      forwardAuth = {
-        enable = lib.mkEnableOption ''
-          ingress-level access control via Traefik forwardAuth.
-          Independent of app-level SSO (OIDC) the service might use
-        '';
-
-        groups = lib.mkOption {
-          type = lib.types.either
-            (lib.types.enum (lib.attrValues cfg.groups))
-            (lib.types.listOf (lib.types.enum (lib.attrValues cfg.groups)));
-          apply = v: if builtins.isList v then v else [ v ];
-          default = [ cfg.groups.admin ];
-          description = "Groups allowed to access via forwardAuth (OR semantics). Accepts a single group or a list.";
-        };
+      # Access control policy (consumed by whichever auth mechanism is active)
+      access.allowedGroups = lib.mkOption {
+        type = lib.types.listOf (lib.types.enum (lib.attrValues cfg.groups));
+        default = [ ];
+        description = "Groups authorized to access this service. Empty means unrestricted (any authenticated user).";
       };
+
+      # Ingress-level authentication (Traefik forwardAuth, mutually exclusive with OIDC)
+      forwardAuth.enable = lib.mkEnableOption "ingress-level access control via Traefik forwardAuth";
 
       # Pre-backup hook (consumed by backup.nix)
       backup = {
@@ -143,21 +142,6 @@ let
         description = "Extra Traefik middleware definitions to attach to this service's router";
       };
 
-      # Access scope (derived from auth config, used by homepage and catalogue integrations)
-      scope = lib.mkOption {
-        type = lib.types.enum [ "everyone" "family" "admin" ];
-        default = let
-          hasOidc = (lib.attrByPath [ "oidc" "enable" ] false config) == true;
-          oidcGroups = lib.attrByPath [ "oidc" "allowedGroups" ] [ ] config;
-          hasGuests = lib.elem cfg.groups.guests oidcGroups;
-        in
-          if config.forwardAuth.enable then
-            (if lib.elem cfg.groups.users config.forwardAuth.groups then "family" else "admin")
-          else if hasOidc then
-            (if oidcGroups == [ ] || hasGuests then "everyone" else "family")
-          else "everyone";
-        description = "Derived access scope: everyone (no auth / guest-accessible), family (users+admin), or admin.";
-      };
     };
   };
 in

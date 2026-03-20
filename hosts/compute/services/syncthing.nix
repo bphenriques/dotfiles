@@ -42,12 +42,13 @@ let
 in
 {
   custom.homelab.services.syncthing = {
-    description = "File Sync";
-    version = config.services.syncthing.package.version;
-    homepage = config.services.syncthing.package.meta.homepage;
-    category = "General";
+    metadata.description = "File Sync";
+    metadata.version = config.services.syncthing.package.version;
+    metadata.homepage = config.services.syncthing.package.meta.homepage;
+    metadata.category = "General";
     port = 8384;
     healthcheck.path = "/rest/noauth/health";
+    access.allowedGroups = [ config.custom.homelab.groups.admin ];
     forwardAuth.enable = true;
     secrets.files.gui-password = { rotatable = true; };
     integrations.homepage.enable = true;

@@ -12,10 +12,10 @@ let
 in
 {
   custom.homelab.services.coturn = {
-    description = "STUN/TURN Server";
-    version = "4.9.0";
-    homepage = "https://github.com/coturn/coturn";
-    category = "Media";
+    metadata.description = "STUN/TURN Server";
+    metadata.version = "4.9.0";
+    metadata.homepage = "https://github.com/coturn/coturn";
+    metadata.category = "Media";
     port = listenPort;
     ingress.enable = false;
     integrations.monitoring.enable = false;

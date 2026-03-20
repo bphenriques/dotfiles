@@ -25,15 +25,15 @@ nix eval --impure --json --expr "
     end;
 
   def header:
-    "| Name | Description | Version | Subdomain | Internal Port | Auth | Scope |",
-    "|------|-------------|---------|-----------|---------------|------|-------|";
+    "| Name | Description | Version | Subdomain | Internal Port | Auth |",
+    "|------|-------------|---------|-----------|---------------|------|";
 
   def sanitize: tostring | gsub("\\|"; "\\\\|");
 
   def row:
-    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) | \(.scope) |";
+    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) |";
 
-  ["General", "Media", "Monitoring", "Administration"] as $order |
+  ["General", "Media", "Monitoring", "Administration", "Infrastructure"] as $order |
   ($order | to_entries | map({(.value): .key}) | add // {}) as $idx |
   [to_entries[] | .value] | sort_by(.category, .name) | group_by(.category) |
   sort_by(($idx[.[0].category] // 999))[] |

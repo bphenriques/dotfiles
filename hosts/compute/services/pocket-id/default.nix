@@ -8,10 +8,10 @@ in
 
   custom.homelab = {
     services.pocket-id = {
-      description = "OIDC Provider";
-      version = config.services.pocket-id.package.version;
-      homepage = config.services.pocket-id.package.meta.homepage;
-      category = "Administration";
+      metadata.description = "OIDC Provider";
+      metadata.version = config.services.pocket-id.package.version;
+      metadata.homepage = config.services.pocket-id.package.meta.homepage;
+      metadata.category = "Administration";
       subdomain = "auth";
       port = port;
       secrets = {
@@ -23,6 +23,7 @@ in
       };
       healthcheck.path = "/health";
       integrations.homepage.enable = true;
+      integrations.homepage.tab = "Home";
       integrations.catalogue.displayName = "Pocket ID";
     };
 

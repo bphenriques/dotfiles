@@ -16,16 +16,14 @@ let
 in
 {
   custom.homelab.services.radicale = {
-    description = "CalDAV & CardDAV";
-    version = pkgs.radicale.version;
-    homepage = pkgs.radicale.meta.homepage;
-    category = "General";
+    metadata.description = "CalDAV & CardDAV";
+    metadata.version = pkgs.radicale.version;
+    metadata.homepage = pkgs.radicale.meta.homepage;
+    metadata.category = "General";
     port = 5232;
     subdomain = "radicale";
-    forwardAuth = {
-      enable = true;
-      groups = [ config.custom.homelab.groups.admin ];
-    };
+    access.allowedGroups = [ config.custom.homelab.groups.admin ];
+    forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
     integrations.catalogue.displayName = "Radicale";

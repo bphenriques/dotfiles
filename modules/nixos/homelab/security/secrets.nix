@@ -139,7 +139,8 @@ let
 
   allVars = globalSecretVars // oidcVars;
 
-  # Auto-detect cross-owner dependencies from placeholder patterns in template content
+  # Auto-detect cross-owner dependencies by scanning template content for placeholder strings.
+  # Template deps aren't structural (runtime substitution), so this eval-time heuristic derives the dependency graph.
   crossDeps = ownerName: ownerCfg:
     lib.filter (otherName: otherName != ownerName &&
       lib.any (tmpl: lib.hasInfix "__HOMELAB_SECRET_${otherName}_" tmpl.content)

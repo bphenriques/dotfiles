@@ -9,7 +9,8 @@ let
       hasOidc = (lib.attrByPath [ "oidc" "enable" ] false service) == true;
       hasForwardAuth = service.forwardAuth.enable;
     in {
-      inherit (service) name description category subdomain port version homepage scope;
+      inherit (service) name subdomain port;
+      inherit (service.metadata) description category version homepage;
       displayName = service.integrations.catalogue.displayName;
       auth = { oidc = hasOidc; forwardAuth = hasForwardAuth; };
     };

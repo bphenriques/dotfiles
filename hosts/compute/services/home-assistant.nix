@@ -8,16 +8,14 @@ in
   # 2. Uncomment thread/matter/bluetooth extraComponents below
   # 3. Set up OTBR as a container for Thread border routing
   custom.homelab.services.home-assistant = {
-    description = "Home Automation";
-    version = config.services.home-assistant.package.version;
-    homepage = config.services.home-assistant.package.meta.homepage;
-    category = "General";
+    metadata.description = "Home Automation";
+    metadata.version = config.services.home-assistant.package.version;
+    metadata.homepage = config.services.home-assistant.package.meta.homepage;
+    metadata.category = "General";
     port = 8123;
     subdomain = "home";
-    forwardAuth = {
-      enable = true;
-      groups = [ config.custom.homelab.groups.admin ];
-    };
+    access.allowedGroups = [ config.custom.homelab.groups.admin ];
+    forwardAuth.enable = true;
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";

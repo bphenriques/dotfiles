@@ -73,10 +73,10 @@ let
 in
 {
   custom.homelab.services.wireguard = {
-    description = "VPN";
-    version = "1.0";
-    homepage = "https://www.wireguard.com/";
-    category = "Administration";
+    metadata.description = "VPN";
+    metadata.version = "1.0";
+    metadata.homepage = "https://www.wireguard.com/";
+    metadata.category = "Administration";
     port = port;
     ingress.enable = false;
     integrations.monitoring.enable = false;

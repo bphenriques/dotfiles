@@ -6,13 +6,14 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.ntfy = {
-    description = "Push Notifications";
-    version = config.services.ntfy-sh.package.version;
-    homepage = config.services.ntfy-sh.package.meta.homepage;
-    category = "Monitoring";
+    metadata.description = "Push Notifications";
+    metadata.version = config.services.ntfy-sh.package.version;
+    metadata.homepage = config.services.ntfy-sh.package.meta.homepage;
+    metadata.category = "Monitoring";
     port = 2586;
     healthcheck.path = "/v1/health";
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Home";
   };
 
   services.ntfy-sh = {

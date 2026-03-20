@@ -4,10 +4,10 @@ let
 in
 {
   custom.homelab.services.prometheus = {
-    description = "Metrics";
-    version = pkgs.prometheus.version;
-    homepage = pkgs.prometheus.meta.homepage;
-    category = "Monitoring";
+    metadata.description = "Metrics";
+    metadata.version = pkgs.prometheus.version;
+    metadata.homepage = pkgs.prometheus.meta.homepage;
+    metadata.category = "Monitoring";
     port = 9090;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;

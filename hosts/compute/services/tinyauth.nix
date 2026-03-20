@@ -7,15 +7,15 @@ in
 {
   custom.homelab = {
     services.tinyauth = {
-      description = "ForwardAuth Gateway";
-      category = "Infrastructure";
-      version = config.services.tinyauth.package.version;
-      homepage = config.services.tinyauth.package.meta.homepage;
+      metadata.description = "ForwardAuth Gateway";
+      metadata.category = "Infrastructure";
+      metadata.version = config.services.tinyauth.package.version;
+      metadata.homepage = config.services.tinyauth.package.meta.homepage;
       port = 3000;
+      access.allowedGroups = with cfg.groups; [ users admin ];
       oidc = {
         enable = true;
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
-        allowedGroups = with cfg.groups; [ users admin ];
         systemd.dependentServices = [ "tinyauth" ];
       };
       secrets = {
@@ -54,7 +54,7 @@ in
     } // lib.listToAttrs (
       lib.mapAttrsToList (name: svc: {
         name = "APPS_${lib.toUpper name}_OAUTH_GROUPS"; # FIXME: service names with hyphens produce invalid env var names (e.g., home-assistant → APPS_HOME-ASSISTANT_...)
-        value = lib.concatStringsSep "," svc.forwardAuth.groups;
+        value = lib.concatStringsSep "," svc.access.allowedGroups;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );
   };
