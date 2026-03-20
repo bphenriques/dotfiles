@@ -1,7 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.custom.homelab.services.radicale;
-  backupCfg = config.custom.homelab.backup;
 
   usernames = builtins.attrNames (lib.filterAttrs (_: u: u.services.radicale.enable) config.custom.homelab.users);
 
@@ -42,7 +41,6 @@ in
         name = "backup-radicale";
         text = ''
           export RADICALE_DATA="/var/lib/radicale/collections"
-          export OUTPUT_DIR="${backupCfg.extrasDir}/radicale"
 
           # shellcheck disable=SC1091
           source ${./backup.sh}

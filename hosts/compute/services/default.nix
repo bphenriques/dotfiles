@@ -24,6 +24,7 @@ in
     ./wireguard
     ./opencloud
     ./home-assistant.nix
+    ./actual-budget
     ./radicale
     ./tandoor-recipes
     ./filebrowser
@@ -76,8 +77,43 @@ in
           };
         };
       };
+      guest = {
+        email = "guest@localhost";
+        firstName = "Guest";
+        lastName = "User";
+        groups = [ config.custom.homelab.groups.guests ];
+        services = {
+          oidc.enable = false;
+          jellyfin = {
+            enable = true;
+            passwordFile = config.sops.secrets."guest/password".path;
+          };
+          kavita = {
+            enable = true;
+            passwordFile = config.sops.secrets."guest/password".path;
+          };
+          jellyseerr = {
+            enable = true;
+            permissions = {
+              autoApprove = false;
+              advancedRequests = false;
+              viewRecentlyAdded = true;
+            };
+          };
+          tandoor = {
+            enable = true;
+            passwordFile = config.sops.secrets."guest/password".path;
+            group = "guest";
+          };
+          filebrowser = {
+            enable = true;
+            permissions = { create = true; delete = false; rename = false; modify = false; execute = false; share = false; download = true; };
+          };
+        };
+      };
     };
   };
 
   sops.secrets."jellyfin/home/password" = { };
+  sops.secrets."guest/password" = { };
 }

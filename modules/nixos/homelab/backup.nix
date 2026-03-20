@@ -48,9 +48,15 @@ let
   # Services that have a backup script defined
   servicesWithBackup = lib.filterAttrs (_: svc: svc.backup.package != null) homelabCfg.services;
 
-  serviceHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") servicesWithBackup;
-  standaloneHookNames = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") cfg.hooks;
-  allHookServiceNames = serviceHookNames ++ standaloneHookNames;
+  # Unit names (with .service suffix) for systemd dependency fields
+  serviceHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") servicesWithBackup;
+  standaloneHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") cfg.hooks;
+  allHookUnits = serviceHookUnits ++ standaloneHookUnits;
+
+  # Service IDs (without .service suffix) for NixOS systemd.services keys / ntfy injection
+  allHookServiceIds =
+    (lib.mapAttrsToList (name: _: "homelab-backup-${name}") servicesWithBackup)
+    ++ (lib.mapAttrsToList (name: _: "homelab-backup-${name}") cfg.hooks);
 in
 {
   options.custom.homelab.backup = {
@@ -68,13 +74,6 @@ in
       description = "Working directory root assembled for backup.";
     };
 
-    extrasDir = lib.mkOption {
-      type = lib.types.str;
-      default = extrasDir;
-      readOnly = true;
-      description = "Directory for extra files to include in the backup. Populate via service backup hooks.";
-    };
-
     bindings = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = { };
@@ -87,11 +86,17 @@ in
         options = {
           package = lib.mkOption {
             type = lib.types.package;
-            description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies.";
+            description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies. OUTPUT_DIR is provided as an environment variable pointing to a fresh, empty directory for the hook's output.";
           };
           after = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [ ];
+          };
+          outputDir = lib.mkOption {
+            type = lib.types.str;
+            default = "${extrasDir}/${name}";
+            readOnly = true;
+            description = "Directory where the hook writes its output. Available as OUTPUT_DIR in the hook environment.";
           };
         };
       }));
@@ -112,7 +117,21 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkMerge [
+    {
+      custom.homelab._serviceOptionExtensions = [
+        ({ name, ... }: {
+          options.backup.outputDir = lib.mkOption {
+            type = lib.types.str;
+            default = "${extrasDir}/${name}";
+            readOnly = true;
+            description = "Directory where the hook writes its output. Available as OUTPUT_DIR in the hook environment.";
+          };
+        })
+      ];
+    }
+
+    (lib.mkIf cfg.enable {
     sops = {
       secrets."backup/b2/bucket" = { };
       secrets."backup/b2/bucket_id" = { };
@@ -133,15 +152,22 @@ in
       };
     };
 
+    custom.homelab.tasks.backup.systemdServices = lib.mkAfter allHookServiceIds;
+
     systemd.services = let
-      mkHookService = name: { package, after, ... }: lib.nameValuePair "homelab-backup-${name}" {
+      mkHookService = name: { package, outputDir, after, ... }: lib.nameValuePair "homelab-backup-${name}" {
         description = "Pre-backup hook: ${name}";
         after = [ "network-online.target" ] ++ after;
-        wants = [ "network-online.target" ];
+        wants = [ "network-online.target" ] ++ after;
+        environment.OUTPUT_DIR = outputDir;
         serviceConfig = {
           Type = "oneshot";
+          ExecStartPre = [
+            "${pkgs.coreutils}/bin/rm -rf -- ${outputDir}"
+            "${pkgs.coreutils}/bin/install -d -m 0750 -o root -g root -- ${outputDir}"
+          ];
           ExecStart = lib.getExe package;
-          ReadWritePaths = [ cfg.extrasDir ];
+          ReadWritePaths = [ extrasDir ];
           ProtectSystem = "strict";
           ProtectHome = true;
           PrivateTmp = true;
@@ -167,13 +193,13 @@ in
     in serviceHooks // standaloneHooks // {
       homelab-backup = {
         description = "Homelab backup (Backblaze B2)";
-        after = [ "network-online.target" "remote-fs.target" "ntfy-configure.service" ] ++ allHookServiceNames;
-        wants = [ "network-online.target" "ntfy-configure.service" ];
-        requires = allHookServiceNames;
+        after = [ "network-online.target" "remote-fs.target" "ntfy-configure.service" ] ++ allHookUnits;
+        wants = [ "network-online.target" "ntfy-configure.service" ] ++ allHookUnits;
         unitConfig.RequiresMountsFor = lib.attrValues cfg.bindings;
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
           ExecStart = "${pkgs.util-linux}/bin/flock -w 21600 ${stateDir}/lock ${rusticManage} backup";
+          ExecStartPost = "${pkgs.findutils}/bin/find ${extrasDir} -mindepth 1 -maxdepth 1 -exec ${pkgs.coreutils}/bin/rm -rf -- {} +";
           TimeoutStartSec = "6h";
           StateDirectory = "homelab-backup";
           ReadWritePaths = [ stateDir ];
@@ -196,7 +222,7 @@ in
 
     systemd.tmpfiles.rules = [
       "d ${cfg.src} 0750 root root -"
-      "d ${cfg.extrasDir} 0750 root root -"
+      "d ${extrasDir} 0750 root root -"
       "d /etc/rustic 0755 root root -"
       "L+ /etc/rustic/rustic.toml - - - - ${rusticProfile}"
       "L+ /etc/rustic/secrets.toml - - - - ${config.sops.templates."homelab-backup-secrets.toml".path}"
@@ -220,5 +246,6 @@ in
         Persistent = true;
       };
     };
-  };
+  })
+  ];
 }

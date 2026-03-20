@@ -111,7 +111,7 @@ sudo rm /var/lib/homelab-secrets/miniflux/admin-password && sudo systemctl resta
 
 ### Backup
 
-Backups hooks are regular Nix packages:
+Backup hooks are systemd oneshot services (`homelab-backup-<name>`) started by the main `homelab-backup` unit via `Wants=` + `After=`. Hook failures do not block the backup but trigger ntfy failure notifications via the task integration. The `OUTPUT_DIR` environment variable is set automatically by the backup module, and the directory is created fresh before each hook run and cleaned up after a successful backup:
 ```nix
 custom.homelab.services.miniflux.backup.package = pkgs.writeShellApplication {
   name = "backup-miniflux";
@@ -119,7 +119,6 @@ custom.homelab.services.miniflux.backup.package = pkgs.writeShellApplication {
   text = ''
     export MINIFLUX_URL="${serviceCfg.url}"
     export MINIFLUX_ADMIN_PASSWORD_FILE="${serviceCfg.secrets.files.admin-password.path}"
-    export OUTPUT_DIR="${backupCfg.extrasDir}/miniflux"
     source ${./backup.sh}
   '';
 };

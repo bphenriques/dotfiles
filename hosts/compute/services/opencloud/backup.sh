@@ -9,7 +9,6 @@
 systemctl stop opencloud.service
 trap 'systemctl start opencloud.service' EXIT
 
-rm -rf "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR"
 rsync -aHAX --numeric-ids "$DATA_DIR/" "$OUTPUT_DIR/"
 
 test -d "$OUTPUT_DIR/storage" || { echo "ERROR: backup appears incomplete (no storage dir)"; exit 1; }

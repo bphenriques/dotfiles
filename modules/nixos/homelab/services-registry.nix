@@ -125,7 +125,7 @@ let
         package = lib.mkOption {
           type = lib.types.nullOr lib.types.package;
           default = null;
-          description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies.";
+          description = "Package providing backup script. Use writeShellApplication with runtimeInputs for dependencies. OUTPUT_DIR is provided as an environment variable pointing to a fresh, empty directory for the hook's output.";
         };
 
         after = lib.mkOption {
@@ -133,6 +133,7 @@ let
           default = [ ];
           description = "Systemd services this backup hook requires and orders after.";
         };
+
       };
 
       # Per-service Traefik middlewares (consumed by ingress.nix)

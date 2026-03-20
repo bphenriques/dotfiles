@@ -1,11 +1,8 @@
-{ lib, config, pkgs, utils, ... }:
+{ lib, config, pkgs, ... }:
 let
   inherit (lib) mkOption types;
 
   cfg = config.custom.homelab.smb;
-
-  # Convert a path to a systemd unit name (e.g., /mnt/homelab-bphenriques -> mnt-homelab\x2dbphenriques)
-  pathToUnitName = path: utils.escapeSystemdPath (lib.removePrefix "/" path);
 
   smbMountCfg = types.submodule ({ name, config, ... }: {
     options = {
@@ -29,12 +26,6 @@ let
         type = types.int;
         description = "GID for the mount group (required for SMB mount options)";
       };
-      systemd.automountUnit = mkOption {
-        type = types.str;
-        default = "${pathToUnitName config.localMount}.automount";
-        readOnly = true;
-        description = "Systemd automount unit name for this mount";
-      };
       systemd.dependentServices = mkOption {
         type = types.listOf types.str;
         default = [ ];
@@ -42,12 +33,8 @@ let
           Systemd services that depend on this mount being available.
 
           For each service listed, the module automatically adds:
-            - requires = [ automountUnit ]
-            - after = [ automountUnit ]
-
-          The automount unit is always active; actual mount happens on first
-          access to the mount point. This avoids boot failures when the network
-          isn't fully ready yet while still ensuring proper service ordering.
+            - unitConfig.RequiresMountsFor = [ localMount ]
+            - Restart/retry configuration for network filesystem races
 
           Group membership for mount access must still be configured explicitly
           via users.users.<name>.extraGroups.

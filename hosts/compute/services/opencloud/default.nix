@@ -5,7 +5,6 @@ let
   collaboraCfg = cfg.services.collabora;
   wopiCfg = cfg.services.wopi;
   oidcCfg = cfg.oidc;
-  backupCfg = cfg.backup;
 
   # CSP config to allow external OIDC provider and Collabora
   # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
@@ -76,7 +75,6 @@ in
           runtimeInputs = [ pkgs.rsync pkgs.systemd ];
           text = ''
             export DATA_DIR="/var/lib/opencloud"
-            export OUTPUT_DIR="${backupCfg.extrasDir}/opencloud"
 
             # shellcheck disable=SC1091
             source ${./backup.sh}

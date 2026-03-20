@@ -5,14 +5,11 @@
 #   2. pg_restore --clean --if-exists --no-owner -d tandoor_recipes backup/tandoor/database.dump
 #   3. cp -a backup/tandoor/media/. /var/lib/tandoor-recipes/media/
 #   4. systemctl start tandoor-recipes
-rm -rf "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR"
-
 runuser -u "$DB_USER" -- pg_dump \
   --format=custom \
   --no-owner \
   --host=/run/postgresql \
-  --file="$OUTPUT_DIR/database.dump" \
-  "$DB_NAME"
+  "$DB_NAME" > "$OUTPUT_DIR/database.dump"
 
 test -s "$OUTPUT_DIR/database.dump" || { echo "ERROR: database dump is empty"; exit 1; }
 

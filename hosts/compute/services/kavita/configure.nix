@@ -10,6 +10,9 @@ let
   # Libraries available to all users
   publicLibraries = [ "Books" "Comics" "Manga" ];
 
+  enabledUsers = lib.filterAttrs (_: u: u.services.kavita.enable) config.custom.homelab.users;
+  localUsers = lib.filterAttrs (_: u: u.services.kavita.passwordFile != null) enabledUsers;
+
   # TODO: admin could be removed if Kavita supports OIDC-only admin
   kavitaConfigFile = pkgs.writeText "kavita-config.json" (builtins.toJSON {
     kavitaUrl = serviceCfg.url;
@@ -30,7 +33,7 @@ let
       defaultRoles = defaultUserRoles;
       defaultLibraries = publicLibraries;
       autoLogin = false;
-      disablePasswordAuth = true;
+      disablePasswordAuth = false;
     };
 
     # type: 0=Manga, 1=Comic, 2=Book, 3=Image, 4=LightNovel
@@ -40,6 +43,15 @@ let
       { name = "Comics";  type = 1; folders = [ "/mnt/kavita/comics" ]; fileGroupTypes = [ 0 ];   }
       { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ 0 ];   }
     ];
+
+    # Local users provisioned with password authentication
+    localUsers = lib.mapAttrsToList (_: u: {
+      username = u.username;
+      email = u.email;
+      passwordCredential = "kavita-password-${u.username}";
+      roles = [ "Login" ];
+      libraries = u.services.kavita.libraries;
+    }) localUsers;
 
     # Per-user overrides (for private library access):
     users = [
@@ -64,6 +76,9 @@ in
       Group = kavitaCfg.user;
       Restart = "on-failure";
       RestartSec = 10;
+      LoadCredential = lib.mapAttrsToList (_: u:
+        "kavita-password-${u.username}:${u.services.kavita.passwordFile}"
+      ) localUsers;
     };
     environment = {
       KAVITA_URL = serviceCfg.url;

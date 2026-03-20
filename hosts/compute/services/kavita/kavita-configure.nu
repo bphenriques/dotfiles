@@ -150,6 +150,45 @@ def update_user [kavita_user: record, roles: list, library_ids: list, headers: r
   }
 }
 
+def provision_local_users [library_map: record, headers: record] {
+  if ($config.localUsers? | default [] | is-empty) {
+    print "  No local users configured"
+    return
+  }
+
+  for user in $config.localUsers {
+    let password = open ($env.CREDENTIALS_DIRECTORY | path join $user.passwordCredential) | str trim
+
+    # Register user if not yet created (idempotent — 400 means already exists)
+    let existing_users = get_users $headers
+    let found = $existing_users | where username == $user.username | get 0?
+    if $found == null {
+      let body = {
+        username: $user.username
+        password: $password
+        email: ($user.email? | default "")
+      }
+      let r = http post $"($base_url)/api/Account/register" $body --content-type application/json --full --allow-errors
+      if $r.status == 200 {
+        print $"  Created local user: ($user.username)"
+      } else if $r.status != 400 {
+        error make { msg: $"Failed to register local user ($user.username): ($r.status) - ($r.body)" }
+      }
+    } else {
+      print $"  Local user '($user.username)' already exists"
+    }
+
+    # Ensure roles and library access (re-fetch to get the user record after possible creation)
+    let kavita_users = get_users $headers
+    let kavita_user = $kavita_users | where username == $user.username | get 0?
+    if $kavita_user != null {
+      let library_ids = $user.libraries | each { |name| $library_map | get $name }
+      update_user $kavita_user $user.roles $library_ids $headers
+      print $"  Updated '($user.username)': roles=($user.roles), libraries=($user.libraries)"
+    }
+  }
+}
+
 def sync_user_roles [library_map: record, headers: record] {
   if ($config.users | is-empty) {
     print "  No users configured for role sync"
@@ -203,6 +242,10 @@ def main [] {
   # Update settings via API
   update_server_settings $headers
   update_oidc_settings $library_map $headers
+
+  # Provision local users (e.g., guest accounts)
+  print "Provisioning local users..."
+  provision_local_users $library_map $headers
 
   # Sync user roles (if any configured)
   print "Syncing user roles..."

@@ -152,7 +152,12 @@ in
       ROMM_PORT = toString serviceCfg.port;  # Host network: bind to configured port
       DISABLE_SETUP_WIZARD = "true";
       HASHEOUS_API_ENABLED = "true";
-      DISABLE_USERPASS_LOGIN = "true";
+      KIOSK_MODE = "true";  # Read-only access without login; OIDC users still get full access
+
+      # Auto-scan: picks up new/changed ROMs without manual intervention
+      ENABLE_RESCAN_ON_FILESYSTEM_CHANGE = "true";
+      ENABLE_SCHEDULED_RESCAN = "true";
+      SCHEDULED_RESCAN_CRON = "0 3 * * *";
 
       DB_HOST = "127.0.0.1";  # Host MySQL via host network
       DB_NAME = db.name;

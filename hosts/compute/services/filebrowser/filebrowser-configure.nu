@@ -36,8 +36,9 @@ def configure_defaults [] {
   let p = $d.permissions
 
   let args = [
+    $"--root=($env.FILEBROWSER_ROOT)"
     "--auth.method=proxy"
-    "--auth.header=Remote-User"
+    "--auth.header=Remote-User" # From Tinyauth
     $"--scope=($d.scope)"
     $"--perm.create=($p.create)"
     $"--perm.delete=($p.delete)"
@@ -65,9 +66,19 @@ def configure_defaults [] {
 def ensure_user [user: record] {
   let exists = (fb_try users find $user.username).exit_code == 0
 
+  # Use per-user permissions if set, otherwise inherit defaults
+  let p = $user.permissions? | default $config.defaults.permissions
+
   let user_args = [
     $"--scope=($user.scope)"
     $"--perm.admin=($user.admin)"
+    $"--perm.create=($p.create)"
+    $"--perm.delete=($p.delete)"
+    $"--perm.rename=($p.rename)"
+    $"--perm.modify=($p.modify)"
+    $"--perm.execute=($p.execute)"
+    $"--perm.share=($p.share)"
+    $"--perm.download=($p.download)"
     $"--hideDotfiles=($config.hideDotfiles)"
     $"--singleClick=($config.singleClick)"
     $"--viewMode=($config.viewMode)"
