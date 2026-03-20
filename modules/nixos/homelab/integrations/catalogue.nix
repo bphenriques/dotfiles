@@ -9,13 +9,9 @@ let
       hasOidc = (lib.attrByPath [ "oidc" "enable" ] false service) == true;
       hasForwardAuth = service.forwardAuth.enable;
     in {
-      inherit (service) name description category subdomain port version homepage;
+      inherit (service) name description category subdomain port version homepage scope;
       displayName = service.integrations.catalogue.displayName;
       auth = { oidc = hasOidc; forwardAuth = hasForwardAuth; };
-      scope =
-        if hasForwardAuth then service.forwardAuth.groups
-        else if hasOidc then [ cfg.groups.users ]
-        else null;
     };
 in
 {

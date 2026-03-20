@@ -20,6 +20,7 @@ in
     };
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
+    integrations.homepage.tab = "Admin";
     integrations.catalogue.displayName = "Home Assistant";
   };
 

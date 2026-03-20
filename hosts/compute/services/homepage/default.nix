@@ -4,25 +4,19 @@ let
   serviceCfg = cfg.services.homepage;
   sonarrCfg = cfg.services.sonarr;
   radarrCfg = cfg.services.radarr;
-  generatedServices = cfg.homepage.generatedServices;
+  homepageCfg = cfg.homepage;
 
-  # Display order for categories within each tab
-  categoryOrder = [ "General" "Media" "Monitoring" "Administration" ];
+  # Display order for scope sections on the Home tab
+  scopeOrder = [ homepageCfg.scopeLabels.everyone homepageCfg.scopeLabels.family ];
 
-  sortedCategories = tabServices: let
-    known = lib.filter (c: lib.hasAttr c tabServices) categoryOrder;
-    extra = lib.filter (c: !lib.elem c categoryOrder) (lib.attrNames tabServices);
-  in known ++ extra;
+  homeSections = lib.filter (s: lib.hasAttr s homepageCfg.generatedHomeServices) scopeOrder;
 
-  homeCategories = sortedCategories generatedServices.Home;
-  adminCategories' = sortedCategories generatedServices.Admin;
-
-  mkCategoryGroup = tabServices: cat: let svcs = tabServices.${cat} or []; in
-    lib.optional (svcs != []) { "${cat}" = svcs; };
+  mkScopeGroup = scope: let svcs = homepageCfg.generatedHomeServices.${scope} or []; in
+    lib.optional (svcs != []) { "${scope}" = svcs; };
 
   agendaGroup = {
     "Movie/TV Agenda" = [{
-      "Movie/TV Agenda" = {
+      "" = {
         widget = {
           type = "calendar";
           view = "agenda";
@@ -47,12 +41,10 @@ let
     }];
   };
 
-  adminServices = lib.concatLists (map (cat: generatedServices.Admin.${cat} or []) adminCategories');
-
   servicesYaml =
-    lib.concatMap (mkCategoryGroup generatedServices.Home) homeCategories
+    lib.concatMap mkScopeGroup homeSections
     ++ [ agendaGroup ]
-    ++ lib.optional (adminServices != []) { "Admin" = adminServices; };
+    ++ lib.optional (homepageCfg.generatedAdminServices != []) { "Admin" = homepageCfg.generatedAdminServices; };
 
   # Custom package with wallpaper/favicon
   wallpaper = "${self.pkgs.wallpapers}/share/wallpapers/sky-sunset.png";
@@ -66,7 +58,7 @@ let
   });
 in
 {
-  # Does not require authentication as it just aggregates links and runs health checks behind the scenes.
+  # Unauthenticated: aggregates links and health status. Scope headers communicate access requirements.
   custom.homelab.services.homepage = {
     description = "Dashboard";
     version = config.services.homepage-dashboard.package.version;
@@ -106,21 +98,20 @@ in
         hideVisitURL = true;
       };
       layout =
-        map (cat: {
-          "${cat}" = {
+        map (scope: {
+          "${scope}" = {
             tab = "Home";
             style = "columns";
             columns = 6;
-            header = false;
-            useEqualHeights = false;
+            header = true;
           };
-        }) homeCategories
+        }) homeSections
         ++ [{
           "Movie/TV Agenda" = {
             tab = "Home";
             style = "columns";
             columns = 3;
-            header = false;
+            header = true;
           };
         }]
         ++ [{

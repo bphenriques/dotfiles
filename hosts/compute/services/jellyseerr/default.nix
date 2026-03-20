@@ -19,6 +19,7 @@ in
       '';
       systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
     };
+    scope = "family"; # auth delegated to Jellyfin
     healthcheck.path = "/api/v1/status";
     integrations.homepage.enable = true;
   };

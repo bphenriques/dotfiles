@@ -142,6 +142,22 @@ let
         default = { };
         description = "Extra Traefik middleware definitions to attach to this service's router";
       };
+
+      # Access scope (derived from auth config, used by homepage and catalogue integrations)
+      scope = lib.mkOption {
+        type = lib.types.enum [ "everyone" "family" "admin" ];
+        default = let
+          hasOidc = (lib.attrByPath [ "oidc" "enable" ] false config) == true;
+          oidcGroups = lib.attrByPath [ "oidc" "allowedGroups" ] [ ] config;
+          hasGuests = lib.elem cfg.groups.guests oidcGroups;
+        in
+          if config.forwardAuth.enable then
+            (if lib.elem cfg.groups.users config.forwardAuth.groups then "family" else "admin")
+          else if hasOidc then
+            (if oidcGroups == [ ] || hasGuests then "everyone" else "family")
+          else "everyone";
+        description = "Derived access scope: everyone (no auth / guest-accessible), family (users+admin), or admin.";
+      };
     };
   };
 in

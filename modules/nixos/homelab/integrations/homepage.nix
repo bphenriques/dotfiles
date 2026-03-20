@@ -5,6 +5,12 @@ let
   adminCategories = [ "Monitoring" "Administration" ];
   defaultTab = category: if lib.elem category adminCategories then "Admin" else "Home";
 
+  scopeLabels = {
+    everyone = "Everyone";
+    family = "Family";
+    admin = "Admin";
+  };
+
   homepageServices = lib.filter
     (s: s.integrations.homepage.enable)
     (lib.attrValues cfg.services);
@@ -31,16 +37,21 @@ let
       };
     };
 
-  # Group by tab, then by category within each tab
+  # Group by tab, then by scope (Home) or flat (Admin)
   servicesByTab = lib.groupBy (s: s.integrations.homepage.tab) homepageServices;
   externalsByTab = lib.groupBy (e: e.tab) (lib.attrValues cfg.external);
 
-  mkTabServices = tab: let
-    svcs = servicesByTab.${tab} or [];
-    exts = externalsByTab.${tab} or [];
-    servicesByCategory = lib.mapAttrs (_: ss: map mkServiceEntry ss) (lib.groupBy (s: s.category) svcs);
-    externalByCategory = lib.mapAttrs (_: es: map mkExternalEntry es) (lib.groupBy (e: e.category) exts);
-  in lib.zipAttrsWith (_: lib.concatLists) [ servicesByCategory externalByCategory ];
+  mkHomeServices = let
+    svcs = servicesByTab.${"Home"} or [];
+    exts = externalsByTab.${"Home"} or [];
+    servicesByScope = lib.mapAttrs (_: ss: map mkServiceEntry ss) (lib.groupBy (s: scopeLabels.${s.scope}) svcs);
+    externalByScope = lib.mapAttrs (_: es: map mkExternalEntry es) (lib.groupBy (_: scopeLabels.everyone) exts);
+  in lib.zipAttrsWith (_: lib.concatLists) [ servicesByScope externalByScope ];
+
+  mkAdminServices = let
+    svcs = servicesByTab.${"Admin"} or [];
+    exts = externalsByTab.${"Admin"} or [];
+  in map mkServiceEntry svcs ++ map mkExternalEntry exts;
 in
 {
   config.custom.homelab._serviceOptionExtensions = [
@@ -75,13 +86,26 @@ in
     })
   ];
 
-  options.custom.homelab.homepage.generatedServices = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.attrsOf (lib.types.listOf lib.types.anything));
-    default = {
-      Home = mkTabServices "Home";
-      Admin = mkTabServices "Admin";
+  options.custom.homelab.homepage = {
+    scopeLabels = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = scopeLabels;
+      readOnly = true;
+      description = "Mapping from scope enum values to display labels (read-only)";
     };
-    readOnly = true;
-    description = "Auto-generated homepage services grouped by tab and category (read-only)";
+
+    generatedHomeServices = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.listOf lib.types.anything);
+      default = mkHomeServices;
+      readOnly = true;
+      description = "Auto-generated Home tab services grouped by scope label (read-only)";
+    };
+
+    generatedAdminServices = lib.mkOption {
+      type = lib.types.listOf lib.types.anything;
+      default = mkAdminServices;
+      readOnly = true;
+      description = "Auto-generated Admin tab services as a flat list (read-only)";
+    };
   };
 }
