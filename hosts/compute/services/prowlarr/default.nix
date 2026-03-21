@@ -6,6 +6,7 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.prowlarr = {
+    displayName = "Prowlarr";
     metadata.description = "Manage *rr services";
     metadata.version = config.services.prowlarr.package.version;
     metadata.homepage = config.services.prowlarr.package.meta.homepage;

@@ -26,7 +26,7 @@ let
 in
 {
   custom.homelab.services.couchdb = {
-    integrations.catalogue.displayName = "CouchDB";
+    displayName = "CouchDB";
     port = 5984;
     metadata.category = "Infrastructure";
     metadata.description = "Document Database";
@@ -53,7 +53,7 @@ in
       chttpd = {
         require_valid_user = true;
         require_valid_user_except_for_up = true;
-        max_http_request_size = 4294967296;
+        max_http_request_size = 104857600; # 100MB — sufficient for Obsidian note sync
         enable_cors = true;
       };
       chttpd_auth.require_valid_user = true;

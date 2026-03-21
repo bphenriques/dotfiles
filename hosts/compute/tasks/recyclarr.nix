@@ -20,7 +20,6 @@ let
     };
   };
 
-  # FIXME exit code
   yamlFormat = pkgs.formats.yaml { };
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in

@@ -8,6 +8,7 @@ in
   # 2. Uncomment thread/matter/bluetooth extraComponents below
   # 3. Set up OTBR as a container for Thread border routing
   custom.homelab.services.home-assistant = {
+    displayName = "Home Assistant";
     metadata.description = "Home Automation";
     metadata.version = config.services.home-assistant.package.version;
     metadata.homepage = config.services.home-assistant.package.meta.homepage;
@@ -19,7 +20,6 @@ in
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
-    integrations.catalogue.displayName = "Home Assistant";
   };
 
   services.home-assistant = {

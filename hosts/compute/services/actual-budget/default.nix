@@ -7,6 +7,7 @@ in
   imports = [ ./backup.nix ];
 
   custom.homelab.services.actual-budget = {
+    displayName = "Actual Budget";
     metadata.description = "Budget Manager";
     metadata.version = config.services.actual.package.version;
     metadata.homepage = config.services.actual.package.meta.homepage;

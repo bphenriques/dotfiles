@@ -7,6 +7,7 @@ in
   imports = [ ./configure.nix ./backup.nix ];
 
   custom.homelab.services.miniflux = {
+    displayName = "Miniflux";
     metadata.description = "RSS Server";
     metadata.version = config.services.miniflux.package.version;
     metadata.homepage = config.services.miniflux.package.meta.homepage;

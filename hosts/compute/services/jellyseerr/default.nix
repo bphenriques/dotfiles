@@ -8,6 +8,7 @@ in
 
   # Auth is delegated to Jellyfin (users sign in via Jellyfin credentials, not direct OIDC/forwardAuth)
   custom.homelab.services.jellyseerr = {
+    displayName = "Jellyseerr";
     metadata.category = "Media";
     metadata.description = "TV / Movie Finder";
     metadata.version = config.services.jellyseerr.package.version;

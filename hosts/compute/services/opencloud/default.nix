@@ -32,6 +32,7 @@ in
 {
   custom.homelab.services = {
     opencloud = {
+      displayName = "OpenCloud";
       metadata.description = "Cloud Storage & Office";
       metadata.version = config.services.opencloud.package.version;
       metadata.homepage = config.services.opencloud.package.meta.homepage;
@@ -67,7 +68,6 @@ in
       };
       integrations.homepage.enable = true;
       integrations.homepage.icon = "open-cloud.svg";
-      integrations.catalogue.displayName = "OpenCloud";
 
       backup = {
         package = pkgs.writeShellApplication {

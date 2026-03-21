@@ -15,6 +15,7 @@ let
 in
 {
   custom.homelab.services.transmission = {
+    displayName = "Transmission";
     metadata.description = "Torrent Client";
     metadata.version = config.services.transmission.package.version;
     metadata.homepage = config.services.transmission.package.meta.homepage;

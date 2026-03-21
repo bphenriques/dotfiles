@@ -53,7 +53,7 @@ in
       OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file; # Client ID uses placeholder (no _FILE support); secret uses native file ref
     } // lib.listToAttrs (
       lib.mapAttrsToList (name: svc: {
-        name = "APPS_${lib.toUpper name}_OAUTH_GROUPS"; # FIXME: service names with hyphens produce invalid env var names (e.g., home-assistant → APPS_HOME-ASSISTANT_...)
+        name = "APPS_${lib.toUpper (lib.replaceStrings ["-"] ["_"] name)}_OAUTH_GROUPS";
         value = lib.concatStringsSep "," svc.access.allowedGroups;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );

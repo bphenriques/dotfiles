@@ -2,6 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.cleanuparr;
   dataDir = "/var/lib/cleanuparr";
+  version = "2.4.7";
 
   cleanuparrUser = {
     name = "cleanuparr";
@@ -12,8 +13,9 @@ let
 in
 {
   custom.homelab.services.cleanuparr = {
+    displayName = "Cleanuparr";
     metadata.description = "Queue Cleanup";
-    metadata.version = "2.4.7";
+    metadata.version = version;
     metadata.homepage = "https://github.com/cleanuparr/cleanuparr";
     metadata.category = "Media";
     port = 11011;
@@ -37,7 +39,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.cleanuparr = {
-    image = "ghcr.io/cleanuparr/cleanuparr:2.4.7";
+    image = "ghcr.io/cleanuparr/cleanuparr:${version}";
     autoStart = true;
     ports = [ "${serviceCfg.host}:${toString serviceCfg.port}:11011" ];
     environment = {

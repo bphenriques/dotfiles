@@ -5,6 +5,7 @@ let
 in
 {
   custom.homelab.services.alertmanager = {
+    displayName = "Alertmanager";
     metadata.description = "Alert Routing";
     metadata.version = config.services.prometheus.alertmanager.package.version;
     metadata.homepage = "https://prometheus.io/docs/alerting/latest/alertmanager/";

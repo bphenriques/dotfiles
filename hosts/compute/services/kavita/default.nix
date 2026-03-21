@@ -11,6 +11,7 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.kavita = {
+    displayName = "Kavita";
     metadata.description = "Book Server";
     metadata.version = config.services.kavita.package.version;
     metadata.homepage = config.services.kavita.package.meta.homepage;

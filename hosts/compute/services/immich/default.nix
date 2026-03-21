@@ -7,6 +7,7 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.immich = {
+    displayName = "Immich";
     metadata.description = "Photo & Video Gallery";
     metadata.version = config.services.immich.package.version;
     metadata.homepage = config.services.immich.package.meta.homepage;
@@ -56,7 +57,7 @@ in
         autoRegister = true;
         autoLaunch = false;
       };
-      passwordLogin.enabled = true;
+      passwordLogin.enabled = true; # TODO: review whether this is still needed after OIDC is fully rolled out
       library.watch.enabled = true;
 
       ffmpeg = {

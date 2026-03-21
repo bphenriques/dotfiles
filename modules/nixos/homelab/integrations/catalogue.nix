@@ -11,7 +11,7 @@ let
     in {
       inherit (service) name subdomain port;
       inherit (service.metadata) description category version homepage;
-      displayName = service.integrations.catalogue.displayName;
+      inherit (service) displayName;
       auth = { oidc = hasOidc; forwardAuth = hasForwardAuth; };
     };
 in
@@ -21,12 +21,6 @@ in
       options.integrations.catalogue = {
         enable = lib.mkEnableOption "service catalogue entry" // {
           default = true;
-        };
-
-        displayName = lib.mkOption {
-          type = lib.types.str;
-          default = name;
-          description = "Human-readable service name (defaults to attribute name)";
         };
       };
     })

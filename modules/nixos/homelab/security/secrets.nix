@@ -140,7 +140,8 @@ let
   allVars = globalSecretVars // oidcVars;
 
   # Auto-detect cross-owner dependencies by scanning template content for placeholder strings.
-  # Template deps aren't structural (runtime substitution), so this eval-time heuristic derives the dependency graph.
+  # Template deps aren't structural (runtime substitution via replace-secret), so static analysis
+  # can't resolve them. This eval-time string scan is the only way to derive the dependency graph.
   crossDeps = ownerName: ownerCfg:
     lib.filter (otherName: otherName != ownerName &&
       lib.any (tmpl: lib.hasInfix "__HOMELAB_SECRET_${otherName}_" tmpl.content)

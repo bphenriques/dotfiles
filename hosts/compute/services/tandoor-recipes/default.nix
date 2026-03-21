@@ -8,6 +8,7 @@ in
   imports = [ ./setup.nix ./users.nix ./backup.nix ];
 
   custom.homelab.services.tandoor = {
+    displayName = "Tandoor";
     metadata.description = "Recipe Manager";
     metadata.version = pkg.version;
     metadata.homepage = pkg.meta.homepage;
@@ -40,7 +41,6 @@ in
     };
     integrations.homepage.enable = true;
     integrations.homepage.icon = "tandoor-recipes.svg";
-    integrations.catalogue.displayName = "Tandoor";
     healthcheck.path = "/accounts/login/";
   };
 

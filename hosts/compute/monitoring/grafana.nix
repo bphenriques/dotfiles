@@ -13,6 +13,7 @@ let
 in
 {
   custom.homelab.services.grafana = {
+    displayName = "Grafana";
     metadata.description = "Dashboards";
     metadata.version = pkgs.grafana.version;
     metadata.homepage = pkgs.grafana.meta.homepage;

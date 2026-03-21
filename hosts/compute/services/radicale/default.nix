@@ -15,6 +15,7 @@ let
 in
 {
   custom.homelab.services.radicale = {
+    displayName = "Radicale";
     metadata.description = "CalDAV & CardDAV";
     metadata.version = pkgs.radicale.version;
     metadata.homepage = pkgs.radicale.meta.homepage;
@@ -25,7 +26,6 @@ in
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
-    integrations.catalogue.displayName = "Radicale";
     healthcheck.path = "/.web/";
 
     secrets = {

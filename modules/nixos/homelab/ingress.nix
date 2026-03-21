@@ -86,6 +86,7 @@ in
       environment.CF_API_EMAIL = ingressCfg.cloudflareEmail;
     };
 
+    # No rate limiting: all services are behind WireGuard/LAN, keeping config simple.
     services.traefik = {
       enable = true;
       staticConfigOptions = {

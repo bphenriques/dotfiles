@@ -11,6 +11,7 @@ in
   ];
 
   custom.homelab.services.jellyfin = {
+    displayName = "Jellyfin";
     metadata.description = "Media Player";
     metadata.version = config.services.jellyfin.package.version;
     metadata.homepage = config.services.jellyfin.package.meta.homepage;

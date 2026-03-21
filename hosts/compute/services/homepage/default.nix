@@ -52,8 +52,8 @@ in
               previousDays = 3;
               timezone = config.time.timeZone;
               integrations = [
-                { type = "sonarr"; service_group = "Admin"; service_name = "sonarr"; }
-                { type = "radarr"; service_group = "Admin"; service_name = "radarr"; }
+                { type = "sonarr"; service_group = "Admin"; service_name = sonarrCfg.displayName; }
+                { type = "radarr"; service_group = "Admin"; service_name = radarrCfg.displayName; }
               ];
             };
           };

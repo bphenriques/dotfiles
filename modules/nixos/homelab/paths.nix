@@ -5,6 +5,13 @@ let
   cfg = config.custom.homelab.paths;
   smbCfg = config.custom.homelab.smb;
 
+  # Reusable submodule for media categories with a common root/library/inbox layout
+  mkMediaCategoryOpt = parent: name: {
+    root = mkOption { type = types.str; default = "${parent}/${name}"; };
+    library = mkOption { type = types.str; default = "${parent}/${name}/library"; };
+    inbox = mkOption { type = types.str; default = "${parent}/${name}/inbox"; };
+  };
+
   userPathsOpt = types.submodule ({ config, ... }: {
     options = {
       root = mkOption {
@@ -47,30 +54,13 @@ in {
         description = "Base mount point for media storage";
       };
 
-      music = {
-        root = mkOption { type = types.str; default = "${cfg.media.root}/music"; };
-        library = mkOption { type = types.str; default = "${cfg.media.root}/music/library"; };
+      music = mkMediaCategoryOpt cfg.media.root "music" // {
         playlists = mkOption { type = types.str; default = "${cfg.media.root}/music/playlists"; };
-        inbox = mkOption { type = types.str; default = "${cfg.media.root}/music/inbox"; };
       };
 
-      books = {
-        root = mkOption { type = types.str; default = "${cfg.media.root}/books"; };
-        library = mkOption { type = types.str; default = "${cfg.media.root}/books/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.media.root}/books/inbox"; };
-      };
-
-      comics = {
-        root = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
-        library = mkOption { type = types.str; default = "${cfg.media.root}/comics/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.media.root}/comics/inbox"; };
-      };
-
-      manga = {
-        root = mkOption { type = types.str; default = "${cfg.media.root}/manga"; };
-        library = mkOption { type = types.str; default = "${cfg.media.root}/manga/library"; };
-        inbox = mkOption { type = types.str; default = "${cfg.media.root}/manga/inbox"; };
-      };
+      books  = mkMediaCategoryOpt cfg.media.root "books";
+      comics = mkMediaCategoryOpt cfg.media.root "comics";
+      manga  = mkMediaCategoryOpt cfg.media.root "manga";
 
       gaming = {
         emulation = {

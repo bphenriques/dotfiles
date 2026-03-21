@@ -6,6 +6,7 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.ntfy = {
+    displayName = "Ntfy";
     metadata.description = "Push Notifications";
     metadata.version = config.services.ntfy-sh.package.version;
     metadata.homepage = config.services.ntfy-sh.package.meta.homepage;

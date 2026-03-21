@@ -9,6 +9,7 @@ in
 
   custom.homelab = {
     services.pocket-id = {
+      displayName = "Pocket ID";
       metadata.description = "OIDC Provider";
       metadata.version = config.services.pocket-id.package.version;
       metadata.homepage = config.services.pocket-id.package.meta.homepage;
@@ -25,7 +26,6 @@ in
       healthcheck.path = "/health";
       integrations.homepage.enable = true;
       integrations.homepage.tab = "Home";
-      integrations.catalogue.displayName = "Pocket ID";
     };
 
     oidc.provider = {

@@ -172,7 +172,9 @@ in
     };
 
     clients = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything; # Authoritative schema lives under services.<name>.oidc; this is a derived read-only view
+      # Type safety is enforced at the source (services.<name>.oidc submodule). This read-only
+      # derived view uses `anything` intentionally to avoid duplicating the schema definition.
+      type = lib.types.attrsOf lib.types.anything;
       default = derivedClients;
       readOnly = true;
       description = "Derived OIDC client configs keyed by service name (read-only)";

@@ -1,13 +1,8 @@
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
-  categoryType = lib.types.enum [
-    "General"
-    "Media"
-    "Monitoring"
-    "Administration"
-    "Infrastructure"
-  ];
+  categories = [ "General" "Media" "Monitoring" "Administration" "Infrastructure" ];
+  categoryType = lib.types.enum categories;
 
   baseServiceModule = { name, config, ... }: {
     options = {
@@ -15,6 +10,12 @@ let
         type = lib.types.str;
         default = name;
         description = "Service identifier (defaults to attribute name)";
+      };
+
+      displayName = lib.mkOption {
+        type = lib.types.str;
+        default = name;
+        description = "Human-readable service name (defaults to attribute name)";
       };
 
       metadata = lib.mkOption {
@@ -157,6 +158,13 @@ in
       internal = true;
     };
 
+    categories = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = categories;
+      readOnly = true;
+      description = "Valid service categories";
+    };
+
     domain = lib.mkOption {
       type = lib.types.str;
       description = "Base domain for all services (e.g. 'home.example.com')";
@@ -181,6 +189,12 @@ in
             type = lib.types.str;
             default = name;
             description = "Entry identifier (defaults to attribute name)";
+          };
+
+          displayName = lib.mkOption {
+            type = lib.types.str;
+            default = name;
+            description = "Human-readable entry name (defaults to attribute name)";
           };
 
           description = lib.mkOption {
@@ -219,18 +233,31 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = let
-      ingressServices = lib.filter (s: s.ingress.enable) (lib.attrValues cfg.services);
+      allServices = lib.attrValues cfg.services;
+      ingressServices = lib.filter (s: s.ingress.enable) allServices;
 
       allHosts = lib.concatMap (s: [ s.publicHost ] ++ s.aliases) ingressServices;
       dupHosts = lib.filter (h: lib.count (x: x == h) allHosts > 1) (lib.unique allHosts);
 
+      # Services listening on the same host (default 127.0.0.1)
+      allPorts = map (s: { inherit (s) name host port; }) allServices;
+      dupPorts = lib.filter (p:
+        lib.count (q: q.host == p.host && q.port == p.port) allPorts > 1
+      ) allPorts;
+
       dualAuthServices = lib.filter
         (s: (lib.attrByPath [ "oidc" "enable" ] false s) && s.forwardAuth.enable)
-        (lib.attrValues cfg.services);
+        allServices;
     in [
       {
         assertion = dupHosts == [ ];
         message = "Service public hosts and aliases must be unique. Conflicting: ${toString dupHosts}";
+      }
+      {
+        assertion = dupPorts == [ ];
+        message = "Services have port collisions on the same host: ${
+          lib.concatMapStringsSep ", " (p: "${p.name} (${p.host}:${toString p.port})") dupPorts
+        }";
       }
       {
         assertion = dualAuthServices == [ ];

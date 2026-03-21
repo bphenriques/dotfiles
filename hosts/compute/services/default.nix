@@ -40,18 +40,21 @@ in
 
     external = {
       synology = {
+        displayName = "Synology";
         description = "NAS";
         category = "Administration";
         url = "http://${hosts.bruno-home-nas}:5000";
         icon = "synology-dsm.svg";
       };
       inky = {
+        displayName = "Inky";
         description = "E-Ink Display";
         category = "Media";
         url = "http://${hosts.inky}:5000";
         tab = "Admin";
       };
       jetkvm = {
+        displayName = "JetKVM";
         description = "Remote KVM";
         category = "Administration";
         url = "http://${hosts.jetkvm}";

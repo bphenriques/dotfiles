@@ -71,6 +71,7 @@ in
   };
 
   custom.homelab.services.romm = {
+    displayName = "RomM";
     metadata.description = "ROM Manager";
     metadata.version = "4.7.0";
     metadata.homepage = "https://github.com/rommapp/romm";

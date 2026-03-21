@@ -4,6 +4,7 @@ let
 in
 {
   custom.homelab.services.prometheus = {
+    displayName = "Prometheus";
     metadata.description = "Metrics";
     metadata.version = pkgs.prometheus.version;
     metadata.homepage = pkgs.prometheus.meta.homepage;

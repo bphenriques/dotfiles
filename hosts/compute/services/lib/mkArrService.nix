@@ -54,6 +54,7 @@ let
 in
 {
   custom.homelab.services.${name} = {
+    displayName = upperName;
     inherit port;
     metadata.description = description;
     metadata.version = config.services.${name}.package.version;

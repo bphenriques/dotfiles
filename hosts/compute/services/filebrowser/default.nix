@@ -10,6 +10,7 @@ in
   imports = [ ./configure.nix ];
 
   custom.homelab.services.filebrowser = {
+    displayName = "File Browser";
     metadata.description = "File Browser";
     metadata.version = pkgs.filebrowser.version;
     metadata.homepage = pkgs.filebrowser.meta.homepage;
@@ -31,6 +32,7 @@ in
   };
 
   custom.homelab.external.shared-files = {
+    displayName = "Shared Files";
     description = "Shared Files";
     category = "General";
     url = "https://shared.${cfg.domain}";
