@@ -1,6 +1,6 @@
 { pkgs, config, self, lib, ... }:
 let
-  background = "${self.pkgs.wallpapers}/share/wallpapers/lake.jpg";
+  background = self.pkgs.wallpapers.files.lake;
   lockPackage = pkgs.writeShellApplication {
     name = "session-lock";
     runtimeInputs = [

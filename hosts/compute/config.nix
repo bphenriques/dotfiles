@@ -37,6 +37,7 @@
       shared = { gid = 5002; };
     };
   };
+  custom.homelab.ingress.allowedInterfaces = [ "bond0" "wg0" ];
   virtualisation = {
     podman.enable = true;
     oci-containers.backend = "podman";

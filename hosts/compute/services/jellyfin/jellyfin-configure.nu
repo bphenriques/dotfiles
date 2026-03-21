@@ -11,11 +11,11 @@ let config = open $env.JELLYFIN_CONFIG_FILE
 let oidc_users = open $env.OIDC_USERS_FILE
 
 def wait_ready [] {
-  print "Waiting for Jellyfin..."
   for attempt in 1..30 {
+    print $"Waiting for Jellyfin... ($attempt)"
     let r = try { http get $"($base_url)/Startup/Configuration" --max-time 2sec --full --allow-errors } catch { null }
     if $r != null and $r.status in [200, 401, 403] { return }
-    sleep 1sec
+    sleep 2sec
   }
   error make { msg: "Jellyfin failed to start after 30 attempts" }
 }

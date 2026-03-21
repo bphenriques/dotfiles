@@ -9,9 +9,9 @@ let admin_pass = open $env.COUCHDB_ADMIN_PASS_FILE | str trim
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for CouchDB... ($attempt)"
-    try { http get $"($base_url)/_up" --max-time 2sec | ignore; return } catch { sleep 1sec }
+    try { http get $"($base_url)/_up" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
-  error make { msg: "CouchDB failed to start" }
+  error make { msg: "CouchDB failed to start after 30 attempts" }
 }
 
 def ensure_user [name: string, password_file: string] {

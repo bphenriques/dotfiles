@@ -19,8 +19,8 @@ let ntfy_token = open $env.NTFY_TOKEN_FILE | str trim
 let headers = [X-Api-Key $api_key]
 
 def wait_ready [] {
-  print $"Waiting for ($arr_name)..."
   for attempt in 1..30 {
+    print $"Waiting for ($arr_name)... ($attempt)"
     let r = try { http get $"($base_url)/api/v3/system/status" --headers $headers --full --allow-errors } catch { null }
     if $r != null and $r.status == 200 { return }
     sleep 2sec

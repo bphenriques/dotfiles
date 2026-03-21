@@ -52,8 +52,8 @@ in
       OAUTH_PROVIDERS_POCKETID_SCOPES = "openid profile email groups";
       OAUTH_PROVIDERS_POCKETID_CLIENTSECRETFILE = serviceCfg.oidc.secret.file; # Client ID uses placeholder (no _FILE support); secret uses native file ref
     } // lib.listToAttrs (
-      lib.mapAttrsToList (name: svc: {
-        name = "APPS_${lib.toUpper (lib.replaceStrings ["-"] ["_"] name)}_OAUTH_GROUPS";
+      lib.mapAttrsToList (_: svc: {
+        name = "APPS_${lib.toUpper (lib.replaceStrings ["-"] ["_"] svc.subdomain)}_OAUTH_GROUPS";
         value = lib.concatStringsSep "," svc.access.allowedGroups;
       }) (lib.filterAttrs (_: s: s.forwardAuth.enable) cfg.services)
     );

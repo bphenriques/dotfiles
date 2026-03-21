@@ -15,7 +15,7 @@ let headers = [X-Api-Key $api_key]
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Jellyseerr... ($attempt)"
-    try { http get $"($base_url)/api/v1/status" --max-time 2sec | ignore; return } catch { sleep 1sec }
+    try { http get $"($base_url)/api/v1/status" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
   error make { msg: "Jellyseerr failed to start after 30 attempts" }
 }

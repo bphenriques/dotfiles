@@ -11,7 +11,6 @@ let
       name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };
       groups = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = [ cfg.groups.users ];
         description = "Groups assigned to this user. If admin group is included, the user is marked as admin.";
       };
       isAdmin = lib.mkOption { type = lib.types.bool; readOnly = true; default = lib.elem cfg.groups.admin config.groups; };

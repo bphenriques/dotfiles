@@ -13,8 +13,8 @@ let config = open $env.PROWLARR_CONFIG_FILE
 let headers = [X-Api-Key $api_key]
 
 def wait_ready [] {
-  print "Waiting for Prowlarr..."
   for attempt in 1..30 {
+    print $"Waiting for Prowlarr... ($attempt)"
     let r = try { http get $"($base_url)/api/v1/system/status" --headers $headers; return } catch { null }
     sleep 2sec
   }

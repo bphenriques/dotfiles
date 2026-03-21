@@ -122,6 +122,32 @@ let
   # Derive clients from services
   derivedClients = lib.mapAttrs (_: svc: svc.oidc // { allowedGroups = svc.access.allowedGroups; }) oidcServices;
 
+  oidcClientView = lib.types.submodule {
+    options = {
+      enable = lib.mkOption { type = lib.types.bool; };
+      name = lib.mkOption { type = lib.types.str; };
+      callbackURLs = lib.mkOption { type = lib.types.listOf lib.types.str; };
+      pkce = lib.mkOption { type = lib.types.bool; };
+      gid = lib.mkOption { type = lib.types.nullOr lib.types.int; };
+      group = lib.mkOption { type = lib.types.str; };
+      credentialsDir = lib.mkOption { type = lib.types.str; };
+      allowedGroups = lib.mkOption { type = lib.types.listOf lib.types.str; };
+      id = {
+        file = lib.mkOption { type = lib.types.str; };
+        placeholder = lib.mkOption { type = lib.types.str; };
+      };
+      secret = {
+        file = lib.mkOption { type = lib.types.str; };
+        placeholder = lib.mkOption { type = lib.types.str; };
+      };
+      systemd = {
+        dependentServices = lib.mkOption { type = lib.types.listOf lib.types.str; };
+        loadCredentials = lib.mkOption { type = lib.types.listOf lib.types.str; };
+        supplementaryGroups = lib.mkOption { type = lib.types.listOf lib.types.str; };
+      };
+    };
+  };
+
   # Users enabled for OIDC
   enabledUsers = lib.filterAttrs (_: u: u.services.oidc.enable) homelabCfg.users;
 
@@ -172,9 +198,7 @@ in
     };
 
     clients = lib.mkOption {
-      # Type safety is enforced at the source (services.<name>.oidc submodule). This read-only
-      # derived view uses `anything` intentionally to avoid duplicating the schema definition.
-      type = lib.types.attrsOf lib.types.anything;
+      type = lib.types.attrsOf oidcClientView;
       default = derivedClients;
       readOnly = true;
       description = "Derived OIDC client configs keyed by service name (read-only)";

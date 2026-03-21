@@ -12,7 +12,7 @@ let oidc_users = open $env.OIDC_USERS_FILE
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Miniflux... ($attempt)"
-    try { http get $"($base_url)/healthcheck" --max-time 2sec | ignore; return } catch { sleep 1sec }
+    try { http get $"($base_url)/healthcheck" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
   error make { msg: "Miniflux failed to start after 30 attempts" }
 }

@@ -3,7 +3,7 @@
 let
   username = "brunohenriques";
   wallpapers = self.pkgs.wallpapers.override {
-    selected = [ "lake-fishing-sunset" "mountains" "whale-sunset" "watch-tower" ];
+    selected = [ "lake-fishing-sunset" "mountains" "watch-tower" ];
   };
 in
 {
@@ -14,7 +14,7 @@ in
   home-manager.users.${username} = ./brunohenriques.nix;
 
   system.defaults.screencapture.location = "/Users/${username}/Pictures/screenshots";  # Avoid bloating the Desktop with screenshots.
-  system.desktop.picture = "${wallpapers}/share/wallpapers/mountains.png";
+  system.desktop.picture = wallpapers.files.mountains;
 
   homebrew = {
     brews = [

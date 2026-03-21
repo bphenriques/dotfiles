@@ -67,6 +67,7 @@ in
         email = "home@localhost";
         firstName = "Home";
         lastName = "User";
+        groups = [ config.custom.homelab.groups.users ];
         services = {
           oidc.enable = false; # ad-hoc user, no OIDC account
           jellyfin = {

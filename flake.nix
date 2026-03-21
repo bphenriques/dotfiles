@@ -54,7 +54,12 @@
       apps      = import ./apps { inherit nixpkgs self generators; };
       packages  = import ./packages { inherit nixpkgs generators; };
       formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);                       # `nix fmt`
-      checks    = forAllSystems (system: { formatting = treefmtEval.${system}.config.build.check self; });  # `nix flake check`
+      checks    = forAllSystems (system: {                                                                  # `nix flake check`
+        formatting = treefmtEval.${system}.config.build.check self;
+      } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+        eval-compute = self.nixosConfigurations.compute.config.system.build.toplevel;
+        eval-laptop = self.nixosConfigurations.laptop.config.system.build.toplevel;
+      });
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });

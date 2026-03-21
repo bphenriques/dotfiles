@@ -30,6 +30,7 @@ let
     RemainAfterExit = true;
     Restart = "on-failure";
     RestartSec = 10;
+    UMask = "0077";
     PrivateTmp = true;
     ProtectSystem = "strict";
     ReadWritePaths = [ cfg.credentials.dir ];

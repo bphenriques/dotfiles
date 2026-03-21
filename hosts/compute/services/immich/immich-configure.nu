@@ -8,7 +8,7 @@ def wait_ready [] {
     print $"Waiting for Immich... ($attempt)"
     try { http get $"($base_url)/api/server/ping" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
-  error make { msg: "Immich failed to start" }
+  error make { msg: "Immich failed to start after 60 attempts" }
 }
 
 def admin_signup [admin: record, password: string] {

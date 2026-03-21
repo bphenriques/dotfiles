@@ -11,11 +11,11 @@ let oidc_client_id = open $env.OIDC_CLIENT_ID_FILE | str trim
 let oidc_client_secret = open $env.OIDC_CLIENT_SECRET_FILE | str trim
 
 def wait_ready [] {
-  print "Waiting for Jellyfin..."
   for attempt in 1..30 {
+    print $"Waiting for Jellyfin... ($attempt)"
     let r = try { http get $"($base_url)/health" --max-time 2sec --full --allow-errors } catch { null }
     if $r != null and $r.status == 200 { return }
-    sleep 1sec
+    sleep 2sec
   }
   error make { msg: "Jellyfin failed to respond after 30 attempts" }
 }

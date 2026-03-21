@@ -122,6 +122,7 @@ in {
           # Security hardening:
           "nosuid"    # Ignore SUID/SGID bits on executables. Prevents privilege escalation
           "nodev"     # Ignore device files. Prevents creating fake /dev nodes on NAS that could be used to access hardware or bypass permissions.
+          "noexec"    # Prevent execution. If needed, copy to local drive.
           "vers=3.0"  # Use SMB3 protocol with encryption support and better security.
 
           # Credentials

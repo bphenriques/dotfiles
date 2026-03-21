@@ -52,7 +52,7 @@ in
     extraConfig = {
       TIMEZONE = config.time.timeZone;
       MEDIA_ROOT = "/var/lib/tandoor-recipes/media";
-      ALLOWED_HOSTS = serviceCfg.publicHost;
+      ALLOWED_HOSTS = "${serviceCfg.publicHost},127.0.0.1";
       CSRF_TRUSTED_ORIGINS = serviceCfg.publicUrl;
 
       SOCIAL_PROVIDERS = "allauth.socialaccount.providers.openid_connect";

@@ -39,6 +39,12 @@ in
       description = "Port for Traefik's Prometheus metrics endpoint (localhost only)";
     };
 
+    allowedInterfaces = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Network interfaces to allow HTTP/HTTPS traffic on. If empty, allows on all interfaces (not recommended).";
+    };
+
     forwardAuth = {
       enable = lib.mkEnableOption "forwardAuth middleware";
 
@@ -61,7 +67,9 @@ in
       }
     ];
 
-    networking.firewall.allowedTCPPorts = [ 80 443 ];
+    networking.firewall = if ingressCfg.allowedInterfaces == []
+      then { allowedTCPPorts = [ 80 443 ]; }
+      else { interfaces = lib.genAttrs ingressCfg.allowedInterfaces (_: { allowedTCPPorts = [ 80 443 ]; }); };
 
     sops = {
       secrets.cloudflare_dns_api_token = { };
@@ -136,10 +144,10 @@ in
         };
       };
 
-      dynamicConfigOptions = let
-        routeConfigs = map mkTraefikRoute (lib.filter (s: s.ingress.enable) (lib.attrValues cfg.services));
-        routesConfig = lib.foldl' lib.recursiveUpdate { } routeConfigs;
-        authMiddleware = lib.optionalAttrs ingressCfg.forwardAuth.enable {
+      dynamicConfigOptions = lib.pipe (lib.attrValues cfg.services) [
+        (lib.filter (s: s.ingress.enable))
+        (map mkTraefikRoute)
+        (routes: routes ++ lib.optional ingressCfg.forwardAuth.enable {
           http.middlewares.forwardAuth.forwardAuth = {
             address = "${ingressCfg.forwardAuth.url}/api/auth/traefik";
             trustForwardHeader = true;
@@ -150,8 +158,9 @@ in
               "Remote-Name"
             ];
           };
-        };
-      in lib.foldl' lib.recursiveUpdate { } [ routesConfig authMiddleware ];
+        })
+        (lib.foldl' lib.recursiveUpdate { })
+      ];
     };
   };
 }

@@ -8,7 +8,7 @@ def wait_ready [] {
     print $"Waiting for Kavita... ($attempt)"
     try { http get $"($base_url)/api/health" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
-  error make { msg: "Kavita failed to start" }
+  error make { msg: "Kavita failed to start after 60 attempts" }
 }
 
 def register_admin [password: string] {
