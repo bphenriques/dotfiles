@@ -18,12 +18,16 @@ let
       inherit (client) name callbackURLs pkce allowedGroups;
     });
 
-  pocketIdManage = pkgs.writeShellScriptBin "pocket-id-manage" ''
-    export POCKET_ID_URL="${pocketIdCfg.url}"
-    export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
-    export POCKET_ID_GUESTS_GROUP="${config.custom.homelab.groups.guests}"
-    exec ${lib.getExe pkgs.nushell} ${self.lib.builders.writeNushellScript "pocket-id-manage" ./pocket-id-manage.nu} "$@"
-  '';
+  pocketIdManage = pkgs.writeShellApplication {
+    name = "pocket-id-manage";
+    runtimeInputs = [ self.pkgs.pocket-id-manage ];
+    text = ''
+      export POCKET_ID_URL="${pocketIdCfg.url}"
+      export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"
+      export POCKET_ID_GUESTS_GROUP="${config.custom.homelab.groups.guests}"
+      exec pocket-id-manage-bin "$@"
+    '';
+  };
 
   hardenedServiceConfig = {
     Type = "oneshot";
