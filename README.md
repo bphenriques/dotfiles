@@ -5,22 +5,28 @@
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
 [![Darwin Install](https://img.shields.io/badge/Darwin_Install-docs-blue)](./apps/darwin-install/README.md)
 
-Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that works _for me_. I hope this helps you!
+Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that
+works _for me_. I hope this helps you!
 
 <p float="center">
-  <img src="hosts/laptop/screenshots/general.png" width="49%" />
-  <img src="hosts/compute/screenshots/homepage.png" width="49%" />
+  <img src="hosts/laptop/screenshots/general.png" width="46%" />
+  <img src="hosts/compute/screenshots/homepage.png" width="52%" />
 </p>
 
 ## Hosts
 
-| Host | Platform | Description                                                           |
-|------|----------|-----------------------------------------------------------------------|
-| [compute](./hosts/compute) | NixOS | Self-hosted homelab (service registry, OIDC SSO, secret provisioning) |
-| [laptop](./hosts/laptop) | NixOS | Personal workstation                                                  |
-| [work-macos](./hosts/work-macos) | Darwin | Work MacBook                                                          |
+| Host                             | Platform | Description                                                                                            |
+|----------------------------------|----------|--------------------------------------------------------------------------------------------------------|
+| [compute](./hosts/compute)       | NixOS    | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
+| [storage](./hosts/storage)       | Synology | NAS (SMB, snapshots, NUT)                                                                              |
+| [laptop](./hosts/laptop)         | NixOS    | Personal workstation                                                                                   |
+| [inky](./hosts/inky)             | NixOS    | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
+| [work-macos](./hosts/work-macos) | Darwin   | Work MacBook                                                                                           |
 
-The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
+See also: [infrastructure](./hosts/infrastructure.md) (Cloudflare DNS/ACME setup).
+
+The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single
+registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
 
 ```nix
 custom.homelab.services.miniflux = {
@@ -33,11 +39,10 @@ custom.homelab.services.miniflux = {
 };
 ```
 
-See the auto-generated [service catalogue](./hosts/compute/services.md).
-
 ## Nix Stack
 
 Layout:
+
 - [`hosts/`](./hosts): per-host configurations (hardware, services, users)
 - [`modules/`](./modules): reusable modules that *define* options (e.g., `custom.homelab.*`)
 - [`profiles/`](./profiles): shared opinionated configuration that *sets* standard options (imported by hosts)
@@ -45,25 +50,31 @@ Layout:
 - [`lib/`](./lib): custom helpers and builders
 - [`apps/`](./apps): runnable scripts (installation, post-install)
 
-> **Note:** A companion private repository (`dotfiles-private`) is used as a flake input for [sensitive configuration](#sensitive-configuration).
+> **Note:** A companion private repository (`dotfiles-private`) is used as a flake input
+> for [sensitive configuration](#sensitive-configuration).
 
 Key dependencies:
+
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
 - [`stylix`](https://github.com/danth/stylix) for consistent theming
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 
-Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
+Not using [flake-utils](https://github.com/numtide/flake-utils)
+or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
 ## Sensitive Configuration
 
 I use a companion private `dotfiles-private` repository as a flake input for private configuration either because:
+
 - I do not want to expose private information such as public domain, user definitions, and SMTP settings.
 - I do not want to overexpose my sops encrypted file. The encrypted files and `.sops.yaml` live in `dotfiles-private`.
 
 At build time, `dotfiles-private` outputs will be available under `self.private`.
 
-For reference, the structure of my `dotfiles-private`:
+<details>
+<summary>Structure of <code>dotfiles-private</code></summary>
+
 ```
 .
 ├── flake.lock
@@ -90,19 +101,27 @@ For reference, the structure of my `dotfiles-private`:
 └── shell.nix               <- With sops package inside
 ```
 
+</details>
+
 For reference, [`hosts-secrets`](./apps/host-secrets) is a utility function that I use to generate the secrets file.
 
-## Flake Outputs
+## Workflow
 
-```
-$ nix flake show github:bphenriques/dotfiles
-$ nix run github:bphenriques/dotfiles#<package>
+A [`dot`](./packages/dotfiles/dotfiles) CLI wraps the native rebuild tools:
+
+```bash
+dot s                # apply changes to the current host
+dot d compute        # deploy to the compute host remotely
+dot u                # update flake inputs
 ```
 
 ## AI Disclaimer
 
-AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster, not to replace understanding. I drive the architecture, review and own every line.
+AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster,
+not to replace understanding. I drive the architecture, review and own every line.
 
 ## Acknowledgements
 
-Thanks to everyone sharing dotfiles, maintaining the [Arch Wiki](https://wiki.archlinux.org/) and [NixOS Wiki](https://wiki.nixos.org/), and helping in the [NixOS community](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community).
+Thanks to everyone sharing dotfiles, maintaining the [Arch Wiki](https://wiki.archlinux.org/)
+and [NixOS Wiki](https://wiki.nixos.org/), and helping in
+the [NixOS community](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community).
