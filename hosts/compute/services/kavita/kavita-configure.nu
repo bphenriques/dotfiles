@@ -159,7 +159,7 @@ def provision_local_users [library_map: record, headers: record] {
   for user in $config.localUsers {
     let password = open ($env.CREDENTIALS_DIRECTORY | path join $user.passwordCredential) | str trim
 
-    # Register user if not yet created (idempotent — 400 means already exists)
+    # Register user if not yet created (idempotent - 400 means already exists)
     let existing_users = get_users $headers
     let found = $existing_users | where username == $user.username | get 0?
     if $found == null {

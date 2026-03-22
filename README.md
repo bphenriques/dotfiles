@@ -29,18 +29,21 @@ custom.homelab.services.miniflux = {
   oidc.enable = true;
   integrations.homepage.enable = true;
   healthcheck.path = "/healthcheck";
+  backup.package = /* pre-backup hook script */;
 };
 ```
+
+See the auto-generated [service catalogue](./hosts/compute/services.md).
 
 ## Nix Stack
 
 Layout:
-- [`hosts/`](./hosts) — per-host configurations (hardware, services, users)
-- [`modules/`](./modules) — reusable modules that *define* options (e.g., `custom.homelab.*`)
-- [`profiles/`](./profiles) — shared opinionated configuration that *sets* standard options (imported by hosts)
-- [`packages/`](./packages) — custom packages and scripts
-- [`lib/`](./lib) — custom helpers and builders
-- [`apps/`](./apps) — runnable scripts (installation, post-install)
+- [`hosts/`](./hosts): per-host configurations (hardware, services, users)
+- [`modules/`](./modules): reusable modules that *define* options (e.g., `custom.homelab.*`)
+- [`profiles/`](./profiles): shared opinionated configuration that *sets* standard options (imported by hosts)
+- [`packages/`](./packages): custom packages and scripts
+- [`lib/`](./lib): custom helpers and builders
+- [`apps/`](./apps): runnable scripts (installation, post-install)
 
 > **Note:** A companion private repository (`dotfiles-private`) is used as a flake input for [sensitive configuration](#sensitive-configuration).
 

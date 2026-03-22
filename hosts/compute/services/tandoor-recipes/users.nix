@@ -1,4 +1,4 @@
-# Tandoor user provisioning (idempotent — runs on every config change).
+# Tandoor user provisioning (idempotent, runs on every config change).
 #
 # Creates local users with password auth and assigns them to the default space
 # with the configured permission group. Logic lives in tandoor-provision-users.py.

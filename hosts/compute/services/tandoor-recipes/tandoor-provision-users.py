@@ -19,7 +19,7 @@ config = json.load(open(os.environ["TANDOOR_USERS_CONFIG"]))
 creds_dir = os.environ.get("CREDENTIALS_DIRECTORY", "")
 space = Space.objects.first()
 if not space:
-    raise RuntimeError("No space found — Tandoor may not be fully initialized yet")
+    raise RuntimeError("No space found. Tandoor may not be fully initialized yet")
 
 for entry in config:
     username = entry["username"]
@@ -42,7 +42,7 @@ for entry in config:
     try:
         group = Group.objects.get(name=group_name)
     except Group.DoesNotExist:
-        raise RuntimeError(f"Group '{group_name}' not found — Tandoor may not be fully initialized yet")
+        raise RuntimeError(f"Group '{group_name}' not found. Tandoor may not be fully initialized yet")
 
     # Strip comment permissions from guest group (make it truly read-only)
     if group_name == "guest":

@@ -1,4 +1,4 @@
-# Minimal STUN/TURN for EmulatorJS netplay. Static credentials in Nix store — accepted risk: LAN/VPN-scoped firewall.
+# Minimal STUN/TURN for EmulatorJS netplay. Static credentials in Nix store. Accepted risk: LAN/VPN-scoped firewall.
 { config, self, ... }:
 let
   listenPort = 3478;

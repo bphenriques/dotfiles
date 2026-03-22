@@ -13,6 +13,7 @@ let
       inherit (service.metadata) description category version homepage;
       inherit (service) displayName;
       auth = { oidc = hasOidc; forwardAuth = hasForwardAuth; };
+      hasBackup = service.backup.package != null;
     };
 in
 {

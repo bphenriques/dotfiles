@@ -1,5 +1,5 @@
 { lib, self, ... }: {
-  # Auto-reboot on failure — override boot.shell_on_fail from base profile (would hang headless)
+  # Auto-reboot on failure
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 

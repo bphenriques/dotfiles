@@ -24,14 +24,16 @@ nix eval --impure --json --expr "
     else "—"
     end;
 
+  def backup_str: if .hasBackup then "✓" else "—" end;
+
   def header:
-    "| Name | Description | Version | Subdomain | Internal Port | Auth |",
-    "|------|-------------|---------|-----------|---------------|------|";
+    "| Name | Description | Version | Subdomain | Internal Port | Auth | Backup |",
+    "|------|-------------|---------|-----------|---------------|------|--------|";
 
   def sanitize: tostring | gsub("\\|"; "\\\\|");
 
   def row:
-    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) |";
+    "| [\(.displayName | sanitize)](\(.homepage)) | \(.description | sanitize) | \(.version | sanitize) | `\(.subdomain)` | \(.port) | \(auth_str) | \(backup_str) |";
 
   ["General", "Media", "Monitoring", "Administration", "Infrastructure"] as $order |
   ($order | to_entries | map({(.value): .key}) | add // {}) as $idx |

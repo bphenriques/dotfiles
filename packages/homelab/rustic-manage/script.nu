@@ -62,7 +62,7 @@ def "main verify" [] {
 }
 
 def main [] {
-  print "rustic-manage — Rustic backup management
+  print "rustic-manage - Rustic backup management
 
   backup              Run backup, prune, and notify
   verify              Check repository and data integrity"

@@ -25,7 +25,7 @@
     extraPackages = with pkgs; [
       intel-media-driver    # VAAPI driver (iHD). oOnly driver supporting Alder Lake-N
       vpl-gpu-rt            # oneVPL GPU runtime (required for QSV)
-      intel-compute-runtime # OpenCL runtime — required for HDR->SDR tonemapping (Jellyfin)
+      intel-compute-runtime # OpenCL runtime. Required for HDR->SDR tonemapping (Jellyfin)
     ];
   };
   environment.systemPackages = [ pkgs.intel-gpu-tools ];

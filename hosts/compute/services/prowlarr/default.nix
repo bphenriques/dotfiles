@@ -34,7 +34,7 @@ in
     environmentFiles = [ serviceCfg.secrets.templates."prowlarr.env".path ];
   };
 
-  # Prowlarr is an indexer manager — it talks to APIs, not the filesystem. No media mount needed.
+  # Prowlarr is an indexer manager: it talks to APIs, not the filesystem. No media mount needed.
   systemd.services.prowlarr = {
     serviceConfig = {
       Restart = "on-failure";

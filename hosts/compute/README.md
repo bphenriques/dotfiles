@@ -34,7 +34,7 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 - **SMB**: Services access [NAS](../storage) storage via SMB mounts
 - **Backblaze B2**: Off-site encrypted backups via [rustic](https://github.com/rustic-rs/rustic) (daily backup, weekly verification). Recovery _should_ be documented.
 - **Prometheus + Alertmanager**: Metrics, HTTP probes, and alerting.
-- **[ntfy](https://ntfy.sh)** — Push notifications for system alerts and service events
+- **[ntfy](https://ntfy.sh)**: Push notifications for system alerts and service events
 
 All services bind to `127.0.0.1`; only Traefik (80/443) and Wireguard are exposed on the firewall.
 
@@ -53,18 +53,13 @@ reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenan
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
 - **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
 
-## Miniflux Example
+## Example: Miniflux
 
-### Service Registry
-
-[`services/miniflux/default.nix`](./services/miniflux/default.nix) wires routing, auth, homepage, and metadata:
+A single [service registration](./services/miniflux/default.nix) drives routing, OIDC, secrets, monitoring, homepage, and backups:
 
 ```nix
 custom.homelab.services.miniflux = {
-  metadata.description = "RSS Server";
-  metadata.version = config.services.miniflux.package.version;
-  metadata.homepage = config.services.miniflux.package.meta.homepage;
-  metadata.category = "General";
+  metadata = { description = "RSS Server"; category = "General"; /* ... */ };
   port = 8081;
   healthcheck.path = "/healthcheck";
   access.allowedGroups = with config.custom.homelab.groups; [ admin ];
@@ -73,69 +68,20 @@ custom.homelab.services.miniflux = {
     systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
   };
   integrations.homepage.enable = true;
+  backup.package = /* pre-backup hook script */;
 };
 ```
 
-From this, the service gets a Traefik route, OIDC client, systemd ordering, a homepage entry, and a health check endpoint for monitoring and dashboard status.
-
-### OIDC wiring
-
-OIDC credentials are consumed via files to ensure we do not leak secrets to Nix store:
-```nix
-services.miniflux.config = {
-  OAUTH2_CLIENT_ID_FILE     = serviceCfg.oidc.id.file;
-  OAUTH2_CLIENT_SECRET_FILE = serviceCfg.oidc.secret.file;
-  OAUTH2_OIDC_DISCOVERY_ENDPOINT = oidcCfg.provider.issuerUrl;
-};
-```
-
-### Runtime secrets
-
-Runtime secrets like the admin password are generated at boot:
-
-```nix
-custom.homelab.services.miniflux.secrets = {
-  files.admin-password = { rotatable = false; };
-  templates."admin-credentials.env".content = ''
-    ADMIN_USERNAME=admin
-    ADMIN_PASSWORD=${serviceCfg.secrets.placeholder.admin-password}
-  '';
-  systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
-};
-```
-
-Rotation is done calling:
-```
-sudo rm /var/lib/homelab-secrets/miniflux/admin-password && sudo systemctl restart homelab-secrets-miniflux
-```
-
-### Backup
-
-Backup hooks are systemd oneshot services (`homelab-backup-<name>`) started by the main `homelab-backup` unit via `Wants=` + `After=`. Hook failures do not block the backup but trigger ntfy failure notifications via the task integration. The `OUTPUT_DIR` environment variable is set automatically by the backup module, and the directory is created fresh before each hook run and cleaned up after a successful backup:
-```nix
-custom.homelab.services.miniflux.backup.package = pkgs.writeShellApplication {
-  name = "backup-miniflux";
-  runtimeInputs = [ pkgs.curl ];
-  text = ''
-    export MINIFLUX_URL="${serviceCfg.url}"
-    export MINIFLUX_ADMIN_PASSWORD_FILE="${serviceCfg.secrets.files.admin-password.path}"
-    source ${./backup.sh}
-  '';
-};
-```
-
-### User access
-
-Users are declared centrally; per-service flags drive OIDC provisioning and configure-time setup:
+Users are declared centrally — per-service flags drive OIDC provisioning and configure-time setup:
 
 ```nix
 custom.homelab.users.alice = {
   email = "alice@example.com";
   firstName = "Alice";
   lastName = "Smith";
-  services.immich.enable = true;
-  services.jellyfin.enable = true;
   services.miniflux.enable = true;
+  services.jellyfin.enable = true;
+  services.immich.enable = true;
 };
 ```
 

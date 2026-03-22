@@ -117,7 +117,7 @@ let
   # Derive clients from services
   derivedClients = lib.mapAttrs (_: svc: svc.oidc // { allowedGroups = svc.access.allowedGroups; }) oidcServices;
 
-  # Read-only projection type for oidc.clients — intentionally re-declares fields from mkServiceOidcSchema.
+  # Read-only projection type for oidc.clients. intentionally re-declares fields from mkServiceOidcSchema.
   # This is a typed contract for consumers (e.g. pocket-id provisioning), not a shared schema with defaults.
   # It also adds allowedGroups which doesn't exist in mkServiceOidcSchema.
   oidcClientView = lib.types.submodule {

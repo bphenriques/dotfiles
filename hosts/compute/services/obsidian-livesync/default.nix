@@ -53,7 +53,7 @@ in
       chttpd = {
         require_valid_user = true;
         require_valid_user_except_for_up = true;
-        max_http_request_size = 104857600; # 100MB — sufficient for Obsidian note sync
+        max_http_request_size = 104857600; # 100MB. Sufficient for Obsidian note sync
         enable_cors = true;
       };
       chttpd_auth.require_valid_user = true;

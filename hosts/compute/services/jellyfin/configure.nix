@@ -20,7 +20,7 @@ let
       EnableHwAcceleration = true;
       EnableHwEncoding = true;
       EnableHwDecoding = true;
-      # N150 (Alder Lake-N) only has the low-power fixed-function encoder — these must be enabled.
+      # N150 (Alder Lake-N) only has the low-power fixed-function encoder. These must be enabled.
       EnableIntelLowPowerH264HwEncoder = true;
       EnableIntelLowPowerHevcHwEncoder = true;
       # HDR→SDR tonemapping via OpenCL (requires intel-compute-runtime in hardware.graphics.extraPackages)
