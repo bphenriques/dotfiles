@@ -1,12 +1,10 @@
-# Minimal STUN/TURN server for EmulatorJS netplay (WebRTC).
-# Static credentials + restricted to LAN/VPN via interface-scoped firewall rules.
+# Minimal STUN/TURN for EmulatorJS netplay. Static credentials in Nix store — accepted risk: LAN/VPN-scoped firewall.
 { config, self, ... }:
 let
   listenPort = 3478;
   minPort = 49152;
   maxPort = 49999;
 
-  # Static TURN credentials (not secret — access is controlled by firewall)
   turnUser = "romm";
   turnPassword = "romm-netplay";
 in

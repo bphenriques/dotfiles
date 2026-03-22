@@ -57,9 +57,7 @@ in
     };
   };
 
-  # FileBrowser with proxy auth: Traefik forwardAuth handles authentication and sends `Remote-User` header.
-  # Security: boundAny local process can spoof `Remote-User` and gain access. Acceptable.
-  # Traefik does not support unix socket backends, so this is the best available option.
+  # Proxy auth via Traefik forwardAuth (Remote-User). Local bypass on 127.0.0.1 acceptable.
   services.filebrowser = {
     enable = true;
     settings = {
@@ -70,7 +68,6 @@ in
     };
   };
 
-  # Additions on top of the NixOS module: SMB mount access, bind mounts, explicit ordering, extra hardening
   users.users.filebrowser.extraGroups = [
     homelabMounts.shared.group
     homelabMounts.bphenriques.group
@@ -80,7 +77,7 @@ in
     after = [ "filebrowser-configure.service" ];
     requires = [ "filebrowser-configure.service" ];
     serviceConfig = {
-      # Bind SMB mounts into FileBrowser's view — avoids global bind mounts that can race with CIFS automount
+      # BindPaths avoids global bind mounts that race with CIFS automount
       BindPaths = [
         "${homelabMounts.shared.localMount}:${filebrowserRoot}/shared"
         "${homelabMounts.bphenriques.localMount}:${filebrowserRoot}/bphenriques"
@@ -89,7 +86,6 @@ in
       Restart = lib.mkForce "on-failure";
       RestartSec = "5s";
 
-      # Extra hardening beyond what the NixOS module provides
       ProtectSystem = "strict";
       ProtectHome = true;
       ProtectClock = true;

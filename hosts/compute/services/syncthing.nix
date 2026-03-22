@@ -5,6 +5,7 @@ let
   homelabMounts = config.custom.homelab.smb.mounts;
   syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.custom.homelab.users;
 
+  # Intentional as select the exact systems to sync
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
   allSyncthingDevices = lib.pipe syncthingUsers [

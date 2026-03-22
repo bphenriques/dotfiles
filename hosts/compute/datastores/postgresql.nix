@@ -1,6 +1,4 @@
-# Shared PostgreSQL instance used by:
-# - Miniflux (auto-configured via createDatabaseLocally)
-# - Immich (auto-configured via NixOS module, requires pgvecto.rs → max PG 16)
+# Servics: Miniflux, Immich
 { pkgs, ... }:
 {
   services.postgresql = {

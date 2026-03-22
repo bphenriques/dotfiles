@@ -1,8 +1,5 @@
-# Tandoor superuser provisioning (runs once on first boot).
-#
-# NOTE: DB env vars and PYTHONPATH are duplicated from the NixOS tandoor-recipes module
-# because createsuperuser runs outside the main service and needs the full Django environment.
-# These match the values set by services.tandoor-recipes.database.createLocally = true.
+# Tandoor superuser provisioning (first boot only).
+# NOTE: DB env vars duplicated from NixOS tandoor-recipes module (createsuperuser needs full Django env).
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.tandoor;

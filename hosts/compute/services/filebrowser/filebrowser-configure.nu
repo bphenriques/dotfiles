@@ -1,21 +1,6 @@
 #!/usr/bin/env nu
 
 # Configures FileBrowser proxy auth and per-user scopes via the CLI.
-#
-# Environment variables:
-#   FILEBROWSER_CONFIG_FILE - Path to JSON config file
-#   FILEBROWSER_DB          - Path to FileBrowser database
-#
-# Config file format:
-# {
-#   "defaults": {
-#     "scope": "/shared",
-#     "permissions": { "create": true, "delete": false, ... }
-#   },
-#   "users": [
-#     { "username": "bphenriques", "scope": "/", "admin": true }
-#   ]
-# }
 
 let config = open $env.FILEBROWSER_CONFIG_FILE
 

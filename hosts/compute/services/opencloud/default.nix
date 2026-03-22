@@ -6,14 +6,8 @@ let
   wopiCfg = cfg.services.wopi;
   oidcCfg = cfg.oidc;
 
-  # CSP config to allow external OIDC provider and Collabora
-  # https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
-  #
-  # Security exceptions:
-  # - 'unsafe-eval'/'unsafe-inline': required by OpenCloud Web UI (fails to render without them)
-  # - proofkeys.disable (below): WOPI proof-key verification breaks Collabora ↔ OpenCloud flow.
-  #   WOPI is publicly routable (Collabora calls back via public URL), but access is limited to
-  #   authenticated users via OpenCloud's own auth. Accepted risk for homelab use.
+  # CSP: https://doc.owncloud.com/ocis/next/deployment/services/s-list/proxy.html#content-security-policy
+  # unsafe-eval/unsafe-inline required by OpenCloud Web UI; proofkeys.disable needed for Collabora WOPI flow.
   oidcHost = builtins.replaceStrings ["https://"] [""] oidcCfg.provider.issuerUrl;
   yamlFormat = pkgs.formats.yaml { };
   cspConfig = yamlFormat.generate "opencloud-csp.yaml" {
@@ -204,8 +198,7 @@ in
       server_name = collaboraCfg.publicHost;
     };
   };
-  # Collabora requires OpenCloud (cannot function without it)
-  # Hardened: processes untrusted documents, no access to NAS/host data needed
+  # Hardened: processes untrusted documents, no NAS access needed
   systemd.services.coolwsd = {
     after = [ "opencloud.service" ];
     requires = [ "opencloud.service" ];

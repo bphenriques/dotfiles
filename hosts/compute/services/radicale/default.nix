@@ -27,6 +27,7 @@ in
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
     healthcheck.path = "/.web/";
+    healthcheck.probeModule = "http_any"; # Radicale requires htpasswd auth on all endpoints; 401 confirms service is up
 
     secrets = {
       files = lib.listToAttrs (map (uname: {

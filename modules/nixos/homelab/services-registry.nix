@@ -83,6 +83,12 @@ let
         description = "Full health check URL (derived from url and healthcheck path)";
       };
 
+      healthcheck.probeModule = lib.mkOption {
+        type = lib.types.enum [ "http_2xx" "http_any" ];
+        default = "http_2xx";
+        description = "Blackbox exporter module for health probes. Use http_any for services that require authentication on all endpoints.";
+      };
+
       # Routing (public)
       subdomain = lib.mkOption {
         type = lib.types.str;

@@ -13,10 +13,7 @@ in
     port = 9093;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;
-    integrations.homepage = {
-      enable = true;
-      icon = "alertmanager.svg";
-    };
+    integrations.homepage.enable = true;
     integrations.ntfy = {
       enable = true;
       topic = "admin";

@@ -51,12 +51,10 @@ in
       TZ = config.time.timeZone;
     };
     volumes = [ "${dataDir}:/config" ];
-    # Security exception: LinuxServer-style container requires elevated privileges at startup.
-    # The entrypoint uses PUID/PGID to setuid/chown, which needs no-new-privileges=false + CHOWN/SETUID/SETGID caps.
-    # Compensating controls: bound to 127.0.0.1 (via port mapping), memory-limited, minimal volume access.
     extraOptions = [
       "--network=host"
       "--memory=256m"
+      # Security exception: LinuxServer-style container requires elevated privileges at startup (PUID/PGID to setuid/chown).
       "--security-opt=no-new-privileges=false"
       "--cap-add=CHOWN"
       "--cap-add=SETUID"

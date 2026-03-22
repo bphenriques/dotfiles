@@ -17,14 +17,26 @@ in
   networking.hostName = "inky";
 
   # Homelab integration
-  networking.hosts = lib.mapAttrs' (name: ip: lib.nameValuePair ip [ name ]) shared.networks.main.hosts;
+  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} shared.networks.main.hosts;
   custom.homelab.smb = {
     enable = true;
     hostname = shared.networks.main.hosts.bruno-home-nas;
+    credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
     };
+  };
+  sops.secrets."homelab/samba/username" = { };
+  sops.secrets."homelab/samba/password" = { };
+  sops.templates."homelab-samba-credentials" = {
+    owner = "root";
+    group = "root";
+    mode = "0400";
+    content = ''
+      username=${config.sops.placeholder."homelab/samba/username"}
+      password=${config.sops.placeholder."homelab/samba/password"}
+    '';
   };
 
   # WiFi configuration - Pi Zero 2W uses wireless only

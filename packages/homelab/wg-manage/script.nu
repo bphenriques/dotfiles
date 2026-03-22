@@ -1,10 +1,6 @@
 #!/usr/bin/env nu
 
-# WireGuard client management (IPv4 only)
-#
-# Required env: WG_DATA_DIR, WG_INTERFACE, WG_SERVER_ENDPOINT, WG_SERVER_IP, WG_CLIENT_SUBNET, WG_CLIENT_DNS, WG_HOMELAB_NAME
-# Optional env: WG_SERVER_ALLOWED_IPS (defaults to WG_CLIENT_SUBNET)
-# Email env: WG_SMTP_URL_FILE, WG_SMTP_FROM, WG_EMAIL_TEMPLATE_FILE, WG_EMAIL_SUBJECT
+# WireGuard client management (IPv4 only).
 
 def require_env [name: string] {
   let val = ($env | get -o $name)
@@ -30,7 +26,20 @@ if not ($server_pubkey_file | path exists) { error make { msg: "Server key not f
 
 def get_server_pubkey [] { open --raw $server_pubkey_file | str trim }
 def get_live_peers [] { wg show $interface dump | lines | skip 1 | each { $in | split row "\t" | get 0 } }
-def conf_file [name: string, device: string] { $"($clients_dir)/($name)/($homelab_name)-($device).conf" }
+def validate_iface_name [device: string] {
+  let iface_name = $"($homelab_name)-($device)"
+  if ($iface_name | str length) > 15 {
+    error make { msg: $"Interface name '($iface_name)' exceeds 15 chars" }
+  }
+  if ($iface_name | str replace --all '[a-z0-9-]' '' | is-not-empty) {
+    error make { msg: $"Interface name '($iface_name)' contains invalid characters (allowed: a-z, 0-9, -)" }
+  }
+}
+
+def conf_file [name: string, device: string] {
+  validate_iface_name $device
+  $"($clients_dir)/($name)/($homelab_name)-($device).conf"
+}
 def get_client [name: string] {
   let dir = $"($clients_dir)/($name)"
   if not ($dir | path exists) {
@@ -119,6 +128,7 @@ def create_client [name: string, --email: string, --ip: string, --device: string
   let dir = $"($clients_dir)/($name)"
   let client_ip = if $ip == null { next_ip } else { $ip }
   let dev = if $device == null { $name } else { $device }
+  validate_iface_name $dev
   mkdir $dir
 
   let priv_key = (wg genkey | str trim)

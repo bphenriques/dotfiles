@@ -4,12 +4,7 @@ let
   prometheusCfg = config.custom.homelab.services.prometheus;
   json = pkgs.formats.json { };
 
-  systemDashboard = json.generate "system.json" (import ./dashboards/system.nix);
-
-  dashboardDir = pkgs.linkFarm "grafana-dashboards" [{
-    name = "system.json";
-    path = systemDashboard;
-  }];
+  systemDashboard = json.generate "system.json" (import ./grafana-dashboard.nix);
 in
 {
   custom.homelab.services.grafana = {
@@ -55,7 +50,7 @@ in
         name = "Prometheus";
         uid = "prometheus";
         type = "prometheus";
-        url = "http://${prometheusCfg.host}:${toString prometheusCfg.port}";
+        url = prometheusCfg.url;
         isDefault = true;
         editable = false;
       }];
@@ -64,7 +59,10 @@ in
         name = "homelab";
         type = "file";
         disableDeletion = true;
-        options.path = dashboardDir;
+        options.path = pkgs.linkFarm "grafana-dashboards" [{
+          name = "system.json";
+          path = systemDashboard;
+        }];
       }];
     };
   };

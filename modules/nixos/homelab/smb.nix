@@ -61,9 +61,7 @@ in {
     
     credentialsPath = mkOption {
       type = types.str;
-      default = config.sops.templates."homelab-samba-credentials".path;
-      description = "Path to the SMB credentials file";
-      readOnly = true;
+      description = "Path to the SMB credentials file (must be provided by the host, e.g. via sops-nix)";
     };
     
     mounts = mkOption {
@@ -92,20 +90,6 @@ in {
 
     environment.systemPackages = [ pkgs.cifs-utils ];
     
-    sops = {
-      secrets."homelab/samba/username" = { };
-      secrets."homelab/samba/password" = { };
-      templates."homelab-samba-credentials" = {
-        owner = "root";
-        group = "root";
-        mode = "0400";
-        content = ''
-          username=${config.sops.placeholder."homelab/samba/username"}
-          password=${config.sops.placeholder."homelab/samba/password"}
-        '';
-      };
-    };
-
     users.groups = lib.mapAttrs' (name: mountCfg: lib.nameValuePair mountCfg.group { gid = mountCfg.gid; } ) cfg.mounts;
 
     fileSystems = lib.mapAttrs' (name: mountCfg:
@@ -119,17 +103,15 @@ in {
           "file_mode=0660"
           "dir_mode=0770"
 
-          # Security hardening:
-          "nosuid"    # Ignore SUID/SGID bits on executables. Prevents privilege escalation
-          "nodev"     # Ignore device files. Prevents creating fake /dev nodes on NAS that could be used to access hardware or bypass permissions.
-          "noexec"    # Prevent execution. If needed, copy to local drive.
-          "vers=3.0"  # Use SMB3 protocol with encryption support and better security.
+          # Security: nosuid/nodev/noexec, SMB3 for encryption
+          "nosuid"
+          "nodev"
+          "noexec"
+          "vers=3.0"
 
-          # Credentials
           "credentials=${cfg.credentialsPath}"
 
-          # Automount: don't mount at boot, trigger on first access. This avoids boot failures when network isn't fully ready yet.
-          # No x-systemd.idle-timeout=15 as it is always on and negligible impact. Also need the mount to persist for cron jobs that depend on the mounts.
+          # Automount on first access (avoids boot race with network)
           "_netdev"
           "x-systemd.automount"
           "noauto"

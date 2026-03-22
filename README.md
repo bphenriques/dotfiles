@@ -9,7 +9,7 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 
 <p float="center">
   <img src="hosts/laptop/screenshots/general.png" width="49%" />
-  <img src="hosts/laptop/screenshots/music-menu.png" width="49%" />
+  <img src="hosts/compute/screenshots/homepage.png" width="49%" />
 </p>
 
 ## Hosts
@@ -19,6 +19,18 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 | [compute](./hosts/compute) | NixOS | Self-hosted homelab (service registry, OIDC SSO, secret provisioning) |
 | [laptop](./hosts/laptop) | NixOS | Personal workstation                                                  |
 | [work-macos](./hosts/work-macos) | Darwin | Work MacBook                                                          |
+
+The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
+
+```nix
+custom.homelab.services.miniflux = {
+  metadata = { description = "RSS"; category = "General"; /* ... */ };
+  port = 8081;
+  oidc.enable = true;
+  integrations.homepage.enable = true;
+  healthcheck.path = "/healthcheck";
+};
+```
 
 ## Nix Stack
 
@@ -83,6 +95,10 @@ For reference, [`hosts-secrets`](./apps/host-secrets) is a utility function that
 $ nix flake show github:bphenriques/dotfiles
 $ nix run github:bphenriques/dotfiles#<package>
 ```
+
+## AI Disclaimer
+
+AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster, not to replace understanding. I drive the architecture, review and own every line.
 
 ## Acknowledgements
 

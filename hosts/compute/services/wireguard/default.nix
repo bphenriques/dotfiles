@@ -1,7 +1,4 @@
-# Security Model:
-# - Access control is enforced SERVER-SIDE via nftables, not client-side AllowedIPs
-# - Full access is only permitted through users managed using Nix. Manual users have restricted access.
-# - Client IPs are explicitly assigned per device for stable firewall rules
+# WireGuard VPN. Access control via server-side nftables, not client AllowedIPs.
 { config, lib, pkgs, self, ... }:
 let
   cfg = config.custom.homelab;
@@ -44,7 +41,7 @@ let
   wgEnv = {
     WG_DATA_DIR = dataDir;
     WG_INTERFACE = interface;
-    WG_HOMELAB_NAME = "bphenriques-homelab";
+    WG_HOMELAB_NAME = "bphenr";
     WG_SERVER_ENDPOINT = "${endpoint}:${toString port}";
     WG_SERVER_IP = serverIp;
     WG_CLIENT_SUBNET = clientSubnet;
@@ -129,12 +126,7 @@ in
   networking.firewall.allowedUDPPorts = [ port ];
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
-  # Firewall (forward chain only, not input):
-  # - Default: drop all forwarding (policy drop) - explicit deny-by-default
-  # - Allow Podman container traffic (uses iptables-nft for NAT, but our chain would block without this)
-  # - Allow fullAccess WireGuard clients to forward to LAN
-  # - Restricted clients can still reach server services, just not forward to LAN
-  # - No input chain restrictions needed: access control is managed through OIDC+ForwardAuth
+  # Forward chain: deny-by-default, allow Podman + fullAccess WireGuard clients to LAN
   networking.nftables.enable = true;
   networking.nftables.tables.wireguard-access = {
     family = "inet";
@@ -168,11 +160,21 @@ in
   assertions = let
     clientsByIp = lib.groupBy (c: c.ip) clients;
     ipCollisions = lib.filterAttrs (_: cs: builtins.length cs > 1) clientsByIp;
+
+    maxIfNameLen = 15;
+    prefix = "${wgEnv.WG_HOMELAB_NAME}-";
+    maxDeviceLen = maxIfNameLen - builtins.stringLength prefix;
+    tooLong = builtins.filter (c: builtins.stringLength c.device > maxDeviceLen) clients;
   in [{
     assertion = ipCollisions == { };
     message = "WireGuard IP collision detected: ${lib.concatStringsSep ", " (
       lib.mapAttrsToList (ip: cs: "${ip} -> [${lib.concatMapStringsSep ", " (c: c.name) cs}]") ipCollisions
     )}";
+  } {
+    assertion = tooLong == [ ];
+    message = "WireGuard device name too long (max ${toString maxDeviceLen} chars with prefix '${prefix}'): ${
+      lib.concatMapStringsSep ", " (c: "'${c.device}' (${toString (builtins.stringLength c.device)} chars)") tooLong
+    }";
   }];
 
   environment.systemPackages = [ wgManage ];

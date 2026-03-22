@@ -1,20 +1,10 @@
-# Implements secret generation and templating for services, tasks, and standalone owners.
-#
-# Generates secrets on first boot, stores in /var/lib/homelab-secrets/<owner>/<file>.
-# Templates are rendered using replace-secret with a global substitution map:
-# - All secret file placeholders across all owners
-# - All OIDC credential placeholders (id + secret)
-# Cross-owner and OIDC dependencies are auto-detected from placeholder patterns in template content.
-#
-# Creates per-owner Unix groups for isolation, auto-wires systemd dependencies.
-#
-# Rotation: sudo rm /var/lib/homelab-secrets/<owner>/<file> && sudo systemctl restart homelab-secrets-<owner>
+# Secret generation, templating, and per-owner group isolation. See hosts/compute/README.md.
 { lib, config, pkgs, ... }:
 let
   cfg = config.custom.homelab;
   secretsBaseDir = "/var/lib/homelab-secrets";
 
-  mkPlaceholder = ownerName: secretName: "__HOMELAB_SECRET_${ownerName}_${secretName}__";
+  mkPlaceholder = ownerName: secretName: "@HOMELAB_SECRET_${ownerName}_${secretName}@";
 
   mkSecretsSchema = ownerName: { config, ... }: {
     options = {
@@ -144,7 +134,7 @@ let
   # can't resolve them. This eval-time string scan is the only way to derive the dependency graph.
   crossDeps = ownerName: ownerCfg:
     lib.filter (otherName: otherName != ownerName &&
-      lib.any (tmpl: lib.hasInfix "__HOMELAB_SECRET_${otherName}_" tmpl.content)
+      lib.any (tmpl: lib.hasInfix "@HOMELAB_SECRET_${otherName}_" tmpl.content)
         (lib.attrValues ownerCfg.templates)
     ) (lib.attrNames allOwners);
 
@@ -204,7 +194,7 @@ let
             '${filePath}' \
             '${tmpl.path}'
         '') relevantVars)}
-        if ${pkgs.gnugrep}/bin/grep -qE '__HOMELAB_SECRET_|@HOMELAB_OIDC_' '${tmpl.path}'; then
+        if ${pkgs.gnugrep}/bin/grep -qE '@HOMELAB_(SECRET|OIDC)_' '${tmpl.path}'; then
           echo "ERROR: unreplaced placeholders in ${tmpl.path}" >&2
           exit 1
         fi
@@ -221,6 +211,14 @@ let
   oidcBaseUnit = cfg.oidc.systemd.baseProvisionUnit;
   oidcClientUnitPrefix = cfg.oidc.systemd.clientProvisionUnitPrefix;
   mkOidcClientUnit = name: "${oidcClientUnitPrefix}${name}.service";
+
+  # Eval-time validation: extract placeholder tokens from template content and verify they all resolve
+  extractPlaceholders = content: let
+    parts = builtins.split "(@HOMELAB_[A-Z]+_[A-Za-z0-9_-]+_[A-Za-z0-9_.-]+@)" content;
+  in
+    lib.unique (lib.concatMap (part:
+      if lib.isList part then part else []
+    ) parts);
 in {
   options.custom.homelab.secrets = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
@@ -266,7 +264,15 @@ in {
           assertion = dupNames == [];
           message = "Secret owner name collision across services/tasks/standalone: ${toString dupNames}";
         }
-      ];
+      ] ++ lib.flatten (lib.mapAttrsToList (ownerName: ownerCfg:
+        lib.mapAttrsToList (tmplName: tmpl: let
+          found = extractPlaceholders tmpl.content;
+          unknown = lib.filter (p: ! lib.hasAttr p allVars) found;
+        in {
+          assertion = unknown == [];
+          message = "Unknown placeholders in ${ownerName}/templates/${tmplName}: ${lib.concatStringsSep ", " unknown}";
+        }) ownerCfg.templates
+      ) allOwners);
 
       users.groups = lib.mapAttrs' (_: owner:
         lib.nameValuePair owner.group (lib.optionalAttrs (owner.gid != null) {

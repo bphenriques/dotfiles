@@ -1,4 +1,7 @@
 { lib, config, ... }:
+let
+  smbCfg = config.custom.homelab.smb;
+in
 {
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
   users.users.bphenriques = {
@@ -8,10 +11,8 @@
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
-      ++ lib.optionals config.custom.homelab.smb.enable [
-        "homelab-media"
-        "homelab-bphenriques"
-      ];
+      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
+      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
   };
 
   programs.git = {

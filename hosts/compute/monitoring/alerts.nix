@@ -8,22 +8,22 @@ let
     (lib.attrValues cfg.services);
 
   # Each scope groups its exporter, scrape config, and alert rules.
-  # Out of scope:
-  # - mysql as it only serves no-critical services.
   scopes = [
     # System metrics: CPU, RAM, disk, temperature, network
-    {
+    (let
+      listenAddress = "127.0.0.1";
+      port = 9101;
+    in {
       enable = true;
       exporters.node = {
         enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9101; # 9100 is taken by OpenCloud's built-in metrics
-        enabledCollectors = [ "hwmon" "rapl" "systemd" "thermal_zone" ]; # rapl: power consumption via Intel RAPL (MSR)
+        inherit listenAddress port;
+        enabledCollectors = [ "hwmon" "rapl" "systemd" "thermal_zone" ];
       };
       scrapeConfigs = [{
         job_name = "node";
         static_configs = [{
-          targets = [ "127.0.0.1:9101" ];
+          targets = [ "${listenAddress}:${toString port}" ];
           labels.instance = hostname;
         }];
       }];
@@ -67,21 +67,23 @@ let
           }
         ];
       }];
-    }
+    })
 
     # NVMe SMART health: scraped every 5m since attributes change slowly
-    {
+    (let
+      listenAddress = "127.0.0.1";
+      port = 9633;
+    in {
       enable = true;
       exporters.smartctl = {
         enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9633;
+        inherit listenAddress port;
       };
       scrapeConfigs = [{
         job_name = "smartctl";
         scrape_interval = "5m";
         static_configs = [{
-          targets = [ "127.0.0.1:9633" ];
+          targets = [ "${listenAddress}:${toString port}" ];
           labels.instance = hostname;
         }];
       }];
@@ -111,21 +113,23 @@ let
           }
         ];
       }];
-    }
+    })
 
     # PostgreSQL: backs Miniflux + Immich (critical services)
-    {
+    (let
+      listenAddress = "127.0.0.1";
+      port = 9187;
+    in {
       enable = true;
       exporters.postgres = {
         enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9187;
+        inherit listenAddress port;
         runAsLocalSuperUser = true;
       };
       scrapeConfigs = [{
         job_name = "postgres";
         static_configs = [{
-          targets = [ "127.0.0.1:9187" ];
+          targets = [ "${listenAddress}:${toString port}" ];
           labels.instance = hostname;
         }];
       }];
@@ -148,41 +152,58 @@ let
           }
         ];
       }];
-    }
+    })
 
     # Healthcheck probes for all monitored services
-    {
+    (let
+      listenAddress = "127.0.0.1";
+      port = 9116;
+    in {
       enable = true;
       exporters.blackbox = {
         enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9116; # 9115 is taken by OpenCloud
+        inherit listenAddress port;
         configFile = yaml.generate "blackbox.yml" {
-          modules.http_2xx = {
-            prober = "http";
-            timeout = "5s";
-            http = {
-              valid_http_versions = [ "HTTP/1.1" "HTTP/2.0" ];
-              valid_status_codes = [];
-              follow_redirects = true;
-              preferred_ip_protocol = "ip4";
+          modules = {
+            http_2xx = {
+              prober = "http";
+              timeout = "5s";
+              http = {
+                valid_http_versions = [ "HTTP/1.1" "HTTP/2.0" ];
+                valid_status_codes = [];
+                follow_redirects = true;
+                preferred_ip_protocol = "ip4";
+              };
+            };
+            # For services that require auth on all endpoints (e.g. Radicale).
+            http_any = {
+              prober = "http";
+              timeout = "5s";
+              http = {
+                valid_http_versions = [ "HTTP/1.1" "HTTP/2.0" ];
+                valid_status_codes = [ 200 204 301 302 303 307 308 401 403 ];
+                follow_redirects = false;
+                preferred_ip_protocol = "ip4";
+              };
             };
           };
         };
       };
-      scrapeConfigs = [{
-        job_name = "healthcheck";
+      scrapeConfigs = let
+        byModule = lib.groupBy (s: s.healthcheck.probeModule) monitoredServices;
+      in lib.mapAttrsToList (moduleName: services: {
+        job_name = "healthcheck-${moduleName}";
         metrics_path = "/probe";
-        params.module = [ "http_2xx" ];
+        params.module = [ moduleName ];
         static_configs = map (s: {
           targets = [ s.healthcheck.url ];
           labels.instance = s.name;
-        }) monitoredServices;
+        }) services;
         relabel_configs = [
           { source_labels = [ "__address__" ]; target_label = "__param_target"; }
-          { target_label = "__address__"; replacement = "127.0.0.1:9116"; }
+          { target_label = "__address__"; replacement = "${listenAddress}:${toString port}"; }
         ];
-      }];
+      }) byModule;
       rules = [{
         name = "services";
         rules = [
@@ -202,7 +223,7 @@ let
           }
         ];
       }];
-    }
+    })
 
     # Traefik request metrics (scrape only, no alerts)
     {
@@ -219,23 +240,25 @@ let
     }
 
     # WireGuard peer metrics (scrape only, no alerts)
-    {
+    (let
+      listenAddress = "127.0.0.1";
+      port = 9586;
+    in {
       enable = true;
       exporters.wireguard = {
         enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9586;
+        inherit listenAddress port;
         latestHandshakeDelay = true;
       };
       scrapeConfigs = [{
         job_name = "wireguard";
         static_configs = [{
-          targets = [ "127.0.0.1:9586" ];
+          targets = [ "${listenAddress}:${toString port}" ];
           labels.instance = hostname;
         }];
       }];
       rules = [];
-    }
+    })
 
     # Prometheus self-monitoring (always on)
     {

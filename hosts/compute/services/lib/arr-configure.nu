@@ -1,14 +1,6 @@
 #!/usr/bin/env nu
 
-# Generic *arr service initialization script (radarr/sonarr)
-#
-# Environment variables:
-#   ARR_NAME          - Display name (e.g., "Radarr", "Sonarr")
-#   ARR_URL           - Service URL
-#   ARR_API_KEY_FILE  - Path to API key file
-#   ARR_CONFIG_FILE   - Path to JSON config file
-#   ARR_CATEGORY_FIELD - Download client category field ("movieCategory" or "tvCategory")
-#   NTFY_TOKEN_FILE    - Path to ntfy publisher token file
+# Generic *arr service initialization (Radarr/Sonarr).
 
 let arr_name = $env.ARR_NAME
 let base_url = $env.ARR_URL

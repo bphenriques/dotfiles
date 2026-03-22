@@ -11,9 +11,31 @@ in
     };
   };
 
+  sops = {
+    secrets."backup/b2/bucket" = { };
+    secrets."backup/b2/bucket_id" = { };
+    secrets."backup/b2/application_key_id" = { };
+    secrets."backup/b2/application_key" = { };
+    secrets."backup/rustic/password" = { };
+    templates."homelab-backup-secrets.toml" = {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+      content = ''
+        [repository.options]
+        bucket = "${config.sops.placeholder."backup/b2/bucket"}"
+        bucket_id = "${config.sops.placeholder."backup/b2/bucket_id"}"
+        application_key_id = "${config.sops.placeholder."backup/b2/application_key_id"}"
+        application_key = "${config.sops.placeholder."backup/b2/application_key"}"
+      '';
+    };
+  };
+
   custom.homelab.backup = {
     enable = true;
     package = self.pkgs.rustic-manage;
+    passwordFile = config.sops.secrets."backup/rustic/password".path;
+    secretsFile = config.sops.templates."homelab-backup-secrets.toml".path;
     bindings = {
       "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;
       "/nas/bphenriques/notes"                = paths.users.bphenriques.notes;

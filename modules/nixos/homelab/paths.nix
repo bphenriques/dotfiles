@@ -3,14 +3,6 @@ let
   inherit (lib) mkOption types;
   
   cfg = config.custom.homelab.paths;
-  smbCfg = config.custom.homelab.smb;
-
-  # Reusable submodule for media categories with a common root/library/inbox layout
-  mkMediaCategoryOpt = parent: name: {
-    root = mkOption { type = types.str; default = "${parent}/${name}"; };
-    library = mkOption { type = types.str; default = "${parent}/${name}/library"; };
-    inbox = mkOption { type = types.str; default = "${parent}/${name}/inbox"; };
-  };
 
   userPathsOpt = types.submodule ({ config, ... }: {
     options = {
@@ -32,7 +24,7 @@ let
       
       documents = {
         root = mkOption { type = types.str; default = "${config.root}/documents"; };
-        consume = mkOption { type = types.str; default = "${config.root}/inbox/documents"; };
+        inbox = mkOption { type = types.str; default = "${config.root}/documents/inbox"; };
       };
       
       notes = mkOption { type = types.str; default = "${config.root}/notes"; };
@@ -54,13 +46,28 @@ in {
         description = "Base mount point for media storage";
       };
 
-      music = mkMediaCategoryOpt cfg.media.root "music" // {
+      music = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/music"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/music/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/music/inbox"; };
         playlists = mkOption { type = types.str; default = "${cfg.media.root}/music/playlists"; };
       };
 
-      books  = mkMediaCategoryOpt cfg.media.root "books";
-      comics = mkMediaCategoryOpt cfg.media.root "comics";
-      manga  = mkMediaCategoryOpt cfg.media.root "manga";
+      books = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/books"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/books/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/books/inbox"; };
+      };
+      comics = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/comics/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/comics/inbox"; };
+      };
+      manga = {
+        root = mkOption { type = types.str; default = "${cfg.media.root}/manga"; };
+        library = mkOption { type = types.str; default = "${cfg.media.root}/manga/library"; };
+        inbox = mkOption { type = types.str; default = "${cfg.media.root}/manga/inbox"; };
+      };
 
       gaming = {
         emulation = {
@@ -81,12 +88,4 @@ in {
     };
   };
 
-  config = lib.mkIf smbCfg.enable {
-    custom.homelab.paths = {
-      media.root = lib.mkDefault smbCfg.mounts.media.localMount;
-      users = lib.mapAttrs
-        (_: m: { root = lib.mkDefault m.localMount; })
-        (lib.removeAttrs smbCfg.mounts [ "media" ]);
-    };
-  };
 }

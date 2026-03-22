@@ -1,9 +1,4 @@
-# OIDC provider configuration and client provisioning.
-# Global provider config + derives clients from services.*.oidc.
-#
-# Client secrets are generated on first provision or when credentials are missing/stale.
-# All OIDC-consuming services must be listed in oidc.systemd.dependentServices to
-# receive updated credentials.
+# OIDC client provisioning derived from service declarations.
 { lib, config, ... }:
 let
   homelabCfg = config.custom.homelab;
@@ -122,6 +117,9 @@ let
   # Derive clients from services
   derivedClients = lib.mapAttrs (_: svc: svc.oidc // { allowedGroups = svc.access.allowedGroups; }) oidcServices;
 
+  # Read-only projection type for oidc.clients — intentionally re-declares fields from mkServiceOidcSchema.
+  # This is a typed contract for consumers (e.g. pocket-id provisioning), not a shared schema with defaults.
+  # It also adds allowedGroups which doesn't exist in mkServiceOidcSchema.
   oidcClientView = lib.types.submodule {
     options = {
       enable = lib.mkOption { type = lib.types.bool; };

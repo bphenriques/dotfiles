@@ -1,21 +1,6 @@
 #!/usr/bin/env nu
 
-# ntfy setup: admin user, topic ACLs, and publisher tokens.
-#
-# Expects ntfy, chown, chmod in PATH.
-#
-# Environment variables:
-#   NTFY_ADMIN_PASSWORD_FILE - Path to admin password file
-#   NTFY_PROVISION_FILE      - Path to JSON config file
-#
-# Config file format:
-# {
-#   "publicTopics": ["media"],
-#   "publishers": {
-#     "radarr":       { "topic": "media",    "tokenFile": "/path", "owner": "radarr" },
-#     "transmission": { "topic": "download", "tokenFile": "/path", "owner": "transmission" }
-#   }
-# }
+# Provisions ntfy admin user, topic ACLs, and publisher tokens.
 
 let config = open $env.NTFY_PROVISION_FILE
 

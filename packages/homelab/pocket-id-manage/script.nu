@@ -8,16 +8,6 @@
 #   reinvite           Resend one-time access email (manual)
 #   list               List all users with groups (manual)
 #   remove             Remove CLI-managed guest users (manual)
-#
-# Environment variables (always required):
-#   POCKET_ID_URL          - Pocket-ID base URL
-#   POCKET_ID_API_KEY_FILE - Path to file containing API key
-#
-# Subcommand-specific env vars:
-#   POCKET_ID_GUESTS_GROUP   - Name of the guests group (invite)
-#   OIDC_CONFIG_FILE         - Path to JSON config with users and groups (provision-users)
-#   OIDC_CREDENTIALS_DIR     - Base directory for OIDC credentials (provision-users, provision-client)
-#   OIDC_CLIENT_CONFIG_FILE  - Path to JSON config for this client (provision-client)
 
 const PAGINATION_LIMIT = 100
 

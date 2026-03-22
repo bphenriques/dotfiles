@@ -3,7 +3,7 @@
 Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small attack surface, and declarative service management.
 
 <p float="center">
-  <img src="screenshots/homepage.png" width="49%" />
+  <img src="screenshots/homepage.png" width="100%" />
 </p>
 
 ## Architecture

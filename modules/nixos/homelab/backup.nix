@@ -14,7 +14,7 @@ let
     global.use-profiles = ["secrets"];
     repository = {
       repository = "opendal:b2";
-      password-file = config.sops.secrets."backup/rustic/password".path;
+      password-file = cfg.passwordFile;
     };
 
     backup = {
@@ -65,6 +65,16 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       description = "The rustic-manage package to use.";
+    };
+
+    passwordFile = lib.mkOption {
+      type = lib.types.str;
+      description = "Path to the rustic repository password file";
+    };
+
+    secretsFile = lib.mkOption {
+      type = lib.types.str;
+      description = "Path to the rendered B2 credentials TOML file (symlinked to /etc/rustic/secrets.toml)";
     };
 
     src = lib.mkOption {
@@ -132,26 +142,6 @@ in
     }
 
     (lib.mkIf cfg.enable {
-    sops = {
-      secrets."backup/b2/bucket" = { };
-      secrets."backup/b2/bucket_id" = { };
-      secrets."backup/b2/application_key_id" = { };
-      secrets."backup/b2/application_key" = { };
-      secrets."backup/rustic/password" = { };
-      templates."homelab-backup-secrets.toml" = {
-        owner = "root";
-        group = "root";
-        mode = "0400";
-        content = ''
-          [repository.options]
-          bucket = "${config.sops.placeholder."backup/b2/bucket"}"
-          bucket_id = "${config.sops.placeholder."backup/b2/bucket_id"}"
-          application_key_id = "${config.sops.placeholder."backup/b2/application_key_id"}"
-          application_key = "${config.sops.placeholder."backup/b2/application_key"}"
-        '';
-      };
-    };
-
     custom.homelab.tasks.backup.systemdServices = lib.mkAfter allHookServiceIds;
 
     systemd.services = let
@@ -225,7 +215,7 @@ in
       "d ${extrasDir} 0750 root root -"
       "d /etc/rustic 0755 root root -"
       "L+ /etc/rustic/rustic.toml - - - - ${rusticProfile}"
-      "L+ /etc/rustic/secrets.toml - - - - ${config.sops.templates."homelab-backup-secrets.toml".path}"
+      "L+ /etc/rustic/secrets.toml - - - - ${cfg.secretsFile}"
     ]
     ++ lib.mapAttrsToList (dst: _: "d ${cfg.src}${dst} 0750 root root -") cfg.bindings;
 

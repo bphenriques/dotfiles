@@ -1,21 +1,6 @@
 #!/usr/bin/env nu
 
-# Generates Radicale htpasswd file from homelab user secrets.
-#
-# Uses htpasswd -iB (stdin mode) to avoid leaking passwords in process args.
-# Expects htpasswd, chmod, chown, mv in PATH.
-#
-# Environment variables:
-#   RADICALE_PROVISION_FILE - Path to JSON config file
-#
-# Config file format:
-# {
-#   "htpasswdFile": "/var/lib/radicale/users",
-#   "users": {
-#     "alice": { "passwordFile": "/var/lib/homelab-secrets/radicale/password-alice" },
-#     "bob":   { "passwordFile": "/var/lib/homelab-secrets/radicale/password-bob" }
-#   }
-# }
+# Generates Radicale htpasswd from homelab user secrets.
 
 def main [] {
   let config = open $env.RADICALE_PROVISION_FILE

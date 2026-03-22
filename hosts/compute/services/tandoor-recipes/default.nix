@@ -27,7 +27,7 @@ in
             name = oidcCfg.provider.displayName;
             client_id = serviceCfg.oidc.id.placeholder;
             secret = serviceCfg.oidc.secret.placeholder;
-            settings.server_url = oidcCfg.provider.issuerUrl;
+            settings.server_url = "${oidcCfg.provider.issuerUrl}/.well-known/openid-configuration";
           }];
         };
       };

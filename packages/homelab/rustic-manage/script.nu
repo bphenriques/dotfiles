@@ -1,11 +1,6 @@
 #!/usr/bin/env nu
 
 # Rustic backup management: backup and verify.
-#
-# Required env:
-#   STATE_DIR          - State directory for runtime artifacts
-#   NTFY_URL           - ntfy topic URL (success notifications)
-#   NTFY_TOKEN_FILE    - Path to file containing ntfy publisher token (success notifications)
 
 def require_env [name: string] {
   let val = ($env | get -o $name)

@@ -1,7 +1,4 @@
-# MariaDB Datastore
-#
-# Used by:
-# - Romm
+# Services: Romm
 { pkgs, ... }:
 {
   services.mysql = {

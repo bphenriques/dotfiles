@@ -39,12 +39,11 @@ in
     };
 
     external = {
-      synology = {
+      synology-dsm = {
         displayName = "Synology";
         description = "NAS";
         category = "Administration";
         url = "http://${hosts.bruno-home-nas}:5000";
-        icon = "synology-dsm.svg";
       };
       inky = {
         displayName = "Inky";
