@@ -23,8 +23,6 @@ works _for me_. I hope this helps you!
 | [inky](./hosts/inky)             | NixOS    | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
 | [work-macos](./hosts/work-macos) | Darwin   | Work MacBook                                                                                           |
 
-See also: [infrastructure](./hosts/infrastructure.md) (Cloudflare DNS/ACME setup).
-
 The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single
 registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
 
@@ -50,9 +48,6 @@ Layout:
 - [`lib/`](./lib): custom helpers and builders
 - [`apps/`](./apps): runnable scripts (installation, post-install)
 
-> **Note:** A companion private repository (`dotfiles-private`) is used as a flake input
-> for [sensitive configuration](#sensitive-configuration).
-
 Key dependencies:
 
 - [`disko`](https://github.com/nix-community/disko) for declarative disk partitioning
@@ -65,12 +60,10 @@ or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
 ## Sensitive Configuration
 
-I use a companion private `dotfiles-private` repository as a flake input for private configuration either because:
+I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to `self.private` because:
 
 - I do not want to expose private information such as public domain, user definitions, and SMTP settings.
-- I do not want to overexpose my sops encrypted file. The encrypted files and `.sops.yaml` live in `dotfiles-private`.
-
-At build time, `dotfiles-private` outputs will be available under `self.private`.
+- I do not want to overexpose the sops encrypted file nor the `.sops.yaml`.
 
 <details>
 <summary>Structure of <code>dotfiles-private</code></summary>
@@ -102,8 +95,6 @@ At build time, `dotfiles-private` outputs will be available under `self.private`
 ```
 
 </details>
-
-For reference, [`hosts-secrets`](./apps/host-secrets) is a utility function that I use to generate the secrets file.
 
 ## Workflow
 
