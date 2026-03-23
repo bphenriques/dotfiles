@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 let
+  port = 9090;
   serviceCfg = config.custom.homelab.services.prometheus;
 in
 {
   imports = [
     ./alertmanager.nix
-    ./alerts.nix
     ./grafana.nix
   ];
 
@@ -15,10 +15,28 @@ in
     metadata.version = pkgs.prometheus.version;
     metadata.homepage = pkgs.prometheus.meta.homepage;
     metadata.category = "Monitoring";
-    port = 9090;
+    inherit port;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
+    integrations.monitoring = {
+      scrapeConfigs = [{
+        job_name = "prometheus";
+        static_configs = [{
+          targets = [ "127.0.0.1:${toString port}" ];
+        }];
+      }];
+      rules = [{
+        name = "prometheus";
+        rules = [{
+          alert = "PrometheusTargetDown";
+          expr = "up == 0";
+          "for" = "5m";
+          labels.severity = "warning";
+          annotations.summary = "{{ $labels.job }}/{{ $labels.instance }} down";
+        }];
+      }];
+    };
   };
 
   # Writes directly to NVMe. SSD wear is negligible with 60s and small set of alerts.

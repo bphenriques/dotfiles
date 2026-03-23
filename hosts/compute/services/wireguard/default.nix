@@ -66,7 +66,6 @@ let
       exec wg-manage-bin "$@"
     '';
   };
-  prometheusCfg = config.custom.homelab.services.prometheus;
 in
 {
   custom.homelab.services.wireguard = {
@@ -76,7 +75,22 @@ in
     metadata.category = "Administration";
     port = port;
     ingress.enable = false;
-    integrations.monitoring.enable = false;
+    integrations.monitoring = {
+      healthcheck = false;
+      exporters.wireguard = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+        port = 9586;
+        latestHandshakeDelay = true;
+      };
+      scrapeConfigs = [{
+        job_name = "wireguard";
+        static_configs = [{
+          targets = [ "127.0.0.1:9586" ];
+          labels.instance = config.networking.hostName;
+        }];
+      }];
+    };
   };
 
   systemd.tmpfiles.rules = [

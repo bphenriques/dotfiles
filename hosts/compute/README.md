@@ -55,6 +55,7 @@ reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenan
 - **Secret provisioning** with per-service group isolation and systemd ordering:
   - **OIDC Clients** [provisioned from declarations](../../modules/nixos/homelab/security/oidc.nix)
   - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/secrets.nix)
+- **[Monitoring registry](#monitoring)**: Custom extensions for exporters, scrape configs, and alert rules
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
 - **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
 

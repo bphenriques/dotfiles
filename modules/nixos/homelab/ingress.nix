@@ -61,6 +61,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    custom.homelab.monitoring.scopes.traefik = {
+      scrapeConfigs = [{
+        job_name = "traefik";
+        static_configs = [{
+          targets = [ "127.0.0.1:${toString ingressCfg.metricsPort}" ];
+          labels.instance = config.networking.hostName;
+        }];
+      }];
+    };
+
     assertions = let
       forwardAuthServices = lib.filter (s: s.forwardAuth.enable && s.ingress.enable) (lib.attrValues cfg.services);
     in [
