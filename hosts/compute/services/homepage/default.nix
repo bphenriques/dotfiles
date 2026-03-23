@@ -98,8 +98,9 @@ in
         };
       }
       {
-        openmeteo = {
+        openmeteo = { # City location
           label = "Lisbon";
+          # Lisbon city center (not a personal address)
           latitude = 38.736946;
           longitude = -9.142685;
           timezone = config.time.timeZone;

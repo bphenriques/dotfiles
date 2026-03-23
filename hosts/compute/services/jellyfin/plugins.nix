@@ -5,28 +5,11 @@ let
 
   adminUsernameFile = pkgs.writeText "jellyfin-admin-username" "admin";
 
-  themeCSS = ''@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");'';
-  plugins = {
-    sso = {
-      name = "SSO-Auth";
-      version = "4.0.0.3";
-      src = pkgs.fetchzip {
-        url = "https://github.com/9p4/jellyfin-plugin-sso/releases/download/v4.0.0.3/sso-authentication_4.0.0.3.zip";
-        hash = "sha256-Jkuc+Ua7934iSutf/zTY1phTxaltUkfiujOkCi7BW8w=";
-        stripRoot = false;
-      };
-    };
-    # Post-deploy: configure API credentials in Jellyfin UI → Dashboard → Plugins → Open Subtitles
-    opensubtitles = {
-      name = "Open Subtitles";
-      version = "23.0.0.0";
-      src = pkgs.fetchzip {
-        url = "https://repo.jellyfin.org/releases/plugin/open-subtitles/open-subtitles_23.0.0.0.zip";
-        hash = "sha256-+5gwpkZliE5Kb3JKqcUDAAZDZ0UXNue4NkUgdn0fYMA=";
-        stripRoot = false;
-      };
-    };
-  };
+  themeCSS = builtins.readFile pkgs.elegantfin-jellyfin-theme;
+  plugins = [
+    pkgs.jellyfin-plugin-sso
+    pkgs.jellyfin-plugin-open-subtitles  # Post-deploy: configure API credentials in Jellyfin UI
+  ];
 
   # SSO plugin configuration
   brandingConfig = {
@@ -66,23 +49,25 @@ let
 in
 {
   systemd.services.jellyfin.serviceConfig.ExecStartPre = let
-    installPlugin = plugin: ''
+    installPlugin = plugin: let
+      name = plugin.passthru.jellyfin.pluginDirName;
+    in ''
       # Remove old versions of this plugin (avoids duplicate loads after upgrades)
-      find "/var/lib/jellyfin/plugins" -maxdepth 1 -name "${plugin.name}_*" -not -name "${plugin.name}_${plugin.version}" -exec rm -rf {} +
+      find "/var/lib/jellyfin/plugins" -maxdepth 1 -name "${name}_*" -not -name "${name}_${plugin.version}" -exec rm -rf {} +
 
-      pluginDir="/var/lib/jellyfin/plugins/${plugin.name}_${plugin.version}"
+      pluginDir="/var/lib/jellyfin/plugins/${name}_${plugin.version}"
       marker="$pluginDir/.installed-src"
 
       # Reinstall if missing or if the Nix store path changed (hash bump, repack, etc.)
-      if [ ! -f "$marker" ] || [ "$(cat "$marker")" != "${plugin.src}" ]; then
+      if [ ! -f "$marker" ] || [ "$(cat "$marker")" != "${plugin}" ]; then
         rm -rf "$pluginDir"
         mkdir -p "$pluginDir"
-        cp -r ${plugin.src}/. "$pluginDir/"
-        echo "${plugin.src}" > "$marker"
+        cp -r ${plugin}/. "$pluginDir/"
+        echo "${plugin}" > "$marker"
       fi
     '';
     installScript = pkgs.writeShellScript "jellyfin-install-plugins" ''
-      ${lib.concatMapStringsSep "\n" installPlugin (lib.attrValues plugins)}
+      ${lib.concatMapStringsSep "\n" installPlugin plugins}
       chmod -R u+rw "/var/lib/jellyfin/plugins"
       chown -R jellyfin:jellyfin "/var/lib/jellyfin/plugins"
     '';
@@ -91,7 +76,7 @@ in
   # SSO plugin configuration service - runs after jellyfin-configure
   systemd.services.jellyfin-sso-configure = {
     description = "Jellyfin SSO setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "jellyfin.service" ];
     after = [ "jellyfin-configure.service" ];
     requires = [ "jellyfin-configure.service" ];
     partOf = [ "jellyfin.service" ];

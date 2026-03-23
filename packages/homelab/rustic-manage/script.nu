@@ -58,7 +58,7 @@ def "main verify" [] {
   ^rustic check
 
   print "=== Checking data integrity (500MB subset) ==="
-  ^rustic check "--read-data" "--read-data-subset=500MB"
+  ^rustic check "--read-data" "--read-data-subset=500MB" # Reasonable sample for homelab-scale backups
 }
 
 def main [] {

@@ -71,7 +71,7 @@ in
 {
   custom.homelab.services.wireguard = {
     metadata.description = "VPN";
-    metadata.version = "1.0";
+    metadata.version = "N/A";
     metadata.homepage = "https://www.wireguard.com/";
     metadata.category = "Administration";
     port = port;
@@ -154,6 +154,7 @@ in
 
   sops.templates."wireguard-smtp-url" = {
     owner = "root";
+    mode = "0400";
     content = "smtp://${smtpCfg.user}:${config.sops.placeholder."smtp-password"}@${smtpCfg.host}:${toString smtpCfg.port}";
   };
 

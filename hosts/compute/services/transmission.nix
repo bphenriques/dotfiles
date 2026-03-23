@@ -4,6 +4,7 @@ let
   pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.smb.mounts;
   ntfyCfg = config.custom.homelab.services.ntfy;
+  # Token read via cat: BindReadOnlyPaths ensures access; LoadCredential won't work for Transmission subprocesses.
   ntfyNotify = { title, tags }: pkgs.writeShellScript "torrent-notify" ''
     ${pkgs.curl}/bin/curl -s \
       -H "Authorization: Bearer $(cat ${serviceCfg.integrations.ntfy.tokenFile})" \

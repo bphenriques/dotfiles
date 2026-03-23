@@ -5,8 +5,6 @@ let
   oidcCfg = config.custom.homelab.oidc;
   enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.homelab.users;
 
-  adminUsernameFile = pkgs.writeText "jellyfin-admin-username" "admin";
-
   jellyfinConfig = {
     serverName = "Jellyfin";
     libraries = [
@@ -20,10 +18,12 @@ let
       EnableHwAcceleration = true;
       EnableHwEncoding = true;
       EnableHwDecoding = true;
+
       # N150 (Alder Lake-N) only has the low-power fixed-function encoder. These must be enabled.
       EnableIntelLowPowerH264HwEncoder = true;
       EnableIntelLowPowerHevcHwEncoder = true;
-      # HDR→SDR tonemapping via OpenCL (requires intel-compute-runtime in hardware.graphics.extraPackages)
+
+      # HDR -> SDR tonemapping via OpenCL (requires intel-compute-runtime in hardware.graphics.extraPackages)
       EnableTonemapping = true;
       TonemappingAlgorithm = "bt2390";
     };
@@ -52,7 +52,7 @@ in
 
   systemd.services.jellyfin-configure = {
     description = "Jellyfin setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "jellyfin.service" ];
     after = [ "jellyfin.service" ];
     requires = [ "jellyfin.service" ];
     partOf = [ "jellyfin.service" ];
@@ -67,7 +67,7 @@ in
     };
     environment = {
       JELLYFIN_URL = serviceCfg.url;
-      JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
+      JELLYFIN_ADMIN_USERNAME_FILE = pkgs.writeText "jellyfin-admin-username" "admin";  # Not a secret but keeps consistency.
       JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
       JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # Validates non-local users exist in OIDC provider

@@ -5,7 +5,7 @@ let
   baseUserModule = { name, config, ... }: {
     options = {
       username = lib.mkOption { type = lib.types.str; default = name; };
-      email = lib.mkOption { type = lib.types.str; };
+      email = lib.mkOption { type = lib.types.str; }; # Not enforced unique: guest/ad-hoc users may share placeholder emails
       firstName = lib.mkOption { type = lib.types.str; };
       lastName = lib.mkOption { type = lib.types.str; };
       name = lib.mkOption { type = lib.types.str; default = "${config.firstName} ${config.lastName}"; };

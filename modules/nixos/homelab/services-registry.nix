@@ -117,7 +117,7 @@ let
       # Ingress
       ingress.enable = lib.mkEnableOption "Traefik ingress route for this service" // { default = true; };
 
-      # Access control policy (consumed by whichever auth mechanism is active)
+      # Access control policy (consumed by whichever auth mechanism is active). Empty = any authenticated user.
       access.allowedGroups = lib.mkOption {
         type = lib.types.listOf (lib.types.enum (lib.attrValues cfg.groups));
         default = [ ];

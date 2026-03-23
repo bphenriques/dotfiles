@@ -39,7 +39,7 @@ in
 {
   systemd.services.prowlarr-configure = {
     description = "Prowlarr setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "prowlarr.service" ];
     after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
     requires = [ "prowlarr.service" ];
     wants = [ "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];

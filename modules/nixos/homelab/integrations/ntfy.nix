@@ -1,5 +1,6 @@
 { lib, config, pkgs, ... }:
 let
+  # Tokens are created idempotently by ntfy-configure; stale tokens for removed services are harmless (write-only, topic-scoped).
   tokenDir = "/var/lib/homelab-secrets/ntfy-publishers";
   cfg = config.custom.homelab.ntfy;
   ntfyCfg = config.custom.homelab.services.ntfy;

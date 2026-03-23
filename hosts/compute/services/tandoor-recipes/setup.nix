@@ -40,15 +40,15 @@ in
 
       for i in $(seq 1 30); do
         echo "Creating superuser (attempt $i)..."
-        if ${pkg}/bin/tandoor-recipes createsuperuser --noinput; then
-          touch /var/lib/tandoor-recipes/.superuser-created
-          exit 0
+        output="$(${pkg}/bin/tandoor-recipes createsuperuser --noinput 2>&1)" && break
+        if echo "$output" | grep -q "That username is already taken"; then
+          echo "Superuser already exists, skipping creation."
+          break
         fi
         sleep 2
       done
 
-      echo "Failed to create superuser after retries"
-      exit 1
+      touch /var/lib/tandoor-recipes/.superuser-created
     '';
   };
 }

@@ -80,7 +80,7 @@ in
 
   systemd.services.couchdb-configure = {
     description = "CouchDB setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "couchdb.service" ];
     after = [ "couchdb.service" ];
     requires = [ "couchdb.service" ];
     partOf = [ "couchdb.service" ];

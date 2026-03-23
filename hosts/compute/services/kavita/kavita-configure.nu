@@ -189,37 +189,6 @@ def provision_local_users [library_map: record, headers: record] {
   }
 }
 
-def sync_user_roles [library_map: record, headers: record] {
-  if ($config.users | is-empty) {
-    print "  No users configured for role sync"
-    return
-  }
-
-  let kavita_users = get_users $headers
-
-  for user_config in $config.users {
-    let kavita_user = $kavita_users | where email == $user_config.email | get 0?
-
-    if $kavita_user == null {
-      print $"  User ($user_config.email) not found in Kavita (will be created on first login)"
-      continue
-    }
-
-    if $kavita_user.userName == $config.adminUsername {
-      print $"  Skipping admin user"
-      continue
-    }
-
-    # Map library names to IDs
-    let user_library_ids = $user_config.libraries | each { |lib_name|
-      $library_map | get $lib_name
-    }
-
-    update_user $kavita_user $user_config.roles $user_library_ids $headers
-    print $"  Updated user ($kavita_user.userName): roles=($user_config.roles), libraries=($user_config.libraries)"
-  }
-}
-
 def main [] {
   wait_ready
   print "Kavita is ready"
@@ -246,10 +215,6 @@ def main [] {
   # Provision local users (e.g., guest accounts)
   print "Provisioning local users..."
   provision_local_users $library_map $headers
-
-  # Sync user roles (if any configured)
-  print "Syncing user roles..."
-  sync_user_roles $library_map $headers
 
   print "Kavita configuration complete"
 }

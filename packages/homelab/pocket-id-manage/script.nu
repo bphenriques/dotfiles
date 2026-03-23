@@ -9,6 +9,7 @@
 #   list               List all users with groups (manual)
 #   remove             Remove CLI-managed guest users (manual)
 
+# Good enough for homelab scale; Pocket-ID unlikely to exceed 100 users/groups/clients.
 const PAGINATION_LIMIT = 100
 
 let base_url = $env.POCKET_ID_URL

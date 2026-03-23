@@ -36,9 +36,9 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 - **Prometheus + Alertmanager**: Metrics, HTTP probes, and alerting.
 - **[ntfy](https://ntfy.sh)**: Push notifications for system alerts and service events
 
-All services bind to `127.0.0.1`; only Traefik (80/443) and Wireguard are exposed on the firewall.
+All services bind to `127.0.0.1`, only Traefik (80/443) and Wireguard are exposed on the firewall (specific interfaces).
 
-Full service list in [`services.md`](./services.md) (auto-generated via `nix run .#service-catalogue`).
+Full service list in [`services.md`](./services.md) (auto-generated via `nix run .#service-catalogue`) and installation [here](install.md).
 
 ## Design
 

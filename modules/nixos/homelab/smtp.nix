@@ -23,9 +23,9 @@
     };
 
     tls = lib.mkOption {
-      type = lib.types.str;
-      default = "true";
-      description = "Whether to use TLS";
+      type = lib.types.enum [ "none" "starttls" "tls" ];
+      default = "starttls";
+      description = "TLS mode for SMTP connection";
     };
 
     passwordFile = lib.mkOption {

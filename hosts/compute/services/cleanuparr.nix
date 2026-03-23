@@ -41,7 +41,7 @@ in
   virtualisation.oci-containers.containers.cleanuparr = {
     image = "ghcr.io/cleanuparr/cleanuparr:${version}";
     autoStart = true;
-    ports = [ "${serviceCfg.host}:${toString serviceCfg.port}:11011" ];
+
     environment = {
       PORT = "11011";
       BASE_PATH = "";

@@ -1,4 +1,4 @@
-# Servics: Miniflux, Immich
+# Services: Miniflux, Immich
 { pkgs, ... }:
 {
   services.postgresql = {

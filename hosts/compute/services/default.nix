@@ -106,11 +106,6 @@ in
               viewRecentlyAdded = true;
             };
           };
-          tandoor = {
-            enable = true;
-            passwordFile = config.sops.secrets."guest/password".path;
-            group = "guest";
-          };
           filebrowser = {
             enable = true;
             permissions = { create = true; delete = false; rename = false; modify = false; execute = false; share = false; download = true; };

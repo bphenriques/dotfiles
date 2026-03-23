@@ -106,7 +106,7 @@ in
           websecure = {
             address = "0.0.0.0:443";
 
-            # Extended timeouts for large uploads (Immich). Entrypoint-scoped, affects all services.
+            # Extended timeouts for large uploads (Immich). Entrypoint-scoped (Traefik has no per-router timeout).
             transport.respondingTimeouts = {
               readTimeout = "600s";
               idleTimeout = "600s";

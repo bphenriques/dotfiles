@@ -107,7 +107,7 @@ in
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ name ];
   systemd.services."${name}-configure" = {
     description = "${upperName} setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "${name}.service" ];
     after = [ "${name}.service" "transmission.service" "recyclarr.service" "ntfy-configure.service" ];
     requires = [ "${name}.service" ];
     wants = [ "transmission.service" "recyclarr.service" "ntfy-configure.service" ];

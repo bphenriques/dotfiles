@@ -44,25 +44,20 @@ let
       { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ 0 ];   }
     ];
 
-    # Local users provisioned with password authentication
+    # Local users provisioned with password authentication (all get public libraries)
     localUsers = lib.mapAttrsToList (_: u: {
       username = u.username;
       email = u.email;
       passwordCredential = "kavita-password-${u.username}";
       roles = [ "Login" ];
-      libraries = u.services.kavita.libraries;
+      libraries = publicLibraries;
     }) localUsers;
-
-    # Per-user overrides (for private library access):
-    users = [
-      #{ email = "user@example.com"; roles = defaultUserRoles; libraries = publicLibraries ++ [ "PrivateLib" ]; }
-    ];
   });
 in
 {
   systemd.services.kavita-configure = {
     description = "Kavita setup";
-    wantedBy = [ "kavita.service" ]; # Unconventional but ensures configure runs when kavita starts
+    wantedBy = [ "kavita.service" ];
     after = [ "kavita.service" ];
     requires = [ "kavita.service" ];
     partOf = [ "kavita.service" ];

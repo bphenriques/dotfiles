@@ -7,11 +7,15 @@ let
   crossPlatform = forAllSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
+      pkgsWithOverlays = import nixpkgs { inherit system; overlays = lib.attrValues self.overlays; };
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
       host-secrets = pkgs.callPackage ./host-secrets { };
       service-catalogue = pkgs.callPackage ./service-catalogue { };
+      check-updates = pkgsWithOverlays.callPackage ./check-updates {
+        writeNushellScript = self.lib.builders.${system}.writeNushellScript;
+      };
       });
 
   linux = forLinuxSystems (system:

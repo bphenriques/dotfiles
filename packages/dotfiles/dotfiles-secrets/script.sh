@@ -50,6 +50,7 @@ init_host() {
   # Build fields array. Optionally add LUKS key
   age-keygen -o "$tmpdir/age.key" 2>/dev/null
   local fields
+  # Bitwarden field types: 0=text, 1=hidden, 2=secure note (secureNote.type: 0=generic)
   fields=$(jq -n --arg sops "$(cat "$tmpdir/age.key")" '[{name: "sops-private", value: $sops, type: 0}]')
 
   local luks_password=""

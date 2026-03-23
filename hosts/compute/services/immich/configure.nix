@@ -46,7 +46,7 @@ in
 
   systemd.services.immich-configure = {
     description = "Immich setup";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [ "immich-server.service" ];
     after = [ "immich-server.service" ];
     requires = [ "immich-server.service" ];
     partOf = [ "immich-server.service" ];

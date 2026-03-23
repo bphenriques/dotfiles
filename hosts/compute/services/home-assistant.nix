@@ -45,6 +45,7 @@ in
         name = "Home";
         unit_system = "metric";
         time_zone = config.time.timeZone;
+        # Lisbon city center (not a personal address)
         latitude = 38.736946;
         longitude = -9.142685;
       };

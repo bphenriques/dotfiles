@@ -88,7 +88,7 @@ in
       type = lib.types.attrsOf lib.types.str;
       default = { };
       example = { "/nas/bphenriques/notes" = "/mnt/nas/bphenriques/notes"; };
-      description = "Mapping of destination folder (relative to src) to source path for read-only bind mounts.";
+      description = "Mapping of virtual backup path (key, must start with '/') to source path (value) for read-only bind mounts.";
     };
 
     hooks = lib.mkOption {
@@ -142,6 +142,13 @@ in
     }
 
     (lib.mkIf cfg.enable {
+    assertions = let
+      invalidKeys = lib.filter (k: !(lib.hasPrefix "/" k)) (lib.attrNames cfg.bindings);
+    in [{
+      assertion = invalidKeys == [];
+      message = "Backup binding keys must be absolute paths (start with '/'). Invalid: ${toString invalidKeys}";
+    }];
+
     custom.homelab.tasks.backup.systemdServices = lib.mkAfter allHookServiceIds;
 
     systemd.services = let
@@ -157,6 +164,7 @@ in
             "${pkgs.coreutils}/bin/install -d -m 0750 -o root -g root -- ${outputDir}"
           ];
           ExecStart = lib.getExe package;
+          TimeoutStartSec = "30min";
           ReadWritePaths = [ extrasDir ];
           ProtectSystem = "strict";
           ProtectHome = true;

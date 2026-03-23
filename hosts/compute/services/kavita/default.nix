@@ -59,6 +59,8 @@ in
         "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
       ];
     };
+    # Kavita has no native _FILE support for OIDC credentials; replace placeholders at runtime.
+    # If upstream adds file-based config, switch to it and remove this workaround.
     preStart = lib.mkAfter ''
       ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.oidc.id.placeholder}' \
         "''${CREDENTIALS_DIRECTORY}/oidc-id" \

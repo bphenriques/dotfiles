@@ -5,7 +5,7 @@ let
   pkg = config.services.tandoor-recipes.package;
 in
 {
-  imports = [ ./setup.nix ./users.nix ./backup.nix ];
+  imports = [ ./setup.nix ./backup.nix ];
 
   custom.homelab.services.tandoor = {
     displayName = "Tandoor";
@@ -31,7 +31,7 @@ in
           }];
         };
       };
-      systemd.dependentServices = [ "tandoor-recipes" "tandoor-recipes-provision-users" ];
+      systemd.dependentServices = [ "tandoor-recipes" "tandoor-recipes-superuser" ];
     };
     access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
     oidc = {
