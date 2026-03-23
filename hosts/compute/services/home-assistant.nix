@@ -1,12 +1,10 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.home-assistant;
+  donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
+  otbrDataDir = "/var/lib/otbr";
 in
 {
-  # TODO: Once I have ZBT-2 dongle:
-  # 1. Find stable device path: `ls -l /dev/serial/by-id/`
-  # 2. Uncomment thread/matter/bluetooth extraComponents below
-  # 3. Set up OTBR as a container for Thread border routing
   custom.homelab.services.home-assistant = {
     displayName = "Home Assistant";
     metadata.description = "Home Automation";
@@ -31,11 +29,10 @@ in
       "zeroconf"      # Device discovery
       "dhcp"          # Device discovery
 
-      # Thread / Matter (requires dongle)
-      # "thread"
-      # "matter"
-      # "bluetooth"
-      # "otbr"
+      # Thread / Matter (ZBT-2 dongle via OTBR container)
+      "thread"
+      "matter"
+      "otbr"
     ];
 
     config = {
@@ -73,12 +70,63 @@ in
     "f ${dir}/automations.yaml 0644 ${user} ${group} -"
     "f ${dir}/scenes.yaml 0644 ${user} ${group} -"
     "f ${dir}/scripts.yaml 0644 ${user} ${group} -"
+    "d ${otbrDataDir} 0755 root root -"
   ];
 
-  systemd.services.home-assistant.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "10s";
-    RestartMaxDelaySec = "5min";
-    RestartSteps = 5;
+  # Matter controller: bridges HA to Matter/Thread devices via websocket (port 5580).
+  services.matter-server.enable = true;
+
+  # OpenThread Border Router: bridges the ZBT-2 dongle's Thread radio to the IP network.
+  # Home Assistant connects to OTBR's REST API (port 8081) for Thread/Matter device management.
+  virtualisation.oci-containers.containers.otbr = {
+    image = "openthread/border-router:latest";
+    autoStart = true;
+
+    environment = {
+      OT_RCP_DEVICE = "spinel+hdlc+uart:///dev/ttyACM0?uart-baudrate=460800";
+      OT_INFRA_IF = "bond0";
+      OT_THREAD_IF = "wpan0";
+      OT_REST_LISTEN_ADDR = "127.0.0.1";
+      OT_REST_LISTEN_PORT = "8081";
+      OT_LOG_LEVEL = "5";
+      TZ = config.time.timeZone;
+    };
+
+    volumes = [ "${otbrDataDir}:/data" ];
+    extraOptions = [
+      "--network=host"
+      "--device=${donglePath}:/dev/ttyACM0"
+      "--device=/dev/net/tun:/dev/net/tun"
+      "--cap-add=NET_ADMIN"
+      "--cap-add=NET_RAW"
+      "--memory=128m"
+    ];
+  };
+
+  # Ensure OTBR starts after bond0 is up
+  systemd.services.podman-otbr = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
+
+  systemd.services.home-assistant = {
+    after = [ "podman-otbr.service" ];
+    wants = [ "podman-otbr.service" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
+    };
+  };
+
+  # IPv6 forwarding required for Thread border routing
+  boot.kernel.sysctl = {
+    "net.ipv6.conf.all.disable_ipv6" = 0;
+    "net.ipv6.conf.all.forwarding" = 1;
+    "net.ipv6.conf.all.accept_ra" = 2;
+    "net.ipv6.conf.all.accept_ra_rt_info_max_plen" = 64;
+    "net.ipv6.conf.default.forwarding" = 1;
+    "net.ipv6.conf.default.accept_ra" = 2;
   };
 }

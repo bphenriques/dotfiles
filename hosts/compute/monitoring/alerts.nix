@@ -176,11 +176,12 @@ let
               };
             };
             # For services that require auth on all endpoints (e.g. Radicale).
+            # Radicale speaks HTTP/1.0 internally, so we must accept it.
             http_any = {
               prober = "http";
               timeout = "5s";
               http = {
-                valid_http_versions = [ "HTTP/1.1" "HTTP/2.0" ];
+                valid_http_versions = [ "HTTP/1.0" "HTTP/1.1" "HTTP/2.0" ];
                 valid_status_codes = [ 200 204 301 302 303 307 308 401 403 ];
                 follow_redirects = false;
                 preferred_ip_protocol = "ip4";
