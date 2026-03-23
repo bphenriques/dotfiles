@@ -64,12 +64,11 @@ in
   # Ensure UI-managed YAML files exist on first boot
   systemd.tmpfiles.rules = let
     dir = config.services.home-assistant.configDir;
-    user = "hass";
-    group = "hass";
+    inherit (config.systemd.services.home-assistant.serviceConfig) User Group;
   in [
-    "f ${dir}/automations.yaml 0644 ${user} ${group} -"
-    "f ${dir}/scenes.yaml 0644 ${user} ${group} -"
-    "f ${dir}/scripts.yaml 0644 ${user} ${group} -"
+    "f ${dir}/automations.yaml 0644 ${User} ${Group} -"
+    "f ${dir}/scenes.yaml 0644 ${User} ${Group} -"
+    "f ${dir}/scripts.yaml 0644 ${User} ${Group} -"
     "d ${otbrDataDir} 0755 root root -"
   ];
 

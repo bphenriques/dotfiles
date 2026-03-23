@@ -27,6 +27,7 @@
   };
 
   # Homelab integration
+  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
   networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} self.shared.networks.main.hosts;
   custom.homelab.paths = {
     media.root = config.custom.homelab.smb.mounts.media.localMount;

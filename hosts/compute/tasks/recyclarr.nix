@@ -35,10 +35,10 @@ in
     systemd.dependentServices = [ "recyclarr" ];
   };
 
-  # Recyclarr runs as a systemd timer to periodically sync TRaSH guides
+  # Runs once at boot (to apply config on deploy) and daily at 3 AM via timer
   systemd.services.recyclarr = {
     description = "Recyclarr sync";
-    wantedBy = [ "multi-user.target" ];  # Required on boot: once radarr and sonarr are up
+    wantedBy = [ "multi-user.target" ];
     after = [ "radarr.service" "sonarr.service" ];
     wants = [ "radarr.service" "sonarr.service" ];
     serviceConfig = {

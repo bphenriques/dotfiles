@@ -1,6 +1,11 @@
 # Services: Miniflux, Immich
-{ pkgs, config, ... }:
+{ lib, pkgs, config, ... }:
 {
+  assertions = [{
+    assertion = lib.versionOlder config.services.postgresql.package.version "17";
+    message = "PostgreSQL must be < 17 (Immich + pgvecto.rs constraint). Got: ${config.services.postgresql.package.version}";
+  }];
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_16; # Immich + pgvecto.rs requires <= 16

@@ -43,7 +43,7 @@
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
 | [Pocket ID](https://pocket-id.org) | OIDC Provider | 2.3.0 | `auth` | 8094 | — | — |
-| [wireguard](https://www.wireguard.com/) | VPN | 1.0 | `wireguard` | 51820 | — | — |
+| [wireguard](https://www.wireguard.com/) | VPN | N/A | `wireguard` | 51820 | — | — |
 
 ### Infrastructure
 

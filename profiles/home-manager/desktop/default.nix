@@ -30,7 +30,7 @@
     ./helix.nix           # Editor
   ];
 
-  xdg.mimeApps.enable = pkgs.stdenv.isLinux; # Default apps and directories
+  xdg.mimeApps.enable = pkgs.stdenv.isLinux;    # Default apps and directories
 
   # Enable easier font management
   fonts.fontconfig.enable = true;

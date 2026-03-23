@@ -1,5 +1,5 @@
 # Minimal STUN/TURN for EmulatorJS netplay. Static credentials in Nix store. Accepted risk: LAN/VPN-scoped firewall.
-{ config, self, ... }:
+{ config, pkgs, self, ... }:
 let
   listenPort = 3478;
   minPort = 49152;
@@ -11,7 +11,7 @@ in
 {
   custom.homelab.services.coturn = {
     metadata.description = "STUN/TURN Server";
-    metadata.version = "4.9.0";
+    metadata.version = pkgs.coturn.version;
     metadata.homepage = "https://github.com/coturn/coturn";
     metadata.category = "Media";
     port = listenPort;

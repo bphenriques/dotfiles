@@ -37,7 +37,8 @@ in
       security.secret_key = "$__file{${serviceCfg.secrets.files.secret-key.path}}";
       users.allow_sign_up = false;
 
-      # Already gated using forward auth
+      # Anonymous auth is safe here: Grafana is behind forwardAuth, so all users are already
+      # authenticated via the proxy. This sets the default Grafana role for those users.
       "auth.anonymous" = {
         enabled = true;
         org_role = "Viewer";

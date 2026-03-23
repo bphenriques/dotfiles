@@ -44,9 +44,10 @@ in
     enable = true;
     listenAddress = serviceCfg.host;
     port = serviceCfg.port;
+    # Both limits apply; size is the effective bound (~15 targets × ~200 metrics × 60s × ~3 bytes/sample ≈ 13 MB/day ≈ 4.7 GB/year)
     retentionTime = "365d";
     extraFlags = [
-      "--storage.tsdb.retention.size=2GB"
+      "--storage.tsdb.retention.size=5GB"
       "--storage.tsdb.wal-compression"
     ];
     globalConfig = {

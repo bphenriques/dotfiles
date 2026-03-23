@@ -48,8 +48,8 @@ in
       "/nas/media/gaming/emulation/roms"      = paths.media.gaming.emulation.roms;
       "/nas/media/gaming/emulation/bios"      = paths.media.gaming.emulation.bios;
 
-      # TODO: Configure HA backup scheduler (via UI) to write backups to /var/lib/hass/backups/, then uncomment:
-      # "/services/home-assistant"            = "${config.services.home-assistant.configDir}/backups";
+      # Enable HA backup scheduler via UI (Settings → System → Backups). Backups are written to {configDir}/backups/ by default.
+      "/services/home-assistant"            = "${config.services.home-assistant.configDir}/backups";
     };
   };
 }

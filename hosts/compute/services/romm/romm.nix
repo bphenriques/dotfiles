@@ -54,6 +54,7 @@ let
           port = toString config.services.coturn.listening-port;
           lanIP = self.shared.networks.main.hosts.compute;
           wgIP = "10.100.0.1";
+          # Plaintext is acceptable — TURN relay is LAN/WG-only, no internet exposure, credentials are non-sensitive
           turnCreds = { username = "romm"; credential = "romm-netplay"; };
         in [
           { urls = "stun:${lanIP}:${port}"; }

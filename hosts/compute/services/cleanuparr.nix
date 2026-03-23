@@ -43,7 +43,7 @@ in
     autoStart = true;
 
     environment = {
-      PORT = "11011";
+      PORT = toString serviceCfg.port;
       BASE_PATH = "";
       PUID = toString cleanuparrUser.uid;
       PGID = toString cleanuparrUser.gid;

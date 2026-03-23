@@ -75,7 +75,7 @@ in
     overrideFolders = true;
 
     openDefaultPorts = false;
-    guiAddress = "127.0.0.1:8384";
+    guiAddress = "${serviceCfg.host}:${toString serviceCfg.port}";
     guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
 
     settings = {

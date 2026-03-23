@@ -1,9 +1,8 @@
 { config, pkgs, lib, ... }:
-lib.mkIf pkgs.stdenv.isDarwin {
+{
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {
     enable = true;
-    package = if pkgs.stdenv.isLinux then pkgs.ghostty else null;
     enableFishIntegration = config.programs.fish.enable;
 
     settings = let
