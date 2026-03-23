@@ -18,7 +18,6 @@ works _for me_. I hope this helps you!
 | Host                             | Platform | Description                                                                                            |
 |----------------------------------|----------|--------------------------------------------------------------------------------------------------------|
 | [compute](./hosts/compute)       | NixOS    | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
-| [storage](./hosts/storage)       | Synology | NAS (SMB, snapshots, NUT)                                                                              |
 | [laptop](./hosts/laptop)         | NixOS    | Personal workstation                                                                                   |
 | [inky](./hosts/inky)             | NixOS    | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
 | [work-macos](./hosts/work-macos) | Darwin   | Work MacBook                                                                                           |
@@ -60,7 +59,8 @@ or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
 ## Sensitive Configuration
 
-I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to `self.private` because:
+I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to
+`self.private` because:
 
 - I do not want to expose private information such as public domain, user definitions, and SMTP settings.
 - I do not want to overexpose the sops encrypted file nor the `.sops.yaml`.
