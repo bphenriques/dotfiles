@@ -1,4 +1,4 @@
-# NixOS & Darwin Dotfiles
+# bphenriques's fleet (Homelab & Laptops & Misc)
 
 [![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)

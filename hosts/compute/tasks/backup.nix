@@ -47,9 +47,6 @@ in
       "/nas/media/music/playlists"            = paths.media.music.playlists;
       "/nas/media/gaming/emulation/roms"      = paths.media.gaming.emulation.roms;
       "/nas/media/gaming/emulation/bios"      = paths.media.gaming.emulation.bios;
-
-      # Enable HA backup scheduler via UI (Settings → System → Backups). Backups are written to {configDir}/backups/ by default.
-      "/services/home-assistant"            = "${config.services.home-assistant.configDir}/backups";
     };
   };
 }

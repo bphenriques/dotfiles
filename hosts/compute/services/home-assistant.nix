@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.home-assistant;
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
@@ -18,6 +18,15 @@ in
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";
+    backup = {
+      package = pkgs.writeShellApplication {
+        name = "backup-home-assistant";
+        text = ''
+          cp -a "${config.services.home-assistant.configDir}/backups/." "$OUTPUT_DIR/"
+        '';
+      };
+      after = [ "home-assistant.service" ];
+    };
   };
 
   services.home-assistant = {
