@@ -1,4 +1,5 @@
 #shellcheck shell=bash
+set -euo pipefail
 
 info() { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }

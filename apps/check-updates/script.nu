@@ -1,10 +1,16 @@
 let metadata = open $env.METADATA_FILE
 
+let headers = if "GITHUB_TOKEN" in $env {
+  { Authorization: $"Bearer ($env.GITHUB_TOKEN)" }
+} else {
+  {}
+}
+
 print "Checking pinned external packages for updates...\n"
 
 let results = $metadata | each { |pkg|
   let latest_tag = try {
-    http get $"https://api.github.com/repos/($pkg.repo)/releases/latest" | get tag_name
+    http get --headers $headers $"https://api.github.com/repos/($pkg.repo)/releases/latest" | get tag_name
   } catch {
     print $"  ⚠ ($pkg.name): failed to query ($pkg.repo)"
     return null

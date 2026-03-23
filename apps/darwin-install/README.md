@@ -6,7 +6,7 @@
 # Install
 
 1. Install [`nix` (Determinate Systems)](https://determinate.systems/nix-installer/).
-2. Boostrap:
+2. Bootstrap:
    ```shell
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```

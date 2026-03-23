@@ -67,7 +67,7 @@ $ nix-shell -p nvme-cli
 
 Following this:
 1. List the nvmes available: `sudo nvme list`
-2. Then, check if `nvme` to see what it has to say: 
+2. Then, check the NVMe LBA format to see if it can be optimised:
 
    ```
    $ sudo nvme id-ns -H /dev/nvme0n1 | grep "Relative Performance"

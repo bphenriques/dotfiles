@@ -9,14 +9,19 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 ## Architecture
 
 ```
-  Cloudflare           ┌────────────────────────────────────┐
-  (DNS + ACME only)    │         Compute Server             │
-                       │                                    │
-  LAN / Wireguard ─────├──▶ Traefik ──┬──▶ Pocket-ID (OIDC) │
-                       │              ├──▶ Jellyfin, Immich │
-                       │              ├──▶ Homepage, ...    │
-                       │              │                     │
-                       └──────────────┼─────────────────────┘
+  Cloudflare           ┌──────────────────────────────────────────┐
+  (DNS + ACME only)    │            Compute Server                │
+                       │                                          │
+  LAN / Wireguard ─────├──▶ Traefik ──┬──▶ Pocket-ID (OIDC)       │
+                       │              ├──▶ Jellyfin, Immich, ...  │
+                       │              ├──▶ Homepage               │
+                       │              ├──▶ Alertmanager, ntfy     │
+                       │              │                           │
+                       │  Prometheus ─┼──▶ scrape targets         │
+                       │       │      │                           │
+                       │       ▼      │                           │
+                       │  Alertmanager──▶ ntfy ──▶ push notif     │
+                       └──────────────┼───────────────────────────┘
                                       │
                                       ▼
                                 ┌───────────┐
@@ -32,7 +37,7 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 - **Tinyauth**: ForwardAuth middleware for services without native OIDC
 - **Wireguard**: VPN for remote access
 - **SMB**: Services access [NAS](../storage) storage via SMB mounts
-- **Backblaze B2**: Off-site encrypted backups via [rustic](https://github.com/rustic-rs/rustic) (daily backup, weekly verification). Recovery _should_ be documented.
+- **Backblaze B2**: Off-site encrypted backups via [rustic](https://github.com/rustic-rs/rustic) (daily backup, weekly verification). Restore with `rustic restore latest <target-dir>` (see [rustic docs](https://rustic.cli.rs/docs/commands/restore.html)).
 - **Prometheus + Alertmanager**: Metrics, HTTP probes, and alerting.
 - **[ntfy](https://ntfy.sh)**: Push notifications for system alerts and service events
 
