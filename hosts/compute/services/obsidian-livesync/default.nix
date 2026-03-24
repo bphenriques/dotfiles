@@ -1,18 +1,6 @@
-{ lib, config, pkgs, self, ... }:
+{ lib, config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.couchdb;
-
-  enabledUsers = lib.filterAttrs (_: u: u.services.couchdb.enable) config.custom.homelab.users;
-  settings = {
-    users = lib.mapAttrsToList (_: u: {
-      name = u.username;
-      passwordFile = config.sops.secrets."couchdb/${u.username}/password".path;
-    }) enabledUsers;
-
-    databases = lib.concatLists (lib.mapAttrsToList (_: u:
-      map (db: { name = db; owner = u.username; }) u.services.couchdb.databases
-    ) enabledUsers);
-  };
 
   cors = {
     origins = [ "app://obsidian.md" "capacitor://localhost" "http://localhost" ];
@@ -25,6 +13,8 @@ let
   toCommaSeparated = lib.concatStringsSep ", ";
 in
 {
+  imports = [ ./configure.nix ];
+
   custom.homelab.services.couchdb = {
     displayName = "CouchDB";
     port = 5984;
@@ -70,41 +60,14 @@ in
       };
     };
   };
-
-  systemd.services.couchdb.serviceConfig.RuntimeDirectory = "couchdb";
-
-  sops.secrets = lib.mapAttrs' (_: u: lib.nameValuePair
-    "couchdb/${u.username}/password"
-    { group = config.services.couchdb.group; mode = "0440"; }
-  ) enabledUsers;
-
-  systemd.services.couchdb-configure = {
-    description = "CouchDB setup";
-    wantedBy = [ "couchdb.service" ];
-    after = [ "couchdb.service" ];
-    requires = [ "couchdb.service" ];
-    partOf = [ "couchdb.service" ];
-    restartTriggers = [ ./couchdb-configure.nu ];
-    startLimitIntervalSec = 300;
-    startLimitBurst = 3;
-    serviceConfig = {
-      Type = "oneshot";
-      TimeoutStartSec = 600;
-      User = config.services.couchdb.user;
-      Group = config.services.couchdb.group;
-      Restart = "on-failure";
-      RestartSec = 10;
-    };
-    environment = {
-      COUCHDB_URL = serviceCfg.url;
-      COUCHDB_BIND_ADDRESS = config.services.couchdb.bindAddress;
-      COUCHDB_PORT = toString config.services.couchdb.port;
-      COUCHDB_ADMIN_USER = config.services.couchdb.adminUser;
-      COUCHDB_ADMIN_PASS_FILE = serviceCfg.secrets.files.admin-password.path;
-      COUCHDB_SETTINGS_FILE = pkgs.writeText "couchdb-settings.json" (builtins.toJSON settings);
-    };
-    path = [ pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "couchdb-configure" ./couchdb-configure.nu}'';
+  systemd.services.couchdb = {
+    # The Erlang BEAM VM uses busy-wait schedulers by default to reduce latency.
+    # In my case, I am ok with initial delay to ensure CPU remains idle most times:
+    # - +sbwt none: Disable scheduler busy-wait threshold
+    # - +sbwtdcpu none: Disable dirty CPU scheduler busy-wait
+    # - +sbwtdio none: Disable dirty I/O scheduler busy-wait
+    environment.ERL_ZFLAGS = "+sbwt none +sbwtdcpu none +sbwtdio none";
+    serviceConfig.RuntimeDirectory = "couchdb";
   };
 
   # Obsidian LiveSync specific CouchDB settings

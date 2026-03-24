@@ -1,19 +1,14 @@
-{ config, pkgs, lib, self, ... }:
+{ config, pkgs, lib, ... }:
 let
   serviceCfg = config.custom.homelab.services.radicale;
 
   usernames = builtins.attrNames (lib.filterAttrs (_: u: u.services.radicale.enable) config.custom.homelab.users);
 
   htpasswdFile = "/var/lib/radicale/users";
-  configFile = pkgs.writeText "radicale-configure.json" (builtins.toJSON {
-    inherit htpasswdFile;
-    users = lib.listToAttrs (map (uname: {
-      name = uname;
-      value = { passwordFile = serviceCfg.secrets.files."password-${uname}".path; };
-    }) usernames);
-  });
 in
 {
+  imports = [ ./configure.nix ];
+
   custom.homelab.services.radicale = {
     displayName = "Radicale";
     metadata.description = "CalDAV & CardDAV";
@@ -72,25 +67,5 @@ in
       server.hosts = [ "127.0.0.1:${toString serviceCfg.port}" ];
       storage.filesystem_folder = "/var/lib/radicale/collections";
     };
-  };
-
-  systemd.services.radicale-configure = {
-    description = "Generate Radicale htpasswd from homelab users";
-    requiredBy = [ "radicale.service" ];
-    before = [ "radicale.service" ];
-    restartTriggers = [ configFile ./radicale-configure.nu ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      TimeoutStartSec = 600;
-      Restart = "on-failure";
-      RestartSec = 10;
-      UMask = "0027";
-    };
-    startLimitIntervalSec = 300;
-    startLimitBurst = 3;
-    environment.RADICALE_PROVISION_FILE = configFile;
-    path = [ pkgs.apacheHttpd pkgs.nushell pkgs.coreutils ];
-    script = ''nu ${self.lib.builders.writeNushellScript "radicale-configure" ./radicale-configure.nu}'';
   };
 }
