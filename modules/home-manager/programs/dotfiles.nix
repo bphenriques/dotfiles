@@ -23,20 +23,10 @@ in
       default = self.pkgs.dotfiles-secrets;
       description = "package to install regarding secrets.";
     };
-
-    enableFishIntegration = lib.mkOption {
-      type = lib.types.bool;
-      description = "Whether to enable Fish integration.";
-      default = true;
-    };
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package cfg.packageSecrets ];
     home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
-
-    programs.fish = lib.mkIf cfg.enableFishIntegration {
-      plugins = [ { name = "dotfiles"; src = "${cfg.package.src}/fish-plugin"; } ];
-    };
   };
 }

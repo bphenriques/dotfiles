@@ -35,6 +35,29 @@
       '';
     in toString derivation; # only care about the path to the png file
 
+  writeShellToolWithFishPlugin = { name, runtimeInputs ? [], text, fishPluginSrc, meta ? {} }:
+    pkgs.stdenv.mkDerivation {
+      inherit name meta;
+      dontBuild = true;
+      buildCommand = let
+        script = pkgs.writeShellApplication {
+          inherit name runtimeInputs text meta;
+        };
+      in ''
+        mkdir -p $out/bin
+        cp ${script}/bin/${name} $out/bin
+
+        if [ -d "${fishPluginSrc}/functions" ]; then
+          mkdir -p $out/share/fish/vendor_functions.d
+          cp ${fishPluginSrc}/functions/*.fish $out/share/fish/vendor_functions.d/
+        fi
+        if [ -d "${fishPluginSrc}/conf.d" ]; then
+          mkdir -p $out/share/fish/vendor_conf.d
+          cp ${fishPluginSrc}/conf.d/*.fish $out/share/fish/vendor_conf.d/
+        fi
+      '';
+    };
+
   writeNushellScript = name: src:
     pkgs.runCommand "${name}-checked" { } ''
       ${lib.getExe pkgs.nushell} --no-config-file --commands 'if not (nu-check "${src}") { exit 1 }'

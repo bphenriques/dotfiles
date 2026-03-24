@@ -4,14 +4,16 @@ let
   inherit (generators) forAllSystems forLinuxSystems mergeAllSystems;
 
   crossPlatform = forAllSystems (system:
-    let pkgs = nixpkgs.legacyPackages.${system};
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      builders = import ../lib/builders.nix { lib = nixpkgs.lib; inherit pkgs; };
     in rec {
       preview = pkgs.callPackage ./cli/preview { };
-      fzf-rg = pkgs.callPackage ./cli/fzf-rg { };
-      fzf-fd = pkgs.callPackage ./cli/fzf-fd { inherit preview; };
-      project = pkgs.callPackage ./cli/project { inherit preview; };
+      fzf-rg = pkgs.callPackage ./cli/fzf-rg { inherit builders; };
+      fzf-fd = pkgs.callPackage ./cli/fzf-fd { inherit preview builders; };
+      project = pkgs.callPackage ./cli/project { inherit preview builders; };
       bw-session = pkgs.callPackage ./dotfiles/bw-session { };
-      dotfiles = pkgs.callPackage ./dotfiles/dotfiles { };
+      dotfiles = pkgs.callPackage ./dotfiles/dotfiles { inherit builders; };
       dotfiles-secrets = pkgs.callPackage ./dotfiles/dotfiles-secrets { inherit bw-session; };
     }
   );
