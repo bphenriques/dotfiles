@@ -20,7 +20,6 @@ in
     access.allowedGroups = with cfg.groups; [ guests users admin ];
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
 
     # Upload size limit (4GB). A protection on top of Synology quota
     traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296;

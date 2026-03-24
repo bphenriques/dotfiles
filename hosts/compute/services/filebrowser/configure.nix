@@ -52,10 +52,15 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 600;
+      Restart = "on-failure";
+      RestartSec = 10;
       User = "filebrowser";
       Group = "filebrowser";
       StateDirectory = "filebrowser";
     };
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     environment = {
       FILEBROWSER_CONFIG_FILE = configFile;
       FILEBROWSER_DB = filebrowserDb;

@@ -17,7 +17,7 @@ in
     forwardAuth.enable = false; # Home-Assistant mobile apps breaks. Relying on built-in authentication.
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
+    integrations.homepage.tab = "Home";
     backup = {
       package = pkgs.writeShellApplication {
         name = "backup-home-assistant";

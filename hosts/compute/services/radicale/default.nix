@@ -82,8 +82,13 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 600;
+      Restart = "on-failure";
+      RestartSec = 10;
       UMask = "0027";
     };
+    startLimitIntervalSec = 300;
+    startLimitBurst = 3;
     environment.RADICALE_PROVISION_FILE = configFile;
     path = [ pkgs.apacheHttpd pkgs.nushell pkgs.coreutils ];
     script = ''nu ${self.lib.builders.writeNushellScript "radicale-configure" ./radicale-configure.nu}'';

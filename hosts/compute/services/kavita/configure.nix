@@ -67,6 +67,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 600;
       User = kavitaCfg.user;
       Group = kavitaCfg.user;
       Restart = "on-failure";

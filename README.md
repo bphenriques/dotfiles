@@ -9,8 +9,12 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 works _for me_. I hope this helps you!
 
 <p float="center">
-  <img src="hosts/laptop/screenshots/general.png" width="46%" />
-  <img src="hosts/compute/screenshots/homepage.png" width="52%" />
+  <img src="hosts/compute/screenshots/homepage.png" width="49%" />
+  <img src="hosts/compute/screenshots/grafana.png" width="49%" />
+</p>
+<p float="center">
+  <img src="hosts/laptop/screenshots/general.png" width="49%" />
+  <img src="hosts/laptop/screenshots/music-menu.png" width="49%" />
 </p>
 
 ## Hosts

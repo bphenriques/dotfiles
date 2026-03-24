@@ -71,7 +71,7 @@ in
     };
     healthcheck.path = "/ping";
     integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
+    integrations.homepage.tab = "Home";
     integrations.homepage.extraConfig.widget = {
       type = name;
       url = serviceCfg.url;
@@ -118,6 +118,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 600;
       Restart = "on-failure";
       RestartSec = 10;
     };

@@ -39,6 +39,7 @@ in
     package = customPackage;
     listenPort = serviceCfg.port;
     allowedHosts = serviceCfg.publicHost;
+    bookmarks = [ ]; # No use yet, but considering.
     services =
       lib.optional (homepageCfg.generatedHomeServices != []) { "Services" = homepageCfg.generatedHomeServices; }
       ++ [{
@@ -52,8 +53,8 @@ in
               previousDays = 3;
               timezone = config.time.timeZone;
               integrations = [
-                { type = "sonarr"; service_group = "Admin"; service_name = sonarrCfg.displayName; }
-                { type = "radarr"; service_group = "Admin"; service_name = radarrCfg.displayName; }
+                { type = "sonarr"; service_group = "Services"; service_name = sonarrCfg.displayName; }
+                { type = "radarr"; service_group = "Services"; service_name = radarrCfg.displayName; }
               ];
             };
           };
@@ -69,7 +70,7 @@ in
       statusStyle = "dot";
       headerStyle = "clean";
       hideVersion = true;
-      target = "_self";
+      target = "_blank";
       background = "/images/background.png";
       favicon = "/images/favicon.svg";
       quicklaunch = {
@@ -78,6 +79,7 @@ in
         hideVisitURL = true;
       };
       layout = [
+        { "Bookmarks" = { tab = "Home"; style = "row"; columns = 8; header = false; }; }
         { "Services" = { tab = "Home"; style = "row"; columns = 6; header = false; }; }
         { "Movie/TV Agenda" = { tab = "Home"; style = "row"; columns = 3; header = false; }; }
         { "Admin" = { tab = "Admin"; style = "columns"; columns = 6; header = false; useEqualHeights = true; }; }

@@ -56,6 +56,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 600;
       User = config.services.immich.user;
       Group = config.services.immich.group;
       Restart = "on-failure";

@@ -89,6 +89,7 @@ in
     startLimitBurst = 3;
     serviceConfig = {
       Type = "oneshot";
+      TimeoutStartSec = 600;
       User = config.services.couchdb.user;
       Group = config.services.couchdb.group;
       Restart = "on-failure";
