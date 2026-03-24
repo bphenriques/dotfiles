@@ -4,7 +4,7 @@ Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small
 
 <p float="center">
   <img src="screenshots/homepage.png" width="49%" />
-  <img src="screenshots/grafana.png" width="49%" />
+  <img src="screenshots/grafana.png" width="46%" />
 </p>
 
 ## Architecture
