@@ -1,8 +1,10 @@
 { lib, pkgs, builders, ... }:
-builders.writeShellToolWithFishPlugin {
-  name = "fzf-rg";
-  runtimeInputs = [ pkgs.ripgrep pkgs.fzf ];
-  text = lib.fileContents ./script.sh;
+builders.mkFishShellPlugin {
+  drv = pkgs.writeShellApplication {
+    name = "fzf-rg";
+    runtimeInputs = [ pkgs.ripgrep pkgs.fzf ];
+    text = lib.fileContents ./script.sh;
+    meta.platforms = lib.platforms.all;
+  };
   fishPluginSrc = ./fish-plugin;
-  meta.platforms = lib.platforms.all;
 }

@@ -23,18 +23,18 @@ esac
 
 usage() {
   cat <<EOF
-dotfiles [l]ocal <command>
-  [s]ync [--boot] [--test] [--dry-activate]   Apply local configuration
-  [u]pdate                                    Update flake inputs (and brew on Darwin)
-  [b]uild                                     Build local configuration
-  [c]hangelog [N]                              Show changelog between last N profiles (default: 2)
-  [o]ptimise                                  GC and deduplicate the Nix store
-  [r]epair                                    Repair the Nix store
-  [i]nfo                                      List packages in current system
+dotfiles <host|.> <command>
 
-dotfiles [r]emote <host> <command>
-  [s]ync [--boot]                             Deploy configuration to remote host
-  [c]hangelog [N]                              Show changelog for remote host (default: 2)
+  '.' targets the current host ($CURRENT_HOST). Commands that only apply locally
+  are marked with [local].
+
+  [s]ync [--boot] [--test] [--dry-activate]   Apply configuration
+  [c]hangelog [N]                              Show changelog between last N profiles (default: 2)
+  [u]pdate                  [local]            Update flake inputs (and brew on Darwin)
+  [b]uild                   [local]            Build configuration
+  [o]ptimise                [local]            GC and deduplicate the Nix store
+  [r]epair                  [local]            Repair the Nix store
+  [i]nfo                    [local]            List packages in current system
 EOF
 }
 
@@ -74,6 +74,7 @@ _darwin_update() {
   fi
 }
 
+# Note: For health checks and auto-rollback, consider deploy-rs: https://github.com/serokell/deploy-rs
 _nixos_deploy() {
   local host="$1"
   local target_ip
@@ -126,55 +127,62 @@ _nvd_diff_generations() {
 }
 
 cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
+
+target="${1:-}"
+[[ -n $target ]] || { usage; exit 0; }
+shift
+
+# Resolve '.' to the current host
+[[ $target == "." ]] && target="$CURRENT_HOST"
+
+is_local() { [[ $target == "$CURRENT_HOST" ]]; }
+assert_local() { is_local || fatal "'$1' can only be run on the current host (use '.' or '$CURRENT_HOST')"; }
+
 case "${1:-}" in
-  local|l)
+  sync|s)
     shift
-    case "${1:-}" in
-      sync|s)
-        shift
-        info "Dotfiles Sync - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
-        "_${SYSTEM_TYPE}_sync" "$@"
-        ;;
-      update|u)
-        info "Dotfiles Update - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
-        "${NIX[@]}" flake update
-        case "$SYSTEM_TYPE" in
-          darwin) _darwin_update ;;
-        esac
-        ;;
-      build|b)    "_${SYSTEM_TYPE}_build" ;;
-      changelog|c)
-        shift
-        have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
-        _nvd_diff_generations "${1:-2}"
-        ;;
-      optimise|o)
-        info "Optimizing Nix Store - GC + Dedup"
-        nix store gc
-        nix store optimise
-        success "Optimizing Nix Store"
-        ;;
-      repair|r) sudo nix-store --repair --verify --check-contents ;;
-      info|i)   nix-store -qR /run/current-system | sed -n 's|/nix/store/[0-9a-z]\{32\}-||p' | sort -u ;;
-      *) usage; exit 1 ;;
+    if is_local; then
+      info "Dotfiles Sync - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
+      "_${SYSTEM_TYPE}_sync" "$@"
+    else
+      _nixos_deploy "$target" "${1:-}"
+    fi
+    ;;
+  changelog|c)
+    shift
+    if is_local; then
+      have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
+      _nvd_diff_generations "${1:-2}"
+    else
+      _nvd_diff_generations "${1:-2}" ssh "root@$(get_host_ip "$target")"
+    fi
+    ;;
+  update|u)
+    assert_local update
+    info "Dotfiles Update - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
+    "${NIX[@]}" flake update
+    case "$SYSTEM_TYPE" in
+      darwin) _darwin_update ;;
     esac
     ;;
-  remote|r)
-    shift
-    host="${1:-}"
-    [[ -n $host ]] || fatal "Usage: dotfiles remote <host> <command>"
-    shift
-    case "${1:-}" in
-      sync|s)
-        shift
-        _nixos_deploy "$host" "${1:-}"
-        ;;
-      changelog|c)
-        shift
-        _nvd_diff_generations "${1:-2}" ssh "root@$(get_host_ip "$host")"
-        ;;
-      *) usage; exit 1 ;;
-    esac
+  build|b)
+    assert_local build
+    "_${SYSTEM_TYPE}_build"
     ;;
-  *) usage; exit 0 ;;
+  optimise|o)
+    assert_local optimise
+    info "Optimizing Nix Store - GC + Dedup"
+    nix store gc
+    nix store optimise
+    success "Optimizing Nix Store"
+    ;;
+  repair|r)
+    assert_local repair
+    sudo nix-store --repair --verify --check-contents
+    ;;
+  info|i)
+    assert_local info
+    nix-store -qR /run/current-system | sed -n 's|/nix/store/[0-9a-z]\{32\}-||p' | sort -u
+    ;;
+  *) usage; exit 1 ;;
 esac

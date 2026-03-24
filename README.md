@@ -101,11 +101,11 @@ I use a companion private `dotfiles-private` repository as a flake input for pri
 A [`dot`](./packages/dotfiles/dotfiles) CLI wraps the native rebuild tools:
 
 ```bash
-dot l s              # apply changes to the current host
-dot l u              # update flake inputs
-dot l c              # show changelog between last two local profiles
-dot r compute s      # deploy to the compute host remotely
-dot r compute c      # show changelog for the compute host
+dot . s              # apply changes to the current host
+dot . u              # update flake inputs
+dot . c              # show changelog between last two local profiles
+dot compute s        # deploy to the compute host remotely
+dot compute c        # show changelog for the compute host
 ```
 
 ## AI Disclaimer
