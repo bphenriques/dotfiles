@@ -14,7 +14,6 @@ in
     metadata.category = "Media";
     port = 2283;
     subdomain = "photos";
-    # TODO: admin-password could be removed if Immich supports OIDC-only admin
     secrets = {
       files.admin-password = { rotatable = false; };
       systemd.dependentServices = [ "immich-configure" ];

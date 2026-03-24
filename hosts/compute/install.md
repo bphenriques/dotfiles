@@ -36,7 +36,7 @@ Register admin passkey via browser (accept the invite received via email)
 
 1. Complete onboarding wizard
 2. Flash ZBT-2 with OpenThread RCP firmware using [Device Toolbox](https://toolbox.openhomefoundation.org/home-assistant-connect-zbt-2/) from a PC with Chrome
-3. Add OTBR integration: Settings → Integrations → OTBR → `http://127.0.0.1:8081`
+3. Add OTBR integration: Settings → Integrations → OTBR → `http://127.0.0.1:8091`
 4. Add Thread integration: set OTBR network as preferred, enable Android/iOS credentials
 5. Add Matter integration: accept default websocket URL
 6. Sync Thread credentials in companion app, then commission Matter devices by scanning QR codes

@@ -14,7 +14,7 @@ in
     port = 8123;
     subdomain = "home";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];
-    forwardAuth.enable = true;
+    forwardAuth.enable = false; # Home-Assistant mobile apps breaks. Relying on built-in authentication.
     healthcheck.path = "/manifest.json";
     integrations.homepage.enable = true;
     integrations.homepage.tab = "Admin";

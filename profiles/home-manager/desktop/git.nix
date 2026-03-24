@@ -93,6 +93,7 @@ in
     signing = {
       key = "792C2768AD3A4930BCCFA467075389B5C3ADA858";
       signByDefault = true;
+      format = "openpgp";
     };
 
     ignores = [

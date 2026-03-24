@@ -1,4 +1,4 @@
-{ lib, self, ... }: {
+{ pkgs, lib, self, ... }: {
   # Auto-reboot on failure
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
@@ -29,6 +29,6 @@
       LoginGraceTime = "30s";
     };
   };
-}
 
-# TODO: https://blog.aldnav.com/blog/going-headless-with-nixos/
+  environment.systemPackages = [ pkgs.nvd ]; # Remote changelog diffing
+}
