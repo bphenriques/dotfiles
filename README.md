@@ -10,8 +10,9 @@ works _for me_. I hope this helps you!
 
 <p float="center">
   <img src="hosts/compute/screenshots/homepage.png" width="49%" />
-  <img src="hosts/compute/screenshots/grafana.png" width="49%" />
+  <img src="hosts/compute/screenshots/grafana.png" width="46%" />
 </p>
+
 <p float="center">
   <img src="hosts/laptop/screenshots/general.png" width="49%" />
   <img src="hosts/laptop/screenshots/music-menu.png" width="49%" />
