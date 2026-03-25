@@ -3,6 +3,37 @@ _:
 {
   programs.claude-code = {
     enable = true;
+
+    settings = {
+      model = "opus";
+      permissions = {
+        allow = [
+          "Skill"
+          "Read"
+          "Glob"
+          "Grep"
+          "Agent"
+          "Bash(git *)"
+          "Bash(nix *)"
+          "Bash(home-manager *)"
+          "Bash(nixos-rebuild *)"
+        ];
+      };
+      hooks = {
+        Stop = [
+          {
+            matcher = "";
+            hooks = [
+              {
+                type = "command";
+                command = "bash ${./claude-code-stop-hook.sh}";
+              }
+            ];
+          }
+        ];
+      };
+    };
+
     skills = {
       review-code = ''
         ---
