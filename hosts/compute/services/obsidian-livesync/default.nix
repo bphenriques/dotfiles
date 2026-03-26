@@ -61,12 +61,18 @@ in
     };
   };
   systemd.services.couchdb = {
-    # The Erlang BEAM VM uses busy-wait schedulers by default to reduce latency.
-    # In my case, I am ok with initial delay to ensure CPU remains idle most times:
-    # - +sbwt none: Disable scheduler busy-wait threshold
-    # - +sbwtdcpu none: Disable dirty CPU scheduler busy-wait
-    # - +sbwtdio none: Disable dirty I/O scheduler busy-wait
-    environment.ERL_ZFLAGS = "+sbwt none +sbwtdcpu none +sbwtdio none";
+    # Tune Erlang BEAM VM for low-traffic, single-user Obsidian sync.
+    # Outcome of troubleshooting high idle CPU (~2%) with no active traffic.
+    #
+    # Scheduler count (defaults to 1 per CPU core):
+    # - +S 2:2:       Use 2 normal schedulers (enough for HTTP + compaction concurrency)
+    # - +SDcpu 2:2:   Use 2 dirty CPU schedulers (matches normal scheduler count)
+    #
+    # Busy-wait (defaults to spinning to reduce latency):
+    # - +sbwt none:      Disable scheduler busy-wait threshold
+    # - +sbwtdcpu none:  Disable dirty CPU scheduler busy-wait
+    # - +sbwtdio none:   Disable dirty I/O scheduler busy-wait
+    environment.ERL_ZFLAGS = "+S 2:2 +SDcpu 2:2 +sbwt none +sbwtdcpu none +sbwtdio none";
     serviceConfig.RuntimeDirectory = "couchdb";
   };
 

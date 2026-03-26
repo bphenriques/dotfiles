@@ -1,8 +1,11 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.home-assistant;
+  inherit (config.systemd.services.home-assistant.serviceConfig) User Group;
+
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
   otbrDataDir = "/var/lib/otbr";
+  configDir = config.services.home-assistant.configDir;
 in
 {
   custom.homelab.services.home-assistant = {
@@ -21,9 +24,7 @@ in
     backup = {
       package = pkgs.writeShellApplication {
         name = "backup-home-assistant";
-        text = ''
-          cp -a "${config.services.home-assistant.configDir}/backups/." "$OUTPUT_DIR/"
-        '';
+        text = ''cp -a "${configDir}/backups/." "$OUTPUT_DIR/"'';
       };
       after = [ "home-assistant.service" ];
     };
@@ -46,7 +47,6 @@ in
 
     config = {
       default_config = {};
-
       homeassistant = {
         name = "Home";
         unit_system = "metric";
@@ -54,6 +54,8 @@ in
         # Lisbon city center (not a personal address)
         latitude = 38.736946;
         longitude = -9.142685;
+        external_url = serviceCfg.publicUrl;
+        internal_url = serviceCfg.url;
       };
 
       http = {
@@ -70,14 +72,10 @@ in
     };
   };
 
-  # Ensure UI-managed YAML files exist on first boot
-  systemd.tmpfiles.rules = let
-    dir = config.services.home-assistant.configDir;
-    inherit (config.systemd.services.home-assistant.serviceConfig) User Group;
-  in [
-    "f ${dir}/automations.yaml 0644 ${User} ${Group} -"
-    "f ${dir}/scenes.yaml 0644 ${User} ${Group} -"
-    "f ${dir}/scripts.yaml 0644 ${User} ${Group} -"
+  systemd.tmpfiles.rules = [
+    "f ${configDir}/automations.yaml 0644 ${User} ${Group} -"
+    "f ${configDir}/scenes.yaml 0644 ${User} ${Group} -"
+    "f ${configDir}/scripts.yaml 0644 ${User} ${Group} -"
     "d ${otbrDataDir} 0755 root root -"
   ];
 
