@@ -28,6 +28,7 @@ in
     ./radicale
     ./tandoor-recipes
     ./filebrowser
+    ./gitea
     ./bentopdf.nix
   ];
 

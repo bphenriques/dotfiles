@@ -33,6 +33,8 @@ in
         root_url = serviceCfg.publicUrl;
       };
       analytics.reporting_enabled = false;
+      "unified_alerting".enabled = false;
+      alerting.enabled = false; # Already using Alert Manager
       dashboards.default_home_dashboard_path = "${systemDashboard}";
       security.secret_key = "$__file{${serviceCfg.secrets.files.secret-key.path}}";
       users.allow_sign_up = false;
