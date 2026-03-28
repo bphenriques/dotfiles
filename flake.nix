@@ -5,7 +5,7 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
-      # "https://nixos-raspberrypi.cachix.org"
+      # "https://nixos-raspberrypi.cachix.org"  # No binary cache published for the inky (aarch64-linux) host
    ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="

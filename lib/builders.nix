@@ -9,12 +9,12 @@
   }: pkgs.writeShellApplication {
       inherit name runtimeInputs;
       text = let
-        options = lib.concatMapStringsSep "\\n" (entry: entry.label) entries;
+        options = lib.concatMapStringsSep "\n" (entry: entry.label) entries;
         exec = "${lib.getExe package} --dmenu ${extraArgs}";
       in ''
         #shellcheck shell=bash
 
-        chosen="$(echo -e "${options}" | ${exec})"
+        chosen="$(printf '%s' "${options}" | ${exec})"
         case ''${chosen} in
           ${lib.concatMapStringsSep "\n" (entry: ''"${entry.label}") ${entry.exec} ;;'') entries}
         esac
@@ -49,6 +49,7 @@
           cp ${fishPluginSrc}/conf.d/*.fish $out/share/fish/vendor_conf.d/
         fi
       '';
+      meta.platforms = lib.platforms.all;
     };
 
   writeNushellScript = name: src:

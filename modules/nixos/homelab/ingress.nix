@@ -73,12 +73,19 @@ in
 
     assertions = let
       forwardAuthServices = lib.filter (s: s.forwardAuth.enable && s.ingress.enable) (lib.attrValues cfg.services);
+      middlewareConflicts = lib.filter (s: lib.hasAttr "forwardAuth" s.traefik.middlewares) forwardAuthServices;
     in [
       {
         assertion = forwardAuthServices == [ ] || ingressCfg.forwardAuth.enable;
         message = "Services have forwardAuth enabled but custom.homelab.ingress.forwardAuth.enable is false: ${
           lib.concatMapStringsSep ", " (s: s.name) forwardAuthServices
         }. Traefik would silently skip auth for these services.";
+      }
+      {
+        assertion = middlewareConflicts == [ ];
+        message = "Services define a 'forwardAuth' middleware that conflicts with the built-in auth gateway: ${
+          lib.concatMapStringsSep ", " (s: s.name) middlewareConflicts
+        }. Rename the custom middleware to avoid silently overriding authentication.";
       }
     ];
 

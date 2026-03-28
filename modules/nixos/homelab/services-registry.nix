@@ -157,7 +157,10 @@ in
   options.custom.homelab = {
     enable = lib.mkEnableOption "home-server services";
 
-    # Internal extension point for per-service options (e.g., integrations).
+    # Internal extension point: other homelab modules (oidc.nix, backup.nix, monitoring.nix)
+    # append submodule definitions here to augment the per-service schema at evaluation time.
+    # Each consumer adds its own sub-namespace (e.g. `oidc`, `backup`, `integrations`).
+    # This avoids circular imports while keeping the registry the single source of truth.
     _serviceOptionExtensions = lib.mkOption {
       type = lib.types.listOf lib.types.deferredModule;
       default = [ ];
