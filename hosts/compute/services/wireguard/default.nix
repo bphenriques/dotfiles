@@ -163,6 +163,12 @@ in
         # Drop all other WireGuard client forwarding (restricted clients can only reach server)
         iifname "${interface}" drop
       }
+
+      # NAT: masquerade WireGuard client traffic forwarded to LAN so replies route back through compute
+      chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip saddr ${clientSubnet} ip daddr ${self.shared.networks.main.subnet} masquerade
+      }
     '';
   };
 
