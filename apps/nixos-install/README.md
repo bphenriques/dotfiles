@@ -53,6 +53,17 @@
     nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' $FLAKE_URL#desktop-post-install --refresh -- "$HOST" "$BITWARDEN_EMAIL"
     ```
 
+## Install SD card
+
+1. Identify the SD card device: `sudo fdisk -l`
+2. Build and flash:
+   ```shell
+   HOST=inky
+   DEVICE=/dev/sdX
+   BITWARDEN_EMAIL=me@me.com
+   nix run .#nixos-install -- sd-card "$HOST" "$BITWARDEN_EMAIL" "$DEVICE"
+   ```
+
 # Misc
 
 ## NVMes

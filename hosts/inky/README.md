@@ -6,26 +6,11 @@ Raspberry Pi Zero 2W with Inky Impression 7.3" display powering [InkyPi](https:/
 
 ### SD Card Installation
 
-Build the SD card image (cross-compiles for `aarch64-linux`):
-
-```bash
-nix build .#nixosConfigurations.inky.config.system.build.images.sd-card
-```
-
-Flash it to the SD card:
+Build, flash, and provision secrets in one step:
 
 ```bash
 sudo fdisk -l  # Identify the SD card device (e.g. /dev/sdX)
-zstdcat result/nixos-image-*.img.zst | sudo dd bs=4M of=/dev/sdX iflag=fullblock status=progress oflag=sync
-```
-
-Before first boot, copy the SOPS age key so secrets can be decrypted:
-
-```bash
-sudo mkdir -p /mnt/var/lib/sops-nix
-sudo cp <AGE_KEY_FILE> /mnt/var/lib/sops-nix/system-keys.txt
-sudo chmod 400 /mnt/var/lib/sops-nix/system-keys.txt
-sudo umount /mnt
+nix run .#nixos-install -- sd-card inky <bw-email> /dev/sdX
 ```
 
 Insert the SD card into the Pi Zero 2W and power it on. It should connect to WiFi and be reachable at `inky.local` (mDNS) or `192.168.1.197` (static DHCP reservation).

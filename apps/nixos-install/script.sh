@@ -14,9 +14,10 @@ usage() {
 Install NixOS on a new machine.
 
 Usage:
-  $0 remote <host> <bw-email> <ssh-host>   Install remotely via nixos-anywhere
-  $0 local  <host> <bw-email>              Install locally (booted from USB)
-  $0 rescue <host> <bw-email>              Mount encrypted disks for recovery
+  $0 remote  <host> <bw-email> <ssh-host>   Install remotely via nixos-anywhere
+  $0 local   <host> <bw-email>              Install locally (booted from USB)
+  $0 rescue  <host> <bw-email>              Mount encrypted disks for recovery
+  $0 sd-card <host> <bw-email> <device>     Build and flash SD card image
 
 Prerequisites:
   1. Create host config: hosts/<host>/{config.nix,hardware-configuration.nix,disko.nix}
@@ -134,11 +135,60 @@ rescue() {
   sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 }
 
+sd_card_install() {
+  [[ $# -eq 3 ]] || usage
+  local host="$1"
+  local bw_email="$2"
+  local device="$3"
+
+  # Safety: confirm device
+  [[ -b "$device" ]] || fatal "Not a block device: ${device}"
+  info "WARNING: This will overwrite ALL data on ${device}"
+  read -rp "Type 'yes' to continue: " confirm
+  [[ "$confirm" == "yes" ]] || fatal "Aborted"
+
+  info "Building SD card image for ${host}..."
+  local image_path
+  image_path="$(nix build "${FLAKE_URL}#nixosConfigurations.${host}.config.system.build.images.sd-card" --no-link --print-out-paths)"
+
+  info "Flashing image to ${device}..."
+  zstdcat "${image_path}"/*.img.zst | sudo dd bs=4M of="${device}" iflag=fullblock status=progress oflag=sync
+
+  # Wait for partition table to be re-read
+  sudo partprobe "${device}"
+  sleep 2
+
+  info "Mounting root partition to install secrets..."
+  local mount_dir
+  mount_dir="$(mktemp -d)"
+  sudo mount /dev/disk/by-label/NIXOS_SD "$mount_dir"
+
+  unlock_bitwarden "$bw_email"
+
+  info "Fetching sops key for ${host}..."
+  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1; then
+    sudo mkdir -p "${mount_dir}${SOPS_AGE_SYSTEM_FILE%/*}"
+    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "${mount_dir}${SOPS_AGE_SYSTEM_FILE}" > /dev/null
+    sudo chmod 400 "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
+    success "Host sops key installed"
+  else
+    sudo umount "$mount_dir"
+    rmdir "$mount_dir"
+    fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
+  fi
+
+  sudo umount "$mount_dir"
+  rmdir "$mount_dir"
+
+  success "SD card ready. Insert into the device and power on."
+}
+
 [[ $# -lt 1 ]] && usage
 
 case "$1" in
-  remote) shift; remote_install "$@" ;;
-  local)  shift; local_install "$@"  ;;
-  rescue) shift; rescue "$@"         ;;
+  remote)  shift; remote_install "$@"  ;;
+  local)   shift; local_install "$@"   ;;
+  rescue)  shift; rescue "$@"          ;;
+  sd-card) shift; sd_card_install "$@" ;;
   *) usage ;;
 esac
