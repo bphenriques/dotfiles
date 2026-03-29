@@ -20,6 +20,7 @@
     };
     scrapeConfigs = [{
       job_name = "postgres";
+      scrape_interval = "120s";
       static_configs = [{
         targets = [ "127.0.0.1:9187" ];
         labels.instance = config.networking.hostName;
@@ -31,7 +32,7 @@
         {
           alert = "PostgresDown";
           expr = "pg_up == 0";
-          "for" = "2m";
+          "for" = "5m";
           labels.severity = "critical";
           annotations.summary = "PostgreSQL down";
         }

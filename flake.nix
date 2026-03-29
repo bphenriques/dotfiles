@@ -53,8 +53,8 @@
       );
       apps      = import ./apps { inherit nixpkgs self generators; };
       packages  = import ./packages { inherit nixpkgs generators; };
-      formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);                       # `nix fmt`
-      checks    = forAllSystems (system: {                                                                  # `nix flake check`
+      formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper); # `nix fmt`
+      checks    = forAllSystems (system: {                                            # `nix flake check`
         formatting = treefmtEval.${system}.config.build.check self;
       } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
         eval-compute = self.nixosConfigurations.compute.config.system.build.toplevel;

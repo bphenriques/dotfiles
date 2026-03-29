@@ -12,8 +12,5 @@
       auto-optimise-store   = true;                       # Optimise the store when building
     };
   };
-  nixpkgs.config = {
-    allowUnfree = true; # I was maintaining a list.. because it was _nicer_ and _explicit_ but.. I am lazy.
-    permittedInsecurePackages = [ ];
-  };
+  nixpkgs.config.allowUnfree = true; # I was maintaining a list.. because it was _nicer_ and _explicit_ but.. I am lazy.
 }

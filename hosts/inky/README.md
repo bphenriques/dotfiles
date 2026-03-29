@@ -1,24 +1,34 @@
 # Inky
 
-Raspberry Pi Zero 2W with an e-ink display for ambient information and music playback.
-
-## Hardware
-
-- **Model**: Raspberry Pi Zero 2W
-- **CPU**: ARM Cortex-A53 (quad-core)
-- **RAM**: 512MB
-- **Storage**: SD card
-- **Display**: Inky Impression 7.3" (SPI)
-- **Audio**: MAX98357A I2S DAC (hifiberry-dac overlay)
-- **Network**: WiFi only (wlan0)
-
-## Software
-
-- **Display**: [InkyPi](https://github.com/fatihak/InkyPi) - web-based e-ink dashboard
-- **Music**: [Music Player Daemon](https://www.musicpd.org/) with ALSA output
-- **Discovery**: Avahi (mDNS) - accessible via `inky.local`
+Raspberry Pi Zero 2W with Inky Impression 7.3" display powering [InkyPi](https://github.com/fatihak/InkyPi) and a small DAC (MAX98357A) for the [Music Player Daemon](https://www.musicpd.org/).
 
 ## Setup
+
+### SD Card Installation
+
+Build the SD card image (cross-compiles for `aarch64-linux`):
+
+```bash
+nix build .#nixosConfigurations.inky.config.system.build.images.sd-card
+```
+
+Flash it to the SD card:
+
+```bash
+sudo fdisk -l  # Identify the SD card device (e.g. /dev/sdX)
+zstdcat result/nixos-image-*.img.zst | sudo dd bs=4M of=/dev/sdX iflag=fullblock status=progress oflag=sync
+```
+
+Before first boot, copy the SOPS age key so secrets can be decrypted:
+
+```bash
+sudo mkdir -p /mnt/var/lib/sops-nix
+sudo cp <AGE_KEY_FILE> /mnt/var/lib/sops-nix/system-keys.txt
+sudo chmod 400 /mnt/var/lib/sops-nix/system-keys.txt
+sudo umount /mnt
+```
+
+Insert the SD card into the Pi Zero 2W and power it on. It should connect to WiFi and be reachable at `inky.local` (mDNS) or `192.168.1.197` (static DHCP reservation).
 
 ### InkyPi Installation
 
@@ -50,19 +60,3 @@ aplay -l  # Should show "sndrpihifiberry"
 | 5000 | InkyPi web UI   |
 | 6600 | MPD             |
 
-## Notes
-
-### SD Card Wear Reduction
-- Logs stored in RAM (volatile journald)
-- `/tmp` as tmpfs (64MB)
-- Root filesystem: `noatime` + `commit=60`
-
-### Power Optimization (~30-40% reduction)
-- GPU frequency scales down to 50MHz when idle
-- Activity LED disabled
-- Bluetooth disabled
-- CPU governor: `ondemand`
-
-### Reliability
-- Hardware watchdog enabled (30s timeout, 10min reboot)
-- WiFi-only boot (doesn't wait for ethernet)

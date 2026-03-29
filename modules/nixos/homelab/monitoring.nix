@@ -89,6 +89,7 @@ let
     byModule = lib.groupBy (s: s.healthcheck.probeModule) healthcheckedServices;
   in lib.mapAttrsToList (moduleName: services: {
     job_name = "healthcheck-${moduleName}";
+    scrape_interval = "300s";  # Reduce wakeups: healthcheck probes don't need 60s resolution
     metrics_path = "/probe";
     params.module = [ moduleName ];
     static_configs = map (s: {
@@ -107,16 +108,16 @@ let
       {
         alert = "ServiceDown";
         expr = "probe_success == 0";
-        "for" = "3m";
+        "for" = "6m";
         labels.severity = "critical";
         annotations.summary = "{{ $labels.instance }} unreachable";
       }
       {
         alert = "ServiceSlowResponse";
-        expr = "probe_success == 1 and probe_duration_seconds > 10";
+        expr = "probe_success == 1 and probe_duration_seconds > 4";
         "for" = "5m";
         labels.severity = "warning";
-        annotations.summary = "{{ $labels.instance }} slow (>10s)";
+        annotations.summary = "{{ $labels.instance }} slow (>4s)";
       }
     ];
   }];

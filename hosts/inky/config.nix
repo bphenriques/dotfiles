@@ -1,7 +1,4 @@
-{ config, pkgs, lib, ... }:
-let
-  shared = import ../shared.nix;
-in
+{ config, pkgs, lib, self, ... }:
 {
   imports = [
     # Base
@@ -17,10 +14,10 @@ in
   networking.hostName = "inky";
 
   # Homelab integration
-  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} shared.networks.main.hosts;
+  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} self.shared.networks.main.hosts;
   custom.homelab.smb = {
     enable = true;
-    hostname = shared.networks.main.hosts.bruno-home-nas;
+    hostname = self.shared.networks.main.hosts.bruno-home-nas;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
       bphenriques = { gid = 5000; };
@@ -39,8 +36,13 @@ in
     '';
   };
 
+  # Media paths (derived from SMB mount)
+  custom.homelab.paths = {
+    media.root = config.custom.homelab.smb.mounts.media.localMount;
+  };
+
   # WiFi configuration - Pi Zero 2W uses wireless only
-  networking.nameservers = [ shared.dns.cloudflare ];
+  networking.nameservers = [ self.shared.dns.cloudflare ];
   networking.wireless = {
     enable = true;
     interfaces = [ "wlan0" ];
@@ -75,10 +77,7 @@ in
   powerManagement.cpuFreqGovernor = "ondemand";
 
   # Watchdog for automatic recovery from hangs
-  systemd.watchdog = {
-    runtimeTime = "30s";
-    rebootTime = "10min";
-  };
+  systemd.watchdog.rebootTime = "10min";
 
   # Secrets
   sops.defaultSopsFile = ./secrets.yaml;

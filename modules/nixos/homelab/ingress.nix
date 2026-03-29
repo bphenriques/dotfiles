@@ -64,6 +64,7 @@ in
     custom.homelab.monitoring.scopes.traefik = {
       scrapeConfigs = [{
         job_name = "traefik";
+        scrape_interval = "120s";
         static_configs = [{
           targets = [ "127.0.0.1:${toString ingressCfg.metricsPort}" ];
           labels.instance = config.networking.hostName;

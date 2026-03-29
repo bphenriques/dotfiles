@@ -68,7 +68,7 @@ in
       # Features I do not need
       mailer.ENABLED = false;
       packages.ENABLED = false;
-      #cron."update_checker".ENABLED = false;q
+      "cron.update_checker".ENABLED = false;
       indexer.REPO_INDEXER_ENABLED = false;
       other.SHOW_FOOTER_VERSION = false;
       actions.ENABLED = false;

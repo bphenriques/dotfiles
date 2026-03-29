@@ -22,6 +22,7 @@ in
     integrations.monitoring = {
       scrapeConfigs = [{
         job_name = "prometheus";
+        scrape_interval = "300s";
         static_configs = [{
           targets = [ "127.0.0.1:${toString port}" ];
         }];
@@ -31,7 +32,7 @@ in
         rules = [{
           alert = "PrometheusTargetDown";
           expr = "up == 0";
-          "for" = "5m";
+          "for" = "10m";
           labels.severity = "warning";
           annotations.summary = "{{ $labels.job }}/{{ $labels.instance }} down";
         }];

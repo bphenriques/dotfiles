@@ -158,7 +158,9 @@ in
       KIOSK_MODE = "true";  # Read-only access without login; OIDC users still get full access
 
       # Auto-scan: picks up new/changed ROMs without manual intervention
-      ENABLE_RESCAN_ON_FILESYSTEM_CHANGE = "true";
+      # Filesystem watching uses polling (not inotify) on Podman bind mounts, wasting CPU.
+      # The daily scheduled rescan is sufficient.
+      ENABLE_RESCAN_ON_FILESYSTEM_CHANGE = "false";
       ENABLE_SCHEDULED_RESCAN = "true";
       SCHEDULED_RESCAN_CRON = "0 3 * * *";
 

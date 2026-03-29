@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, config, self, ... }:
 let
   smbCfg = config.custom.homelab.smb;
 in
@@ -13,6 +13,8 @@ in
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
+
+    openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
   };
 
   programs.git = {

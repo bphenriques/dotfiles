@@ -15,20 +15,6 @@
   };
 
   networking.useDHCP = false;
-  networking.firewall.enable = true;
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "prohibit-password";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      X11Forwarding = false;
-      AllowAgentForwarding = false;
-      AllowTcpForwarding = false;
-      MaxAuthTries = 3;
-      LoginGraceTime = "30s";
-    };
-  };
 
   environment.systemPackages = [ pkgs.nvd ]; # Remote changelog diffing
 }

@@ -15,6 +15,21 @@
 
   boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
 
+  networking.firewall.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "prohibit-password";
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      X11Forwarding = false;
+      AllowAgentForwarding = false;
+      AllowTcpForwarding = false;
+      MaxAuthTries = 3;
+      LoginGraceTime = "30s";
+    };
+  };
+
   # Localization
   time.timeZone = "Europe/Lisbon";
   i18n = {
@@ -24,14 +39,6 @@
       "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME"
     ] (_: "pt_PT.UTF-8");
   };
-
-  environment.systemPackages = let
-    filesystems = [ pkgs.exfat pkgs.ntfs3g ]; # Support exFAT and NTFS
-    hardware    = [
-      pkgs.powertop   # Check what is consuming too much energy
-      pkgs.usbutils   # USB utilities
-    ];
-  in filesystems ++ hardware;
 
   programs.fish.enable = true;  # System level.
 

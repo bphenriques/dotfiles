@@ -27,24 +27,44 @@ def ensure_admin [] {
   }
 }
 
+def find_auth_source_id [name: string] {
+  let r = ^gitea $config_flag admin auth list --vertical-bars | complete
+  if $r.exit_code != 0 { return null }
+  $r.stdout | str trim | lines | skip 1 | each { |line|
+    let cols = $line | split row "|" | each { |c| $c | str trim }
+    if ($cols | length) >= 4 and $cols.1 == $name {
+      $cols.0 | into int
+    }
+  } | flatten | get 0?
+}
+
 def ensure_oidc_source [] {
-  let list_result = ^gitea $config_flag admin auth list --vertical-bars | complete
-  let existing_id = if $list_result.exit_code == 0 {
-    $list_result.stdout | str trim | lines | skip 1 | each { |line|
-      let cols = $line | split row "|" | each { |c| $c | str trim }
-      if ($cols | length) >= 3 and $cols.2 == $source_name {
-        $cols.1 | into int
-      }
-    } | flatten | get 0?
+  let oauth_args = [--name $source_name --provider openidConnect --key $client_id --secret $client_secret --auto-discover-url $env.OIDC_DISCOVERY_URL --scopes "openid,email,profile,groups"]
+
+  let existing_id = find_auth_source_id $source_name
+  if $existing_id != null {
+    ^gitea $config_flag admin auth update-oauth --id ($existing_id | into string) ...$oauth_args
+    print $"OIDC source '($source_name)' updated"
+    return
   }
 
-  if $existing_id != null {
-    ^gitea $config_flag admin auth update-oauth --id $existing_id --name $source_name --provider openidConnect --key $client_id --secret $client_secret --auto-discover-url $env.OIDC_DISCOVERY_URL --scopes "openid,email,profile,groups"
-    print $"OIDC source '($source_name)' updated"
-  } else {
-    ^gitea $config_flag admin auth add-oauth --name $source_name --provider openidConnect --key $client_id --secret $client_secret --auto-discover-url $env.OIDC_DISCOVERY_URL --scopes "openid,email,profile,groups"
+  # Try to create; if it already exists (race or name mismatch in list parsing), find and update instead
+  let r = ^gitea $config_flag admin auth add-oauth ...$oauth_args | complete
+  if $r.exit_code == 0 {
     print $"OIDC source '($source_name)' created"
+    return
   }
+
+  if ($r.stderr | str contains "already exists") {
+    let id = find_auth_source_id $source_name
+    if $id != null {
+      ^gitea $config_flag admin auth update-oauth --id ($id | into string) ...$oauth_args
+      print $"OIDC source '($source_name)' updated"
+      return
+    }
+  }
+
+  error make { msg: $"Failed to configure OIDC source: ($r.stderr)" }
 }
 
 def main [] {

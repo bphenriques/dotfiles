@@ -29,7 +29,10 @@
     ];
   };
   environment.systemPackages = [ pkgs.intel-gpu-tools ];
-  boot.kernelParams = [ "i915.enable_guc=3" ]; # Enable GuC/HuC firmware for better media scheduling
+  boot.kernelParams = [
+    "i915.enable_guc=3"                # Enable GuC/HuC firmware for better media scheduling
+    "block.events_dfl_poll_msecs=0"     # Disable removable media polling (no optical drives)
+  ];
 
   # Bonding: only bond0 gets DHCP, physical interfaces stay silent
   # Router DHCP reservation should use bond0's MAC (inherited from enp1s0)
@@ -154,7 +157,7 @@
     };
     scrapeConfigs = [{
       job_name = "smartctl";
-      scrape_interval = "5m";
+      scrape_interval = "15m";
       static_configs = [{
         targets = [ "127.0.0.1:9633" ];
         labels.instance = config.networking.hostName;

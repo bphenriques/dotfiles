@@ -69,6 +69,13 @@
       SupplementaryGroups = [ "spi" "gpio" ];
       NoNewPrivileges = true;
       PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ "/opt/inkypi" ];
+      ProtectKernelTunables = true;
+      ProtectControlGroups = true;
+      RestrictRealtime = true;
+      DeviceAllow = [ "/dev/spidev* rw" "/dev/gpiochip* rw" ];
     };
   };
 

@@ -10,5 +10,9 @@
     shellcheck.enable = true; # Shell script linter
   };
 
-  settings.formatter.shfmt.options = [ "-i" "2" "-ci" "-s" ]; # 2-space indent, indent case labels, simplify var
+  settings.formatter.shfmt.options = [
+    "-i" "2" # 2-space indentation
+    "-ci"    # indent switch/case labels
+    "-s"     # simplify shell expressions
+  ];
 }

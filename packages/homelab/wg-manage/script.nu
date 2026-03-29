@@ -31,8 +31,8 @@ def validate_iface_name [device: string] {
   if ($iface_name | str length) > 15 {
     error make { msg: $"Interface name '($iface_name)' exceeds 15 chars" }
   }
-  if ($iface_name | str replace --all '[a-z0-9-]' '' | is-not-empty) {
-    error make { msg: $"Interface name '($iface_name)' contains invalid characters (allowed: a-z, 0-9, -)" }
+  if ($iface_name | str replace --all --regex '[a-z0-9-]' '' | is-not-empty) {
+    error make { msg: $"Interface name '($iface_name)' contains invalid characters [allowed: a-z, 0-9, -]" }
   }
 }
 

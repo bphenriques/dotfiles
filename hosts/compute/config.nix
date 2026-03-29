@@ -77,6 +77,12 @@
     };
   };
 
+  # FIXME: Temporary
+  environment.systemPackages = [
+    pkgs.powertop
+    pkgs.usbutils
+  ];
+
   # Secrets
   sops.defaultSopsFile = self.private.hosts.compute.sopsSecretsFile;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";

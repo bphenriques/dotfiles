@@ -16,7 +16,7 @@ in
     ./cleanuparr.nix
     ./romm
     ./homepage
-    ./obsidian-livesync
+    #./obsidian-livesync
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
