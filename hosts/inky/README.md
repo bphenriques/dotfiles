@@ -10,6 +10,7 @@ Build, flash, and provision secrets in one step:
 
 ```bash
 sudo fdisk -l  # Identify the SD card device (e.g. /dev/sdX)
+export FLAKE_URL=.  # Use local checkout (default: github:bphenriques/dotfiles/main)
 nix run .#nixos-install -- sd-card inky <bw-email> /dev/sdX
 ```
 

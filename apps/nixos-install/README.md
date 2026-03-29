@@ -56,11 +56,12 @@
 ## Install SD card
 
 1. Identify the SD card device: `sudo fdisk -l`
-2. Build and flash:
+2. Build, flash, and provision secrets:
    ```shell
    HOST=inky
    DEVICE=/dev/sdX
    BITWARDEN_EMAIL=me@me.com
+   export FLAKE_URL=.  # Use local checkout (default: github:bphenriques/dotfiles/main)
    nix run .#nixos-install -- sd-card "$HOST" "$BITWARDEN_EMAIL" "$DEVICE"
    ```
 

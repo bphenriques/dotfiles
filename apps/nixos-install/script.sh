@@ -147,6 +147,11 @@ sd_card_install() {
   read -rp "Type 'yes' to continue: " confirm
   [[ "$confirm" == "yes" ]] || fatal "Aborted"
 
+  # Pre-flight: verify secrets are available before destructive operations
+  unlock_bitwarden "$bw_email"
+  dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1 \
+    || fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
+
   info "Building SD card image for ${host}..."
   local image_path
   image_path="$(nix build "${FLAKE_URL}#nixosConfigurations.${host}.config.system.build.images.sd-card" --no-link --print-out-paths)"
@@ -158,27 +163,27 @@ sd_card_install() {
   sudo partprobe "${device}"
   sleep 2
 
-  info "Mounting root partition to install secrets..."
+  # Find the NIXOS_SD partition on the specific device
+  local root_part
+  root_part="$(lsblk -rno PATH,LABEL "$device" | awk '$2=="NIXOS_SD"{print $1; exit}')"
+  [[ -n "$root_part" ]] || fatal "Could not find NIXOS_SD partition on ${device}"
+
+  info "Mounting ${root_part} to install secrets..."
   local mount_dir
   mount_dir="$(mktemp -d)"
-  sudo mount /dev/disk/by-label/NIXOS_SD "$mount_dir"
+  trap 'sudo umount "$mount_dir" 2>/dev/null || true; rmdir "$mount_dir" 2>/dev/null || true' EXIT
+  sudo mount "$root_part" "$mount_dir"
 
-  unlock_bitwarden "$bw_email"
-
-  info "Fetching sops key for ${host}..."
-  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1; then
-    sudo mkdir -p "${mount_dir}${SOPS_AGE_SYSTEM_FILE%/*}"
-    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "${mount_dir}${SOPS_AGE_SYSTEM_FILE}" > /dev/null
-    sudo chmod 400 "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
-    success "Host sops key installed"
-  else
-    sudo umount "$mount_dir"
-    rmdir "$mount_dir"
-    fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
-  fi
+  info "Installing sops key for ${host}..."
+  sudo mkdir -p "${mount_dir}${SOPS_AGE_SYSTEM_FILE%/*}"
+  dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "${mount_dir}${SOPS_AGE_SYSTEM_FILE}" > /dev/null
+  sudo chown root:root "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
+  sudo chmod 600 "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
+  success "Host sops key installed"
 
   sudo umount "$mount_dir"
   rmdir "$mount_dir"
+  trap - EXIT
 
   success "SD card ready. Insert into the device and power on."
 }
