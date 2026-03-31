@@ -58,6 +58,7 @@ in {
         library = mkOption { type = types.str; default = "${cfg.media.root}/books/library"; };
         inbox = mkOption { type = types.str; default = "${cfg.media.root}/books/inbox"; };
       };
+
       comics = {
         root = mkOption { type = types.str; default = "${cfg.media.root}/comics"; };
         library = mkOption { type = types.str; default = "${cfg.media.root}/comics/library"; };

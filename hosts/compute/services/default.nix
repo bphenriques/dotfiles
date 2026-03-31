@@ -30,6 +30,7 @@ in
     ./filebrowser
     ./gitea
     ./bentopdf.nix
+    ./larapaper.nix
   ];
 
   custom.homelab = {

@@ -76,20 +76,46 @@ def create_library [lib: record, headers: record] {
     print $"Created library: ($lib.name)"
     true
   } else {
-    print $"Warning: Failed to create library ($lib.name): ($r.status) - ($r.body)"
-    false
+    error make { msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)" }
   }
+}
+
+def update_library [existing: record, lib: record, headers: record] {
+  let body = {
+    id: $existing.id
+    name: $lib.name
+    type: $lib.type
+    folders: $lib.folders
+    fileGroupTypes: $lib.fileGroupTypes
+    folderWatching: ($existing.folderWatching? | default true)
+    includeInDashboard: ($existing.includeInDashboard? | default true)
+    includeInSearch: ($existing.includeInSearch? | default true)
+    manageCollections: ($existing.manageCollections? | default true)
+    manageReadingLists: ($existing.manageReadingLists? | default true)
+    allowScrobbling: ($existing.allowScrobbling? | default false)
+    allowMetadataMatching: ($existing.allowMetadataMatching? | default true)
+    enableMetadata: ($existing.enableMetadata? | default true)
+    removePrefixForSortName: ($existing.removePrefixForSortName? | default false)
+    inheritWebLinksFromFirstChapter: ($existing.inheritWebLinksFromFirstChapter? | default false)
+    excludePatterns: ($existing.excludePatterns? | default [])
+  }
+
+  let r = http post $"($base_url)/api/Library/update" $body --headers $headers --content-type application/json --full --allow-errors
+  if $r.status != 200 {
+    error make { msg: $"Failed to update library ($lib.name): ($r.status) - ($r.body)" }
+  }
+  print $"Updated library: ($lib.name)"
 }
 
 def ensure_libraries [libraries: list, headers: record] {
   let existing = get_libraries $headers
-  let existing_names = $existing | get name
 
   $libraries | each { |lib|
-    if $lib.name in $existing_names {
-      print $"Library ($lib.name) already exists"
-    } else {
+    let found = $existing | where name == $lib.name | get 0?
+    if $found == null {
       create_library $lib $headers
+    } else {
+      update_library $found $lib $headers
     }
   } | ignore
 }
@@ -122,6 +148,8 @@ def update_oidc_settings [library_map: record, headers: record] {
     | upsert syncUserSettings $oidc.syncUserSettings
     | upsert defaultRoles $oidc.defaultRoles
     | upsert defaultLibraries $default_library_ids
+    | upsert defaultAgeRestriction $oidc.defaultAgeRestriction
+    | upsert defaultIncludeUnknowns $oidc.defaultIncludeUnknowns
     | upsert autoLogin $oidc.autoLogin
     | upsert disablePasswordAuthentication $oidc.disablePasswordAuth
 
@@ -137,16 +165,45 @@ def get_users [headers: record] {
   $r.body
 }
 
-def update_user [kavita_user: record, roles: list, library_ids: list, headers: record] {
-  # Patch the existing user record with our desired values
-  let body = $kavita_user
-    | upsert userId $kavita_user.id
-    | upsert roles $roles
-    | upsert libraries $library_ids
+def update_user [kavita_user: record, roles: list, library_ids: list, age_restriction: record, headers: record] {
+  let body = {
+    userId: $kavita_user.id
+    username: $kavita_user.username
+    email: ($kavita_user.email? | default "")
+    roles: $roles
+    libraries: $library_ids
+    ageRestriction: $age_restriction
+    identityProvider: $kavita_user.identityProvider
+  }
 
   let r = http post $"($base_url)/api/Account/update" $body --headers $headers --content-type application/json --full --allow-errors
   if $r.status != 200 {
-    error make { msg: $"Failed to update user ($kavita_user.userName): ($r.status) - ($r.body)" }
+    error make { msg: $"Failed to update user ($kavita_user.username): ($r.status) - ($r.body)" }
+  }
+}
+
+def reconcile_oidc_users [library_map: record, headers: record] {
+  let oidc = $config.oidc
+  let expected_library_ids = $oidc.defaultLibraries | each { |name| $library_map | get $name } | sort
+  let expected_roles = $oidc.defaultRoles
+  let expected_age = { ageRating: $oidc.defaultAgeRestriction, includeUnknowns: $oidc.defaultIncludeUnknowns }
+
+  let users = get_users $headers
+  # identityProvider: 0=Kavita, 1=OIDC
+  let oidc_users = $users | where identityProvider == 1
+
+  for user in $oidc_users {
+    let current_library_ids = $user.libraries | get id | sort
+    let current_age = $user.ageRestriction
+    let libs_match = $current_library_ids == $expected_library_ids
+    let age_match = ($current_age.ageRating == $expected_age.ageRating) and ($current_age.includeUnknowns == $expected_age.includeUnknowns)
+
+    if $libs_match and $age_match {
+      print $"  OIDC user '($user.username)' already up to date"
+    } else {
+      update_user $user $user.roles $expected_library_ids $expected_age $headers
+      print $"  Updated OIDC user '($user.username)': libraries=($oidc.defaultLibraries), ageRestriction=($expected_age)"
+    }
   }
 }
 
@@ -183,7 +240,8 @@ def provision_local_users [library_map: record, headers: record] {
     let kavita_user = $kavita_users | where username == $user.username | get 0?
     if $kavita_user != null {
       let library_ids = $user.libraries | each { |name| $library_map | get $name }
-      update_user $kavita_user $user.roles $library_ids $headers
+      let age_restriction = { ageRating: -1, includeUnknowns: true }
+      update_user $kavita_user $user.roles $library_ids $age_restriction $headers
       print $"  Updated '($user.username)': roles=($user.roles), libraries=($user.libraries)"
     }
   }
@@ -211,6 +269,11 @@ def main [] {
   # Update settings via API
   update_server_settings $headers
   update_oidc_settings $library_map $headers
+
+  # Reconcile OIDC users: ensure they have public libraries
+  # (defaultLibraries only applies at first provisioning, not retroactively)
+  print "Reconciling OIDC users..."
+  reconcile_oidc_users $library_map $headers
 
   # Provision local users (e.g., guest accounts)
   print "Provisioning local users..."

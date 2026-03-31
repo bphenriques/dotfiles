@@ -32,16 +32,20 @@ let
       syncUserSettings = false;  # Roles managed via API, not OIDC claims
       defaultRoles = defaultUserRoles;
       defaultLibraries = publicLibraries;
+      # AgeRating -1 = NotApplicable (no restriction)
+      defaultAgeRestriction = -1;
+      defaultIncludeUnknowns = true;
       autoLogin = false;
       disablePasswordAuth = false;
     };
 
     # type: 0=Manga, 1=Comic, 2=Book, 3=Image, 4=LightNovel
-    # fileGroupTypes: 0=Archive, 1=EPUB, 2=PDF, 3=Image
-    libraries = [
-      { name = "Books";   type = 2; folders = [ "/mnt/kavita/books" ];  fileGroupTypes = [ 1 2 ]; }
-      { name = "Comics";  type = 1; folders = [ "/mnt/kavita/comics" ]; fileGroupTypes = [ 0 ];   }
-      { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ 0 ];   }
+    libraries = let
+      fileType = { archive = 1; epub = 2; pdf = 3; image = 4; };
+    in [
+      { name = "Books";   type = 2; folders = [ "/mnt/kavita/books" ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
+      { name = "Comics";  type = 1; folders = [ "/mnt/kavita/comics" ]; fileGroupTypes = [ fileType.archive ];           }
+      { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ fileType.archive ];           }
     ];
 
     # Local users provisioned with password authentication (all get public libraries)
