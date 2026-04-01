@@ -4,12 +4,12 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
-| [Actual Budget](https://actualbudget.org/) | Budget Manager | 26.3.0 | `budget` | 5006 | OIDC | ✓ |
 | [Bentopdf](https://bentopdf.com) | PDF Generator | 1.11.2 | `bentopdf` | 8092 | ForwardAuth | — |
 | [File Browser](https://filebrowser.org) | File Browser | 2.61.2 | `files` | 8085 | ForwardAuth | — |
+| [Gitea](https://about.gitea.com) | Git Server | 1.25.5 | `git` | 3100 | OIDC | ✓ |
 | [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.3.3 | `home` | 8123 | — | ✓ |
+| [LaraPaper](https://github.com/usetrmnl/larapaper) | E-Ink Display Server | 0.31.3 | `trmnl` | 4567 | ForwardAuth | — |
 | [Miniflux](https://miniflux.app/) | RSS Server | 2.2.18 | `miniflux` | 8081 | OIDC | ✓ |
-| [OpenCloud](https://github.com/opencloud-eu/opencloud) | Cloud Storage & Office | 5.2.0 | `cloud` | 9200 | OIDC | ✓ |
 | [Radicale](https://radicale.org/v3.html) | CalDAV & CardDAV | 3.6.1 | `radicale` | 5232 | ForwardAuth | ✓ |
 | [Syncthing](https://syncthing.net/) | File Sync | 2.0.12 | `syncthing` | 8384 | ForwardAuth | — |
 | [Tandoor](https://tandoor.dev/) | Recipe Manager | 2.5.3 | `tandoor` | 9092 | OIDC | ✓ |
@@ -50,7 +50,12 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
-| [CouchDB](https://couchdb.apache.org) | Document Database | 3.5.1 | `couchdb` | 5984 | — | — |
 | [homepage](https://gethomepage.dev) | Dashboard | 1.10.1 | `homepage` | 3001 | — | — |
 | [tinyauth](https://tinyauth.app) | ForwardAuth Gateway | 5.0.4 | `tinyauth` | 3000 | OIDC | — |
+
+### Productivity
+
+| Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
+|------|-------------|---------|-----------|---------------|------|--------|
+| [Grist](https://github.com/gristlabs/grist-core) | Spreadsheet Database | 1.7.12 | `grist` | 8484 | ForwardAuth | ✓ |
 

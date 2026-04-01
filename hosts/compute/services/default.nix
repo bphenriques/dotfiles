@@ -14,18 +14,14 @@ in
     ./jellyseerr
     ./prowlarr
     ./cleanuparr.nix
-    ./flaresolverr.nix
     ./romm
     ./homepage
-    #./obsidian-livesync
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
     ./ntfy
     ./wireguard
-    ./opencloud
     ./home-assistant.nix
-    ./actual-budget
     ./radicale
     ./tandoor-recipes
     ./filebrowser

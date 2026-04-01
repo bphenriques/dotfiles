@@ -122,64 +122,6 @@ def ensure_indexers [] {
   }
 }
 
-def ensure_indexer_proxy [] {
-  print "Configuring indexer proxy..."
-  let proxy_cfg = ($config | get -o indexerProxy)
-  if $proxy_cfg == null {
-    print "  No indexer proxy configured"
-    return
-  }
-
-  let existing = http get $"($base_url)/api/v1/indexerproxy" --headers $headers --full --allow-errors
-  if $existing.status != 200 {
-    error make { msg: $"Failed to get indexer proxies: ($existing.status) - ($existing.body)" }
-  }
-
-  let existing_proxy = ($existing.body | default [] | where name == $proxy_cfg.name | get 0?)
-  let tag_id = ensure_tag $proxy_cfg.tag
-
-  let schemas = http get $"($base_url)/api/v1/indexerproxy/schema" --headers $headers --full --allow-errors
-  if $schemas.status != 200 {
-    error make { msg: $"Failed to get indexer proxy schemas: ($schemas.status)" }
-  }
-
-  let schema = ($schemas.body | where implementation == "FlareSolverr" | get 0?)
-  if $schema == null {
-    error make { msg: "FlareSolverr indexer proxy schema not found" }
-  }
-
-  let base_fields = if $existing_proxy != null { $existing_proxy.fields } else { $schema.fields }
-  let fields = $base_fields | each { |f|
-    match $f.name {
-      "host" => ($f | upsert value $proxy_cfg.host)
-      _ => $f
-    }
-  }
-
-  if $existing_proxy != null {
-    let payload = ($existing_proxy | merge {
-      fields: $fields
-      tags: [$tag_id]
-    })
-    let r = http put $"($base_url)/api/v1/indexerproxy/($existing_proxy.id)" $payload --headers $headers --content-type application/json --full --allow-errors
-    if $r.status not-in [200, 202] {
-      error make { msg: $"Failed to update indexer proxy ($proxy_cfg.name): ($r.status) - ($r.body)" }
-    }
-    print $"  Updated indexer proxy: ($proxy_cfg.name)"
-  } else {
-    let payload = ($schema | merge {
-      name: $proxy_cfg.name
-      fields: $fields
-      tags: [$tag_id]
-    })
-    let r = http post $"($base_url)/api/v1/indexerproxy" $payload --headers $headers --content-type application/json --full --allow-errors
-    if $r.status not-in [200, 201] {
-      error make { msg: $"Failed to create indexer proxy ($proxy_cfg.name): ($r.status) - ($r.body)" }
-    }
-    print $"  Created indexer proxy: ($proxy_cfg.name)"
-  }
-}
-
 def ensure_applications [] {
   print "Configuring applications..."
   let applications = ($config | get -o applications) | default []
@@ -324,7 +266,6 @@ def main [] {
   wait_ready
   print "Prowlarr is ready"
 
-  ensure_indexer_proxy
   ensure_applications
   ensure_notification
   ensure_indexers
