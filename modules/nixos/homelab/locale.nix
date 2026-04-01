@@ -8,7 +8,7 @@
 
     language = lib.mkOption {
       type = lib.types.str;
-      description = "Locale identifier for regional formatting (e.g. 'pt_PT')";
+      description = "BCP 47 locale identifier for regional formatting (e.g. 'pt-PT')";
     };
 
     currency = lib.mkOption {

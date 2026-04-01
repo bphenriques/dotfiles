@@ -36,7 +36,7 @@ in
     domain = self.private.hosts.compute.settings.domain;
     locale = {
       timezone = config.time.timeZone;
-      language = "pt_PT";
+      language = "pt-PT";
       currency = "EUR";
       latitude = 38.736946;
       longitude = -9.142685;

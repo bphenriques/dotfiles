@@ -79,10 +79,16 @@ in
     volumes = [
       "${dataDir}:/persist"
     ];
+
+    # Grist's entrypoint chown's /persist, requiring these caps and no-new-privileges=false.
+    # gvisor sandboxing (Excel import) needs: pids-limit override (global default=100 is too low)
+    # and label=disable (overlay fs I/O access for nested gvisor gofer).
     user = "0:0";
     extraOptions = [
       "--memory=512m"
+      "--pids-limit=-1"
       "--security-opt=no-new-privileges=false"
+      "--security-opt=label=disable"
       "--cap-add=CHOWN"
       "--cap-add=DAC_OVERRIDE"
       "--cap-add=FOWNER"
