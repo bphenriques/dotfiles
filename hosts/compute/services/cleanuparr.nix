@@ -48,7 +48,7 @@ in
       PUID = toString cleanuparrUser.uid;
       PGID = toString cleanuparrUser.gid;
       UMASK = "022";
-      TZ = config.time.timeZone;
+      TZ = config.custom.homelab.locale.timezone;
     };
     volumes = [ "${dataDir}:/config" ];
     extraOptions = [

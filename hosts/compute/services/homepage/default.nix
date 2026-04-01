@@ -51,7 +51,7 @@ in
               maxEvents = 10;
               showTime = true;
               previousDays = 3;
-              timezone = config.time.timeZone;
+              timezone = cfg.locale.timezone;
               integrations = [
                 { type = "sonarr"; service_group = "Services"; service_name = sonarrCfg.displayName; }
                 { type = "radarr"; service_group = "Services"; service_name = radarrCfg.displayName; }
@@ -102,10 +102,9 @@ in
       {
         openmeteo = { # City location
           label = "Lisbon";
-          # Lisbon city center (not a personal address)
-          latitude = 38.736946;
-          longitude = -9.142685;
-          timezone = config.time.timeZone;
+          latitude = cfg.locale.latitude;
+          longitude = cfg.locale.longitude;
+          timezone = cfg.locale.timezone;
           units = "metric";
           cache = 300;
         };

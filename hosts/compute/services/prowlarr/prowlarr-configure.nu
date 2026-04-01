@@ -1,8 +1,9 @@
 #!/usr/bin/env nu
 
-# Initializes Prowlarr declaratively via the API but:
-# - Only creates entities if missing;
-# - Won't reconcile whenever there is a config drift.
+# Initializes Prowlarr declaratively via the API:
+# - Creates entities if missing;
+# - Reconciles applications whenever there is a config drift;
+# - Forces an indexer sync to propagate changes to connected apps.
 
 let base_url = $env.PROWLARR_URL
 let api_key = open $env.PROWLARR_API_KEY_FILE | str trim
@@ -19,6 +20,25 @@ def wait_ready [] {
     sleep 2sec
   }
   error make { msg: "Prowlarr failed to start after 30 attempts" }
+}
+
+def ensure_tag [tag_name: string]: nothing -> int {
+  let existing = http get $"($base_url)/api/v1/tag" --headers $headers --full --allow-errors
+  if $existing.status != 200 {
+    error make { msg: $"Failed to get tags: ($existing.status) - ($existing.body)" }
+  }
+
+  let tag = ($existing.body | default [] | where label == $tag_name | get 0?)
+  if $tag != null {
+    return $tag.id
+  }
+
+  let r = http post $"($base_url)/api/v1/tag" { label: $tag_name } --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 201] {
+    error make { msg: $"Failed to create tag ($tag_name): ($r.status) - ($r.body)" }
+  }
+  print $"  Created tag: ($tag_name)"
+  $r.body.id
 }
 
 def get_default_app_profile_id [] {
@@ -76,14 +96,19 @@ def ensure_indexers [] {
       if $custom_value != null { $f | upsert value $custom_value } else { $f }
     }
 
+    # Resolve tag names to IDs
+    let tag_names = ($idx | get -o tags) | default []
+    let tag_ids = $tag_names | each { |t| ensure_tag $t }
+
     let payload = $schema | merge {
       name: $idx.name
       enable: true
       appProfileId: $app_profile_id
       fields: $fields
+      tags: $tag_ids
     }
 
-    let r = http post $"($base_url)/api/v1/indexer" $payload --headers $headers --content-type application/json --full --allow-errors
+    let r = http post $"($base_url)/api/v1/indexer?forceSave=true" $payload --headers $headers --content-type application/json --full --allow-errors
     if $r.status not-in [200, 201] {
       print $"  Warning: Failed to create indexer ($idx.name): ($r.status) - ($r.body)"
       $failed = ($failed | append $idx.name)
@@ -93,7 +118,65 @@ def ensure_indexers [] {
   }
 
   if ($failed | is-not-empty) {
-    error make { msg: $"Failed to create indexers: ($failed | str join ', ')" }
+    print $"  Warning: Failed to create indexers: ($failed | str join ', ')"
+  }
+}
+
+def ensure_indexer_proxy [] {
+  print "Configuring indexer proxy..."
+  let proxy_cfg = ($config | get -o indexerProxy)
+  if $proxy_cfg == null {
+    print "  No indexer proxy configured"
+    return
+  }
+
+  let existing = http get $"($base_url)/api/v1/indexerproxy" --headers $headers --full --allow-errors
+  if $existing.status != 200 {
+    error make { msg: $"Failed to get indexer proxies: ($existing.status) - ($existing.body)" }
+  }
+
+  let existing_proxy = ($existing.body | default [] | where name == $proxy_cfg.name | get 0?)
+  let tag_id = ensure_tag $proxy_cfg.tag
+
+  let schemas = http get $"($base_url)/api/v1/indexerproxy/schema" --headers $headers --full --allow-errors
+  if $schemas.status != 200 {
+    error make { msg: $"Failed to get indexer proxy schemas: ($schemas.status)" }
+  }
+
+  let schema = ($schemas.body | where implementation == "FlareSolverr" | get 0?)
+  if $schema == null {
+    error make { msg: "FlareSolverr indexer proxy schema not found" }
+  }
+
+  let base_fields = if $existing_proxy != null { $existing_proxy.fields } else { $schema.fields }
+  let fields = $base_fields | each { |f|
+    match $f.name {
+      "host" => ($f | upsert value $proxy_cfg.host)
+      _ => $f
+    }
+  }
+
+  if $existing_proxy != null {
+    let payload = ($existing_proxy | merge {
+      fields: $fields
+      tags: [$tag_id]
+    })
+    let r = http put $"($base_url)/api/v1/indexerproxy/($existing_proxy.id)" $payload --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 202] {
+      error make { msg: $"Failed to update indexer proxy ($proxy_cfg.name): ($r.status) - ($r.body)" }
+    }
+    print $"  Updated indexer proxy: ($proxy_cfg.name)"
+  } else {
+    let payload = ($schema | merge {
+      name: $proxy_cfg.name
+      fields: $fields
+      tags: [$tag_id]
+    })
+    let r = http post $"($base_url)/api/v1/indexerproxy" $payload --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201] {
+      error make { msg: $"Failed to create indexer proxy ($proxy_cfg.name): ($r.status) - ($r.body)" }
+    }
+    print $"  Created indexer proxy: ($proxy_cfg.name)"
   }
 }
 
@@ -110,18 +193,13 @@ def ensure_applications [] {
     error make { msg: $"Failed to get applications: ($existing.status) - ($existing.body)" }
   }
 
-  let existing_names = ($existing.body | default [] | get -o name | default [])
-
   let schemas = http get $"($base_url)/api/v1/applications/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
     error make { msg: $"Failed to get application schemas: ($schemas.status)" }
   }
 
   for app in $applications {
-    if $app.name in $existing_names {
-      print $"  Application exists: ($app.name)"
-      continue
-    }
+    let existing_app = ($existing.body | default [] | where name == $app.name | get 0?)
 
     # Get the appropriate API key
     let app_api_key = match $app.implementation {
@@ -140,8 +218,9 @@ def ensure_applications [] {
       continue
     }
 
-    # Build fields
-    let fields = $schema.fields | each { |f|
+    # Build fields from existing record (preserving server-set values) or schema defaults
+    let base_fields = if $existing_app != null { $existing_app.fields } else { $schema.fields }
+    let fields = $base_fields | each { |f|
       match $f.name {
         "baseUrl" => ($f | upsert value $app.baseUrl)
         "prowlarrUrl" => ($f | upsert value $app.prowlarrUrl)
@@ -151,21 +230,29 @@ def ensure_applications [] {
       }
     }
 
-    let payload = {
-      name: $app.name
-      syncLevel: $app.syncLevel
-      fields: $fields
-      implementationName: $app.implementation
-      implementation: $app.implementation
-      configContract: $"($app.implementation)Settings"
-      tags: []
+    if $existing_app != null {
+      let payload = ($existing_app | merge {
+        syncLevel: $app.syncLevel
+        fields: $fields
+      })
+      let r = http put $"($base_url)/api/v1/applications/($existing_app.id)" $payload --headers $headers --content-type application/json --full --allow-errors
+      if $r.status not-in [200, 202] {
+        error make { msg: $"Failed to update application ($app.name): ($r.status) - ($r.body)" }
+      }
+      print $"  Updated application: ($app.name)"
+    } else {
+      let payload = ($schema | merge {
+        name: $app.name
+        syncLevel: $app.syncLevel
+        fields: $fields
+        tags: []
+      })
+      let r = http post $"($base_url)/api/v1/applications" $payload --headers $headers --content-type application/json --full --allow-errors
+      if $r.status not-in [200, 201] {
+        error make { msg: $"Failed to create application ($app.name): ($r.status) - ($r.body)" }
+      }
+      print $"  Created application: ($app.name)"
     }
-
-    let r = http post $"($base_url)/api/v1/applications" $payload --headers $headers --content-type application/json --full --allow-errors
-    if $r.status not-in [200, 201] {
-      error make { msg: $"Failed to create application ($app.name): ($r.status) - ($r.body)" }
-    }
-    print $"  Created application: ($app.name)"
   }
 }
 
@@ -224,13 +311,24 @@ def ensure_notification [] {
   print $"  Created notification: ($notification_name)"
 }
 
+def sync_indexers [] {
+  print "Syncing indexers to applications..."
+  let r = http post $"($base_url)/api/v1/command" { name: "ApplicationIndexerSync" } --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 201, 202] {
+    error make { msg: $"Failed to sync indexers: ($r.status) - ($r.body)" }
+  }
+  print "  Indexer sync triggered"
+}
+
 def main [] {
   wait_ready
   print "Prowlarr is ready"
 
+  ensure_indexer_proxy
   ensure_applications
   ensure_notification
   ensure_indexers
+  sync_indexers
 
   print "Prowlarr initialization complete"
 }

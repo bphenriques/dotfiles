@@ -11,6 +11,11 @@ let
     # - definitionName: Internal name (find via Prowlarr UI or API: GET /api/v1/indexer/schema)
     # - fields: Optional fields (e.g., baseUrl, apiKey, username/password/cookie). Not required for public indexers.
     indexers = self.private.hosts.compute.settings.services.prowlarr.indexers;
+    indexerProxy = {
+      name = "FlareSolverr";
+      host = "http://127.0.0.1:8191/";
+      tag = "cloudflare-solver";
+    };
     applications = [
       {
         name = "Radarr";
@@ -40,9 +45,9 @@ in
   systemd.services.prowlarr-configure = {
     description = "Prowlarr setup";
     wantedBy = [ "prowlarr.service" ];
-    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
+    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" "podman-flaresolverr.service" ];
     requires = [ "prowlarr.service" ];
-    wants = [ "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
+    wants = [ "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" "podman-flaresolverr.service" ];
     partOf = [ "prowlarr.service" ];
     restartTriggers = [ settingsFile ./prowlarr-configure.nu ];
     startLimitIntervalSec = 300;

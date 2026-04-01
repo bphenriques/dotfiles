@@ -14,6 +14,7 @@ in
     ./jellyseerr
     ./prowlarr
     ./cleanuparr.nix
+    ./flaresolverr.nix
     ./romm
     ./homepage
     #./obsidian-livesync
@@ -31,11 +32,19 @@ in
     ./gitea
     ./bentopdf.nix
     ./larapaper.nix
+    ./grist
   ];
 
   custom.homelab = {
     enable = true;
     domain = self.private.hosts.compute.settings.domain;
+    locale = {
+      timezone = config.time.timeZone;
+      language = "pt_PT";
+      currency = "EUR";
+      latitude = 38.736946;
+      longitude = -9.142685;
+    };
     ingress.cloudflareEmail = self.private.hosts.compute.settings.cloudflare.email;
     smtp = self.private.hosts.compute.settings.smtp // {
       passwordFile = config.sops.secrets."smtp-password".path;

@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let
-  serviceCfg = config.custom.homelab.services.home-assistant;
+  cfg = config.custom.homelab;
+  serviceCfg = cfg.services.home-assistant;
   inherit (config.systemd.services.home-assistant.serviceConfig) User Group;
 
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
@@ -50,10 +51,9 @@ in
       homeassistant = {
         name = "Home";
         unit_system = "metric";
-        time_zone = config.time.timeZone;
-        # Lisbon city center (not a personal address)
-        latitude = 38.736946;
-        longitude = -9.142685;
+        time_zone = cfg.locale.timezone;
+        latitude = cfg.locale.latitude;
+        longitude = cfg.locale.longitude;
         external_url = serviceCfg.publicUrl;
         internal_url = serviceCfg.url;
       };
@@ -95,7 +95,7 @@ in
       OT_REST_LISTEN_ADDR = "127.0.0.1";
       OT_REST_LISTEN_PORT = "8091";
       OT_LOG_LEVEL = "5";
-      TZ = config.time.timeZone;
+      TZ = cfg.locale.timezone;
     };
 
     volumes = [ "${otbrDataDir}:/data" ];

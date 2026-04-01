@@ -70,7 +70,7 @@ in
       APP_ENV = "production";
       APP_DEBUG = "false";
       APP_URL = serviceCfg.publicUrl;
-      APP_TIMEZONE = config.time.timeZone;
+      APP_TIMEZONE = config.custom.homelab.locale.timezone;
       PHP_OPCACHE_ENABLE = "1"; # Cache compiled PHP bytecode in memory, avoiding re-parsing on every request
       DB_CONNECTION = "sqlite";
       DB_DATABASE = "database/storage/database.sqlite";

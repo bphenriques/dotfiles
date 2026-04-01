@@ -50,7 +50,7 @@ in
     address = "127.0.0.1";
     database.createLocally = true;
     extraConfig = {
-      TIMEZONE = config.time.timeZone;
+      TIMEZONE = config.custom.homelab.locale.timezone;
       MEDIA_ROOT = "/var/lib/tandoor-recipes/media";
       ALLOWED_HOSTS = "${serviceCfg.publicHost},127.0.0.1";
       CSRF_TRUSTED_ORIGINS = serviceCfg.publicUrl;
