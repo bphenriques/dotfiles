@@ -9,5 +9,6 @@ pkgs.writeShellApplication {
     selfPkgs.dotfiles-secrets
   ];
   text = lib.fileContents ./script.sh;
+  meta.description = "Post-install setup for desktop hosts";
   meta.platforms = lib.platforms.all;
 }

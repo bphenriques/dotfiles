@@ -10,5 +10,6 @@ pkgs.writeShellApplication {
     selfPkgs.dotfiles-secrets
   ];
   text = lib.fileContents ./script.sh;
+  meta.description = "Install NixOS on a host";
   meta.platforms = lib.platforms.all;
 }

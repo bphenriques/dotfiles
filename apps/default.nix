@@ -2,7 +2,7 @@
 let
   inherit (generators) forAllSystems forLinuxSystems forDarwinSystems mergeAllSystems;
   lib = nixpkgs.lib;
-  pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; } ) attrs;
+  pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; meta = pkg.meta or {}; } ) attrs;
 
   crossPlatform = forAllSystems (system:
     let

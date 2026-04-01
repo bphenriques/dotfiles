@@ -10,4 +10,5 @@ pkgs.writeShellApplication {
     export METADATA_FILE="${metadataJson}"
     exec nu ${script} "$@"
   '';
+  meta.description = "Check for updates on pinned packages";
 }

@@ -35,7 +35,7 @@
 
       # Disable onboard audio, LED, enable I2C
       base-dt-params = {
-        audio.enable = false;
+        audio.enable = lib.mkForce false;
         act_led_trigger.value = "none";
         i2c_arm = {
           enable = true;

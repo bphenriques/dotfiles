@@ -1,7 +1,7 @@
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
-  categories = [ "General" "Media" "Monitoring" "Administration" "Infrastructure" "Productivity" ];
+  categories = [ "General" "Home" "Media" "Monitoring" "Administration" "Infrastructure" "Productivity" ];
   categoryType = lib.types.enum categories;
 
   baseServiceModule = { name, config, ... }: {

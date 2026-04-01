@@ -22,7 +22,7 @@ in
     metadata.description = "E-Ink Display Server";
     metadata.version = version;
     metadata.homepage = "https://github.com/usetrmnl/larapaper";
-    metadata.category = "General";
+    metadata.category = "Home";
     port = 4567;
     subdomain = "trmnl";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

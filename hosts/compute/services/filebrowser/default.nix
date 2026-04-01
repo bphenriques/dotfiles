@@ -14,7 +14,7 @@ in
     metadata.description = "File Browser";
     metadata.version = pkgs.filebrowser.version;
     metadata.homepage = pkgs.filebrowser.meta.homepage;
-    metadata.category = "General";
+    metadata.category = "Home";
     port = 8085;
     subdomain = "files";
     access.allowedGroups = with cfg.groups; [ guests users admin ];

@@ -14,7 +14,7 @@ in
     metadata.description = "Home Automation";
     metadata.version = config.services.home-assistant.package.version;
     metadata.homepage = config.services.home-assistant.package.meta.homepage;
-    metadata.category = "General";
+    metadata.category = "Home";
     port = 8123;
     subdomain = "home";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

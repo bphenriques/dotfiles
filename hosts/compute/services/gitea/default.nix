@@ -11,7 +11,7 @@ in
     metadata.description = "Git Server";
     metadata.version = config.services.gitea.package.version;
     metadata.homepage = config.services.gitea.package.meta.homepage;
-    metadata.category = "General";
+    metadata.category = "Productivity";
     port = 3100;
     subdomain = "git";
     access.allowedGroups = with config.custom.homelab.groups; [ admin ];

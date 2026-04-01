@@ -12,7 +12,7 @@ in
     metadata.description = "Recipe Manager";
     metadata.version = pkg.version;
     metadata.homepage = pkg.meta.homepage;
-    metadata.category = "General";
+    metadata.category = "Home";
     port = 9092;
     secrets = {
       files.secret-key = { rotatable = true; bytes = 50; };
