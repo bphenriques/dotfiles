@@ -79,6 +79,8 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   documentation.nixos.enable = false;
+  documentation.man.enable = false;
+  documentation.doc.enable = false;
   security.sudo.extraConfig = "Defaults lecture=never";
 
   environment.systemPackages = [ pkgs.nvd ];
