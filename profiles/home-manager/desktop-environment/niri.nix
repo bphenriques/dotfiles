@@ -4,7 +4,9 @@ let
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
-  terminal        = lib.getExe' pkgs.foot "footclient";
+  # FIXME: Unsure but we likely need this: systemctl enable --user app-com.mitchellh.ghostty.service
+  terminal        = "${lib.getExe pkgs.ghostty} +new-window";
+
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
   files-browser   = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
@@ -226,7 +228,7 @@ in
       }
 
       layer-rule {
-        match namespace="swww-daemon"
+        match namespace="awww-daemon"
         place-within-backdrop true
       }
       

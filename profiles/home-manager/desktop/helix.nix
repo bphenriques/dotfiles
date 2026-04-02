@@ -8,9 +8,9 @@
     # Language Server Protocols. Check with hx --health
     extraPackages = [
       pkgs.marksman                                # LSP for Markdown
-      pkgs.nodePackages.bash-language-server       # LSP for Bash
-      pkgs.nodePackages.yaml-language-server       # LSP for YAML
-      pkgs.nodePackages.vscode-json-languageserver # LSP for JSON
+      pkgs.bash-language-server                    # LSP for Bash
+      pkgs.yaml-language-server                    # LSP for YAML
+      pkgs.vscode-json-languageserver              # LSP for JSON
       pkgs.vscode-langservers-extracted            # LSP for HTML/CSS/JSON/ESLint
       pkgs.typescript-language-server              # LSP for Typescript
       pkgs.docker-compose-language-service         # LSP for docker-compose

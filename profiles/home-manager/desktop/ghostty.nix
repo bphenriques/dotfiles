@@ -4,6 +4,7 @@
   programs.ghostty = {
     enable = true;
     enableFishIntegration = config.programs.fish.enable;
+    systemd.enable = pkgs.stdenv.isLinux;
 
     settings = let
       common = {
@@ -14,6 +15,7 @@
       linux = lib.optionalAttrs pkgs.stdenv.isLinux {
         gtk-single-instance = true;
         window-decoration = true;
+        quit-after-last-window-closed = false; # Reduces latency when opening new windows
       };
 
       darwin = lib.optionalAttrs pkgs.stdenv.isDarwin {

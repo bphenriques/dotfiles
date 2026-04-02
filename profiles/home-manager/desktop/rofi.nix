@@ -90,7 +90,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         filebrowser {
           directories-first: false;
           directory: "${self.pkgs.wallpapers}/share/wallpapers";
-          command: "${lib.getExe self.pkgs.swww-util} one";
+          command: "${lib.getExe self.pkgs.awww-util} one";
         }
       }
     '';

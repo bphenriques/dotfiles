@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 
-PROJ_ROOT="${PROJ_ROOT:-XDG_DOCUMENTS_DIR}"
+PROJ_ROOT="${PROJ_ROOT:-${XDG_DOCUMENTS_DIR}}"
 
 __proj_clone_repo() {
   target="$(basename "$1" .git)"

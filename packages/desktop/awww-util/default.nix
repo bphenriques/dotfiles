@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 pkgs.writeShellApplication {
-  name = "swww-util";
-  runtimeInputs = [ pkgs.swww ];
+  name = "awww-util";
+  runtimeInputs = [ pkgs.awww ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.linux;
 }

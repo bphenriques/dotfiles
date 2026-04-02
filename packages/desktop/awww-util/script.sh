@@ -1,5 +1,5 @@
 #shellcheck shell=bash
-set_wallpaper() { test -f "$1" && swww img --transition-type none "$1"; }
+set_wallpaper() { test -f "$1" && awww img --transition-type none "$1"; }
 random_file() { find "$1" -type f | sort -R | head -1 ; }
 
 case "${1:-}" in
