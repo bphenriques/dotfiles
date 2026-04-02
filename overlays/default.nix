@@ -83,4 +83,39 @@ _: {
       }) (lib.filterAttrs (_: pkg: pkg ? passthru && pkg.passthru ? updateInfo) packages);
     }
   );
+
+  # Run `nix run .#check-updates` to check for newer upstream releases.
+  pinned-container-images = (_final: prev: let
+    lib = prev.lib;
+    images = {
+      grist = {
+        image = "gristlabs/grist";
+        version = "1.7.12";
+        updateInfo = { repo = "gristlabs/grist-core"; stripPrefix = "v"; };
+      };
+      larapaper = {
+        image = "ghcr.io/usetrmnl/larapaper";
+        version = "0.31.3";
+        updateInfo = { repo = "usetrmnl/larapaper"; };
+      };
+      romm = {
+        image = "rommapp/romm";
+        version = "4.8.0";
+        updateInfo = { repo = "rommapp/romm"; };
+      };
+      cleanuparr = {
+        image = "ghcr.io/cleanuparr/cleanuparr";
+        version = "2.9.3";
+        updateInfo = { repo = "cleanuparr/cleanuparr"; stripPrefix = "v"; };
+      };
+    };
+  in {
+    containerImages = images;
+    trackedContainerVersions = lib.mapAttrsToList (name: img: {
+      inherit name;
+      inherit (img) version;
+      repo = img.updateInfo.repo;
+      stripPrefix = img.updateInfo.stripPrefix or "";
+    }) images;
+  });
 }

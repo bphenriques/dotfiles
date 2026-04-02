@@ -1,14 +1,16 @@
 { lib, pkgs, writeNushellScript }:
 let
-  metadataJson = pkgs.writeText "pinned-metadata.json" (builtins.toJSON pkgs.trackedGithubVersions);
+  packagesJson = pkgs.writeText "packages-metadata.json" (builtins.toJSON pkgs.trackedGithubVersions);
+  containersJson = pkgs.writeText "containers-metadata.json" (builtins.toJSON pkgs.trackedContainerVersions);
   script = writeNushellScript "check-updates" ./script.nu;
 in
 pkgs.writeShellApplication {
   name = "check-updates";
   runtimeInputs = [ pkgs.nushell ];
   text = ''
-    export METADATA_FILE="${metadataJson}"
+    export PACKAGES_FILE="${packagesJson}"
+    export CONTAINERS_FILE="${containersJson}"
     exec nu ${script} "$@"
   '';
-  meta.description = "Check for updates on pinned packages";
+  meta.description = "Check for updates on pinned packages and container images";
 }

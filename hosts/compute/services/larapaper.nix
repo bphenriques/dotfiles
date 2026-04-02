@@ -2,11 +2,11 @@
 # Device:
 # - Xteink X4: Flash TRMNL firmware via https://trmnl.com/flash (select "X4")
 # - Then choose custom server and device should register automatically.
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.larapaper;
   dataDir = "/var/lib/larapaper";
-  version = "0.31.3";
+  img = pkgs.containerImages.larapaper;
 
   # Alpine www-data UID/GID
   larapaperUser = {
@@ -20,7 +20,7 @@ in
   custom.homelab.services.larapaper = {
     displayName = "LaraPaper";
     metadata.description = "E-Ink Display Server";
-    metadata.version = version;
+    metadata.version = img.version;
     metadata.homepage = "https://github.com/usetrmnl/larapaper";
     metadata.category = "Home";
     port = 4567;
@@ -63,7 +63,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.larapaper = {
-    image = "ghcr.io/usetrmnl/larapaper:${version}";
+    image = "${img.image}:${img.version}";
     autoStart = true;
 
     environment = {

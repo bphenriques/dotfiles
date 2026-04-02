@@ -9,7 +9,7 @@ let
   oidcCfg = cfg.oidc;
 
   dataDir = "/var/lib/romm";
-  version = "4.7.0";
+  img = pkgs.containerImages.romm;
 
   # Dedicated user for RomM container - member of media group for SMB access
   # GIDs 950 (user), 970 (secrets), 971 (oidc) are fixed for container supplementary group access
@@ -75,7 +75,7 @@ in
   custom.homelab.services.romm = {
     displayName = "RomM";
     metadata.description = "ROM Manager";
-    metadata.version = version;
+    metadata.version = img.version;
     metadata.homepage = "https://github.com/rommapp/romm";
     metadata.category = "Media";
     port = 8095;
@@ -148,7 +148,7 @@ in
 
   # TODO: Add health check when podman supports healthcheck restart policy
   virtualisation.oci-containers.containers.romm = {
-    image = "rommapp/romm:${version}";
+    image = "${img.image}:${img.version}";
     autoStart = true;
 
     environment = {

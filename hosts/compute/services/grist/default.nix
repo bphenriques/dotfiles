@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.custom.homelab;
   serviceCfg = cfg.services.grist;
@@ -6,7 +6,7 @@ let
   adminUsers = lib.filterAttrs (_: u: u.isAdmin) cfg.users;
   adminEmail = (lib.head (lib.attrValues adminUsers)).email;
   dataDir = "/var/lib/grist";
-  version = "1.7.12";
+  img = pkgs.containerImages.grist;
 in
 {
   imports = [ ./backup.nix ];
@@ -14,7 +14,7 @@ in
   custom.homelab.services.grist = {
     displayName = "Grist";
     metadata.description = "Spreadsheet Database";
-    metadata.version = version;
+    metadata.version = img.version;
     metadata.homepage = "https://github.com/gristlabs/grist-core";
     metadata.category = "Productivity";
     port = 8484;
@@ -38,7 +38,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.grist = {
-    image = "gristlabs/grist:${version}";
+    image = "${img.image}:${img.version}";
     autoStart = true;
 
     environment = {
