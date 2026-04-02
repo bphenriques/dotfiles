@@ -157,7 +157,7 @@ sd_card_install() {
   image_path="$(nix build "${FLAKE_URL}#nixosConfigurations.${host}.config.system.build.images.sd-card" --no-link --print-out-paths)"
 
   info "Flashing image to ${device}..."
-  zstdcat "${image_path}"/*.img.zst | sudo dd bs=4M of="${device}" iflag=fullblock status=progress oflag=sync
+  zstdcat "${image_path}"/sd-image/*.img.zst | sudo dd bs=4M of="${device}" iflag=fullblock status=progress oflag=sync
 
   # Wait for partition table to be re-read
   sudo partprobe "${device}"
