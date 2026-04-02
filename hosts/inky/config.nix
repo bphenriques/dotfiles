@@ -24,7 +24,6 @@
       warn-dirty = false;
       auto-optimise-store = true;
     };
-    registry.nixpkgs.flake = self.inputs.nixpkgs;
   };
   nixpkgs.config.allowUnfree = true;
 
@@ -149,10 +148,10 @@
   powerManagement.cpuFreqGovernor = "ondemand";
 
   # Watchdog for automatic recovery from hangs
-  systemd.extraConfig = lib.concatStringsSep "\n" [
-    "RuntimeWatchdogSec=30s"
-    "RebootWatchdogSec=10min"
-  ];
+  systemd.settings.Manager = {
+    RuntimeWatchdogSec = "30s";
+    RebootWatchdogSec = "10min";
+  };
 
   # Secrets
   sops.defaultSopsFile = self.private.hosts.inky.sopsSecretsFile;
