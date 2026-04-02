@@ -4,16 +4,31 @@ let
 in {
   services.mpd = {
     enable = true;
-    settings = {
-      music_directory = paths.media.music.library;
-      playlist_directory = paths.media.music.playlists;
-      audio_output = [{
-        type = "alsa";
-        name = "MAX98357A";
-        device = "hw:sndrpihifiberry,0";
-        mixer_type = "software";
-      }];
-    };
+
+    musicDirectory = paths.media.music.library;
+    playlistDirectory = paths.media.music.playlists;
+    extraConfig = ''
+      audio_output {
+        type "alsa"
+        name "MAX98357A"
+        device "hw:sndrpihifiberry,0"
+        mixer_type "software"
+      }
+
+      playlist_plugin {
+        name "m3u"
+        as_directory "yes"
+      }
+
+      playlist_plugin {
+        name "extm3u"
+        as_directory "yes"
+      }
+
+      input {
+        plugin "curl"
+      }
+    '';
   };
 
   # MPD needs access to SMB mount
