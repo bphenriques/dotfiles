@@ -1,8 +1,6 @@
 { pkgs, ... }:
 {
-  # InkyPi dependencies
-  # InkyPi is installed imperatively due to mutable state (plugins, config)
-  # See: https://github.com/fatihak/InkyPi
+  # InkyPi (https://github.com/fatihak/InkyPi) is installed imperatively due to mutable state (plugins, config)
 
   environment.systemPackages = with pkgs; [
     # Python environment
@@ -32,18 +30,6 @@
     home = "/opt/inkypi";
   };
   users.groups.inkypi = {};
-
-  # mDNS for local network discovery (inky.local)
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    publish = {
-      enable = true;
-      addresses = true;
-      domain = true;
-      workstation = true;
-    };
-  };
 
   # Systemd service wrapper for InkyPi
   # Activates only after manual installation at /opt/inkypi

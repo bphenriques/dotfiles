@@ -4,6 +4,18 @@ Raspberry Pi Zero 2W with Inky Impression 7.3" display powering [InkyPi](https:/
 
 ## Setup
 
+### Init Host
+
+Generate and upload to Bitwarden the secrets:
+```declarative
+dotfiles-secrets <email> init-host inky
+```
+
+Then, let's generate the sops-secret file:
+```
+nix run .#host-secrets -- inky
+```
+
 ### SD Card Installation
 
 Build, flash, and provision secrets in one step:
@@ -11,7 +23,7 @@ Build, flash, and provision secrets in one step:
 ```bash
 sudo fdisk -l  # Identify the SD card device (e.g. /dev/sdX)
 export FLAKE_URL=.  # Use local checkout (default: github:bphenriques/dotfiles/main)
-nix run .#nixos-install -- sd-card inky <bw-email> /dev/sdX
+nix run .#nixos-install -- sd-card inky $(cat /tmp/email) /dev/mmcblk0
 ```
 
 Insert the SD card into the Pi Zero 2W and power it on. It should connect to WiFi and be reachable at `inky.local` (mDNS) or `192.168.1.197` (static DHCP reservation).

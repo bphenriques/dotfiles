@@ -74,8 +74,9 @@ init_host() {
   fi
   
   echo "Next steps:"
-  echo "  1. Create hosts/${host}/.sops.yaml with the public key above"
-  echo "  2. Create hosts/${host}/secrets.yaml and encrypt with: sops hosts/${host}/secrets.yaml"
+  echo "  1. Update .sops.yaml with the public key above"
+  echo "  2. Fetch the secret key and append to ~/.config/sops/age/keys.txt"
+  echo "  3. Create hosts/${host}/secrets.yaml and encrypt with: sops edit hosts/${host}/secrets.yaml"
   echo "  3. Apply the changes"
   rm -rf "$tmpdir"
 }
