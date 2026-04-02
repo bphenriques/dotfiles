@@ -63,6 +63,6 @@
 
   # Enable ALSA only (no PulseAudio/PipeWire needed)
   hardware.alsa.enable = lib.mkDefault true;
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   services.pipewire.enable = false;
 }

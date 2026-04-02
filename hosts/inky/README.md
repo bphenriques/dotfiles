@@ -26,7 +26,7 @@ export FLAKE_URL=.  # Use local checkout (default: github:bphenriques/dotfiles/m
 nix run .#nixos-install -- sd-card inky $(cat /tmp/email) /dev/mmcblk0
 ```
 
-Insert the SD card into the Pi Zero 2W and power it on. It should connect to WiFi and be reachable at `inky.local` (mDNS) or `192.168.1.197` (static DHCP reservation).
+Insert the SD card into the Pi Zero 2W and power it on. It should connect to WiFi and be reachable via the static IP.
 
 ### InkyPi Installation
 

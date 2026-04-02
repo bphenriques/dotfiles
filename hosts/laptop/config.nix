@@ -13,6 +13,9 @@
 
   networking.hostName = "bphenriques-laptop";
 
+  # Enable aarch64 emulation so we can build for ARM targets (e.g., inky Raspberry Pi) from this x86_64 host.
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   boot = {
     kernelPackages = pkgs.linuxPackages_6_19;
 

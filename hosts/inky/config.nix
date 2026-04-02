@@ -42,6 +42,7 @@
   };
 
   # WiFi configuration - Pi Zero 2W uses wireless only
+  sops.secrets."wifi/env" = { };
   networking.nameservers = [ self.shared.dns.cloudflare ];
   networking.wireless = {
     enable = true;
@@ -77,12 +78,11 @@
   powerManagement.cpuFreqGovernor = "ondemand";
 
   # Watchdog for automatic recovery from hangs
-  systemd.watchdog.rebootTime = "10min";
+  systemd.settings.Manager.RebootWatchdogSec = "10min";
 
   # Secrets
-  sops.defaultSopsFile = ./secrets.yaml;
+  sops.defaultSopsFile = self.private.hosts.inky.sopsSecretsFile;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
-  sops.secrets."wifi/env" = { };
 
   # Users
   users.mutableUsers = false;
