@@ -34,7 +34,7 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 root root -"
+    "d ${dataDir} 0750 1001 1001 -"
   ];
 
   virtualisation.oci-containers.containers.grist = {
