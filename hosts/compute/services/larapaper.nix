@@ -98,6 +98,7 @@ in
       "--cap-add=SETUID"
       "--cap-add=SETGID"
       "--cap-add=KILL"
+      "--pids-limit=256"
     ];
   };
 }

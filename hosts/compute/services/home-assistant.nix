@@ -85,6 +85,7 @@ in
   # OpenThread Border Router: bridges the ZBT-2 dongle's Thread radio to the IP network.
   # Home Assistant connects to OTBR's REST API (port 8091) for Thread/Matter device management.
   virtualisation.oci-containers.containers.otbr = {
+    # Upstream only publishes :latest and :main tags
     image = "openthread/border-router:latest";
     autoStart = true;
 

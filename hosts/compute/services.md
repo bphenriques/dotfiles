@@ -12,16 +12,16 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
-| [Cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.4.7 | `cleanuparr` | 11011 | ForwardAuth | — |
+| [Cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.9.3 | `cleanuparr` | 11011 | ForwardAuth | — |
 | [coturn](https://github.com/coturn/coturn) | STUN/TURN Server | 4.9.0 | `coturn` | 3478 | — | — |
-| [Immich](https://immich.app/) | Photo & Video Gallery | 2.6.1 | `photos` | 2283 | OIDC | — |
-| [Jellyfin](https://jellyfin.org/) | Media Player | 10.11.6 | `jellyfin` | 8096 | OIDC | — |
-| [Jellyseerr](https://github.com/Fallenbagel/jellyseerr) | TV / Movie Finder | 2.7.3 | `jellyseerr` | 9099 | — | — |
+| [Immich](https://immich.app/) | Photo & Video Gallery | 2.6.3 | `photos` | 2283 | OIDC | — |
+| [Jellyfin](https://jellyfin.org/) | Media Player | 10.11.7 | `jellyfin` | 8096 | OIDC | — |
+| [Jellyseerr](https://github.com/seerr-team/seerr) | TV / Movie Finder | 3.1.0 | `jellyseerr` | 9099 | — | — |
 | [Kavita](https://kavitareader.com) | Book Server | 0.8.8.3 | `kavita` | 8097 | OIDC | — |
 | [Prowlarr](https://prowlarr.com/) | Manage *rr services | 2.3.0.5236 | `prowlarr` | 9096 | ForwardAuth | — |
 | [Radarr](https://radarr.video) | Movie Tracker | 6.0.4.10291 | `radarr` | 9098 | ForwardAuth | ✓ |
-| [RomM](https://github.com/rommapp/romm) | ROM Manager | 4.7.0 | `romm` | 8095 | OIDC | — |
-| [Sonarr](https://sonarr.tv) | TV Tracker | 4.0.16.2944 | `sonarr` | 9097 | ForwardAuth | ✓ |
+| [RomM](https://github.com/rommapp/romm) | ROM Manager | 4.8.0 | `romm` | 8095 | OIDC | — |
+| [Sonarr](https://sonarr.tv) | TV Tracker | 4.0.17.2952 | `sonarr` | 9097 | ForwardAuth | ✓ |
 | [Transmission](https://www.transmissionbt.com/) | Torrent Client | 4.1.1 | `transmission` | 9091 | ForwardAuth | — |
 
 ### Monitoring
@@ -29,8 +29,8 @@
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
 | [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) | Alert Routing | 0.31.1 | `alertmanager` | 9093 | ForwardAuth | — |
-| [Grafana](https://grafana.com) | Dashboards | 12.4.1 | `grafana` | 3010 | ForwardAuth | — |
-| [Ntfy](https://ntfy.sh) | Push Notifications | 2.19.2 | `ntfy` | 2586 | — | — |
+| [Grafana](https://grafana.com) | Dashboards | 12.4.2 | `grafana` | 3010 | ForwardAuth | — |
+| [Ntfy](https://ntfy.sh) | Push Notifications | 2.20.1 | `ntfy` | 2586 | — | — |
 | [Prometheus](https://prometheus.io) | Metrics | 3.10.0 | `prometheus` | 9090 | ForwardAuth | — |
 
 ### Administration
@@ -44,7 +44,7 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
-| [homepage](https://gethomepage.dev) | Dashboard | 1.10.1 | `homepage` | 3001 | — | — |
+| [homepage](https://gethomepage.dev) | Dashboard | 1.11.0 | `homepage` | 3001 | — | — |
 | [tinyauth](https://tinyauth.app) | ForwardAuth Gateway | 5.0.4 | `tinyauth` | 3000 | OIDC | — |
 
 ### Home
@@ -52,10 +52,10 @@
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
 | [File Browser](https://filebrowser.org) | File Browser | 2.61.2 | `files` | 8085 | ForwardAuth | — |
-| [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.3.3 | `home` | 8123 | — | ✓ |
+| [Home Assistant](https://home-assistant.io/) | Home Automation | 2026.3.4 | `home` | 8123 | — | ✓ |
 | [LaraPaper](https://github.com/usetrmnl/larapaper) | E-Ink Display Server | 0.31.3 | `trmnl` | 4567 | ForwardAuth | — |
-| [Syncthing](https://syncthing.net/) | File Sync | 2.0.12 | `syncthing` | 8384 | ForwardAuth | — |
-| [Tandoor](https://tandoor.dev/) | Recipe Manager | 2.5.3 | `tandoor` | 9092 | OIDC | ✓ |
+| [Syncthing](https://syncthing.net/) | File Sync | 2.0.15 | `syncthing` | 8384 | ForwardAuth | — |
+| [Tandoor](https://tandoor.dev/) | Recipe Manager | 2.6.0 | `tandoor` | 9092 | OIDC | ✓ |
 
 ### Productivity
 
