@@ -36,7 +36,6 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
-    nixos-raspberrypi.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
