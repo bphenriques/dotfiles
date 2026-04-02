@@ -41,7 +41,7 @@ in
   options.custom.homelab.media = {
     jellyfin.serverId = lib.mkOption {
       type = lib.types.str;
-      description = "Jellyfin server ID for integrations (e.g., Jellyseerr)";
+      description = "Jellyfin server ID for integrations (e.g., Seerr)";
     };
 
     radarr = lib.mkOption {

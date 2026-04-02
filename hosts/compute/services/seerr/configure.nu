@@ -1,23 +1,23 @@
 #!/usr/bin/env nu
 
-# Initializes Jellyseerr (partially) declaratively via the API.
+# Initializes Seerr (partially) declaratively via the API.
 # - TODO: reconcile on config drift.
 
-let base_url = $env.JELLYSEERR_URL
-let api_key = open $env.JELLYSEERR_API_KEY_FILE | str trim
+let base_url = $env.SEERR_URL
+let api_key = open $env.SEERR_API_KEY_FILE | str trim
 let jellyfin_admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
 let jellyfin_admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let radarr_api_key = open $env.RADARR_API_KEY_FILE | str trim
 let sonarr_api_key = open $env.SONARR_API_KEY_FILE | str trim
-let config = open $env.JELLYSEERR_CONFIG_FILE
+let config = open $env.SEERR_CONFIG_FILE
 let headers = [X-Api-Key $api_key]
 
 def wait_ready [] {
   for attempt in 1..30 {
-    print $"Waiting for Jellyseerr... ($attempt)"
+    print $"Waiting for Seerr... ($attempt)"
     try { http get $"($base_url)/api/v1/status" --max-time 2sec | ignore; return } catch { sleep 2sec }
   }
-  error make { msg: "Jellyseerr failed to start after 30 attempts" }
+  error make { msg: "Seerr failed to start after 30 attempts" }
 }
 
 def complete_setup_wizard [] {
@@ -25,7 +25,7 @@ def complete_setup_wizard [] {
   let public_settings = if $r.status == 200 { $r.body } else { { initialized: false, mediaServerType: 0 } }
 
   if ($public_settings.initialized? | default false) {
-    print "Jellyseerr is already initialized"
+    print "Seerr is already initialized"
     return
   }
 
@@ -177,8 +177,8 @@ def sync_jellyfin_users [users: record] {
   }
 }
 
-# Permission bitmask values from Jellyseerr v2.2.3
-# Source: https://github.com/Fallenbagel/jellyseerr/blob/v2.2.3/server/lib/permissions.ts
+# Permission bitmask values from Seerr (formerly seerr v2.2.3)
+# Source: https://github.com/Fallenbagel/seerr/blob/v2.2.3/server/lib/permissions.ts
 const PERM_REQUEST               = 32
 const PERM_REQUEST_4K            = 1024
 const PERM_REQUEST_ADVANCED      = 8192
@@ -212,7 +212,7 @@ const MANAGED_MASK = (
 def configure_user_permissions [users: record] {
   print "Configuring user permissions..."
 
-  # Get all Jellyseerr users
+  # Get all Seerr users
   let all_users = http get $"($base_url)/api/v1/user" --headers $headers --full --allow-errors
   if $all_users.status != 200 {
     error make { msg: $"Failed to get users: ($all_users.status) - ($all_users.body)" }
@@ -238,7 +238,7 @@ def configure_user_permissions [users: record] {
       $managed_perms = $managed_perms bit-or $PERM_RECENT_VIEW
     }
 
-    # Clear managed bits, preserve any other Jellyseerr-granted permissions
+    # Clear managed bits, preserve any other Seerr-granted permissions
     let current_perms = $user.permissions? | default 0
     let base_perms = $current_perms bit-and (0xFFFFFFFF bit-xor $MANAGED_MASK)
     let desired_perms = $base_perms bit-or $managed_perms
@@ -272,5 +272,5 @@ def main [] {
     print "  No users to configure"
   }
 
-  print "Jellyseerr initialization complete"
+  print "Seerr initialization complete"
 }

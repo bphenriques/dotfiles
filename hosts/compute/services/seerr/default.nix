@@ -1,34 +1,34 @@
 { config, ... }:
 let
-  serviceCfg = config.custom.homelab.services.jellyseerr;
+  serviceCfg = config.custom.homelab.services.seerr;
   jellyfinCfg = config.custom.homelab.services.jellyfin;
 in
 {
   imports = [ ./configure.nix ];
 
   # Auth is delegated to Jellyfin (users sign in via Jellyfin credentials, not direct OIDC/forwardAuth)
-  custom.homelab.services.jellyseerr = {
-    displayName = "Jellyseerr";
+  custom.homelab.services.seerr = {
+    displayName = "Seerr";
     metadata.category = "Media";
     metadata.description = "TV / Movie Finder";
-    metadata.version = config.services.jellyseerr.package.version;
-    metadata.homepage = config.services.jellyseerr.package.meta.homepage;
+    metadata.version = config.services.seerr.package.version;
+    metadata.homepage = config.services.seerr.package.meta.homepage;
     port = 9099;
     secrets = {
       files.api-key = { rotatable = true; };
-      templates."jellyseerr.env".content = ''
+      templates."seerr.env".content = ''
         API_KEY=${serviceCfg.secrets.placeholder.api-key}
       '';
-      systemd.dependentServices = [ "jellyseerr" "jellyseerr-configure" ];
+      systemd.dependentServices = [ "seerr" "seerr-configure" ];
     };
     healthcheck.path = "/api/v1/status";
     integrations.homepage.enable = true;
   };
 
-  services.jellyseerr = {
+  services.seerr = {
     enable = true;
     port = serviceCfg.port;
   };
 
-  systemd.services.jellyseerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.templates."jellyseerr.env".path;
+  systemd.services.seerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.templates."seerr.env".path;
 }

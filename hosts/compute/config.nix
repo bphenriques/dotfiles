@@ -18,7 +18,7 @@
   # Basic setup
   networking.hostName = "compute";
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_18;
+    kernelPackages = pkgs.linuxPackages_6_19;
     loader.systemd-boot = {
       enable = true;
       editor = false;
@@ -67,6 +67,7 @@
     allowedInterfaces = [ "bond0" "wg0" ];
     cloudflareTokenEnvFile = config.sops.templates."traefik-cloudflare".path;
   };
+
   virtualisation = {
     podman.enable = true;
     oci-containers.backend = "podman";
@@ -76,12 +77,6 @@
       no_new_privileges = true;
     };
   };
-
-  # FIXME: Temporary
-  environment.systemPackages = [
-    pkgs.powertop
-    pkgs.usbutils
-  ];
 
   # Secrets
   sops.defaultSopsFile = self.private.hosts.compute.sopsSecretsFile;

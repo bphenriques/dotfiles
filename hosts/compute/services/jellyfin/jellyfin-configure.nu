@@ -143,7 +143,7 @@ def ensure_libraries [headers: list] {
   }
 }
 
-# FIXME: Remove passwordFile check once Jellyseerr supports OIDC
+# FIXME: Remove passwordFile check once Seerr supports OIDC
 # Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
 def ensure_users [headers: list, users: list] {
   print "Configuring users..."

@@ -11,7 +11,7 @@ in
     ./kavita
     ./miniflux
     ./pocket-id
-    ./jellyseerr
+    ./seerr
     ./prowlarr
     ./cleanuparr.nix
     ./romm
@@ -81,7 +81,7 @@ in
             enable = true;
             passwordFile = config.sops.secrets."jellyfin/home/password".path;
           };
-          jellyseerr = {
+          seerr = {
             enable = true;
             permissions = {
               autoApprove = true;
@@ -106,7 +106,7 @@ in
             enable = true;
             passwordFile = config.sops.secrets."guest/password".path;
           };
-          jellyseerr = {
+          seerr = {
             enable = true;
             permissions = {
               autoApprove = false;

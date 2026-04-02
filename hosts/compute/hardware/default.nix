@@ -5,8 +5,6 @@
   ];
 
   hardware.enableRedistributableFirmware = true;  # Misc drivers
-  services.fwupd.enable = true;                   # Updates firmwares: `fwupdmgr`
-  services.fwupd.daemonSettings.DisabledPlugins = [ "uefi_capsule" ]; # BIOS doesn't support capsule updates
 
   # Disk
   services.fstrim.enable = true;  # Weekly TRIM for NVMe longevity

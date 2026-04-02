@@ -25,7 +25,7 @@ stability, maintenance, and declarative setup:
 
 - Prefer stable API/CLI when possible. Home Assistant does not have an API and is heavily based on wizards.
 - If I really need to access internal conventions, I need to ensure it is stable enough and worth it (e.g., Jellyfin and
-  Jellyseerr). Opted out of Tandoor's Django ORM internals.
+  Seerr). Opted out of Tandoor's Django ORM internals.
 - Small one-time settings can be deferred post-install.
 
 ### Pocket-ID
@@ -53,7 +53,7 @@ Register admin passkey via browser (accept the invite received via email)
 
 Configure Open Subtitles plugin credentials: Admin → Plugins → Open Subtitles → API key
 
-### Jellyseerr
+### Seerr
 
 Trigger initial library scan
 
