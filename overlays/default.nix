@@ -95,12 +95,12 @@ _: {
       };
       larapaper = {
         image = "ghcr.io/usetrmnl/larapaper";
-        version = "0.31.3";
+        version = "0.31.4";
         updateInfo = { repo = "usetrmnl/larapaper"; };
       };
       romm = {
         image = "rommapp/romm";
-        version = "4.8.0";
+        version = "4.8.1";
         updateInfo = { repo = "rommapp/romm"; };
       };
     };
