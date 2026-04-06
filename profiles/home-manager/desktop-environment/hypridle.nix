@@ -20,7 +20,7 @@ in
         { timeout = 60 * 19;   on-timeout = notify { msg = "Turning off screen in 1 minute"; icon = (mkIcon "sleep" "󰒲"); }; }
         { timeout = 60 * 20;  on-timeout = "${niri} msg action power-off-monitors"; on-resume = "${niri} msg action power-on-monitors"; }
         { timeout = 60 * 25;  on-timeout = lock; }
-        { timeout = 60 * 45;  on-timeout = "${lib.getExe' pkgs.systemd "systemctl"} suspend"; }
+        #{ timeout = 60 * 45;  on-timeout = "${lib.getExe' pkgs.systemd "systemctl"} suspend"; }
       ];
     };
   };

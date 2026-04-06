@@ -48,6 +48,14 @@ let
       topic = serviceCfg.integrations.ntfy.topic;
       tags = ntfyTags;
     };
+    defaultDelayProfile = {
+      enableUsenet = true;
+      enableTorrent = true;
+      preferredProtocol = "torrent";
+      usenetDelay = 0;
+      torrentDelay = 120;
+      bypassIfHighestQuality = true;
+    };
   };
 
   settingsFile = pkgs.writeText "${name}-config.json" (builtins.toJSON settings);

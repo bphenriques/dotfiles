@@ -13,7 +13,6 @@ in
     ./pocket-id
     ./seerr
     ./prowlarr
-    ./cleanuparr.nix
     ./romm
     ./homepage
     ./syncthing.nix
@@ -29,6 +28,7 @@ in
     ./bentopdf.nix
     ./larapaper.nix
     ./grist
+    ./voice-assistant # WIP and exploring
   ];
 
   custom.homelab = {

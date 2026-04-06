@@ -12,15 +12,14 @@
 
 | Name | Description | Version | Subdomain | Internal Port | Auth | Backup |
 |------|-------------|---------|-----------|---------------|------|--------|
-| [Cleanuparr](https://github.com/cleanuparr/cleanuparr) | Queue Cleanup | 2.9.3 | `cleanuparr` | 11011 | ForwardAuth | — |
 | [coturn](https://github.com/coturn/coturn) | STUN/TURN Server | 4.9.0 | `coturn` | 3478 | — | — |
 | [Immich](https://immich.app/) | Photo & Video Gallery | 2.6.3 | `photos` | 2283 | OIDC | — |
 | [Jellyfin](https://jellyfin.org/) | Media Player | 10.11.7 | `jellyfin` | 8096 | OIDC | — |
-| [seerr](https://github.com/seerr-team/seerr) | TV / Movie Finder | 3.1.0 | `seerr` | 9099 | — | — |
 | [Kavita](https://kavitareader.com) | Book Server | 0.8.8.3 | `kavita` | 8097 | OIDC | — |
 | [Prowlarr](https://prowlarr.com/) | Manage *rr services | 2.3.0.5236 | `prowlarr` | 9096 | ForwardAuth | — |
 | [Radarr](https://radarr.video) | Movie Tracker | 6.0.4.10291 | `radarr` | 9098 | ForwardAuth | ✓ |
 | [RomM](https://github.com/rommapp/romm) | ROM Manager | 4.8.0 | `romm` | 8095 | OIDC | — |
+| [Seerr](https://github.com/seerr-team/seerr) | TV / Movie Finder | 3.1.0 | `seerr` | 9099 | — | — |
 | [Sonarr](https://sonarr.tv) | TV Tracker | 4.0.17.2952 | `sonarr` | 9097 | ForwardAuth | ✓ |
 | [Transmission](https://www.transmissionbt.com/) | Torrent Client | 4.1.1 | `transmission` | 9091 | ForwardAuth | — |
 

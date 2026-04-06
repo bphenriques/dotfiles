@@ -195,6 +195,41 @@ def ensure_notification [] {
   print $"  Created notification: ($notification_name)"
 }
 
+def ensure_default_delay_profile [] {
+  print "Configuring default delay profile..."
+  let profile = ($config | get -o defaultDelayProfile)
+  if $profile == null {
+    print "  No default delay profile config - skipping"
+    return
+  }
+
+  let existing = http get $"($base_url)/api/v3/delayprofile" --headers $headers --full --allow-errors
+  if $existing.status != 200 {
+    error make { msg: $"Failed to get delay profiles: ($existing.status) - ($existing.body)" }
+  }
+
+  let defaults = ($existing.body | where tags == [])
+  if ($defaults | length) != 1 {
+    print $"  Warning: Expected exactly one default delay profile, found ($defaults | length) - skipping"
+    return
+  }
+
+  let existing_profile = $defaults | get 0
+  let payload = ($existing_profile | merge {
+    enableUsenet: $profile.enableUsenet
+    enableTorrent: $profile.enableTorrent
+    preferredProtocol: $profile.preferredProtocol
+    usenetDelay: $profile.usenetDelay
+    torrentDelay: $profile.torrentDelay
+    bypassIfHighestQuality: $profile.bypassIfHighestQuality
+  })
+  let r = http put $"($base_url)/api/v3/delayprofile/($existing_profile.id)" $payload --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 202] {
+    error make { msg: $"Failed to update delay profile: ($r.status) - ($r.body)" }
+  }
+  print $"  Updated default delay profile: torrent delay ($profile.torrentDelay)min, usenet delay ($profile.usenetDelay)min"
+}
+
 def main [] {
   wait_ready
   print $"($arr_name) is ready"
@@ -202,6 +237,7 @@ def main [] {
   ensure_root_folders
   ensure_download_client
   ensure_notification
+  ensure_default_delay_profile
 
   print $"($arr_name) initialization complete"
 }

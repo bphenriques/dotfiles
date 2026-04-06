@@ -14,7 +14,7 @@
   zramSwap = {
     enable = true;
     memoryPercent = 25;
-    algorithm = "zstd";
+    algorithm = "lz4";  # Cheaper than zstd: less CPU during reclaim on 4 E-cores
   };
 
   # Graphics
@@ -76,8 +76,10 @@
     group = "keys";
   };
 
-  # Misc
+  # Thermal & stability
+  boot.kernelModules = [ "iTCO_wdt" ]; # Hardware watchdog: Intel TCO timer. Confirm with journalctl -b -g 'watchdog\|iTCO'
   services.thermald.enable = true;   # Intel thermal daemon
+  systemd.oomd.enable = true;        # Kill services under memory pressure before kernel OOM
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)
     "btusb"      # Bluetooth USB

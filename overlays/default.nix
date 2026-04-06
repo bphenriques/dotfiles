@@ -103,11 +103,6 @@ _: {
         version = "4.8.0";
         updateInfo = { repo = "rommapp/romm"; };
       };
-      cleanuparr = {
-        image = "ghcr.io/cleanuparr/cleanuparr";
-        version = "2.9.3";
-        updateInfo = { repo = "cleanuparr/cleanuparr"; stripPrefix = "v"; };
-      };
     };
   in {
     containerImages = images;
