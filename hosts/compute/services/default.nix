@@ -29,6 +29,7 @@ in
     ./larapaper.nix
     ./grist
     ./voice-assistant # WIP and exploring
+    ./mympd.nix
   ];
 
   custom.homelab = {
