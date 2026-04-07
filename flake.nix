@@ -5,12 +5,10 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://nixpkgs-wayland.cachix.org"
-      "https://nixos-raspberrypi.cachix.org"
    ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
-      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
    ];
   };
 
@@ -35,7 +33,6 @@
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
-    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi";
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
@@ -71,7 +68,6 @@
 
       nixosConfigurations.compute = import ./hosts/compute inputs;
       nixosConfigurations.laptop = import ./hosts/laptop inputs;
-      nixosConfigurations.inky = import ./hosts/inky inputs;
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }

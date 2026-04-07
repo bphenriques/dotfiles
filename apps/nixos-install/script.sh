@@ -17,7 +17,6 @@ Usage:
   $0 remote  <host> <bw-email> <ssh-host>   Install remotely via nixos-anywhere
   $0 local   <host> <bw-email>              Install locally (booted from USB)
   $0 rescue  <host> <bw-email>              Mount encrypted disks for recovery
-  $0 sd-card <host> <bw-email> <device>     Build and flash SD card image
 
 Prerequisites:
   1. Create host config: hosts/<host>/{config.nix,hardware-configuration.nix,disko.nix}
@@ -135,65 +134,11 @@ rescue() {
   sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 }
 
-sd_card_install() {
-  [[ $# -eq 3 ]] || usage
-  local host="$1"
-  local bw_email="$2"
-  local device="$3"
-
-  # Safety: confirm device
-  [[ -b "$device" ]] || fatal "Not a block device: ${device}"
-  info "WARNING: This will overwrite ALL data on ${device}"
-  read -rp "Type 'yes' to continue: " confirm
-  [[ "$confirm" == "yes" ]] || fatal "Aborted"
-
-  # Pre-flight: verify secrets are available before destructive operations
-  unlock_bitwarden "$bw_email"
-  dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1 \
-    || fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
-
-  info "Building SD card image for ${host}..."
-  local image_path
-  image_path="$(nix build "${FLAKE_URL}#nixosConfigurations.${host}.config.system.build.images.sd-card" --no-link --print-out-paths)"
-
-  info "Flashing image to ${device}..."
-  zstdcat "${image_path}"/sd-image/*.img.zst | sudo dd bs=4M of="${device}" iflag=fullblock status=progress oflag=sync
-
-  # Wait for partition table to be re-read
-  sudo partprobe "${device}"
-  sleep 2
-
-  # Find the NIXOS_SD partition on the specific device
-  local root_part
-  root_part="$(lsblk -rno PATH,LABEL "$device" | awk '$2=="NIXOS_SD"{print $1; exit}')"
-  [[ -n "$root_part" ]] || fatal "Could not find NIXOS_SD partition on ${device}"
-
-  info "Mounting ${root_part} to install secrets..."
-  local mount_dir
-  mount_dir="$(mktemp -d)"
-  trap 'sudo umount "$mount_dir" 2>/dev/null || true; rmdir "$mount_dir" 2>/dev/null || true' EXIT
-  sudo mount "$root_part" "$mount_dir"
-
-  info "Installing sops key for ${host}..."
-  sudo mkdir -p "${mount_dir}${SOPS_AGE_SYSTEM_FILE%/*}"
-  dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "${mount_dir}${SOPS_AGE_SYSTEM_FILE}" > /dev/null
-  sudo chown root:root "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
-  sudo chmod 600 "${mount_dir}${SOPS_AGE_SYSTEM_FILE}"
-  success "Host sops key installed"
-
-  sudo umount "$mount_dir"
-  rmdir "$mount_dir"
-  trap - EXIT
-
-  success "SD card ready. Insert into the device and power on."
-}
-
 [[ $# -lt 1 ]] && usage
 
 case "$1" in
   remote)  shift; remote_install "$@"  ;;
   local)   shift; local_install "$@"   ;;
   rescue)  shift; rescue "$@"          ;;
-  sd-card) shift; sd_card_install "$@" ;;
   *) usage ;;
 esac

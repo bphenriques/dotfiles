@@ -4,8 +4,6 @@ pkgs.writeShellApplication {
   runtimeInputs = [
     pkgs.disko            # Local installations
     pkgs.nixos-anywhere   # Remote installations
-    pkgs.parted           # SD card installations (partprobe)
-    pkgs.zstd             # SD card installations (zstdcat)
     selfPkgs.bw-session
     selfPkgs.dotfiles-secrets
   ];

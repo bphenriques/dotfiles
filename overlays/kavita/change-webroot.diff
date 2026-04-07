@@ -1,0 +1,73 @@
+diff -ruN a/API/Controllers/FallbackController.cs b/API/Controllers/FallbackController.cs
+--- a/API/Controllers/FallbackController.cs	2026-04-06 23:46:06.985356098 +0100
++++ b/API/Controllers/FallbackController.cs	2026-04-06 23:46:28.976924792 +0100
+@@ -31,7 +31,7 @@
+             return NotFound();
+         }
+ 
+-        return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"), "text/HTML");
++        return PhysicalFile(Path.Combine("@webroot@", "index.html"), "text/HTML");
+     }
+ }
+ 
+diff -ruN a/API/Services/DirectoryService.cs b/API/Services/DirectoryService.cs
+--- a/API/Services/DirectoryService.cs	2026-04-06 23:46:07.109351999 +0100
++++ b/API/Services/DirectoryService.cs	2026-04-06 23:46:28.979704215 +0100
+@@ -135,7 +135,7 @@
+         ExistOrCreate(SiteThemeDirectory);
+         FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
+         ExistOrCreate(FaviconDirectory);
+-        LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
++        LocalizationDirectory = FileSystem.Path.Join("@out@/lib/kavita-backend", "I18N");
+         CustomizedTemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "templates");
+         ExistOrCreate(CustomizedTemplateDirectory);
+         TemplateDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "EmailTemplates");
+diff -ruN a/API/Services/LocalizationService.cs b/API/Services/LocalizationService.cs
+--- a/API/Services/LocalizationService.cs	2026-04-06 23:46:07.110846083 +0100
++++ b/API/Services/LocalizationService.cs	2026-04-06 23:46:28.983561688 +0100
+@@ -56,7 +56,7 @@
+         {
+             _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
+                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
+-                "wwwroot", "assets/langs");
++                "@webroot@", "assets/langs");
+         }
+ 
+         _cacheOptions = new MemoryCacheEntryOptions()
+diff -ruN a/API/Startup.cs b/API/Startup.cs
+--- a/API/Startup.cs	2026-04-06 23:46:07.120056981 +0100
++++ b/API/Startup.cs	2026-04-06 23:46:39.792163915 +0100
+@@ -35,6 +35,7 @@
+ using Microsoft.Extensions.Caching.Hybrid;
+ using Microsoft.Extensions.Configuration;
+ using Microsoft.Extensions.DependencyInjection;
++using Microsoft.Extensions.FileProviders;
+ using Microsoft.Extensions.Hosting;
+ using Microsoft.Extensions.Logging;
+ using Microsoft.Net.Http.Headers;
+@@ -269,8 +270,6 @@
+         app.UsePathBase(basePath);
+         if (!env.IsDevelopment())
+         {
+-            // We don't update the index.html in local as we don't serve from there
+-            UpdateBaseUrlInIndex(basePath);
+ 
+             // Update DB with what's in config
+             var dataContext = serviceProvider.GetRequiredService<DataContext>();
+@@ -310,6 +309,7 @@
+         // Ensure static files is before our custom middleware stack
+         app.UseStaticFiles(new StaticFileOptions
+         {
++            FileProvider = new PhysicalFileProvider("@webroot@"),
+             // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
+             // ftl files are needed for PDF zoom options (https://github.com/Kareadita/Kavita/issues/3995)
+             ContentTypeProvider = new FileExtensionContentTypeProvider
+@@ -522,7 +522,7 @@
+         try
+         {
+             var htmlDoc = new HtmlDocument();
+-            var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
++            var indexHtmlPath = Path.Combine("@webroot@", "index.html");
+             htmlDoc.Load(indexHtmlPath);
+ 
+             var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");

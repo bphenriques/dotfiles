@@ -1,0 +1,15 @@
+# Memory and power optimization
+gpu_mem=16
+gpu_freq_min=50
+initial_turbo=30
+
+# Disable onboard audio and LED
+dtparam=audio=off
+dtparam=act_led_trigger=none
+
+# Enable I2C, SPI (Inky display), I2S DAC (MAX98357A), disable Bluetooth
+dtparam=i2c_arm=on
+dtoverlay=spi
+dtoverlay=hifiberry-dac
+gpio=25=op,dh
+dtoverlay=disable-bt

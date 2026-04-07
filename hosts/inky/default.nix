@@ -1,46 +1,44 @@
-{ nixpkgs, self, sops-nix, home-manager, dotfiles-private, nixos-raspberrypi, stylix, ... }:
+{ lib, pkgs }:
 let
-  inherit (nixpkgs.lib.attrsets) attrValues;
+  shared = import ../shared.nix;
 
-  system = "aarch64-linux";
-
-  nixModule = {
-    nixpkgs = {
-      overlays = attrValues self.overlays;
-    };
+  # SMB mounts: share name → gid (mirrors modules/nixos/homelab/smb.nix conventions)
+  nasIP = shared.networks.main.hosts.bruno-home-nas;
+  mounts = {
+    bphenriques = { gid = 5000; };
+    media       = { gid = 5001; };
   };
 
-  # Only include modules needed for inky (not all homelab services)
-  nixosModules = [
-    self.nixosModules.homelab-smb
-    self.nixosModules.homelab-paths
-    sops-nix.nixosModules.sops
-    home-manager.nixosModules.home-manager
+  smbOpts = [
+    "vers=3.0" "credentials=/root/.smb-credentials" "uid=0"
+    "nosuid" "nodev" "noexec"
+    "_netdev" "x-systemd.automount" "noauto"
+    "x-systemd.device-timeout=5s" "x-systemd.mount-timeout=5s"
+    "file_mode=0660" "dir_mode=0770"
   ];
 
-  sharedSpecialArgs = {
-    inherit nixos-raspberrypi;
-    self = self // {
-      pkgs = self.packages.${system} // dotfiles-private.packages.${system};
-      lib.builders = self.lib.builders.${system};
-      private = dotfiles-private;
-      shared = import ../shared.nix;
-    };
-  };
+  smbFstabFragment = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: cfg:
+    let opts = smbOpts ++ [ "gid=${toString cfg.gid}" ];
+    in "//${nasIP}/${name} /mnt/homelab-${name} cifs ${lib.concatStringsSep "," opts} 0 0"
+  ) mounts);
 
-  hmModule = {
-    home-manager = {
-      sharedModules = attrValues self.homeManagerModules ++ [
-        stylix.homeModules.stylix
-      ];
-      extraSpecialArgs = sharedSpecialArgs;
-    };
-  };
+  groupsEnv = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: cfg:
+    "HOMELAB_${lib.toUpper (builtins.replaceStrings ["-"] ["_"] name)}_GID=${toString cfg.gid}"
+  ) mounts);
 
-  rpiModules = with nixos-raspberrypi.nixosModules; [
-    raspberry-pi-02.base
-  ];
-in nixos-raspberrypi.lib.nixosSystem {
-  specialArgs = sharedSpecialArgs;
-  modules = nixosModules ++ rpiModules ++ [ nixModule hmModule ./config.nix ];
-}
+in
+pkgs.runCommand "inky-setup" { } ''
+  mkdir -p $out/config/generated
+
+  cp -r --no-preserve=mode ${./files}/. $out/config/
+
+  cat > $out/config/generated/smb.fstab.fragment <<'FSTAB'
+${smbFstabFragment}
+FSTAB
+
+  cat > $out/config/generated/groups.env <<'GROUPS'
+${groupsEnv}
+GROUPS
+
+  install -Dm755 ${./setup.sh} $out/setup.sh
+''

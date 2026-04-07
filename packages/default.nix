@@ -15,6 +15,7 @@ let
       bw-session = pkgs.callPackage ./dotfiles/bw-session { };
       dotfiles = pkgs.callPackage ./dotfiles/dotfiles { inherit builders; };
       dotfiles-secrets = pkgs.callPackage ./dotfiles/dotfiles-secrets { inherit bw-session; };
+      inky-setup = pkgs.callPackage ../hosts/inky { };
     }
   );
 

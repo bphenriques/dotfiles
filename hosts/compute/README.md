@@ -1,11 +1,17 @@
 # Compute Server
 
-Beelink EQ14 (N150+32GB RAM) running NixOS. Optimised for low maintenance, small attack surface, and declarative service management.
+NixOS homelab server optimised for low maintenance, small attack surface, and declarative service management.
 
 <p float="center">
   <img src="screenshots/homepage.png" width="49%" />
   <img src="screenshots/grafana.png" width="46%" />
 </p>
+
+## Hardware
+
+- **Model**: Beelink EQ14
+- **CPU**: Intel N150
+- **RAM**: 32GB
 
 ## Architecture
 
