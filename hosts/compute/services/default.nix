@@ -58,7 +58,7 @@ in
         displayName = "Inky";
         description = "E-Ink Display";
         category = "Media";
-        url = "http://${hosts.inky}:5000";
+        url = "http://${hosts.inky}";
         tab = "Admin";
       };
       jetkvm = {

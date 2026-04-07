@@ -2,7 +2,7 @@
 
 [InkyPi](https://github.com/fatihak/InkyPi) e-ink dashboard and [MPD](https://www.musicpd.org/) music player on a Raspberry Pi Zero 2W.
 
-Runs **Raspberry Pi OS Lite** (not NixOS). Configuration is managed via an idempotent setup bundle built with Nix (`nix build .#inky-setup`).
+Runs **Raspberry Pi OS Lite** (not NixOS). `nix build .#inky-setup` produces an idempotent bootstrap bundle that configures the OS and installs InkyPi imperatively.
 
 ## Hardware
 
@@ -12,7 +12,7 @@ Runs **Raspberry Pi OS Lite** (not NixOS). Configuration is managed via an idemp
 
 ## Setup
 
-### 1. Flash SD Card
+**1. Flash SD Card**
 
 Use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash **Raspberry Pi OS Lite (64-bit)**.
 ```bash
@@ -27,24 +27,19 @@ In the imager settings (the setup script assumes these are done):
 - WiFi: SSID and password
 - Locale/timezone: `en_GB.UTF-8` / `Europe/Lisbon`
 
-### 2. Run Setup
+**2. Deploy and Configure**
 
 ```bash
 nix build .#inky-setup
-rsync -a --delete result/ bphenriques@192.168.1.92:/home/bphenriques/inky-setup/
-ssh -t bphenriques@192.168.1.92 'sudo bash /home/bphenriques/inky-setup/setup.sh'
+rsync -a --delete result/ bphenriques@inky:/home/bphenriques/inky-setup/
+ssh -t bphenriques@inky 'sudo bash /home/bphenriques/inky-setup/setup.sh'
+
+# Set credentials (prompted by setup.sh on first run)
+ssh bphenriques@inky
+sudo nano /root/.smb-credentials   # NAS username/password
+sudo nano /etc/inkypi.env          # IMMICH_KEY
 ```
 
-### 3. Configure SMB Credentials
+## Notes
 
-```bash
-ssh bphenriques@192.168.1.92
-sudo nano /root/.smb-credentials   # Set actual NAS username/password
-```
-
-## Network Ports
-
-| Port | Service       |
-|------|---------------|
-| 80   | InkyPi web UI |
-| 6600 | MPD           |
+- MPD control: `/usr/local/bin/mpd-ctl {toggle|radio|vol-up|vol-down}`, for use with the InkyPi Hardware Buttons plugin.

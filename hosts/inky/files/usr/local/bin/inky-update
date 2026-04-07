@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+cd /opt/inkypi
+git pull
+sudo bash install/update.sh

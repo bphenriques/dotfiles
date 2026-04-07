@@ -17,6 +17,7 @@ in
     MPD_PORT = toString 6600;
   };
 
+  # TODO: changing settings need to be protected
   custom.homelab.services.mympd = {
     displayName = "My MPD";
     metadata.description = "Remote MPD Client";

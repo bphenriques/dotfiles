@@ -4,9 +4,9 @@ let
 
   # SMB mounts: share name → gid (mirrors modules/nixos/homelab/smb.nix conventions)
   nasIP = shared.networks.main.hosts.bruno-home-nas;
+
   mounts = {
-    bphenriques = { gid = 5000; };
-    media       = { gid = 5001; };
+    media = { gid = 5001; };
   };
 
   smbOpts = [

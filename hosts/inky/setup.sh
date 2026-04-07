@@ -48,7 +48,7 @@ setup_packages() {
   apt-get full-upgrade -y -qq
 
   info "Installing packages..."
-  apt-get install -y -qq cifs-utils mpd fish git python3-dev > /dev/null
+  apt-get install -y -qq cifs-utils mpd mpc fish git python3-dev jq > /dev/null
 }
 
 setup_config_files() {
@@ -57,12 +57,23 @@ setup_config_files() {
     dest="/${src#"$CONFIG_DIR/"}"
     install -Dm644 "$src" "$dest"
   done
+  find "$CONFIG_DIR/usr" -type f -print0 | while IFS= read -r -d '' src; do
+    dest="/${src#"$CONFIG_DIR/"}"
+    install -Dm755 "$src" "$dest"
+  done
 }
 
 setup_boot() {
   info "Configuring boot..."
   if ! grep -q 'panic=1' /boot/firmware/cmdline.txt 2>/dev/null; then
     sed -i 's/$/ panic=1 boot.panic_on_fail/' /boot/firmware/cmdline.txt
+  fi
+
+  # Larger SPI buffer for full-frame e-ink updates on the Inky Impression 7.3".
+  # Default 4096 is too small; 128K avoids partial-frame transfers.
+  # Ref: https://github.com/pimoroni/inky?tab=readme-ov-file#install-stable-library-from-pypi
+  if ! grep -q 'spidev.bufsiz' /boot/firmware/cmdline.txt 2>/dev/null; then
+    sed -i 's/$/ spidev.bufsiz=131072/' /boot/firmware/cmdline.txt
   fi
   replace_block /boot/firmware/config.txt "$CONFIG_DIR/boot/firmware/config.txt.fragment"
 }
@@ -73,28 +84,28 @@ setup_storage() {
     echo 'tmpfs /tmp tmpfs nosuid,nodev,size=64M 0 0' >> /etc/fstab
 
   if grep -E '^\S+\s+/\s' /etc/fstab | grep -qv 'noatime'; then
-    sed -i '/^\S\+\s\+\/\s/s/defaults/defaults,noatime,commit=60/' /etc/fstab
+    sed -i '/^\S\+\s\+\/\s/s/defaults/defaults,noatime/' /etc/fstab
+  fi
+  if grep -E '^\S+\s+/\s' /etc/fstab | grep -qv 'commit='; then
+    sed -i '/^\S\+\s\+\/\s/s/noatime/noatime,commit=60/' /etc/fstab
   fi
 
   replace_block /etc/fstab "$CONFIG_DIR/generated/smb.fstab.fragment"
-  mkdir -p /mnt/homelab-media /mnt/homelab-$USERNAME
+  mkdir -p /mnt/homelab-media
 
   if [[ ! -f /root/.smb-credentials ]]; then
     printf 'username=\npassword=\n' > /root/.smb-credentials
-    chmod 400 /root/.smb-credentials
     info "IMPORTANT: Edit /root/.smb-credentials with actual NAS credentials"
   fi
+  chmod 400 /root/.smb-credentials
 }
 
 setup_users() {
   info "Configuring users..."
-  getent group homelab-$USERNAME >/dev/null || groupadd -g "$HOMELAB_BPHENRIQUES_GID" homelab-$USERNAME
-  getent group homelab-media       >/dev/null || groupadd -g "$HOMELAB_MEDIA_GID" homelab-media
+  getent group homelab-media >/dev/null || groupadd -g "$HOMELAB_MEDIA_GID" homelab-media
 
   id $USERNAME >/dev/null 2>&1 || fatal "User $USERNAME must be created by rpi-imager"
-  usermod -aG audio,gpio,spi,i2c,homelab-media,homelab-$USERNAME $USERNAME
-
-  usermod -aG homelab-media mpd
+  usermod -aG audio,gpio,spi,i2c,homelab-media $USERNAME
 }
 
 setup_inkypi() {
@@ -103,6 +114,37 @@ setup_inkypi() {
     git clone https://github.com/fatihak/InkyPi.git /opt/inkypi
   fi
   bash /opt/inkypi/install/install.sh < /dev/null
+
+  local plugins_dir="/usr/local/inkypi/src/plugins"
+
+  # Install plugins (skip if already present)
+  if [[ ! -d "$plugins_dir/immich" ]]; then
+    inkypi plugin install immich https://github.com/doowylloh88/InkyPi-Immich
+  fi
+  if [[ ! -d "$plugins_dir/hardwarebuttons" ]]; then
+    inkypi plugin install hardwarebuttons https://github.com/RobinWts/InkyPi-Plugin-hardwarebuttons
+  fi
+
+  # Hardwarebuttons requires patching InkyPi core to register plugin blueprints.
+  # Ref: https://github.com/RobinWts/InkyPi-Plugin-hardwarebuttons#step-2-patch-core-files
+  if ! grep -q 'register_plugin_blueprints' /usr/local/inkypi/src/inkypi.py 2>/dev/null; then
+    bash "$plugins_dir/hardwarebuttons/patch-core.sh"
+  fi
+
+  # Use saturated palette for vivid colors (default 0.5 is washed out).
+  # Other image enhancements (contrast, brightness, etc.) are best tuned per-plugin via the web UI.
+  # Ref: https://github.com/fatihak/InkyPi/issues/502
+  local device_cfg="/opt/inkypi/src/config/device.json"
+  if ! jq -e '.image_settings.inky_saturation' "$device_cfg" >/dev/null 2>&1; then
+    jq '.image_settings.inky_saturation = 0' "$device_cfg" > "$device_cfg.tmp" && mv "$device_cfg.tmp" "$device_cfg"
+  fi
+
+  # Immich plugin reads IMMICH_KEY from the environment
+  if [[ ! -f /etc/inkypi.env ]]; then
+    printf 'IMMICH_KEY=\n' > /etc/inkypi.env
+    info "IMPORTANT: Edit /etc/inkypi.env with actual Immich API key"
+  fi
+  chmod 600 /etc/inkypi.env
 }
 
 setup_services() {
@@ -110,7 +152,10 @@ setup_services() {
   systemctl disable --now bluetooth.service    || true
   systemctl disable --now avahi-daemon.service || true
   systemctl daemon-reload
+  sysctl --system > /dev/null
   systemctl enable mpd
+  systemctl restart mpd
+  systemctl restart sshd
 }
 
 # ── Main ──────────────────────────────────────────────────────────
@@ -120,11 +165,7 @@ setup_config_files
 setup_boot
 setup_storage
 setup_users
-setup_services
 setup_inkypi
+setup_services
 
-success "Setup complete."
-if [[ ! -s /root/.smb-credentials ]] || grep -q '=$' /root/.smb-credentials 2>/dev/null; then
-  info "IMPORTANT: Edit /root/.smb-credentials with actual NAS credentials"
-fi
-info "Reboot to apply kernel params and config.txt changes."
+success "Setup complete. Reboot to apply kernel params and config.txt changes."

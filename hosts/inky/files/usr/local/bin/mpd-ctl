@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+case "${1:-}" in
+  toggle)   mpc toggle ;;
+  radio)    mpc clear && mpc add "https://stream-icy.bauermedia.pt/comercial.mp3" && mpc play ;;
+  vol-up)   mpc volume +5 ;;
+  vol-down) mpc volume -5 ;;
+  *)        echo "Usage: mpd-ctl {toggle|radio|vol-up|vol-down}" >&2; exit 1 ;;
+esac
