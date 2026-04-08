@@ -1,4 +1,6 @@
 #!/bin/sh
+# Note: this pulls HEAD, which may diverge from the pinned SHAs in setup.sh. That's fine —
+# setup.sh pins the initial install; manual updates via this script are accepted as-is.
 set -eu
 cd /opt/inkypi
 git pull

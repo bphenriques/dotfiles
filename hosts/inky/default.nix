@@ -22,9 +22,21 @@ let
     in "//${nasIP}/${name} /mnt/homelab-${name} cifs ${lib.concatStringsSep "," opts} 0 0"
   ) mounts);
 
-  groupsEnv = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: cfg:
-    "HOMELAB_${lib.toUpper (builtins.replaceStrings ["-"] ["_"] name)}_GID=${toString cfg.gid}"
-  ) mounts);
+  # InkyPi device.json defaults
+  inkypi = {
+    timezone = "Europe/Lisbon";
+    timeFormat = "24h";
+    inkySaturation = 0;
+  };
+
+  setupEnv = {
+    HOMELAB_MEDIA_GID = toString mounts.media.gid;
+    INKYPI_TIMEZONE = inkypi.timezone;
+    INKYPI_TIME_FORMAT = inkypi.timeFormat;
+    INKYPI_INKY_SATURATION = toString inkypi.inkySaturation;
+  };
+
+  setupEnvFile = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") setupEnv);
 
 in
 pkgs.runCommand "inky-setup" { } ''
@@ -36,9 +48,9 @@ pkgs.runCommand "inky-setup" { } ''
 ${smbFstabFragment}
 FSTAB
 
-  cat > $out/config/generated/groups.env <<'GROUPS'
-${groupsEnv}
-GROUPS
+  cat > $out/config/generated/setup.env <<'ENV'
+${setupEnvFile}
+ENV
 
   install -Dm755 ${./setup.sh} $out/setup.sh
 ''

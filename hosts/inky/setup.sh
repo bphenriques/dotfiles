@@ -18,8 +18,8 @@ fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
 [[ $(id -u) -eq 0 ]] || fatal "Must run as root"
 [[ -d "$CONFIG_DIR" ]] || fatal "Config directory not found: $CONFIG_DIR"
 
-# shellcheck source=config/generated/groups.env
-source "$CONFIG_DIR/generated/groups.env"
+# shellcheck source=config/generated/setup.env
+source "$CONFIG_DIR/generated/setup.env"
 
 # Replace or insert a managed block in a file.
 replace_block() {
@@ -33,8 +33,6 @@ replace_block() {
     echo "$MARKER_END"
   } >> "$target"
 }
-
-# ── Domain setup functions ────────────────────────────────────────
 
 setup_packages() {
   export DEBIAN_FRONTEND=noninteractive
@@ -110,19 +108,29 @@ setup_users() {
 
 setup_inkypi() {
   info "Setting up InkyPi..."
+
+  # Pinned versions — update SHAs after testing new releases.
+  local inkypi_sha="73c21a1ba5b565cace7d65aa8f788712067644ab"
+  local immich_sha="af6b48e98fd0b5a842ce20b8e6cd61af41908749"
+  local hardwarebuttons_sha="e208ed63b767278262c8dcd957ec890a22001046"
+
   if [[ ! -d /opt/inkypi/.git ]]; then
     git clone https://github.com/fatihak/InkyPi.git /opt/inkypi
+    git -C /opt/inkypi checkout "$inkypi_sha"
+    bash /opt/inkypi/install/install.sh < /dev/null
   fi
-  bash /opt/inkypi/install/install.sh < /dev/null
 
   local plugins_dir="/usr/local/inkypi/src/plugins"
 
-  # Install plugins (skip if already present)
+  # Install plugins pinned to specific commits.
   if [[ ! -d "$plugins_dir/immich" ]]; then
-    inkypi plugin install immich https://github.com/doowylloh88/InkyPi-Immich
+    git clone https://github.com/doowylloh88/InkyPi-Immich "$plugins_dir/immich"
+    git -C "$plugins_dir/immich" checkout "$immich_sha"
   fi
+
   if [[ ! -d "$plugins_dir/hardwarebuttons" ]]; then
-    inkypi plugin install hardwarebuttons https://github.com/RobinWts/InkyPi-Plugin-hardwarebuttons
+    git clone https://github.com/RobinWts/InkyPi-Plugin-hardwarebuttons "$plugins_dir/hardwarebuttons"
+    git -C "$plugins_dir/hardwarebuttons" checkout "$hardwarebuttons_sha"
   fi
 
   # Hardwarebuttons requires patching InkyPi core to register plugin blueprints.
@@ -131,13 +139,22 @@ setup_inkypi() {
     bash "$plugins_dir/hardwarebuttons/patch-core.sh"
   fi
 
-  # Use saturated palette for vivid colors (default 0.5 is washed out).
-  # Other image enhancements (contrast, brightness, etc.) are best tuned per-plugin via the web UI.
-  # Ref: https://github.com/fatihak/InkyPi/issues/502
-  local device_cfg="/opt/inkypi/src/config/device.json"
-  if ! jq -e '.image_settings.inky_saturation' "$device_cfg" >/dev/null 2>&1; then
-    jq '.image_settings.inky_saturation = 0' "$device_cfg" > "$device_cfg.tmp" && mv "$device_cfg.tmp" "$device_cfg"
+  # FIXME: Remove once fixed upstream: https://github.com/pimoroni/inky/issues/258 (and then inkypi)
+  local inky_e673="/usr/local/inkypi/venv_inkypi/lib/python3.13/site-packages/inky/inky_e673.py"
+  if grep -qF 'self._spi_bus.xfer3(data)' "$inky_e673"; then
+    sed -i 's/            self._spi_bus.xfer3(data)/            for _i in range(((len(data) - 1) \/\/ _SPI_CHUNK_SIZE) + 1):\n                _off = _i * _SPI_CHUNK_SIZE\n                self._spi_bus.xfer(data[_off:_off + _SPI_CHUNK_SIZE])/' "$inky_e673"
+  elif ! grep -qF '_SPI_CHUNK_SIZE' "$inky_e673"; then
+    fatal "inky SPI chunk patch: expected pattern not found — upstream may have changed"
   fi
+
+  # Image saturation: 0 gives vivid colors (default 0.5 is washed out). Ref: https://github.com/fatihak/InkyPi/issues/502
+  local device_cfg="/opt/inkypi/src/config/device.json"
+  jq \
+    --arg tz "$INKYPI_TIMEZONE" \
+    --arg tf "$INKYPI_TIME_FORMAT" \
+    --argjson sat "$INKYPI_INKY_SATURATION" \
+    '.timezone = $tz | .time_format = $tf | .image_settings.inky_saturation = $sat' \
+    "$device_cfg" > "$device_cfg.tmp" && mv "$device_cfg.tmp" "$device_cfg"
 
   # Immich plugin reads IMMICH_KEY from the environment
   if [[ ! -f /etc/inkypi.env ]]; then
@@ -157,8 +174,6 @@ setup_services() {
   systemctl restart mpd
   systemctl restart sshd
 }
-
-# ── Main ──────────────────────────────────────────────────────────
 
 setup_packages
 setup_config_files
