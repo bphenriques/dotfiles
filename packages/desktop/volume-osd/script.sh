@@ -43,39 +43,42 @@ friendly_source_name() {
   esac
 }
 
+# Echoes the icon stored in the named env var. Usage: get_icon OSD_VOLUME_HEADSET_ICON
+get_icon() { local var="$1"; echo -n "${!var}"; }
+
 get_sink_icon() {
   local device_type="$1"
   case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_ICON}" ;;
-    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_ICON}" ;;
-    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_ICON}" ;;
+    internal)   get_icon OSD_VOLUME_INTERNAL_SPEAKERS_ICON ;;
+    external)   get_icon OSD_VOLUME_EXTERNAL_SPEAKERS_ICON ;;
+    headset)    get_icon OSD_VOLUME_HEADSET_ICON ;;
+    headphones) get_icon OSD_VOLUME_HEADPHONES_ICON ;;
   esac
 }
 
 get_sink_mute_icon() {
   local device_type="$1"
   case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON}" ;;
-    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_MUTE_ICON}" ;;
-    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_MUTE_ICON}" ;;
+    internal)   get_icon OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON ;;
+    external)   get_icon OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON ;;
+    headset)    get_icon OSD_VOLUME_HEADSET_MUTE_ICON ;;
+    headphones) get_icon OSD_VOLUME_HEADPHONES_MUTE_ICON ;;
   esac
 }
 
 get_source_icon() {
   local device_type="$1"
   case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_MICROPHONE_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_ICON}" ;;
+    internal) get_icon OSD_VOLUME_MICROPHONE_ICON ;;
+    headset)  get_icon OSD_VOLUME_HEADSET_ICON ;;
   esac
 }
 
 get_source_mute_icon() {
   local device_type="$1"
   case "$device_type" in
-    internal)     echo -n "$OSD_VOLUME_MICROPHONE_MUTE_ICON" ;;
-    headset)      echo -n "$OSD_VOLUME_HEADSET_MUTE_ICON" ;;
+    internal) get_icon OSD_VOLUME_MICROPHONE_MUTE_ICON ;;
+    headset)  get_icon OSD_VOLUME_HEADSET_MUTE_ICON ;;
   esac
 }
 
