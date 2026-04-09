@@ -130,7 +130,7 @@
         {
           alert = "HighTemperature";
           expr = "max by(instance) (node_hwmon_temp_celsius) > 80";
-          "for" = "2m";
+          "for" = "30s";
           labels.severity = "critical";
           annotations.summary = "Temp > 80°C";
         }

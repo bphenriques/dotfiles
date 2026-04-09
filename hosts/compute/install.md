@@ -49,6 +49,12 @@ Register admin passkey via browser (accept the invite received via email)
    5. Create a dashboard: Settings → Dashboards → Add Dashboard → new from scratch
    6. Add a **Picture Entity card** → select the camera entity → set camera view to **Live** (WebRTC via go2rtc, ~0.5s latency)
 
+### Kapowarr
+
+1. Set ComicVine API key: Settings → General → ComicVine API Key (get one at [comicvine.gamespot.com](https://comicvine.gamespot.com/api/))
+2. Add root folder: Settings → Media Management → Root Folders → add `/comics`
+3. Torrent client: only qBittorrent is supported (Transmission planned for V1.4.0); built-in direct download clients (GetComics, Mega, Pixeldrain) work without configuration
+
 ### Jellyfin
 
 Configure Open Subtitles plugin credentials: Admin → Plugins → Open Subtitles → API key

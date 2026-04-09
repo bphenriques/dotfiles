@@ -1,6 +1,5 @@
 { config, pkgs, ... }:
 let
-  port = 9090;
   serviceCfg = config.custom.homelab.services.prometheus;
 in
 {
@@ -15,7 +14,7 @@ in
     metadata.version = pkgs.prometheus.version;
     metadata.homepage = pkgs.prometheus.meta.homepage;
     metadata.category = "Monitoring";
-    inherit port;
+    port = 9090;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
@@ -24,7 +23,7 @@ in
         job_name = "prometheus";
         scrape_interval = "300s";
         static_configs = [{
-          targets = [ "127.0.0.1:${toString port}" ];
+          targets = [ "127.0.0.1:${toString serviceCfg.port}" ];
         }];
       }];
       rules = [{

@@ -26,13 +26,10 @@ let
     ) usersWithMounts);
   });
 
-  # Bind user photo directories into immich for external library imports
-  photoBinds = lib.concatLists (lib.mapAttrsToList (username: _:
+  # Photo directories immich needs access to for external library imports
+  photoPaths = lib.concatLists (lib.mapAttrsToList (username: _:
     let userPaths = pathsCfg.users.${username}.photos;
-    in [
-      "${userPaths.library}:/mnt/immich/${username}"
-      "${userPaths.inbox}:/mnt/immich/${username}-inbox"
-    ]
+    in [ userPaths.library userPaths.inbox ]
   ) usersWithMounts);
 in
 {
@@ -42,7 +39,7 @@ in
     lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
   ) enabledUsers;
 
-  systemd.services.immich-server.serviceConfig.BindPaths = photoBinds;
+  systemd.services.immich-server.serviceConfig.ReadWritePaths = photoPaths;
 
   systemd.services.immich-configure = {
     description = "Immich setup";

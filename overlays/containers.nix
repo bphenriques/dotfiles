@@ -12,6 +12,11 @@ _final: prev: let
       version = "0.31.4";
       updateInfo = { repo = "usetrmnl/larapaper"; };
     };
+    kapowarr = {
+      image = "mrcas/kapowarr";
+      version = "1.3.1";
+      updateInfo = { repo = "Casvt/Kapowarr"; stripPrefix = "V"; };
+    };
     romm = {
       image = "rommapp/romm";
       version = "4.8.1";

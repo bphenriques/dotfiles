@@ -36,7 +36,7 @@ in
   systemd.services.jellyfin.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
   custom.homelab.smb.mounts.media.systemd.dependentServices = [ "jellyfin" ];
 
-  systemd.services.jellyfin.serviceConfig.BindReadOnlyPaths = [ pathsCfg.media.music.library ];
+  systemd.services.jellyfin.serviceConfig.ReadOnlyPaths = [ pathsCfg.media.music.library ];
 
   assertions = [
     {

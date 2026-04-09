@@ -2,6 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.kavita;
   oidcCfg = config.custom.homelab.oidc;
+  pathsCfg = config.custom.homelab.paths;
   kavitaCfg = config.services.kavita;
 
   # Default roles for new users (OIDC provisioned)
@@ -43,9 +44,9 @@ let
     libraries = let
       fileType = { archive = 1; epub = 2; pdf = 3; image = 4; };
     in [
-      { name = "Books";   type = 2; folders = [ "/mnt/kavita/books" ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
-      { name = "Comics";  type = 1; folders = [ "/mnt/kavita/comics" ]; fileGroupTypes = [ fileType.archive ];           }
-      { name = "Manga";   type = 0; folders = [ "/mnt/kavita/manga" ];  fileGroupTypes = [ fileType.archive ];           }
+      { name = "Books";   type = 2; folders = [ pathsCfg.media.books.library ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
+      { name = "Comics";  type = 1; folders = [ pathsCfg.media.comics.library ]; fileGroupTypes = [ fileType.archive ];           }
+      { name = "Manga";   type = 0; folders = [ pathsCfg.media.manga.library ];  fileGroupTypes = [ fileType.archive ];           }
     ];
 
     # Local users provisioned with password authentication (all get public libraries)

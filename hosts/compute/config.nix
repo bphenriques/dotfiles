@@ -43,6 +43,24 @@
       shared = { gid = 5002; };
     };
   };
+  custom.homelab.ingress = {
+    allowedInterfaces = [ "bond0" "wg0" ];
+    cloudflareTokenEnvFile = config.sops.templates."traefik-cloudflare".path;
+  };
+
+  virtualisation = {
+    podman.enable = true;
+    oci-containers.backend = "podman";
+    containers.containersConf.settings.containers = {
+      default_capabilities = [];
+      pids_limit = 100;
+      no_new_privileges = true;
+    };
+  };
+
+  # Secrets
+  sops.defaultSopsFile = self.private.hosts.compute.sopsSecretsFile;
+  sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   sops = {
     secrets."homelab/samba/username" = { };
     secrets."homelab/samba/password" = { };
@@ -63,24 +81,6 @@
       '';
     };
   };
-  custom.homelab.ingress = {
-    allowedInterfaces = [ "bond0" "wg0" ];
-    cloudflareTokenEnvFile = config.sops.templates."traefik-cloudflare".path;
-  };
-
-  virtualisation = {
-    podman.enable = true;
-    oci-containers.backend = "podman";
-    containers.containersConf.settings.containers = {
-      default_capabilities = [];
-      pids_limit = 100;
-      no_new_privileges = true;
-    };
-  };
-
-  # Secrets
-  sops.defaultSopsFile = self.private.hosts.compute.sopsSecretsFile;
-  sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
 
   # Users
   users.mutableUsers = false;

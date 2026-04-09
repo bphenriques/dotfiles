@@ -8,6 +8,7 @@ in
     ./sonarr
     ./immich
     ./jellyfin
+    ./kapowarr.nix
     ./kavita
     ./miniflux
     ./pocket-id

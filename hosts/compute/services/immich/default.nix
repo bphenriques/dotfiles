@@ -98,5 +98,6 @@ in
   systemd.services.immich-machine-learning.serviceConfig = {
     MemoryMax = "5G";
     MemoryHigh = "4G";
+    CPUQuota = "200%";  # max 2 of 4 cores — prevents thermal shutdown on N150
   };
 }

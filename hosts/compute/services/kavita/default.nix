@@ -53,10 +53,10 @@ in
   systemd.services.kavita = {
     serviceConfig = {
       LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
-      BindReadOnlyPaths = [
-        "${pathsCfg.media.books.library}:/mnt/kavita/books"
-        "${pathsCfg.media.comics.library}:/mnt/kavita/comics"
-        "${pathsCfg.media.manga.library}:/mnt/kavita/manga"
+      ReadOnlyPaths = [
+        pathsCfg.media.books.library
+        pathsCfg.media.comics.library
+        pathsCfg.media.manga.library
       ];
     };
     # Kavita has no native _FILE support for OIDC credentials; replace placeholders at runtime.

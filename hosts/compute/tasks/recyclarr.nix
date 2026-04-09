@@ -65,7 +65,7 @@ in
   systemd.timers.recyclarr = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*-*-* 03:00:00"; # Run daily at 3 AM
+      OnCalendar = "*-*-* 02:00:00"; # Run before backup (3 AM) to avoid racing with arr-configure restarts
       RandomizedDelaySec = "1h";
       Persistent = true;
     };
