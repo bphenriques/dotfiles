@@ -108,10 +108,11 @@
 
     # GUI centric
     pkgs.xwayland-satellite
-    pkgs.qbittorrent   # Torrent client. FIXME: alternative TUI?
-    pkgs.gparted       # TODO: I partially know how to do in the terminal... but... this is easier.
+    pkgs.qbittorrent      # Torrent client. FIXME: alternative TUI?
+    pkgs.gparted          # TODO: I partially know how to do in the terminal... but... this is easier.
     pkgs.jetbrains.idea-oss
-    pkgs.amp-cli       # AI Assistant.
+    pkgs.amp-cli          # AI Assistant.
+    kdePackages.kdenlive  # Editor
   ];
 
   home = {
