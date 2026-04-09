@@ -82,6 +82,21 @@
   boot.kernelModules = [ "iTCO_wdt" ]; # Hardware watchdog: Intel TCO timer. Confirm with journalctl -b -g 'watchdog\|iTCO'
   services.thermald.enable = true;   # Intel thermal daemon
   systemd.oomd.enable = true;        # Kill services under memory pressure before kernel OOM
+
+  # Resource control: aggregate caps for thermally intensive and control-plane workloads
+  custom.homelab.resourceControl.slices = {
+    throttled.sliceConfig = {
+      CPUQuota = "300%";    # Hard limit. The remaining CPU is left free to have thermal headroom otherwise the device will shutdown.
+      CPUWeight = 20;       # Reduce priority under contention
+      MemoryHigh = "16G";
+      MemoryMax = "20G";
+    };
+    critical = {
+      extraSystemdServices = [ "sshd" "dhcpcd" ];
+      sliceConfig.CPUWeight = 1000;
+    };
+  };
+
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)
     "btusb"      # Bluetooth USB

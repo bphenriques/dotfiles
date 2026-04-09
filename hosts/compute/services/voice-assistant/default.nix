@@ -55,9 +55,13 @@ in
     port = 8179;
     subdomain = "voice";
     forwardAuth.enable = true;
-    healthcheck.path = "/health";
+    integrations.monitoring.healthcheck = false;
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "voice-assistant";
+    resourceControl = {
+      slice = "throttled";
+      systemdServices = [ "whisper-server" "whisper-en-server" "parakeet-server" "ollama" "gemma4-server" ];
+    };
   };
 
   # Internal STT service — not exposed via Traefik
@@ -189,11 +193,6 @@ in
       MemoryHigh = "10G";
       MemoryMax = "12G";
       MemorySwapMax = "0";
-      CPUQuota = "150%";
-      CPUWeight = 10;
-      IOWeight = 10;
-      Nice = 10;
-      OOMScoreAdjust = 500;
       Restart = "no";
       TimeoutStartSec = "15min";  # model download + load on first start
       NoNewPrivileges = true;
@@ -246,7 +245,6 @@ in
     MemoryHigh = "6G";
     MemoryMax = "8G";
     MemorySwapMax = "0";
-    CPUQuota = "200%";  # max 2 of 4 cores; prevents thermal shutdown
   };
   services.ollama.environmentVariables = {
     OLLAMA_LOAD_TIMEOUT = "10m";  # vision projector load can be slow on CPU

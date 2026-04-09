@@ -29,6 +29,10 @@ in
     };
     healthcheck.path = "/health";
     integrations.homepage.enable = true;
+    resourceControl = {
+      slice = "throttled";
+      systemdServices = [ "jellyfin" ];
+    };
   };
 
   services.jellyfin.enable = true;
