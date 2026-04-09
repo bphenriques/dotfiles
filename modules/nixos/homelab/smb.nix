@@ -111,12 +111,9 @@ in {
 
           "credentials=${cfg.credentialsPath}"
 
-          # Automount on first access (avoids boot race with network)
           "_netdev"
-          "x-systemd.automount"
-          "noauto"
-          "x-systemd.device-timeout=5s"
-          "x-systemd.mount-timeout=5s"
+          "nofail"
+          "x-systemd.mount-timeout=30s"
         ];
       }
     ) cfg.mounts;

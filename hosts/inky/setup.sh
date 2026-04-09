@@ -46,7 +46,7 @@ setup_packages() {
   apt-get full-upgrade -y -qq
 
   info "Installing packages..."
-  apt-get install -y -qq cifs-utils mpd mpc fish git python3-dev jq > /dev/null
+  apt-get install -y -qq cifs-utils mpd mpc git python3-dev jq > /dev/null
 }
 
 setup_config_files() {
@@ -166,10 +166,12 @@ setup_inkypi() {
 
 setup_services() {
   info "Configuring services..."
-  systemctl disable --now bluetooth.service    || true
+  systemctl disable --now bluetooth.service || true
   systemctl disable --now avahi-daemon.service || true
+
   systemctl daemon-reload
   sysctl --system > /dev/null
+
   systemctl enable mpd
   systemctl restart mpd
   systemctl restart sshd

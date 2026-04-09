@@ -70,9 +70,33 @@ in
         hashVerificationEnabled = true;
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
+
+      # Reduce ML-bound job concurrency to limit memory pressure during batch operations
+      job = {
+        faceDetection.concurrency = 1;
+        smartSearch.concurrency = 1;
+      };
+
+      # Spread nightly work to avoid a midnight thundering herd
+      library.scan.cronExpression = "0 3 * * *";
+      nightlyTasks.startTime = "02:00";
+    };
+
+    # Reduce ML thread usage
+    machine-learning.environment = {
+      MACHINE_LEARNING_REQUEST_THREADS = "2";
+      MACHINE_LEARNING_MODEL_INTRA_OP_THREADS = "1";
     };
   };
 
-  systemd.services.immich-server.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups ++ [ "video" "render" ];
+  systemd.services.immich-server.serviceConfig = {
+    SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups ++ [ "video" "render" ];
+    MemoryMax = "4G";
+    MemoryHigh = "3G";
+  };
   systemd.services.immich-server.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
+  systemd.services.immich-machine-learning.serviceConfig = {
+    MemoryMax = "5G";
+    MemoryHigh = "4G";
+  };
 }
