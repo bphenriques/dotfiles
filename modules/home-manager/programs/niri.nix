@@ -15,7 +15,7 @@ let
 in
 {
   options.custom.programs.niri = {
-    enable = lib.mkEnableOption "programs-niri";
+    enable = lib.mkEnableOption "custom-niri";
 
     environment = lib.mkOption {
       description = "Environment variables to set in a niri session";
