@@ -1,5 +1,12 @@
 { lib, pkgs }:
 {
+  # Option type for app executables: accepts a package (extracts the main binary) or a raw string path.
+  mkAppOpt = default: lib.mkOption {
+    inherit default;
+    description = "";
+    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
+  };
+
   writeFuzzelDmenuApplication = {
     name,
     runtimeInputs ? [ ],

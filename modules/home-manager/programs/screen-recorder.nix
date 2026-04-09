@@ -4,12 +4,7 @@ let
   inherit (lib) nameValuePair;
 
   cfg = config.custom.programs.screen-recorder;
-
-  mkAppOpt = default: lib.mkOption {
-    inherit default;
-    description = "";
-    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-  };
+  mkAppOpt = self.lib.builders.mkAppOpt;
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 

@@ -5,12 +5,6 @@ let
 
   cfg = config.custom.programs.screenshot;
 
-  mkAppOpt = default: lib.mkOption {
-    inherit default;
-    description = "";
-    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-  };
-
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
