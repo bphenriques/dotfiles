@@ -16,6 +16,7 @@
 | [coturn](https://github.com/coturn/coturn) | STUN/TURN Server | 4.9.0 | `coturn` | 3478 | — | — |
 | [Immich](https://immich.app/) | Photo & Video Gallery | 2.6.3 | `photos` | 2283 | OIDC | — |
 | [Jellyfin](https://jellyfin.org/) | Media Player | 10.11.7 | `jellyfin` | 8096 | OIDC | — |
+| [Kapowarr](https://github.com/Casvt/Kapowarr) | Comic Book Manager | 1.3.1 | `kapowarr` | 5656 | ForwardAuth | — |
 | [Kavita](https://kavitareader.com) | Book Server | 0.8.9.1 | `kavita` | 8097 | OIDC | — |
 | [Prowlarr](https://prowlarr.com/) | Manage *rr services | 2.3.0.5236 | `prowlarr` | 9096 | ForwardAuth | — |
 | [Radarr](https://radarr.video) | Movie Tracker | 6.0.4.10291 | `radarr` | 9098 | ForwardAuth | ✓ |

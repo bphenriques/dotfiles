@@ -43,6 +43,8 @@
     };
   };
   networking.interfaces.bond0.useDHCP = true;
+  networking.interfaces.enp1s0.wakeOnLan.enable = true;
+  networking.interfaces.enp2s0.wakeOnLan.enable = true;
 
   # Wait for bond0 carrier before starting dhcpcd (bond takes a moment to come up at boot). This ensures the right IP.
   # Otherwise, it will fall back to to 169.254.x.x link-local address as DHCP is slow.
