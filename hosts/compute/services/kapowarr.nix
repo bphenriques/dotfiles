@@ -11,7 +11,7 @@ in
     displayName = "Kapowarr";
     metadata.description = "Comic Book Manager";
     metadata.version = img.version;
-    metadata.homepage = "https://github.com/Casvt/Kapowarr"; # FIXME: Add homepage as attribute of the img
+    metadata.homepage = img.homepage;
     metadata.category = "Media";
     port = 5656;
     access.allowedGroups = with config.custom.homelab.groups; [ users admin ];

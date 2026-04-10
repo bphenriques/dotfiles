@@ -15,7 +15,7 @@ in
     displayName = "Grist";
     metadata.description = "Spreadsheet Database";
     metadata.version = img.version;
-    metadata.homepage = "https://github.com/gristlabs/grist-core";
+    metadata.homepage = img.homepage;
     metadata.category = "Productivity";
     port = 8484;
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

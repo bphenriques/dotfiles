@@ -21,7 +21,7 @@ in
     displayName = "LaraPaper";
     metadata.description = "E-Ink Display Server";
     metadata.version = img.version;
-    metadata.homepage = "https://github.com/usetrmnl/larapaper";
+    metadata.homepage = img.homepage;
     metadata.category = "Home";
     port = 4567;
     subdomain = "trmnl";

@@ -86,8 +86,8 @@
   # Resource control: aggregate caps for thermally intensive and control-plane workloads
   custom.homelab.resourceControl.slices = {
     throttled.sliceConfig = {
-      CPUQuota = "300%";    # Hard limit. The remaining CPU is left free to have thermal headroom otherwise the device will shutdown.
-      CPUWeight = 20;       # Reduce priority under contention
+      AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
+      CPUWeight = 20;
       MemoryHigh = "16G";
       MemoryMax = "20G";
     };

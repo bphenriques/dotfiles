@@ -76,7 +76,7 @@ in
     displayName = "RomM";
     metadata.description = "ROM Manager";
     metadata.version = img.version;
-    metadata.homepage = "https://github.com/rommapp/romm";
+    metadata.homepage = img.homepage;
     metadata.category = "Media";
     port = 8095;
 

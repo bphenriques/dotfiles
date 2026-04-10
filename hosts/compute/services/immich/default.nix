@@ -34,7 +34,7 @@ in
     integrations.homepage.enable = true;
     resourceControl = {
       slice = "throttled";
-      systemdServices = [ "immich-machine-learning" ];
+      systemdServices = [ "immich-server" "immich-machine-learning" ];
     };
   };
 
@@ -65,6 +65,7 @@ in
 
       ffmpeg = {
         accel = "qsv";
+        accelDecode = true;
         acceptedVideoCodecs = [ "h264" "hevc" ];
         preferredHwDevice = "/dev/dri/renderD128";
       };
@@ -75,8 +76,10 @@ in
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
 
-      # Reduce ML-bound job concurrency to limit memory pressure during batch operations
+      # Reduce job concurrency: video disabled (iGPU heats N150 package); ML/thumbnails capped for thermal safety
       job = {
+        videoConversion.concurrency = 1;  # iGPU shares die with CPU; sustained QSV overheats passive N150. Pause via admin UI.
+        thumbnailGeneration.concurrency = 1;
         faceDetection.concurrency = 1;
         smartSearch.concurrency = 1;
       };
@@ -88,7 +91,7 @@ in
 
     # Reduce ML thread usage
     machine-learning.environment = {
-      MACHINE_LEARNING_REQUEST_THREADS = "2";
+      MACHINE_LEARNING_REQUEST_THREADS = "1";
       MACHINE_LEARNING_MODEL_INTRA_OP_THREADS = "1";
     };
   };

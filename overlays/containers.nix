@@ -5,21 +5,25 @@ _final: prev: let
     grist = {
       image = "gristlabs/grist";
       version = "1.7.12";
+      homepage = "https://github.com/gristlabs/grist-core";
       updateInfo = { repo = "gristlabs/grist-core"; stripPrefix = "v"; };
     };
     larapaper = {
       image = "ghcr.io/usetrmnl/larapaper";
       version = "0.31.4";
+      homepage = "https://github.com/usetrmnl/larapaper";
       updateInfo = { repo = "usetrmnl/larapaper"; };
     };
     kapowarr = {
       image = "mrcas/kapowarr";
       version = "1.3.1";
+      homepage = "https://github.com/Casvt/Kapowarr";
       updateInfo = { repo = "Casvt/Kapowarr"; stripPrefix = "V"; };
     };
     romm = {
       image = "rommapp/romm";
       version = "4.8.1";
+      homepage = "https://github.com/rommapp/romm";
       updateInfo = { repo = "rommapp/romm"; };
     };
   };
