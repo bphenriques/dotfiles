@@ -87,6 +87,7 @@
   custom.homelab.resourceControl.slices = {
     throttled.sliceConfig = {
       AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
+      CPUQuota = "150%";    # hard cap prevents turbo heat-soak on passively-cooled N150
       CPUWeight = 20;
       MemoryHigh = "16G";
       MemoryMax = "20G";

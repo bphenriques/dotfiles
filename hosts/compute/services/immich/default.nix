@@ -43,7 +43,6 @@ in
     host = serviceCfg.host;
     port = serviceCfg.port;
     mediaLocation = "/var/lib/immich";
-    accelerationDevices = [ "/dev/dri/renderD128" ];
 
     settings = {
       server.externalDomain = serviceCfg.publicUrl;
@@ -64,10 +63,10 @@ in
       library.watch.enabled = true;
 
       ffmpeg = {
-        accel = "qsv";
-        accelDecode = true;
+        accel = "disabled";      # CPU-only; iGPU reserved for Jellyfin and I can't throttle GPU. Both will lead to thermal issues in such as small device.
+        accelDecode = false;
         acceptedVideoCodecs = [ "h264" "hevc" ];
-        preferredHwDevice = "/dev/dri/renderD128";
+        threads = 2;
       };
 
       storageTemplate = {
@@ -76,15 +75,15 @@ in
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
 
-      # Reduce job concurrency: video disabled (iGPU heats N150 package); ML/thumbnails capped for thermal safety
+      # Reduce job concurrency: ML for memory pressure, thumbnails for CPU/thermal
       job = {
-        videoConversion.concurrency = 1;  # iGPU shares die with CPU; sustained QSV overheats passive N150. Pause via admin UI.
+        videoConversion.concurrency = 1;
         thumbnailGeneration.concurrency = 1;
         faceDetection.concurrency = 1;
         smartSearch.concurrency = 1;
       };
 
-      # Spread nightly work to avoid a midnight thundering herd
+      # Spread nightly work
       library.scan.cronExpression = "0 3 * * *";
       nightlyTasks.startTime = "02:00";
     };
@@ -97,11 +96,10 @@ in
   };
 
   systemd.services.immich-server.serviceConfig = {
-    SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups ++ [ "video" "render" ];
+    SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
     MemoryMax = "4G";
     MemoryHigh = "3G";
   };
-  systemd.services.immich-server.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
   systemd.services.immich-machine-learning.serviceConfig = {
     MemoryMax = "5G";
     MemoryHigh = "4G";
