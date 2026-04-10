@@ -46,7 +46,7 @@ setup_packages() {
   apt-get full-upgrade -y -qq
 
   info "Installing packages..."
-  apt-get install -y -qq cifs-utils mpd mpc git python3-dev jq > /dev/null
+  apt-get install -y -qq cifs-utils mpd mpc git python3-dev jq wireguard-tools qrencode iptables > /dev/null
 }
 
 setup_config_files() {
@@ -164,6 +164,54 @@ setup_inkypi() {
   chmod 600 /etc/inkypi.env
 }
 
+setup_wireguard() {
+  info "Configuring WireGuard..."
+  local datadir="/var/lib/wireguard"
+  local admin_ip="${WG_CLIENT_IP}"
+  mkdir -p "$datadir/server" "$datadir/admin"
+  chmod 700 "$datadir" "$datadir/server" "$datadir/admin"
+
+  # Server keys
+  if [[ ! -f "$datadir/server/private.key" ]]; then
+    wg genkey > "$datadir/server/private.key"
+    chmod 600 "$datadir/server/private.key"
+    wg pubkey < "$datadir/server/private.key" > "$datadir/server/public.key"
+    success "Generated WireGuard server keys"
+  fi
+
+  # Admin client keys
+  if [[ ! -f "$datadir/admin/private.key" ]]; then
+    wg genkey > "$datadir/admin/private.key"
+    chmod 600 "$datadir/admin/private.key"
+    wg pubkey < "$datadir/admin/private.key" > "$datadir/admin/public.key"
+    echo "$admin_ip" > "$datadir/admin/ip"
+    success "Generated WireGuard admin client keys"
+  fi
+
+  mkdir -p /etc/wireguard
+  cat > /etc/wireguard/wg0.conf <<EOF
+[Interface]
+Address = ${WG_ADDRESS}
+ListenPort = ${WG_PORT}
+PrivateKey = $(cat "$datadir/server/private.key")
+PostUp = iptables -A FORWARD -i %i -o wlan0 -j ACCEPT; iptables -t nat -A POSTROUTING -s ${WG_CLIENT_SUBNET} -o wlan0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -o wlan0 -j ACCEPT; iptables -t nat -D POSTROUTING -s ${WG_CLIENT_SUBNET} -o wlan0 -j MASQUERADE
+
+[Peer]
+PublicKey = $(cat "$datadir/admin/public.key")
+AllowedIPs = ${admin_ip}/32
+EOF
+  chmod 600 /etc/wireguard/wg0.conf
+
+  install -Dm600 "$CONFIG_DIR/generated/wg-ctl.env" /etc/wireguard/wg-ctl.env
+
+  if [[ ! -f /etc/wireguard/endpoint ]]; then
+    printf '' > /etc/wireguard/endpoint
+    chmod 600 /etc/wireguard/endpoint
+    info "IMPORTANT: Edit /etc/wireguard/endpoint with public IP/DDNS:port"
+  fi
+}
+
 setup_services() {
   info "Configuring services..."
   systemctl disable --now bluetooth.service || true
@@ -174,6 +222,8 @@ setup_services() {
 
   systemctl enable mpd
   systemctl restart mpd
+  systemctl enable wg-quick@wg0
+  systemctl restart wg-quick@wg0
   systemctl restart sshd
 }
 
@@ -183,6 +233,7 @@ setup_boot
 setup_storage
 setup_users
 setup_inkypi
+setup_wireguard
 setup_services
 
 success "Setup complete. Reboot to apply kernel params and config.txt changes."

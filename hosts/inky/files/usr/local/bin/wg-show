@@ -1,0 +1,23 @@
+#!/bin/sh
+# Show WireGuard admin client config as QR code.
+set -eu
+WG_ENV="/etc/wireguard/wg-ctl.env"
+ENDPOINT_FILE="/etc/wireguard/endpoint"
+[ -f "$WG_ENV" ] || { echo "Missing $WG_ENV" >&2; exit 1; }
+[ -f "$ENDPOINT_FILE" ] || { echo "Missing $ENDPOINT_FILE — write your public IP/DDNS:port" >&2; exit 1; }
+. "$WG_ENV"
+
+DIR="/var/lib/wireguard"
+WG_ENDPOINT=$(cat "$ENDPOINT_FILE")
+cat <<EOF | qrencode -t ANSIUTF8
+[Interface]
+PrivateKey = $(cat "$DIR/admin/private.key")
+Address = $(cat "$DIR/admin/ip")/32
+DNS = $WG_CLIENT_DNS
+
+[Peer]
+PublicKey = $(cat "$DIR/server/public.key")
+Endpoint = $WG_ENDPOINT
+AllowedIPs = $WG_ALLOWED_IPS
+PersistentKeepalive = 25
+EOF

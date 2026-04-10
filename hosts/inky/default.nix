@@ -29,12 +29,31 @@ let
     inkySaturation = 0;
   };
 
+  # WireGuard backup VPN server (separate subnet from compute's 10.100.0.0/24)
+  wireguard = {
+    port = 51821;
+    address = "10.100.1.1/24";
+    clientSubnet = "10.100.1.0/24";
+    dns = shared.dns.cloudflare;
+    clientIP = "10.100.1.2";
+    allowedIPs = "${wireguard.clientSubnet},${shared.networks.main.subnet}";
+  };
+
   setupEnv = {
     HOMELAB_MEDIA_GID = toString mounts.media.gid;
     INKYPI_TIMEZONE = inkypi.timezone;
     INKYPI_TIME_FORMAT = inkypi.timeFormat;
     INKYPI_INKY_SATURATION = toString inkypi.inkySaturation;
+    WG_PORT = toString wireguard.port;
+    WG_ADDRESS = wireguard.address;
+    WG_CLIENT_SUBNET = wireguard.clientSubnet;
+    WG_CLIENT_IP = wireguard.clientIP;
   };
+
+  wgCtlEnv = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") {
+    WG_CLIENT_DNS = wireguard.dns;
+    WG_ALLOWED_IPS = wireguard.allowedIPs;
+  });
 
   setupEnvFile = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") setupEnv);
 
@@ -51,6 +70,10 @@ FSTAB
   cat > $out/config/generated/setup.env <<'ENV'
 ${setupEnvFile}
 ENV
+
+  cat > $out/config/generated/wg-ctl.env <<'WGENV'
+${wgCtlEnv}
+WGENV
 
   install -Dm755 ${./setup.sh} $out/setup.sh
 ''
