@@ -12,21 +12,23 @@ let
     hash = "sha256-EBpIe0aw1FO7DzB6F3oAWD5FRLF2iZGtOHllMxuamdc=";
   };
 
+  # FIXME: ps2 (external), psp (external), switch, wii
+
   # Each entry maps a ROM directory to a Pegasus collection and RetroArch core.
   # `shortname` defaults to `dir` when omitted.
   systems = [
-    { dir = "megadrive"; name = "Megadrive";        core = "genesis_plus_gx_libretro.so";   extensions = "md"; }
-    { dir = "nes";       name = "NES";              core = "fceumm_libretro.so";            extensions = "nes"; }
-    { dir = "snes";      name = "Super Nintendo";   core = "snes9x_libretro.so";            extensions = "smc, sfc"; }
-    { dir = "psx";       name = "PlayStation";      core = "swanstation_libretro.so";       extensions = "chd, m3u"; }
-    { dir = "gb";        name = "Game Boy";         core = "gambatte_libretro.so";          extensions = "gb"; }
-    { dir = "gbc";       name = "Game Boy Color";   core = "gambatte_libretro.so";          extensions = "gbc"; }
-    { dir = "gba";       name = "Game Boy Advance"; core = "mgba_libretro.so";              extensions = "gba"; }
-    { dir = "nds";       name = "Nintendo DS";      core = "desmume_libretro.so";           extensions = "nds"; }
-    { dir = "dos";       name = "DOS";              core = "dosbox_pure_libretro.so";       extensions = "zip"; }
-    { dir = "doom";      name = "Doom";             core = "prboom_libretro.so";            extensions = "wad"; }
-    { dir = "fbneo";     name = "Arcade";           core = "fbneo_libretro.so";             extensions = "zip"; shortname = "arcade"; }
-    { dir = "dreamcast"; name = "Dreamcast";        core = "flycast_libretro.so";           extensions = "chd"; }
+    { dir = "megadrive"; name = "Megadrive";        core = "genesis_plus_gx"; extensions = [ "md" ]; }
+    { dir = "nes";       name = "NES";              core = "fceumm";          extensions = [ "nes" ]; }
+    { dir = "snes";      name = "Super Nintendo";   core = "snes9x";          extensions = [ "smc" "sfc" ]; }
+    { dir = "psx";       name = "PlayStation";      core = "swanstation";     extensions = [ "chd" "m3u" ]; }
+    { dir = "gb";        name = "Game Boy";         core = "gambatte";        extensions = [ "gb" ]; }
+    { dir = "gbc";       name = "Game Boy Color";   core = "gambatte";        extensions = [ "gbc" ]; }
+    { dir = "gba";       name = "Game Boy Advance"; core = "mgba";            extensions = [ "gba" ]; }
+    { dir = "nds";       name = "Nintendo DS";      core = "desmume";         extensions = [ "nds" ]; }
+    { dir = "dos";       name = "DOS";              core = "dosbox_pure";     extensions = [ "zip" ]; }
+    { dir = "doom";      name = "Doom";             core = "prboom";          extensions = [ "wad" ]; }
+    { dir = "fbneo";     name = "Arcade";           core = "fbneo";           extensions = [ "zip" ]; shortname = "arcade"; }
+    { dir = "dreamcast"; name = "Dreamcast";        core = "flycast";         extensions = [ "chd" ]; }
   ];
 
   # Skyscraper folder name → Pegasus asset key
@@ -41,8 +43,7 @@ let
   ];
   mkSystemScript = sys: let
     romsDir = "${emulationPaths.roms}/${sys.dir}";
-    exts = lib.splitString ", " sys.extensions;
-    findArgs = lib.concatMapStringsSep " -o " (e: "-name '*.${e}'") exts;
+    findArgs = lib.concatMapStringsSep " -o " (e: "-name '*.${e}'") sys.extensions;
     assetChecks = lib.concatMapStringsSep "\n" (a: ''
       asset="${romsDir}/media/${a.folder}/$basename.png"
       if [[ -f "$asset" ]]; then printf 'assets.${a.asset}: %s\n' "$asset" >> "$out"; fi
@@ -54,7 +55,7 @@ let
       {
         printf 'collection: ${sys.name}\n'
         printf 'shortname: ${sys.shortname or sys.dir}\n'
-        printf 'launch: ${retroarch} -L ${coresDir}/${sys.core} "{file.path}"\n'
+        printf 'launch: ${retroarch} -L ${coresDir}/${sys.core}_libretro.so "{file.path}"\n'
         printf '\n'
       } > "$out"
 
