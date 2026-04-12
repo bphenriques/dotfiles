@@ -4,6 +4,8 @@ let
 
   cfg = config.custom.homelab.smb;
 
+  hasDepServices = mountCfg: mountCfg.systemd.dependentServices != [];
+
   smbMountCfg = types.submodule ({ name, config, ... }: {
     options = {
       localMount = mkOption {
@@ -112,9 +114,24 @@ in {
           "credentials=${cfg.credentialsPath}"
 
           "_netdev"
+        ]
+        # Mounts with dependentServices use boot-time mounting: RequiresMountsFor (used to wire
+        # service dependencies) conflicts with x-systemd.automount because it forces the mount
+        # immediately at service start, defeating lazy mounting and hitting the network race window.
+        # Instead, we mount at boot with nofail (non-blocking) and a generous timeout, relying on
+        # the service retry logic below as a safety net.
+        #
+        # Mounts without dependentServices use automount (lazy mount on first access), which avoids
+        # boot-time races entirely — particularly important on WiFi where routing may not be ready
+        # when network-online.target is reached.
+        ++ (if hasDepServices mountCfg then [
           "nofail"
           "x-systemd.mount-timeout=30s"
-        ];
+        ] else [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.mount-timeout=30s"
+        ]);
       }
     ) cfg.mounts;
 

@@ -18,6 +18,7 @@
     ./ghostty.nix         # Terminal (slower to open and has GPU acceleration)
     ./mangohud.nix        # Game HUD
     ./retroarch.nix       # Emulation
+    ./pegasus.nix         # Game launcher frontend
     ./discord.nix         # Social
     ./rofi.nix            # Alternative customizable menu
     ./lang-scala.nix      # Programming language

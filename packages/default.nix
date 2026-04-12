@@ -31,6 +31,7 @@ let
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
+      scrape-roms = pkgs.callPackage ./cli/scrape-roms { };
       wg-manage = pkgs.callPackage ./homelab/wg-manage { };
       rustic-manage = pkgs.callPackage ./homelab/rustic-manage { };
       pocket-id-manage = pkgs.callPackage ./homelab/pocket-id-manage { };
