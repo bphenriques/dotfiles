@@ -10,6 +10,9 @@ let
     { dir = "nes"; }
     { dir = "snes"; }
     { dir = "psx"; }
+    { dir = "ps2"; }
+    { dir = "psp"; }
+    { dir = "wii"; }
     { dir = "gb"; }
     { dir = "gbc"; }
     { dir = "gba"; }

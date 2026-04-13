@@ -1,10 +1,5 @@
-{ lib, pkgs, config, osConfig, ... }:
+{ lib, pkgs, config, osConfig, self, ... }:
 let
-  emulationPaths = osConfig.custom.homelab.paths.media.gaming.emulation;
-  retroarchPackage = config.programs.retroarch.finalPackage;
-  retroarch = lib.getExe' retroarchPackage "retroarch";
-  coresDir = "${retroarchPackage}/lib/retroarch/cores";
-
   gameOS-theme = pkgs.fetchFromGitHub {
     owner = "PlayingKarrde";
     repo = "gameOS";
@@ -12,10 +7,7 @@ let
     hash = "sha256-EBpIe0aw1FO7DzB6F3oAWD5FRLF2iZGtOHllMxuamdc=";
   };
 
-  # FIXME: ps2 (external), psp (external), switch, wii
-
-  # Each entry maps a ROM directory to a Pegasus collection and RetroArch core.
-  # `shortname` defaults to `dir` when omitted.
+  # Maps a ROM directory to a Pegasus collection and a launch command (retroarch using the `core` key, or `launch` for other executables).
   systems = [
     { dir = "megadrive"; name = "Megadrive";        core = "genesis_plus_gx"; extensions = [ "md" ]; }
     { dir = "nes";       name = "NES";              core = "fceumm";          extensions = [ "nes" ]; }
@@ -29,62 +21,59 @@ let
     { dir = "doom";      name = "Doom";             core = "prboom";          extensions = [ "wad" ]; }
     { dir = "fbneo";     name = "Arcade";           core = "fbneo";           extensions = [ "zip" ]; shortname = "arcade"; }
     { dir = "dreamcast"; name = "Dreamcast";        core = "flycast";         extensions = [ "chd" ]; }
+    { dir = "psp";       name = "PSP";              launch = "${lib.getExe pkgs.ppsspp} --fullscreen --pause-menu-exit \"{file.path}\"";  extensions = [ "iso" "cso" ]; }
+    { dir = "ps2";       name = "PlayStation 2";    launch = "${lib.getExe pkgs.pcsx2} -fullscreen -fastboot -batch -- \"{file.path}\"";  extensions = [ "iso" "chd" ]; }
+    { dir = "wii";       name = "Wii";              launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\"";                      extensions = [ "iso" "wbfs" "rvz" ]; }
   ];
 
-  # Skyscraper folder name → Pegasus asset key
+  retroarchPackage = config.programs.retroarch.finalPackage;
+  coresDir = "${retroarchPackage}/lib/retroarch/cores";
+  mkLaunchCmd = sys:
+    if sys ? core
+    then "${lib.getExe' retroarchPackage "retroarch"} -L ${coresDir}/${sys.core}_libretro.so \"{file.path}\""
+    else sys.launch;
+  configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
+    romsDir = osConfig.custom.homelab.paths.media.gaming.emulation.roms;
 
-  # Maps Skyscraper folder to Pegasus assert. Required for the script that writes the pegasus metadata
-  artworkMapping = [
-    { folder = "covers";      asset = "box_front"; }
-    { folder = "screenshots"; asset = "screenshot"; }
-    { folder = "wheels";      asset = "logo"; }
-    { folder = "marquees";    asset = "marquee"; }
-    { folder = "textures";    asset = "background"; }
-  ];
-  mkSystemScript = sys: let
-    romsDir = "${emulationPaths.roms}/${sys.dir}";
-    findArgs = lib.concatMapStringsSep " -o " (e: "-name '*.${e}'") sys.extensions;
-    assetChecks = lib.concatMapStringsSep "\n" (a: ''
-      asset="${romsDir}/media/${a.folder}/$basename.png"
-      if [[ -f "$asset" ]]; then printf 'assets.${a.asset}: %s\n' "$asset" >> "$out"; fi
-    '') artworkMapping;
-  in ''
-    # ${sys.name}
-    out="$METAFILES_DIR/${sys.dir}.metadata.pegasus.txt"
-    if [[ -d "${romsDir}" ]]; then
-      {
-        printf 'collection: ${sys.name}\n'
-        printf 'shortname: ${sys.shortname or sys.dir}\n'
-        printf 'launch: ${retroarch} -L ${coresDir}/${sys.core}_libretro.so "{file.path}"\n'
-        printf '\n'
-      } > "$out"
+    # Maps Skyscraper folder to Pegasus asset
+    artworkMapping = [
+      { folder = "covers";      asset = "box_front"; }
+      { folder = "screenshots"; asset = "screenshot"; }
+      { folder = "wheels";      asset = "logo"; }
+      { folder = "marquees";    asset = "marquee"; }
+      { folder = "textures";    asset = "background"; }
+   ];
+    systems = map (sys: {
+      inherit (sys) dir name extensions;
+      shortname = sys.shortname or sys.dir;
+      launch = mkLaunchCmd sys;
+    }) systems;
+  });
 
-      find "${romsDir}" -maxdepth 1 -type f \( ${findArgs} \) | sort | while read -r rom; do
-        basename="''${rom##*/}"
-        basename="''${basename%.*}"
-        printf '\ngame: %s\nfile: %s\n' "$basename" "$rom" >> "$out"
-        ${assetChecks}
-      done
-    fi
-  '';
-
-  generatePegasusMetadata = pkgs.writeShellApplication {
-    name = "generate-pegasus-metadata";
-    runtimeInputs = [ pkgs.findutils ];
-    meta.platforms = lib.platforms.linux;
-    text = ''
-      METAFILES_DIR="${config.xdg.configHome}/pegasus-frontend/metafiles"
-      mkdir -p "$METAFILES_DIR"
-      ${lib.concatMapStringsSep "\n" mkSystemScript systems}
-      printf 'Pegasus metadata generated in %s\n' "$METAFILES_DIR"
-    '';
-  };
+  metafilesDir = "${config.xdg.configHome}/pegasus-frontend/metafiles";
 in
 lib.mkIf pkgs.stdenv.isLinux {
-  home.packages = [
-    pkgs.pegasus-frontend
-    generatePegasusMetadata
-  ];
+  home.packages = [ pkgs.pegasus-frontend ];
+
+  systemd.user = {
+    services.generate-pegasus-metadata = {
+      Unit.Description = "Generate Pegasus frontend metadata files";
+      Service = {
+        Type = "oneshot";
+        ExecStart = lib.escapeShellArgs [ (lib.getExe self.pkgs.generate-pegasus-metadata) configFile metafilesDir ];
+      };
+    };
+
+    timers.generate-pegasus-metadata = {
+      Unit.Description = "Generate Pegasus metadata weekly";
+      Install.WantedBy = [ "timers.target" ];
+      Timer = {
+        OnCalendar = "weekly";
+        RandomizedDelaySec = "6h";
+        Persistent = true;
+      };
+    };
+  };
 
   xdg.configFile = {
     "pegasus-frontend/themes/gameOS".source = gameOS-theme;

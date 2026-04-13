@@ -42,6 +42,10 @@ let
         flycast_anistropic_filtering = "4"
         flycast_enable_rtt = "On"
       '';
+      overrides = ''
+        video_scale_integer = "false"
+        aspect_ratio_index = "22"
+      '';
     };
     desmume = {
       displayName = "DeSmuME";
@@ -90,6 +94,10 @@ let
   coreShaderFiles = lib.mapAttrs' (_: cfg:
     lib.nameValuePair "retroarch/config/${cfg.displayName}/${cfg.displayName}.slangp" { text = cfg.shader; }
   ) (lib.filterAttrs (_: cfg: cfg ? shader) coreConfigs);
+
+  coreOverrideFiles = lib.mapAttrs' (_: cfg:
+    lib.nameValuePair "retroarch/config/${cfg.displayName}/${cfg.displayName}.cfg" { text = cfg.overrides; }
+  ) (lib.filterAttrs (_: cfg: cfg ? overrides) coreConfigs);
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.retroarch = {
@@ -133,10 +141,13 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Prevent RetroArch from overwriting managed config
       config_save_on_exit = "false";
+
+      # Gamepad hotkeys: L3+R3 opens menu (save/load states accessible from there)
+      input_menu_toggle_gamepad_combo = "2";
     };
   };
 
-  xdg.configFile = coreOptionFiles // coreShaderFiles;
+  xdg.configFile = coreOptionFiles // coreShaderFiles // coreOverrideFiles;
 
   home.packages = [
     pkgs.mame-tools  # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso

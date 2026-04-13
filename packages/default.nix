@@ -20,7 +20,9 @@ let
   );
 
   linux = forLinuxSystems (system:
-    let pkgs = nixpkgs.legacyPackages.${system};
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      builders = import ../lib/builders.nix { lib = nixpkgs.lib; inherit pkgs; };
     in {
       volume-osd = pkgs.callPackage ./desktop/volume-osd { };
       brightness-osd = pkgs.callPackage ./desktop/brightness-osd { };
@@ -31,6 +33,7 @@ let
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
+      generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (builders) writeNushellScript; };
       scrape-roms = pkgs.callPackage ./cli/scrape-roms { };
       wg-manage = pkgs.callPackage ./homelab/wg-manage { };
       rustic-manage = pkgs.callPackage ./homelab/rustic-manage { };

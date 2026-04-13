@@ -19,6 +19,9 @@
     ./mangohud.nix        # Game HUD
     ./retroarch.nix       # Emulation
     ./pegasus.nix         # Game launcher frontend
+    ./ppsspp.nix          # PSP emulator
+    ./pcsx2.nix           # PS2 emulator
+    ./dolphin.nix         # Wii/GameCube emulator
     ./discord.nix         # Social
     ./rofi.nix            # Alternative customizable menu
     ./lang-scala.nix      # Programming language
