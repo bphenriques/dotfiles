@@ -33,7 +33,7 @@ in
     enable = lib.mkEnableOption "custom-screen-recorder";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.screen-recorder.override {
+      default = self.packages.screen-recorder.override {
         recordIcon = mkIcon "screen-recorder-record-icon" "󰑋";
         informationIcon = mkIcon "screen-recorder-information-icon" "";
         errorIcon = mkIcon "screen-recorder-error-icon" "";

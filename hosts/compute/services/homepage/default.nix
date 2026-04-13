@@ -7,7 +7,7 @@ let
   homepageCfg = cfg.homepage;
 
   # Custom package with wallpaper/favicon
-  wallpaper = self.pkgs.wallpapers.files.sky-sunset;
+  wallpaper = self.packages.wallpapers.files.sky-sunset;
   favicon = ./compass.svg;
   customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
     postInstall = (oldAttrs.postInstall or "") + ''

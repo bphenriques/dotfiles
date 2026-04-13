@@ -10,7 +10,7 @@ in
     enable = lib.mkEnableOption "custom-volume-osd";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.volume-osd.override {
+      default = self.packages.volume-osd.override {
         headphonesIcon = mkIcon "volume-osd-headphones" "";
         headphonesMuteIcon = mkIcon "volume-osd-headphones" "󰋐";
         headsetIcon = mkIcon "volume-osd-headset" "󰋎";

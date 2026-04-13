@@ -55,7 +55,7 @@ let
   wgManage = pkgs.writeShellApplication {
     name = "wg-manage";
     runtimeInputs = [
-      (self.pkgs.wg-manage.override {
+      (self.packages.wg-manage.override {
         homepageUrl = cfg.services.homepage.publicUrl;
         emailSubject = "🏠 Home Sweet (Remote) Home: WireGuard VPN key inside";
         emailTemplateMd = ./email-template.md;

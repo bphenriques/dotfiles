@@ -7,7 +7,7 @@ in {
     enable = lib.mkEnableOption "project";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.project;
+      default = self.packages.project;
       description = "package to install.";
     };
 

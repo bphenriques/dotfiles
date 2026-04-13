@@ -89,8 +89,8 @@ lib.mkIf pkgs.stdenv.isLinux {
         modi: "filebrowser";
         filebrowser {
           directories-first: false;
-          directory: "${self.pkgs.wallpapers}/share/wallpapers";
-          command: "${lib.getExe self.pkgs.awww-util} one";
+          directory: "${self.packages.wallpapers}/share/wallpapers";
+          command: "${lib.getExe self.packages.awww-util} one";
         }
       }
     '';

@@ -7,6 +7,19 @@ let
   # Option key names verified against libretro source code.
   shaderPath = "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang";
 
+  # Shared shader presets (see: https://retrogamecorps.com/2024/09/01/guide-shaders-and-overlays-on-retro-handhelds/)
+  lcdShader = ''
+    shaders = 1
+    shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
+    filter_linear0 = false
+    scale_type0 = viewport
+  '';
+  crtShader = ''
+    shaders = 1
+    shader0 = ${shaderPath}/crt/shaders/crt-geom.slang
+    filter_linear0 = false
+    scale_type0 = viewport
+  ''; # If performance is an issue, try crt-geom-mini.slang
   # Key: canonical core id. `displayName` must match RetroArch's core display name exactly
   # (used for per-core config/shader directory names).
   coreConfigs = {
@@ -16,6 +29,7 @@ let
         genesis_plus_gx_overscan = "disabled"
         genesis_plus_gx_render = "single field"
       '';
+      shader = crtShader;
     };
     fceumm = {
       displayName = "FCEUmm";
@@ -23,6 +37,11 @@ let
         fceumm_overscan_h = "enabled"
         fceumm_overscan_v = "enabled"
       '';
+      shader = crtShader;
+    };
+    snes9x = {
+      displayName = "Snes9x";
+      shader = crtShader;
     };
     swanstation = {
       displayName = "SwanStation";
@@ -33,6 +52,10 @@ let
         swanstation_GPU_PGXPEnable = "true"
         swanstation_GPU_PGXPCulling = "true"
         swanstation_GPU_PGXPTextureCorrection = "true"
+      '';
+      overrides = ''
+        video_scale_integer = "false"
+        aspect_ratio_index = "22"
       '';
     };
     flycast = {
@@ -54,6 +77,7 @@ let
         desmume_screens_layout = "top/bottom"
         desmume_screens_gap = "0"
       '';
+      shader = lcdShader;
     };
     gambatte = {
       displayName = "Gambatte";
@@ -66,24 +90,26 @@ let
         gambatte_mix_frames = "accurate"
         gambatte_dark_filter_level = "0"
       '';
-      shader = ''
-        shaders = 1
-        shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
-        filter_linear0 = false
-        scale_type0 = viewport
-      '';
+      shader = lcdShader;
     };
     mgba = {
       displayName = "mGBA";
       options = ''
         mgba_interframe_blending = "mix"
       '';
-      shader = ''
-        shaders = 1
-        shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
-        filter_linear0 = false
-        scale_type0 = viewport
-      '';
+      shader = lcdShader;
+    };
+    fbneo = {
+      displayName = "FinalBurn Neo";
+      shader = crtShader;
+    };
+    dosbox_pure = {
+      displayName = "DOSBox-pure";
+      shader = crtShader;
+    };
+    prboom = {
+      displayName = "PrBoom";
+      shader = crtShader;
     };
   };
 
@@ -142,8 +168,18 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Prevent RetroArch from overwriting managed config
       config_save_on_exit = "false";
 
-      # Gamepad hotkeys: L3+R3 opens menu (save/load states accessible from there)
-      input_menu_toggle_gamepad_combo = "2";
+      # Rewind
+      rewind_enable = "true";
+
+      # Gamepad hotkeys (Xbox-style button indices: Select=6, Start=7, LB=4, RB=5, X=2, Y=3, LT=axis+2, RT=axis+5)
+      input_enable_hotkey_btn = "6";        # Select — hold to activate hotkeys
+      input_exit_emulator_btn = "7";        # Select+Start — quit
+      input_load_state_btn = "4";           # Select+LB — load state
+      input_save_state_btn = "5";           # Select+RB — save state
+      input_menu_toggle_btn = "3";          # Select+Y (North) — quick menu
+      input_fps_toggle_btn = "2";           # Select+X (West) — toggle FPS
+      input_rewind_axis = "+2";             # Select+LT — rewind
+      input_hold_fast_forward_axis = "+5";  # Select+RT — fast forward
     };
   };
 

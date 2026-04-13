@@ -60,7 +60,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       Unit.Description = "Generate Pegasus frontend metadata files";
       Service = {
         Type = "oneshot";
-        ExecStart = lib.escapeShellArgs [ (lib.getExe self.pkgs.generate-pegasus-metadata) configFile metafilesDir ];
+        ExecStart = lib.escapeShellArgs [ (lib.getExe self.packages.generate-pegasus-metadata) configFile metafilesDir ];
       };
     };
 

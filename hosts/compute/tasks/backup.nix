@@ -33,7 +33,7 @@ in
 
   custom.homelab.backup = {
     enable = true;
-    package = self.pkgs.rustic-manage;
+    package = self.packages.rustic-manage;
     passwordFile = config.sops.secrets."backup/rustic/password".path;
     secretsFile = config.sops.templates."homelab-backup-secrets.toml".path;
     bindings = {

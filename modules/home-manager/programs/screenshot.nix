@@ -36,7 +36,7 @@ in
     enable = lib.mkEnableOption "custom-screenshot";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.screenshot;
+      default = self.packages.screenshot;
     };
     directory = lib.mkOption {
       description = "Location of screenshots";

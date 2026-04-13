@@ -17,7 +17,7 @@ let
       lib = {
         builders = import ../../lib/builders.nix { inherit (nixpkgs) lib; pkgs = nixpkgs.legacyPackages.${system}; };
       };
-      pkgs = self.packages.${system} // dotfiles-private.packages.${system};
+      packages = self.packages.${system} // dotfiles-private.packages.${system};
     };
   };
 

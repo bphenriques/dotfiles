@@ -2,7 +2,7 @@
 
 let
   username = "brunohenriques";
-  wallpapers = self.pkgs.wallpapers.override {
+  wallpapers = self.packages.wallpapers.override {
     selected = [ "lake-fishing-sunset" "mountains" "watch-tower" ];
   };
 in

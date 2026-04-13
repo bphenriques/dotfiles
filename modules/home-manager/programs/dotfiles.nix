@@ -14,13 +14,13 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.dotfiles;
+      default = self.packages.dotfiles;
       description = "package to install regarding management dotfiles.";
     };
 
     packageSecrets = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.dotfiles-secrets;
+      default = self.packages.dotfiles-secrets;
       description = "package to install regarding secrets.";
     };
   };

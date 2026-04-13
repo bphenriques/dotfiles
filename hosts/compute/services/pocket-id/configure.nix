@@ -20,7 +20,7 @@ let
 
   pocketIdManage = pkgs.writeShellApplication {
     name = "pocket-id-manage";
-    runtimeInputs = [ self.pkgs.pocket-id-manage ];
+    runtimeInputs = [ self.packages.pocket-id-manage ];
     text = ''
       export POCKET_ID_URL="${pocketIdCfg.url}"
       export POCKET_ID_API_KEY_FILE="${cfg.provider.apiKeyFile}"

@@ -35,7 +35,7 @@ in
     enable = lib.mkEnableOption "custom-mpc";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.mpc-plus.override {
+      default = self.packages.mpc-plus.override {
         musicIcon = mkIcon "mpc-plus-track" "";
         artistIcon = mkIcon "mpc-plus-artist" "󰠃";
         albumIcon = mkIcon "mpc-plus-album" "󰀥";

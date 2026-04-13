@@ -9,7 +9,7 @@ in
     enable = lib.mkEnableOption "custom-brightness-osd";
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.brightness-osd.override {
+      default = self.packages.brightness-osd.override {
         iconOff = mkIcon "brightness-osd-off" "󰃞";
         iconLow = mkIcon "brightness-osd-low" "󰃞";
         iconMedium = mkIcon "brightness-osd-medium" "󰃟";

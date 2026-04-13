@@ -1,9 +1,9 @@
 { lib, config, self, ... }:
 let
-  wallpapers = "${self.pkgs.wallpapers}/share/wallpapers";
+  wallpapers = "${self.packages.wallpapers}/share/wallpapers";
 in
 {
-  home.packages = [ self.pkgs.awww-util ];
+  home.packages = [ self.packages.awww-util ];
   systemd.user.services.set-wallpaper = {
     Unit = {
       Description = "Sets the wallpaper";
@@ -13,7 +13,7 @@ in
     Install.WantedBy = [ config.wayland.systemd.target ];
     Service = {
       Type = "oneshot";
-      ExecStart = lib.escapeShellArgs [ "${lib.getExe self.pkgs.awww-util}" "random" wallpapers ];
+      ExecStart = lib.escapeShellArgs [ "${lib.getExe self.packages.awww-util}" "random" wallpapers ];
     };
   };
 }

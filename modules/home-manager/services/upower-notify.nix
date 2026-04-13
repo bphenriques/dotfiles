@@ -20,7 +20,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.upower-notify.override {
+      default = self.packages.upower-notify.override {
         battery0Icon            = mkIcon "battery0" "󰂎" config.lib.stylix.colors.withHashtag.base08;
         battery0ChargingIcon    = mkIcon "battery0-charging" "󰢟" config.lib.stylix.colors.withHashtag.base0B;
         battery10Icon           = mkIcon "battery10" "󰁺" config.lib.stylix.colors.withHashtag.base08;

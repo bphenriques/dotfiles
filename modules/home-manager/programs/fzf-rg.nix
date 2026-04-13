@@ -8,7 +8,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.pkgs.fzf-rg;
+      default = self.packages.fzf-rg;
       description = "package to install.";
     };
   };

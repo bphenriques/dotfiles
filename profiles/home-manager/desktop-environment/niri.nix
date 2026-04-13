@@ -158,13 +158,13 @@ in
       "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+E"             = ''spawn-sh "${files-browser}"'';
-      "Mod+K"             = ''spawn-sh "${lib.getExe self.pkgs.niri-keyboard-layout} next"'';
+      "Mod+K"             = ''spawn-sh "${lib.getExe self.packages.niri-keyboard-layout} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
       "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
       "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
 
       # Focus management
-      "Mod+Tab"         = ''spawn "${lib.getExe self.pkgs.niri-window-dmenu}"'';
+      "Mod+Tab"         = ''spawn "${lib.getExe self.packages.niri-window-dmenu}"'';
       #"Alt+Tab"         = "focus-window-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
