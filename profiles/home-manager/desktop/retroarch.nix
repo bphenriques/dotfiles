@@ -3,16 +3,13 @@ let
   emulationPaths = osConfig.custom.homelab.paths.media.gaming.emulation;
   stateDir = "${config.xdg.stateHome}/retroarch";
 
-  # Per-core config: https://docs.libretro.com/library/
-  # Option key names verified against libretro source code.
-  shaderPath = "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang";
 
   toRetroArchConfig = lib.generators.toKeyValue {
     mkKeyValue = k: v: k + " = " + builtins.toJSON v;
   };
 
+  shaderPath = "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang";
   # Shared shader presets — slang format requires video_driver = "vulkan" (or d3d)
-  # Reference: https://retrogamecorps.com/2024/09/01/guide-shaders-and-overlays-on-retro-handhelds/
   lcdShader = ''
     shaders = 1
     shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
@@ -23,31 +20,11 @@ let
     shaders = 1
     shader0 = ${shaderPath}/crt/shaders/crt-gdv-mini-ultra.slang
     scale_type0 = viewport
-  ''; # May need to lower Saturation Boost from ~1.20 to ~0.9 via Quick Menu > Shaders > Parameters
+  '';
+
+  # Simple Preset: references upstream newpixie-crt.slangp and overrides parameters only.
   crt3dShader = ''
-    shaders = 4
-    shader0 = ${shaderPath}/crt/shaders/newpixie/accumulate.slang
-    alias0 = accum1
-    scale0 = 1.0
-    scale_type0 = source
-    filter_linear0 = true
-    shader1 = ${shaderPath}/crt/shaders/newpixie/blur_horiz.slang
-    alias1 = blur1
-    scale_1 = 1.0
-    scale_type1 = source
-    filter_linear1 = true
-    shader2 = ${shaderPath}/crt/shaders/newpixie/blur_vert.slang
-    alias2 = blur2
-    scale_2 = 1.0
-    scale_type2 = source
-    filter_linear2 = true
-    shader3 = ${shaderPath}/crt/shaders/newpixie/newpixie-crt.slang
-    filter_linear3 = true
-    scale_type3 = viewport
-    textures = "frametexture"
-    frametexture = ${shaderPath}/crt/shaders/newpixie/crtframe.png
-    frametexture_linear = true
-    frametexture_wrap_mode = clamp_to_border
+    #reference "${shaderPath}/crt/newpixie-crt.slangp"
     parameters = "use_frame;curvature;vignette;ghosting;wiggle_toggle;scanroll"
     use_frame = "0.0"
     curvature = "1.0"
@@ -55,9 +32,15 @@ let
     ghosting = "1.0"
     wiggle_toggle = "0.0"
     scanroll = "1.0"
-  ''; # Tweak curvature/vignette via Quick Menu > Shaders > Parameters
-  # Key: canonical core id. `displayName` must match RetroArch's core display name exactly
-  # (used for per-core config/shader directory names).
+  '';
+
+  # Shared per-core overrides for 3D cores that need non-integer scaling
+  nonIntegerScaleOverrides = {
+    video_scale_integer = "false";
+    aspect_ratio_index = "22";
+  };
+
+  # Key: canonical core id. `displayName` must match RetroArch's core display name exactly (used for per-core config/shader directory names).
   coreConfigs = {
     genesis_plus_gx = {
       displayName = "Genesis Plus GX";
@@ -91,10 +74,7 @@ let
         swanstation_GPU_PGXPCulling = "true";
         swanstation_GPU_PGXPTextureCorrection = "true";
       };
-      overrides = {
-        video_scale_integer = "false";
-        aspect_ratio_index = "22";
-      };
+      overrides = nonIntegerScaleOverrides;
       shader = crt3dShader;
     };
     flycast = {
@@ -104,10 +84,7 @@ let
         flycast_anistropic_filtering = "2";
         flycast_enable_rtt = "On";
       };
-      overrides = {
-        video_scale_integer = "false";
-        aspect_ratio_index = "22";
-      }; # Do NOT enable rewind — causes corruption (https://github.com/flyinghead/flycast/issues/471)
+      overrides = nonIntegerScaleOverrides;
     };
     desmume = {
       displayName = "DeSmuME";
@@ -208,14 +185,14 @@ lib.mkIf pkgs.stdenv.isLinux {
       rewind_enable = "false";
 
       # Gamepad hotkeys (Xbox-style button indices: Select=6, Start=7, LB=4, RB=5, X=2, Y=3, LT=axis+2, RT=axis+5)
-      input_enable_hotkey_btn = "6";        # Select — hold to activate hotkeys
-      input_exit_emulator_btn = "7";        # Select+Start — quit
-      input_load_state_btn = "4";           # Select+LB — load state
-      input_save_state_btn = "5";           # Select+RB — save state
-      input_menu_toggle_btn = "3";          # Select+Y (North) — quick menu
-      input_fps_toggle_btn = "2";           # Select+X (West) — toggle FPS
-      input_rewind_axis = "+2";             # Select+LT — rewind
-      input_hold_fast_forward_axis = "+5";  # Select+RT — fast forward
+      input_enable_hotkey_btn = "6";        # Select: hold to activate hotkeys
+      input_exit_emulator_btn = "7";        # Select+Start: quit
+      input_load_state_btn = "4";           # Select+LB: load state
+      input_save_state_btn = "5";           # Select+RB: save state
+      input_menu_toggle_btn = "3";          # Select+Y (North): quick menu
+      input_fps_toggle_btn = "2";           # Select+X (West): toggle FPS
+      input_rewind_axis = "+2";             # Select+LT: rewind
+      input_hold_fast_forward_axis = "+5";  # Select+RT: fast forward
     };
   };
 
