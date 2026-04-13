@@ -10,7 +10,6 @@ let
     download.public = false;
     admin.public = false;
     backups.public = false;
-    voice-assistant.public = false;
   };
 
   mkNtfyIntegration = name: {
