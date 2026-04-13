@@ -7,7 +7,12 @@ let
   # Option key names verified against libretro source code.
   shaderPath = "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang";
 
-  # Shared shader presets (see: https://retrogamecorps.com/2024/09/01/guide-shaders-and-overlays-on-retro-handhelds/)
+  toRetroArchConfig = lib.generators.toKeyValue {
+    mkKeyValue = k: v: k + " = " + builtins.toJSON v;
+  };
+
+  # Shared shader presets — slang format requires video_driver = "vulkan" (or d3d)
+  # Reference: https://retrogamecorps.com/2024/09/01/guide-shaders-and-overlays-on-retro-handhelds/
   lcdShader = ''
     shaders = 1
     shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
@@ -16,87 +21,123 @@ let
   '';
   crtShader = ''
     shaders = 1
-    shader0 = ${shaderPath}/crt/shaders/crt-geom.slang
-    filter_linear0 = false
+    shader0 = ${shaderPath}/crt/shaders/crt-gdv-mini-ultra.slang
     scale_type0 = viewport
-  ''; # If performance is an issue, try crt-geom-mini.slang
+  ''; # May need to lower Saturation Boost from ~1.20 to ~0.9 via Quick Menu > Shaders > Parameters
+  crt3dShader = ''
+    shaders = 4
+    shader0 = ${shaderPath}/crt/shaders/newpixie/accumulate.slang
+    alias0 = accum1
+    scale0 = 1.0
+    scale_type0 = source
+    filter_linear0 = true
+    shader1 = ${shaderPath}/crt/shaders/newpixie/blur_horiz.slang
+    alias1 = blur1
+    scale_1 = 1.0
+    scale_type1 = source
+    filter_linear1 = true
+    shader2 = ${shaderPath}/crt/shaders/newpixie/blur_vert.slang
+    alias2 = blur2
+    scale_2 = 1.0
+    scale_type2 = source
+    filter_linear2 = true
+    shader3 = ${shaderPath}/crt/shaders/newpixie/newpixie-crt.slang
+    filter_linear3 = true
+    scale_type3 = viewport
+    textures = "frametexture"
+    frametexture = ${shaderPath}/crt/shaders/newpixie/crtframe.png
+    frametexture_linear = true
+    frametexture_wrap_mode = clamp_to_border
+    parameters = "use_frame;curvature;vignette;ghosting;wiggle_toggle;scanroll"
+    use_frame = "0.0"
+    curvature = "1.0"
+    vignette = "0.3"
+    ghosting = "1.0"
+    wiggle_toggle = "0.0"
+    scanroll = "1.0"
+  ''; # Tweak curvature/vignette via Quick Menu > Shaders > Parameters
   # Key: canonical core id. `displayName` must match RetroArch's core display name exactly
   # (used for per-core config/shader directory names).
   coreConfigs = {
     genesis_plus_gx = {
       displayName = "Genesis Plus GX";
-      options = ''
-        genesis_plus_gx_overscan = "disabled"
-        genesis_plus_gx_render = "single field"
-      '';
+      options = {
+        genesis_plus_gx_overscan = "disabled";
+        genesis_plus_gx_render = "single field";
+      };
+      overrides = { rewind_enable = "true"; };
       shader = crtShader;
     };
     fceumm = {
       displayName = "FCEUmm";
-      options = ''
-        fceumm_overscan_h = "enabled"
-        fceumm_overscan_v = "enabled"
-      '';
+      options = {
+        fceumm_overscan_h = "enabled";
+        fceumm_overscan_v = "enabled";
+      };
       shader = crtShader;
     };
     snes9x = {
       displayName = "Snes9x";
+      overrides = { rewind_enable = "true"; };
       shader = crtShader;
     };
     swanstation = {
       displayName = "SwanStation";
-      options = ''
-        swanstation_GPU_ResolutionScale = "3"
-        swanstation_GPU_TrueColor = "true"
-        swanstation_GPU_TextureFilter = "Nearest"
-        swanstation_GPU_PGXPEnable = "true"
-        swanstation_GPU_PGXPCulling = "true"
-        swanstation_GPU_PGXPTextureCorrection = "true"
-      '';
-      overrides = ''
-        video_scale_integer = "false"
-        aspect_ratio_index = "22"
-      '';
+      options = {
+        swanstation_GPU_ResolutionScale = "3";
+        swanstation_GPU_TrueColor = "true";
+        swanstation_GPU_TextureFilter = "Nearest";
+        swanstation_GPU_PGXPEnable = "true";
+        swanstation_GPU_PGXPCulling = "true";
+        swanstation_GPU_PGXPTextureCorrection = "true";
+      };
+      overrides = {
+        video_scale_integer = "false";
+        aspect_ratio_index = "22";
+      };
+      shader = crt3dShader;
     };
     flycast = {
       displayName = "Flycast";
-      options = ''
-        flycast_internal_resolution = "1920x1440"
-        flycast_anistropic_filtering = "4"
-        flycast_enable_rtt = "On"
-      '';
-      overrides = ''
-        video_scale_integer = "false"
-        aspect_ratio_index = "22"
-      '';
+      options = {
+        flycast_internal_resolution = "1280x960";
+        flycast_anistropic_filtering = "2";
+        flycast_enable_rtt = "On";
+      };
+      overrides = {
+        video_scale_integer = "false";
+        aspect_ratio_index = "22";
+      }; # Do NOT enable rewind — causes corruption (https://github.com/flyinghead/flycast/issues/471)
     };
     desmume = {
       displayName = "DeSmuME";
-      options = ''
-        desmume_internal_resolution = "512x384"
-        desmume_screens_layout = "top/bottom"
-        desmume_screens_gap = "0"
-      '';
+      options = {
+        desmume_internal_resolution = "512x384";
+        desmume_screens_layout = "top/bottom";
+        desmume_screens_gap = "0";
+      };
       shader = lcdShader;
     };
     gambatte = {
       displayName = "Gambatte";
-      options = ''
-        gambatte_gb_colorization = "internal"
-        gambatte_gb_internal_palette = "GB - DMG"
-        gambatte_gbc_color_correction = "GBC only"
-        gambatte_gbc_color_correction_mode = "accurate"
-        gambatte_gbc_frontlight_position = "central"
-        gambatte_mix_frames = "accurate"
-        gambatte_dark_filter_level = "0"
-      '';
+      options = {
+        gambatte_gb_colorization = "internal";
+        gambatte_gb_internal_palette = "GB - DMG";
+        gambatte_gbc_color_correction = "GBC only";
+        gambatte_gbc_color_correction_mode = "accurate";
+        gambatte_gbc_frontlight_position = "central";
+        gambatte_mix_frames = "accurate";
+        gambatte_dark_filter_level = "0";
+      };
+      overrides = { rewind_enable = "true"; };
       shader = lcdShader;
     };
     mgba = {
       displayName = "mGBA";
-      options = ''
-        mgba_interframe_blending = "mix"
-      '';
+      options = {
+        mgba_interframe_blending = "mix";
+      };
+      overrides = { rewind_enable = "true"; };
       shader = lcdShader;
     };
     fbneo = {
@@ -113,17 +154,12 @@ let
     };
   };
 
-  coreOptionFiles = lib.mapAttrs' (_: cfg:
-    lib.nameValuePair "retroarch/config/${cfg.displayName}/${cfg.displayName}.opt" { text = cfg.options; }
-  ) (lib.filterAttrs (_: cfg: cfg ? options) coreConfigs);
-
-  coreShaderFiles = lib.mapAttrs' (_: cfg:
-    lib.nameValuePair "retroarch/config/${cfg.displayName}/${cfg.displayName}.slangp" { text = cfg.shader; }
-  ) (lib.filterAttrs (_: cfg: cfg ? shader) coreConfigs);
-
-  coreOverrideFiles = lib.mapAttrs' (_: cfg:
-    lib.nameValuePair "retroarch/config/${cfg.displayName}/${cfg.displayName}.cfg" { text = cfg.overrides; }
-  ) (lib.filterAttrs (_: cfg: cfg ? overrides) coreConfigs);
+  coreConfigFiles = lib.concatMapAttrs (_: { displayName, options ? {}, shader ? null, overrides ? {} }:
+    let prefix = "retroarch/config/${displayName}/${displayName}";
+    in lib.optionalAttrs (options != {})  { "${prefix}.opt".text = toRetroArchConfig options; }
+    // lib.optionalAttrs (shader != null)  { "${prefix}.slangp".text = shader; }
+    // lib.optionalAttrs (overrides != {}) { "${prefix}.cfg".text = toRetroArchConfig overrides; }
+  ) coreConfigs;
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.retroarch = {
@@ -168,8 +204,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Prevent RetroArch from overwriting managed config
       config_save_on_exit = "false";
 
-      # Rewind
-      rewind_enable = "true";
+      # Rewind: off globally, enabled per-core for lightweight systems
+      rewind_enable = "false";
 
       # Gamepad hotkeys (Xbox-style button indices: Select=6, Start=7, LB=4, RB=5, X=2, Y=3, LT=axis+2, RT=axis+5)
       input_enable_hotkey_btn = "6";        # Select — hold to activate hotkeys
@@ -183,7 +219,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
   };
 
-  xdg.configFile = coreOptionFiles // coreShaderFiles // coreOverrideFiles;
+  xdg.configFile = coreConfigFiles;
 
   home.packages = [
     pkgs.mame-tools  # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso
