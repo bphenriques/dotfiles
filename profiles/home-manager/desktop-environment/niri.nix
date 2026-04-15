@@ -4,13 +4,12 @@ let
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
-  # FIXME: Unsure but we likely need this: systemctl enable --user app-com.mitchellh.ghostty.service
   terminal        = "${lib.getExe pkgs.ghostty} +new-window";
 
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
-  files-browser   = "${terminal} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-  system-monitor  = "${terminal} --title=btop-tui ${lib.getExe config.programs.btop.package}";
+  files-browser   = "${terminal} --title=yazi-tui --command ${lib.getExe config.programs.yazi.package}";
+  system-monitor  = "${terminal} --title=btop-tui --command ${lib.getExe config.programs.btop.package}";
   dunstctl        = lib.getExe' pkgs.dunst "dunstctl";
 
   emoji = pkgs.writeShellApplication {
@@ -70,10 +69,6 @@ in
         urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
       }
 
-      border {
-        off
-      }
-
       shadow {
         on
       }
@@ -93,7 +88,6 @@ in
 
     windowRules = {
       popups = lib.map (title: ''title="${title}"'') [
-        "Steam Settings"
         "^(pwvucontrol)"
         "^(Volume Control)"
         "^(dialog)"
@@ -103,6 +97,8 @@ in
         "^(error)"
         "^(notification)"
         "^(Extension)"
+      ] ++ [
+        ''app-id="Steam" title=r#"^Steam .+"#''
       ];
 
       pip = lib.map (title: ''title="${title}"'') [
@@ -118,11 +114,12 @@ in
       ];
     };
 
-    # TODO: expand-column-to-available-width, center-visible-columns
     bindings = {
       # Size management
-      "Mod+R"       = "switch-preset-column-width";
-      "Mod+Shift+R" = "switch-preset-window-height";
+      "Mod+R"            = "switch-preset-column-width";
+      "Mod+Ctrl+R"       = "switch-preset-column-width-back";
+      "Mod+Shift+R"      = "switch-preset-window-height";
+
       "Mod+Minus"   = ''set-column-width "-10%"'';
       "Mod+Kp_Add"  = ''set-column-width "+10%"'';
       "Mod+Shift+Minus" = ''set-window-height "-10%"'';
@@ -131,15 +128,19 @@ in
       # Layout management
       "Mod+T"       = "toggle-column-tabbed-display";
       "Mod+W"       = "toggle-window-floating";
+      "Mod+Shift+W" = "switch-focus-between-floating-and-tiling";
       "Mod+Q"       = "close-window";
       "Mod+C"       = "center-column";
       "Mod+Shift+C" = "center-window";
+      "Mod+Ctrl+C"  = "center-visible-columns";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+Ctrl+Shift+F" = "maximize-window-to-edges";
+      "Mod+Ctrl+F"  = "maximize-window-to-edges";
+      "Mod+A"       = "toggle-window-rule-opacity";
       "Mod+Comma"        = "consume-window-into-column";
       "Mod+Shift+Comma"  = "expel-window-from-column";
       "Mod+O repeat=false" = "toggle-overview";
+      "Mod+Escape"  = "toggle-keyboard-shortcuts-inhibit";
 
        # Screenshots
       "Print"       = ''screenshot-screen'';
@@ -165,13 +166,11 @@ in
 
       # Focus management
       "Mod+Tab"         = ''spawn "${lib.getExe self.packages.niri-window-dmenu}"'';
-      #"Alt+Tab"         = "focus-window-previous";
+      "Mod+Grave"       = "focus-workspace-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
       "Mod+Down"        = "focus-window-or-workspace-down";
-      "Mod+Shift+Down"  = "focus-workspace-down";
       "Mod+Up"          = "focus-window-or-workspace-up";
-      "Mod+Shift+Up"    = "focus-workspace-up";
       "Mod+Right"       = "focus-column-right";
       "Mod+Home"        = "focus-column-first";
 
@@ -180,6 +179,8 @@ in
       "Mod+Ctrl+Down"  = "move-window-down-or-to-workspace-down";
       "Mod+Ctrl+Up"    = "move-window-up-or-to-workspace-up";
       "Mod+Ctrl+Right" = "move-column-right";
+      "Mod+Ctrl+Shift+Down" = "move-workspace-down";
+      "Mod+Ctrl+Shift+Up"   = "move-workspace-up";
       "Mod+BracketLeft"   = "consume-or-expel-window-left";
       "Mod+BracketRight"  = "consume-or-expel-window-right";
 
@@ -198,10 +199,29 @@ in
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightness} decrease"'';
     };
 
-    # TODO: Explore tiled state window rule from 25.05 release
-    # TODO: Explore is_urgent to add border red   
-    # TODO: Update to use another variant that is blurred: https://github.com/YaLTeR/niri/wiki/Overview#backdrop-customization
+    # TODO: Explore tiled state window rule (not yet available in 25.11)
    extraConfig = ''
+      workspace "1" {}
+      workspace "2" {}
+
+      window-rule {
+        match app-id=r#"firefox$"#
+        open-on-workspace "1"
+      }
+
+      window-rule {
+        match app-id="jetbrains-idea"
+        open-on-workspace "2"
+      }
+
+      window-rule {
+        match app-id="retroarch"
+        match app-id="PCSX2"
+        match app-id="dolphin-emu"
+        match app-id=r#"^steam_app"#
+        open-fullscreen true
+      }
+
       window-rule {
         geometry-corner-radius 6
         clip-to-geometry true
@@ -212,7 +232,7 @@ in
         match app-id=r#"zen$"#
         match app-id="Steam"
         match app-id=r#"^discord$"#
-        match app-id="jetbrains-idea-ce"
+        match app-id="jetbrains-idea"
 
         open-maximized true
       }
@@ -220,6 +240,15 @@ in
       window-rule {
         match is-active=false
         opacity 0.90
+      }
+
+      window-rule {
+        match is-urgent=true
+        border {
+          on
+          active-color "${config.lib.stylix.colors.withHashtag.base08}"
+          inactive-color "${config.lib.stylix.colors.withHashtag.base08}"
+        }
       }
 
       window-rule {

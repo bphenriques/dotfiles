@@ -5,12 +5,13 @@ let
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
-  deviceOpt = lib.types.submodule ({ name, config, ... }: {
+  deviceOpt = lib.types.submodule {
     options = {
-      host  = lib.mkOption { type = lib.types.str; default = name; };
-      port  = lib.mkOption { type = lib.types.port; default = 6600; };
+      host          = lib.mkOption { type = lib.types.str; };
+      port          = lib.mkOption { type = lib.types.port; default = 6600; };
+      notifications = lib.mkOption { type = lib.types.bool; default = false; };
     };
-  });
+  };
 
   mpc-plus = lib.getExe cfg.package;
   exec = {
@@ -27,6 +28,7 @@ let
     search-play       = ''${mpc-plus} dmenu-file-exec play'';
     search-enqueue    = ''${mpc-plus} dmenu-file-exec add'';
     search-next       = ''${mpc-plus} dmenu-file-exec next'';
+    select-stream     = ''${mpc-plus} dmenu-radio-stream'';
     select-server     = ''${mpc-plus} dmenu-select-server'';
   };
 in
@@ -64,7 +66,7 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.mpc-plus" pkgs lib.platforms.linux) ];
 
-    xdg.configFile= mapAttrs' (name: value: (nameValuePair "mpc-plus/${name}.json" { text = (builtins.toJSON value); })) cfg.devices;
+    xdg.configFile = mapAttrs' (name: value: (nameValuePair "mpc-plus/${name}.json" { text = builtins.toJSON { inherit (value) host port; }; })) cfg.devices;
 
     home.packages = [
       pkgs.mpc
@@ -93,7 +95,9 @@ in
       { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
       { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
       { key = "space";        desc = "Play...";           cmd = exec.search-play; }
+      { key = "r";            desc = "Stream...";         cmd = exec.select-stream; }
       { key = "a";            desc = "Shuffle library";   cmd = exec.play-shuffled; }
+      { key = "d";            desc = "Select Server";     cmd = exec.select-server; }
     ];
   };
 }

@@ -26,7 +26,7 @@ in
     port = 4567;
     subdomain = "trmnl";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];
-    forwardAuth.enable = true;
+    forwardAuth.enable = false;
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any"; # Redirects to login when unauthenticated
     integrations.homepage.enable = true;

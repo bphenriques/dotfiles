@@ -17,6 +17,9 @@ _:
   };
 
   # CPU: AMD
+  # auto-epp: automatically switches EPP based on AC/battery (balance_performance on AC, power on battery).
+  # power-profiles-daemon: provides `powerprofilesctl` API but auto-epp overrides its EPP settings.
+  # Both coexist: auto-epp handles the day-to-day AC/battery switching; PPD is kept for compatibility.
   services.power-profiles-daemon.enable = true;
   services.auto-epp = {
     enable = true;

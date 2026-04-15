@@ -35,7 +35,7 @@ in
     metadata.category = "General";
     port = 8093;
     access.allowedGroups = [ config.custom.homelab.groups.users ];
-    forwardAuth.enable = true;
+    forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
     integrations.homepage.enable = true;
   };
 }

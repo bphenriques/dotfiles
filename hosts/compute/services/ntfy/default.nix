@@ -14,7 +14,7 @@ in
     port = 2586;
     healthcheck.path = "/v1/health";
     integrations.homepage.enable = true;
-    integrations.homepage.tab = "Home";
+    integrations.homepage.tab = "Admin";
   };
 
   services.ntfy-sh = {

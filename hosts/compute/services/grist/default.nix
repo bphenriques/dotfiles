@@ -37,6 +37,13 @@ in
     "d ${dataDir} 0750 1001 1001 -"
   ];
 
+  systemd.services.podman-grist.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+    RestartMaxDelaySec = "5min";
+    RestartSteps = 5;
+  };
+
   virtualisation.oci-containers.containers.grist = {
     image = "${img.image}:${img.version}";
     autoStart = true;
@@ -85,7 +92,7 @@ in
     # and label=disable (overlay fs I/O access for nested gvisor gofer).
     user = "0:0";
     extraOptions = [
-      "--memory=512m"
+      "--memory=1g"
       "--pids-limit=-1"
       "--security-opt=no-new-privileges=false"
       "--security-opt=label=disable"

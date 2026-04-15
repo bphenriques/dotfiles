@@ -9,19 +9,15 @@ MPC_PLUS_CONFIG_DIR="${XDG_CONFIG_HOME}/mpc-plus"
 MPC_PLUS_STATE_DIR="${XDG_STATE_HOME}/mpc-plus"
 MPC_PLUS_SELECTED_HOST="${MPC_PLUS_STATE_DIR}/selected.env"
 
-save_or_compress() { magick - -geometry x128 "$destination" >/dev/null 2>&1; }
 _notify() { notify-send --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
 
-toggle_random() { case "$(mpc status '%random%')" in off) mpc random on ;; on) mpc random off ;; esac }
-random_status_icon() { case "$(mpc status '%random%')" in off) echo -n "${MPC_PLUS_NO_RANDOM_ICON}" ;; on) echo -n "${MPC_PLUS_RANDOM_ICON}" ;; esac }
-
-toggle_repeat() { case "$(mpc status '%repeat%')" in off) mpc repeat on ;; on) mpc repeat off ;; esac }
-repeat_status_icon() { case "$(mpc status '%repeat%')" in off) echo -n "${MPC_PLUS_NO_REPEAT_ICON}" ;; on) echo -n "${MPC_PLUS_REPEAT_ICON}" ;; esac }
+toggle_random() { case "$(mpc status '%random%')" in off) mpc random on >/dev/null && echo on ;; on) mpc random off >/dev/null && echo off ;; esac }
+toggle_repeat() { case "$(mpc status '%repeat%')" in off) mpc repeat on >/dev/null && echo on ;; on) mpc repeat off >/dev/null && echo off ;; esac }
 
 list_title_artist_album() {
   mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
     # Minor safeguard and assumption: the library is organized using the standard (?) Artist/Album/Song. Works for me. Might not work with you.
-    if [ -n "$title" ] && [ -n "$artist" ] && [ -n "$album" ]; then
+    if [[ -n "$title" && -n "$artist" && -n "$album" ]]; then
       printf "%s\t%s\u0000icon\u001f%s\n" "$artist" "$artist" "$MPC_PLUS_ARTIST_ICON"
       printf "%s\t%s by %s\u0000icon\u001f%s\n" "$artist/$album" "$album" "$artist" "$MPC_PLUS_ALBUM_ICON"
       printf "%s\t%s by %s (%s)\u0000icon\u001f%s\n" "$file" "$title" "$artist" "$album" "$MPC_PLUS_SONG_ICON"
@@ -30,80 +26,130 @@ list_title_artist_album() {
     fi
   done | LC_ALL=C sort --unique
 }
-select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1; }
+select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1 --counter --placeholder "Search by title, artist, or album..."; }
 
 # FIXME: Ideally we would get the file and check if the duration of the track is -1. This suffices _for me_.
-# shellcheck disable=SC2016
-list_radio_stream() { mpc lsplaylists | grep '^radio' | xargs -I{} sh -c 'printf "%s\t%s\n" {} "$(mpc playlist {})"' | LC_ALL=C sort --unique; }
+list_radio_stream() {
+  mpc lsplaylists | while read -r pl; do
+    [[ $pl == radio* ]] || continue
+    printf "%s\t%s\n" "$pl" "$pl"
+  done | LC_ALL=C sort --unique
+}
 select_radio_stream() { list_radio_stream | fuzzel --dmenu --accept-nth=1 --with-nth="2.."; }
 
-get_mpc_artwork_icon() {
-  art_cache_key="$(mpc -f '%artist%_%album%_%title%' | head -1)"
-  destination="$MPC_PLUS_CACHE_DIR/$art_cache_key.png"
+# Resolves album artwork for a file path, using album-level caching.
+# Skips streams, writes atomically via mktemp+mv.
+# Runs in a subshell with pipefail so a failing mpc doesn't get masked by magick's exit code.
+_try_mpc_art() {
+  local cmd="$1" file="$2" out="$3"
+  ( set -o pipefail; mpc "$cmd" "$file" 2>/dev/null | magick - -geometry x128 "PNG:$out" >/dev/null 2>&1 ) && [[ -s "$out" ]]
+}
 
-  # First generate the base image with a reasonable for notifications
-  if [ -f "$destination" ]; then
-    echo -n "$destination"
+get_mpc_artwork_icon() {
+  local file="$1" album_dir key destination tmp
+
+  [[ -n "$file" && "$file" != *://* ]] || { printf '%s' "$MPC_PLUS_SONG_ICON"; return; }
+
+  # Cache key is album-level (directory). For per-track artwork, replace $album_dir with $file.
+  album_dir="${file%/*}"
+  key="$(printf '%s\0%s\0%s' "$MPD_HOST" "$MPD_PORT" "$album_dir" | sha256sum | cut -d' ' -f1)"
+  destination="$MPC_PLUS_CACHE_DIR/$key.png"
+
+  [[ -s "$destination" ]] && { printf '%s' "$destination"; return; }
+
+  tmp="$(mktemp "$MPC_PLUS_CACHE_DIR/.art.XXXXXX.png")" || { printf '%s' "$MPC_PLUS_SONG_ICON"; return; }
+
+  if _try_mpc_art readpicture "$file" "$tmp" || _try_mpc_art albumart "$file" "$tmp"; then
+    mv -f "$tmp" "$destination"
+    printf '%s' "$destination"
   else
-    if mpc readpicture "$(mpc -f '%file%' | head -1)" | save_or_compress; then
-      echo -n "$destination"
-    elif mpc albumart "$(mpc -f '%file%' | head -1)" | save_or_compress; then
-      echo -n "$destination"
-    else
-      echo -n "$MPC_PLUS_SONG_ICON"
-    fi
+    rm -f "$tmp"
+    printf '%s' "$MPC_PLUS_SONG_ICON"
   fi
 }
 
-handle_event() {
-  local summary msg icon
-  msg="$(mpc -f '[%title%[ by %artist%]]|%file%' current)"
-  case "$(mpc status '%state%')" in
-    playing)
-      summary="Now playing"
-      icon="$(get_mpc_artwork_icon)"
-      ;;
-    paused)
-      summary="Paused"
-      icon="$(get_mpc_artwork_icon)"
-      ;;
-    stopped)
-      summary="Nothing playing"
-      icon="${MPC_PLUS_STOPPED_ICON}"
-      ;;
+# In-memory state for the notifications-daemon, refreshed on player events and reused on mixer events.
+CURRENT_SUMMARY="Nothing playing"
+CURRENT_MSG=""
+CURRENT_ICON="$MPC_PLUS_STOPPED_ICON"
+
+refresh_current_state() {
+  local file title artist name state
+
+  state="$(mpc status '%state%' 2>/dev/null || true)"
+  case "$state" in
+    playing) CURRENT_SUMMARY="Now playing" ;;
+    paused)  CURRENT_SUMMARY="Paused" ;;
+    *)       CURRENT_SUMMARY="Nothing playing"; CURRENT_MSG=""; CURRENT_ICON="$MPC_PLUS_STOPPED_ICON"; return ;;
   esac
 
+  IFS=$'\t' read -r file title artist name < <(mpc current -f '%file%\t%title%\t%artist%\t%name%' 2>/dev/null || true)
+
+  if [[ -n "$title" ]]; then
+    CURRENT_MSG="$title${artist:+ by $artist}"
+  elif [[ -n "$name" ]]; then
+    CURRENT_MSG="$name"
+  elif [[ -n "$file" ]]; then
+    local basename="${file##*/}"
+    CURRENT_MSG="${basename%.*}"
+  else
+    CURRENT_MSG=""
+  fi
+
+  CURRENT_ICON="$(get_mpc_artwork_icon "$file")"
+}
+
+handle_event() {
   case "$1" in
-    player) _notify -i "${icon}" "$summary" "$msg"                                                ;;
-    mixer)  _notify -i "${icon}" -h "int:value:$(mpc volume | grep -Po '[\d]+')" "$summary" "$msg" ;;
+    player)
+      refresh_current_state
+      _notify -i "$CURRENT_ICON" "$CURRENT_SUMMARY" "$CURRENT_MSG"
+      ;;
+    mixer)
+      local volume
+      volume="$(mpc volume | grep -Eo '[0-9]+' || true)"  # mpc volume may return 'n/a' when unavailable
+      if [[ -n "$volume" ]]; then
+        _notify -i "$CURRENT_ICON" -h "int:value:${volume}" "$CURRENT_SUMMARY" "$CURRENT_MSG"
+      else
+        _notify -i "$CURRENT_ICON" "$CURRENT_SUMMARY" "$CURRENT_MSG"
+      fi
+      ;;
   esac
 }
 
 # shellcheck source=/dev/null
 load_config() {
-  mkdir -p "${MPC_PLUS_CONFIG_DIR}"
-  mkdir -p "${MPC_PLUS_CACHE_DIR}"
-  mkdir -p "${MPC_PLUS_STATE_DIR}"
+  mkdir -p "${MPC_PLUS_CONFIG_DIR}" "${MPC_PLUS_CACHE_DIR}" "${MPC_PLUS_STATE_DIR}"
 
-  if [ ! -f "${MPC_PLUS_CONFIG_DIR}"/default.json ]; then
-    echo '{ "host": "localhost", "port": 6600 }' > "${MPC_PLUS_CONFIG_DIR}"/default.json
+  # Use pre-determined device if set (e.g., from systemd per-service environment)
+  if [[ -n "${MPC_PLUS_SINGLE_DEVICE:-}" ]]; then
+    local target="${MPC_PLUS_CONFIG_DIR}/${MPC_PLUS_SINGLE_DEVICE}.json"
+    if [[ -f "$target" ]]; then
+      MPD_HOST="$(jq -r '.host' < "$target")"
+      MPD_PORT="$(jq -r '.port' < "$target")"
+      MPD_HOST_DISPLAY_NAME="$MPC_PLUS_SINGLE_DEVICE"
+    else
+      printf "mpc-plus: device '%s' is not configured (%s)\n" "$MPC_PLUS_SINGLE_DEVICE" "$target" >&2
+      return 1
+    fi
+  elif [[ -f "${MPC_PLUS_SELECTED_HOST}" ]]; then
+    source "${MPC_PLUS_SELECTED_HOST}"
+  else
+    MPD_HOST="${MPD_HOST:-"127.0.0.1"}"
+    MPD_PORT=${MPD_PORT:-6600}
+    MPD_HOST_DISPLAY_NAME="local"
   fi
 
-  if [ ! -f "${MPC_PLUS_SELECTED_HOST}" ]; then
-    config_set_server default
-  fi
-
-  set -o allexport
-  source "${MPC_PLUS_SELECTED_HOST}"
-  set +o allexport
+  export MPD_HOST MPD_PORT
 }
 
 config_list_servers() { find -L "${MPC_PLUS_CONFIG_DIR}" -type f -name '*.json' ! -name 'config.json' -exec basename {} ".json" \;; }
 config_set_server() {
   local selected="$1"
-  local device_file="${MPC_PLUS_CONFIG_DIR}/$selected.json";
-  if [ ! -f "${device_file}" ]; then
+  local device_file="${MPC_PLUS_CONFIG_DIR}/$selected.json"
+  if [[ ! -f "${device_file}" ]]; then
     _notify --urgency=critical --icon "$MPC_PLUS_ERROR_ICON" "No configuration file available for $selected"
+    return 1
   fi
 
   printf 'MPD_HOST_DISPLAY_NAME="%s"\nMPD_HOST="%s"\nMPD_PORT="%s"' \
@@ -122,11 +168,23 @@ case "${1:-}" in
   volume-decrease)  mpc volume "-${2:-5}"                               ;;
   play-shuffled)    mpc random on && mpc clear && mpc add / && mpc play ;;
   clear)            mpc clear && _notify -i "${MPC_PLUS_CLEAR_ICON}" "Music Queue" "No songs"                       ;;
-  toggle-random)    toggle_random && _notify -i "$(random_status_icon)" "Shuffle Songs: $(mpc status '%random%')"   ;;
-  toggle-repeat)    toggle_repeat && _notify -i "$(repeat_status_icon)" "Repeat Song: $(mpc status '%repeat%')"     ;;
+  toggle-random)
+    new_state="$(toggle_random)"
+    case "$new_state" in
+      on)  _notify -i "${MPC_PLUS_RANDOM_ICON}" "Shuffle Songs: on" ;;
+      off) _notify -i "${MPC_PLUS_NO_RANDOM_ICON}" "Shuffle Songs: off" ;;
+    esac
+    ;;
+  toggle-repeat)
+    new_state="$(toggle_repeat)"
+    case "$new_state" in
+      on)  _notify -i "${MPC_PLUS_REPEAT_ICON}" "Repeat Song: on" ;;
+      off) _notify -i "${MPC_PLUS_NO_REPEAT_ICON}" "Repeat Song: off" ;;
+    esac
+    ;;
   dmenu-file-exec)
     selection="$(select_title_artist_album)"
-    if [ "$selection" != "" ]; then
+    if [[ -n "$selection" ]]; then
       case "${2:-play}" in
         play)     mpc clear && mpc add "$selection" && mpc play ;;
         next)     mpc insert "$selection" && mpc play           ;;
@@ -136,17 +194,27 @@ case "${1:-}" in
     ;;
   dmenu-radio-stream)
     selection="$(select_radio_stream)"
-    if [ "$selection" != "" ]; then
+    if [[ -n "$selection" ]]; then
       mpc clear && mpc load "${selection}" && mpc play
     fi
     ;;
   list-servers)         config_list_servers ;;
   dmenu-select-server)
-    selection="$(config_list_servers | fuzzel --dmenu --placeholder "Current: ${MPD_HOST_DISPLAY_NAME}")"
-    if [ "$selection" != "" ]; then
+    selection="$(config_list_servers | fuzzel --dmenu --mesg "Current: ${MPD_HOST_DISPLAY_NAME}")"
+    if [[ -n "$selection" ]]; then
       config_set_server "$selection"
+      _notify -i "${MPC_PLUS_DEVICE_ICON}" "MPD Server: $selection"
     fi
-    _notify -i "${MPC_PLUS_DEVICE_ICON}" "MPD Server: $selection"
     ;;
-  notifications-daemon) mpc idleloop player mixer | while read -r event; do handle_event "$event"; done  ;;
+  # Long-lived daemon: process substitution (< <(...)) keeps the loop in the main shell so CURRENT_* globals persist.
+  # mpc idleloop blocks until an event occurs, so no busy-looping. Outer loop reconnects if MPD restarts.
+  notifications-daemon)
+    while :; do
+      refresh_current_state
+      while IFS= read -r event; do
+        handle_event "$event"
+      done < <(mpc idleloop player mixer 2>/dev/null)
+      sleep 1
+    done
+    ;;
 esac

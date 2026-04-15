@@ -8,7 +8,7 @@
   ];
 
   # Misc
-  services.fwupd.enable = true;                   # Updates firmwares: `fwupdmgr`.
+  services.fwupd.enable = true; # Updates firmwares: `fwupdmgr`.
 
   # Storage
   services.fstrim.enable = true;
@@ -20,14 +20,14 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-   # Battery
-  #services.upower = {
-  #  enable = true;
-  #  percentageLow = 30;
-  #  percentageCritical = 20;
-  #  percentageAction = 10;
-  #  criticalPowerAction = "PowerOff";
-  #};
+  # Battery
+  services.upower = {
+    enable = true;
+    percentageLow = 30;
+    percentageCritical = 20;
+    percentageAction = 10;
+    criticalPowerAction = "PowerOff";
+  };
 
   # Touchpad
   services.libinput = {

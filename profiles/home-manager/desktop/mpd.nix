@@ -1,4 +1,4 @@
-{ lib, pkgs, config, osConfig, ... }:
+{ lib, pkgs, config, osConfig, self, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
@@ -31,11 +31,18 @@ lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.mpc-plus = {
     enable = true;
     devices = {
-      "default" = { host = config.services.mpd.network.listenAddress; port = config.services.mpd.network.port; };
-      "pixel" = { };
+      "local" = {
+        host = config.services.mpd.network.listenAddress;
+        port = config.services.mpd.network.port;
+        notifications = true;
+      };
+      "inky" = {
+        host = self.shared.networks.main.hosts.inky;
+        notifications = true;
+      };
     };
   };
-  custom.services.mpc-plus.enable = true; # notifications
+  custom.services.mpc-plus.enable = true;
   services.mpdris2 = {
     enable = true;
     multimediaKeys = true;  # Integration with multimedia keys.

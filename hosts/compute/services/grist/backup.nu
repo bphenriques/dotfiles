@@ -9,8 +9,4 @@ let doc_ids = ($workspaces | get docs | flatten | get id)
 for doc_id in $doc_ids {
   http get --headers $headers $"($env.GRIST_URL)/api/docs/($doc_id)/download"
     | save --force $"($output_dir)/($doc_id).grist"
-
-  # Portable escape hatch
-  http get --headers $headers $"($env.GRIST_URL)/api/docs/($doc_id)/download/xlsx"
-    | save --force $"($output_dir)/($doc_id).xlsx"
 }

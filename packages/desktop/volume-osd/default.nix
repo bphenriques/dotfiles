@@ -21,18 +21,31 @@ pkgs.writeShellApplication {
     pkgs.wireplumber
     pkgs.jq
     pkgs.libnotify
+    pkgs.fuzzel
   ];
   text = ''
+    # Variables are accessed via indirect expansion (''${!var}) in get_icon
+    # shellcheck disable=SC2034
     OSD_VOLUME_HEADPHONES_ICON="${headphonesIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_HEADPHONES_MUTE_ICON="${headphonesMuteIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_HEADSET_ICON="${headsetIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_HEADSET_MUTE_ICON="${headsetMuteIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_INTERNAL_SPEAKERS_ICON="${internalSpeakersIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON="${internalSpeakersMuteIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_EXTERNAL_SPEAKERS_ICON="${externalSpeakersIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON="${externalSpeakersMuteIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_MICROPHONE_ICON="${microphoneIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_MICROPHONE_MUTE_ICON="${microphoneMuteIcon}"
+    # shellcheck disable=SC2034
     OSD_VOLUME_ERROR_ICON="${errorIcon}"
 
     ${lib.fileContents ./script.sh}

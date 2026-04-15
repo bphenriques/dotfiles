@@ -1,123 +1,105 @@
 #shellcheck shell=bash
 
-# TODO Migrate more calls to pipewire/wireplumber: https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/Migrate-PulseAudio#set-card-profile
-list_sources()    { pactl -f json list sources | jq -cr '[ .[] | select((.ports | any((.type == "Mic") or (.type == "Headset")))) ]'; }
-list_sinks()      { pactl -f json list sinks; }
-get_sink()        { pactl -f json list sinks | jq -cr --arg sink "$1" '.[] | select(.name == $sink)'; }
-get_source()      { pactl -f json list sources | jq -cr --arg source "$1" '.[] | select(.name == $source)'; }
-is_sink_muted()   { pactl get-sink-mute "$1" | grep -q "Mute: yes"; }
-is_source_muted() { pactl get-source-mute "$1" | grep -q "Mute: yes"; }
+VOLUME_LIMIT=1.5  # wpctl decimal: 1.0 = 100%, 1.5 = 150%
+
+# Device queries (pactl for rich JSON properties, no wpctl equivalent)
+list_sources() { pactl -f json list sources | jq -cr '[ .[] | select((.ports // []) | any(.type == "Mic" or .type == "Headset")) ]'; }
+list_sinks()   { pactl -f json list sinks; }
+get_sink()     { pactl -f json list sinks | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
+get_source()   { pactl -f json list sources | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
 
 # Wireplumber
-get_volume()  { wpctl get-volume "$1" | grep -Po '[\d].[\d]+' | awk '{ print $1 * 100 }'; }
-set_volume()  { wpctl set-volume "$1" "$2"; }
-set_mute()    { wpctl set-mute "$1" "$2"; }
+set_volume() { wpctl set-volume --limit "$VOLUME_LIMIT" "$1" "$2"; }
+set_mute()   { wpctl set-mute "$1" "$2"; }
 
+# Classifies a device using pactl JSON: device.form_factor > active port type > device.bus.
+# Takes kind (sink/source) to distinguish speakers from microphones.
 device_type() {
-  case "$1" in
-    *Headset*)      echo -n "headset"       ;;
-    *SteelSeries*)  echo -n "headset"       ;;
-    *analog*)       echo -n "internal"      ;;
-    *)              echo -n "external"      ;;
+  local kind="$1"
+  echo "$2" | jq -j --arg kind "$kind" '
+    . as $root |
+    (.properties["device.form_factor"] // "") as $ff |
+    (first(.ports[]? | select(.name == $root.active_port) | .type) // "") as $pt |
+    (.properties["device.bus"] // "") as $bus |
+    if $kind == "source" then
+      if   $ff == "headset" or $pt == "Headset" then "headset"
+      else                                           "microphone"
+      end
+    else
+      if   $ff == "headset"                          then "headset"
+      elif $ff == "headphone"                        then "headphones"
+      elif $pt == "Speaker"                          then "internal"
+      elif $pt == "Headphones"                       then "headphones"
+      elif $pt == "Headset"                          then "headset"
+      elif $pt == "HDMI"                             then "external"
+      elif $bus == "usb" or $bus == "bluetooth"      then "external"
+      else                                                "internal"
+      end
+    end
+  '
+}
+
+friendly_device_name() {
+  local json="$1" dtype="$2"
+  case "$dtype" in
+    internal)   echo -n "Speakers" ;;
+    headphones) echo -n "Headphones" ;;
+    *)          echo "$json" | jq -j '.properties["node.nick"] // .description' ;;
   esac
 }
 
-friendly_sink_name() {
-  local sink_name
-  sink_name="$(get_sink "$1" | jq -r '.name')"
-  case "${sink_name}" in
-    *Headset*)  echo -n "Headset"                     ;;
-    *analog*)   echo -n "Laptop"                      ;;
-    *hdmi*)     echo -n "HDMI"                        ;;
-    *)          get_sink "$1" | jq -r '.description'  ;;
+# Returns the icon for a device type and mute state.
+# Uses indirect variable expansion to look up OSD_VOLUME_*_ICON env vars.
+get_icon() {
+  local dtype="$1" muted="$2"
+  local device_label
+  case "$dtype" in
+    microphone) device_label="MICROPHONE" ;;
+    internal)   device_label="INTERNAL_SPEAKERS" ;;
+    external)   device_label="EXTERNAL_SPEAKERS" ;;
+    headset)    device_label="HEADSET" ;;
+    headphones) device_label="HEADPHONES" ;;
+    *)          return ;;
   esac
+  # Indirect expansion: constructs var name like OSD_VOLUME_HEADSET_MUTE_ICON, then ${!var} dereferences it.
+  local var="OSD_VOLUME_${device_label}_${muted:+MUTE_}ICON"
+  echo -n "${!var}"
 }
 
-friendly_source_name() {
-  local source_name
-  source_name="$(get_source "$1" | jq -r '.name')"
-  case "${source_name}" in
-    *analog*)   echo -n "Laptop"                        ;;
-    *Headset*)  echo -n "Headset"                       ;;
-    *)          get_source "$1" | jq -r '.description'  ;;
-  esac
-}
+notify_current_device() {
+  local kind="$1"
+  local device_json dtype muted
 
-get_sink_icon() {
-  local device_type="$1"
-  case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_ICON}" ;;
-    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_ICON}" ;;
-    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_ICON}" ;;
+  case "$kind" in
+    sink)   device_json="$(get_sink "$(pactl get-default-sink)")" ;;
+    source) device_json="$(get_source "$(pactl get-default-source)")" ;;
   esac
-}
 
-get_sink_mute_icon() {
-  local device_type="$1"
-  case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_INTERNAL_SPEAKERS_MUTE_ICON}" ;;
-    external)     echo -n "${OSD_VOLUME_EXTERNAL_SPEAKERS_MUTE_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_MUTE_ICON}" ;;
-    headphones)   echo -n "${OSD_VOLUME_HEADPHONES_MUTE_ICON}" ;;
-  esac
-}
+  dtype="$(device_type "$kind" "$device_json")"
 
-get_source_icon() {
-  local device_type="$1"
-  case "$device_type" in
-    internal)     echo -n "${OSD_VOLUME_MICROPHONE_ICON}" ;;
-    headset)      echo -n "${OSD_VOLUME_HEADSET_ICON}" ;;
-  esac
-}
+  local wpctl_output progress display_progress
+  wpctl_output="$(wpctl get-volume "@DEFAULT_${kind^^}@")"
+  progress="$(awk '{ printf "%d", $2 * 100 }' <<< "$wpctl_output")"
 
-get_source_mute_icon() {
-  local device_type="$1"
-  case "$device_type" in
-    internal)     echo -n "$OSD_VOLUME_MICROPHONE_MUTE_ICON" ;;
-    headset)      echo -n "$OSD_VOLUME_HEADSET_MUTE_ICON" ;;
-  esac
-}
-
-notify_current_sink() {
-  current="$(pactl get-default-sink)"
-  progress="$(get_volume @DEFAULT_SINK@)"
-  icon=
-  if is_sink_muted @DEFAULT_SINK@ || [ "$progress" -eq 0 ]; then
-    icon="$(get_sink_mute_icon "$(device_type "$current")")"
-    progress=0
+  muted=
+  if [[ "$wpctl_output" == *"[MUTED]"* ]]; then
+    muted=true
+    display_progress=0
   else
-    icon="$(get_sink_icon "$(device_type "$current")")"
+    display_progress="$(awk -v p="$progress" -v limit="$VOLUME_LIMIT" 'BEGIN { printf "%d", p / limit }')"
   fi
 
   notify-send \
-    --icon "$icon" \
-    --category "volume-osd" \
-    --hint string:x-canonical-private-synchronous:volume \
-    --hint int:value:"$progress" \
+    --icon "$(get_icon "$dtype" "$muted")" \
+    --category "volume-osd-$kind" \
+    --hint "string:x-canonical-private-synchronous:volume-$kind" \
+    --hint int:value:"$display_progress" \
     --transient \
-    "$(friendly_sink_name "$(pactl get-default-sink)")"
+    "$(friendly_device_name "$device_json" "$dtype")" "${progress}%"
 }
 
-notify_current_source() {
-  current="$(pactl get-default-source)"
-  progress="$(get_volume @DEFAULT_SOURCE@)"
-  icon=
-  if is_source_muted @DEFAULT_SOURCE@ || [ "$progress" -eq 0 ]; then
-    icon="$(get_source_mute_icon "$(device_type "$current")")"
-    progress=0
-  else
-    icon="$(get_source_icon "$(device_type "$current")")"
-  fi
-
-  notify-send \
-    --icon "$icon" \
-    --category "volume-osd" \
-    --hint string:x-canonical-private-synchronous:volume \
-    --hint int:value:"$progress" \
-    --transient \
-    "$(friendly_source_name "$(pactl get-default-source)")"
-}
+notify_current_sink()   { notify_current_device sink; }
+notify_current_source() { notify_current_device source; }
 
 notify_failure() {
   notify-send \
@@ -126,66 +108,51 @@ notify_failure() {
     --category "volume-osd" \
     --hint string:x-canonical-private-synchronous:volume \
     --transient \
-    "${1:-'Failure while running volume-osd'}" "${2:-}"
+    "${1:-Failure while running volume-osd}" "${2:-}"
 }
 
+# Process substitution (< <(...)) keeps the loop in the main shell so rc accumulates correctly.
 move_all_sink_inputs() {
-  target_sink_index="$1"
-  for sink_input_index in $(pactl -f json list sink-inputs | jq -r '.[].index'); do
-    pactl move-sink-input "$sink_input_index" "$target_sink_index"
-  done
+  local target_index="$1" rc=0
+  while read -r index; do
+    pactl move-sink-input "$index" "$target_index" || rc=1
+  done < <(pactl -f json list sink-inputs | jq -r '.[].index')
+  return "$rc"
 }
 
-get_next_sink() {
-  inc="${1:-"+1"}"
-  current="$(get_sink "$(pactl get-default-sink)" | jq -cr '.index')"
-  current_pos_index="$(list_sinks | jq -cr --arg current "${current}" '[.[].index] | index($current | tonumber)')"
-  number_sinks="$(list_sinks | jq 'length')"
-  next_index="$(list_sinks | jq -cr --arg inc "$inc" --arg current "$current_pos_index" --arg total "$number_sinks" '[.[].index][(($current | tonumber)+($inc | tonumber)) % ($total | tonumber)]')"
-
-  list_sinks | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber)) | .name'
+move_all_source_outputs() {
+  local target_index="$1" rc=0
+  while read -r index; do
+    pactl move-source-output "$index" "$target_index" || rc=1
+  done < <(pactl -f json list source-outputs | jq -r '.[].index')
+  return "$rc"
 }
+
+# Finds the next/previous device by cycling through indices. Wraps around using jq's modulo and negative array indexing.
+get_next_device() {
+  local all_devices="$1" current_name="$2" inc="${3:-1}"
+  echo "$all_devices" | jq -cr \
+    --arg name "$current_name" \
+    --arg inc "$inc" '
+      [.[].index] as $indices |
+      (.[] | select(.name == $name) | .index) as $current |
+      ($indices | index($current)) as $pos |
+      $indices[(($pos + ($inc | tonumber)) % ($indices | length))] as $next |
+      .[] | select(.index == $next) | .name
+    '
+}
+
+get_next_sink()   { get_next_device "$(list_sinks)" "$(pactl get-default-sink)" "${1:-+1}"; }
+get_next_source() { get_next_device "$(list_sources)" "$(pactl get-default-source)" "${1:-+1}"; }
 
 set_sink_and_move() {
   if ! pactl set-default-sink "$1"; then
     notify_failure "Failed to change sound output"
     return 1
   fi
-
   if ! move_all_sink_inputs "$(get_sink "$1" | jq -r '.index')"; then
     notify_failure "Failed to move sound output"
   fi
-}
-
-sink_dmenu_options() {
-  for sink_name in $(list_sinks | jq -r '.[].name'); do
-    printf '%s\u0000icon\u001f%s\n' "$(friendly_sink_name "$sink_name")" "$(get_sink_icon "$(device_type "$sink_name")")"
-  done
-}
-
-sink_select_fuzzel() {
-  sinks="$(list_sinks | jq -r '[ .[].name ]')"
-  selection="$(sink_dmenu_options | fuzzel --dmenu --index --width 65 --lines "$(echo "$sinks" | jq length)")"
-  if [ "$selection" != -1 ]; then
-    echo "$sinks" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'
-  fi
-}
-
-move_all_source_outputs() {
-  target_source_index="$1"
-  for index in $(pactl -f json list  source-outputs | jq -r '.[].index'); do
-    pactl move-sink-input "$index" "$target_source_index"
-  done
-}
-
-get_next_source() {
-  inc="${1:-"+1"}"
-  current="$(get_source "$(pactl get-default-source)" | jq -cr '.index')"
-  current_pos_index="$(list_sources | jq -cr --arg current "${current}" '[.[].index] | index($current | tonumber)')"
-  number_sources="$(list_sources | jq 'length')"
-  next_index="$(list_sources | jq -cr --arg inc "$inc" --arg current "$current_pos_index" --arg total "$number_sources" '[.[].index][(($current | tonumber)+($inc | tonumber)) % ($total | tonumber)]')"
-
-  list_sources | jq -cr --arg index "$next_index" '.[] | select(.index == ($index | tonumber)) | .name'
 }
 
 set_source_and_move() {
@@ -193,51 +160,71 @@ set_source_and_move() {
     notify_failure "Failed to change sound source"
     return 1
   fi
-
   if ! move_all_source_outputs "$(get_source "$1" | jq -r '.index')"; then
     notify_failure "Failed to move sound source"
   fi
 }
 
-source_dmenu_options() {
-  for name in $(list_sources | jq -r '.[] | .name'); do
-    printf '%s\u0000icon\u001f%s\n' "$(friendly_source_name "$name")" "$(get_source_icon "$(device_type "$name")")"
-  done
+device_dmenu_options() {
+  local kind="$1" all_devices="$2"
+  local device_json dtype
+  while IFS= read -r device_json; do
+    dtype="$(device_type "$kind" "$device_json")"
+    printf '%s\u0000icon\u001f%s\n' \
+      "$(friendly_device_name "$device_json" "$dtype")" \
+      "$(get_icon "$dtype" "")"
+  done < <(echo "$all_devices" | jq -c '.[]')
 }
 
-source_select_fuzzel() {
-  sources="$(list_sources | jq -r '[ .[] | .name ]')"
-  selection="$(source_dmenu_options | fuzzel --dmenu --index --width 65 --lines "$(echo "$sources" | jq length)")"
-  if [ "$selection" != -1 ]; then
-    echo "$sources" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'
+device_select_fuzzel() {
+  local kind="$1" all_devices="$2"
+  local current_device prompt
+
+  case "$kind" in
+    sink)   prompt="Output"; current_device="$(get_sink "$(pactl get-default-sink)")" ;;
+    source) prompt="Input";  current_device="$(get_source "$(pactl get-default-source)")" ;;
+  esac
+
+  local current_dtype current_name
+  current_dtype="$(device_type "$kind" "$current_device")"
+  current_name="$(friendly_device_name "$current_device" "$current_dtype")"
+
+  local names selection
+  names="$(echo "$all_devices" | jq -r '[ .[].name ]')"
+  selection="$(device_dmenu_options "$kind" "$all_devices" | fuzzel --dmenu --index --width 65 \
+    --lines "$(echo "$names" | jq length)" \
+    --prompt "$prompt: " \
+    --mesg "Current: $current_name")"
+  if [[ -n "$selection" && "$selection" != -1 ]]; then
+    echo "$names" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'
   fi
 }
 
 case "${1:-}" in
-  # For sinks
-  sink-toggle-mute)   set_mute @DEFAULT_SINK@ toggle && notify_current_sink                 ;;
-  sink-increase)      set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink          ;;
-  sink-decrease)      set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink          ;;
-  sink-move)          set_sink_and_move "$2" && notify_current_sink                         ;;
-  sink-move-next)     set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink      ;;
-  sink-move-prev)     set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink      ;;
+  # Sinks (audio output)
+  sink-toggle-mute) set_mute @DEFAULT_SINK@ toggle && notify_current_sink ;;
+  sink-increase)    set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink ;;
+  sink-decrease)    set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink ;;
+  sink-move)        set_sink_and_move "$2" && notify_current_sink ;;
+  sink-move-next)   set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink ;;
+  sink-move-prev)   set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink ;;
   sink-move-fuzzel)
-    selection="$(sink_select_fuzzel)"
-    if [ "$selection" != "" ]; then
+    selection="$(device_select_fuzzel sink "$(list_sinks)")"
+    if [[ -n "$selection" ]]; then
       set_sink_and_move "$selection" && notify_current_sink
     fi
     ;;
 
-  # For sources
-  source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle && notify_current_source              ;;
-  source-increase)    set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source       ;;
-  source-decrease)    set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source       ;;
-  source-move)        set_source_and_move "$2" && notify_current_source                      ;;
+  # Sources (audio input)
+  source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle && notify_current_source ;;
+  source-increase)    set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source ;;
+  source-decrease)    set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source ;;
+  source-move)        set_source_and_move "$2" && notify_current_source ;;
   source-move-next)   set_source_and_move "$(get_next_source "+1")" && notify_current_source ;;
   source-move-prev)   set_source_and_move "$(get_next_source "-1")" && notify_current_source ;;
   source-move-fuzzel)
-    selection="$(source_select_fuzzel)"
-    if [ "$selection" != "" ]; then
+    selection="$(device_select_fuzzel source "$(list_sources)")"
+    if [[ -n "$selection" ]]; then
       set_source_and_move "$selection" && notify_current_source
     fi
     ;;

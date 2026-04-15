@@ -1,111 +1,37 @@
 #shellcheck shell=bash
 
-LAPTOP_UPOWER_DEVICE="${UPOWER_DEVICE:-battery_BAT0}"
-UPOWER_NOTIFY_LOW="${UPOWER_NOTIFY_LOW:-30}"
-UPOWER_NOTIFY_CRITICAL="${UPOWER_NOTIFY_CRITICAL:-20}"
+readonly UPOWER_DEVICE="${UPOWER_DEVICE:?'UPOWER_DEVICE must be set (e.g., battery_BAT0)'}"
+readonly UPOWER_NOTIFY_LOW="${UPOWER_NOTIFY_LOW:-30}"
+readonly UPOWER_NOTIFY_CRITICAL="${UPOWER_NOTIFY_CRITICAL:-20}"
+readonly POLL_TIMEOUT=60
+readonly UPOWER_DEVICE_PATH="/org/freedesktop/UPower/devices/${UPOWER_DEVICE}"
+
+# Fail fast if the battery device does not exist
+if ! upower -i "$UPOWER_DEVICE_PATH" &>/dev/null; then
+  echo "Battery device '${UPOWER_DEVICE}' not found. Available devices:" >&2
+  upower -e >&2
+  exit 1
+fi
 
 is_plugged() { acpi -a | grep -q "on-line"; }
-get_battery_percentage() { upower -i "/org/freedesktop/UPower/devices/${LAPTOP_UPOWER_DEVICE}" | grep percentage | awk '{ print $2; }' | tr -d '%'; }
-
-#shellcheck disable=SC2034
-monitor_battery_status() {
-  echo "Monitoring battery capacity..."
-  last_plugged=
-  last_percentage=
-  critical=0
-  low=0
-  upower --monitor | while read -r timestamp junk1 junk2 path; do
-      [ "$path" != "/org/freedesktop/UPower/devices/$LAPTOP_UPOWER_DEVICE" ] && continue
-
-      plugged=
-      if is_plugged; then
-        plugged=1
-      else
-        plugged=0
-      fi
-      percentage="$(get_battery_percentage)"
-
-      if [ "$percentage" != "$last_percentage" ]; then
-        echo "Change in capacity: $percentage"
-        if [ "$percentage" -ge 0 ] && [ "$percentage" -le "$UPOWER_NOTIFY_CRITICAL" ] && [ "$critical" -eq 0 ]; then
-          critical=1
-          low=0
-          notify_current_battery "$percentage"
-        elif [ "$percentage" -ge "$UPOWER_NOTIFY_CRITICAL" ] && [ "$percentage" -le "$UPOWER_NOTIFY_LOW" ] && [ "$low" -eq 0 ]; then
-          critical=0
-          low=1
-          notify_current_battery "$percentage"
-        else
-          critical=0
-          low=0
-        fi
-        last_percentage="$percentage"
-      elif [ "$plugged" != "$last_plugged" ]; then
-        echo "Change in plug/unplug: $plugged"
-        notify_current_battery "$percentage"
-        last_plugged="$plugged"
-      fi
-    done
-}
+get_battery_percentage() { upower -i "$UPOWER_DEVICE_PATH" | grep percentage | awk '{ print $2; }' | tr -d '%'; }
 
 get_icon() {
-  percentage="$1"
-  if [ "$percentage" -ge 0 ] && [ "$percentage" -lt 10 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_0_ICON"
-  elif [ "$percentage" -ge 10 ] && [ "$percentage" -lt 20 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_10_ICON"
-  elif [ "$percentage" -ge 20 ] && [ "$percentage" -lt 30 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_20_ICON"
-  elif [ "$percentage" -ge 30 ] && [ "$percentage" -lt 40 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_30_ICON"
-  elif [ "$percentage" -ge 40 ] && [ "$percentage" -lt 50 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_40_ICON"
-  elif [ "$percentage" -ge 50 ] && [ "$percentage" -lt 60 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_50_ICON"
-  elif [ "$percentage" -ge 60 ] && [ "$percentage" -lt 70 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_60_ICON"
-  elif [ "$percentage" -ge 70 ] && [ "$percentage" -lt 80 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_70_ICON"
-  elif [ "$percentage" -ge 80 ] && [ "$percentage" -lt 90 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_80_ICON"
-  elif [ "$percentage" -ge 90 ] && [ "$percentage" -lt 100 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_90_ICON"
-  else
-    echo "$UPOWER_NOTIFY_LEVEL_100_ICON"
-  fi
+  local level=$(( ($1 / 10) * 10 ))
+  [ "$level" -gt 100 ] && level=100
+  echo "$UPOWER_ICONS_DIR/$level"
 }
 
 get_charging_icon() {
-  percentage="$1"
-  if [ "$percentage" -ge 0 ] && [ "$percentage" -lt 10 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_0_CHARGING_ICON"
-  elif [ "$percentage" -ge 10 ] && [ "$percentage" -lt 20 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_10_CHARGING_ICON"
-  elif [ "$percentage" -ge 20 ] && [ "$percentage" -lt 30 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_20_CHARGING_ICON"
-  elif [ "$percentage" -ge 30 ] && [ "$percentage" -lt 40 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_30_CHARGING_ICON"
-  elif [ "$percentage" -ge 40 ] && [ "$percentage" -lt 50 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_40_CHARGING_ICON"
-  elif [ "$percentage" -ge 50 ] && [ "$percentage" -lt 60 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_50_CHARGING_ICON"
-  elif [ "$percentage" -ge 60 ] && [ "$percentage" -lt 70 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_60_CHARGING_ICON"
-  elif [ "$percentage" -ge 70 ] && [ "$percentage" -lt 80 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_70_CHARGING_ICON"
-  elif [ "$percentage" -ge 80 ] && [ "$percentage" -lt 90 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_80_CHARGING_ICON"
-  elif [ "$percentage" -ge 90 ] && [ "$percentage" -lt 100 ]; then
-    echo "$UPOWER_NOTIFY_LEVEL_90_CHARGING_ICON"
-  else
-    echo "$UPOWER_NOTIFY_LEVEL_100_CHARGING_ICON"
-  fi
+  local level=$(( ($1 / 10) * 10 ))
+  [ "$level" -gt 100 ] && level=100
+  echo "$UPOWER_CHARGING_ICONS_DIR/$level"
 }
 
 notify_current_battery() {
-  percentage="$1"
+  local percentage="$1"
 
-  urgency=
+  local urgency=
   if [ "$percentage" -ge 0 ] && [ "$percentage" -lt "$UPOWER_NOTIFY_CRITICAL" ]; then
     urgency=critical
   elif [ "$percentage" -ge "$UPOWER_NOTIFY_CRITICAL" ] && [ "$percentage" -lt "$UPOWER_NOTIFY_LOW" ]; then
@@ -114,7 +40,7 @@ notify_current_battery() {
     urgency=normal
   fi
 
-  icon=
+  local icon=
   if is_plugged; then
     icon="$(get_charging_icon "$percentage")"
   else
@@ -131,7 +57,84 @@ notify_current_battery() {
     "Battery: $percentage%"
 }
 
+# Reads current battery state, compares against last_state, sends notifications on threshold crossings or plug/unplug events, and updates last_state.
+#shellcheck disable=SC2178,SC2128
+check_and_notify() {
+  local -n last_state=$1
+
+  local percentage
+  if ! percentage="$(get_battery_percentage)"; then
+    echo "Failed to read battery percentage, skipping" >&2
+    return 1
+  fi
+  local plugged=0
+  is_plugged && plugged=1
+
+  # Detect plug/unplug change
+  if [ "$plugged" != "${last_state[plugged]}" ]; then
+    notify_current_battery "$percentage"
+  # Detect threshold crossings
+  elif [ "$percentage" != "${last_state[percentage]}" ]; then
+    if [ "$percentage" -le "$UPOWER_NOTIFY_CRITICAL" ] && [ "${last_state[notified_critical]}" -eq 0 ]; then
+      last_state[notified_critical]=1
+      last_state[notified_low]=0
+      notify_current_battery "$percentage"
+    elif [ "$percentage" -gt "$UPOWER_NOTIFY_CRITICAL" ] && [ "$percentage" -le "$UPOWER_NOTIFY_LOW" ] && [ "${last_state[notified_low]}" -eq 0 ]; then
+      last_state[notified_critical]=0
+      last_state[notified_low]=1
+      notify_current_battery "$percentage"
+    elif [ "$percentage" -gt "$UPOWER_NOTIFY_LOW" ]; then
+      last_state[notified_critical]=0
+      last_state[notified_low]=0
+    fi
+  fi
+
+  last_state[percentage]="$percentage"
+  last_state[plugged]="$plugged"
+}
+
+upower_monitor() {
+  declare -A last_state=(
+    [plugged]=0
+    [percentage]=""
+    [notified_low]=0
+    [notified_critical]=0
+  )
+
+  # Seed state (no notification on startup)
+  if ! last_state[percentage]="$(get_battery_percentage)"; then
+    echo "Failed to get initial battery percentage, exiting" >&2
+    exit 1
+  fi
+  is_plugged && last_state[plugged]=1
+
+  # Pre-classify so we don't re-notify for the current state
+  if [ "${last_state[percentage]}" -le "$UPOWER_NOTIFY_CRITICAL" ]; then
+    last_state[notified_critical]=1
+  elif [ "${last_state[percentage]}" -le "$UPOWER_NOTIFY_LOW" ]; then
+    last_state[notified_low]=1
+  fi
+
+  echo "Monitoring battery (device=$UPOWER_DEVICE, percentage=${last_state[percentage]}%, plugged=${last_state[plugged]})"
+
+  while true; do
+    if read -t "$POLL_TIMEOUT" -r line; then
+      case "$line" in
+        *"$UPOWER_DEVICE"*) ;;
+        *) continue ;;
+      esac
+    else
+      # Timeout (rc > 128): no event received, fall through to poll battery state.
+      # EOF (rc <= 128): pipe closed (upower died), exit so systemd restarts the service.
+      rc=$?
+      [ "$rc" -le 128 ] && { echo "upower --monitor pipe closed (rc=$rc), exiting" >&2; exit 1; }
+    fi
+
+    check_and_notify last_state || continue
+  done
+}
+
 case "${1:-}" in
-  get-notify)           notify_current_battery "$(get_battery_percentage)"    ;;
-  monitor-status)       monitor_battery_status                                ;;
+  notify)    notify_current_battery "$(get_battery_percentage)"  ;;
+  monitor)   upower --monitor | upower_monitor                   ;;
 esac

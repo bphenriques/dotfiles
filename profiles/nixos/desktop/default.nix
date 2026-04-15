@@ -9,7 +9,7 @@
     ./gamemode.nix      # Gaming: nice to have.
     ./gamescope.nix     # Gaming: Micro-compositor
     ./nautilus.nix      # Ideally I wish it was terminal based but xdg-desktop-portal-termfilechooser seems too old to consider
-    # ./sunshine.nix    # Still doesnt work.
+    ./sunshine.nix      # Game streaming (Sunshine + Moonlight)
   ];
 
   boot.kernelParams = [
