@@ -28,7 +28,6 @@ list_title_artist_album() {
 }
 select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1 --counter --placeholder "Search by title, artist, or album..."; }
 
-# FIXME: Ideally we would get the file and check if the duration of the track is -1. This suffices _for me_.
 list_radio_stream() {
   mpc lsplaylists | while read -r pl; do
     [[ $pl == radio* ]] || continue

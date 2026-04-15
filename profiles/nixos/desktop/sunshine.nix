@@ -1,4 +1,15 @@
 { pkgs, lib, config, ... }:
+let
+  # Sunshine runs with cap_sys_admin (setcap wrapper). Steam's bwrap sandbox rejects inherited capabilities.
+  # setpriv clears ambient+inheritable caps so Steam launches cleanly.
+  steamBigPicture = pkgs.writeShellScript "sunshine-steam-big-picture" ''
+    exec ${lib.getExe' pkgs.util-linux "setsid"} \
+      ${lib.getExe' pkgs.util-linux "setpriv"} \
+        --ambient-caps=-all \
+        --inh-caps=-all \
+        ${lib.getExe pkgs.steam} steam://open/bigpicture
+  '';
+in
 {
   services.sunshine = {
     enable = true;
@@ -20,16 +31,17 @@
         {
            name = "Steam Big Picture";
            output = "/tmp/sunshine-steam.txt";
-           detached = ["${pkgs.util-linux}/bin/setsid ${pkgs.steam}/bin/steam steam://open/bigpicture"];
+           detached = ["${steamBigPicture}"];
            image-path = "steam.png";
         }
       ];
     };
   };
 
-  # Sunshine needs access to /dev/uinput to simulate input devices (virtual mouse/keyboard).
-  # The NixOS module runs Sunshine as a user service, so /dev/uinput must be group-accessible.
+  # Sunshine needs access to /dev/uinput (virtual mouse/keyboard) and /dev/uhid (DS5 gamepad emulation).
+  # The NixOS module runs Sunshine as a user service, so these devices must be group-accessible.
   services.udev.extraRules = lib.optionalString config.services.sunshine.enable ''
     KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
+    KERNEL=="uhid", SUBSYSTEM=="misc", MODE="0660", GROUP="input", OPTIONS+="static_node=uhid"
   '';
 }
