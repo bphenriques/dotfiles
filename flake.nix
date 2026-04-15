@@ -40,6 +40,7 @@
       generators = import ./lib/generators.nix { lib = nixpkgs.lib; };
       inherit (generators) forAllSystems readModulesAttrs;
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
+      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost;
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -66,8 +67,16 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      nixosConfigurations.compute = import ./hosts/compute inputs;
-      nixosConfigurations.laptop = import ./hosts/laptop inputs;
+      nixosConfigurations.compute = mkNixosHost {
+        system = "x86_64-linux";
+        configPath = ./hosts/compute;
+      };
+      nixosConfigurations.laptop = mkNixosHost {
+        system = "x86_64-linux";
+        configPath = ./hosts/laptop;
+        extraOverlays = [ inputs.nur.overlays.default ];
+        extraHmModules = [ inputs.stylix.homeModules.stylix ];
+      };
       darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }

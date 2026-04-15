@@ -26,14 +26,7 @@
     percentageLow = 30;
     percentageCritical = 20;
     percentageAction = 10;
-    criticalPowerAction = "PowerOff";
-  };
-
-  # Touchpad
-  services.libinput = {
-    enable = true;
-    touchpad.naturalScrolling = false;
-    touchpad.tapping = true;
+    criticalPowerAction = "Hibernate";
   };
 
   environment.systemPackages = [

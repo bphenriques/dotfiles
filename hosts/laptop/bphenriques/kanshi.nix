@@ -12,7 +12,7 @@ let
   };
   livingRoomScreen = {
     criteria = "LG Electronics LG TV SSCR2 0x01010101";
-    mode = "2560x1440@119.998";
+    mode = "2560x1440@119.998Hz";
     scale = 1.0;
   };
 
@@ -24,30 +24,30 @@ in
     enable = true;
     settings = [
       {
-         profile = {
-           name = "internal";
-           outputs = [ (enable laptopScreen) ];
-         };
-       }
-       {
-         profile = {
-           name = "external-office";
-           outputs = [ (disable laptopScreen) (enable dellScreen) ];
-         };
-       }
-       {
-         profile = {
-           name = "external-living-room";
-           outputs = [ (disable laptopScreen) (enable livingRoomScreen) ];
-         };
-       }
-   ];
+        profile = {
+          name = "internal";
+          outputs = [ (enable laptopScreen) ];
+        };
+      }
+      {
+        profile = {
+          name = "external-office";
+          outputs = [ (disable laptopScreen) (enable dellScreen) ];
+        };
+      }
+      {
+        profile = {
+          name = "external-living-room";
+          outputs = [ (disable laptopScreen) (enable livingRoomScreen) ];
+        };
+      }
+    ];
   };
 
   custom.programs.niri.output.default = {
-    identifier  = "eDP-1";
-    resolution  = "2880x1800";
-    refreshRate = "120.001"; # using float leads to trailing zeros that I dont want
-    scale       = "1.75";
+    identifier  = laptopScreen.criteria;
+    resolution  = builtins.head (builtins.split "@" laptopScreen.mode);
+    refreshRate = builtins.replaceStrings [ "Hz" ] [ "" ] (builtins.elemAt (builtins.split "@" laptopScreen.mode) 2);
+    scale       = toString laptopScreen.scale;
   };
 }
