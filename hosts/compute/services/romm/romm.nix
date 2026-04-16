@@ -36,6 +36,7 @@ let
       multi_file.names = [
         ".stfolder"
         ".idea"
+        "media"
       ];
     };
     system.platforms = {

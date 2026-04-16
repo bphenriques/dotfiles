@@ -20,7 +20,7 @@ in
     secrets = {
       files = {
         token-key = { rotatable = true; bytes = 64; };
-        admin-password = { rotatable = false; }; # TODO: admin-password could be removed if Kavita supports OIDC-only admin
+        admin-password = { rotatable = false; }; # For API bootstrapping only
       };
       systemd.dependentServices = [ "kavita" "kavita-configure" ];
     };

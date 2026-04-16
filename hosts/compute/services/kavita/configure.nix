@@ -14,7 +14,7 @@ let
   enabledUsers = lib.filterAttrs (_: u: u.services.kavita.enable) config.custom.homelab.users;
   localUsers = lib.filterAttrs (_: u: u.services.kavita.passwordFile != null) enabledUsers;
 
-  # TODO: admin could be removed if Kavita supports OIDC-only admin
+  # Admin user is for API bootstrapping only (initial setup + config reconciliation)
   kavitaConfigFile = pkgs.writeText "kavita-config.json" (builtins.toJSON {
     kavitaUrl = serviceCfg.url;
     adminUsername = "admin";
@@ -57,6 +57,9 @@ let
       roles = [ "Login" ];
       libraries = publicLibraries;
     }) localUsers;
+
+    # OIDC users who should receive the Admin role (based on homelab group membership)
+    oidcAdminUsernames = lib.mapAttrsToList (_: u: u.username) (lib.filterAttrs (_: u: u.isAdmin) enabledUsers);
   });
 in
 {

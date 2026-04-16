@@ -7,15 +7,14 @@ let
   enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.homelab.users;
   usersWithMounts = lib.filterAttrs (username: _: homelabMounts ? ${username}) enabledUsers;
 
-  # TODO: admin could be removed if Immich supports OIDC-only admin
-  # TODO: Sync the OIDC user files for tighter SSO integration (not implemented).
+  # Admin user for API bootstrapping; OIDC users get admin via isAdmin flag
   immichConfigFile = pkgs.writeText "immich-config.json" (builtins.toJSON {
     admin = {
       email = "admin@immich.local";
       name = "Immich Admin";
       passwordFile = serviceCfg.secrets.files.admin-password.path;
     };
-    users = lib.mapAttrsToList (_: u: { inherit (u) email name; }) enabledUsers;
+    users = lib.mapAttrsToList (_: u: { inherit (u) email name isAdmin; }) enabledUsers;
 
     libraries = lib.concatLists (lib.mapAttrsToList (username: u:
       let userPaths = pathsCfg.users.${username}.photos;

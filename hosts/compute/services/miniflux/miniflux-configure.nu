@@ -23,12 +23,12 @@ def get_users [] {
   $r.body
 }
 
-def create_user [username: string, openid_connect_id: string] {
+def create_user [username: string, openid_connect_id: string, is_admin: bool] {
   let body = {
     username: $username
     password: (random chars --length 32)
     openid_connect_id: $openid_connect_id
-    is_admin: false # I am not special, there is only one admin that should be used sparingly.
+    is_admin: $is_admin
   }
 
   let r = http post $"($base_url)/v1/users" $body --user $admin_username --password $admin_password --content-type application/json --full --allow-errors
@@ -61,9 +61,10 @@ def main [] {
       let openid_connect_id = $oidc_user.id
       let miniflux_user = $miniflux_users | where username == $cfg.username | get 0?
 
+      let is_admin = ($cfg.is_admin? | default false)
       let user_id = if $miniflux_user == null {
-        let created = create_user $cfg.username $openid_connect_id
-        print $"  ($cfg.username): created with openid_connect_id"
+        let created = create_user $cfg.username $openid_connect_id $is_admin
+        print $"  ($cfg.username): created with openid_connect_id, admin=($is_admin)"
         $created.id
       } else {
         $miniflux_user.id

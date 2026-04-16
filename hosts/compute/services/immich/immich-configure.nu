@@ -55,9 +55,17 @@ def get_all [endpoint: string, headers: record] {
 }
 
 def ensure_user [user: record, existing: list, headers: record] {
+  let is_admin = ($user.isAdmin? | default false)
   let found = $existing | where email == $user.email | get 0?
   if $found != null {
-    print $"User ($user.email) already exists"
+    if ($found.isAdmin != $is_admin) {
+      let body = { isAdmin: $is_admin }
+      let r = http put $"($base_url)/api/admin/users/($found.id)" $body --headers $headers --content-type application/json --full --allow-errors
+      if $r.status != 200 { error make { msg: $"Failed to update user ($user.email): ($r.status) - ($r.body)" } }
+      print $"User ($user.email) admin status updated to ($is_admin)"
+    } else {
+      print $"User ($user.email) already exists"
+    }
     return $found.id
   }
 

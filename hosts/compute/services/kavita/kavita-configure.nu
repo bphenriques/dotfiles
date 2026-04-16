@@ -184,8 +184,9 @@ def update_user [kavita_user: record, roles: list, library_ids: list, age_restri
 
 def reconcile_oidc_users [library_map: record, headers: record] {
   let oidc = $config.oidc
+  let admin_usernames = ($config.oidcAdminUsernames? | default [])
   let expected_library_ids = $oidc.defaultLibraries | each { |name| $library_map | get $name } | sort
-  let expected_roles = $oidc.defaultRoles
+  let default_roles = $oidc.defaultRoles
   let expected_age = { ageRating: $oidc.defaultAgeRestriction, includeUnknowns: $oidc.defaultIncludeUnknowns }
 
   let users = get_users $headers
@@ -193,16 +194,19 @@ def reconcile_oidc_users [library_map: record, headers: record] {
   let oidc_users = $users | where identityProvider == 1
 
   for user in $oidc_users {
+    let expected_roles = if ($user.username in $admin_usernames) { ["Admin"] } else { $default_roles }
     let current_library_ids = $user.libraries | get id | sort
+    let current_roles = $user.roles | sort
     let current_age = $user.ageRestriction
     let libs_match = $current_library_ids == $expected_library_ids
+    let roles_match = $current_roles == ($expected_roles | sort)
     let age_match = ($current_age.ageRating == $expected_age.ageRating) and ($current_age.includeUnknowns == $expected_age.includeUnknowns)
 
-    if $libs_match and $age_match {
+    if $libs_match and $roles_match and $age_match {
       print $"  OIDC user '($user.username)' already up to date"
     } else {
-      update_user $user $user.roles $expected_library_ids $expected_age $headers
-      print $"  Updated OIDC user '($user.username)': libraries=($oidc.defaultLibraries), ageRestriction=($expected_age)"
+      update_user $user $expected_roles $expected_library_ids $expected_age $headers
+      print $"  Updated OIDC user '($user.username)': roles=($expected_roles), libraries=($oidc.defaultLibraries), ageRestriction=($expected_age)"
     }
   }
 }
