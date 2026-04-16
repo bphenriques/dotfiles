@@ -11,27 +11,19 @@ _: {
     ./backup.nix
   ];
 
-  # Recyclarr configuration using TRaSH Guide include templates
-  # See: https://recyclarr.dev/reference/configuration/include/
+  # Recyclarr v8 configuration using guide-backed quality profiles
+  # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
   # See: https://trash-guides.info/
   custom.homelab.media.radarr = {
-    qualityDefinitionTemplate = "radarr-quality-definition-movie";
+    qualityDefinitionType = "movie";
     profiles = {
       default = {
         name = "HD Bluray + WEB";
-        recyclarrTemplates = [
-          "radarr-quality-definition-movie"
-          "radarr-quality-profile-hd-bluray-web"
-          "radarr-custom-formats-hd-bluray-web"
-        ];
+        trashId = "d1d67249d3890e49bc12e275d989a7e9";
       };
       uhd = {
         name = "UHD Bluray + WEB";
-        recyclarrTemplates = [
-          "radarr-quality-definition-movie"
-          "radarr-quality-profile-uhd-bluray-web"
-          "radarr-custom-formats-uhd-bluray-web"
-        ];
+        trashId = "64fb5f9858489bdac2af690e27c8f42f";
       };
     };
   };

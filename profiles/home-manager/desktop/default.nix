@@ -21,6 +21,7 @@
     ./pegasus.nix         # Game launcher frontend
     ./ppsspp.nix          # PSP emulator
     ./pcsx2.nix           # PS2 emulator
+    ./flycast.nix         # Dreamcast emulator
     ./dolphin.nix         # Wii/GameCube emulator
     ./discord.nix         # Social
     ./rofi.nix            # Alternative customizable menu

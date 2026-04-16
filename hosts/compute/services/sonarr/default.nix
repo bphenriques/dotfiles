@@ -11,24 +11,18 @@ _: {
     ./backup.nix
   ];
 
+  # Recyclarr v8 configuration using guide-backed quality profiles
+  # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
   custom.homelab.media.sonarr = {
-    qualityDefinitionTemplate = "sonarr-quality-definition-series";
+    qualityDefinitionType = "series";
     profiles = {
       default = {
         name = "WEB-1080p";
-        recyclarrTemplates = [
-          "sonarr-quality-definition-series"
-          "sonarr-v4-quality-profile-web-1080p"
-          "sonarr-v4-custom-formats-web-1080p"
-        ];
+        trashId = "72dae194fc92bf828f32cde7744e51a1";
       };
       uhd = {
         name = "WEB-2160p";
-        recyclarrTemplates = [
-          "sonarr-quality-definition-series"
-          "sonarr-v4-quality-profile-web-2160p"
-          "sonarr-v4-custom-formats-web-2160p"
-        ];
+        trashId = "d1498e7d189fbe6c7110ceaabb7473e6";
       };
     };
   };

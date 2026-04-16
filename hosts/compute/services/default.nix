@@ -26,6 +26,7 @@ in
     ./tandoor-recipes
     ./filebrowser
     ./gitea
+    ./papra.nix
     ./bentopdf.nix
     ./larapaper.nix
     ./grist

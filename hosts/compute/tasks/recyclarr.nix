@@ -4,20 +4,23 @@ let
   radarrCfg = config.custom.homelab.services.radarr;
   sonarrCfg = config.custom.homelab.services.sonarr;
 
-  # Build recyclarr include templates from media settings
-  mkIncludeTemplates = serviceCfg:
-    [{ template = serviceCfg.qualityDefinitionTemplate; }]
-      ++ lib.concatMap (profile: map (t: { template = t; }) profile.recyclarrTemplates) (lib.attrValues serviceCfg.profiles);
+  # Build v8 guide-backed quality profiles from media settings
+  mkQualityProfiles = mediaCfg:
+    map (profile: {
+      trash_id = profile.trashId;
+      name = profile.name;
+      reset_unmatched_scores.enabled = true;
+    }) (lib.attrValues mediaCfg.profiles);
+
+  mkServiceConfig = mediaCfg: serviceCfg: {
+    base_url = serviceCfg.url;
+    quality_definition.type = mediaCfg.qualityDefinitionType;
+    quality_profiles = mkQualityProfiles mediaCfg;
+  };
 
   recyclarrConfig = {
-    radarr.movies = {
-      base_url = radarrCfg.url;
-      include = mkIncludeTemplates config.custom.homelab.media.radarr;
-    };
-    sonarr.tv = {
-      base_url = sonarrCfg.url;
-      include = mkIncludeTemplates config.custom.homelab.media.sonarr;
-    };
+    radarr.movies = mkServiceConfig config.custom.homelab.media.radarr radarrCfg;
+    sonarr.tv = mkServiceConfig config.custom.homelab.media.sonarr sonarrCfg;
   };
 
   yamlFormat = pkgs.formats.yaml { };
@@ -58,7 +61,7 @@ in
       RestrictSUIDSGID = true;
     };
     environment = {
-      RECYCLARR_APP_DATA = appDataDir;
+      RECYCLARR_CONFIG_DIR = appDataDir;
     };
   };
 

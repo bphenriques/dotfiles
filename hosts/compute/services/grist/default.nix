@@ -1,10 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   cfg = config.custom.homelab;
   serviceCfg = cfg.services.grist;
   tinyauthCfg = cfg.services.tinyauth;
-  adminUsers = lib.filterAttrs (_: u: u.isAdmin) cfg.users;
-  adminEmail = (lib.head (lib.attrValues adminUsers)).email;
+  adminEmail = cfg.adminUser.email;
   dataDir = "/var/lib/grist";
   img = pkgs.containerImages.grist;
 in

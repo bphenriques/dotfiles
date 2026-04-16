@@ -1,15 +1,15 @@
 { lib, ... }:
 let
-  # Quality profile definition
+  # Quality profile definition (v8: guide-backed via trash_id)
   qualityProfileOpt = lib.types.submodule {
     options = {
       name = lib.mkOption {
         type = lib.types.str;
-        description = "Name of the quality profile as created by recyclarr";
+        description = "Name of the quality profile (used for adoption and display)";
       };
-      recyclarrTemplates = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        description = "Recyclarr include templates for this profile";
+      trashId = lib.mkOption {
+        type = lib.types.str;
+        description = "TRaSH guide-backed quality profile trash_id";
       };
     };
   };
@@ -26,9 +26,9 @@ let
   # Service-specific settings (radarr, sonarr)
   mediaServiceOpt = lib.types.submodule {
     options = {
-      qualityDefinitionTemplate = lib.mkOption {
+      qualityDefinitionType = lib.mkOption {
         type = lib.types.str;
-        description = "Recyclarr quality definition template";
+        description = "Recyclarr quality_definition type (e.g., 'movie' or 'series')";
       };
       profiles = lib.mkOption {
         type = profilesOpt;

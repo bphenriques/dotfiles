@@ -20,6 +20,12 @@ _final: prev: let
       homepage = "https://github.com/Casvt/Kapowarr";
       updateInfo = { repo = "Casvt/Kapowarr"; stripPrefix = "V"; };
     };
+    papra = {
+      image = "ghcr.io/papra-hq/papra";
+      version = "26.4.0";
+      homepage = "https://github.com/papra-hq/papra";
+      updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
+    };
     romm = {
       image = "rommapp/romm";
       version = "4.8.1";

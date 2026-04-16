@@ -1,8 +1,7 @@
-{ config, lib, self, pkgs, ... }:
+{ config, self, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.grist;
-  adminUsers = lib.filterAttrs (_: u: u.isAdmin) config.custom.homelab.users;
-  adminEmail = (lib.head (lib.attrValues adminUsers)).email;
+  adminEmail = config.custom.homelab.adminUser.email;
 in
 {
   custom.homelab.services.grist.backup = {

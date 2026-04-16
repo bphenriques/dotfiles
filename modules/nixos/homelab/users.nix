@@ -2,6 +2,8 @@
 let
   cfg = config.custom.homelab;
 
+  adminUsers = lib.filterAttrs (_: u: u.isAdmin) cfg.users;
+
   baseUserModule = { name, config, ... }: {
     options = {
       username = lib.mkOption { type = lib.types.str; default = name; };
@@ -51,5 +53,20 @@ in
       });
       default = { };
     };
+
+    adminUser = lib.mkOption {
+      type = lib.types.unspecified;
+      readOnly = true;
+      description = "The single admin user (derived from users with the admin group).";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    assertions = [{
+      assertion = lib.length (lib.attrNames adminUsers) == 1;
+      message = "Exactly one admin user must exist, but found ${toString (lib.length (lib.attrNames adminUsers))}: ${toString (lib.attrNames adminUsers)}";
+    }];
+
+    custom.homelab.adminUser = lib.head (lib.attrValues adminUsers);
   };
 }
