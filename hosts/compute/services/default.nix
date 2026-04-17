@@ -28,7 +28,6 @@ in
     ./gitea
     ./papra.nix
     ./bentopdf.nix
-    ./larapaper.nix
     ./grist
     ./mympd.nix
   ];
