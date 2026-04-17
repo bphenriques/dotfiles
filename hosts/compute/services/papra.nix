@@ -125,6 +125,7 @@ in
     extraOptions = [
       "--memory=1g"
       "--pids-limit=128"
+      "--group-add=${toString homelabMounts.bphenriques.gid}"
       "--add-host=${cfg.services.pocket-id.publicHost}:${self.shared.networks.main.hosts.compute}"
       "--add-host=${serviceCfg.publicHost}:${self.shared.networks.main.hosts.compute}"
     ];

@@ -57,7 +57,7 @@ in
   systemd.services.seerr-configure = {
     description = "Seerr setup";
     wantedBy = [ "seerr.service" ];
-    after = [ "seerr.service" "jellyfin.service" "radarr.service" "sonarr.service" ];
+    after = [ "seerr.service" "jellyfin-configure.service" "radarr.service" "sonarr.service" ];
     requires = [ "seerr.service" ];
     wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
     partOf = [ "seerr.service" "jellyfin-configure.service" ];
