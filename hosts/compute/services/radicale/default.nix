@@ -47,11 +47,18 @@ in
   };
 
   # CalDAV/CardDAV endpoint without forwardAuth for regular sync. Uses Radicale's own htpasswd auth instead.
+  # Includes .well-known redirects (RFC 6764) so DAVx5 and other clients can auto-discover the server.
   services.traefik.dynamicConfigOptions.http = {
     routers.radicale-dav = {
       rule = "Host(`dav.${config.custom.homelab.domain}`)";
       entryPoints = [ "websecure" ];
       service = "radicale-svc";
+      middlewares = [ "radicale-wellknown" ];
+    };
+    middlewares.radicale-wellknown.redirectRegex = {
+      regex = "^(https?://[^/]+)/\\.well-known/(caldav|carddav)/?$"; # Traefik matches full URL, not path
+      replacement = "\${1}/";
+      permanent = false;
     };
   };
 
