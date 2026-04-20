@@ -1,11 +1,16 @@
 { pkgs, config, self, ... }:
 {
   imports = [
-    ../common.nix
+    ../settings.nix
     ./brew.nix
     ./hardware.nix
     ./preferences.nix
   ];
+
+  nix.gc = {
+    automatic = true;
+    options = "--delete-older-than 7d";
+  };
 
   programs.fish.enable = true;
   environment.shells = [ config.programs.fish.package ];  # Register the shell

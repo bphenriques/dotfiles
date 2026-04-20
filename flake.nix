@@ -77,6 +77,5 @@
         extraOverlays = [ inputs.nur.overlays.default ];
         extraHmModules = [ inputs.stylix.homeModules.stylix ];
       };
-      darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }

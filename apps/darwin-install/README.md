@@ -13,7 +13,7 @@
 
 3. Run the desktop post-install:
    ```shell
-   HOST=work-macos
+   HOST=my-darwin-host
    BITWARDEN_EMAIL=me@me.com
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#desktop-post-install -- $HOST $BITWARDEN_EMAIL
    ```

@@ -25,7 +25,6 @@ works _for me_. I hope this helps you!
 | [compute](./hosts/compute)       | NixOS               | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
 | [laptop](./hosts/laptop)         | NixOS               | Personal workstation                                                                                   |
 | [inky](./hosts/inky)             | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
-| [work-macos](./hosts/work-macos) | MacOS               | Work MacBook                                                                                           |
 
 The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single
 registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:

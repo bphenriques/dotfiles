@@ -1,6 +1,6 @@
 { pkgs, lib, self, ... }:
 {
-  imports = [ ../common.nix ];
+  imports = [ ../settings.nix ];
 
   # Label visible in the boot menu. Format: YYMMdd-HHmmss (e.g. 250415-194532)
   system.nixos.label = let
@@ -10,6 +10,15 @@
   # Pin nixpkgs registry to flake input (replaces nix-channel for flake workflows)
   # Allows: nix shell nixpkgs#hello, nix run nixpkgs#cowsay, etc.
   nix.registry.nixpkgs.flake = self.inputs.nixpkgs;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+
+  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
+  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} self.shared.networks.main.hosts;
 
   boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
 

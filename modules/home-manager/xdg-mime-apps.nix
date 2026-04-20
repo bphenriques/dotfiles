@@ -14,7 +14,7 @@ let
   mkMimeOption = description: default: lib.mkOption {
     type = lib.types.listOf lib.types.str;
     description = lib.mdDoc ''List of mimes describing ${description} files'';
-    default = [];
+    inherit default;
   };
 in
 {

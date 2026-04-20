@@ -37,7 +37,6 @@
   };
 
   # Homelab integration
-  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} self.shared.networks.main.hosts;
   custom.homelab.paths = {
     media.root = config.custom.homelab.smb.mounts.media.localMount;
     users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
