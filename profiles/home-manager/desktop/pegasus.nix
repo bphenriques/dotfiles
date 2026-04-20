@@ -27,11 +27,21 @@ let
     { dir = "wii";       name = "Wii";              launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\"";                      extensions = [ "iso" "wbfs" "rvz" ]; }
   ];
 
-  retroarchPackage = config.programs.retroarch.finalPackage;
-  coresDir = "${retroarchPackage}/lib/retroarch/cores";
+  # Resolve cores dir from retroarch on PATH so metadata doesn't go stale when the package changes.
+  # Assumes bin/retroarch and lib/retroarch/cores live under the same package root.
+  retroarchWithCore = pkgs.writeShellApplication {
+    name = "retroarch-with-core";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      retroarch_bin="$(readlink -f "$(command -v retroarch)")"
+      core_path="''${retroarch_bin%/bin/retroarch}/lib/retroarch/cores/''${1}_libretro.so"
+      shift
+      exec "$retroarch_bin" -L "$core_path" "$@"
+    '';
+  };
   mkLaunchCmd = sys:
     if sys ? core
-    then "${lib.getExe' retroarchPackage "retroarch"} -L ${coresDir}/${sys.core}_libretro.so \"{file.path}\""
+    then "${lib.getExe retroarchWithCore} ${sys.core} \"{file.path}\""
     else sys.launch;
   configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
     romsDir = osConfig.custom.homelab.paths.media.gaming.emulation.roms;
@@ -57,6 +67,7 @@ lib.mkIf pkgs.stdenv.isLinux {
   home.packages = [ pkgs.pegasus-frontend ];
 
   systemd.user = {
+    # Re-run after RetroArch changes: systemctl --user start generate-pegasus-metadata.service
     services.generate-pegasus-metadata = {
       Unit.Description = "Generate Pegasus frontend metadata files";
       Service = {

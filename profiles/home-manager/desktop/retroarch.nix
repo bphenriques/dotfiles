@@ -84,7 +84,8 @@ let
         flycast_anistropic_filtering = "2";
         flycast_enable_rtt = "On";
       };
-      overrides = nonIntegerScaleOverrides;
+      overrides = nonIntegerScaleOverrides; # Do NOT enable rewind — causes corruption (https://github.com/flyinghead/flycast/issues/471)
+      shader = crt3dShader;
     };
     desmume = {
       displayName = "DeSmuME";
@@ -173,6 +174,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Video
       video_driver = "vulkan";
+      vulkan_gpu_index = "1";  # Force NVIDIA dGPU (GPU0=AMD iGPU, GPU1=NVIDIA RTX 4060)
       video_shader_enable = "true";
       video_scale_integer = "true";  # Automatic integer scale
       aspect_ratio_index = "22";     # "Core Provided": let each core report its native ratio
