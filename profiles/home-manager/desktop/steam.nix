@@ -9,6 +9,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       ''
         window-rule {
           match app-id=r#"^steam_app"#
+          open-on-workspace "3"
           open-fullscreen true
           open-focused true
         }
@@ -16,6 +17,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       ''
         window-rule {
           match app-id="Steam"
+          open-on-workspace "3"
           open-maximized true
           scroll-factor 0.5
         }

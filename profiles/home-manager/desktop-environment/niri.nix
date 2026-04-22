@@ -229,6 +229,7 @@ in
    extraConfig = ''
       workspace "1" {}
       workspace "2" {}
+      workspace "3" {}
 
       cursor {
         xcursor-theme "${config.stylix.cursor.name}"

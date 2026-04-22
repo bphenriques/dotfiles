@@ -210,6 +210,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       ''
         window-rule {
           match app-id="com.libretro.RetroArch"
+          open-on-workspace "3"
           open-fullscreen true
           open-focused true
         }
