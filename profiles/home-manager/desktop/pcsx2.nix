@@ -6,4 +6,24 @@
 # Manual setup (one-time): Settings → Controllers → configure gamepad for Port 1.
 lib.mkIf pkgs.stdenv.isLinux {
   home.packages = [ pkgs.pcsx2 ];
+
+  custom.programs.niri.windowRules = {
+    byApp = [
+      ''
+        window-rule {
+          match app-id="PCSX2"
+          open-fullscreen true
+          open-focused true
+        }
+      ''
+    ];
+    overrides = [
+      ''
+        window-rule {
+          match app-id="PCSX2"
+          opacity 1.0
+        }
+      ''
+    ];
+  };
 }

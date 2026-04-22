@@ -4,7 +4,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     config = {
       # UI
-      fullscreen = true;
       keep-open = "always";           # Prevents auto-close upon playback complete.
       osd-duration = 500;             # Hide On-Screen-Display quickly.
       save-position-on-quit = "yes";  # Remember where I left.
@@ -93,4 +92,16 @@ lib.mkIf pkgs.stdenv.isLinux {
     video = lib.mkBefore [ "mpv.desktop" ];
     audio = lib.mkBefore [ "mpv.desktop" ];
   };
+
+  custom.programs.niri.windowRules.byApp = [
+    ''
+      window-rule {
+        match app-id="mpv"
+        open-floating true
+        open-focused true
+        default-column-width { fixed 960; }
+        default-window-height { fixed 540; }
+      }
+    ''
+  ];
 }

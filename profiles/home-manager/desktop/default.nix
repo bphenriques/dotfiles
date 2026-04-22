@@ -19,6 +19,7 @@
     ./mangohud.nix        # Game HUD
     ./retroarch.nix       # Emulation
     ./pegasus.nix         # Game launcher frontend
+    ./steam-rom-manager.nix # Steam ROM shortcuts
     ./ppsspp.nix          # PSP emulator
     ./pcsx2.nix           # PS2 emulator
     ./flycast.nix         # Dreamcast emulator
@@ -27,9 +28,13 @@
     ./rofi.nix            # Alternative customizable menu
     ./lang-scala.nix      # Programming language
     ./heroic.nix          # Unified game client
+    ./steam.nix           # Steam client + Proton games
+    ./jetbrains.nix       # IDE
+    ./kdenlive.nix        # Video editor
+    ./qbittorrent.nix     # Torrent client
     ./umu-launcher.nix    # Ad-hoc game launcher
     ./mpd.nix             # Music player
-    ./wallpaper.nix       # Set wallpaper
+    ./awww.nix            # Wallpaper daemon
     ./obsidian.nix        # note taking
     ./yazi.nix            # File browser
     ./helix.nix           # Editor
@@ -54,6 +59,7 @@
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     includes = [ "$HOME/.ssh/config.local" ];
     matchBlocks = {
       "*" = {
@@ -113,11 +119,8 @@
 
     # GUI centric
     pkgs.xwayland-satellite
-    pkgs.qbittorrent              # Torrent client. FIXME: alternative TUI?
-    pkgs.gparted                  # TODO: I partially know how to do in the terminal... but... this is easier.
-    pkgs.jetbrains.idea-oss
+    pkgs.gparted
     pkgs.amp-cli                  # AI Assistant.
-    pkgs.kdePackages.kdenlive     # Video editor
   ];
 
   home = {

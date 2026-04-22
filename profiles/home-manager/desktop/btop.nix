@@ -1,4 +1,7 @@
 { pkgs, lib, config, self, ... }:
+let
+  system-monitor = "${lib.getExe pkgs.ghostty} +new-window --title=btop-tui -e ${lib.getExe config.programs.btop.package}";
+in
 {
   programs.btop = {
     enable = true;
@@ -19,4 +22,8 @@
       exec = ''${lib.getExe' pkgs.foot "footclient"} --title=btop-tui ${lib.getExe config.programs.btop.package}'';
     })
   ];
+
+  custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.isLinux {
+    "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
+  };
 }

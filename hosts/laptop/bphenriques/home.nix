@@ -74,5 +74,10 @@ in
     ];
   };
 
+  custom.programs.niri.input = {
+    touchpad = [ "tap" "natural-scroll" "drag false" ];
+    mouse = [ ''accel-profile "flat"'' ];
+  };
+
   home.stateVersion = "24.05";
 }

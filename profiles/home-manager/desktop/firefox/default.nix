@@ -90,4 +90,25 @@ lib.mkIf pkgs.stdenv.isLinux {
 
   custom.xdgDefaultApps.internetBrowser = lib.mkBefore [ "firefox.desktop" ];
   home.sessionVariables.BROWSER = "firefox";
+
+  custom.programs.niri = {
+    spawnAtStartup = [ "${lib.getExe pkgs.firefox}" ];
+    windowRules = {
+      byApp = [
+        ''
+          window-rule {
+            match app-id="firefox" at-startup=true  // Placement only on login
+            open-on-workspace "1"
+            open-focused true
+          }
+        ''
+        ''
+          window-rule {
+            match app-id="firefox"
+            open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
+          }
+        ''
+      ];
+    };
+  };
 }

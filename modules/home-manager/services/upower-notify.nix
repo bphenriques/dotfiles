@@ -53,7 +53,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [ (lib.hm.assertions.assertPlatform "custom.services.upower-notify" pkgs lib.platforms.linux) ];
+    assertions = [
+      (lib.hm.assertions.assertPlatform "custom.services.upower-notify" pkgs lib.platforms.linux)
+      {
+        assertion = cfg.percentageCritical < cfg.percentageLow;
+        message = "custom.services.upower-notify: percentageCritical (${toString cfg.percentageCritical}) must be less than percentageLow (${toString cfg.percentageLow})";
+      }
+    ];
     systemd.user.services.upower-notify = {
       Unit = {
         Description = "upower battery monitor";

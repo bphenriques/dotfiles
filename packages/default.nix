@@ -27,7 +27,6 @@ let
       volume-osd = pkgs.callPackage ./desktop/volume-osd { };
       brightness-osd = pkgs.callPackage ./desktop/brightness-osd { };
       upower-notify = pkgs.callPackage ./desktop/upower-notify { };
-      niri-window-dmenu = pkgs.callPackage ./desktop/niri-window-dmenu { };
       niri-keyboard-layout = pkgs.callPackage ./desktop/niri-keyboard-layout { };
       awww-util = pkgs.callPackage ./desktop/awww-util { };
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };

@@ -76,6 +76,26 @@ in
     };
   };
 
-  custom.programs.niri.layerRules.screencasting.block = [ ''namespace="^notifications$"'' ];
+  custom.programs.niri = {
+    bindings = let dunstctl = lib.getExe' pkgs.dunst "dunstctl"; in {
+      "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
+      "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
+      "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
+    };
+    layerRules = {
+      screencasting.block = [ ''namespace="^notifications$"'' ];
+      extra = [
+        ''
+          layer-rule {
+            match namespace="notifications"
+            shadow {
+              on
+            }
+            geometry-corner-radius 6
+          }
+        ''
+      ];
+    };
+  };
 }
 

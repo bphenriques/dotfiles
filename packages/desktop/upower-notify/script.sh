@@ -13,7 +13,7 @@ if ! upower -i "$UPOWER_DEVICE_PATH" &>/dev/null; then
   exit 1
 fi
 
-is_plugged() { acpi -a | grep -q "on-line"; }
+is_plugged() { ! upower -i "$UPOWER_DEVICE_PATH" | grep -q "state:.*discharging"; }
 get_battery_percentage() { upower -i "$UPOWER_DEVICE_PATH" | grep percentage | awk '{ print $2; }' | tr -d '%'; }
 
 get_icon() {
@@ -120,7 +120,7 @@ upower_monitor() {
   while true; do
     if read -t "$POLL_TIMEOUT" -r line; then
       case "$line" in
-        *"$UPOWER_DEVICE"*) ;;
+        *"$UPOWER_DEVICE_PATH"*) ;;
         *) continue ;;
       esac
     else

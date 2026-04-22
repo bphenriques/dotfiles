@@ -51,8 +51,8 @@ stop() {
 case "${1:-}" in
   screen-audio)     shift 1 && record "$1" --audio                              ;;
   screen-no-audio)  shift 1 && record "$1"                                      ;;
-  region-audio)     shift 1 && record "$1" --geometry "$(slurp -d)" --audio     ;;
-  region-no-audio)  shift 1 && record "$1" --geometry "$(slurp -d)"             ;;
+  region-audio)     shift 1 && geometry="$(slurp -d)" || exit 0; record "$1" --geometry "$geometry" --audio     ;;
+  region-no-audio)  shift 1 && geometry="$(slurp -d)" || exit 0; record "$1" --geometry "$geometry"             ;;
   stop)             shift 1 && stop                                             ;;
   *)                echo "Unknown command" && exit 1                            ;;
 esac

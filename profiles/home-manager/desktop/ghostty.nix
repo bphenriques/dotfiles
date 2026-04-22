@@ -31,6 +31,24 @@
     "x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
     "x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
   };
+
+  custom.programs.niri = lib.mkIf pkgs.stdenv.isLinux {
+    spawnShAtStartup = [ "${lib.getExe pkgs.ghostty} +new-window" ];
+    windowRules = {
+      byApp = [
+        ''
+          window-rule {
+            match app-id="com.mitchellh.ghostty"
+            default-column-width { proportion 0.5; }
+          }
+        ''
+      ];
+      byType.tui = lib.map (title: ''title="${title}"'') [
+        "btop-tui"
+        "yazi-tui"
+      ];
+    };
+  };
 }
 
 

@@ -3,7 +3,9 @@ let
   wallpapers = "${self.packages.wallpapers}/share/wallpapers";
 in
 {
+  services.awww.enable = true;
   home.packages = [ self.packages.awww-util ];
+
   systemd.user.services.set-wallpaper = {
     Unit = {
       Description = "Sets the wallpaper";
@@ -16,4 +18,13 @@ in
       ExecStart = lib.escapeShellArgs [ "${lib.getExe self.packages.awww-util}" "random" wallpapers ];
     };
   };
+
+  custom.programs.niri.layerRules.extra = [
+    ''
+      layer-rule {
+        match namespace="awww-daemon"
+        place-within-backdrop true
+      }
+    ''
+  ];
 }

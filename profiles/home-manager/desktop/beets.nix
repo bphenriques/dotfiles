@@ -2,7 +2,6 @@
 let
   inherit (lib) foldl';
 
-  # FIXME: Make this a more configurable setting.
   musicDir = osConfig.custom.homelab.paths.media.music.root;
   musicLibrary = osConfig.custom.homelab.paths.media.music.library;
 

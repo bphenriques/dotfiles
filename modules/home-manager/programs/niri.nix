@@ -3,11 +3,19 @@
 let
   cfg = config.custom.programs.niri;
 
+  niriValidatedConfig = configText: pkgs.runCommandLocal "niri-config-validated" {
+    nativeBuildInputs = [ pkgs.niri ];
+    text = configText;
+    passAsFile = [ "text" ];
+  } ''
+    niri validate -c "$textPath"
+    cp "$textPath" $out
+  '';
+
   displayOutputOpt = lib.types.submodule {
     options = {
       identifier  = lib.mkOption { type = lib.types.str; };
       resolution  = lib.mkOption { type = lib.types.str; };
-      position    = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
       refreshRate = lib.mkOption { type = lib.types.str; };
       scale       = lib.mkOption { type = lib.types.str; };
     };
@@ -72,31 +80,61 @@ in
       };
     };
 
+    spawnAtStartup = lib.mkOption {
+      description = "Programs to spawn at startup (path to binary, no arguments)";
+      type = lib.types.listOf lib.types.str;
+      default = [];
+    };
+
+    spawnShAtStartup = lib.mkOption {
+      description = "Shell commands to run at startup (supports arguments, pipes, etc.)";
+      type = lib.types.listOf lib.types.str;
+      default = [];
+    };
+
     windowRules = {
-      popups = lib.mkOption {
-        description = "List of matching rules for popups windows";
+      base = lib.mkOption {
+        description = "Rendered 1st. Generic defaults (corner-radius, opacity, floating shadow)";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
 
-      pip = lib.mkOption {
-        description = "List of matching rules for picture-in-picture windows";
+      byApp = lib.mkOption {
+        description = "Rendered 2nd. App-specific rules contributed by individual app profiles";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
 
-      tui = lib.mkOption {
-        description = "List of matching rules for terminal user interface applications";
-        type = lib.types.listOf lib.types.str;
-        default = [];
-      };
-
-      screencasting = {
-        block = lib.mkOption {
-          description = "List of matching window rules to block from screencasting";
+      byType = {
+        popups = lib.mkOption {
+          description = "Rendered 3rd. Matching rules for popup windows (overrides app defaults)";
           type = lib.types.listOf lib.types.str;
           default = [];
         };
+
+        pip = lib.mkOption {
+          description = "Rendered 3rd. Matching rules for picture-in-picture windows (overrides app defaults)";
+          type = lib.types.listOf lib.types.str;
+          default = [];
+        };
+
+        tui = lib.mkOption {
+          description = "Rendered 3rd. Matching rules for terminal user interface applications (overrides app defaults)";
+          type = lib.types.listOf lib.types.str;
+          default = [];
+        };
+      };
+
+      overrides = lib.mkOption {
+        description = "Rendered 4th. Must-win rules (e.g., gaming opacity, urgent borders)";
+        type = lib.types.listOf lib.types.str;
+        default = [];
+      };
+
+      privacy = lib.mkOption {
+        description = "Rendered 5th. Privacy rules (e.g., block-out-from screen-capture)";
+        type = lib.types.listOf lib.types.str;
+        default = [];
       };
     };
 
@@ -104,6 +142,7 @@ in
       launchers = lib.mkOption {
         description = "List of matching rules for launcher layers";
         type = lib.types.listOf lib.types.str;
+        default = [];
       };
 
       screencasting = {
@@ -112,6 +151,12 @@ in
           type = lib.types.listOf lib.types.str;
           default = [];
         };
+      };
+
+      extra = lib.mkOption {
+        description = "Additional layer rules contributed by app profiles or global config";
+        type = lib.types.listOf lib.types.str;
+        default = [];
       };
     };
 
@@ -143,7 +188,7 @@ in
     assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.niri" pkgs lib.platforms.linux) ];
 
     wayland.systemd.target = "niri.service";
-    xdg.configFile."niri/config.kdl".text = ''
+    xdg.configFile."niri/config.kdl".source = niriValidatedConfig ''
       prefer-no-csd
       screenshot-path "${cfg.screenshotPath}"
       hotkey-overlay {
@@ -184,36 +229,62 @@ in
         ${cfg.layout}
       }
 
+      ${lib.concatMapStringsSep "\n" (entry: ''spawn-at-startup "${entry}"'') cfg.spawnAtStartup}
+      ${lib.concatMapStringsSep "\n" (cmd: ''spawn-sh-at-startup "${cmd}"'') cfg.spawnShAtStartup}
+
+      // 1. Base defaults
+      ${lib.concatStringsSep "\n\n" cfg.windowRules.base}
+
+      // 2. App-specific rules
+      ${lib.concatStringsSep "\n\n" cfg.windowRules.byApp}
+
+      // 3. Window-kind overrides (byType) — override app defaults
+      ${lib.optionalString (cfg.windowRules.byType.popups != []) ''
       window-rule {
-        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.popups}
+        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.byType.popups}
 
         open-floating true
+        open-maximized false
+        open-maximized-to-edges false
+        open-fullscreen false
       }
+      ''}
 
+      ${lib.optionalString (cfg.windowRules.byType.pip != []) ''
       window-rule {
-        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.pip}
+        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.byType.pip}
 
         open-floating true
         open-focused false
+        open-maximized false
+        open-maximized-to-edges false
+        open-fullscreen false
         default-column-width { fixed 480; }
         default-window-height { fixed 270; }
         default-floating-position x=32 y=32 relative-to="bottom-right"
       }
+      ''}
 
+      ${lib.optionalString (cfg.windowRules.byType.tui != []) ''
       window-rule {
-        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.tui}
-
-        default-column-width { fixed 1280; }
-        default-window-height { fixed 720; }
+        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.byType.tui}
 
         open-floating true
+        open-maximized false
+        open-maximized-to-edges false
+        open-fullscreen false
+        default-column-width { fixed 1280; }
+        default-window-height { fixed 720; }
       }
+      ''}
 
-      window-rule {
-        ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.screencasting.block}
-        block-out-from "screencast"
-      }
+      // 4. Must-win overrides
+      ${lib.concatStringsSep "\n\n" cfg.windowRules.overrides}
 
+      // 5. Privacy rules
+      ${lib.concatStringsSep "\n\n" cfg.windowRules.privacy}
+
+      ${lib.optionalString (cfg.layerRules.launchers != []) ''
       layer-rule {
         ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.layerRules.launchers}
         shadow {
@@ -222,36 +293,65 @@ in
 
         geometry-corner-radius 10
       }
+      ''}
 
+      ${lib.concatStringsSep "\n\n" cfg.layerRules.extra}
+
+      ${lib.optionalString (cfg.layerRules.screencasting.block != []) ''
       layer-rule {
         ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.layerRules.screencasting.block}
         block-out-from "screencast"
       }
+      ''}
 
-      // Indicate screencasted windows with red colors.
+      // Indicate screencasted windows with the urgent/red color.
       window-rule {
         match is-window-cast-target=true
 
         focus-ring {
-          active-color "#f38ba8"
-          inactive-color "#7d0d2d"
+          active-color "${config.lib.stylix.colors.withHashtag.base08}"
+          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
         }
 
         border {
-          inactive-color "#7d0d2d"
+          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
         }
 
         shadow {
-          color "#7d0d2d70"
+          color "${config.lib.stylix.colors.withHashtag.base08}70"
         }
 
         tab-indicator {
-          active-color "#f38ba8"
-          inactive-color "#7d0d2d"
+          active-color "${config.lib.stylix.colors.withHashtag.base08}"
+          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
         }
       }
 
+      // Keyboard-triggered actions use short fixed durations (easing).
+      // Gesture-sensitive actions (touchpad swipes) use springs to respond to finger velocity.
+      // Springs: higher stiffness = snappier. damping-ratio=1.0 = no oscillation (critically damped).
       animations {
+        window-open {
+          duration-ms 150
+        }
+        window-close {
+          duration-ms 150
+        }
+        window-resize {
+          duration-ms 150
+        }
+        window-movement {
+          duration-ms 150
+        }
+        workspace-switch {
+          spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001
+        }
+        horizontal-view-movement {
+          spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+        }
+        overview-open-close {
+          spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+        }
       }
 
       binds {

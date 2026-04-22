@@ -11,19 +11,13 @@ case "${1:-}" in
     ;;
   region)
     shift 1
+    geometry="$(slurp)" || exit 0
     destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').png"
-    grim -g "$(slurp)" "$destination"
+    grim -g "$geometry" "$destination"
     notify "$destination"
     ;;
-  screen-copy)  grim - | wl-copy                     ;;
-  screen-edit)  grim - | swappy -f -                 ;;
-  region-copy)  grim -g "$(slurp)" - | wl-copy       ;;
-  region-edit)  grim -g "$(slurp)" - | swappy -f -   ;;
+  screen-copy)  grim - | wl-copy                                              ;;
+  screen-edit)  grim - | swappy -f -                                          ;;
+  region-copy)  geometry="$(slurp)" || exit 0; grim -g "$geometry" - | wl-copy      ;;
+  region-edit)  geometry="$(slurp)" || exit 0; grim -g "$geometry" - | swappy -f -  ;;
 esac
-
-# TODO: idea from showcase
-# #!/bin/bash
-# screenshot_dir=~/Pictures/Screenshots
-# niri msg action screenshot &&
-#   inotifywait -e close $screenshot_dir &&
-#  swappy start --file "$(ls -d -t $screenshot_dir/* | head -n 1)"```

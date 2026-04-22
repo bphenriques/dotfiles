@@ -1,5 +1,4 @@
 _:
-# FIXME: https://mynixos.com/home-manager/options/programs.claude-code
 {
   programs.claude-code = {
     enable = true;

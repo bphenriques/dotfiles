@@ -19,7 +19,6 @@ pkgs.writeShellApplication {
   name = "upower-notify";
   runtimeInputs = [
     pkgs.upower
-    pkgs.acpi
     pkgs.libnotify
   ];
   text = ''

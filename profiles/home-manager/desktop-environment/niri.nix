@@ -4,13 +4,9 @@ let
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
-  terminal        = "${lib.getExe pkgs.ghostty} +new-window";
-
+  terminal        = lib.getExe pkgs.ghostty;
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
-  files-browser   = "${terminal} --title=yazi-tui --command ${lib.getExe config.programs.yazi.package}";
-  system-monitor  = "${terminal} --title=btop-tui --command ${lib.getExe config.programs.btop.package}";
-  dunstctl        = lib.getExe' pkgs.dunst "dunstctl";
 
   emoji = pkgs.writeShellApplication {
     name = "emoji-picker";
@@ -30,12 +26,15 @@ in
     };
 
     input = {
-      keyboard.xkb = {
-        layout = "us,pt";
-        variant = "euro,";
-        options = "caps:ctrl_modifier";
+      keyboard = {
+        xkb = {
+          layout = "us,pt";
+          variant = "euro,";
+          options = "caps:ctrl_modifier";
+        };
+        extraOptions = [ ''track-layout "global"'' ]; # Keep layout consistent across all windows
       };
-      touchpad = [ "tap" "natural-scroll" "drag false" ];
+
       extraOptions = [
         ''focus-follows-mouse max-scroll-amount="10%"''
       ];
@@ -64,7 +63,7 @@ in
 
       focus-ring {
         width 2
-        active-color "${config.lib.stylix.colors.withHashtag.base0D}"
+        active-gradient from="${config.lib.stylix.colors.withHashtag.base0D}" to="${config.lib.stylix.colors.withHashtag.base0E}" angle=45
         inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
         urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
       }
@@ -87,30 +86,65 @@ in
     '';
 
     windowRules = {
-      popups = lib.map (title: ''title="${title}"'') [
-        "^(pwvucontrol)"
-        "^(Volume Control)"
-        "^(dialog)"
-        "^(file_progress)"
-        "^(confirm)"
-        "^(download)"
-        "^(error)"
-        "^(notification)"
-        "^(Extension)"
-      ] ++ [
-        ''app-id="Steam" title=r#"^Steam .+"#''
+      byType = {
+        popups = lib.map (title: ''title="${title}"'') [
+          "^(pwvucontrol)"
+          "^(Volume Control)"
+          "^(dialog)"
+          "^(file_progress)"
+          "^(confirm)"
+          "^(download)"
+          "^(error)"
+          "^(notification)"
+          "^(Extension)"
+        ];
+
+        pip = lib.map (title: ''title="${title}"'') [
+          "^Picture in picture$"
+          "^Discord Popout$"
+        ];
+
+        tui = lib.map (title: ''title="${title}"'') [
+          "nmtui-tui"
+        ];
+      };
+
+      base = [
+        ''
+          window-rule {
+            match is-floating=true
+            shadow {
+              softness 30
+              spread 5
+            }
+          }
+        ''
+        ''
+          window-rule {
+            geometry-corner-radius 6
+            clip-to-geometry true
+          }
+        ''
+        ''
+          window-rule {
+            match is-active=false
+            opacity 0.90
+          }
+        ''
       ];
 
-      pip = lib.map (title: ''title="${title}"'') [
-        "^Picture in picture$"
-        "^Discord Popout$"
-      ];
-
-      tui = lib.map (title: ''title="${title}"'') [
-        "Volume Control"
-        "nmtui-tui"
-        "btop-tui"
-        "yazi-tui"
+      # Generic overrides — cross-cutting rules not tied to any app profile
+      overrides = [
+        ''
+          window-rule {
+            match is-urgent=true
+            border {
+              on
+              active-color "${config.lib.stylix.colors.withHashtag.base08}"
+              inactive-color "${config.lib.stylix.colors.withHashtag.base08}"
+            }
+          }
+        ''
       ];
     };
 
@@ -139,7 +173,6 @@ in
       "Mod+A"       = "toggle-window-rule-opacity";
       "Mod+Comma"        = "consume-window-into-column";
       "Mod+Shift+Comma"  = "expel-window-from-column";
-      "Mod+O repeat=false" = "toggle-overview";
       "Mod+Escape"  = "toggle-keyboard-shortcuts-inhibit";
 
        # Screenshots
@@ -148,24 +181,18 @@ in
       "Mod+Print"   = ''spawn-sh "${config.custom.programs.screenshot.dmenu}"'';
       "Mod+Shift+S" = ''spawn-sh "${lib.getExe config.custom.programs.screenshot.package} region-edit"'';
 
-      # Notifications
-      "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
-      "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
-      "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
-
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
       "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn-sh "${lib.getExe config.custom.programs.wlr-which-key.package} global"'';
-      "Mod+Return"        = ''spawn-sh "${terminal}"'';
+      "Mod+Return"        = ''spawn-sh "${terminal} +new-window"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
-      "Mod+E"             = ''spawn-sh "${files-browser}"'';
+      "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
       "Mod+K"             = ''spawn-sh "${lib.getExe self.packages.niri-keyboard-layout} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
-      "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
       "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
 
       # Focus management
-      "Mod+Tab"         = ''spawn "${lib.getExe self.packages.niri-window-dmenu}"'';
+      "Mod+Tab repeat=false" = "toggle-overview";
       "Mod+Grave"       = "focus-workspace-previous";
       "Mod+End"         = "focus-column-last";
       "Mod+Left"        = "focus-column-left";
@@ -199,68 +226,10 @@ in
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightness} decrease"'';
     };
 
-    # TODO: Explore tiled state window rule (not yet available in 25.11)
    extraConfig = ''
       workspace "1" {}
       workspace "2" {}
 
-      window-rule {
-        match app-id=r#"firefox$"#
-        open-on-workspace "1"
-      }
-
-      window-rule {
-        match app-id="jetbrains-idea"
-        open-on-workspace "2"
-      }
-
-      window-rule {
-        match app-id="retroarch"
-        match app-id="PCSX2"
-        match app-id="dolphin-emu"
-        match app-id=r#"^steam_app"#
-        open-fullscreen true
-      }
-
-      window-rule {
-        geometry-corner-radius 6
-        clip-to-geometry true
-      }
-
-      window-rule {
-        match app-id=r#"firefox$"#
-        match app-id=r#"zen$"#
-        match app-id="Steam"
-        match app-id=r#"^discord$"#
-        match app-id="jetbrains-idea"
-
-        open-maximized true
-      }
-
-      window-rule {
-        match is-active=false
-        opacity 0.90
-      }
-
-      window-rule {
-        match is-urgent=true
-        border {
-          on
-          active-color "${config.lib.stylix.colors.withHashtag.base08}"
-          inactive-color "${config.lib.stylix.colors.withHashtag.base08}"
-        }
-      }
-
-      window-rule {
-        match app-id=r#"^Bitwarden$"#
-        block-out-from "screen-capture"
-      }
-
-      layer-rule {
-        match namespace="awww-daemon"
-        place-within-backdrop true
-      }
-      
       cursor {
         xcursor-theme "${config.stylix.cursor.name}"
         xcursor-size ${toString config.stylix.cursor.size}

@@ -204,4 +204,24 @@ lib.mkIf pkgs.stdenv.isLinux {
     pkgs.mame-tools  # Convert to CHD: parallel chdman createcd -i {} -o {.}.chd ::: *.iso
     pkgs.maxcso      # To convert to CSO
   ];
+
+  custom.programs.niri.windowRules = {
+    byApp = [
+      ''
+        window-rule {
+          match app-id="com.libretro.RetroArch"
+          open-fullscreen true
+          open-focused true
+        }
+      ''
+    ];
+    overrides = [
+      ''
+        window-rule {
+          match app-id="com.libretro.RetroArch"
+          opacity 1.0
+        }
+      ''
+    ];
+  };
 }
