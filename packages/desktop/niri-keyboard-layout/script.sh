@@ -1,17 +1,15 @@
 #shellcheck shell=bash
 
 notify_current() {
-  case "$(niri msg --json keyboard-layouts | jq -r '.names[.current_idx]')" in
-    "English"*)     text=US ;;
-    "Portuguese"*)  text=PT ;;
-  esac
+  local layout
+  layout="$(niri msg --json keyboard-layouts | jq -r '.names[.current_idx]')"
 
   notify-send \
     --icon "$KEYBOARD_ICON" \
     --category "keyboard-input" \
     --hint string:x-canonical-private-synchronous:keyboard-input \
     --transient \
-    "Keyboard Layout: $text"
+    "Keyboard Layout" "$layout"
 }
 
 case "${1:-}" in

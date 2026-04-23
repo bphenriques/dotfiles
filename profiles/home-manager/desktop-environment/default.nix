@@ -15,6 +15,7 @@
     session.enable = true;
     volume-osd.enable = true;
     brightness-osd.enable = true;
+    niri-keyboard-layout.enable = true;
     file-explorer.browser = "${lib.getExe pkgs.ghostty} +new-window --title=yazi-tui -e ${lib.getExe config.programs.yazi.package}";
   };
 

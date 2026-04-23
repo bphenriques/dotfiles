@@ -187,7 +187,7 @@ in
       "Mod+Return"        = ''spawn-sh "${terminal} +new-window"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
-      "Mod+K"             = ''spawn-sh "${lib.getExe self.packages.niri-keyboard-layout} next"'';
+      "Mod+K"             = ''spawn-sh "${lib.getExe config.custom.programs.niri-keyboard-layout.package} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
       "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
 
