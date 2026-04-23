@@ -45,6 +45,10 @@
     };
   };
 
+  # Pre-built nix-index database: command-not-found suggestions + comma.
+  programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
+
   # Discard home-manager configuration manual.
   manual = {
     html.enable = false;

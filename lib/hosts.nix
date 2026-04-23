@@ -23,7 +23,9 @@ in
         { nixpkgs.overlays = attrValues self.overlays ++ extraOverlays; }
         {
           home-manager = {
-            sharedModules = attrValues self.homeManagerModules ++ extraHmModules;
+            sharedModules = attrValues self.homeManagerModules ++ [
+              inputs.nix-index-database.hmModules.nix-index
+            ] ++ extraHmModules;
             extraSpecialArgs = sharedSpecialArgs;
           };
         }

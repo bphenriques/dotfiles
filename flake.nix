@@ -33,6 +33,8 @@
     disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
+    nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:

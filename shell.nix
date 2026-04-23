@@ -8,5 +8,7 @@ pkgs.mkShellNoCC {
     pkgs.shellcheck           # Scripting sanity checks
     pkgs.nix-output-monitor   # Better build UI: `nom build` instead of `nix build`
     pkgs.nvd                  # Package changelog: `nvd diff /nix/var/nix/profiles/system-{41,42}-link`
+    pkgs.nurl                 # Generate Nix fetcher calls from URLs
+    pkgs.nix-init             # Generate Nix packages from URLs
   ];
 }

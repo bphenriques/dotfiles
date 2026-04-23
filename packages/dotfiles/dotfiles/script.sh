@@ -3,7 +3,6 @@ set -e
 
 have_cmd() { command -v "$1" >/dev/null 2>&1; }
 info() { printf '[ .. ] %s\n' "$1"; }
-success() { printf '[ OK ] %s\n' "$1"; }
 fatal() {
   printf '[FAIL] %s\n' "$1" >&2
   exit 1
@@ -35,9 +34,6 @@ dotfiles <host|.> <command>
   [c]hangelog [N]                              Show changelog between last N profiles (default: 2)
   [u]pdate                  [local]            Update flake inputs (and brew on Darwin)
   [b]uild                   [local]            Build configuration
-  [o]ptimise                [local]            GC and deduplicate the Nix store
-  [r]epair                  [local]            Repair the Nix store
-  [i]nfo                    [local]            List packages in current system
 EOF
 }
 
@@ -53,8 +49,16 @@ nix_build() {
 
 get_host_ip() { "${NIX[@]}" eval --raw --file "$SHARED_HOSTS_CONFIGURATION" "networks.main.hosts.$1" || fatal "Could not find IP for host '$1'."; }
 
+_show_changelog() {
+  [[ -e /run/current-system && -e ./result ]] || return 0
+  have_cmd nvd || return 0
+  nvd diff /run/current-system ./result
+}
+
 _nixos_build() { nix_build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel"; }
 _nixos_sync() {
+  _nixos_build
+  _show_changelog
   case "${1:-}" in
     --boot) sudo nixos-rebuild boot --flake ".#$CURRENT_HOST" ;;
     --test) sudo nixos-rebuild test --flake ".#$CURRENT_HOST" ;;
@@ -69,7 +73,15 @@ _nixos_sync() {
 
 _darwin_build() { nix_build ".#darwinConfigurations.$CURRENT_HOST.system"; }
 _darwin_sync() {
+  case "${1:-}" in
+    "") ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
   _darwin_build
+  _show_changelog
   ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
 }
 _darwin_update() {
@@ -180,21 +192,7 @@ case "${1:-}" in
   build | b)
     assert_local build
     "_${SYSTEM_TYPE}_build"
-    ;;
-  optimise | o)
-    assert_local optimise
-    info "Optimizing Nix Store - GC + Dedup"
-    nix store gc
-    nix store optimise
-    success "Optimizing Nix Store"
-    ;;
-  repair | r)
-    assert_local repair
-    sudo nix-store --repair --verify --check-contents
-    ;;
-  info | i)
-    assert_local info
-    nix-store -qR /run/current-system | sed -n 's|/nix/store/[0-9a-z]\{32\}-||p' | sort -u
+    _show_changelog
     ;;
   *)
     usage

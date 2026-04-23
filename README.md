@@ -101,7 +101,8 @@ I use a companion private `dotfiles-private` repository as a flake input for pri
 A [`dot`](./packages/dotfiles/dotfiles) CLI wraps the native rebuild tools:
 
 ```bash
-dot . s              # apply changes to the current host
+dot . s              # build, preview changes, and apply to the current host
+dot . b              # build and preview changes without applying
 dot . u              # update flake inputs
 dot . c              # show changelog between last two local profiles
 dot compute s        # deploy to the compute host remotely
