@@ -119,7 +119,6 @@
     pkgs.unrar     # Still need it
 
     # GUI centric
-    pkgs.xwayland-satellite
     pkgs.gparted
     pkgs.amp-cli                  # AI Assistant.
   ];

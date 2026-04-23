@@ -23,6 +23,6 @@
   };
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    pkgs.xwayland-satellite       # Required by Niri. Niri sets it up automatically
+    pkgs.xwayland-satellite       # Needed in PATH for niri's built-in xwayland support
   ];
 }
