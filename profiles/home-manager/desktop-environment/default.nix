@@ -9,11 +9,20 @@
     ./niri.nix              # Window Manager
   ];
 
-  custom.programs.screenshot.enable = true;
-  custom.programs.screen-recorder.enable = true;
-  custom.programs.session.enable = true;
-  custom.programs.volume-osd.enable = true;
-  custom.programs.brightness-osd.enable = true;
-  custom.programs.file-explorer.browser = "${lib.getExe' pkgs.foot "footclient"} --title=yazi-tui ${lib.getExe config.programs.yazi.package}";
-  custom.services.upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
+  custom.programs = {
+    screenshot.enable = true;
+    screen-recorder.enable = true;
+    session.enable = true;
+    volume-osd.enable = true;
+    brightness-osd.enable = true;
+    file-explorer.browser = "${lib.getExe pkgs.ghostty} +new-window --title=yazi-tui -e ${lib.getExe config.programs.yazi.package}";
+  };
+
+  custom.services = {
+    upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
+  };
+
+  home.packages = lib.optionals pkgs.stdenv.isLinux [
+    pkgs.xwayland-satellite       # Required by Niri. Niri identifies this package to
+  ];
 }

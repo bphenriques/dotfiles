@@ -18,8 +18,6 @@ _:
 
       # Laptop is often plugged in and treated as a desktop, so keep both GPUs always on via PRIME sync.
       sync.enable = true;
-      offload.enable = false;
-      offload.enableOffloadCmd = false;
     };
   };
 }

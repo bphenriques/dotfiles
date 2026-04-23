@@ -1,23 +1,32 @@
 _:
 let
-  laptopScreen = {
+  mkScreen = { criteria, resolution, refreshRate, scale }: {
+    inherit criteria resolution refreshRate scale;
+    mode = "${resolution}@${refreshRate}Hz";
+  };
+
+  laptopScreen = mkScreen {
     criteria = "eDP-1";
-    mode = "2880x1800@120.001Hz";
+    resolution = "2880x1800";
+    refreshRate = "120.001";
     scale = 1.75;
   };
-  dellScreen = {
+  dellScreen = mkScreen {
     criteria = "Dell Inc. DELL S2721DGF 4P11R83";
-    mode = "2560x1440@143.92Hz";
+    resolution = "2560x1440";
+    refreshRate = "143.92";
     scale = 1.0;
   };
-  livingRoomScreen = {
+  livingRoomScreen = mkScreen {
     criteria = "LG Electronics LG TV SSCR2 0x01010101";
-    mode = "2560x1440@119.998Hz";
+    resolution = "2560x1440";
+    refreshRate = "119.998";
     scale = 1.0;
   };
 
-  enable = screen: screen // { status = "enable"; };
-  disable = screen: screen // { status = "disable"; };
+  toKanshi = screen: { inherit (screen) criteria mode scale; };
+  enable = screen: toKanshi screen // { status = "enable"; };
+  disable = screen: toKanshi screen // { status = "disable"; };
 in
 {
   services.kanshi = {
@@ -46,8 +55,8 @@ in
 
   custom.programs.niri.output.default = {
     identifier  = laptopScreen.criteria;
-    resolution  = builtins.head (builtins.split "@" laptopScreen.mode);
-    refreshRate = builtins.replaceStrings [ "Hz" ] [ "" ] (builtins.elemAt (builtins.split "@" laptopScreen.mode) 2);
+    resolution  = laptopScreen.resolution;
+    refreshRate = laptopScreen.refreshRate;
     scale       = toString laptopScreen.scale;
   };
 }

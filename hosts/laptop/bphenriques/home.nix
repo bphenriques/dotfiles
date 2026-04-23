@@ -13,51 +13,20 @@ in
     ../../../profiles/home-manager/desktop-environment
     ../../../profiles/home-manager/desktop
     ./kanshi.nix
-    ./stylix.nix
   ];
 
-  xdg.userDirs = {
-    enable = true;
-    createDirectories = false;  # Created separately
-    setSessionVariables = true;
-
-    desktop   = "${config.home.homeDirectory}/desktop";
-    pictures  = "${config.home.homeDirectory}/pictures";
-    documents = "${config.home.homeDirectory}/workdir";  # btrfs mount
-    music     = "${config.home.homeDirectory}/music";
-    download  = "${config.home.homeDirectory}/downloads";
-
-    extraConfig.SCREENSHOTS = "${config.home.homeDirectory}/screenshots"; # Non standard used by some apps.
-    extraConfig.RECORDINGS = "${config.home.homeDirectory}/recordings";
-  };
-
-  # https://www.mankier.com/5/tmpfiles.d
+  # NAS symlinks — avoid mounting directly to $HOME to prevent slowdowns when offline
   systemd.user.tmpfiles.rules = [
-    # Create default directories
-    "d ${config.xdg.userDirs.desktop}     - - - -"
-    "d ${config.xdg.userDirs.pictures}    - - - -"
-    "d ${config.xdg.userDirs.music}       - - - -"
-    "d ${config.xdg.userDirs.download}    - - - -"
-    "d ${config.xdg.userDirs.extraConfig.SCREENSHOTS} - - - -"
-    "d ${config.xdg.userDirs.extraConfig.RECORDINGS}  - - - -"
-
-    # Note: avoiding mounting directy to avoid slowing down access to $HOME in-case I am offline.
     "L ${config.xdg.userDirs.pictures}/nas  - - - - ${mounts.nasPrivate}/photos"
     "L ${config.xdg.userDirs.music}/nas     - - - - ${mounts.nasMedia}/music"
   ];
 
   gtk.gtk3.bookmarks = [
-    "file://${config.xdg.userDirs.extraConfig.SCREENSHOTS}"
-    "file://${config.xdg.userDirs.extraConfig.RECORDINGS}"
-
-    # Samba mounts
     "file://${mounts.nasPrivate}"
     "file://${mounts.nasMedia}"
   ];
 
   custom.dotfiles.enable = true;
-  custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.SCREENSHOTS;
-  custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.RECORDINGS;
   custom.programs.file-explorer = {
     enable = true;
     bookmarks = [

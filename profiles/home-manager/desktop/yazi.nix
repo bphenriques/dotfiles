@@ -1,7 +1,4 @@
 { pkgs, config, lib, ... }:
-let
-  files-browser = "${lib.getExe pkgs.ghostty} +new-window --title=yazi-tui -e ${lib.getExe config.programs.yazi.package}";
-in
 {
   stylix.targets.yazi.enable = true;
   programs.yazi = {
@@ -34,6 +31,6 @@ in
   ];
 
   custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.isLinux {
-    "Mod+E" = ''spawn-sh "${files-browser}"'';
+    "Mod+E" = ''spawn-sh "${config.custom.programs.file-explorer.browser}"'';
   };
 }

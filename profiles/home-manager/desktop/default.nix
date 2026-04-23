@@ -1,6 +1,8 @@
 { pkgs, lib, config, ... }:
 {
   imports = [
+    ./stylix.nix          # Color scheme, fonts, icons, cursor
+    ./xdg-userdirs.nix    # XDG user directories, screenshots, recordings
     ./btop.nix            # System Monitor
     ./fish.nix            # Shell
     ./fzf.nix             # Fuzzy search
@@ -22,7 +24,6 @@
     ./steam-rom-manager.nix # Steam ROM shortcuts
     ./ppsspp.nix          # PSP emulator
     ./pcsx2.nix           # PS2 emulator
-    ./flycast.nix         # Dreamcast emulator
     ./dolphin.nix         # Wii/GameCube emulator
     ./discord.nix         # Social
     ./rofi.nix            # Alternative customizable menu
