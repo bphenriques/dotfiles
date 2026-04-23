@@ -138,20 +138,6 @@ in
       };
     };
 
-    gaming = {
-      workspace = lib.mkOption {
-        description = "Workspace for gaming apps (fullscreen, focused, no opacity dimming)";
-        type = lib.types.str;
-        default = "3";
-      };
-
-      appIds = lib.mkOption {
-        description = "App-id patterns for games/emulators. Generates byApp (workspace, fullscreen) and overrides (opacity) rules";
-        type = lib.types.listOf lib.types.str;
-        default = [];
-      };
-    };
-
     layerRules = {
       launchers = lib.mkOption {
         description = "List of matching rules for launcher layers";

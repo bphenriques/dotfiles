@@ -21,7 +21,6 @@ let
     { dir = "doom";      name = "Doom";             core = "prboom";          extensions = [ "wad" ]; }
     { dir = "fbneo";     name = "Arcade";           core = "fbneo";           extensions = [ "zip" ]; shortname = "arcade"; }
     { dir = "dreamcast"; name = "Dreamcast";        core = "flycast";         extensions = [ "chd" ]; }
-    #{ dir = "dreamcast"; name = "Dreamcast";        launch = "${lib.getExe pkgs.flycast} \"{file.path}\"";  extensions = [ "chd" ]; }
     { dir = "psp";       name = "PSP";              launch = "${lib.getExe pkgs.ppsspp} --fullscreen --pause-menu-exit \"{file.path}\"";  extensions = [ "iso" "cso" ]; }
     { dir = "ps2";       name = "PlayStation 2";    launch = "${lib.getExe pkgs.pcsx2} -fullscreen -fastboot -batch -- \"{file.path}\"";  extensions = [ "iso" "chd" ]; }
     { dir = "wii";       name = "Wii";              launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\"";                      extensions = [ "iso" "wbfs" "rvz" ]; }

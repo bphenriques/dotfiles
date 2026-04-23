@@ -23,6 +23,6 @@
   };
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    pkgs.xwayland-satellite       # Required by Niri. Niri identifies this package to
+    pkgs.xwayland-satellite       # Required by Niri. Niri sets it up automatically
   ];
 }
