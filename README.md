@@ -5,8 +5,7 @@
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
 [![Darwin Install](https://img.shields.io/badge/Darwin_Install-docs-blue)](./apps/darwin-install/README.md)
 
-Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that
-works _for me_. I hope this helps you!
+Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that works _for me_. I hope this helps you!
 
 <p float="center">
   <img src="hosts/compute/screenshots/homepage.png" width="49%" />
@@ -20,14 +19,13 @@ works _for me_. I hope this helps you!
 
 ## Hosts
 
-| Host                             | Platform            | Description                                                                                            |
+| Host | Platform | Description |
 |----------------------------------|---------------------|--------------------------------------------------------------------------------------------------------|
-| [compute](./hosts/compute)       | NixOS               | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
-| [laptop](./hosts/laptop)         | NixOS               | Personal workstation                                                                                   |
-| [inky](./hosts/inky)             | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
+| [compute](./hosts/compute) | NixOS | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
+| [laptop](./hosts/laptop) | NixOS | Personal workstation |
+| [inky](./hosts/inky) | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers |
 
-The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single
-registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
+The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
 
 ```nix
 custom.homelab.services.miniflux = {
@@ -58,13 +56,11 @@ Key dependencies:
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 
-Not using [flake-utils](https://github.com/numtide/flake-utils)
-or [impermanence](https://github.com/nix-community/impermanence) intentionally.
+Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
 ## Sensitive Configuration
 
-I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to
-`self.private` because:
+I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to `self.private` because:
 
 - I do not want to expose private information such as public domain, user definitions, and SMTP settings.
 - I do not want to overexpose the sops encrypted file nor the `.sops.yaml`.
@@ -114,11 +110,8 @@ dot compute c        # show changelog for the compute host
 
 ## AI Disclaimer
 
-AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster,
-not to replace understanding. I drive the architecture, review and own every line.
+AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster, not to replace understanding. I drive the architecture, review and own every line.
 
 ## Acknowledgements
 
-Thanks to everyone sharing dotfiles, maintaining the [Arch Wiki](https://wiki.archlinux.org/)
-and [NixOS Wiki](https://wiki.nixos.org/), and helping in
-the [NixOS community](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community).
+Thanks to everyone sharing dotfiles, maintaining the [Arch Wiki](https://wiki.archlinux.org/) and [NixOS Wiki](https://wiki.nixos.org/), and helping in the [NixOS community](https://github.com/NixOS/nixpkgs?tab=readme-ov-file#community).
