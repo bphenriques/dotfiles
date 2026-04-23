@@ -4,7 +4,10 @@ set -e
 have_cmd() { command -v "$1" >/dev/null 2>&1; }
 info() { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }
-fatal() { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
+fatal() {
+  printf '[FAIL] %s\n' "$1" >&2
+  exit 1
+}
 
 DOTFILES_LOCATION=${DOTFILES_LOCATION:-"$HOME/.dotfiles"}
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
@@ -17,7 +20,7 @@ OS="$(uname -s)"
 SYSTEM_TYPE=
 case "$OS" in
   Darwin) SYSTEM_TYPE="darwin" ;;
-  Linux)  [[ -d /etc/nixos ]] && SYSTEM_TYPE="nixos" ;; # home-manager only installs are not supported (yet)
+  Linux) [[ -d /etc/nixos ]] && SYSTEM_TYPE="nixos" ;; # home-manager only installs are not supported (yet)
 esac
 [[ -n $SYSTEM_TYPE ]] || fatal "Unsupported OS: $OS"
 
@@ -53,11 +56,14 @@ get_host_ip() { "${NIX[@]}" eval --raw --file "$SHARED_HOSTS_CONFIGURATION" "net
 _nixos_build() { nix_build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel"; }
 _nixos_sync() {
   case "${1:-}" in
-    --boot)           sudo nixos-rebuild boot --flake ".#$CURRENT_HOST"           ;;
-    --test)           sudo nixos-rebuild test --flake ".#$CURRENT_HOST"           ;;
-    --dry-activate)   sudo nixos-rebuild dry-activate --flake ".#$CURRENT_HOST"   ;;
-    "")               sudo nixos-rebuild switch --flake ".#$CURRENT_HOST"         ;;
-    *)                usage; exit 1                                               ;;
+    --boot) sudo nixos-rebuild boot --flake ".#$CURRENT_HOST" ;;
+    --test) sudo nixos-rebuild test --flake ".#$CURRENT_HOST" ;;
+    --dry-activate) sudo nixos-rebuild dry-activate --flake ".#$CURRENT_HOST" ;;
+    "") sudo nixos-rebuild switch --flake ".#$CURRENT_HOST" ;;
+    *)
+      usage
+      exit 1
+      ;;
   esac
 }
 
@@ -82,16 +88,19 @@ _nixos_deploy() {
 
   info "Deploying '$host' to root@${target_ip}..."
   case "${2:-}" in
-    --boot) nixos-rebuild boot   --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
-    "")     nixos-rebuild switch --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
-    *)      usage; exit 1 ;;
+    --boot) nixos-rebuild boot --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
+    "") nixos-rebuild switch --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
+    *)
+      usage
+      exit 1
+      ;;
   esac
 }
 
 # Lists system profile paths, version-sorted. Args are an optional command prefix (e.g., ssh root@ip).
 _list_profiles() {
   # shellcheck disable=SC2012
-  if (( $# == 0 )); then
+  if (($# == 0)); then
     ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null
   else
     "$@" 'ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null'
@@ -103,7 +112,7 @@ _nvd_diff_generations() {
   local count="$1"
   shift
 
-  [[ "$count" =~ ^[1-9][0-9]*$ ]] || fatal "Changelog count must be a positive integer"
+  [[ $count =~ ^[1-9][0-9]*$ ]] || fatal "Changelog count must be a positive integer"
 
   local -a profiles=()
   local line
@@ -112,13 +121,13 @@ _nvd_diff_generations() {
   done < <(_list_profiles "$@")
 
   local total=${#profiles[@]}
-  if (( total < 2 )); then
+  if ((total < 2)); then
     info "Not enough profiles to compare"
     return 0
   fi
 
   local start=0
-  (( total > count )) && start=$((total - count))
+  ((total > count)) && start=$((total - count))
 
   local i
   for ((i = start; i < total - 1; i++)); do
@@ -129,7 +138,10 @@ _nvd_diff_generations() {
 cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
 
 target="${1:-}"
-[[ -n $target ]] || { usage; exit 0; }
+[[ -n $target ]] || {
+  usage
+  exit 0
+}
 shift
 
 # Resolve '.' to the current host
@@ -139,7 +151,7 @@ is_local() { [[ $target == "$CURRENT_HOST" ]]; }
 assert_local() { is_local || fatal "'$1' can only be run on the current host (use '.' or '$CURRENT_HOST')"; }
 
 case "${1:-}" in
-  sync|s)
+  sync | s)
     shift
     if is_local; then
       info "Dotfiles Sync - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
@@ -148,7 +160,7 @@ case "${1:-}" in
       _nixos_deploy "$target" "${1:-}"
     fi
     ;;
-  changelog|c)
+  changelog | c)
     shift
     if is_local; then
       have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
@@ -157,7 +169,7 @@ case "${1:-}" in
       _nvd_diff_generations "${1:-2}" ssh "root@$(get_host_ip "$target")"
     fi
     ;;
-  update|u)
+  update | u)
     assert_local update
     info "Dotfiles Update - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
     "${NIX[@]}" flake update
@@ -165,24 +177,27 @@ case "${1:-}" in
       darwin) _darwin_update ;;
     esac
     ;;
-  build|b)
+  build | b)
     assert_local build
     "_${SYSTEM_TYPE}_build"
     ;;
-  optimise|o)
+  optimise | o)
     assert_local optimise
     info "Optimizing Nix Store - GC + Dedup"
     nix store gc
     nix store optimise
     success "Optimizing Nix Store"
     ;;
-  repair|r)
+  repair | r)
     assert_local repair
     sudo nix-store --repair --verify --check-contents
     ;;
-  info|i)
+  info | i)
     assert_local info
     nix-store -qR /run/current-system | sed -n 's|/nix/store/[0-9a-z]\{32\}-||p' | sort -u
     ;;
-  *) usage; exit 1 ;;
+  *)
+    usage
+    exit 1
+    ;;
 esac

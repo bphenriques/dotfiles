@@ -1,5 +1,5 @@
 _final: prev: let
-  lib = prev.lib;
+  inherit (prev) lib;
   packages = {
     elegantfin-jellyfin-theme = prev.stdenvNoCC.mkDerivation rec {
       pname = "elegantfin-jellyfin-theme";

@@ -27,4 +27,3 @@ Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 - **Music**: [Music Player Daemon](https://www.musicpd.org/) with a custom wrapper around [`mpc`](https://www.musicpd.org/clients/mpc/)
 - **Internet Browser**: [Firefox](https://www.mozilla.org/firefox/new/) but exploring alternatives
 - **Quick Menu**: [`wlr-which-key`](https://github.com/MaxVerevkin/wlr-which-key)
-

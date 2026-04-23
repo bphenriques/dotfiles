@@ -1,12 +1,9 @@
 #!/usr/bin/env nu
-
 # Generates Radicale htpasswd from homelab user secrets.
-
 def main [] {
   let config = open $env.RADICALE_PROVISION_FILE
   let users = $config | get -o users | default {}
   let htpasswd_file = $config.htpasswdFile
-
   if ($users | is-empty) {
     print "No users configured, creating empty htpasswd"
     "" | save --force $htpasswd_file
@@ -14,9 +11,7 @@ def main [] {
     ^chown "radicale:radicale" $htpasswd_file
     return
   }
-
   let tmp = $"($htpasswd_file).tmp"
-
   print $"Generating htpasswd for ($users | transpose | length) users..."
   mut first = true
   for entry in ($users | transpose name user) {
@@ -26,10 +21,8 @@ def main [] {
     print $"  ($entry.name): ok"
     $first = false
   }
-
   ^chmod "640" $tmp
   ^chown "radicale:radicale" $tmp
   ^mv -f $tmp $htpasswd_file
-
   print "Radicale htpasswd generation complete"
 }

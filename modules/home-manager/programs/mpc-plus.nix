@@ -57,7 +57,7 @@ in
       default = {
         default = {
           host = config.services.mpd.network.listenAddress;
-          port = config.services.mpd.network.port;
+          inherit (config.services.mpd.network) port;
         };
       };
     };
@@ -77,10 +77,10 @@ in
         icon = mkIcon "music-player" "󰥠";
         exec = ''${lib.getExe config.custom.programs.wlr-which-key.package} mpc-plus'';
         actions = {
-          "shuffle"       = { name = "Shuffle library"; icon = (mkIcon "mpc-plus-shuffle-library" ""); exec = exec.play-shuffled; };
-          "find-play"     = { name = "Play...";         icon = (mkIcon "mpc-plus-find-play" "");       exec = exec.search-play; };
-          "stop"          = { name = "Stop";            icon = (mkIcon "mpc-plus-stop" "");            exec = exec.stop; };
-          "select-server" = { name = "Select server";   icon = (mkIcon "mpc-select-server" "󰓃");        exec = exec.select-server; };
+          "shuffle"       = { name = "Shuffle library"; icon = mkIcon "mpc-plus-shuffle-library" ""; exec = exec.play-shuffled; };
+          "find-play"     = { name = "Play...";         icon = mkIcon "mpc-plus-find-play" "";       exec = exec.search-play; };
+          "stop"          = { name = "Stop";            icon = mkIcon "mpc-plus-stop" "";            exec = exec.stop; };
+          "select-server" = { name = "Select server";   icon = mkIcon "mpc-select-server" "󰓃";        exec = exec.select-server; };
         };
       })
     ];

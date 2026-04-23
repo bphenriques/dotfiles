@@ -61,7 +61,7 @@ in
     enable = true;
     settings = {
       address = "127.0.0.1";
-      port = serviceCfg.port;
+      inherit (serviceCfg) port;
       root = filebrowserRoot;
       database = "/var/lib/filebrowser/filebrowser.db";
     };

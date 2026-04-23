@@ -1,7 +1,7 @@
 { config, ... }:
 let
-  groups = config.users.groups;
-  users = config.users.users;
+  inherit (config.users) groups;
+  inherit (config.users) users;
 in
 {
   disko.devices = {

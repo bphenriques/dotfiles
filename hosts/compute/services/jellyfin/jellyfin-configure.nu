@@ -1,15 +1,12 @@
 #!/usr/bin/env nu
-
 # Initializes Jellyfin declaratively via the API (startup wizard, server settings, branding, libraries, and users)
 #
 # FIXME: Not fully declarative. Entities are not removed, fine for the low cadence changes in here.
-
 let base_url = $env.JELLYFIN_URL
 let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
 let admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let config = open $env.JELLYFIN_CONFIG_FILE
 let oidc_users = open $env.OIDC_USERS_FILE
-
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Jellyfin... ($attempt)"
@@ -17,13 +14,9 @@ def wait_ready [] {
     if $r != null and $r.status in [200, 401, 403] { return }
     sleep 2sec
   }
-  error make { msg: "Jellyfin failed to start after 30 attempts" }
+  error make {msg: "Jellyfin failed to start after 30 attempts"}
 }
-
-def is_startup_wizard_complete [] {
-  (http get $"($base_url)/Startup/Configuration" --full --allow-errors).status in [401, 403]
-}
-
+def is_startup_wizard_complete [] { (http get $"($base_url)/Startup/Configuration" --full --allow-errors).status in [401, 403] }
 # Jellyfin Startup Wizard API flow (undocumented, discovered via source/build logs):
 #   1. POST /Startup/Configuration - Set locale/metadata preferences
 #   2. GET  /Startup/User          - Triggers internal user creation (returns default username)
@@ -33,88 +26,135 @@ def is_startup_wizard_complete [] {
 # Note: Calling POST /Startup/User without GET first returns 500 (no user exists yet)
 def complete_startup_wizard [] {
   print "Running startup wizard..."
-  
   let r1 = http post $"($base_url)/Startup/Configuration" { UICulture: "en-US", MetadataCountryCode: "US", PreferredMetadataLanguage: "en" } --content-type application/json --full --allow-errors
-  if $r1.status != 204 { error make { msg: $"Failed to configure startup: ($r1.status) - ($r1.body)" } }
-  
+  if $r1.status != 204 {
+    error make {
+      msg: $"Failed to configure startup: ($r1.status) - ($r1.body)"
+    }
+  }
   print $"  Creating admin user: ($admin_username)"
   let r2a = http get $"($base_url)/Startup/User" --full --allow-errors
-  if $r2a.status != 200 { error make { msg: $"Failed to get startup user: ($r2a.status) - ($r2a.body)" } }
-  
+  if $r2a.status != 200 {
+    error make {
+      msg: $"Failed to get startup user: ($r2a.status) - ($r2a.body)"
+    }
+  }
   let r2b = http post $"($base_url)/Startup/User" { Name: $admin_username, Password: $admin_password } --content-type application/json --full --allow-errors
-  if $r2b.status != 204 { error make { msg: $"Failed to update admin user: ($r2b.status) - ($r2b.body)" } }
-  
+  if $r2b.status != 204 {
+    error make {
+      msg: $"Failed to update admin user: ($r2b.status) - ($r2b.body)"
+    }
+  }
   let r3 = http post $"($base_url)/Startup/RemoteAccess" { EnableRemoteAccess: true, EnableAutomaticPortMapping: false } --content-type application/json --full --allow-errors
-  if $r3.status != 204 { error make { msg: $"Failed to configure remote access: ($r3.status) - ($r3.body)" } }
-  
+  if $r3.status != 204 {
+    error make {
+      msg: $"Failed to configure remote access: ($r3.status) - ($r3.body)"
+    }
+  }
   let r4 = http post $"($base_url)/Startup/Complete" { } --content-type application/json --full --allow-errors
-  if $r4.status != 204 { error make { msg: $"Failed to complete startup: ($r4.status) - ($r4.body)" } }
-  
+  if $r4.status != 204 {
+    error make {
+      msg: $"Failed to complete startup: ($r4.status) - ($r4.body)"
+    }
+  }
   print "  Startup wizard completed"
 }
-
-def authenticate []: nothing -> record<headers: list> {
+def authenticate []: nothing -> record<headers: list<any>> {
   print $"Authenticating as: ($admin_username)"
-  let auth_headers = [Authorization "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""]
+  let auth_headers = [Authorization, "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""]
   mut token = null
   for attempt in 1..30 {
     let r = try {
       http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers $auth_headers --max-time 5sec --full --allow-errors
     } catch {
-      print $"  Connection failed, retrying... ($attempt)"; sleep 2sec; continue
+      print $"  Connection failed, retrying... ($attempt)"
+      sleep 2sec
+      continue
     }
-    if $r.status == 200 { $token = $r.body.AccessToken; break }
-    if $r.status == 503 { print $"  Server still loading, retrying... ($attempt)"; sleep 2sec; continue }
-    error make { msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)" }
+    if $r.status == 200 {
+      $token = $r.body.AccessToken
+      break
+    }
+    if $r.status == 503 {
+      print $"  Server still loading, retrying... ($attempt)"
+      sleep 2sec
+      continue
+    }
+    error make {
+      msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)"
+    }
   }
-  if $token == null { error make { msg: "Failed to authenticate after 30 attempts" } }
-  { headers: [Authorization $"MediaBrowser Token=\"($token)\""] }
+  if $token == null { error make {msg: "Failed to authenticate after 30 attempts"} }
+  {
+    headers: [
+      Authorization
+      $"MediaBrowser Token=\"($token)\""
+    ]
+  }
 }
-
-def ensure_server_name [headers: list] {
+def ensure_server_name [headers: list<any>] {
   print "Configuring server name..."
   let current = http get $"($base_url)/System/Configuration" --headers $headers --full --allow-errors
-  if $current.status != 200 { error make { msg: $"Failed to get system config: ($current.status)" } }
-  
+  if $current.status != 200 {
+    error make {
+      msg: $"Failed to get system config: ($current.status)"
+    }
+  }
   let updated = $current.body | update ServerName $config.serverName
   let r = http post $"($base_url)/System/Configuration" $updated --content-type application/json --headers $headers --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to configure server name: ($r.status)" } }
+  if $r.status != 204 {
+    error make {
+      msg: $"Failed to configure server name: ($r.status)"
+    }
+  }
   print $"  Server name set to: ($config.serverName)"
 }
-
-def ensure_encoding [headers: list] {
+def ensure_encoding [headers: list<any>] {
   print "Configuring encoding/transcoding..."
   let current = http get $"($base_url)/System/Configuration/encoding" --headers $headers --full --allow-errors
-  if $current.status != 200 { error make { msg: $"Failed to get encoding config: ($current.status)" } }
-  
+  if $current.status != 200 {
+    error make {
+      msg: $"Failed to get encoding config: ($current.status)"
+    }
+  }
   let r = http post $"($base_url)/System/Configuration/encoding" ($current.body | merge $config.encodingConfig) --content-type application/json --headers $headers --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to configure encoding: ($r.status)" } }
+  if $r.status != 204 {
+    error make {
+      msg: $"Failed to configure encoding: ($r.status)"
+    }
+  }
   print "  Encoding configured"
 }
-
-def ensure_trickplay [headers: list] {
+def ensure_trickplay [headers: list<any>] {
   print "Configuring trickplay..."
   let current = http get $"($base_url)/System/Configuration" --headers $headers --full --allow-errors
-  if $current.status != 200 { error make { msg: $"Failed to get system config: ($current.status)" } }
-  
+  if $current.status != 200 {
+    error make {
+      msg: $"Failed to get system config: ($current.status)"
+    }
+  }
   let updated = $current.body | update TrickplayOptions ($current.body.TrickplayOptions | merge $config.trickplayOptions)
   let r = http post $"($base_url)/System/Configuration" $updated --content-type application/json --headers $headers --full --allow-errors
-  if $r.status != 204 { error make { msg: $"Failed to configure trickplay: ($r.status)" } }
+  if $r.status != 204 {
+    error make {
+      msg: $"Failed to configure trickplay: ($r.status)"
+    }
+  }
   print "  Trickplay configured"
 }
-
-def library_options [lib: record] {
-  {
-    EnableRealtimeMonitor: $lib.EnableRealtimeMonitor
-    ExtractTrickplayImagesDuringLibraryScan: $lib.ExtractTrickplayImagesDuringLibraryScan
-    EnableChapterImageExtraction: $lib.EnableChapterImageExtraction
-  }
-}
-
-def ensure_libraries [headers: list] {
+def library_options [lib: record] { {
+  EnableRealtimeMonitor: $lib.EnableRealtimeMonitor
+  ExtractTrickplayImagesDuringLibraryScan: $lib.ExtractTrickplayImagesDuringLibraryScan
+  EnableChapterImageExtraction: $lib.EnableChapterImageExtraction
+} }
+def ensure_libraries [headers: list<any>] {
   print "Configuring libraries..."
   let existing = http get $"($base_url)/Library/VirtualFolders" --headers $headers --full --allow-errors
-  if $existing.status != 200 { error make { msg: $"Failed to get libraries: ($existing.status)" } }
+  if $existing.status != 200 {
+    error make {
+      msg: $"Failed to get libraries: ($existing.status)"
+    }
+  }
   for lib in $config.libraries {
     let desired_options = library_options $lib
     if $lib.Name in ($existing.body | get Name) {
@@ -130,40 +170,57 @@ def ensure_libraries [headers: list] {
       } else {
         let updated = $lo | merge $desired_options
         let r = http post $"($base_url)/Library/VirtualFolders/LibraryOptions" { Id: $current.ItemId, LibraryOptions: $updated } --content-type application/json --headers $headers --full --allow-errors
-        if $r.status != 204 { error make { msg: $"Failed to update library ($lib.Name): ($r.status)" } }
+        if $r.status != 204 {
+          error make {
+            msg: $"Failed to update library ($lib.Name): ($r.status)"
+          }
+        }
         print $"  Updated library options: ($lib.Name)"
       }
     } else {
       let paths = $lib.Locations | each { |p| $"&paths=($p | url encode)" } | str join ""
       let url = $"($base_url)/Library/VirtualFolders?name=($lib.Name | url encode)&collectionType=($lib.CollectionType)($paths)&refreshLibrary=false"
       let r = http post $url { LibraryOptions: $desired_options } --content-type application/json --headers $headers --full --allow-errors
-      if $r.status != 204 { error make { msg: $"Failed to create library ($lib.Name): ($r.status)" } }
+      if $r.status != 204 {
+        error make {
+          msg: $"Failed to create library ($lib.Name): ($r.status)"
+        }
+      }
       print $"  Created library: ($lib.Name)"
     }
   }
 }
-
 # FIXME: Remove passwordFile check once Seerr supports OIDC
 # Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
-def ensure_users [headers: list, users: list] {
+def ensure_users [headers: list<any>, users: list<any>] {
   print "Configuring users..."
   let existing = http get $"($base_url)/Users" --headers $headers --full --allow-errors
-  if $existing.status != 200 { error make { msg: $"Failed to get users: ($existing.status)" } }
-  
+  if $existing.status != 200 {
+    error make {
+      msg: $"Failed to get users: ($existing.status)"
+    }
+  }
   for cfg in $users {
     let has_password_file = ($cfg.passwordFile? | default null) != null
     if not $has_password_file {
       let oidc_matches = $oidc_users | where username == $cfg.username
       if ($oidc_matches | is-empty) {
-        error make { msg: $"User '$cfg.username' not found in OIDC users" }
+        error make {
+          msg: $"User '$cfg.username' not found in OIDC users"
+        }
       }
     }
-
     let existing_matches = $existing.body | where Name == $cfg.username
     if ($existing_matches | is-empty) {
-      let initial_password = if $has_password_file { open $cfg.passwordFile | str trim } else { random chars --length 32 }
+      let initial_password = if $has_password_file {
+        open $cfg.passwordFile | str trim
+      } else { random chars --length 32 }
       let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: $initial_password } --content-type application/json --headers $headers --full --allow-errors
-      if $r.status != 200 { error make { msg: $"Failed to create user '$cfg.username': ($r.status)" } }
+      if $r.status != 200 {
+        error make {
+          msg: $"Failed to create user '$cfg.username': ($r.status)"
+        }
+      }
       print $"  '$cfg.username': created"
     } else {
       print $"  '$cfg.username': exists"
@@ -178,36 +235,39 @@ def ensure_users [headers: list, users: list] {
         }
       }
     }
-
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
       let matches = $users.body | where Name == $cfg.username
-      if ($matches | is-empty) { error make { msg: $"User '$cfg.username' not found after creation" } }
+      if ($matches | is-empty) {
+        error make {
+          msg: $"User '$cfg.username' not found after creation"
+        }
+      }
       let user = $matches | first
       let updated_policy = $user.Policy | merge $cfg.policy
       let r = http post $"($base_url)/Users/($user.Id)/Policy" $updated_policy --content-type application/json --headers $headers --full --allow-errors
-      if $r.status != 204 { error make { msg: $"Failed to update policy for '$cfg.username': ($r.status)" } }
+      if $r.status != 204 {
+        error make {
+          msg: $"Failed to update policy for '$cfg.username': ($r.status)"
+        }
+      }
       print $"  '$cfg.username': policy updated"
     }
   }
 }
-
 def main [] {
   wait_ready
   print "Jellyfin is ready"
-
   if (is_startup_wizard_complete) { print "Startup wizard already completed" } else {
     complete_startup_wizard
     sleep 2sec
   }
-
   let auth = authenticate
   ensure_server_name $auth.headers
   ensure_encoding $auth.headers
   ensure_trickplay $auth.headers
   ensure_libraries $auth.headers
   ensure_users $auth.headers $config.userConfigs
-
   print "Jellyfin initialization complete"
 }

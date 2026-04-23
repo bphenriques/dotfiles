@@ -38,14 +38,14 @@ let
     downloadClient = {
       name = "Transmission";
       host = "127.0.0.1";
-      port = config.custom.homelab.services.transmission.port;
+      inherit (config.custom.homelab.services.transmission) port;
       urlBase = "/transmission/";
       category = name;
     };
     defaultQualityProfile = mediaCfg.profiles.default.name;
     notification = {
       serverUrl = ntfyCfg.url;
-      topic = serviceCfg.integrations.ntfy.topic;
+      inherit (serviceCfg.integrations.ntfy) topic;
       tags = ntfyTags;
     };
     defaultDelayProfile = {
@@ -82,7 +82,7 @@ in
     integrations.homepage.tab = "Home";
     integrations.homepage.extraConfig.widget = {
       type = name;
-      url = serviceCfg.url;
+      inherit (serviceCfg) url;
       key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
       fields = []; # Omit all fields because we already have the calendar view
     };

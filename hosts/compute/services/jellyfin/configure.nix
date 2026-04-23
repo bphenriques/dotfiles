@@ -35,13 +35,13 @@ let
       ProcessPriority = "BelowNormal";
     };
     userConfigs = lib.mapAttrsToList (_: u: {
-      username = u.username;
+      inherit (u) username;
       policy = {
         IsHidden = false;
         EnableSubtitleManagement = true;
       };
     } // lib.optionalAttrs (u.services.jellyfin ? passwordFile) {
-      passwordFile = u.services.jellyfin.passwordFile;
+      inherit (u.services.jellyfin) passwordFile;
     }) enabledUsers;
   };
 

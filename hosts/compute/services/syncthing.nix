@@ -79,7 +79,7 @@ in
     guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
 
     settings = {
-      devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { id = d.id; }) allSyncthingDevices);
+      devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { inherit (d) id; }) allSyncthingDevices);
       options = {
         urAccepted = -1;
         crashReportingEnabled = false;

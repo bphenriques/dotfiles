@@ -25,14 +25,14 @@ let
     metadata  = [ "fetchart" "embedart" "lyrics" "mbsync" ]; # lastgenre
     health    = [ "duplicates" "badfiles" ];
     utility   = [ "edit" "playlist" "scrub" "fish" ]; # https://beets.readthedocs.io/en/stable/plugins/smartplaylist.html
-  in (providers ++ health ++ metadata ++ utility);
+  in providers ++ health ++ metadata ++ utility;
   basePackage = pkgs.python3.pkgs.beets.override {
     # Reference: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/audio/beets/builtin-plugins.nix
     pluginOverrides = foldl' (acc: plugin: acc // { "${plugin}".enable = true; }) { } plugins;
   };
 
   # Sanity check + backup database file to NAS. Can't store the DB file in the NAS as it leads to lock issues.
-  finalPackage = (pkgs.writeScriptBin "beet" ''
+  finalPackage = pkgs.writeScriptBin "beet" ''
     #!${pkgs.stdenv.shell}
     if [ ! -d "${musicLibrary}" ]; then
       echo "${musicLibrary} does not exist!"
@@ -51,7 +51,7 @@ let
       cp -f "${database}" "${databaseBackup}"
     fi
     exit $status
-  '');
+  '';
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.beets = {

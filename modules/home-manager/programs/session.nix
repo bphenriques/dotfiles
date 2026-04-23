@@ -63,7 +63,7 @@ in
           toAction = b: nameValuePair b.id {
             name = b.label;
             icon = mkIcon b.id b.symbol;
-            exec = b.exec;
+            inherit (b) exec;
           };
         in listToAttrs (lib.map toAction sessionActions);
       })

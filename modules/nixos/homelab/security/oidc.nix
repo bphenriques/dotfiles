@@ -115,7 +115,7 @@ let
   oidcServices = lib.filterAttrs (_: svc: svc.oidc.enable) homelabCfg.services;
 
   # Derive clients from services
-  derivedClients = lib.mapAttrs (_: svc: svc.oidc // { allowedGroups = svc.access.allowedGroups; }) oidcServices;
+  derivedClients = lib.mapAttrs (_: svc: svc.oidc // { inherit (svc.access) allowedGroups; }) oidcServices;
 
   # Read-only projection type for oidc.clients. intentionally re-declares fields from mkServiceOidcSchema.
   # This is a typed contract for consumers (e.g. pocket-id provisioning), not a shared schema with defaults.
@@ -274,7 +274,7 @@ in
       ];
 
       custom.homelab._userOptionExtensions = [
-        ({ ... }: {
+        (_: {
           options.services.oidc.enable = lib.mkEnableOption "OIDC account for this user" // {
             default = true;
           };
@@ -303,7 +303,7 @@ in
 
       users.groups = lib.mapAttrs' (_: client:
         lib.nameValuePair client.group (lib.optionalAttrs (client.gid != null) {
-          gid = client.gid;
+          inherit (client) gid;
         })
       ) derivedClients;
 

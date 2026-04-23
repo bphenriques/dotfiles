@@ -46,7 +46,7 @@ in
 
   services.tandoor-recipes = {
     enable = true;
-    port = serviceCfg.port;
+    inherit (serviceCfg) port;
     address = "127.0.0.1";
     database.createLocally = true;
     extraConfig = {

@@ -11,14 +11,14 @@ let
     applicationUrl = serviceCfg.publicUrl;
     jellyfin = {
       hostname = "127.0.0.1";
-      port = jellyfinCfg.port;
+      inherit (jellyfinCfg) port;
       urlBase = "";
       useSsl = false;
     };
     radarr = {
       name = "Radarr";
       hostname = "127.0.0.1";
-      port = radarrCfg.port;
+      inherit (radarrCfg) port;
       useSsl = false;
       baseUrl = "";
       activeDirectory = config.custom.homelab.paths.media.movies;
@@ -31,7 +31,7 @@ let
     sonarr = {
       name = "Sonarr";
       hostname = "127.0.0.1";
-      port = sonarrCfg.port;
+      inherit (sonarrCfg) port;
       useSsl = false;
       baseUrl = "";
       activeDirectory = config.custom.homelab.paths.media.tv;

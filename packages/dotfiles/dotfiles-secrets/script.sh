@@ -1,31 +1,40 @@
 #shellcheck shell=bash
 set -euo pipefail
 
-fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
+fatal() {
+  printf '[FAIL] %s\n' "$1" >&2
+  exit 1
+}
 
 bw_get_item_field() { bw get item "$1" | jq -e --arg FIELD "$2" --raw-output '.fields[] | select(.name == $FIELD) | .value'; }
 
 fetch() {
   local secret_type="${1:-}"
   local host="${2:-}"
-  
+
   test -z "$secret_type" && fatal "secret-type argument not provided"
 
   # GPG keys are shared (not per-host)
   case "$secret_type" in
-    gpg-private-key)  bw get item "github-gpg-private" | jq -re '.notes' ; return ;;
-    gpg-public-key)   bw get item "github-gpg-public" | jq -re '.notes' ; return ;;
+    gpg-private-key)
+      bw get item "github-gpg-private" | jq -re '.notes'
+      return
+      ;;
+    gpg-public-key)
+      bw get item "github-gpg-public" | jq -re '.notes'
+      return
+      ;;
   esac
 
   # All other secrets require a host
   test -z "$host" && fatal "host argument not provided"
 
   case "$secret_type" in
-    sops-secret)      bw_get_item_field "system-nixos-${host}" "sops-private" ;;
-    luks-key)         bw_get_item_field "system-nixos-${host}" "luks-interactive-password" ;;
-    ssh-private-key)  bw get item "ssh-key-nixos-${host}" | jq -re '.sshKey.privateKey' ;;
+    sops-secret) bw_get_item_field "system-nixos-${host}" "sops-private" ;;
+    luks-key) bw_get_item_field "system-nixos-${host}" "luks-interactive-password" ;;
+    ssh-private-key) bw get item "ssh-key-nixos-${host}" | jq -re '.sshKey.privateKey' ;;
     sops-private-key) bw_get_item_field "system-nixos-${host}" "sops-private" ;;
-    *)                fatal "Unknown secret type: $secret_type" ;;
+    *) fatal "Unknown secret type: $secret_type" ;;
   esac
 }
 
@@ -33,15 +42,15 @@ init_host() {
   local host="${1:-}"
   local with_luks="${2:-}"
   test -z "$host" && fatal "host argument not provided"
-  
+
   local item_name
   item_name="system-nixos-$host"
-  
+
   # Check if item already exists
-  if bw get item "$item_name" > /dev/null 2>&1; then
+  if bw get item "$item_name" >/dev/null 2>&1; then
     fatal "Bitwarden item '$item_name' already exists. Delete it first or use a different host name."
   fi
-  
+
   # Generate SOPS age key
   local tmpdir
   tmpdir="$(mktemp -d)"
@@ -58,21 +67,21 @@ init_host() {
     luks_password="$(openssl rand -base64 32)"
     fields=$(echo "$fields" | jq --arg luks "$luks_password" '. += [{name: "luks-interactive-password", value: $luks, type: 1}]')
   fi
-  
+
   local item_json
   item_json=$(jq -n \
     --arg name "$item_name" \
     --argjson fields "$fields" \
     '{type: 2, secureNote: {type: 0}, name: $name, fields: $fields}')
-  
-  echo "$item_json" | bw encode | bw create item > /dev/null
-  bw sync > /dev/null
-  
+
+  echo "$item_json" | bw encode | bw create item >/dev/null
+  bw sync >/dev/null
+
   echo "SOPS public key: $(age-keygen -y "$tmpdir/age.key")"
   if [ -n "$luks_password" ]; then
     echo "LUKS password: Check field 'luks-interactive-password' in Bitwarden"
   fi
-  
+
   echo "Next steps:"
   echo "  1. Update .sops.yaml with the public key above"
   echo "  2. Fetch the secret key and append to ~/.config/sops/age/keys.txt"
@@ -121,9 +130,9 @@ unlock_bitwarden() {
 unlock_bitwarden "$1"
 shift
 case "${1:-}" in
-  -h|--help|"") usage ;;
-  fetch)        shift && fetch "$@" ;;
-  exists)       shift && fetch "$@" > /dev/null 2>&1 ;;
-  init-host)    shift && init_host "$@" ;;
-  *)            fatal "Unknown command: $1" ;;
+  -h | --help | "") usage ;;
+  fetch) shift && fetch "$@" ;;
+  exists) shift && fetch "$@" >/dev/null 2>&1 ;;
+  init-host) shift && init_host "$@" ;;
+  *) fatal "Unknown command: $1" ;;
 esac

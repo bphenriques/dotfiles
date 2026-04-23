@@ -13,20 +13,19 @@ usage() {
 create_session() {
   test -z "$1" && echo "EMAIL not provided" && exit 1
 
-  if ! bw login --check > /dev/null; then
+  if ! bw login --check >/dev/null; then
     BW_SESSION="$(bw login --raw "$1")"
   fi
 
-  if ! bw unlock --check > /dev/null; then
+  if ! bw unlock --check >/dev/null; then
     BW_SESSION="$(bw unlock --raw)"
   fi
 
-  bw sync > /dev/null
+  bw sync >/dev/null
   echo "$BW_SESSION"
 }
 
 case "${1:-}" in
-  ""|--help)      usage ;;
-  session)        shift 1 && create_session "$@"  ;;
+  "" | --help) usage ;;
+  session) shift 1 && create_session "$@" ;;
 esac
-

@@ -21,8 +21,8 @@ let
       routers = {
         "${service.name}" = mkRouterConfig service service.publicHost;
       } // lib.listToAttrs aliasRouters;
-      services."${service.name}-svc".loadBalancer.servers = [{ url = service.url; }];
-      middlewares = service.traefik.middlewares;
+      services."${service.name}-svc".loadBalancer.servers = [{ inherit (service) url; }];
+      inherit (service.traefik) middlewares;
     };
   };
 in

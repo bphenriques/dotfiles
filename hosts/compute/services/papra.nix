@@ -52,10 +52,10 @@ in
 
   custom.homelab.smb.mounts.bphenriques.systemd.dependentServices = [ "podman-papra" ];
 
-  users.groups.${papraUser.group} = { gid = papraUser.gid; };
+  users.groups.${papraUser.group} = { inherit (papraUser) gid; };
   users.users.${papraUser.name} = {
-    uid = papraUser.uid;
-    group = papraUser.group;
+    inherit (papraUser) uid;
+    inherit (papraUser) group;
     isSystemUser = true;
     extraGroups = [ homelabMounts.bphenriques.group ];
   };

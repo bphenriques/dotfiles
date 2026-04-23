@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.grafana;
   prometheusCfg = config.custom.homelab.services.prometheus;
@@ -53,7 +53,7 @@ in
         name = "Prometheus";
         uid = "prometheus";
         type = "prometheus";
-        url = prometheusCfg.url;
+        inherit (prometheusCfg) url;
         isDefault = true;
         editable = false;
       }];

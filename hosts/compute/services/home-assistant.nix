@@ -6,7 +6,7 @@ let
 
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
   otbrDataDir = "/var/lib/otbr";
-  configDir = config.services.home-assistant.configDir;
+  inherit (config.services.home-assistant) configDir;
 in
 {
   custom.homelab.services.home-assistant = {
@@ -52,8 +52,8 @@ in
         name = "Home";
         unit_system = "metric";
         time_zone = cfg.locale.timezone;
-        latitude = cfg.locale.latitude;
-        longitude = cfg.locale.longitude;
+        inherit (cfg.locale) latitude;
+        inherit (cfg.locale) longitude;
         external_url = serviceCfg.publicUrl;
         internal_url = serviceCfg.url;
       };

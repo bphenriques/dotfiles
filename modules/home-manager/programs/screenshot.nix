@@ -1,15 +1,9 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
   inherit (builtins) listToAttrs;
-  inherit (lib) map nameValuePair;
+  inherit (lib) nameValuePair;
 
   cfg = config.custom.programs.screenshot;
-
-  mkAppOpt = default: lib.mkOption {
-    inherit default;
-    description = "";
-    type = lib.types.coercedTo lib.types.package lib.getExe lib.types.str;
-  };
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
@@ -71,7 +65,7 @@ in
           toAction = b: nameValuePair b.id {
             name = b.label;
             icon = mkIcon b.id b.symbol;
-            exec = b.exec;
+            inherit (b) exec;
           };
         in listToAttrs (lib.map toAction screenshotActions);
       })

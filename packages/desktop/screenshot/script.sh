@@ -16,8 +16,14 @@ case "${1:-}" in
     grim -g "$geometry" "$destination"
     notify "$destination"
     ;;
-  screen-copy)  grim - | wl-copy                                              ;;
-  screen-edit)  grim - | swappy -f -                                          ;;
-  region-copy)  geometry="$(slurp)" || exit 0; grim -g "$geometry" - | wl-copy      ;;
-  region-edit)  geometry="$(slurp)" || exit 0; grim -g "$geometry" - | swappy -f -  ;;
+  screen-copy) grim - | wl-copy ;;
+  screen-edit) grim - | swappy -f - ;;
+  region-copy)
+    geometry="$(slurp)" || exit 0
+    grim -g "$geometry" - | wl-copy
+    ;;
+  region-edit)
+    geometry="$(slurp)" || exit 0
+    grim -g "$geometry" - | swappy -f -
+    ;;
 esac

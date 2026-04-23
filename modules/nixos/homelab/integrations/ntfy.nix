@@ -55,7 +55,7 @@ let
 
   mkFailureOverrides = _: task:
     let
-      ntfy = task.integrations.ntfy;
+      inherit (task.integrations) ntfy;
       env = {
         NTFY_URL = "${ntfyCfg.url}/${ntfy.topic}";
         NTFY_TOKEN_FILE = ntfy.tokenFile;

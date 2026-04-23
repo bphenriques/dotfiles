@@ -17,13 +17,13 @@ is_plugged() { ! upower -i "$UPOWER_DEVICE_PATH" | grep -q "state:.*discharging"
 get_battery_percentage() { upower -i "$UPOWER_DEVICE_PATH" | grep percentage | awk '{ print $2; }' | tr -d '%'; }
 
 get_icon() {
-  local level=$(( ($1 / 10) * 10 ))
+  local level=$((($1 / 10) * 10))
   [ "$level" -gt 100 ] && level=100
   echo "$UPOWER_ICONS_DIR/$level"
 }
 
 get_charging_icon() {
-  local level=$(( ($1 / 10) * 10 ))
+  local level=$((($1 / 10) * 10))
   [ "$level" -gt 100 ] && level=100
   echo "$UPOWER_CHARGING_ICONS_DIR/$level"
 }
@@ -127,7 +127,10 @@ upower_monitor() {
       # Timeout (rc > 128): no event received, fall through to poll battery state.
       # EOF (rc <= 128): pipe closed (upower died), exit so systemd restarts the service.
       rc=$?
-      [ "$rc" -le 128 ] && { echo "upower --monitor pipe closed (rc=$rc), exiting" >&2; exit 1; }
+      [ "$rc" -le 128 ] && {
+        echo "upower --monitor pipe closed (rc=$rc), exiting" >&2
+        exit 1
+      }
     fi
 
     check_and_notify last_state || continue
@@ -135,6 +138,6 @@ upower_monitor() {
 }
 
 case "${1:-}" in
-  notify)    notify_current_battery "$(get_battery_percentage)"  ;;
-  monitor)   upower --monitor | upower_monitor                   ;;
+  notify) notify_current_battery "$(get_battery_percentage)" ;;
+  monitor) upower --monitor | upower_monitor ;;
 esac

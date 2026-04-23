@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.filebrowser = {
         enable = lib.mkEnableOption "FileBrowser account for this user";
         scope = lib.mkOption {

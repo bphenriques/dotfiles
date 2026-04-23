@@ -6,16 +6,16 @@ let
   };
 
   umu-run0-desktop-item =
-    (pkgs.makeDesktopItem {
+    pkgs.makeDesktopItem {
       name = "umu-launcher0";
       exec = "${lib.getExe umu-run0} %f";
       type = "Application";
       desktopName = "umu-launcher0";
       categories = [ "Utility" "Game" ];
       icon = "wine";
-      mimeTypes = mimeTypes;
+      inherit mimeTypes;
       extraConfig.Terminal = "true";
-    });
+    };
 
   mimeTypes = [
     "application/x-ms-dos-executable"

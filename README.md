@@ -19,11 +19,11 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 
 ## Hosts
 
-| Host | Platform | Description |
-|----------------------------------|---------------------|--------------------------------------------------------------------------------------------------------|
-| [compute](./hosts/compute) | NixOS | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
-| [laptop](./hosts/laptop) | NixOS | Personal workstation |
-| [inky](./hosts/inky) | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers |
+| Host                       | Platform            | Description                                                                                            |
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| [compute](./hosts/compute) | NixOS               | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
+| [laptop](./hosts/laptop)   | NixOS               | Personal workstation                                                                                   |
+| [inky](./hosts/inky)       | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
 
 The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
 

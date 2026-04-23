@@ -5,6 +5,7 @@ Non-exhaustive documentation regarding how I am setting up my Synology DS923+.
 ## Hard Drive Setup
 
 Nothing really relevant to say other than I have two storage pools:
+
 1. Storage Pool 1: SHR with 2 HDDs.
    1. Quick SMART test every month
    2. Extended SMART test every 6 months.
@@ -13,18 +14,18 @@ Nothing really relevant to say other than I have two storage pools:
 
 ## Users
 
-| User              | Type          | Extra Groups                                         | Services |
-|-------------------|---------------|------------------------------------------------------|----------|
-| `guest`           | Disabled      | -                                                    | -        |
-| `admin`           | Disabled      | -                                                    | -        |
-| `Bruno-Admin`     | Admin         | -                                                    | All      |
-| `Bruno`           | User          | `private`, `media`                                   | Only SMB |
-| `machine-compute` | Internal User | `private`, `media`                                   | Only SMB |
+| User              | Type          | Extra Groups       | Services |
+| ----------------- | ------------- | ------------------ | -------- |
+| `guest`           | Disabled      | -                  | -        |
+| `admin`           | Disabled      | -                  | -        |
+| `Bruno-Admin`     | Admin         | -                  | All      |
+| `Bruno`           | User          | `private`, `media` | Only SMB |
+| `machine-compute` | Internal User | `private`, `media` | Only SMB |
 
 ## Shared Folders
 
 | Folder        | Storage Type | Recycle Bin | Snapshot | Hidden     | Media | Description                                                           |
-|---------------|--------------|-------------|----------|------------|-------|-----------------------------------------------------------------------|
+| ------------- | ------------ | ----------- | -------- | ---------- | ----- | --------------------------------------------------------------------- |
 | `bphenriques` | HDD          | Yes         | Yes      | Restricted | No    | Private files.                                                        |
 | `media`       | HDD          | Yes         | Yes      | No         | No    | Media files with no private information.                              |
 | `shared`      | HDD          | Restricted  | Yes      | No         | Yes   | Shared files across all users.                                        |
@@ -32,14 +33,15 @@ Nothing really relevant to say other than I have two storage pools:
 
 ## Groups
 
-| Group     | Description                             |
-|-----------|-----------------------------------------|
-| `private` | R+W permissions to private media files. |
+| Group     | Description                                 |
+| --------- | ------------------------------------------- |
+| `private` | R+W permissions to private media files.     |
 | `media`   | R+W permissions to non-private media files. |
 
 ## Snapshots
 
 Under Snapshot Replication application, I set it across all folders. For example:
+
 - Every 2h, starting at midnight.
 - Retain all snapshots for 5 days.
 - Retain the latest snapshot per day for 60 days.
@@ -81,6 +83,7 @@ TODO: ideally disable password authentication (see [this link](https://www.cyber
 3. Add the compute host IP to **"Permitted DiskStation devices"**.
 
 On the client (compute host):
+
 1. Verify connection: `upsc ups@192.168.1.192`
 2. Check status: `systemctl status upsmon.service`
 

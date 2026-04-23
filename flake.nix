@@ -37,14 +37,14 @@
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
     let
-      generators = import ./lib/generators.nix { lib = nixpkgs.lib; };
+      generators = import ./lib/generators.nix { inherit (nixpkgs) lib; };
       inherit (generators) forAllSystems readModulesAttrs;
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
       inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost;
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
-          lib = nixpkgs.lib;
+          inherit (nixpkgs) lib;
           pkgs = nixpkgs.legacyPackages.${system};
         }
       );

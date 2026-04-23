@@ -43,7 +43,7 @@ in
   services.prometheus = {
     enable = true;
     listenAddress = serviceCfg.host;
-    port = serviceCfg.port;
+    inherit (serviceCfg) port;
     # Both limits apply; size is the effective bound (~15 targets × ~200 metrics × 60s × ~3 bytes/sample ≈ 13 MB/day ≈ 4.7 GB/year)
     retentionTime = "365d";
     extraFlags = [

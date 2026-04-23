@@ -8,7 +8,7 @@ let
   mkQualityProfiles = mediaCfg:
     map (profile: {
       trash_id = profile.trashId;
-      name = profile.name;
+      inherit (profile) name;
       reset_unmatched_scores.enabled = true;
     }) (lib.attrValues mediaCfg.profiles);
 

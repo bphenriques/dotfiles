@@ -14,6 +14,7 @@ NixOS homelab server optimised for low maintenance, small attack surface, and de
 - **RAM**: 32GB
 
 BIOS tweaks to ensure thermal stability as sustained workloads caused thermal shutdowns (~84°C):
+
 - **BIOS fan curve** (`Del` → `Advanced → Hardware Monitor → Smart Fan Function`): adjust to run fans at full-speed at **80°C** (default is 90°C) and to start earlier with slope of 4 PWM/°C. Temperatures dropped from 83°C to ~65°C under identical load.
 - **Systemd `throttled.slice`**: heavy services (Immich, Jellyfin, Whisper, Ollama) pinned to cores 1-2 (`AllowedCPUs`), hard-capped (`CPUQuota=150%`).
 - **Systemd `critical.slice`**: SSH/DHCP.
@@ -107,10 +108,10 @@ custom.homelab.users.alice = {
 
 Access control is enforced through OIDC [per-client group restriction](../../modules/nixos/homelab/security/oidc.nix) at the service level or through `ForwardAuth` middleware.
 
-| Tier | Group | Intended for | Example access |
-|------|-------|-------------|----------------|
-| Admin | `admin` | Homelab owner | Everything |
-| Users | `users` | Family | Media, recipes |
+| Tier   | Group    | Intended for        | Example access     |
+| ------ | -------- | ------------------- | ------------------ |
+| Admin  | `admin`  | Homelab owner       | Everything         |
+| Users  | `users`  | Family              | Media, recipes     |
 | Guests | `guests` | Friends, colleagues | Romm only (viewer) |
 
 Guests are managed imperatively via `pocket-id-manage` to keep things simpler:

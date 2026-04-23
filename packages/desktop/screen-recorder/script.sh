@@ -1,6 +1,6 @@
 #shellcheck shell=bash
 
-is_recording() { pidof wl-screenrec > /dev/null; }
+is_recording() { pidof wl-screenrec >/dev/null; }
 record() {
   destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
   shift 1
@@ -49,10 +49,16 @@ stop() {
 }
 
 case "${1:-}" in
-  screen-audio)     shift 1 && record "$1" --audio                              ;;
-  screen-no-audio)  shift 1 && record "$1"                                      ;;
-  region-audio)     shift 1 && geometry="$(slurp -d)" || exit 0; record "$1" --geometry "$geometry" --audio     ;;
-  region-no-audio)  shift 1 && geometry="$(slurp -d)" || exit 0; record "$1" --geometry "$geometry"             ;;
-  stop)             shift 1 && stop                                             ;;
-  *)                echo "Unknown command" && exit 1                            ;;
+  screen-audio) shift 1 && record "$1" --audio ;;
+  screen-no-audio) shift 1 && record "$1" ;;
+  region-audio)
+    shift 1 && geometry="$(slurp -d)" || exit 0
+    record "$1" --geometry "$geometry" --audio
+    ;;
+  region-no-audio)
+    shift 1 && geometry="$(slurp -d)" || exit 0
+    record "$1" --geometry "$geometry"
+    ;;
+  stop) shift 1 && stop ;;
+  *) echo "Unknown command" && exit 1 ;;
 esac

@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.wireguard = {
         enable = lib.mkEnableOption "Wireguard configuration for this user (requires Wireguard)";
         devices = lib.mkOption {

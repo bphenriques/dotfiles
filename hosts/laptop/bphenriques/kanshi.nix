@@ -55,8 +55,8 @@ in
 
   custom.programs.niri.output.default = {
     identifier  = laptopScreen.criteria;
-    resolution  = laptopScreen.resolution;
-    refreshRate = laptopScreen.refreshRate;
+    inherit (laptopScreen) resolution;
+    inherit (laptopScreen) refreshRate;
     scale       = toString laptopScreen.scale;
   };
 }

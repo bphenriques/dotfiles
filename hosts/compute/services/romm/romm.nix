@@ -132,10 +132,10 @@ in
   };
 
   # Create dedicated user for RomM container with media group access
-  users.groups.${rommUser.group} = { gid = rommUser.gid; };
+  users.groups.${rommUser.group} = { inherit (rommUser) gid; };
   users.users.${rommUser.name} = {
-    uid = rommUser.uid;
-    group = rommUser.group;
+    inherit (rommUser) uid;
+    inherit (rommUser) group;
     isSystemUser = true;
     extraGroups = [ homelabMounts.media.group serviceCfg.secrets.group ];
   };

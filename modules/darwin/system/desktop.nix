@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (builtins) isPath isAttrs match;
 
   cfg = config.system.desktop;
 

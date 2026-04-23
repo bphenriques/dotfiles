@@ -1,6 +1,6 @@
 { config, self, ... }:
 let
-  paths = config.custom.homelab.paths;
+  inherit (config.custom.homelab) paths;
 in
 {
   custom.homelab.tasks.backup = {

@@ -1,16 +1,16 @@
 #shellcheck shell=bash
 
-VOLUME_LIMIT=1.5  # wpctl decimal: 1.0 = 100%, 1.5 = 150%
+VOLUME_LIMIT=1.5 # wpctl decimal: 1.0 = 100%, 1.5 = 150%
 
 # Device queries (pactl for rich JSON properties, no wpctl equivalent)
 list_sources() { pactl -f json list sources | jq -cr '[ .[] | select((.ports // []) | any(.type == "Mic" or .type == "Headset")) ]'; }
-list_sinks()   { pactl -f json list sinks; }
-get_sink()     { pactl -f json list sinks | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
-get_source()   { pactl -f json list sources | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
+list_sinks() { pactl -f json list sinks; }
+get_sink() { pactl -f json list sinks | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
+get_source() { pactl -f json list sources | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
 
 # Wireplumber
 set_volume() { wpctl set-volume --limit "$VOLUME_LIMIT" "$1" "$2"; }
-set_mute()   { wpctl set-mute "$1" "$2"; }
+set_mute() { wpctl set-mute "$1" "$2"; }
 
 # Classifies a device using pactl JSON: device.form_factor > active port type > device.bus.
 # Takes kind (sink/source) to distinguish speakers from microphones.
@@ -42,9 +42,9 @@ device_type() {
 friendly_device_name() {
   local json="$1" dtype="$2"
   case "$dtype" in
-    internal)   echo -n "Speakers" ;;
+    internal) echo -n "Speakers" ;;
     headphones) echo -n "Headphones" ;;
-    *)          echo "$json" | jq -j '.properties["node.nick"] // .description' ;;
+    *) echo "$json" | jq -j '.properties["node.nick"] // .description' ;;
   esac
 }
 
@@ -55,11 +55,11 @@ get_icon() {
   local device_label
   case "$dtype" in
     microphone) device_label="MICROPHONE" ;;
-    internal)   device_label="INTERNAL_SPEAKERS" ;;
-    external)   device_label="EXTERNAL_SPEAKERS" ;;
-    headset)    device_label="HEADSET" ;;
+    internal) device_label="INTERNAL_SPEAKERS" ;;
+    external) device_label="EXTERNAL_SPEAKERS" ;;
+    headset) device_label="HEADSET" ;;
     headphones) device_label="HEADPHONES" ;;
-    *)          return ;;
+    *) return ;;
   esac
   # Indirect expansion: constructs var name like OSD_VOLUME_HEADSET_MUTE_ICON, then ${!var} dereferences it.
   local var="OSD_VOLUME_${device_label}_${muted:+MUTE_}ICON"
@@ -71,7 +71,7 @@ notify_current_device() {
   local device_json dtype muted
 
   case "$kind" in
-    sink)   device_json="$(get_sink "$(pactl get-default-sink)")" ;;
+    sink) device_json="$(get_sink "$(pactl get-default-sink)")" ;;
     source) device_json="$(get_source "$(pactl get-default-source)")" ;;
   esac
 
@@ -79,10 +79,10 @@ notify_current_device() {
 
   local wpctl_output progress display_progress
   wpctl_output="$(wpctl get-volume "@DEFAULT_${kind^^}@")"
-  progress="$(awk '{ printf "%d", $2 * 100 }' <<< "$wpctl_output")"
+  progress="$(awk '{ printf "%d", $2 * 100 }' <<<"$wpctl_output")"
 
   muted=
-  if [[ "$wpctl_output" == *"[MUTED]"* ]]; then
+  if [[ $wpctl_output == *"[MUTED]"* ]]; then
     muted=true
     display_progress=0
   else
@@ -98,7 +98,7 @@ notify_current_device() {
     "$(friendly_device_name "$device_json" "$dtype")" "${progress}%"
 }
 
-notify_current_sink()   { notify_current_device sink; }
+notify_current_sink() { notify_current_device sink; }
 notify_current_source() { notify_current_device source; }
 
 notify_failure() {
@@ -142,7 +142,7 @@ get_next_device() {
     '
 }
 
-get_next_sink()   { get_next_device "$(list_sinks)" "$(pactl get-default-sink)" "${1:-+1}"; }
+get_next_sink() { get_next_device "$(list_sinks)" "$(pactl get-default-sink)" "${1:-+1}"; }
 get_next_source() { get_next_device "$(list_sources)" "$(pactl get-default-source)" "${1:-+1}"; }
 
 set_sink_and_move() {
@@ -181,8 +181,14 @@ device_select_fuzzel() {
   local current_device prompt
 
   case "$kind" in
-    sink)   prompt="Output"; current_device="$(get_sink "$(pactl get-default-sink)")" ;;
-    source) prompt="Input";  current_device="$(get_source "$(pactl get-default-source)")" ;;
+    sink)
+      prompt="Output"
+      current_device="$(get_sink "$(pactl get-default-sink)")"
+      ;;
+    source)
+      prompt="Input"
+      current_device="$(get_source "$(pactl get-default-source)")"
+      ;;
   esac
 
   local current_dtype current_name
@@ -195,7 +201,7 @@ device_select_fuzzel() {
     --lines "$(echo "$names" | jq length)" \
     --prompt "$prompt: " \
     --mesg "Current: $current_name")"
-  if [[ -n "$selection" && "$selection" != -1 ]]; then
+  if [[ -n $selection && $selection != -1 ]]; then
     echo "$names" | jq -rc --arg INDEX "$selection" '.[$INDEX | tonumber]'
   fi
 }
@@ -203,28 +209,28 @@ device_select_fuzzel() {
 case "${1:-}" in
   # Sinks (audio output)
   sink-toggle-mute) set_mute @DEFAULT_SINK@ toggle && notify_current_sink ;;
-  sink-increase)    set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink ;;
-  sink-decrease)    set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink ;;
-  sink-move)        set_sink_and_move "$2" && notify_current_sink ;;
-  sink-move-next)   set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink ;;
-  sink-move-prev)   set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink ;;
+  sink-increase) set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink ;;
+  sink-decrease) set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink ;;
+  sink-move) set_sink_and_move "$2" && notify_current_sink ;;
+  sink-move-next) set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink ;;
+  sink-move-prev) set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink ;;
   sink-move-fuzzel)
     selection="$(device_select_fuzzel sink "$(list_sinks)")"
-    if [[ -n "$selection" ]]; then
+    if [[ -n $selection ]]; then
       set_sink_and_move "$selection" && notify_current_sink
     fi
     ;;
 
   # Sources (audio input)
   source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle && notify_current_source ;;
-  source-increase)    set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source ;;
-  source-decrease)    set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source ;;
-  source-move)        set_source_and_move "$2" && notify_current_source ;;
-  source-move-next)   set_source_and_move "$(get_next_source "+1")" && notify_current_source ;;
-  source-move-prev)   set_source_and_move "$(get_next_source "-1")" && notify_current_source ;;
+  source-increase) set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source ;;
+  source-decrease) set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source ;;
+  source-move) set_source_and_move "$2" && notify_current_source ;;
+  source-move-next) set_source_and_move "$(get_next_source "+1")" && notify_current_source ;;
+  source-move-prev) set_source_and_move "$(get_next_source "-1")" && notify_current_source ;;
   source-move-fuzzel)
     selection="$(device_select_fuzzel source "$(list_sources)")"
-    if [[ -n "$selection" ]]; then
+    if [[ -n $selection ]]; then
       set_source_and_move "$selection" && notify_current_source
     fi
     ;;

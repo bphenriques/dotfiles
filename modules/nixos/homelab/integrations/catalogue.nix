@@ -6,7 +6,7 @@ let
 
   mkEntry = service:
     let
-      hasOidc = (lib.attrByPath [ "oidc" "enable" ] false service) == true;
+      hasOidc = lib.attrByPath [ "oidc" "enable" ] false service;
       hasForwardAuth = service.forwardAuth.enable;
     in {
       inherit (service) name subdomain port;

@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.seerr = {
         enable = lib.mkEnableOption "Seerr account for this user (requires Jellyfin)";
         permissions = {

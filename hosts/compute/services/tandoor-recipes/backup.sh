@@ -9,9 +9,12 @@ runuser -u "$DB_USER" -- pg_dump \
   --format=custom \
   --no-owner \
   --host=/run/postgresql \
-  "$DB_NAME" > "$OUTPUT_DIR/database.dump"
+  "$DB_NAME" >"$OUTPUT_DIR/database.dump"
 
-test -s "$OUTPUT_DIR/database.dump" || { echo "ERROR: database dump is empty"; exit 1; }
+test -s "$OUTPUT_DIR/database.dump" || {
+  echo "ERROR: database dump is empty"
+  exit 1
+}
 
 if [ -d "$MEDIA_DIR" ]; then
   cp -a "$MEDIA_DIR/." "$OUTPUT_DIR/media/"

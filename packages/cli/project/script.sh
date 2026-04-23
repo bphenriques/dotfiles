@@ -28,7 +28,7 @@ if [ ! -d "${PROJ_ROOT}" ]; then
 fi
 
 case "${1:-}" in
-  --root)   __proj_root ;;
+  --root) __proj_root ;;
   --select)
     shift 1
 
@@ -36,7 +36,7 @@ case "${1:-}" in
     result=
     case "$search" in
       *"github.com"*) result="$(__proj_clone_repo "$search")" ;;
-      *)              result="$(__proj_select "$search")"     ;;
+      *) result="$(__proj_select "$search")" ;;
     esac
 
     if [ -d "${result}" ]; then

@@ -30,6 +30,6 @@
 
     pkgs.libnotify  # Notifications
     # `top` but for GPUs. Very very useful to see which GPU is being used
-    (pkgs.nvtopPackages.amd.override { nvidia = (builtins.elem "nvidia" config.services.xserver.videoDrivers); })
+    (pkgs.nvtopPackages.amd.override { nvidia = builtins.elem "nvidia" config.services.xserver.videoDrivers; })
   ];
 }

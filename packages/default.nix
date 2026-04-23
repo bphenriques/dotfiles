@@ -6,7 +6,7 @@ let
   crossPlatform = forAllSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      builders = import ../lib/builders.nix { lib = nixpkgs.lib; inherit pkgs; };
+      builders = import ../lib/builders.nix { inherit (nixpkgs) lib; inherit pkgs; };
     in rec {
       preview = pkgs.callPackage ./cli/preview { };
       fzf-rg = pkgs.callPackage ./cli/fzf-rg { inherit builders; };
@@ -22,7 +22,7 @@ let
   linux = forLinuxSystems (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      builders = import ../lib/builders.nix { lib = nixpkgs.lib; inherit pkgs; };
+      builders = import ../lib/builders.nix { inherit (nixpkgs) lib; inherit pkgs; };
     in {
       volume-osd = pkgs.callPackage ./desktop/volume-osd { };
       brightness-osd = pkgs.callPackage ./desktop/brightness-osd { };

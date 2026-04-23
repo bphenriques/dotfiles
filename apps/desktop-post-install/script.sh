@@ -7,8 +7,11 @@ DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 
-fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
-info()    { printf '[ .. ] %s\n' "$1"; }
+fatal() {
+  printf '[FAIL] %s\n' "$1" >&2
+  exit 1
+}
+info() { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }
 
 usage() { echo "Usage: $0 <host> <bitwarden-email>" && exit 1; }
@@ -40,7 +43,7 @@ set_host() {
     fatal "There is already a host set that is not identical. Delete ${HOST_FILE_LOCATION} and try again."
   fi
 
-  echo "${host}" > "${HOST_FILE_LOCATION}"
+  echo "${host}" >"${HOST_FILE_LOCATION}"
   success "Host - Set to ${host}!"
 }
 
@@ -70,7 +73,7 @@ import_age_private_key() {
 
   # Append key if not already present (idempotent)
   mkdir -p "$(dirname "$SOPS_AGE_KEY_FILE")"
-  grep --quiet --fixed-strings -- "$key" "$SOPS_AGE_KEY_FILE" 2>/dev/null || echo "$key" >> "$SOPS_AGE_KEY_FILE"
+  grep --quiet --fixed-strings -- "$key" "$SOPS_AGE_KEY_FILE" 2>/dev/null || echo "$key" >>"$SOPS_AGE_KEY_FILE"
   chmod 600 "$SOPS_AGE_KEY_FILE"
 
   success "Sops - Added to ${SOPS_AGE_KEY_FILE}"

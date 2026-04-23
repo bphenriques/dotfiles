@@ -13,6 +13,6 @@ notify_current() {
 }
 
 case "${1:-}" in
-  next) niri msg action switch-layout next && notify_current  ;;
-  get)  notify_current                                        ;;
+  next) niri msg action switch-layout next && notify_current ;;
+  get) notify_current ;;
 esac

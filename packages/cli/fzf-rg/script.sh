@@ -10,5 +10,5 @@ fzf --bind "change:reload:sleep 0.05;$search {q} . || true" \
   --prompt "Find text: " \
   --ansi --query "$initial_query" --disabled \
   --delimiter : \
-  --preview "rg --ignore-case --pretty --context 10 '{q}' {1}" |
-  cut -d ':' -f1
+  --preview "rg --ignore-case --pretty --context 10 '{q}' {1}" \
+  | cut -d ':' -f1

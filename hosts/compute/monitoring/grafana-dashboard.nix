@@ -24,7 +24,7 @@ let
       builtins.genList (i: {
         inherit datasource;
         refId = builtins.elemAt [ "A" "B" "C" "D" "E" "F" "G" "H" ] i;
-        expr = (builtins.elemAt expr i).expr;
+        inherit ((builtins.elemAt expr i)) expr;
         legendFormat = (builtins.elemAt expr i).legend;
       }) (builtins.length expr)
     else

@@ -276,7 +276,7 @@ in {
 
       users.groups = lib.mapAttrs' (_: owner:
         lib.nameValuePair owner.group (lib.optionalAttrs (owner.gid != null) {
-          gid = owner.gid;
+          inherit (owner) gid;
         })
       ) allOwners;
 

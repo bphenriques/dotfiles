@@ -33,7 +33,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     devices = {
       "local" = {
         host = config.services.mpd.network.listenAddress;
-        port = config.services.mpd.network.port;
+        inherit (config.services.mpd.network) port;
         notifications = true;
       };
       "inky" = {

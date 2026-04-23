@@ -51,8 +51,8 @@ let
 
     # Local users provisioned with password authentication (all get public libraries)
     localUsers = lib.mapAttrsToList (_: u: {
-      username = u.username;
-      email = u.email;
+      inherit (u) username;
+      inherit (u) email;
       passwordCredential = "kavita-password-${u.username}";
       roles = [ "Login" ];
       libraries = publicLibraries;

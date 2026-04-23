@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.jellyfin = {
         enable = lib.mkEnableOption "Jellyfin account for this user";
         # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth

@@ -19,6 +19,6 @@ Grab the app for your device:
 
 Turn off your home Wi-fi, enable mobile data, and now you should be able to access: {{HOMEPAGE_URL}}
 
----
+______________________________________________________________________
 
 ⚠️ **Keep it secret, keep it safe!** This config is your personal key to the home network. Don't share it with anyone!

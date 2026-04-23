@@ -7,7 +7,7 @@ let
   adminUsernameFile = pkgs.writeText "miniflux-admin-username" "admin";
 
   userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
-    { username = u.username; } // u.services.miniflux.settings // { is_admin = u.isAdmin; }
+    { inherit (u) username; } // u.services.miniflux.settings // { is_admin = u.isAdmin; }
   ) enabledUsers));
 in
 {

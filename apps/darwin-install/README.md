@@ -6,12 +6,15 @@
 # Install
 
 1. Install [`nix` (Determinate Systems)](https://determinate.systems/nix-installer/).
+
 2. Bootstrap:
+
    ```shell
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#darwin-install
    ```
 
 3. Run the desktop post-install:
+
    ```shell
    HOST=my-darwin-host
    BITWARDEN_EMAIL=me@me.com
@@ -19,6 +22,7 @@
    ```
 
 4. Apply:
+
    ```shell
    nix run --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#dotfiles -- sync
    ```

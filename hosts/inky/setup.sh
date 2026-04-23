@@ -11,12 +11,15 @@ CONFIG_DIR="$SCRIPT_DIR/config"
 MARKER_BEGIN="# BEGIN dotfiles-${HOSTNAME}"
 MARKER_END="# END dotfiles-${HOSTNAME}"
 
-info()    { printf '[ .. ] %s\n' "$1"; }
+info() { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }
-fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
+fatal() {
+  printf '[FAIL] %s\n' "$1" >&2
+  exit 1
+}
 
 [[ $(id -u) -eq 0 ]] || fatal "Must run as root"
-[[ -d "$CONFIG_DIR" ]] || fatal "Config directory not found: $CONFIG_DIR"
+[[ -d $CONFIG_DIR ]] || fatal "Config directory not found: $CONFIG_DIR"
 
 # shellcheck source=config/generated/setup.env
 source "$CONFIG_DIR/generated/setup.env"
@@ -31,7 +34,7 @@ replace_block() {
     echo "$MARKER_BEGIN"
     cat "$fragment"
     echo "$MARKER_END"
-  } >> "$target"
+  } >>"$target"
 }
 
 setup_packages() {
@@ -46,7 +49,7 @@ setup_packages() {
   apt-get full-upgrade -y -qq
 
   info "Installing packages..."
-  apt-get install -y -qq cifs-utils mpd mpc git python3-dev jq wireguard-tools qrencode iptables > /dev/null
+  apt-get install -y -qq cifs-utils mpd mpc git python3-dev jq wireguard-tools qrencode iptables >/dev/null
 }
 
 setup_config_files() {
@@ -78,8 +81,8 @@ setup_boot() {
 
 setup_storage() {
   info "Configuring storage..."
-  grep -q '/tmp.*tmpfs' /etc/fstab || \
-    echo 'tmpfs /tmp tmpfs nosuid,nodev,size=64M 0 0' >> /etc/fstab
+  grep -q '/tmp.*tmpfs' /etc/fstab \
+    || echo 'tmpfs /tmp tmpfs nosuid,nodev,size=64M 0 0' >>/etc/fstab
 
   if grep -E '^\S+\s+/\s' /etc/fstab | grep -qv 'noatime'; then
     sed -i '/^\S\+\s\+\/\s/s/defaults/defaults,noatime/' /etc/fstab
@@ -92,7 +95,7 @@ setup_storage() {
   mkdir -p /mnt/homelab-media
 
   if [[ ! -f /root/.smb-credentials ]]; then
-    printf 'username=\npassword=\n' > /root/.smb-credentials
+    printf 'username=\npassword=\n' >/root/.smb-credentials
     info "IMPORTANT: Edit /root/.smb-credentials with actual NAS credentials"
   fi
   chmod 400 /root/.smb-credentials
@@ -117,7 +120,7 @@ setup_inkypi() {
   if [[ ! -d /opt/inkypi/.git ]]; then
     git clone https://github.com/fatihak/InkyPi.git /opt/inkypi
     git -C /opt/inkypi checkout "$inkypi_sha"
-    bash /opt/inkypi/install/install.sh < /dev/null
+    bash /opt/inkypi/install/install.sh </dev/null
   fi
 
   local plugins_dir="/usr/local/inkypi/src/plugins"
@@ -154,11 +157,11 @@ setup_inkypi() {
     --arg tf "$INKYPI_TIME_FORMAT" \
     --argjson sat "$INKYPI_INKY_SATURATION" \
     '.timezone = $tz | .time_format = $tf | .image_settings.inky_saturation = $sat' \
-    "$device_cfg" > "$device_cfg.tmp" && mv "$device_cfg.tmp" "$device_cfg"
+    "$device_cfg" >"$device_cfg.tmp" && mv "$device_cfg.tmp" "$device_cfg"
 
   # Immich plugin reads IMMICH_KEY from the environment
   if [[ ! -f /etc/inkypi.env ]]; then
-    printf 'IMMICH_KEY=\n' > /etc/inkypi.env
+    printf 'IMMICH_KEY=\n' >/etc/inkypi.env
     info "IMPORTANT: Edit /etc/inkypi.env with actual Immich API key"
   fi
   chmod 600 /etc/inkypi.env
@@ -173,23 +176,23 @@ setup_wireguard() {
 
   # Server keys
   if [[ ! -f "$datadir/server/private.key" ]]; then
-    wg genkey > "$datadir/server/private.key"
+    wg genkey >"$datadir/server/private.key"
     chmod 600 "$datadir/server/private.key"
-    wg pubkey < "$datadir/server/private.key" > "$datadir/server/public.key"
+    wg pubkey <"$datadir/server/private.key" >"$datadir/server/public.key"
     success "Generated WireGuard server keys"
   fi
 
   # Admin client keys
   if [[ ! -f "$datadir/admin/private.key" ]]; then
-    wg genkey > "$datadir/admin/private.key"
+    wg genkey >"$datadir/admin/private.key"
     chmod 600 "$datadir/admin/private.key"
-    wg pubkey < "$datadir/admin/private.key" > "$datadir/admin/public.key"
-    echo "$admin_ip" > "$datadir/admin/ip"
+    wg pubkey <"$datadir/admin/private.key" >"$datadir/admin/public.key"
+    echo "$admin_ip" >"$datadir/admin/ip"
     success "Generated WireGuard admin client keys"
   fi
 
   mkdir -p /etc/wireguard
-  cat > /etc/wireguard/wg0.conf <<EOF
+  cat >/etc/wireguard/wg0.conf <<EOF
 [Interface]
 Address = ${WG_ADDRESS}
 ListenPort = ${WG_PORT}
@@ -206,7 +209,7 @@ EOF
   install -Dm600 "$CONFIG_DIR/generated/wg-ctl.env" /etc/wireguard/wg-ctl.env
 
   if [[ ! -f /etc/wireguard/endpoint ]]; then
-    printf '' > /etc/wireguard/endpoint
+    printf '' >/etc/wireguard/endpoint
     chmod 600 /etc/wireguard/endpoint
     info "IMPORTANT: Edit /etc/wireguard/endpoint with public IP/DDNS:port"
   fi
@@ -218,7 +221,7 @@ setup_services() {
   systemctl disable --now avahi-daemon.service || true
 
   systemctl daemon-reload
-  sysctl --system > /dev/null
+  sysctl --system >/dev/null
 
   systemctl enable mpd
   systemctl restart mpd

@@ -15,7 +15,7 @@ in
       metadata.homepage = config.services.pocket-id.package.meta.homepage;
       metadata.category = "Administration";
       subdomain = "auth";
-      port = port;
+      inherit port;
       secrets = {
         files = {
           encryption-key = { rotatable = true; };

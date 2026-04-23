@@ -1,14 +1,14 @@
 { lib, pkgs, config, ... }:
 let
-  inherit (lib) optionalString concatStringsSep;
+  inherit (lib) concatStringsSep;
 in
 {
   programs.fish = {
     enable = true;
     plugins = [
-      { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
-      { name = "pure"; src = pkgs.fishPlugins.pure.src; }
-      { name = "fish-async-prompt"; src = pkgs.fishPlugins.async-prompt.src; }
+      { name = "autopair"; inherit (pkgs.fishPlugins.autopair) src; }
+      { name = "pure"; inherit (pkgs.fishPlugins.pure) src; }
+      { name = "fish-async-prompt"; inherit (pkgs.fishPlugins.async-prompt) src; }
     ];
 
     functions = {

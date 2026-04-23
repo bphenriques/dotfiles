@@ -20,7 +20,7 @@ in
 
   programs.git = {
     enable = true;
-    config.safe.directory = let home = config.users.users.bphenriques.home; in [
+    config.safe.directory = let inherit (config.users.users.bphenriques) home; in [
       "${home}/.dotfiles"
       "${home}/.dotfiles-private"
     ];

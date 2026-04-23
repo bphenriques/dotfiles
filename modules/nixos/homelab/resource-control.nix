@@ -1,10 +1,10 @@
 { lib, config, ... }:
 let
-  homelab = config.custom.homelab;
+  inherit (config.custom) homelab;
   rcCfg = homelab.resourceControl;
   sliceNames = lib.attrNames rcCfg.slices;
 
-  serviceExtension = { ... }: {
+  serviceExtension = _: {
     options.resourceControl = {
       slice = lib.mkOption {
         type = lib.types.nullOr (lib.types.enum sliceNames);
@@ -74,8 +74,8 @@ in
         message = "Services with resourceControl.slice must declare resourceControl.systemdServices: ${toString servicesMissingUnits}";
       }];
 
-      systemd.slices = lib.mapAttrs (sliceName: units: {
-        sliceConfig = rcCfg.slices.${sliceName}.sliceConfig;
+      systemd.slices = lib.mapAttrs (sliceName: _units: {
+        inherit (rcCfg.slices.${sliceName}) sliceConfig;
       }) (lib.filterAttrs (_: units: units != [ ]) collectedUnits);
 
       systemd.services = lib.mkMerge (

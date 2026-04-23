@@ -11,7 +11,7 @@ in
       default = pkgs.wlr-which-key;
     };
     settings = lib.mkOption {
-      type = yamlFormat.type;
+      inherit (yamlFormat) type;
       default = { };
     };
     menus = lib.mkOption {

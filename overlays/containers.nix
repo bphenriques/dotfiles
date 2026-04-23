@@ -1,6 +1,6 @@
 # Run `nix run .#check-updates` to check for newer upstream releases.
 _final: prev: let
-  lib = prev.lib;
+  inherit (prev) lib;
   images = {
     grist = {
       image = "gristlabs/grist";
@@ -38,7 +38,7 @@ in {
   trackedContainerVersions = lib.mapAttrsToList (name: img: {
     inherit name;
     inherit (img) version;
-    repo = img.updateInfo.repo;
+    inherit (img.updateInfo) repo;
     stripPrefix = img.updateInfo.stripPrefix or "";
   }) images;
 }

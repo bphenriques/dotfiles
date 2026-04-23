@@ -92,9 +92,9 @@ in {
 
     environment.systemPackages = [ pkgs.cifs-utils ];
     
-    users.groups = lib.mapAttrs' (name: mountCfg: lib.nameValuePair mountCfg.group { gid = mountCfg.gid; } ) cfg.mounts;
+    users.groups = lib.mapAttrs' (_name: mountCfg: lib.nameValuePair mountCfg.group { inherit (mountCfg) gid; } ) cfg.mounts;
 
-    fileSystems = lib.mapAttrs' (name: mountCfg:
+    fileSystems = lib.mapAttrs' (_name: mountCfg:
       lib.nameValuePair mountCfg.localMount {
         device = "//${cfg.hostname}/${mountCfg.remote}";
         fsType = "cifs";

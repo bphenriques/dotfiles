@@ -40,8 +40,8 @@ in
 
   services.immich = {
     enable = true;
-    host = serviceCfg.host;
-    port = serviceCfg.port;
+    inherit (serviceCfg) host;
+    inherit (serviceCfg) port;
     mediaLocation = "/var/lib/immich";
 
     settings = {
@@ -50,7 +50,7 @@ in
 
       oauth = {
         enabled = true;
-        issuerUrl = oidcCfg.provider.issuerUrl;
+        inherit (oidcCfg.provider) issuerUrl;
         clientId._secret = serviceCfg.oidc.id.file;
         clientSecret._secret = serviceCfg.oidc.secret.file;
         scope = "openid email profile";

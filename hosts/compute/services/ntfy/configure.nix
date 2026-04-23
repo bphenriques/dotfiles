@@ -2,7 +2,7 @@
 let
   serviceCfg = config.custom.homelab.services.ntfy;
   homelabCfg = config.custom.homelab;
-  topics = homelabCfg.ntfy.topics;
+  inherit (homelabCfg.ntfy) topics;
 
   # Derive publishers from services and tasks with ntfy integration
   ntfyServices = lib.filterAttrs (_: s: s.integrations.ntfy.enable) homelabCfg.services;

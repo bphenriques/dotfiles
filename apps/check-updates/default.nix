@@ -1,4 +1,4 @@
-{ lib, pkgs, writeNushellScript }:
+{ pkgs, writeNushellScript }:
 let
   packagesJson = pkgs.writeText "packages-metadata.json" (builtins.toJSON pkgs.trackedGithubVersions);
   containersJson = pkgs.writeText "containers-metadata.json" (builtins.toJSON pkgs.trackedContainerVersions);

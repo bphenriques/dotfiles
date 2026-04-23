@@ -17,11 +17,11 @@ let
       };
     };
     users = lib.mapAttrsToList (_: u: {
-      username = u.username;
-      scope = u.services.filebrowser.scope;
-      admin = u.services.filebrowser.admin;
+      inherit (u) username;
+      inherit (u.services.filebrowser) scope;
+      inherit (u.services.filebrowser) admin;
     } // lib.optionalAttrs (u.services.filebrowser.permissions != null) {
-      permissions = u.services.filebrowser.permissions;
+      inherit (u.services.filebrowser) permissions;
     }) enabledUsers;
     branding = {
       name = "Shared Files";

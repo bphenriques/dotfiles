@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.kavita = {
         enable = lib.mkEnableOption "Kavita permissions for this user";
         passwordFile = lib.mkOption {

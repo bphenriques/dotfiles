@@ -30,7 +30,7 @@ in
     alertmanager = {
       enable = true;
       listenAddress = serviceCfg.host;
-      port = serviceCfg.port;
+      inherit (serviceCfg) port;
       configuration = {
         route = {
           receiver = "ntfy";

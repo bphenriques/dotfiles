@@ -10,7 +10,7 @@ in
     enable = true;
     iconTheme = {
       name = if (stylix.polarity == "dark") then stylix.icons.dark else stylix.icons.light;
-      package = stylix.icons.package;
+      inherit (stylix.icons) package;
     };
     settings = {
       global = {

@@ -17,7 +17,7 @@ let
         href = service.publicUrl;
         siteMonitor = "${service.publicUrl}${service.healthcheck.path}";
       } // lib.optionalAttrs (service.integrations.homepage.icon != null) {
-        icon = service.integrations.homepage.icon;
+        inherit (service.integrations.homepage) icon;
       } // service.integrations.homepage.extraConfig;
     };
 
@@ -27,12 +27,12 @@ let
         inherit (entry) description;
         href = entry.url;
       } // lib.optionalAttrs (entry.icon != null) {
-        icon = entry.icon;
+        inherit (entry) icon;
       };
     };
 
-  servicesByTab = lib.groupBy (s: s.integrations.homepage.tab) homepageServices;
-  externalsByTab = lib.groupBy (e: e.tab) (lib.attrValues cfg.external);
+  servicesByTab = builtins.groupBy (s: s.integrations.homepage.tab) homepageServices;
+  externalsByTab = builtins.groupBy (e: e.tab) (lib.attrValues cfg.external);
 
   mkTabServices = tab: let
     svcs = servicesByTab.${tab} or [];

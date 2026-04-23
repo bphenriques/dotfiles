@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   config.custom.homelab._userOptionExtensions = [
-    ({ ... }: {
+    (_: {
       options.services.miniflux = {
         enable = lib.mkEnableOption "Miniflux settings for this user";
         settings = lib.mkOption {

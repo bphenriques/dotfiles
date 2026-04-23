@@ -5,8 +5,11 @@ FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME:-main}}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
-fatal()   { printf '[FAIL] %s\n' "$1" >&2; exit 1; }
-info()    { printf '[ .. ] %s\n' "$1"; }
+fatal() {
+  printf '[FAIL] %s\n' "$1" >&2
+  exit 1
+}
+info() { printf '[ .. ] %s\n' "$1"; }
 success() { printf '[ OK ] %s\n' "$1"; }
 
 usage() {
@@ -53,9 +56,9 @@ remote_install() {
 
   info "Fetching sops key for ${host}..."
   post_format_files="$(mktemp -d)"
-  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1; then
+  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
     mkdir -p "$(dirname "${post_format_files}/${SOPS_AGE_SYSTEM_FILE}")"
-    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > "${post_format_files}/${SOPS_AGE_SYSTEM_FILE}"
+    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >"${post_format_files}/${SOPS_AGE_SYSTEM_FILE}"
     success "Host sops key fetched"
   else
     fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
@@ -68,7 +71,7 @@ remote_install() {
     luks_disko_expected_file_location="/tmp/luks-interactive-password.key"
 
     info "Fetching luks encryption key..."
-    dotfiles-secrets "$bw_email" fetch luks-key "$host" > "${luks_local_file}"
+    dotfiles-secrets "$bw_email" fetch luks-key "$host" >"${luks_local_file}"
     extraArgs+=("--disk-encryption-keys" "${luks_disko_expected_file_location}" "${luks_local_file}")
   fi
 
@@ -98,17 +101,17 @@ local_install() {
 
   if dotfiles-secrets "$bw_email" exists luks-key "$host"; then
     info "Fetching luks encryption key..."
-    dotfiles-secrets "$bw_email" fetch luks-key "$host" > "/tmp/luks-interactive-password.key"
+    dotfiles-secrets "$bw_email" fetch luks-key "$host" >"/tmp/luks-interactive-password.key"
   fi
 
   info "Formatting disks..."
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 
   info "Fetching sops key for ${host}..."
-  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" > /dev/null 2>&1; then
+  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
     info "Copying sops system private key to /mnt/${SOPS_AGE_SYSTEM_FILE}"
     sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
-    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "/mnt/${SOPS_AGE_SYSTEM_FILE}" > /dev/null
+    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "/mnt/${SOPS_AGE_SYSTEM_FILE}" >/dev/null
     sudo chown root:root "/mnt/${SOPS_AGE_SYSTEM_FILE}"
     sudo chmod 600 "/mnt/${SOPS_AGE_SYSTEM_FILE}"
     success "Host sops key installed"
@@ -119,7 +122,8 @@ local_install() {
   info "Installing NixOS..."
   sudo nixos-install --no-write-lock-file --no-channel-copy --no-root-password --flake "${FLAKE_URL}#${host}"
 
-  success 'Done! Press any key to reboot. Press F12 if you need to select the right drive to boot'; read -r _;
+  success 'Done! Press any key to reboot. Press F12 if you need to select the right drive to boot'
+  read -r _
   reboot
 }
 
@@ -130,15 +134,24 @@ rescue() {
 
   unlock_bitwarden "$bw_email"
 
-  dotfiles-secrets "$bw_email" fetch luks-key "$host" > "/tmp/luks-interactive-password.key" || fatal "No luks key available"
+  dotfiles-secrets "$bw_email" fetch luks-key "$host" >"/tmp/luks-interactive-password.key" || fatal "No luks key available"
   sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 }
 
 [[ $# -lt 1 ]] && usage
 
 case "$1" in
-  remote)  shift; remote_install "$@"  ;;
-  local)   shift; local_install "$@"   ;;
-  rescue)  shift; rescue "$@"          ;;
+  remote)
+    shift
+    remote_install "$@"
+    ;;
+  local)
+    shift
+    local_install "$@"
+    ;;
+  rescue)
+    shift
+    rescue "$@"
+    ;;
   *) usage ;;
 esac

@@ -2,7 +2,7 @@
 
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
 get_percentage() { brightnessctl --device="${2:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
-set_brightness() { brightnessctl --device="${2:-"$(default_device)"}" set "$1" ; }
+set_brightness() { brightnessctl --device="${2:-"$(default_device)"}" set "$1"; }
 
 notify() {
   percentage="$1"

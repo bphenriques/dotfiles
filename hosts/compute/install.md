@@ -5,7 +5,7 @@
 Ensure the following are ready before installation:
 
 | Dependency   | What                                                   | Reference                                                  |
-|--------------|--------------------------------------------------------|------------------------------------------------------------|
+| ------------ | ------------------------------------------------------ | ---------------------------------------------------------- |
 | SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                   |
 | Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                     |
 | SMTP         | Account credentials for transactional email            | —                                                          |

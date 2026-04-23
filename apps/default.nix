@@ -1,7 +1,7 @@
 { nixpkgs, generators, self }:
 let
   inherit (generators) forAllSystems forLinuxSystems forDarwinSystems mergeAllSystems;
-  lib = nixpkgs.lib;
+  inherit (nixpkgs) lib;
   pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; meta = pkg.meta or {}; } ) attrs;
 
   crossPlatform = forAllSystems (system:
@@ -14,7 +14,7 @@ let
       host-secrets = pkgs.callPackage ./host-secrets { };
       service-catalogue = pkgs.callPackage ./service-catalogue { };
       check-updates = pkgsWithOverlays.callPackage ./check-updates {
-        writeNushellScript = self.lib.builders.${system}.writeNushellScript;
+        inherit (self.lib.builders.${system}) writeNushellScript;
       };
       });
 

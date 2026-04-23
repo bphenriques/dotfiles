@@ -6,7 +6,8 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
-ROMS_ROOT="$1"; shift
+ROMS_ROOT="$1"
+shift
 
 [[ -d $ROMS_ROOT ]] || {
   printf 'ROM root not found: %s\n' "$ROMS_ROOT" >&2

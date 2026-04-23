@@ -1,6 +1,6 @@
 { self, config, ...}:
 let
-  hosts = self.shared.networks.main.hosts;
+  inherit (self.shared.networks.main) hosts;
 in
 {
   imports = [
@@ -34,7 +34,7 @@ in
 
   custom.homelab = {
     enable = true;
-    domain = self.private.hosts.compute.settings.domain;
+    inherit (self.private.hosts.compute.settings) domain;
     locale = {
       timezone = config.time.timeZone;
       language = "pt-PT";

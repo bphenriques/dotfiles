@@ -183,7 +183,7 @@ in
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf (config.custom.programs.wlr-which-key.enable) ''spawn-sh "${lib.getExe config.custom.programs.wlr-which-key.package} global"'';
+      "Mod+Ctrl+Space"    = lib.mkIf config.custom.programs.wlr-which-key.enable ''spawn-sh "${lib.getExe config.custom.programs.wlr-which-key.package} global"'';
       "Mod+Return"        = ''spawn-sh "${terminal} +new-window"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';

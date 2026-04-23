@@ -33,7 +33,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.sound-output; }
       { key = "A"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
     ] ++ [
-      { key = "d"; desc = "Display Layout"; cmd = (lib.getExe pkgs.wdisplays); }
+      { key = "d"; desc = "Display Layout"; cmd = lib.getExe pkgs.wdisplays; }
       { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
     ] ++ lib.optionals config.custom.programs.session.enable [
       { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }

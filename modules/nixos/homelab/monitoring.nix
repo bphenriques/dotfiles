@@ -3,7 +3,7 @@ let
   cfg = config.custom.homelab;
   yaml = pkgs.formats.yaml { };
 
-  monitoringScopeModule = { ... }: {
+  monitoringScopeModule = _: {
     options = {
       enable = lib.mkEnableOption "this monitoring scope" // { default = true; };
 
@@ -86,7 +86,7 @@ let
   };
 
   blackboxScrapeConfigs = lib.optionals hasHealthchecks (let
-    byModule = lib.groupBy (s: s.healthcheck.probeModule) healthcheckedServices;
+    byModule = builtins.groupBy (s: s.healthcheck.probeModule) healthcheckedServices;
   in lib.mapAttrsToList (moduleName: services: {
     job_name = "healthcheck-${moduleName}";
     scrape_interval = "300s";  # Reduce wakeups: healthcheck probes don't need 60s resolution

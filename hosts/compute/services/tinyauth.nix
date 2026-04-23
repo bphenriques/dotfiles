@@ -28,7 +28,7 @@ in
 
     ingress.forwardAuth = {
       enable = true;
-      url = serviceCfg.url;
+      inherit (serviceCfg) url;
     };
   };
 

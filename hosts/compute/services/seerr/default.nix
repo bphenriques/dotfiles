@@ -1,7 +1,6 @@
 { config, ... }:
 let
   serviceCfg = config.custom.homelab.services.seerr;
-  jellyfinCfg = config.custom.homelab.services.jellyfin;
 in
 {
   imports = [ ./configure.nix ];
@@ -27,7 +26,7 @@ in
 
   services.seerr = {
     enable = true;
-    port = serviceCfg.port;
+    inherit (serviceCfg) port;
   };
 
   systemd.services.seerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.templates."seerr.env".path;

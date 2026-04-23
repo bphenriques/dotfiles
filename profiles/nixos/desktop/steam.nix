@@ -1,6 +1,6 @@
 { pkgs, config, ... }:
 let
-  steam-desktop-item = (pkgs.makeDesktopItem {
+  steam-desktop-item = pkgs.makeDesktopItem {
     name = "steam";
     desktopName = "Steam";
     icon = "steam";
@@ -8,7 +8,7 @@ let
     terminal = false;
     mimeTypes = [ "x-scheme-handler/steam" ];
     categories = [ "Network" "FileTransfer" "Game" ];
-  });
+  };
 in
 {
   # Tweaks

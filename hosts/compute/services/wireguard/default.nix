@@ -13,7 +13,7 @@ let
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
   dns = self.shared.dns.cloudflare;
-  endpoint = self.private.hosts.compute.settings.services.wireguard.endpoint;
+  inherit (self.private.hosts.compute.settings.services.wireguard) endpoint;
   smtpCfg = config.custom.homelab.smtp;
 
   dataDir = "/var/lib/wireguard";
@@ -27,9 +27,9 @@ let
       (_: u: map (d: {
         name = "${u.username}-${d.name}";
         device = d.name;
-        ip = d.ip;
-        email = u.email;
-        fullAccess = d.fullAccess;
+        inherit (d) ip;
+        inherit (u) email;
+        inherit (d) fullAccess;
       }) u.services.wireguard.devices)
       enabledUsers
   );
@@ -73,7 +73,7 @@ in
     metadata.version = "N/A";
     metadata.homepage = "https://www.wireguard.com/";
     metadata.category = "Administration";
-    port = port;
+    inherit port;
     ingress.enable = false;
     integrations.monitoring = {
       healthcheck = false;
@@ -179,7 +179,7 @@ in
   };
 
   assertions = let
-    clientsByIp = lib.groupBy (c: c.ip) clients;
+    clientsByIp = builtins.groupBy (c: c.ip) clients;
     ipCollisions = lib.filterAttrs (_: cs: builtins.length cs > 1) clientsByIp;
 
     maxIfNameLen = 15;
