@@ -1,5 +1,14 @@
 { config, pkgs, lib, ... }:
+let
+  ghostty = lib.getExe pkgs.ghostty;
+in
 {
+  custom.programs.terminal = {
+    package = pkgs.ghostty;
+    exec = "${ghostty} +new-window";
+    execApp = { cmd, title ? null }: "${ghostty} +new-window${lib.optionalString (title != null) " --title=${title}"} -e ${cmd}";
+  };
+
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {
     enable = true;
@@ -33,7 +42,7 @@
   };
 
   custom.programs.niri = lib.mkIf pkgs.stdenv.isLinux {
-    spawnShAtStartup = [ "${lib.getExe pkgs.ghostty} +new-window" ];
+    spawnShAtStartup = [ config.custom.programs.terminal.exec ];
     windowRules = {
       byApp = [
         ''
@@ -50,5 +59,3 @@
     };
   };
 }
-
-

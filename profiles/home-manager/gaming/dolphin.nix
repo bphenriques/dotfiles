@@ -5,25 +5,4 @@
 # Manual setup (one-time): open Dolphin -> Settings -> disable analytics.
 lib.mkIf pkgs.stdenv.isLinux {
   home.packages = [ pkgs.dolphin-emu ];
-
-  custom.programs.niri.windowRules = {
-    byApp = [
-      ''
-        window-rule {
-          match app-id="dolphin-emu"
-          open-on-workspace "3"
-          open-fullscreen true
-          open-focused true
-        }
-      ''
-    ];
-    overrides = [
-      ''
-        window-rule {
-          match app-id="dolphin-emu"
-          opacity 1.0
-        }
-      ''
-    ];
-  };
 }

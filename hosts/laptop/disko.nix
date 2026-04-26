@@ -2,6 +2,7 @@
 let
   inherit (config.users) groups;
   inherit (config.users) users;
+  rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
 in
 {
   disko.devices = {
@@ -10,7 +11,7 @@ in
         type = "disk";
         # Using `by-path` as b/c I won't move the SSDs and `by-id` may change (e.g., `/dev/nvme0n1`).
         # How to: run `ls /dev/disk/by-path/ -l` and cross-reference with `sudo nix run nixpkgs#nvme-cli -- list`
-        device = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
+        device = rootDisk;
         content = {
           type = "gpt";
 

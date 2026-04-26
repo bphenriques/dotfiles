@@ -100,10 +100,6 @@ in
       # Visual Code
       ".vscode"
 
-      # IntelliJ files
-      ".idea"
-      ".iml"
-
       # Vim
       "*.swp"
       "*.swo"
@@ -114,6 +110,9 @@ in
       # Python
       "*.pyc"
       "*.pyo"
+
+      # Terraform
+      ".terraform/"
 
       # Personal tools
       "bphenriques-tools/"

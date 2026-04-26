@@ -13,13 +13,14 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   systemctl = lib.getExe' pkgs.systemd "systemctl";
+  rebootToWindowsCmd = value: ''${systemctl} reboot --boot-loader-entry="windows_${value.title}.conf"'';
 
   systemd-boot-windows = lib.optionals osConfig.boot.loader.systemd-boot.enable
     (mapAttrsToList (name: value: {
       id = "session-${name}";
       symbol = "";
       label = "Reboot to ${value.title}";
-      exec = ''${systemctl} reboot --boot-loader-entry="windows_${value.title}.conf"''; # systemctl reboot --boot-loader-entry=help
+      exec = rebootToWindowsCmd value; # systemctl reboot --boot-loader-entry=help
     }) osConfig.boot.loader.systemd-boot.windows);
   sessionActions = [
     { id = "session-lock";      symbol = ""; label = "Lock";                 exec = cfg.exec.lock; }
@@ -46,7 +47,7 @@ in
       shutdown          = mkAppOpt' "${systemctl} poweroff";
       reboot            = mkAppOpt' "${systemctl} reboot";
       reboot-efi        = mkAppOpt' "${systemctl} reboot --firmware-setup";
-      reboot-windows    = mkAppOpt' (lib.getExe osConfig.custom.boot.grub.windows.rebootPackage);
+      reboot-windows    = mkAppOpt' (rebootToWindowsCmd (builtins.head (lib.attrValues osConfig.boot.loader.systemd-boot.windows)));
     };
   };
 

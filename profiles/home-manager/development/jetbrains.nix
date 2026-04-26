@@ -22,4 +22,9 @@ lib.mkIf pkgs.stdenv.isLinux {
       ''
     ];
   };
+
+  programs.git.ignores = [
+    ".idea"
+    ".iml"
+  ];
 }

@@ -4,16 +4,7 @@
     ./greetd.nix        # Login manager
     ./audio.nix
     ./wayland.nix       # Base wayland settings
-    ./docker.nix        # Virtualization
-    ./steam.nix         # Gaming: store + library
-    ./gamemode.nix      # Gaming: nice to have.
-    ./gamescope.nix     # Gaming: Micro-compositor
     ./nautilus.nix      # Ideally I wish it was terminal based but xdg-desktop-portal-termfilechooser seems too old to consider
-    ./sunshine.nix      # Game streaming (Sunshine + Moonlight)
-  ];
-
-  boot.kernelParams = [
-    "boot.shell_on_fail" # allows for root shell if failure to boot
   ];
 
   networking.networkmanager.enable = true;    # More complete package to manage connectivity. Suitable for desktop.

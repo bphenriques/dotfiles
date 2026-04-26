@@ -4,7 +4,7 @@ let
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
-  terminal        = lib.getExe pkgs.ghostty;
+  terminal        = config.custom.programs.terminal.exec;
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
 
@@ -184,7 +184,7 @@ in
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
       "Mod+Ctrl+Space"    = lib.mkIf config.custom.programs.wlr-which-key.enable ''spawn-sh "${lib.getExe config.custom.programs.wlr-which-key.package} global"'';
-      "Mod+Return"        = ''spawn-sh "${terminal} +new-window"'';
+      "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
       "Mod+K"             = ''spawn-sh "${lib.getExe config.custom.programs.niri-keyboard-layout.package} next"'';

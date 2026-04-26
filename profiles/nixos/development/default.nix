@@ -1,14 +1,12 @@
-{ config, ... }:
-{
+{ config, ... }: {
   virtualisation.docker = {
     enable = true;
-    enableOnBoot = false; # Delay until required
+    enableOnBoot = false;
     autoPrune = {
       enable = true;
       dates = "weekly";
       flags = [ "--all" ];
     };
   };
-
   hardware.nvidia-container-toolkit.enable = builtins.elem "nvidia" config.services.xserver.videoDrivers;
 }

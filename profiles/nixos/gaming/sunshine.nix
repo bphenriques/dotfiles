@@ -13,17 +13,15 @@ in
 {
   services.sunshine = {
     enable = true;
-    autoStart = false; # Start manually: `systemctl --user start sunshine`. Avoids session-order issues on Wayland.
-    package = pkgs.sunshine.override { cudaSupport = true; };
+    autoStart = true;
+    package = pkgs.sunshine.override { cudaSupport = true; }; # TODO Review why
     openFirewall = true;
     capSysAdmin = true; # Required for KMS capture on Wayland
 
     settings = {
-      capture = "kms";      # Force KMS capture — avoids portal/other fallbacks on hybrid GPU setups
-      encoder = "nvenc";    # Force NVIDIA encoder — prevents wandering into VAAPI/software on hybrid systems
+      capture = "kms";      # Force KMS capture: avoids portal/other fallbacks on hybrid GPU setups
+      encoder = "nvenc";    # Force NVIDIA encoder: prevents wandering into VAAPI/software on hybrid systems
       min_threads = 4;
-      # output_name: set after checking `journalctl --user -u sunshine` for the correct monitor index
-      # adapter_name: set to "/dev/dri/renderD129" (NVIDIA) only if Sunshine picks the wrong GPU
     };
 
     applications = {

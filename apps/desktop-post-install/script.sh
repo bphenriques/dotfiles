@@ -69,7 +69,7 @@ import_age_private_key() {
 
   info "Sops Private Key - Fetching for ${host}..."
   local key
-  key="$(dotfiles-secrets fetch sops-private-key "${host}")" || fatal "Failed to fetch sops-private-key for ${host}"
+  key="$(dotfiles-secrets "$bw_email" fetch sops-private-key "${host}")" || fatal "Failed to fetch sops-private-key for ${host}"
 
   # Append key if not already present (idempotent)
   mkdir -p "$(dirname "$SOPS_AGE_KEY_FILE")"
@@ -81,8 +81,8 @@ import_age_private_key() {
 
 import_gpg() {
   info "GPG - Importing..."
-  dotfiles-secrets fetch gpg-private-key | gpg --batch --yes --import || fatal "Failed to import GPG private key"
-  dotfiles-secrets fetch gpg-public-key | gpg --batch --yes --import || fatal "Failed to import GPG public key"
+  dotfiles-secrets "$bw_email" fetch gpg-private-key | gpg --batch --yes --import || fatal "Failed to import GPG private key"
+  dotfiles-secrets "$bw_email" fetch gpg-public-key | gpg --batch --yes --import || fatal "Failed to import GPG public key"
   success "GPG - Imported!"
 }
 

@@ -6,39 +6,22 @@
     ./btop.nix            # System Monitor
     ./fish.nix            # Shell
     ./fzf.nix             # Fuzzy search
-    ./direnv.nix          # Automate dev environment when we enter directories
     ./qt.nix              # Setup theming for some set of apps
     ./gtk.nix             # Setup theming for some set of apps
     ./firefox             # Browser
     ./zathura.nix         # Documents
-    ./git.nix
-    ./claude-code.nix     # AI Assistant
     ./mpv.nix             # Videos
     ./imv.nix             # Images
     ./beets.nix           # Music library manager
-    ./foot.nix            # Terminal (very fast to open and no GPU acceleration)
-    ./ghostty.nix         # Terminal (slower to open and has GPU acceleration)
-    ./mangohud.nix        # Game HUD
-    ./retroarch.nix       # Emulation
-    ./pegasus.nix         # Game launcher frontend
-    ./steam-rom-manager.nix # Steam ROM shortcuts
-    ./ppsspp.nix          # PSP emulator
-    ./pcsx2.nix           # PS2 emulator
-    ./dolphin.nix         # Wii/GameCube emulator
+    ./ghostty.nix         # Terminal
     ./discord.nix         # Social
     ./rofi.nix            # Alternative customizable menu
-    ./lang-scala.nix      # Programming language
-    ./heroic.nix          # Unified game client
-    ./steam.nix           # Steam client + Proton games
-    ./jetbrains.nix       # IDE
     ./kdenlive.nix        # Video editor
     ./qbittorrent.nix     # Torrent client
-    ./umu-launcher.nix    # Ad-hoc game launcher
     ./mpd.nix             # Music player
     ./awww.nix            # Wallpaper daemon
     ./obsidian.nix        # note taking
     ./yazi.nix            # File browser
-    ./helix.nix           # Editor
   ];
 
   xdg.mimeApps.enable = pkgs.stdenv.isLinux;    # Default apps and directories
@@ -77,11 +60,6 @@
     };
   };
 
-  # Gpg
-  programs.gpg = {
-    enable = pkgs.stdenv.isLinux;
-    homedir = "${config.xdg.dataHome}/gnupg";
-  };
   services.gpg-agent = {
     enable = pkgs.stdenv.isLinux;
     pinentry.package = pkgs.pinentry-gnome3;
@@ -107,12 +85,7 @@
   programs.nushell.enable = true;         # Adhoc shell for data processing
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    # Dev tools
-    pkgs.parallel
-    pkgs.yq-go          # Query YAML
     pkgs.xdg-user-dirs  # Relevant for desktop
-    pkgs.dateutils
-    pkgs.openssl
 
     # Archive
     pkgs.p7zip     # 7zip for linux
@@ -120,7 +93,6 @@
 
     # GUI centric
     pkgs.gparted
-    pkgs.amp-cli                  # AI Assistant.
   ];
 
   home = {
@@ -135,8 +107,4 @@
     };
   };
 
-  # Defensive hardening and to keep it explicit
-  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
-    "z ${config.programs.gpg.homedir}       0700 ${config.home.username} users"
-  ];
 }

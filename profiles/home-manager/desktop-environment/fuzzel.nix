@@ -8,7 +8,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       vertical-pad = 10;
       inner-pad = 10;
       show-actions = true;
-      terminal = ''${lib.getExe config.programs.ghostty.package} -e {cmd}'';
+      terminal = ''${lib.getExe config.custom.programs.terminal.package} -e {cmd}'';
       icon-theme = config.stylix.icons."${config.stylix.polarity}";
       icons-enabled = true;
     };

@@ -1,6 +1,7 @@
 { pkgs, lib, config, self, ... }:
 let
-  system-monitor = "${lib.getExe pkgs.ghostty} +new-window --title=btop-tui -e ${lib.getExe config.programs.btop.package}";
+  terminal = config.custom.programs.terminal;
+  system-monitor = terminal.execApp { title = "btop-tui"; cmd = lib.getExe config.programs.btop.package; };
 in
 {
   programs.btop = {
@@ -19,7 +20,7 @@ in
       name = "system-monitor";
       desktopName = "System Monitor";
       icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "system-monitor" "";
-      exec = ''${lib.getExe' pkgs.foot "footclient"} --title=btop-tui ${lib.getExe config.programs.btop.package}'';
+      exec = system-monitor;
     })
   ];
 

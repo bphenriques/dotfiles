@@ -3,7 +3,7 @@ let
   inherit (config.lib.stylix) colors;
   inherit (config.stylix) fonts;
 
-  terminal = lib.getExe' pkgs.foot "footclient";
+  terminal = config.custom.programs.terminal;
 in
 lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.wlr-which-key = {
@@ -34,7 +34,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       { key = "A"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
     ] ++ [
       { key = "d"; desc = "Display Layout"; cmd = lib.getExe pkgs.wdisplays; }
-      { key = "n"; desc = "Network Manager"; cmd = "${terminal} --title=nmtui-tui ${lib.getExe' pkgs.networkmanager "nmtui"}"; }
+      { key = "n"; desc = "Network Manager"; cmd = terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
     ] ++ lib.optionals config.custom.programs.session.enable [
       { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }
     ];
