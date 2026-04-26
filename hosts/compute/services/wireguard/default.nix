@@ -1,5 +1,5 @@
 # WireGuard VPN. Access control via server-side nftables, not client AllowedIPs.
-{ config, lib, pkgs, self, ... }:
+{ config, lib, pkgs, self, private, ... }:
 let
   cfg = config.custom.homelab;
   enabledUsers = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg.users;
@@ -12,8 +12,8 @@ let
   port = 51820;
   address = "10.100.0.1/24";
   clientSubnet = "10.100.0.0/24";
-  dns = self.shared.dns.cloudflare;
-  inherit (self.private.hosts.compute.settings.services.wireguard) endpoint;
+  dns = config.custom.fleet.dns;
+  inherit (private.settings.services.wireguard) endpoint;
   smtpCfg = config.custom.homelab.smtp;
 
   dataDir = "/var/lib/wireguard";
@@ -46,7 +46,7 @@ let
     WG_SERVER_IP = serverIp;
     WG_CLIENT_SUBNET = clientSubnet;
     WG_CLIENT_DNS = dns;
-    WG_SERVER_ALLOWED_IPS = "${clientSubnet},${self.shared.networks.main.subnet}";
+    WG_SERVER_ALLOWED_IPS = "${clientSubnet},${config.custom.fleet.lan.subnet}";
   } // lib.optionalAttrs (smtpCfg.from != "") {
     WG_SMTP_FROM = smtpCfg.from;
     WG_SMTP_URL_FILE = config.sops.templates."wireguard-smtp-url".path;
@@ -167,7 +167,7 @@ in
       # NAT: masquerade WireGuard client traffic forwarded to LAN so replies route back through compute
       chain postrouting {
         type nat hook postrouting priority srcnat; policy accept;
-        ip saddr ${clientSubnet} ip daddr ${self.shared.networks.main.subnet} masquerade
+        ip saddr ${clientSubnet} ip daddr ${config.custom.fleet.lan.subnet} masquerade
       }
     '';
   };

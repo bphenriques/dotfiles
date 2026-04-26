@@ -3,14 +3,13 @@ let
   inherit (nixpkgs.lib.attrsets) attrValues;
 in
 {
-  mkNixosHost = { system, configPath, extraOverlays ? [], extraHmModules ? [] }:
+  mkNixosHost = { hostName, system, configPath, extraOverlays ? [], extraHmModules ? [] }:
     let
       sharedSpecialArgs = {
+        private = inputs.dotfiles-private.hosts.${hostName};
         self = self // {
           packages = self.packages.${system} // inputs.dotfiles-private.packages.${system};
           lib = self.lib // { builders = self.lib.builders.${system}; };
-          private = inputs.dotfiles-private;
-          shared = import ../hosts/shared.nix;
         };
       };
     in nixpkgs.lib.nixosSystem {

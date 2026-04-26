@@ -1,5 +1,5 @@
 # Uses host networking to reach MySQL on localhost.
-{ config, pkgs, lib, self, ... }:
+{ config, pkgs, lib, ... }:
 let
   cfg = config.custom.homelab;
   homelabMounts = config.custom.homelab.smb.mounts;
@@ -53,7 +53,7 @@ let
       ice_servers =
         let
           port = toString config.services.coturn.listening-port;
-          lanIP = self.shared.networks.main.hosts.compute;
+          lanIP = config.custom.fleet.lan.hosts.compute;
           wgIP = "10.100.0.1";
           # Plaintext is acceptable — TURN relay is LAN/WG-only, no internet exposure, credentials are non-sensitive
           turnCreds = { username = "romm"; credential = "romm-netplay"; };

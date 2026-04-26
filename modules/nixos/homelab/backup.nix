@@ -128,19 +128,6 @@ in
   };
 
   config = lib.mkMerge [
-    {
-      custom.homelab._serviceOptionExtensions = [
-        ({ name, ... }: {
-          options.backup.outputDir = lib.mkOption {
-            type = lib.types.str;
-            default = "${extrasDir}/${name}";
-            readOnly = true;
-            description = "Directory where the hook writes its output. Available as OUTPUT_DIR in the hook environment.";
-          };
-        })
-      ];
-    }
-
     (lib.mkIf cfg.enable {
     assertions = let
       invalidKeys = lib.filter (k: !(lib.hasPrefix "/" k)) (lib.attrNames cfg.bindings);

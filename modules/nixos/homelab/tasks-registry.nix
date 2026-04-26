@@ -19,22 +19,19 @@ let
   };
 in
 {
-  options.custom.homelab = {
-    _taskOptionExtensions = lib.mkOption {
-      type = lib.types.listOf lib.types.deferredModule;
-      default = [ ];
-      internal = true;
-    };
-
-    tasks = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submoduleWith {
-        modules = [ baseTaskModule ] ++ cfg._taskOptionExtensions;
-      });
-      default = { };
-      description = ''
-        Registry of non-HTTP tasks: backup, timers, maintenance jobs.
-        Integrations extend this via internal extension hooks.
-      '';
-    };
+  options.custom.homelab.tasks = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submoduleWith {
+      specialArgs = { homelabCfg = cfg; };
+      modules = [
+        baseTaskModule
+        ./schemas/secrets.nix
+        ./schemas/ntfy.nix
+      ];
+    });
+    default = { };
+    description = ''
+      Registry of non-HTTP tasks: backup, timers, maintenance jobs.
+      Task schema is composed from base options and per-concern fragments in schemas/.
+    '';
   };
 }

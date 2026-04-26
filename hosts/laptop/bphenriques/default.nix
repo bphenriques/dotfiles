@@ -1,4 +1,4 @@
-{ lib, config, self, ... }:
+{ lib, config, ... }:
 let
   smbCfg = config.custom.homelab.smb;
 in
@@ -15,7 +15,7 @@ in
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
 
-    openssh.authorizedKeys.keys = self.shared.authorizedSSHKeys;
+    openssh.authorizedKeys.keys = config.custom.fleet.authorizedSSHKeys;
   };
 
   programs.git = {

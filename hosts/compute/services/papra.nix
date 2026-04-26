@@ -1,6 +1,6 @@
-# TODO: Add user extension (custom.homelab._userOptionExtensions) for per-user access
+# TODO: Add user schema (schemas/user-papra.nix) for per-user access
 # once Papra exposes an API for organization membership/invites.
-{ config, lib, pkgs, self, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.custom.homelab;
   serviceCfg = cfg.services.papra;
@@ -126,8 +126,8 @@ in
       "--memory=1g"
       "--pids-limit=128"
       "--group-add=${toString homelabMounts.bphenriques.gid}"
-      "--add-host=${cfg.services.pocket-id.publicHost}:${self.shared.networks.main.hosts.compute}"
-      "--add-host=${serviceCfg.publicHost}:${self.shared.networks.main.hosts.compute}"
+      "--add-host=${cfg.services.pocket-id.publicHost}:${config.custom.fleet.lan.hosts.compute}"
+      "--add-host=${serviceCfg.publicHost}:${config.custom.fleet.lan.hosts.compute}"
     ];
   };
 }

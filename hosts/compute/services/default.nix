@@ -1,6 +1,6 @@
-{ self, config, ...}:
+{ config, private, ... }:
 let
-  inherit (self.shared.networks.main) hosts;
+  inherit (config.custom.fleet.lan) hosts;
 in
 {
   imports = [
@@ -34,7 +34,7 @@ in
 
   custom.homelab = {
     enable = true;
-    inherit (self.private.hosts.compute.settings) domain;
+    inherit (private.settings) domain;
     locale = {
       timezone = config.time.timeZone;
       language = "pt-PT";
@@ -42,8 +42,8 @@ in
       latitude = 38.736946;
       longitude = -9.142685;
     };
-    ingress.cloudflareEmail = self.private.hosts.compute.settings.cloudflare.email;
-    smtp = self.private.hosts.compute.settings.smtp // {
+    ingress.cloudflareEmail = private.settings.cloudflare.email;
+    smtp = private.settings.smtp // {
       passwordFile = config.sops.secrets."smtp-password".path;
     };
 
@@ -70,7 +70,7 @@ in
     };
 
     # Individual users whose information is kept private
-    users = self.private.hosts.compute.settings.users // {
+    users = private.settings.users // {
       home = {
         email = "home@localhost";
         firstName = "Home";

@@ -1,4 +1,4 @@
-{ lib, pkgs, config, osConfig, self, ... }:
+{ lib, pkgs, config, osConfig, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
@@ -37,7 +37,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         notifications = true;
       };
       "inky" = {
-        host = self.shared.networks.main.hosts.inky;
+        host = osConfig.custom.fleet.lan.hosts.inky;
         notifications = true;
       };
     };

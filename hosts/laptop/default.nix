@@ -1,4 +1,4 @@
-{ config, pkgs, self, ... }:
+{ config, pkgs, private, ... }:
 let
   primaryUser = "bphenriques";
   rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
@@ -14,6 +14,8 @@ in
     # Users
     ./bphenriques
   ];
+
+  custom.fleet = import ../shared.nix;
 
   networking.hostName = "bphenriques-laptop";
 
@@ -48,7 +50,7 @@ in
   };
   custom.homelab.smb = {
     enable = true;
-    hostname = self.shared.networks.main.hosts.bruno-home-nas;
+    hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
       bphenriques = { gid = 5190; };
@@ -70,7 +72,7 @@ in
   };
 
   # Secrets
-  sops.defaultSopsFile = self.private.hosts.laptop.sopsSecretsFile;
+  sops.defaultSopsFile = private.sopsSecretsFile;
   sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
 
   # Users

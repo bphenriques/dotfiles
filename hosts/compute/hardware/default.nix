@@ -1,4 +1,4 @@
-{ lib, pkgs, self, config, ... }:
+{ lib, pkgs, config, ... }:
 {
   imports = [
     ./hardware-configuration.nix  # Output of nixos-generate-config --root /mnt
@@ -66,7 +66,7 @@
     enable = true;
     mode = "netclient";
     upsmon.monitor.synology = {
-      system = "ups@${self.shared.networks.main.hosts.bruno-home-nas}";
+      system = "ups@${config.custom.fleet.lan.hosts.bruno-home-nas}";
       powerValue = 1;
       user = "compute";
       passwordFile = config.sops.secrets."upsmon/password".path;

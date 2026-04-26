@@ -1,4 +1,4 @@
-{ config, lib, pkgs, self, ... }:
+{ config, lib, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.mympd;
 in
@@ -16,7 +16,7 @@ in
 
   systemd.services.mympd = {
     environment = {
-      MPD_HOST = self.shared.networks.main.hosts.inky;
+      MPD_HOST = config.custom.fleet.lan.hosts.inky;
       MPD_PORT = toString 6600;
     };
     path = [ pkgs.coreutils ];

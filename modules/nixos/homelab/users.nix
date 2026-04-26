@@ -41,15 +41,21 @@ in
       };
     };
 
-    _userOptionExtensions = lib.mkOption {
-      type = lib.types.listOf lib.types.deferredModule;
-      default = [ ];
-      internal = true;
-    };
-
     users = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submoduleWith {
-        modules = [ baseUserModule ] ++ cfg._userOptionExtensions;
+        modules = [
+          baseUserModule
+          ./schemas/user-oidc.nix
+          ./schemas/user-jellyfin.nix
+          ./schemas/user-immich.nix
+          ./schemas/user-kavita.nix
+          ./schemas/user-miniflux.nix
+          ./schemas/user-seerr.nix
+          ./schemas/user-filebrowser.nix
+          ./schemas/user-radicale.nix
+          ./schemas/user-syncthing.nix
+          ./schemas/user-wireguard.nix
+        ];
       });
       default = { };
     };

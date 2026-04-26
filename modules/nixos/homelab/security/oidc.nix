@@ -5,121 +5,15 @@ let
   cfg = homelabCfg.oidc;
   credentialsBaseDir = "/run/homelab-oidc";
 
-  mkPlaceholder = serviceName: field: "@HOMELAB_OIDC_${serviceName}_${field}@";
-
-  mkServiceOidcSchema = { serviceName, serviceConfig }: { config, ... }: {
-    options = {
-      enable = lib.mkEnableOption "OIDC client for this service";
-
-      id = {
-        file = lib.mkOption {
-          type = lib.types.str;
-          default = "${credentialsBaseDir}/${serviceName}/id";
-          readOnly = true;
-          description = "Path to the file containing the client ID";
-        };
-
-        placeholder = lib.mkOption {
-          type = lib.types.str;
-          default = mkPlaceholder serviceName "ID";
-          readOnly = true;
-          description = "Placeholder for client ID (use in config files, substituted at runtime)";
-        };
-      };
-
-      secret = {
-        file = lib.mkOption {
-          type = lib.types.str;
-          default = "${credentialsBaseDir}/${serviceName}/secret";
-          readOnly = true;
-          description = "Path to the file containing the client secret";
-        };
-
-        placeholder = lib.mkOption {
-          type = lib.types.str;
-          default = mkPlaceholder serviceName "SECRET";
-          readOnly = true;
-          description = "Placeholder for client secret (use in config files, substituted at runtime)";
-        };
-      };
-
-      name = lib.mkOption {
-        type = lib.types.str;
-        default = serviceName;
-        description = "Display name of the OIDC client in the provider";
-      };
-
-      callbackURLs = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ "${serviceConfig.publicUrl}/oauth2/oidc/callback" ];
-        description = "Callback URLs for the OIDC client";
-      };
-
-      pkce = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable PKCE for this client";
-      };
-
-      gid = lib.mkOption {
-        type = lib.types.nullOr lib.types.int;
-        default = null;
-        description = "Fixed GID for the credentials group (null = auto-assign)";
-      };
-
-      group = lib.mkOption {
-        type = lib.types.str;
-        default = "homelab-oidc-${serviceName}";
-        readOnly = true;
-        description = "Group name for this client's credentials";
-      };
-
-      credentialsDir = lib.mkOption {
-        type = lib.types.str;
-        default = "${credentialsBaseDir}/${serviceName}";
-        readOnly = true;
-        description = "Directory containing this client's id and secret files";
-      };
-
-      systemd = {
-        dependentServices = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [ ];
-          description = ''
-            Systemd services that depend on this OIDC client's credentials.
-            Automatically wires requires/after/partOf.
-          '';
-        };
-
-        loadCredentials = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [
-            "oidc-id:${config.id.file}"
-            "oidc-secret:${config.secret.file}"
-          ];
-          readOnly = true;
-          description = "Ready-to-use LoadCredential entries for systemd services";
-        };
-
-        supplementaryGroups = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [ config.group ];
-          readOnly = true;
-          description = "Groups to add for direct credential file access";
-        };
-      };
-    };
-  };
-
   # Extract services that have OIDC enabled
   oidcServices = lib.filterAttrs (_: svc: svc.oidc.enable) homelabCfg.services;
 
   # Derive clients from services
   derivedClients = lib.mapAttrs (_: svc: svc.oidc // { inherit (svc.access) allowedGroups; }) oidcServices;
 
-  # Read-only projection type for oidc.clients. intentionally re-declares fields from mkServiceOidcSchema.
+  # Read-only projection type for oidc.clients. Intentionally re-declares fields from schemas/oidc.nix.
   # This is a typed contract for consumers (e.g. pocket-id provisioning), not a shared schema with defaults.
-  # It also adds allowedGroups which doesn't exist in mkServiceOidcSchema.
+  # It also adds allowedGroups which doesn't exist in schemas/oidc.nix.
   oidcClientView = lib.types.submodule {
     options = {
       enable = lib.mkOption { type = lib.types.bool; };
@@ -259,29 +153,6 @@ in
   };
 
   config = lib.mkMerge [
-    {
-      custom.homelab._serviceOptionExtensions = [
-        ({ name, config, ... }: {
-          options.oidc = lib.mkOption {
-            type = lib.types.submodule (mkServiceOidcSchema {
-              serviceName = name;
-              serviceConfig = config;
-            });
-            default = { };
-            description = "OIDC client configuration for this service";
-          };
-        })
-      ];
-
-      custom.homelab._userOptionExtensions = [
-        (_: {
-          options.services.oidc.enable = lib.mkEnableOption "OIDC account for this user" // {
-            default = true;
-          };
-        })
-      ];
-    }
-
     (lib.mkIf (derivedClients != { }) (let
       allDependentServices = lib.concatLists (
         lib.mapAttrsToList (_: client: client.systemd.dependentServices) derivedClients

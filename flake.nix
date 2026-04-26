@@ -70,10 +70,12 @@
       darwinModules       = readModulesAttrs ./modules/darwin;
 
       nixosConfigurations.compute = mkNixosHost {
+        hostName = "compute";
         system = "x86_64-linux";
         configPath = ./hosts/compute;
       };
       nixosConfigurations.laptop = mkNixosHost {
+        hostName = "laptop";
         system = "x86_64-linux";
         configPath = ./hosts/laptop;
         extraOverlays = [ inputs.nur.overlays.default ];

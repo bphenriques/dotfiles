@@ -157,13 +157,6 @@ in
   options.custom.homelab = {
     enable = lib.mkEnableOption "home-server services";
 
-    # Internal extension point for per-service options (e.g., integrations).
-    _serviceOptionExtensions = lib.mkOption {
-      type = lib.types.listOf lib.types.deferredModule;
-      default = [ ];
-      internal = true;
-    };
-
     categories = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = categories;
@@ -178,13 +171,24 @@ in
 
     services = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submoduleWith {
-        modules = [ baseServiceModule ] ++ cfg._serviceOptionExtensions;
+        specialArgs = { homelabCfg = cfg; };
+        modules = [
+          baseServiceModule
+          ./schemas/oidc.nix
+          ./schemas/secrets.nix
+          ./schemas/backup.nix
+          ./schemas/resource-control.nix
+          ./schemas/homepage.nix
+          ./schemas/ntfy.nix
+          ./schemas/monitoring.nix
+          ./schemas/catalogue.nix
+        ];
       });
       default = { };
       description = ''
         Registry of homelab services: routing, metadata, and integrations.
         HTTP ingress is optional (controlled via ingress.enable).
-        Integrations and security concerns extend this via internal extension hooks.
+        Service schema is composed from base options and per-concern fragments in schemas/.
       '';
     };
 

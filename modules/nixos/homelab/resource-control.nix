@@ -4,22 +4,6 @@ let
   rcCfg = homelab.resourceControl;
   sliceNames = lib.attrNames rcCfg.slices;
 
-  serviceExtension = _: {
-    options.resourceControl = {
-      slice = lib.mkOption {
-        type = lib.types.nullOr (lib.types.enum sliceNames);
-        default = null;
-        description = "Shared systemd slice for this service's declared systemdServices.";
-      };
-
-      systemdServices = lib.mkOption {
-        type = lib.types.coercedTo lib.types.str (s: [ s ]) (lib.types.listOf lib.types.str);
-        default = [ ];
-        description = "Systemd service names assigned to the chosen slice. Required when slice is set.";
-      };
-    };
-  };
-
   collectUnits = sliceName:
     let
       sliceCfg = rcCfg.slices.${sliceName};
@@ -66,8 +50,6 @@ in
   };
 
   config = lib.mkMerge [
-    { custom.homelab._serviceOptionExtensions = [ serviceExtension ]; }
-
     (lib.mkIf homelab.enable {
       assertions = [{
         assertion = servicesMissingUnits == [ ];

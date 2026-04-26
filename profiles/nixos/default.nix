@@ -1,4 +1,4 @@
-{ pkgs, lib, self, ... }:
+{ pkgs, lib, config, self, ... }:
 {
   imports = [ ../settings.nix ];
 
@@ -18,7 +18,7 @@
   };
 
   # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
-  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} self.shared.networks.main.hosts;
+  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or []) ++ [ name ]; }) {} config.custom.fleet.lan.hosts;
 
   boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
 
