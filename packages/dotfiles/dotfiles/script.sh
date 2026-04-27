@@ -10,7 +10,6 @@ fatal() {
 
 DOTFILES_LOCATION=${DOTFILES_LOCATION:-"$HOME/.dotfiles"}
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
-SHARED_HOSTS_CONFIGURATION="$DOTFILES_LOCATION/hosts/shared.nix"
 
 [[ -f $HOST_FILE_LOCATION ]] || fatal "$HOST_FILE_LOCATION not found"
 CURRENT_HOST=$(<"$HOST_FILE_LOCATION")
@@ -47,7 +46,7 @@ nix_build() {
   fi
 }
 
-get_host_ip() { "${NIX[@]}" eval --raw --file "$SHARED_HOSTS_CONFIGURATION" "networks.main.hosts.$1" || fatal "Could not find IP for host '$1'."; }
+get_host_ip() { jq -re --arg h "$1" '.[$h] // empty' "$FLEET_HOST_IPS" || fatal "Could not find IP for host '$1'."; }
 
 _show_changelog() {
   [[ -e /run/current-system && -e ./result ]] || return 0

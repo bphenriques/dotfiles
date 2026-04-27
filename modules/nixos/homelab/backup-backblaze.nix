@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.custom.homelab.backup;
+  cfg = config.custom.homelab.backup.backblaze;
   homelabCfg = config.custom.homelab;
 
   stateDir = "/var/lib/homelab-backup";
   extrasDir = "${stateDir}/src/extras";
 
   ntfyCfg = config.custom.homelab.services.ntfy;
-  backupTaskCfg = config.custom.homelab.tasks.backup;
+  backupTaskCfg = config.custom.homelab.tasks."backup-backblaze";
 
   tomlFormat = pkgs.formats.toml { };
   rusticProfile = tomlFormat.generate "homelab.toml" {
@@ -49,17 +49,17 @@ let
   servicesWithBackup = lib.filterAttrs (_: svc: svc.backup.package != null) homelabCfg.services;
 
   # Unit names (with .service suffix) for systemd dependency fields
-  serviceHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") servicesWithBackup;
-  standaloneHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-${name}.service") cfg.hooks;
+  serviceHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-backblaze-${name}.service") servicesWithBackup;
+  standaloneHookUnits = lib.mapAttrsToList (name: _: "homelab-backup-backblaze-${name}.service") cfg.hooks;
   allHookUnits = serviceHookUnits ++ standaloneHookUnits;
 
   # Service IDs (without .service suffix) for NixOS systemd.services keys / ntfy injection
   allHookServiceIds =
-    (lib.mapAttrsToList (name: _: "homelab-backup-${name}") servicesWithBackup)
-    ++ (lib.mapAttrsToList (name: _: "homelab-backup-${name}") cfg.hooks);
+    (lib.mapAttrsToList (name: _: "homelab-backup-backblaze-${name}") servicesWithBackup)
+    ++ (lib.mapAttrsToList (name: _: "homelab-backup-backblaze-${name}") cfg.hooks);
 in
 {
-  options.custom.homelab.backup = {
+  options.custom.homelab.backup.backblaze = {
     enable = lib.mkEnableOption "homelab backup to Backblaze B2";
 
     package = lib.mkOption {
@@ -131,18 +131,32 @@ in
     (lib.mkIf cfg.enable {
     assertions = let
       invalidKeys = lib.filter (k: !(lib.hasPrefix "/" k)) (lib.attrNames cfg.bindings);
-    in [{
-      assertion = invalidKeys == [];
-      message = "Backup binding keys must be absolute paths (start with '/'). Invalid: ${toString invalidKeys}";
-    }];
+      reservedKeys = lib.filter (k: k == "/extras" || lib.hasPrefix "/extras/" k) (lib.attrNames cfg.bindings);
+      hookNameCollisions = lib.intersectLists (lib.attrNames servicesWithBackup) (lib.attrNames cfg.hooks);
+    in [
+      {
+        assertion = invalidKeys == [];
+        message = "Backup binding keys must be absolute paths (start with '/'). Invalid: ${toString invalidKeys}";
+      }
+      {
+        assertion = reservedKeys == [];
+        message = "Backup binding keys must not use reserved /extras namespace: ${toString reservedKeys}";
+      }
+      {
+        assertion = hookNameCollisions == [];
+        message = "Standalone backup hooks must not collide with service backup hook names: ${toString hookNameCollisions}";
+      }
+    ];
 
-    custom.homelab.tasks.backup.systemdServices = lib.mkAfter allHookServiceIds;
+    custom.homelab.tasks."backup-backblaze".systemdServices =
+      [ "homelab-backup-backblaze" "homelab-backup-backblaze-verify" ] ++ allHookServiceIds;
 
     systemd.services = let
-      mkHookService = name: { package, outputDir, after, ... }: lib.nameValuePair "homelab-backup-${name}" {
+      mkHookService = name: { package, outputDir, after, ... }: lib.nameValuePair "homelab-backup-backblaze-${name}" {
         description = "Pre-backup hook: ${name}";
         after = [ "network-online.target" ] ++ after;
-        wants = [ "network-online.target" ] ++ after;
+        wants = [ "network-online.target" ];
+        requires = after;
         environment.OUTPUT_DIR = outputDir;
         serviceConfig = {
           Type = "oneshot";
@@ -176,10 +190,11 @@ in
         RestrictSUIDSGID = true;
       };
     in serviceHooks // standaloneHooks // {
-      homelab-backup = {
-        description = "Homelab backup (Backblaze B2)";
+      homelab-backup-backblaze = {
+        description = "Homelab Backblaze B2 backup";
+        requires = allHookUnits;
         after = [ "network-online.target" "remote-fs.target" "ntfy-configure.service" ] ++ allHookUnits;
-        wants = [ "network-online.target" "ntfy-configure.service" ] ++ allHookUnits;
+        wants = [ "network-online.target" "ntfy-configure.service" ];
         unitConfig.RequiresMountsFor = lib.attrValues cfg.bindings;
         environment = rusticManageEnv;
         serviceConfig = hardenedServiceConfig // {
@@ -191,8 +206,8 @@ in
           BindReadOnlyPaths = lib.mapAttrsToList (dst: src: "${src}:${cfg.src}${dst}") cfg.bindings;
         };
       };
-      homelab-backup-verify = {
-        description = "Homelab backup verification (Backblaze B2)";
+      homelab-backup-backblaze-verify = {
+        description = "Homelab Backblaze B2 backup verification";
         after = [ "network-online.target" "ntfy-configure.service" ];
         wants = [ "network-online.target" "ntfy-configure.service" ];
         environment = rusticManageEnv;
@@ -214,7 +229,7 @@ in
     ]
     ++ lib.mapAttrsToList (dst: _: "d ${cfg.src}${dst} 0750 root root -") cfg.bindings;
 
-    systemd.timers.homelab-backup = {
+    systemd.timers.homelab-backup-backblaze = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = cfg.backupSchedule;
@@ -223,7 +238,7 @@ in
       };
     };
 
-    systemd.timers.homelab-backup-verify = {
+    systemd.timers.homelab-backup-backblaze-verify = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = cfg.verifySchedule;

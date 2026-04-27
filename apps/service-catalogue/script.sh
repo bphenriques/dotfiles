@@ -11,12 +11,7 @@ usage() {
 host="$1"
 echo "> **Auto-generated** from the NixOS service registry (\`nix run .#service-catalogue -- ${host}\`). Do not edit manually."
 echo ""
-nix eval --impure --json --expr "
-  let
-    flake = builtins.getFlake (toString ./.);
-    nixos = flake.nixosConfigurations.${host};
-  in nixos.config.custom.homelab.catalogue
-" | jq -r '
+nix eval --json ".#nixosConfigurations.${host}.config.custom.homelab.catalogue" | jq -r '
   def auth_str:
     if .auth.oidc and .auth.forwardAuth then "OIDC + ForwardAuth"
     elif .auth.oidc then "OIDC"

@@ -15,5 +15,5 @@ in
     '';
   };
 
-  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "homelab-backup-radarr" ];
+  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "homelab-backup-backblaze-radarr" ];
 }

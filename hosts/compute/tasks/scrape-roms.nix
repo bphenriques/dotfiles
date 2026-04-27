@@ -60,6 +60,11 @@ in
     '';
   };
 
+  custom.homelab.tasks.scrape-roms = {
+    systemdServices = [ "scrape-roms" ];
+    storage.smb = [ "media" ];
+  };
+
   systemd.services.scrape-roms = {
     description = "Scrape ROM artwork from ScreenScraper";
     after = [ "network-online.target" ];
@@ -80,8 +85,6 @@ in
       ReadWritePaths = [ stateDir romsDir ];
     };
   };
-
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "scrape-roms" ];
 
   # Skyscraper looks for config at $HOME/.skyscraper/config.ini (not XDG)
   systemd.tmpfiles.rules = [

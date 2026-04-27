@@ -51,7 +51,7 @@
         }
       );
       apps      = import ./apps { inherit nixpkgs self generators; };
-      packages  = import ./packages { inherit nixpkgs generators; };
+      packages  = import ./packages { inherit nixpkgs generators; builders = self.lib.builders; };
       formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper); # `nix fmt`
       checks    = forAllSystems (system: {                                            # `nix flake check`
         formatting = treefmtEval.${system}.config.build.check self;

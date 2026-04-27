@@ -3,8 +3,48 @@ let
   inherit (lib) mkOption types;
 
   cfg = config.custom.homelab.smb;
+  homelabCfg = config.custom.homelab;
 
-  hasDepServices = mountCfg: mountCfg.systemd.dependentServices != [];
+  # Resolve which systemd units a service needs for its storage mounts.
+  # Priority: explicit storage.systemdServices > OCI container auto-detect > service name.
+  ociContainers = config.virtualisation.oci-containers.containers or {};
+  ociBackend = config.virtualisation.oci-containers.backend or "podman";
+
+  resolveServiceUnits = svc:
+    if svc.storage.systemdServices != [ ]
+    then svc.storage.systemdServices
+    else if ociContainers ? ${svc.name}
+    then [ "${ociBackend}-${svc.name}" ]
+    else [ svc.name ];
+
+  # Services and tasks that declare storage mounts
+  servicesWithStorage = lib.filter (svc: svc.storage.smb != [ ]) (lib.attrValues homelabCfg.services);
+  tasksWithStorage = lib.filter (task: task.storage.smb != [ ]) (lib.attrValues homelabCfg.tasks);
+
+  # Build mount→units mapping from service registry
+  serviceMountDeps = lib.foldl' (acc: svc:
+    let units = resolveServiceUnits svc;
+    in lib.foldl' (acc2: mountName:
+      acc2 // { ${mountName} = (acc2.${mountName} or [ ]) ++ units; }
+    ) acc svc.storage.smb
+  ) { } servicesWithStorage;
+
+  # Build mount→units mapping from task registry
+  taskMountDeps = lib.foldl' (acc: task:
+    lib.foldl' (acc2: mountName:
+      acc2 // { ${mountName} = (acc2.${mountName} or [ ]) ++ task.systemdServices; }
+    ) acc task.storage.smb
+  ) { } tasksWithStorage;
+
+  # Merge registry-derived deps with explicit dependentServices per mount
+  allDependentUnits = mountName: mountCfg:
+    lib.unique (
+      mountCfg.systemd.dependentServices
+      ++ (serviceMountDeps.${mountName} or [ ])
+      ++ (taskMountDeps.${mountName} or [ ])
+    );
+
+  hasDepServices = mountName: mountCfg: allDependentUnits mountName mountCfg != [];
 
   smbMountCfg = types.submodule ({ name, config, ... }: {
     options = {
@@ -33,16 +73,8 @@ let
         default = [ ];
         description = ''
           Systemd services that depend on this mount being available.
-
-          For each service listed, the module automatically adds:
-            - unitConfig.RequiresMountsFor = [ localMount ]
-            - Restart/retry configuration for network filesystem races
-
-          Group membership for mount access must still be configured explicitly
-          via users.users.<name>.extraGroups.
-
-          Example:
-            custom.homelab.smb.mounts.media.systemd.dependentServices = [ "jellyfin" "kavita" ];
+          Use for non-registry units or dynamic cases (e.g., Immich per-user mounts).
+          Registry services should use storage.smb instead.
         '';
       };
     };
@@ -85,16 +117,34 @@ in {
        # Collision detection for GIDs
        allGids = lib.mapAttrsToList (_: m: m.gid) cfg.mounts;
        dupGids = lib.filter (gid: lib.count (g: g == gid) allGids > 1) (lib.unique allGids);
-     in [{
-      assertion = dupGids == [];
-      message = "Homelab mounts have duplicate gids: ${toString dupGids}";
-    }];
+
+       # Verify resolved systemd units exist
+       allResolvedUnits = lib.concatMap resolveServiceUnits servicesWithStorage
+         ++ lib.concatMap (task: task.systemdServices) tasksWithStorage;
+       missingUnits = lib.filter (unit: !(config.systemd.services ? ${unit})) allResolvedUnits;
+
+       # Tasks with storage mounts must declare systemdServices
+       tasksMissingUnits = lib.filter (task: task.storage.smb != [ ] && task.systemdServices == [ ]) (lib.attrValues homelabCfg.tasks);
+     in [
+      {
+        assertion = dupGids == [];
+        message = "Homelab mounts have duplicate gids: ${toString dupGids}";
+      }
+      {
+        assertion = missingUnits == [];
+        message = "Storage mount wiring references unknown systemd units: ${lib.concatStringsSep ", " missingUnits}. Set storage.systemdServices explicitly if the unit name differs from the service name.";
+      }
+      {
+        assertion = tasksMissingUnits == [];
+        message = "Tasks with storage.smb must declare systemdServices: ${lib.concatMapStringsSep ", " (t: t.name) tasksMissingUnits}";
+      }
+    ];
 
     environment.systemPackages = [ pkgs.cifs-utils ];
     
     users.groups = lib.mapAttrs' (_name: mountCfg: lib.nameValuePair mountCfg.group { inherit (mountCfg) gid; } ) cfg.mounts;
 
-    fileSystems = lib.mapAttrs' (_name: mountCfg:
+    fileSystems = lib.mapAttrs' (name: mountCfg:
       lib.nameValuePair mountCfg.localMount {
         device = "//${cfg.hostname}/${mountCfg.remote}";
         fsType = "cifs";
@@ -124,7 +174,7 @@ in {
         # Mounts without dependentServices use automount (lazy mount on first access), which avoids
         # boot-time races entirely — particularly important on WiFi where routing may not be ready
         # when network-online.target is reached.
-        ++ (if hasDepServices mountCfg then [
+        ++ (if hasDepServices name mountCfg then [
           "nofail"
           "x-systemd.mount-timeout=30s"
         ] else [
@@ -137,7 +187,7 @@ in {
 
     # Auto-wire systemd dependencies for services that depend on mounts
     systemd.services = lib.mkMerge (
-      lib.mapAttrsToList (_: mountCfg:
+      lib.mapAttrsToList (name: mountCfg:
         lib.listToAttrs (map (svcName: {
           name = svcName;
           value = {
@@ -151,7 +201,7 @@ in {
             startLimitIntervalSec = lib.mkDefault 180;  # 3 minutes
             startLimitBurst = lib.mkDefault 10;
           };
-        }) mountCfg.systemd.dependentServices)
+        }) (allDependentUnits name mountCfg))
       ) cfg.mounts
     );
   };

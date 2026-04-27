@@ -3,12 +3,9 @@ let
   inherit (config.custom.homelab) paths;
 in
 {
-  custom.homelab.tasks.backup = {
-    systemdServices = [ "homelab-backup" "homelab-backup-verify" ];
-    integrations.ntfy = {
-      enable = true;
-      topic = "backups";
-    };
+  custom.homelab.tasks."backup-backblaze".integrations.ntfy = {
+    enable = true;
+    topic = "backups";
   };
 
   sops = {
@@ -31,7 +28,7 @@ in
     };
   };
 
-  custom.homelab.backup = {
+  custom.homelab.backup.backblaze = {
     enable = true;
     package = self.packages.rustic-manage;
     passwordFile = config.sops.secrets."backup/rustic/password".path;

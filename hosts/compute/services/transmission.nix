@@ -28,6 +28,7 @@ in
     integrations.homepage.enable = true;
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "download";
+    storage.smb = [ "media" ];
   };
 
   services.transmission = {
@@ -54,7 +55,6 @@ in
   };
 
   users.users.${config.services.transmission.user}.extraGroups = [ homelabMounts.media.group ];
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "transmission" ];
 
   systemd.services.transmission.serviceConfig = {
     Restart = "on-failure";

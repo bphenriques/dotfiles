@@ -1,7 +1,7 @@
 _:
 {
   imports = [
-    ./backup.nix
+    ./backup-backblaze.nix
     ./recyclarr.nix
     ./scrape-roms.nix
   ];

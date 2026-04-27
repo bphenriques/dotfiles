@@ -42,69 +42,85 @@ let
   };
 in
 {
-  custom.homelab.services.syncthing = {
-    displayName = "Syncthing";
-    metadata.description = "File Sync";
-    metadata.version = config.services.syncthing.package.version;
-    metadata.homepage = config.services.syncthing.package.meta.homepage;
-    metadata.category = "Home";
-    port = 8384;
-    healthcheck.path = "/rest/noauth/health";
-    access.allowedGroups = [ config.custom.homelab.groups.admin ];
-    forwardAuth.enable = true;
-    secrets.files.gui-password = { rotatable = true; };
-    integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
-  };
-
-  users.users.syncthing.extraGroups = [
-    homelabMounts.media.group
-    homelabMounts.bphenriques.group
-  ];
-  custom.homelab.smb.mounts = {
-    media.systemd.dependentServices = [ "syncthing" ];
-    bphenriques.systemd.dependentServices = [ "syncthing" ];
-  };
-
-  services.syncthing = {
-    enable = true;
-    dataDir = "/var/lib/syncthing";
-    configDir = "/var/lib/syncthing/.config/syncthing";
-
-    overrideDevices = true;
-    overrideFolders = true;
-
-    openDefaultPorts = false;
-    guiAddress = "${serviceCfg.host}:${toString serviceCfg.port}";
-    guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
-
-    settings = {
-      devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { inherit (d) id; }) allSyncthingDevices);
-      options = {
-        urAccepted = -1;
-        crashReportingEnabled = false;
-        globalAnnounceEnabled = false;
-        relaysEnabled = false;
-        natEnabled = false;
-        localAnnounceEnabled = true;
+  options.custom.homelab.users = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.services.syncthing = {
+        enable = lib.mkEnableOption "Syncthing configuration for this user";
+        devices = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption { type = lib.types.str; };
+              id = lib.mkOption { type = lib.types.str; };
+            };
+          });
+          default = [ ];
+        };
       };
+    });
+  };
 
-      folders = publicFolders // bphenriquesFolders;
+  config = {
+    custom.homelab.services.syncthing = {
+      displayName = "Syncthing";
+      metadata.description = "File Sync";
+      metadata.version = config.services.syncthing.package.version;
+      metadata.homepage = config.services.syncthing.package.meta.homepage;
+      metadata.category = "Home";
+      port = 8384;
+      healthcheck.path = "/rest/noauth/health";
+      access.allowedGroups = [ config.custom.homelab.groups.admin ];
+      forwardAuth.enable = true;
+      secrets.files.gui-password = { rotatable = true; };
+      integrations.homepage.enable = true;
+      integrations.homepage.tab = "Admin";
+      storage.smb = [ "media" "bphenriques" ];
+    };
 
-      gui = {
-        theme = "dark";
-        insecureAdminAccess = false;
-        insecureSkipHostcheck = true; # Access is constrained by VPN + forwardAuth. Disabling makes syncthing fail.
-        user = "admin";
-        # credentials provided through guiPasswordFile
+    users.users.syncthing.extraGroups = [
+      homelabMounts.media.group
+      homelabMounts.bphenriques.group
+    ];
+
+    services.syncthing = {
+      enable = true;
+      dataDir = "/var/lib/syncthing";
+      configDir = "/var/lib/syncthing/.config/syncthing";
+
+      overrideDevices = true;
+      overrideFolders = true;
+
+      openDefaultPorts = false;
+      guiAddress = "${serviceCfg.host}:${toString serviceCfg.port}";
+      guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
+
+      settings = {
+        devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { inherit (d) id; }) allSyncthingDevices);
+        options = {
+          urAccepted = -1;
+          crashReportingEnabled = false;
+          globalAnnounceEnabled = false;
+          relaysEnabled = false;
+          natEnabled = false;
+          localAnnounceEnabled = true;
+        };
+
+        folders = publicFolders // bphenriquesFolders;
+
+        gui = {
+          theme = "dark";
+          insecureAdminAccess = false;
+          insecureSkipHostcheck = true; # Access is constrained by VPN + forwardAuth. Disabling makes syncthing fail.
+          user = "admin";
+          # credentials provided through guiPasswordFile
+        };
       };
     };
-  };
 
-  systemd.services.syncthing.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "10s";
-    RestartMaxDelaySec = "5min";
-    RestartSteps = 5;
+    systemd.services.syncthing.serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      RestartMaxDelaySec = "5min";
+      RestartSteps = 5;
+    };
   };
 }

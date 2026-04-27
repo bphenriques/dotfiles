@@ -42,21 +42,10 @@ in
     };
 
     users = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submoduleWith {
-        modules = [
-          baseUserModule
-          ./schemas/user-oidc.nix
-          ./schemas/user-jellyfin.nix
-          ./schemas/user-immich.nix
-          ./schemas/user-kavita.nix
-          ./schemas/user-miniflux.nix
-          ./schemas/user-seerr.nix
-          ./schemas/user-filebrowser.nix
-          ./schemas/user-radicale.nix
-          ./schemas/user-syncthing.nix
-          ./schemas/user-wireguard.nix
-        ];
-      });
+      type = lib.types.attrsOf (lib.types.submodule [
+        baseUserModule
+        ./schemas/user-oidc.nix
+      ]);
       default = { };
     };
 

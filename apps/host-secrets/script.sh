@@ -12,12 +12,12 @@ host="$1"
 nix eval --impure --raw --expr "
   let
     flake = builtins.getFlake (toString ./.);
-    lib = flake.inputs.nixpkgs.lib;
-    nixos = flake.nixosConfigurations.${host};
-    localPkgs = flake.inputs.nixpkgs.legacyPackages.\${builtins.currentSystem};
+    nixos = flake.nixosConfigurations.\${host};
+    inherit (nixos) pkgs;
+    inherit (pkgs) lib;
   in
     builtins.readFile (
-      (localPkgs.formats.yaml {}).generate \"host-secrets-example.yaml\" (
+      (pkgs.formats.yaml {}).generate \"host-secrets-example.yaml\" (
         builtins.foldl'
           (acc: key:
             lib.recursiveUpdate

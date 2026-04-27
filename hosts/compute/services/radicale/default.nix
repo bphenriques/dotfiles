@@ -9,6 +9,13 @@ in
 {
   imports = [ ./configure.nix ];
 
+  options.custom.homelab.users = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.services.radicale.enable = lib.mkEnableOption "Radicale CalDAV/CardDAV access for this user";
+    });
+  };
+
+  config = {
   custom.homelab.services.radicale = {
     displayName = "Radicale";
     metadata.description = "CalDAV & CardDAV";
@@ -74,5 +81,6 @@ in
       server.hosts = [ "127.0.0.1:${toString serviceCfg.port}" ];
       storage.filesystem_folder = "/var/lib/radicale/collections";
     };
+  };
   };
 }

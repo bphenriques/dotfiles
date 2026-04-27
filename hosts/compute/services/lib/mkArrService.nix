@@ -88,6 +88,7 @@ in
     };
     integrations.ntfy.enable = true;
     integrations.ntfy.topic = "media";
+    storage.smb = [ "media" ];
   };
 
   services.${name} = {
@@ -112,7 +113,6 @@ in
   };
 
   users.users.${name}.extraGroups = [ homelabMounts.media.group ];
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ name ];
   systemd.services."${name}-configure" = {
     description = "${upperName} setup";
     wantedBy = [ "${name}.service" ];

@@ -19,9 +19,8 @@ in
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any";
     integrations.homepage.enable = true;
+    storage.smb = [ "media" ];
   };
-
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "podman-kapowarr" ];
 
   systemd.tmpfiles.rules = [
     "d ${dataDir}           0750 root root -"

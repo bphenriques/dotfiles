@@ -15,5 +15,5 @@ in
     '';
   };
 
-  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "homelab-backup-sonarr" ];
+  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "homelab-backup-backblaze-sonarr" ];
 }

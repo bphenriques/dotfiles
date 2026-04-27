@@ -15,5 +15,5 @@ in
     '';
   };
 
-  custom.homelab.services.miniflux.secrets.systemd.dependentServices = [ "homelab-backup-miniflux" ];
+  custom.homelab.services.miniflux.secrets.systemd.dependentServices = [ "homelab-backup-backblaze-miniflux" ];
 }

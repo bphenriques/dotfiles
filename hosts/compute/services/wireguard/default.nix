@@ -68,135 +68,163 @@ let
   };
 in
 {
-  custom.homelab.services.wireguard = {
-    metadata.description = "VPN";
-    metadata.version = "N/A";
-    metadata.homepage = "https://www.wireguard.com/";
-    metadata.category = "Administration";
-    inherit port;
-    ingress.enable = false;
-    integrations.monitoring = {
-      healthcheck = false;
-      exporters.wireguard = {
-        enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9586;
-        latestHandshakeDelay = true;
+  options.custom.homelab.users = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.services.wireguard = {
+        enable = lib.mkEnableOption "Wireguard configuration for this user (requires Wireguard)";
+        devices = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption { type = lib.types.strMatching "[a-z0-9][a-z0-9-]*"; description = "Device name (e.g., phone, laptop). Lowercase alphanumeric and dashes only."; };
+              ip = lib.mkOption {
+                type = lib.types.str;
+                description = "Static WireGuard client IP (e.g., 10.100.0.42)";
+              };
+              fullAccess = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "If true, device can access entire network. If false, only the home server.";
+              };
+            };
+          });
+          default = [ ];
+          description = "List of WireGuard devices for this user";
+        };
       };
-      scrapeConfigs = [{
-        job_name = "wireguard";
-        static_configs = [{
-          targets = [ "127.0.0.1:9586" ];
-          labels.instance = config.networking.hostName;
+    });
+  };
+
+  config = {
+    custom.homelab.services.wireguard = {
+      metadata.description = "VPN";
+      metadata.version = "N/A";
+      metadata.homepage = "https://www.wireguard.com/";
+      metadata.category = "Administration";
+      inherit port;
+      ingress.enable = false;
+      integrations.monitoring = {
+        healthcheck = false;
+        exporters.wireguard = {
+          enable = true;
+          listenAddress = "127.0.0.1";
+          port = 9586;
+          latestHandshakeDelay = true;
+        };
+        scrapeConfigs = [{
+          job_name = "wireguard";
+          static_configs = [{
+            targets = [ "127.0.0.1:9586" ];
+            labels.instance = config.networking.hostName;
+          }];
         }];
-      }];
+      };
     };
+
+    systemd.tmpfiles.rules = [
+      "d ${dataDir} 0700 root root -"
+      "d ${dataDir}/server 0700 root root -"
+      "d ${dataDir}/clients 0700 root root -"
+    ];
+
+    systemd.services.wireguard-keygen = {
+      description = "WireGuard keygen";
+      wantedBy = [ "wireguard-${interface}.service" ];
+      before = [ "wireguard-${interface}.service" ];
+      after = [ "systemd-tmpfiles-setup.service" ];
+      serviceConfig.Type = "oneshot";
+      path = [ pkgs.wireguard-tools ];
+      script = ''
+        if [ ! -f "${serverKeyFile}" ]; then
+          echo "Generating Wireguard key..."
+          wg genkey > ${serverKeyFile}
+          chmod 0600 ${serverKeyFile}
+          wg pubkey < ${serverKeyFile} > ${serverPubKeyFile}
+        else
+          echo "Wireguard key already exists."
+        fi
+        echo "Wireguard key ready."
+      '';
+    };
+
+    systemd.services.wireguard-bootstrap = {
+      description = "WireGuard bootstrap";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "wireguard-${interface}.service" "network-online.target" ];  # network-online: required to send email onboard setup guides
+      requires = [ "wireguard-${interface}.service" ];
+      wants = [ "network-online.target" ];
+      restartTriggers = [ clientsJson ];
+      path = [ wgManage ];
+      serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
+      script = ''wg-manage bootstrap ${clientsJson}'';
+    };
+
+    networking.wireguard.interfaces.${interface} = {
+      ips = [ address ];
+      listenPort = port;
+      privateKeyFile = serverKeyFile;
+    };
+
+    networking.firewall.allowedUDPPorts = [ port ];
+    boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
+    # Forward chain: deny-by-default, allow Podman + fullAccess WireGuard clients to LAN
+    networking.nftables.enable = true;
+    networking.nftables.tables.wireguard-access = {
+      family = "inet";
+      content = ''
+        chain forward {
+          type filter hook forward priority 0; policy drop;
+
+          # Allow established/related connections (return traffic)
+          ct state established,related accept
+
+          # Allow Podman container traffic (bridge network).
+          # Podman adds NAT rules via iptables-nft, but with policy drop we must
+          # explicitly allow forwarding to/from container subnets.
+          ip saddr ${podmanSubnet} accept
+          ip daddr ${podmanSubnet} accept
+
+          # Allow fullAccess WireGuard clients to forward to LAN
+          ${lib.concatMapStringsSep "\n        " (c: "iifname \"${interface}\" ip saddr ${c.ip} accept") fullAccessClients}
+
+          # Drop all other WireGuard client forwarding (restricted clients can only reach server)
+          iifname "${interface}" drop
+        }
+
+        # NAT: masquerade WireGuard client traffic forwarded to LAN so replies route back through compute
+        chain postrouting {
+          type nat hook postrouting priority srcnat; policy accept;
+          ip saddr ${clientSubnet} ip daddr ${config.custom.fleet.lan.subnet} masquerade
+        }
+      '';
+    };
+
+    sops.templates."wireguard-smtp-url" = {
+      owner = "root";
+      mode = "0400";
+      content = "smtp://${smtpCfg.user}:${config.sops.placeholder."smtp-password"}@${smtpCfg.host}:${toString smtpCfg.port}";
+    };
+
+    assertions = let
+      clientsByIp = builtins.groupBy (c: c.ip) clients;
+      ipCollisions = lib.filterAttrs (_: cs: builtins.length cs > 1) clientsByIp;
+
+      maxIfNameLen = 15;
+      prefix = "${wgEnv.WG_HOMELAB_NAME}-";
+      maxDeviceLen = maxIfNameLen - builtins.stringLength prefix;
+      tooLong = builtins.filter (c: builtins.stringLength c.device > maxDeviceLen) clients;
+    in [{
+      assertion = ipCollisions == { };
+      message = "WireGuard IP collision detected: ${lib.concatStringsSep ", " (
+        lib.mapAttrsToList (ip: cs: "${ip} -> [${lib.concatMapStringsSep ", " (c: c.name) cs}]") ipCollisions
+      )}";
+    } {
+      assertion = tooLong == [ ];
+      message = "WireGuard device name too long (max ${toString maxDeviceLen} chars with prefix '${prefix}'): ${
+        lib.concatMapStringsSep ", " (c: "'${c.device}' (${toString (builtins.stringLength c.device)} chars)") tooLong
+      }";
+    }];
+
+    environment.systemPackages = [ wgManage ];
   };
-
-  systemd.tmpfiles.rules = [
-    "d ${dataDir} 0700 root root -"
-    "d ${dataDir}/server 0700 root root -"
-    "d ${dataDir}/clients 0700 root root -"
-  ];
-
-  systemd.services.wireguard-keygen = {
-    description = "WireGuard keygen";
-    wantedBy = [ "wireguard-${interface}.service" ];
-    before = [ "wireguard-${interface}.service" ];
-    after = [ "systemd-tmpfiles-setup.service" ];
-    serviceConfig.Type = "oneshot";
-    path = [ pkgs.wireguard-tools ];
-    script = ''
-      if [ ! -f "${serverKeyFile}" ]; then
-        echo "Generating Wireguard key..."
-        wg genkey > ${serverKeyFile}
-        chmod 0600 ${serverKeyFile}
-        wg pubkey < ${serverKeyFile} > ${serverPubKeyFile}
-      else
-        echo "Wireguard key already exists."
-      fi
-      echo "Wireguard key ready."
-    '';
-  };
-
-  systemd.services.wireguard-bootstrap = {
-    description = "WireGuard bootstrap";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "wireguard-${interface}.service" "network-online.target" ];  # network-online: required to send email onboard setup guides
-    requires = [ "wireguard-${interface}.service" ];
-    wants = [ "network-online.target" ];
-    restartTriggers = [ clientsJson ];
-    path = [ wgManage ];
-    serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
-    script = ''wg-manage bootstrap ${clientsJson}'';
-  };
-
-  networking.wireguard.interfaces.${interface} = {
-    ips = [ address ];
-    listenPort = port;
-    privateKeyFile = serverKeyFile;
-  };
-
-  networking.firewall.allowedUDPPorts = [ port ];
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-
-  # Forward chain: deny-by-default, allow Podman + fullAccess WireGuard clients to LAN
-  networking.nftables.enable = true;
-  networking.nftables.tables.wireguard-access = {
-    family = "inet";
-    content = ''
-      chain forward {
-        type filter hook forward priority 0; policy drop;
-
-        # Allow established/related connections (return traffic)
-        ct state established,related accept
-
-        # Allow Podman container traffic (bridge network).
-        # Podman adds NAT rules via iptables-nft, but with policy drop we must
-        # explicitly allow forwarding to/from container subnets.
-        ip saddr ${podmanSubnet} accept
-        ip daddr ${podmanSubnet} accept
-
-        # Allow fullAccess WireGuard clients to forward to LAN
-        ${lib.concatMapStringsSep "\n        " (c: "iifname \"${interface}\" ip saddr ${c.ip} accept") fullAccessClients}
-
-        # Drop all other WireGuard client forwarding (restricted clients can only reach server)
-        iifname "${interface}" drop
-      }
-
-      # NAT: masquerade WireGuard client traffic forwarded to LAN so replies route back through compute
-      chain postrouting {
-        type nat hook postrouting priority srcnat; policy accept;
-        ip saddr ${clientSubnet} ip daddr ${config.custom.fleet.lan.subnet} masquerade
-      }
-    '';
-  };
-
-  sops.templates."wireguard-smtp-url" = {
-    owner = "root";
-    mode = "0400";
-    content = "smtp://${smtpCfg.user}:${config.sops.placeholder."smtp-password"}@${smtpCfg.host}:${toString smtpCfg.port}";
-  };
-
-  assertions = let
-    clientsByIp = builtins.groupBy (c: c.ip) clients;
-    ipCollisions = lib.filterAttrs (_: cs: builtins.length cs > 1) clientsByIp;
-
-    maxIfNameLen = 15;
-    prefix = "${wgEnv.WG_HOMELAB_NAME}-";
-    maxDeviceLen = maxIfNameLen - builtins.stringLength prefix;
-    tooLong = builtins.filter (c: builtins.stringLength c.device > maxDeviceLen) clients;
-  in [{
-    assertion = ipCollisions == { };
-    message = "WireGuard IP collision detected: ${lib.concatStringsSep ", " (
-      lib.mapAttrsToList (ip: cs: "${ip} -> [${lib.concatMapStringsSep ", " (c: c.name) cs}]") ipCollisions
-    )}";
-  } {
-    assertion = tooLong == [ ];
-    message = "WireGuard device name too long (max ${toString maxDeviceLen} chars with prefix '${prefix}'): ${
-      lib.concatMapStringsSep ", " (c: "'${c.device}' (${toString (builtins.stringLength c.device)} chars)") tooLong
-    }";
-  }];
-
-  environment.systemPackages = [ wgManage ];
 }

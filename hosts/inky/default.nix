@@ -3,7 +3,7 @@ let
   shared = import ../shared.nix;
 
   # SMB mounts: share name → gid (mirrors modules/nixos/homelab/smb.nix conventions)
-  nasIP = shared.networks.main.hosts.bruno-home-nas;
+  nasIP = shared.lan.hosts.bruno-home-nas;
 
   mounts = {
     media = { gid = 5001; };
@@ -34,9 +34,9 @@ let
     port = 51821;
     address = "10.100.1.1/24";
     clientSubnet = "10.100.1.0/24";
-    dns = shared.dns.cloudflare;
+    dns = shared.dns;
     clientIP = "10.100.1.2";
-    allowedIPs = "${wireguard.clientSubnet},${shared.networks.main.subnet}";
+    allowedIPs = "${wireguard.clientSubnet},${shared.lan.subnet}";
   };
 
   setupEnv = {

@@ -45,12 +45,11 @@ in
       '';
       systemd.dependentServices = [ "podman-papra" ];
     };
+    storage.smb = [ "bphenriques" ];
   };
 
   # Allow container bridge to reach Traefik for OIDC discovery/token exchange
   networking.firewall.interfaces.podman0.allowedTCPPorts = [ 443 ];
-
-  custom.homelab.smb.mounts.bphenriques.systemd.dependentServices = [ "podman-papra" ];
 
   users.groups.${papraUser.group} = { inherit (papraUser) gid; };
   users.users.${papraUser.name} = {

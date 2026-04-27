@@ -101,9 +101,8 @@ in
     };
     healthcheck.path = "/api/heartbeat";
     integrations.homepage.enable = true;
+    storage.smb = [ "media" ];
   };
-
-  custom.homelab.smb.mounts.media.systemd.dependentServices = [ "podman-romm" ];
 
   # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
   # Assumes NixOS default MySQL root auth: unix socket authentication (no password needed for local root).
