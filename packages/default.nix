@@ -23,7 +23,7 @@ let
     let
       pkgs = nixpkgs.legacyPackages.${system};
       b = builders.${system};
-    in {
+    in rec {
       volume-osd = pkgs.callPackage ./desktop/volume-osd { };
       brightness-osd = pkgs.callPackage ./desktop/brightness-osd { };
       upower-notify = pkgs.callPackage ./desktop/upower-notify { };
@@ -31,6 +31,7 @@ let
       awww-util = pkgs.callPackage ./desktop/awww-util { };
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
+      status-glance = pkgs.callPackage ./desktop/status-glance { inherit upower-notify volume-osd niri-keyboard-layout; };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
       scrape-roms = pkgs.callPackage ./cli/scrape-roms { };

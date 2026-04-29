@@ -48,21 +48,33 @@ friendly_device_name() {
   esac
 }
 
+# Maps device type to the label used in env var names (OSD_VOLUME_<label>_ICON, OSD_VOLUME_<label>_GLYPH, etc.)
+_device_label() {
+  case "$1" in
+    microphone) echo -n "MICROPHONE" ;;
+    internal)   echo -n "INTERNAL_SPEAKERS" ;;
+    external)   echo -n "EXTERNAL_SPEAKERS" ;;
+    headset)    echo -n "HEADSET" ;;
+    headphones) echo -n "HEADPHONES" ;;
+  esac
+}
+
 # Returns the icon for a device type and mute state.
 # Uses indirect variable expansion to look up OSD_VOLUME_*_ICON env vars.
 get_icon() {
-  local dtype="$1" muted="$2"
-  local device_label
-  case "$dtype" in
-    microphone) device_label="MICROPHONE" ;;
-    internal) device_label="INTERNAL_SPEAKERS" ;;
-    external) device_label="EXTERNAL_SPEAKERS" ;;
-    headset) device_label="HEADSET" ;;
-    headphones) device_label="HEADPHONES" ;;
-    *) return ;;
-  esac
-  # Indirect expansion: constructs var name like OSD_VOLUME_HEADSET_MUTE_ICON, then ${!var} dereferences it.
-  local var="OSD_VOLUME_${device_label}_${muted:+MUTE_}ICON"
+  local label muted="$2"
+  label="$(_device_label "$1")"
+  [ -z "$label" ] && return
+  local var="OSD_VOLUME_${label}_${muted:+MUTE_}ICON"
+  echo -n "${!var}"
+}
+
+# Returns the glyph for a device type.
+get_glyph() {
+  local label
+  label="$(_device_label "$1")"
+  [ -z "$label" ] && return
+  local var="OSD_VOLUME_${label}_GLYPH"
   echo -n "${!var}"
 }
 
@@ -219,6 +231,19 @@ case "${1:-}" in
     if [[ -n $selection ]]; then
       set_sink_and_move "$selection" && notify_current_sink
     fi
+    ;;
+
+  # Status (read-only)
+  sink-status)
+    device_json="$(get_sink "$(pactl get-default-sink)")"
+    dtype="$(device_type sink "$device_json")"
+    name="$(friendly_device_name "$device_json" "$dtype")"
+    wpctl_output="$(wpctl get-volume "@DEFAULT_SINK@")"
+    volume="$(awk '{ printf "%d", $2 * 100 }' <<<"$wpctl_output")"
+    muted=false
+    [[ $wpctl_output == *"[MUTED]"* ]] && muted=true
+    glyph="$(get_glyph "$dtype")"
+    printf '%s\t%s\t%s\t%s\t%s\n' "$dtype" "$name" "$volume" "$muted" "$glyph"
     ;;
 
   # Sources (audio input)

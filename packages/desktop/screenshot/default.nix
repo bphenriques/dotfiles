@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
   ...
 }:
 pkgs.writeShellApplication {
@@ -9,10 +8,11 @@ pkgs.writeShellApplication {
   runtimeInputs = [
     pkgs.coreutils
     pkgs.grim
-    pkgs.swappy
+    pkgs.satty
     pkgs.slurp
     pkgs.libnotify
     pkgs.wl-clipboard
+    pkgs.niri
   ];
   text = ''
     ${lib.fileContents ./script.sh}

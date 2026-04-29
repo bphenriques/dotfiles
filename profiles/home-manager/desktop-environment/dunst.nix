@@ -73,6 +73,7 @@ in
         msg_urgency = "critical";
         fullscreen = "show";
       };
+
     };
   };
 

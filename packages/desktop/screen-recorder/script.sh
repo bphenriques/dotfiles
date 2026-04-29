@@ -1,50 +1,64 @@
 #shellcheck shell=bash
 
+: "${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR must be set}"
+STATE_FILE="$XDG_RUNTIME_DIR/screen-recorder-destination"
+
+_notify() { notify-send --category "screen-recorder" --hint string:x-canonical-private-synchronous:screen-recorder "$@"; }
+
 is_recording() { pidof wl-screenrec >/dev/null; }
 record() {
   destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
   shift 1
   if is_recording; then
-    notify-send \
-      --icon "$ERROR_ICON" \
-      --category "screen-recorder" \
-      --hint string:x-canonical-private-synchronous:screen-recorder \
-      "Screen Recorder" "There is already a recording in progress"
-
+    _notify --icon "$ERROR_ICON" "Screen Recorder" "There is already a recording in progress"
     return 1
   else
-    notify-send \
-      --icon "$RECORD_ICON" \
-      --category "screen-recorder" \
-      --hint string:x-canonical-private-synchronous:screen-recorder \
-      "Screen Recorder" "Starting recording..."
+    printf '%s' "$destination" > "$STATE_FILE"
+    _notify --icon "$RECORD_ICON" "Screen Recorder" "Starting recording..."
 
     sleep 1
     if ! wl-screenrec --filename="${destination}" "$@"; then
-      notify-send \
-        --urgency=critical \
-        --icon "$ERROR_ICON" \
-        --category "screen-recorder" \
-        --hint string:x-canonical-private-synchronous:screen-recorder \
-        "Screen Recorder" "Failed to start recording"
+      rm -f "$STATE_FILE"
+      _notify --urgency=critical --icon "$ERROR_ICON" "Screen Recorder" "Failed to start recording"
     fi
   fi
 }
 
 stop() {
-  if is_recording; then
-    pkill --signal INT wl-screenrec
-    notify-send \
-      --icon "$INFORMATION_ICON" \
-      --category "screen-recorder" \
-      --hint string:x-canonical-private-synchronous:screen-recorder \
-      "Screen Recorder" "Recording stopped..."
+  if ! is_recording; then
+    _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Nothing being recorded..."
+    return
+  fi
+
+  pkill --signal INT wl-screenrec
+  sleep 0.5
+
+  local destination=""
+  if [[ -f "$STATE_FILE" ]]; then
+    destination="$(cat "$STATE_FILE")"
+    rm -f "$STATE_FILE"
+  fi
+
+  if [[ -n $destination && -f $destination ]]; then
+    local thumb action
+    thumb="$(mktemp --suffix=.png)"
+    if ffmpeg -y -loglevel error -i "$destination" -frames:v 1 "$thumb"; then
+      action=$(_notify \
+        --action "default=Play" \
+        --expire-time 10000 \
+        --icon "$thumb" \
+        "Screen Recorder" \
+        "$(basename "$destination")" 2>/dev/null || true)
+
+      if [ "$action" = "default" ]; then
+        xdg-open "$destination" >/dev/null 2>&1 || true
+      fi
+    else
+      _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Recording saved"
+    fi
+    rm -f -- "$thumb"
   else
-    notify-send \
-      --icon "$INFORMATION_ICON" \
-      --category "screen-recorder" \
-      --hint string:x-canonical-private-synchronous:screen-recorder \
-      "Screen Recorder" "Nothing being recorded..."
+    _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Recording stopped"
   fi
 }
 

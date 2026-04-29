@@ -20,7 +20,7 @@ in
   networking.hostName = "bphenriques-laptop";
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_19; # Intentionally not LTS as I want to keep up at my own pace
+    kernelPackages = pkgs.linuxPackages_7_0; # Intentionally not LTS as I want to keep up at my own pace
 
     initrd.systemd.enable = true;
 

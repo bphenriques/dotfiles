@@ -20,7 +20,7 @@
   # Basic setup
   networking.hostName = "compute";
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_19;
+    kernelPackages = pkgs.linuxPackages_7_0;
     loader.systemd-boot = {
       enable = true;
       editor = false;

@@ -15,4 +15,8 @@ notify_current() {
 case "${1:-}" in
   next) niri msg action switch-layout next && notify_current ;;
   get) notify_current ;;
+  status)
+    layout="$(niri msg --json keyboard-layouts | jq -r '.names[.current_idx]')"
+    printf '%s\n' "$layout"
+    ;;
 esac

@@ -22,7 +22,7 @@ in
   custom.programs.niri.layerRules.extra = [
     ''
       layer-rule {
-        match namespace="awww-daemon"
+        match namespace="^awww-daemon$"
         place-within-backdrop true
       }
     ''

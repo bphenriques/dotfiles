@@ -292,6 +292,10 @@ in
         }
 
         geometry-corner-radius 10
+
+        background-effect {
+          blur true
+        }
       }
       ''}
 

@@ -14,6 +14,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     };
   };
   stylix.targets.fuzzel.enable = true;
+  programs.fuzzel.settings.colors.background = lib.mkForce "${config.lib.stylix.colors.base00}EB"; # 92% opacity for blur (override stylix's FF alpha)
 
   custom.programs.niri.layerRules = {
     launchers = [ ''namespace="^launcher$"'' ];

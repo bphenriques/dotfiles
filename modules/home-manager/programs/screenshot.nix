@@ -1,29 +1,13 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
-  inherit (builtins) listToAttrs;
-  inherit (lib) nameValuePair;
-
   cfg = config.custom.programs.screenshot;
-
-  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   screenshot = lib.getExe cfg.package;
   exec = {
-    menu          = lib.getExe cfg.dmenu;
-    screen        = ''${screenshot} screen "${cfg.directory}"'';
-    screen-edit   = ''${screenshot} screen-edit'';
-    screen-copy   = ''${screenshot} screen-copy'';
-    region        = ''${screenshot} region "${cfg.directory}"'';
-    region-edit   = ''${screenshot} region-edit'';
-    region-copy   = ''${screenshot} region-copy'';
+    screen        = ''${screenshot} ${cfg.directory} screen'';
+    region        = ''${screenshot} ${cfg.directory} region'';
+    window        = ''${screenshot} ${cfg.directory} window'';
   };
-
-  screenshotActions = [
-    { id = "screenshot-screen";       symbol = "󰹑"; label = "Screen (save)";  exec = exec.screen; }
-    { id = "screenshot-screen-edit";  symbol = "󰹑"; label = "Screen (edit)";  exec = exec.screen-edit; }
-    { id = "screenshot-region";       symbol = ""; label = "Region (save)";  exec = exec.region; }
-    { id = "screenshot-region-edit";  symbol = ""; label = "Region (edit)";  exec = exec.region-edit; }
-  ];
 in
 {
   options.custom.programs.screenshot = {
@@ -37,62 +21,31 @@ in
       type = lib.types.str;
     };
 
-    dmenu = lib.mkOption {
-      type = lib.types.package;
-      default = self.lib.builders.writeFuzzelDmenuApplication {
-        name = "screenshot-menu";
-        entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) screenshotActions;
-        extraArgs = ''--minimal-lines --hide-prompt'';
-      };
+    exec = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      readOnly = true;
+      default = { inherit (exec) screen region window; };
+      description = "Screenshot commands for use in keybindings";
     };
   };
 
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.screenshot" pkgs lib.platforms.linux) ];
 
-    home.packages = [
-      pkgs.grim
-      pkgs.slurp
-      pkgs.swappy
-      cfg.package
-      cfg.dmenu
-      (pkgs.makeDesktopItem {
-        name = "screenshot-menu";
-        desktopName = "Screenshot";
-        icon = mkIcon "screenshot" "󰹑";
-        exec = lib.getExe cfg.dmenu;
-        actions = let
-          toAction = b: nameValuePair b.id {
-            name = b.label;
-            icon = mkIcon b.id b.symbol;
-            inherit (b) exec;
-          };
-        in listToAttrs (lib.map toAction screenshotActions);
-      })
-    ];
+    home.packages = [ cfg.package ];
 
-    custom.programs.swappy.enable = true;
-    custom.programs.swappy.directory = cfg.directory;
+    # Suppress niri's built-in screenshot notification (we show our own with an edit action).
+    services.dunst.settings.niri_screenshot = {
+      appname = "niri";
+      summary = "Screenshot captured";
+      skip_display = true;
+      history_ignore = true;
+    };
 
     custom.programs.wlr-which-key.menus.screenshot = [
-      {
-        key = "s";
-        desc = "Screen";
-        submenu = [
-          { key = "m"; desc = "Save";  cmd = exec.screen; }
-          { key = "c"; desc = "Copy";  cmd = exec.screen-copy; }
-          { key = "e"; desc = "Edit";  cmd = exec.screen-edit; }
-        ];
-      }
-      {
-        key = "r";
-        desc = "Region";
-        submenu = [
-          { key = "m"; desc = "Save";  cmd = exec.region; }
-          { key = "c"; desc = "Copy";  cmd = exec.region-copy; }
-          { key = "e"; desc = "Edit";  cmd = exec.region-edit; }
-        ];
-      }
+      { key = "s"; desc = "Screen"; cmd = exec.screen; }
+      { key = "r"; desc = "Region"; cmd = exec.region; }
+      { key = "w"; desc = "Window"; cmd = exec.window; }
     ];
   };
 }

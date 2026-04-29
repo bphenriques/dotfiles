@@ -16,17 +16,16 @@ fi
 is_plugged() { ! upower -i "$UPOWER_DEVICE_PATH" | grep -q "state:.*discharging"; }
 get_battery_percentage() { upower -i "$UPOWER_DEVICE_PATH" | grep percentage | awk '{ print $2; }' | tr -d '%'; }
 
-get_icon() {
+_round_level() {
   local level=$((($1 / 10) * 10))
   [ "$level" -gt 100 ] && level=100
-  echo "$UPOWER_ICONS_DIR/$level"
+  echo "$level"
 }
 
-get_charging_icon() {
-  local level=$((($1 / 10) * 10))
-  [ "$level" -gt 100 ] && level=100
-  echo "$UPOWER_CHARGING_ICONS_DIR/$level"
-}
+get_discharge_icon() { echo "$UPOWER_DISCHARGE_ICON_DIR/$(_round_level "$1")"; }
+get_charge_icon()    { echo "$UPOWER_CHARGE_ICON_DIR/$(_round_level "$1")"; }
+get_discharge_glyph() { echo -n "${UPOWER_DISCHARGE_GLYPH[$(_round_level "$1")]}"; }
+get_charge_glyph()    { echo -n "${UPOWER_CHARGE_GLYPH[$(_round_level "$1")]}"; }
 
 notify_current_battery() {
   local percentage="$1"
@@ -42,9 +41,9 @@ notify_current_battery() {
 
   local icon=
   if is_plugged; then
-    icon="$(get_charging_icon "$percentage")"
+    icon="$(get_charge_icon "$percentage")"
   else
-    icon="$(get_icon "$percentage")"
+    icon="$(get_discharge_icon "$percentage")"
   fi
 
   notify-send \
@@ -140,4 +139,20 @@ upower_monitor() {
 case "${1:-}" in
   notify) notify_current_battery "$(get_battery_percentage)" ;;
   monitor) upower --monitor | upower_monitor ;;
+  status)
+    pct="$(get_battery_percentage)"
+    state=discharging glyph="" severity=normal
+    if is_plugged; then
+      state=charging
+      glyph="$(get_charge_glyph "$pct")"
+    else
+      glyph="$(get_discharge_glyph "$pct")"
+      if [ "$pct" -lt "$UPOWER_NOTIFY_CRITICAL" ]; then
+        severity=critical
+      elif [ "$pct" -lt "$UPOWER_NOTIFY_LOW" ]; then
+        severity=low
+      fi
+    fi
+    printf '%s\t%s\t%s\t%s\n' "$state" "$pct" "$glyph" "$severity"
+    ;;
 esac

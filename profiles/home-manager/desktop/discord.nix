@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
-  home.packages = [ pkgs.discord-canary ];
+  home.packages = [ pkgs.discord ];
   xdg.mimeApps.defaultApplications."x-scheme-handler/discord" = [ "discord.desktop" ];
 
   custom.programs.niri.windowRules.byApp = [

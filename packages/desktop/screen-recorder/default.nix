@@ -13,6 +13,8 @@ pkgs.writeShellApplication {
     pkgs.wl-screenrec
     pkgs.slurp
     pkgs.libnotify
+    pkgs.ffmpeg-headless
+    pkgs.xdg-utils
   ];
   text = ''
     RECORD_ICON="${recordIcon}"

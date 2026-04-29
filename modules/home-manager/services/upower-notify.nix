@@ -18,9 +18,9 @@ let
     { level = 100; glyph = "󰁹"; chargingGlyph = "󰂅"; color = config.lib.stylix.colors.withHashtag.base0B; }
   ];
 
-  mkLevelIcons = mkIconFn: builtins.listToAttrs (map (b: {
+  mkLevelAttrs = fn: builtins.listToAttrs (map (b: {
     name = toString b.level;
-    value = mkIconFn b;
+    value = fn b;
   }) batteryLevels);
 in
 {
@@ -46,8 +46,10 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       default = self.packages.upower-notify.override {
-        icons = mkLevelIcons (b: mkIcon "battery${toString b.level}" b.glyph b.color);
-        chargingIcons = mkLevelIcons (b: mkIcon "battery${toString b.level}-charging" b.chargingGlyph config.lib.stylix.colors.withHashtag.base0B);
+        icons = mkLevelAttrs (b: mkIcon "battery${toString b.level}" b.glyph b.color);
+        chargingIcons = mkLevelAttrs (b: mkIcon "battery${toString b.level}-charging" b.chargingGlyph config.lib.stylix.colors.withHashtag.base0B);
+        dischargeGlyphs = mkLevelAttrs (b: b.glyph);
+        chargeGlyphs = mkLevelAttrs (b: b.chargingGlyph);
       };
     };
   };

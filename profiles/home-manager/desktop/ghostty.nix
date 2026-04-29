@@ -25,6 +25,7 @@ in
         gtk-single-instance = true;
         window-decoration = true;
         quit-after-last-window-closed = false; # Reduces latency when opening new windows
+        background-opacity = 0.92; # Needed for niri blur to show through
       };
 
       darwin = lib.optionalAttrs pkgs.stdenv.isDarwin {
@@ -49,6 +50,9 @@ in
           window-rule {
             match app-id="com.mitchellh.ghostty"
             default-column-width { proportion 0.5; }
+            background-effect {
+              blur true
+            }
           }
         ''
       ];

@@ -1,6 +1,6 @@
 { config, lib, pkgs, self, ... }:
 let
-  inherit (config.custom.programs) swappy;
+  inherit (config.custom.programs) satty;
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
@@ -17,7 +17,7 @@ in
 {
   custom.programs.niri = {
     enable = true;
-    screenshotPath = "${swappy.directory}/${swappy.format}";
+    screenshotPath = "${satty.directory}/${satty.format}";
 
     environment = {
       # Electron
@@ -123,6 +123,14 @@ in
           window-rule {
             geometry-corner-radius 6
             clip-to-geometry true
+
+            popups {
+              geometry-corner-radius 15
+              opacity 0.92
+              background-effect {
+                blur true
+              }
+            }
           }
         ''
         ''
@@ -150,9 +158,9 @@ in
 
     bindings = {
       # Size management
-      "Mod+R"            = "switch-preset-column-width";
-      "Mod+Ctrl+R"       = "switch-preset-column-width-back";
-      "Mod+Shift+R"      = "switch-preset-window-height";
+      "Mod+R"                 = "switch-preset-column-width";
+      "Mod+Shift+R"           = "switch-preset-column-width-back";
+      "Mod+Ctrl+Shift+R"      = "switch-preset-window-height";
 
       "Mod+Minus"   = ''set-column-width "-10%"'';
       "Mod+Kp_Add"  = ''set-column-width "+10%"'';
@@ -169,17 +177,22 @@ in
       "Mod+Ctrl+C"  = "center-visible-columns";
       "Mod+F"       = "maximize-column";
       "Mod+Shift+F" = "fullscreen-window";
-      "Mod+Ctrl+F"  = "maximize-window-to-edges";
+      "Mod+M"       = "maximize-window-to-edges";
       "Mod+A"       = "toggle-window-rule-opacity";
       "Mod+Comma"        = "consume-window-into-column";
       "Mod+Shift+Comma"  = "expel-window-from-column";
       "Mod+Escape"  = "toggle-keyboard-shortcuts-inhibit";
 
        # Screenshots
-      "Print"       = ''screenshot-screen'';
-      "Shift+Print" = ''screenshot'';
-      "Mod+Print"   = ''spawn-sh "${config.custom.programs.screenshot.dmenu}"'';
-      "Mod+Shift+S" = ''spawn-sh "${lib.getExe config.custom.programs.screenshot.package} region-edit"'';
+      "Print"       = ''spawn-sh "${config.custom.programs.screenshot.exec.screen}"'';
+      "Shift+Print" = ''spawn-sh "${config.custom.programs.screenshot.exec.region}"'';
+      "Mod+Shift+S" = ''spawn-sh "${config.custom.programs.screenshot.exec.window}"'';
+      "Mod+Print"   = ''spawn-sh "${lib.getExe pkgs.grim} - | ${lib.getExe pkgs.satty} --filename -"'';
+
+      # Screencasting
+      "Mod+Shift+P"      = "set-dynamic-cast-window";
+      "Mod+Ctrl+P"       = "set-dynamic-cast-monitor";
+      "Mod+Ctrl+Shift+P" = "clear-dynamic-cast-target";
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
@@ -190,6 +203,7 @@ in
       "Mod+K"             = ''spawn-sh "${lib.getExe config.custom.programs.niri-keyboard-layout.package} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
       "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
+      "Mod+I"             = lib.mkIf config.custom.programs.status-glance.enable ''spawn "${lib.getExe config.custom.programs.status-glance.package}"'';
 
       # Focus management
       "Mod+Tab repeat=false" = "toggle-overview";

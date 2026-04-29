@@ -17,6 +17,8 @@
     brightness-osd.enable = true;
     niri-keyboard-layout.enable = true;
     file-explorer.browser = config.custom.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
+    satty = { enable = true; directory = config.custom.programs.screenshot.directory; };
+    status-glance.enable = true;
   };
 
   custom.services = {

@@ -12,6 +12,11 @@
   microphoneIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/48x48/status/notification-microphone-sensitivity-high.svg",
   microphoneMuteIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/48x48/status/notification-microphone-sensitivity-muted.svg",
   errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
+  headphonesGlyph ? "",
+  headsetGlyph ? "",
+  internalSpeakersGlyph ? "",
+  externalSpeakersGlyph ? "",
+  microphoneGlyph ? "",
   ...
 }:
 pkgs.writeShellApplication {
@@ -47,6 +52,17 @@ pkgs.writeShellApplication {
     OSD_VOLUME_MICROPHONE_MUTE_ICON="${microphoneMuteIcon}"
     # shellcheck disable=SC2034
     OSD_VOLUME_ERROR_ICON="${errorIcon}"
+
+    # shellcheck disable=SC2034
+    OSD_VOLUME_HEADPHONES_GLYPH="${headphonesGlyph}"
+    # shellcheck disable=SC2034
+    OSD_VOLUME_HEADSET_GLYPH="${headsetGlyph}"
+    # shellcheck disable=SC2034
+    OSD_VOLUME_INTERNAL_SPEAKERS_GLYPH="${internalSpeakersGlyph}"
+    # shellcheck disable=SC2034
+    OSD_VOLUME_EXTERNAL_SPEAKERS_GLYPH="${externalSpeakersGlyph}"
+    # shellcheck disable=SC2034
+    OSD_VOLUME_MICROPHONE_GLYPH="${microphoneGlyph}"
 
     ${lib.fileContents ./script.sh}
   '';

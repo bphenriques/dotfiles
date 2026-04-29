@@ -11,7 +11,7 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       default = self.packages.volume-osd.override {
-        headphonesIcon = mkIcon "volume-osd-headphones" "";
+        headphonesIcon = mkIcon "volume-osd-headphones" "󰋋";
         headphonesMuteIcon = mkIcon "volume-osd-headphones" "󰋐";
         headsetIcon = mkIcon "volume-osd-headset" "󰋎";
         headsetMuteIcon = mkIcon "volume-osd-headset-mute" "󰋐";
@@ -21,7 +21,12 @@ in
         externalSpeakersMuteIcon = mkIcon "volume-osd-external-mute" "󰓄";
         microphoneIcon = mkIcon "volume-osd-micro" "󰍬";
         microphoneMuteIcon = mkIcon "volume-osd-micro-mute" "󰍭";
-        errorIcon = mkIcon "volume-osd-error-icon" "";
+        errorIcon = mkIcon "volume-osd-error-icon" "󰀨";
+        headphonesGlyph = "󰋋";
+        headsetGlyph = "󰋎";
+        internalSpeakersGlyph = "󰽟";
+        externalSpeakersGlyph = "󰓃";
+        microphoneGlyph = "󰍬";
       };
     };
   };
@@ -66,4 +71,3 @@ in
     ];
   };
 }
-
