@@ -308,29 +308,6 @@ in
       }
       ''}
 
-      // Indicate screencasted windows with the urgent/red color.
-      window-rule {
-        match is-window-cast-target=true
-
-        focus-ring {
-          active-color "${config.lib.stylix.colors.withHashtag.base08}"
-          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
-        }
-
-        border {
-          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
-        }
-
-        shadow {
-          color "${config.lib.stylix.colors.withHashtag.base08}70"
-        }
-
-        tab-indicator {
-          active-color "${config.lib.stylix.colors.withHashtag.base08}"
-          inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
-        }
-      }
-
       // Keyboard-triggered actions use short fixed durations (easing).
       // Gesture-sensitive actions (touchpad swipes) use springs to respond to finger velocity.
       // Springs: higher stiffness = snappier. damping-ratio=1.0 = no oscillation (critically damped).

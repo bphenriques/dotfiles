@@ -153,6 +153,29 @@ in
             }
           }
         ''
+        ''
+          window-rule {
+            match is-window-cast-target=true
+
+            focus-ring {
+              active-color "${config.lib.stylix.colors.withHashtag.base08}"
+              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+            }
+
+            border {
+              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+            }
+
+            shadow {
+              color "${config.lib.stylix.colors.withHashtag.base08}70"
+            }
+
+            tab-indicator {
+              active-color "${config.lib.stylix.colors.withHashtag.base08}"
+              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+            }
+          }
+        ''
       ];
     };
 
@@ -187,7 +210,6 @@ in
       "Print"       = ''spawn-sh "${config.custom.programs.screenshot.exec.screen}"'';
       "Shift+Print" = ''spawn-sh "${config.custom.programs.screenshot.exec.region}"'';
       "Mod+Shift+S" = ''spawn-sh "${config.custom.programs.screenshot.exec.window}"'';
-      "Mod+Print"   = ''spawn-sh "${lib.getExe pkgs.grim} - | ${lib.getExe pkgs.satty} --filename -"'';
 
       # Screencasting
       "Mod+Shift+P"      = "set-dynamic-cast-window";

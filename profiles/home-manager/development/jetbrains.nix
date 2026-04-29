@@ -10,12 +10,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     byApp = [
       ''
         window-rule {
-          match app-id="jetbrains-idea" at-startup=true  // Placement only on login
-          open-on-workspace "2"
-        }
-      ''
-      ''
-        window-rule {
           match app-id="jetbrains-idea"
           open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
         }
