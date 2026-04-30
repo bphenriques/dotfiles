@@ -116,6 +116,11 @@ in
       };
     };
 
+    networking.firewall.interfaces.bond0 = {
+      allowedTCPPorts = [ 22000 ];
+      allowedUDPPorts = [ 21027 22000 ];
+    };
+
     systemd.services.syncthing.serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";
