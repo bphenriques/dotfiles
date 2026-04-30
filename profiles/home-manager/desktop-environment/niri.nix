@@ -194,7 +194,7 @@ in
       "Mod+T"       = "toggle-column-tabbed-display";
       "Mod+W"       = "toggle-window-floating";
       "Mod+Shift+W" = "switch-focus-between-floating-and-tiling";
-      "Mod+Q"       = "close-window";
+      "Mod+Q repeat=false"  = "close-window";
       "Mod+C"       = "center-column";
       "Mod+Shift+C" = "center-window";
       "Mod+Ctrl+C"  = "center-visible-columns";

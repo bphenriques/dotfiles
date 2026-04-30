@@ -42,10 +42,5 @@ in
       history_ignore = true;
     };
 
-    custom.programs.wlr-which-key.menus.screenshot = [
-      { key = "s"; desc = "Screen"; cmd = exec.screen; }
-      { key = "r"; desc = "Region"; cmd = exec.region; }
-      { key = "w"; desc = "Window"; cmd = exec.window; }
-    ];
   };
 }

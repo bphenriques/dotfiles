@@ -25,6 +25,6 @@ in
   ];
 
   custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.isLinux {
-    "Ctrl+Shift+Escape" = ''spawn-sh "${system-monitor}"'';
+    "Ctrl+Alt+Delete" = ''spawn-sh "${system-monitor}"'';
   };
 }

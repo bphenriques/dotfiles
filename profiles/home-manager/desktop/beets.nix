@@ -46,7 +46,7 @@ let
 
     ${lib.getExe basePackage} "$@"
     status=$?
-    if [ $status -eq 0 ] && [ -f "${database}" ] && ([ ! -f "${databaseBackup}" ] || [[ "$(md5sum "${databaseBackup}")" = "$(md5sum "${database}")" ]]); then
+    if [ $status -eq 0 ] && [ -f "${database}" ] && { [ ! -f "${databaseBackup}" ] || ! cmp -s "${database}" "${databaseBackup}"; }; then
       echo "Backing up beets library: ${database}"
       cp -f "${database}" "${databaseBackup}"
     fi

@@ -2,9 +2,10 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
+  nasPaths = osConfig.custom.homelab.paths;
   mounts = {
-    nasPrivate = osConfig.custom.homelab.paths.users.bphenriques.root;
-    nasMedia = osConfig.custom.homelab.paths.media.root;
+    nasPrivate = nasPaths.users.bphenriques.root;
+    nasMedia = nasPaths.media.root;
   };
 in
 {
@@ -26,6 +27,11 @@ in
   gtk.gtk3.bookmarks = [
     "file://${mounts.nasPrivate}"
     "file://${mounts.nasMedia}"
+    "file://${nasPaths.users.bphenriques.notes} NAS Notes"
+    "file://${nasPaths.users.bphenriques.documents.root} NAS Documents"
+    "file://${nasPaths.media.movies} NAS Movies"
+    "file://${nasPaths.media.tv} NAS TV"
+    "file://${nasPaths.media.downloads.root} NAS Downloads"
   ];
 
   custom.dotfiles.enable = true;
@@ -41,6 +47,31 @@ in
         name = "NAS Media";
         icon = mkIcon "nas-media" "󰥠";
         path = mounts.nasMedia;
+      }
+      {
+        name = "NAS Notes";
+        icon = mkIcon "nas-notes" "󱞁";
+        path = nasPaths.users.bphenriques.notes;
+      }
+      {
+        name = "NAS Documents";
+        icon = mkIcon "nas-documents" "󰈙";
+        path = nasPaths.users.bphenriques.documents.root;
+      }
+      {
+        name = "NAS Movies";
+        icon = mkIcon "nas-movies" "󰎁";
+        path = nasPaths.media.movies;
+      }
+      {
+        name = "NAS TV";
+        icon = mkIcon "nas-tv" "󰟴";
+        path = nasPaths.media.tv;
+      }
+      {
+        name = "NAS Downloads";
+        icon = mkIcon "nas-downloads" "󰇚";
+        path = nasPaths.media.downloads.root;
       }
     ];
   };

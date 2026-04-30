@@ -1,5 +1,6 @@
-_:
+{ lib, pkgs, config, ... }:
 let
+  kanshictl = lib.getExe' pkgs.kanshi "kanshictl";
   mkScreen = { criteria, resolution, refreshRate, scale }: {
     inherit criteria resolution refreshRate scale;
     mode = "${resolution}@${refreshRate}Hz";
@@ -50,6 +51,18 @@ in
           outputs = [ (disable laptopScreen) (enable livingRoomScreen) ];
         };
       }
+    ];
+  };
+
+  custom.programs.wlr-which-key.menus = {
+    display = [
+      { key = "l"; desc = "Laptop";         cmd = "${kanshictl} switch internal"; }
+      { key = "o"; desc = "Office monitor"; cmd = "${kanshictl} switch external-office"; }
+      { key = "t"; desc = "Living room TV"; cmd = "${kanshictl} switch external-living-room"; }
+      { key = "c"; desc = "Configure";      cmd = lib.getExe pkgs.wdisplays; }
+    ];
+    global = lib.mkAfter [
+      { key = "d"; desc = "Display"; submenu = config.custom.programs.wlr-which-key.menus.display; }
     ];
   };
 

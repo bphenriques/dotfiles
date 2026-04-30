@@ -77,24 +77,5 @@ in
       })
     ];
 
-    custom.programs.wlr-which-key.menus.screen-recorder = [
-      { key = "Ctrl+s"; desc = "Save recording";  cmd = "${screen-recorder} stop"; }
-      {
-        key = "s";
-        desc = "Screen";
-        submenu = [
-          { key = "a"; desc = "with audio"; cmd = ''${screen-recorder} screen-audio "${cfg.directory}"''; }
-          { key = "m"; desc = "no audio";   cmd = ''${screen-recorder} screen-no-audio "${cfg.directory}"''; }
-        ];
-      }
-      {
-        key = "r";
-        desc = "Region";
-        submenu = [
-          { key = "a"; desc = "with audio"; cmd = ''${screen-recorder} region-audio "${cfg.directory}"''; }
-          { key = "m"; desc = "no audio";   cmd = ''${screen-recorder} region-no-audio "${cfg.directory}"''; }
-        ];
-      }
-    ];
   };
 }

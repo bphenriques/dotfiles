@@ -13,6 +13,7 @@ let
     };
   };
 
+  whichKeyCfg = config.custom.programs.wlr-which-key;
   mpc-plus = lib.getExe cfg.package;
   exec = {
     play-pause        = ''${mpc-plus} play-pause'';
@@ -75,7 +76,9 @@ in
         name = "Music";
         desktopName = "Music";
         icon = mkIcon "music-player" "󰥠";
-        exec = ''${lib.getExe config.custom.programs.wlr-which-key.package} mpc-plus'';
+        exec = if whichKeyCfg.enable
+          then ''${lib.getExe whichKeyCfg.package} mpc-plus''
+          else exec.search-play;
         actions = {
           "shuffle"       = { name = "Shuffle library"; icon = mkIcon "mpc-plus-shuffle-library" ""; exec = exec.play-shuffled; };
           "find-play"     = { name = "Play...";         icon = mkIcon "mpc-plus-find-play" "";       exec = exec.search-play; };
