@@ -88,7 +88,7 @@ in
       extra = [
         ''
           layer-rule {
-            match namespace="notifications"
+            match namespace="^notifications$"
             shadow {
               on
             }

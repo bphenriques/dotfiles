@@ -29,7 +29,7 @@
       ''
       ''
         window-rule {
-          match app-id="Steam"
+          match app-id="Steam" title="^Steam$"
           open-on-workspace "3"
           open-maximized true
           scroll-factor 0.5
