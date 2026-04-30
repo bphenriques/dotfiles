@@ -29,4 +29,8 @@
     enable = true;
     flatpakSupport.enable = true;
   };
+
+  # niri does not set this for us (unlike GNOME); browsers/portal need it for `prefers-color-scheme`.
+  dconf.settings."org/gnome/desktop/interface".color-scheme =
+    if config.stylix.polarity == "dark" then "prefer-dark" else "default";
 }
