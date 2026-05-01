@@ -25,8 +25,8 @@ in
   ];
 
   gtk.gtk3.bookmarks = [
-    "file://${mounts.nasPrivate}"
-    "file://${mounts.nasMedia}"
+    "file://${mounts.nasPrivate} NAS Private"
+    "file://${mounts.nasMedia} NAS Media"
     "file://${nasPaths.users.bphenriques.notes} NAS Notes"
     "file://${nasPaths.users.bphenriques.documents.root} NAS Documents"
     "file://${nasPaths.media.movies} NAS Movies"

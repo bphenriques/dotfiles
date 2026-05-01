@@ -29,6 +29,7 @@ in
     ./papra.nix
     ./bentopdf.nix
     ./grist
+    ./baserow
     ./mympd.nix
   ];
 

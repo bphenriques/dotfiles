@@ -94,6 +94,9 @@ lib.mkIf pkgs.stdenv.isLinux {
   custom.programs.niri = {
     spawnAtStartup = [ "${lib.getExe pkgs.firefox}" ];
     windowRules = {
+      byType.popups = [
+        ''app-id="firefox" title="^Extension: "''
+      ];
       byApp = [
         ''
           window-rule {

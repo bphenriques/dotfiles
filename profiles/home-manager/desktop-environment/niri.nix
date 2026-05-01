@@ -96,7 +96,6 @@ in
           "^(download)"
           "^(error)"
           "^(notification)"
-          "^(Extension)"
         ];
 
         pip = lib.map (title: ''title="${title}"'') [
@@ -126,10 +125,6 @@ in
 
             popups {
               geometry-corner-radius 15
-              opacity 0.92
-              background-effect {
-                blur true
-              }
             }
           }
         ''
