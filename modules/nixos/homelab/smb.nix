@@ -64,6 +64,16 @@ let
         default = "homelab-${name}";
         description = "Name of the group with access to the mount";
       };
+      uid = mkOption {
+        type = types.int;
+        default = 0;
+        description = ''
+          UID presented as the file owner on the client.
+          Defaults to root (0), which forces all access through group permissions.
+          Set to a user's UID on single-user machines so that tools requiring
+          owner-level operations (e.g., chmod, git) work correctly on the mount.
+        '';
+      };
       gid = mkOption {
         type = types.int;
         description = "GID for the mount group (required for SMB mount options)";
@@ -150,7 +160,7 @@ in {
         fsType = "cifs";
         options = [
           # Permissions
-          "uid=0"
+          "uid=${toString mountCfg.uid}"
           "gid=${toString mountCfg.gid}"
           "file_mode=0660"
           "dir_mode=0770"

@@ -53,7 +53,7 @@ in
     hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
-      bphenriques = { gid = 5190; };
+      bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
       media = { gid = 5512; };
     };
   };
