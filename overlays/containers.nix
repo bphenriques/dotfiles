@@ -32,6 +32,12 @@ _final: prev: let
       homepage = "https://gitlab.com/baserow/baserow";
       updateInfo = { repo = "baserow/baserow"; };
     };
+    teable = {
+      image = "teableio/teable";
+      version = "release.2026-04-30T12-55-17Z.1599";
+      homepage = "https://github.com/teableio/teable";
+      updateInfo = { repo = "teableio/teable"; };
+    };
     romm = {
       image = "rommapp/romm";
       version = "4.8.1";

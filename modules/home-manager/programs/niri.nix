@@ -12,6 +12,29 @@ let
     cp "$textPath" $out
   '';
 
+  workspaceOpt = lib.types.submodule ({ name, ... }: {
+    options = {
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = name;
+        description = "Niri workspace name (defaults to the attribute key)";
+      };
+      openOnDefaultOutput = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Pin workspace to the default output so it follows monitor switches";
+      };
+    };
+  });
+
+  workspaces = lib.attrValues cfg.workspaces;
+
+  renderWorkspaces = lib.concatMapStringsSep "\n" (ws: ''
+    workspace "${ws.name}" {
+      ${lib.optionalString ws.openOnDefaultOutput ''open-on-output "${cfg.output.default.identifier}"''}
+    }
+  '') workspaces;
+
   displayOutputOpt = lib.types.submodule {
     options = {
       identifier  = lib.mkOption { type = lib.types.str; };
@@ -24,6 +47,12 @@ in
 {
   options.custom.programs.niri = {
     enable = lib.mkEnableOption "programs-niri";
+
+    workspaces = lib.mkOption {
+      description = "Named workspaces; attribute keys are stable identifiers, .name is the niri-visible label";
+      type = lib.types.attrsOf workspaceOpt;
+      default = {};
+    };
 
     environment = lib.mkOption {
       description = "Environment variables to set in a niri session";
@@ -224,6 +253,8 @@ in
         mode "${cfg.output.default.resolution}@${cfg.output.default.refreshRate}"
         scale ${cfg.output.default.scale}
       }
+
+      ${renderWorkspaces}
 
       layout {
         ${cfg.layout}

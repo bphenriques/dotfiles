@@ -19,6 +19,13 @@ in
     enable = true;
     screenshotPath = "${satty.directory}/${satty.format}";
 
+    # Pinned to the default output so niri moves them to the active monitor when kanshi disables it.
+    workspaces = {
+      browser.openOnDefaultOutput = true;
+      main.openOnDefaultOutput    = true;
+      gaming.openOnDefaultOutput  = true;
+    };
+
     environment = {
       # Electron
       NIXOS_OZONE_WL = "1";
@@ -258,10 +265,6 @@ in
     };
 
    extraConfig = ''
-      workspace "1" {}
-      workspace "2" {}
-      workspace "3" {}
-
       cursor {
         xcursor-theme "${config.stylix.cursor.name}"
         xcursor-size ${toString config.stylix.cursor.size}

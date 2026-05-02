@@ -1,6 +1,7 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 let
   inherit (pkgs.nur.repos.rycee) firefox-addons;
+  niriWorkspaces = config.custom.programs.niri.workspaces;
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
@@ -101,7 +102,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         ''
           window-rule {
             match app-id="firefox" at-startup=true  // Placement only on login
-            open-on-workspace "1"
+            open-on-workspace "${niriWorkspaces.browser.name}"
             open-focused true
           }
         ''

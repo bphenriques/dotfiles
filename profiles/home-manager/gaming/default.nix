@@ -1,4 +1,7 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
+let
+  niriWorkspaces = config.custom.programs.niri.workspaces;
+in
 {
   imports = [
     ./mangohud.nix          # Game HUD
@@ -12,7 +15,7 @@
     ./umu-launcher.nix      # Ad-hoc game launcher
   ];
 
-  # Workspace 3 is the gaming workspace: fullscreen, no transparency.
+  # Gaming apps go to the "gaming" workspace: fullscreen, no transparency.
   custom.programs.niri.windowRules = {
     byApp = [
       ''
@@ -22,7 +25,7 @@
           match app-id="PCSX2"
           match app-id="dolphin-emu"
           match app-id=r#"^steam_app"#
-          open-on-workspace "3"
+          open-on-workspace "${niriWorkspaces.gaming.name}"
           open-fullscreen true
           open-focused true
         }
@@ -30,7 +33,7 @@
       ''
         window-rule {
           match app-id="Steam" title="^Steam$"
-          open-on-workspace "3"
+          open-on-workspace "${niriWorkspaces.gaming.name}"
           open-maximized true
           scroll-factor 0.5
         }

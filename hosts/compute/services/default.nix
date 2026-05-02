@@ -29,7 +29,9 @@ in
     ./papra.nix
     ./bentopdf.nix
     ./grist
-    ./baserow
+    ./opencloud
+    #./baserow
+    #./teable
     ./mympd.nix
   ];
 
