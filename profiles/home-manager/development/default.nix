@@ -7,6 +7,7 @@
     ./jetbrains.nix       # IDE
     ./claude-code.nix     # AI Assistant
     ./helix.nix           # Editor
+    ./zellij.nix          # Terminal multiplexer
   ];
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [

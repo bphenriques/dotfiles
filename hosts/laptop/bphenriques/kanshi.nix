@@ -1,6 +1,21 @@
 { lib, pkgs, config, ... }:
 let
   kanshictl = lib.getExe' pkgs.kanshi "kanshictl";
+
+  # Moves all named niri workspaces to the given output.
+  moveWorkspacesScript = pkgs.writeShellApplication {
+    name = "niri-move-workspaces";
+    runtimeInputs = [ pkgs.niri pkgs.jq ];
+    text = ''
+      target="$1"
+      niri msg --json workspaces | jq -r '.[] | select(.name != null) | .name' | while read -r ws; do
+        niri msg action move-workspace-to-monitor --reference "$ws" "$target" || true
+      done
+    '';
+  };
+
+  moveWorkspacesTo = output: "sleep 0.5 && ${lib.getExe moveWorkspacesScript} ${lib.escapeShellArg output}";
+
   mkScreen = { criteria, resolution, refreshRate, scale }: {
     inherit criteria resolution refreshRate scale;
     mode = "${resolution}@${refreshRate}Hz";
@@ -37,18 +52,21 @@ in
         profile = {
           name = "internal";
           outputs = [ (enable laptopScreen) ];
+          exec = [ (moveWorkspacesTo laptopScreen.criteria) ];
         };
       }
       {
         profile = {
           name = "external-office";
           outputs = [ (disable laptopScreen) (enable dellScreen) ];
+          exec = [ (moveWorkspacesTo dellScreen.criteria) ];
         };
       }
       {
         profile = {
           name = "external-living-room";
           outputs = [ (disable laptopScreen) (enable livingRoomScreen) ];
+          exec = [ (moveWorkspacesTo livingRoomScreen.criteria) ];
         };
       }
     ];

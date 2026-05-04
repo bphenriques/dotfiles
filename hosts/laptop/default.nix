@@ -54,7 +54,7 @@ in
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
       bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
-      media = { gid = 5512; };
+      media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
     };
   };
   sops = {

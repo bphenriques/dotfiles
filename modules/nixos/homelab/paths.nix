@@ -29,6 +29,7 @@ let
       
       notes = mkOption { type = types.str; default = "${config.root}/notes"; };
       private = mkOption { type = types.str; default = "${config.root}/private"; };
+      finance = mkOption { type = types.str; default = "${config.root}/finance"; };
     };
   });
 in {

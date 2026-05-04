@@ -194,36 +194,20 @@ def "main provision-client" [] {
     print $"  Created OIDC client: ($client.name)"
     $r.body.id
   }
-  # Detect if local credentials are missing or stale (id mismatch means server-side recreate)
-  let local_id = if ($id_file | path exists) {
-    open $id_file | str trim
-  } else { null }
-  let credentials_missing = not ($id_file | path exists) or not ($secret_file | path exists)
-  let id_mismatch = $local_id != null and $local_id != $client_id
-  let needs_secret = $is_new or $credentials_missing or $id_mismatch
-  if $id_mismatch { print $"  Local id mismatch, forcing secret rotation for: ($client.name)" }
-  # Generate new secret only when needed
-  let client_secret = if $needs_secret {
-    let secret_r = http post $"($base_url)/api/oidc/clients/($client_id)/secret" "" --headers $headers --content-type application/json --full --allow-errors
-    if $secret_r.status != 200 {
-      error make {
-        msg: $"Failed to generate secret for OIDC client ($client.name): ($secret_r.status) - ($secret_r.body)"
-      }
+  # Always rotate: pocket-id has no secret-verification endpoint, so server-side rotation silently desyncs from this tmpfs file otherwise.
+  let secret_r = http post $"($base_url)/api/oidc/clients/($client_id)/secret" "" --headers $headers --content-type application/json --full --allow-errors
+  if $secret_r.status != 200 {
+    error make {
+      msg: $"Failed to generate secret for OIDC client ($client.name): ($secret_r.status) - ($secret_r.body)"
     }
-    print $"  Generated new secret for: ($client.name)"
-    $secret_r.body.secret
-  } else {
-    print $"  Secret exists, skipping rotation for: ($client.name)"
-    null
   }
-  # Write credentials
+  let client_secret = $secret_r.body.secret
+  print $"  Rotated secret for: ($client.name)"
   if not ($client_dir | path exists) { mkdir $client_dir }
   chmod 0750 $client_dir
   chown $"root:($client_group)" $client_dir
-  if $needs_secret {
-    write_credential $id_file ($client_id | into string) $client_group
-    write_credential $secret_file $client_secret $client_group
-  }
+  write_credential $id_file ($client_id | into string) $client_group
+  write_credential $secret_file $client_secret $client_group
   print $"  Credentials ready at ($client_dir)"
   # Update allowed user groups if restricted
   if $is_group_restricted {
