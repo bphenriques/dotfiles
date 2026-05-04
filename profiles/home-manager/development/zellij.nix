@@ -8,7 +8,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Press Ctrl-g to unlock Zellij controls, then use shortcuts normally.
       default_mode = "locked";
 
-      # Disable session serialization — Zellij is used for ephemeral workflows (e.g., fin3 edit), not persistent sessions.
+      # Disable session serialization — Zellij is used for ephemeral workflows (e.g., fin edit), not persistent sessions.
       session_serialization = false;
 
       # Suppress first-run wizard and release notes.
