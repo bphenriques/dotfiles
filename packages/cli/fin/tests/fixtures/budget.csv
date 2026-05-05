@@ -1,0 +1,7 @@
+category,description,amount,cadence,sub,month,split-joint
+salario,Salario,2000,monthly,,,
+supermercado,Compras,400,monthly,,,0.5
+casa,Renda,600,monthly,,,0.5
+casa,Seguro,180,yearly,seguro,,0.5
+investimentos,ETF,300,monthly,,,
+casa,Obras,500,once,,2025-07,0.5

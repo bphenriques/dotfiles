@@ -23,15 +23,11 @@ in
     ./wireguard
     ./home-assistant.nix
     ./radicale
-    ./tandoor-recipes
+    ./cook-recipes
     ./filebrowser
     ./gitea
     ./papra.nix
     ./bentopdf.nix
-    ./grist
-    ./opencloud
-    #./baserow
-    #./teable
     ./mympd.nix
   ];
 

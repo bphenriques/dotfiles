@@ -3,34 +3,42 @@ use finlib/ledger.nu *
 use finlib/reports.nu *
 use finlib/render.nu *
 
-const EDITABLE_FILES = [personal joint categories]
+const SHOW_SECTIONS = [summary expenses savings split]
+const VALID_PERIODS = [month year]
 
-def do-year [] {
-  run-hledger [balance -Y -E --depth 2 "--forecast=this year" -p "this year" revenues expenses "assets:savings"]
-}
-
-def do-month [] {
-  run-hledger [balance -E --depth 2 "--forecast=this month" -p "this month" revenues expenses "assets:savings"]
-}
-
-def do-shared [] {
-  print $"  Transfer/mo: (fmt-eur (shared-transfer))"
-}
-
-def do-savings [] {
-  let raw = (run-hledger [balance -E --depth 2 "--forecast=this year" -p "this year" -O csv --layout=bare "assets:savings"])
-  $raw | from csv
-    | where account != "Total:"
-    | each { |r| { label: ($r.account | str replace "assets:savings:" ""), value: ($r.balance | parse-balance | math round --precision 2) } }
-    | sort-by value --reverse
-    | chart "Savings — annual €" blue
-}
-
-def do-dashboard [period: string] {
+def do-show [sections: list<string>, period: string] {
   let data = dashboard-data $period
-  render-summary $data
-  render-expenses-table $data.expenses
-  render-savings-chart $data.savings_rows $data.label
+  let loc = monetary-locale
+  for section in $sections {
+    match $section {
+      "summary" => { render-summary $data $loc }
+      "expenses" => { render-expenses-table $data.expenses $loc }
+      "savings" => { render-savings-chart $data.savings_rows $data.label }
+      "split" => { render-split-table $data.split_rows $data.split_my_total $data.split_other_total $loc $period }
+    }
+  }
+}
+
+def parse-sections [input?: string]: nothing -> list<string> {
+  if ($input == null) or ($input | str trim | is-empty) {
+    return $SHOW_SECTIONS
+  }
+  let sections = $input | split row "," | each { str trim | str downcase } | where { |s| $s != "" } | uniq
+  let invalid = $sections | where { |s| $s not-in $SHOW_SECTIONS }
+  if ($invalid | is-not-empty) {
+    print $"fin: unknown section\(s\): ($invalid | str join ', '). Choose from: ($SHOW_SECTIONS | str join ', ')" --stderr
+    exit 1
+  }
+  $sections
+}
+
+def parse-period [input?: string]: nothing -> string {
+  let p = $input | default "month" | str trim | str downcase
+  if $p not-in $VALID_PERIODS {
+    print $"fin: invalid period '($p)'. Choose from: ($VALID_PERIODS | str join ', ')" --stderr
+    exit 1
+  }
+  $p
 }
 
 def do-check [] {
@@ -42,13 +50,18 @@ def do-check [] {
   }
 
   run-hledger [check -s "--forecast=this year"]
-  print "OK"
+  print $"(ansi green_bold)OK(ansi reset)"
+}
+
+def open-editor [csv_path: string] {
+  let editor = ($env.EDITOR? | default "vi")
+  ^sh -c $"($editor) \"($csv_path)\""
 }
 
 def do-edit-with-sentinel [csv_path: string, sentinel: string] {
   "" | save --force --raw $sentinel
   let err = try {
-    run-external ($env.EDITOR? | default "vi") $csv_path
+    open-editor $csv_path
     null
   } catch { |e| $e }
   rm -f $sentinel
@@ -57,9 +70,9 @@ def do-edit-with-sentinel [csv_path: string, sentinel: string] {
 
 def do-watch-dashboard [sentinel: string] {
   let render = {||
-    print -e "\e[H\e[2J\e[3J"
-    try { do-dashboard "year" } catch { |e| print $e.msg --stderr }
-    print -e "\e[H"
+    print -e $"(ansi cursor_home)(ansi clear_entire_screen_plus_buffer)"
+    try { do-show $SHOW_SECTIONS "month" } catch { |e| print $e.msg --stderr }
+    print -e (ansi cursor_home)
   }
 
   if not ($sentinel | path exists) { return }
@@ -77,24 +90,15 @@ def do-watch-dashboard [sentinel: string] {
   }
 }
 
-def do-edit [file?: string] {
-  let target = if ($file == null) {
-    $EDITABLE_FILES | input list "Edit:"
-  } else if ($file in $EDITABLE_FILES) {
-    $file
-  } else {
-    print $"fin: unknown file '($file)'. Choose from: ($EDITABLE_FILES | str join ', ')" --stderr
-    exit 1
-  }
-  if ($target | is-empty) { return }
-  let csv_path = [(fin-dir) $"($target).csv"] | path join
+def do-edit [] {
+  let csv_path = [(fin-dir) budget.csv] | path join
 
   if ($env.ZELLIJ? | default "" | is-not-empty) or (which zellij | is-empty) {
-    run-external ($env.EDITOR? | default "vi") $csv_path
+    open-editor $csv_path
     return
   }
 
-  let sentinel = [(runtime-dir) fin $"edit.($target).($nu.pid).alive"] | path join
+  let sentinel = [(runtime-dir) fin $"edit.($nu.pid).alive"] | path join
   mkdir ([(runtime-dir) fin] | path join)
   let layout = $'layout {
   default_tab_template {
@@ -118,36 +122,21 @@ default_mode "locked"'
   rm -f $sentinel
 }
 
-def do-ui [] {
-  let journal = journal-path
-  ^hledger-ui -f $journal "--forecast=this year"
-}
-
-def do-web [rest: list<string>] {
-  let journal = journal-path
-  ^hledger-web -f $journal --serve "--forecast=this year" ...$rest
+def do-categories [] {
+  let csv_path = [(fin-dir) categories.csv] | path join
+  open-editor $csv_path
 }
 
 # ── Subcommands ──
 
-def "main year" [] { do-year }
-def "main y" [] { do-year }
-def "main month" [] { do-month }
-def "main m" [] { do-month }
-def "main shared" [] { do-shared }
-def "main s" [] { do-shared }
-def "main savings" [] { do-savings }
-def "main v" [] { do-savings }
-def "main dashboard" [period?: string] { do-dashboard ($period | default "year") }
-def "main d" [period?: string] { do-dashboard ($period | default "year") }
-def "main check" [] { do-check }
-def "main c" [] { do-check }
-def "main edit" [file?: string] { do-edit $file }
-def "main e" [file?: string] { do-edit $file }
-def "main ui" [] { do-ui }
-def "main u" [] { do-ui }
-def "main web" [...rest: string] { do-web $rest }
-def "main w" [...rest: string] { do-web $rest }
+def "main show" [period?: string, sections?: string] { do-show (parse-sections $sections) (parse-period $period) }
+def "main s" [period?: string, sections?: string] { do-show (parse-sections $sections) (parse-period $period) }
+def "main lint" [] { do-check }
+def "main l" [] { do-check }
+def "main edit" [] { do-edit }
+def "main e" [] { do-edit }
+def "main categories" [] { do-categories }
+def "main c" [] { do-categories }
 def "main __edit-with-sentinel" [csv_path: string, sentinel: string] { do-edit-with-sentinel $csv_path $sentinel }
 def "main __watch-dashboard" [sentinel: string] { do-watch-dashboard $sentinel }
 
@@ -156,24 +145,29 @@ def main [...args: string] {
     let journal = journal-path
     ^hledger -f $journal ...($args | skip 1)
   } else {
-    print "fin <command>
+    let b = ansi white_bold
+    let d = ansi white_dimmed
+    let r = ansi reset
+    print $"($b)fin($r) — personal finance forecast CLI \(hledger\)
 
-  [y]ear          Annual forecast
-  [m]onth         Current month forecast
-  [s]hared        Joint account transfer amount
-  sa[v]ings       Savings breakdown chart
-  [d]ashboard [month|year]  Visual summary with charts (default: year)
-  [c]heck         Validate CSVs and generated journal
-  [e]dit [file]   Edit CSV with live dashboard (uses zellij if available)
-  [u]i            Launch hledger-ui
-  [w]eb           Launch hledger-web
-  -- <args>       Pass-through to hledger
+  Reads budget.csv and categories.csv from FIN_DIR.
 
-  Examples:
-    fin d                                         annual dashboard
-    fin d month                                   monthly dashboard
-    fin e personal                                edit personal.csv
-    fin -- balance -M --depth 3 expenses:casa     ad-hoc exploration
-    fin -- register expenses:supermercado         transaction list"
+  ($b)[s]how($r) [month|year] [sections]  ($d)Show sections \(default: month, all\)
+                                  Sections: summary,expenses,savings,split($r)
+  ($b)[e]dit($r)                          ($d)Edit budget.csv \(live preview with zellij\)($r)
+  ($b)[c]ategories($r)                    ($d)Edit categories.csv($r)
+  ($b)[l]int($r)                          ($d)Validate CSVs and generated journal($r)
+  ($b)-- <args>($r)                       ($d)Pass-through to hledger($r)
+
+  ($d)Examples:($r)
+    fin s                                         ($d)monthly overview($r)
+    fin s year                                    ($d)annual overview($r)
+    fin s month summary,expenses                  ($d)summary + expenses only($r)
+    fin s year split                              ($d)annual shared breakdown($r)
+    fin e                                         ($d)edit budget.csv($r)
+    fin -- balance -M --depth 3 expenses:casa     ($d)ad-hoc exploration($r)
+    fin -- register expenses:supermercado         ($d)transaction list($r)
+    fin -- ui --forecast='this year'              ($d)launch hledger-ui($r)
+    fin -- web --serve --forecast='this year'     ($d)launch hledger-web($r)"
   }
 }

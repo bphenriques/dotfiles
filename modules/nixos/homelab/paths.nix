@@ -79,6 +79,7 @@ in {
         };
       };
       
+      recipes = mkOption { type = types.str; default = "${cfg.media.root}/recipes"; };
       movies = mkOption { type = types.str; default = "${cfg.media.root}/movies"; };
       tv = mkOption { type = types.str; default = "${cfg.media.root}/tv"; };
       

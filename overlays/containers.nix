@@ -26,18 +26,6 @@ _final: prev: let
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
-    baserow = {
-      image = "baserow/baserow";
-      version = "2.1.6";
-      homepage = "https://gitlab.com/baserow/baserow";
-      updateInfo = { repo = "baserow/baserow"; };
-    };
-    teable = {
-      image = "teableio/teable";
-      version = "release.2026-04-30T12-55-17Z.1599";
-      homepage = "https://github.com/teableio/teable";
-      updateInfo = { repo = "teableio/teable"; };
-    };
     romm = {
       image = "rommapp/romm";
       version = "4.8.1";

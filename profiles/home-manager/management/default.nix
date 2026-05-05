@@ -3,9 +3,17 @@ let
   financeDir = osConfig.custom.homelab.paths.users.bphenriques.finance;
 in
 lib.mkIf pkgs.stdenv.isLinux {
-  home.packages = [ self.packages.fin ];
+  home.packages = [
+    pkgs.hledger
+
+    # Custom wrapper
+    self.packages.fin
+
+    # UI
+    pkgs.hledger-ui
+    pkgs.puffin
+  ];
   home.sessionVariables = {
-    LEDGER_FILE = "${financeDir}/current.journal";
     FIN_DIR = financeDir;
   };
 }

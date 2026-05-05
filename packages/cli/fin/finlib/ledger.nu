@@ -1,15 +1,17 @@
-use ./core.nu [fin-dir runtime-dir fmt-eur MONTH_RE]
-use ./budget.nu [load-categories load-budget enrich-budget monthly-joint-transfer validate-categories validate-budget]
-
-const KIND_PREFIX = { income: "revenues", expense: "expenses", savings: "assets:savings" }
-const PERSONAL_ACCOUNT = "assets:banco:conta-pessoal"
-const JOINT_ACCOUNT = "assets:banco:conta-conjunta"
+use ./core.nu [fin-dir runtime-dir fmt-currency monetary-locale MONTH_RE KIND_PREFIX PRIMARY_BANK]
+use ./budget.nu [load-categories load-budget enrich-budget split-columns split-names shared-monthly-transfer shared-monthly-breakdown validate-categories validate-budget]
 
 export def derive-account [category: string, sub: string, kind: string]: nothing -> string {
   let prefix = ($KIND_PREFIX | get $kind)
   if ($sub | is-empty) { $"($prefix):($category)" } else { $"($prefix):($category):($sub)" }
 }
 
+# split-{name} → assets:banco:{name}:my-share
+def bank-for [split_name]: nothing -> string {
+  if $split_name == null { $PRIMARY_BANK } else { $"assets:banco:($split_name):my-share" }
+}
+
+# Periodic cadences only — "once" is dispatched separately by render-row.
 def cadence-rule [cadence: string]: nothing -> string {
   match $cadence {
     "monthly" => "monthly"
@@ -19,62 +21,55 @@ def cadence-rule [cadence: string]: nothing -> string {
   }
 }
 
-def render-row [
-  row: record
-  kind: string
-  bank_account: string
-  amount: float
-]: nothing -> string {
-  let account = derive-account $row.category ($row.sub? | default "") $kind
-  if $row.cadence == "once" {
-    if ($row.month | is-empty) or ($row.month !~ $MONTH_RE) {
-      error make { msg: $"fin: once entry '($row.description)' has invalid month '($row.month? | default "")'" }
-    }
-    let date = $"($row.month)-01"
-    if $kind == "income" {
-      $"($date) ($row.description)\n    ($bank_account)    (fmt-eur $amount)\n    ($account)\n"
-    } else {
-      $"($date) ($row.description)\n    ($account)    (fmt-eur $amount)\n    ($bank_account)\n"
-    }
+def posting-pair [account: string, bank: string, amount: float, kind: string, loc: record]: nothing -> string {
+  let amt = fmt-currency $amount $loc
+  if $kind == "income" {
+    $"    ($bank)    ($amt)\n    ($account)"
   } else {
-    let rule = cadence-rule $row.cadence
-    if $kind == "income" {
-      $"~ ($rule)  ($row.description)\n    ($bank_account)    (fmt-eur $amount)\n    ($account)\n"
-    } else {
-      $"~ ($rule)  ($row.description)\n    ($account)    (fmt-eur $amount)\n    ($bank_account)\n"
-    }
+    $"    ($account)    ($amt)\n    ($bank)"
   }
+}
+
+def render-row [entry: record, loc: record]: nothing -> string {
+  let account = derive-account $entry.row.category $entry.row.sub $entry.kind
+  let bank = bank-for $entry.split_name
+  let postings = posting-pair $account $bank $entry.effective_amount $entry.kind $loc
+  if $entry.row.cadence == "once" {
+    if ($entry.row.month | is-empty) or ($entry.row.month !~ $MONTH_RE) {
+      error make { msg: $"fin: once entry '($entry.row.description)' has invalid month '($entry.row.month)'" }
+    }
+    $"($entry.row.month)-01 ($entry.row.description)\n($postings)\n"
+  } else {
+    let rule = cadence-rule $entry.row.cadence
+    $"~ ($rule)  ($entry.row.description)\n($postings)\n"
+  }
+}
+
+def render-block [entries: list, header: string, loc: record]: nothing -> list<string> {
+  if ($entries | is-empty) { return [] }
+  let body = $entries | each { |e| render-row $e $loc }
+  ["" $"; ── ($header) ──" ""] | append $body
 }
 
 def generate-journal []: nothing -> string {
   let cats = load-categories
+  let all = load-budget | enrich-budget $cats
+  let splits = split-names
+  let loc = monetary-locale
+  let commodity_sample = fmt-currency 1000.00 $loc
 
-  let personal = load-budget "personal.csv"
-    | upsert sub { |r| $r.sub? | default "" | into string }
-    | upsert month { |r| $r.month? | default "" | into string }
-  let joint = load-budget "joint.csv"
-    | upsert sub { |r| $r.sub? | default "" | into string }
-    | upsert month { |r| $r.month? | default "" | into string }
-    | update my_share { into float }
-
-  let personal_enriched = $personal | enrich-budget $cats "personal.csv" $PERSONAL_ACCOUNT
-  let joint_enriched = $joint | enrich-budget $cats "joint.csv" $JOINT_ACCOUNT
-
-  let personal_periodic = $personal_enriched | where row.cadence != "once"
-  let personal_once = $personal_enriched | where row.cadence == "once"
-  let joint_periodic = $joint_enriched | where row.cadence != "once"
-  let joint_once = $joint_enriched | where row.cadence == "once"
-
-  let all_accounts = ($personal_enriched | each { |e| derive-account $e.row.category ($e.row.sub? | default "") $e.kind })
-    | append ($joint_enriched | each { |e| derive-account $e.row.category ($e.row.sub? | default "") $e.kind })
-    | append [$PERSONAL_ACCOUNT $JOINT_ACCOUNT]
+  let split_banks = $splits | each { |s| bank-for $s }
+  let all_accounts = $all
+    | each { |e| derive-account $e.row.category $e.row.sub $e.kind }
+    | append $PRIMARY_BANK
+    | append $split_banks
     | uniq | sort
 
   mut parts: list<string> = [
     $"; Generated by fin — do not edit"
     $"; Source: (fin-dir)"
     ""
-    "commodity €1.000,00"
+    $"commodity ($commodity_sample)"
     ""
     "account assets      ; type: A"
     "account revenues    ; type: R"
@@ -84,49 +79,48 @@ def generate-journal []: nothing -> string {
     $parts = ($parts | append $"account ($acc)")
   }
 
-  if ($personal_periodic | is-not-empty) {
-    $parts = ($parts | append ["" "; ── Personal ──" ""])
-    for entry in $personal_periodic {
-      $parts = ($parts | append (render-row $entry.row $entry.kind $entry.bank $entry.row.amount))
+  # Personal periodic entries (no split)
+  let personal_periodic = $all | where split_name == null and row.cadence != "once"
+  $parts = ($parts | append (render-block $personal_periodic "Personal" $loc))
+
+  # Split periodic entries, grouped by split name
+  for name in $splits {
+    let entries = $all | where split_name == $name and row.cadence != "once"
+    let label = $name | str capitalize
+    $parts = ($parts | append (render-block $entries $label $loc))
+  }
+
+  # Transfers for each split
+  for name in $splits {
+    let transfer = shared-monthly-transfer $name
+    if $transfer > 0 {
+      let split_bank = bank-for $name
+      let label = $name | str capitalize
+      $parts = ($parts | append [
+        ""
+        $"; ── Transfer: ($label) ──"
+        ""
+        $"~ monthly  Transfer ($name)"
+        $"    ($split_bank)    (fmt-currency $transfer $loc)"
+        $"    ($PRIMARY_BANK)"
+        ""
+      ])
     }
   }
 
-  if ($joint_periodic | is-not-empty) {
-    $parts = ($parts | append ["" "; ── Joint ──" ""])
-    for entry in $joint_periodic {
-      let amount = ($entry.row.amount * $entry.row.my_share | math round --precision 2)
-      $parts = ($parts | append (render-row $entry.row $entry.kind $entry.bank $amount))
-    }
-  }
-
-  let transfer_total = monthly-joint-transfer
-  if $transfer_total > 0 {
-    $parts = ($parts | append [
-      ""
-      "; ── Transfer ──"
-      ""
-      $"~ monthly  Transferência conta conjunta"
-      $"    ($JOINT_ACCOUNT)    (fmt-eur $transfer_total)"
-      $"    ($PERSONAL_ACCOUNT)"
-      ""
-    ])
-  }
-
-  if ($personal_once | is-not-empty) or ($joint_once | is-not-empty) {
-    $parts = ($parts | append ["" "; ── One-off ──" ""])
-    for entry in $personal_once {
-      $parts = ($parts | append (render-row $entry.row $entry.kind $entry.bank $entry.row.amount))
-    }
-    for entry in $joint_once {
-      let amount = ($entry.row.amount * $entry.row.my_share | math round --precision 2)
-      $parts = ($parts | append (render-row $entry.row $entry.kind $entry.bank $amount))
-    }
-  }
+  # One-off entries from all sources
+  let all_once = $all | where row.cadence == "once"
+  $parts = ($parts | append (render-block $all_once "One-off" $loc))
 
   $parts | str join "\n"
 }
 
 export def journal-path []: nothing -> string {
+  let errors = validate-source
+  if ($errors | is-not-empty) {
+    let msg = $errors | each { |e| $"  ✗ ($e)" } | str join "\n"
+    error make { msg: $msg }
+  }
   let dir = [(runtime-dir) fin] | path join
   let path = [$dir plan.generated.journal] | path join
   let content = generate-journal
@@ -144,11 +138,13 @@ export def run-hledger [args: list<string>] {
 
 export def validate-source []: nothing -> list<string> {
   let cats = load-categories
-  (validate-categories $cats)
-    | append (validate-budget ($cats | get name) "personal.csv")
-    | append (validate-budget ($cats | get name) "joint.csv")
+  (validate-categories $cats) | append (validate-budget $cats)
 }
 
 export def shared-transfer []: nothing -> float {
-  monthly-joint-transfer
+  split-names | each { |s| shared-monthly-transfer $s } | append 0 | math sum
+}
+
+export def shared-breakdown []: nothing -> table {
+  split-names | each { |s| shared-monthly-breakdown $s } | flatten
 }
