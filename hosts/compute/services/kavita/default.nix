@@ -56,6 +56,7 @@ in
       enable = true;
       tokenKeyFile = serviceCfg.secrets.files.token-key.path;
       settings.Port = serviceCfg.port;
+      settings.IpAddresses = "127.0.0.1";
       settings.OpenIdConnectSettings = {
         Authority = oidcCfg.provider.issuerUrl;
         ClientId = serviceCfg.oidc.id.placeholder;

@@ -54,7 +54,7 @@ BIOS tweaks to ensure thermal stability as sustained workloads caused thermal sh
 - **Prometheus + Alertmanager**: Metrics, HTTP probes, and alerting.
 - **[ntfy](https://ntfy.sh)**: Push notifications for system alerts and service events
 
-All services bind to `127.0.0.1`, only Traefik (80/443) and Wireguard are exposed on the firewall (specific interfaces).
+Services bind to `127.0.0.1` where possible; the firewall default-denies all other ports. Only Traefik and services that by nature require direct network access (e.g., Wireguard, Syncthing) are reachable on specific interfaces.
 
 Full service list in [`services.md`](./services.md) (auto-generated via `nix run .#service-catalogue`) and installation [here](install.md).
 

@@ -94,6 +94,7 @@ in
   services.${name} = {
     enable = true;
     settings.server.port = serviceCfg.port;
+    settings.server.bindaddress = "127.0.0.1";
     environmentFiles = [ serviceCfg.secrets.templates."${name}.env".path ];
   };
 
