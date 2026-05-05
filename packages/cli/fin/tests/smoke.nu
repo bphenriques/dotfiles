@@ -15,17 +15,17 @@ def "test validate-source passes" [] {
 
 def "test load-categories" [] {
   let cats = load-categories
-  assert equal ($cats | length) 4
+  assert equal ($cats | length) 9
   assert equal ($cats | where kind == "income" | length) 1
-  assert equal ($cats | where kind == "expense" | length) 2
-  assert equal ($cats | where kind == "savings" | length) 1
+  assert equal ($cats | where kind == "expense" | length) 6
+  assert equal ($cats | where kind == "savings" | length) 2
 }
 
 def "test load-budget" [] {
   let b = load-budget
-  assert equal ($b | length) 6
-  assert equal ($b | where cadence == "monthly" | length) 4
-  assert equal ($b | where cadence == "yearly" | length) 1
+  assert equal ($b | length) 16
+  assert equal ($b | where cadence == "monthly" | length) 13
+  assert equal ($b | where cadence == "yearly" | length) 2
   assert equal ($b | where cadence == "once" | length) 1
 }
 
@@ -62,9 +62,13 @@ def "test journal-generates" [] {
   let content = open $path --raw
   assert ($content | str contains "commodity") "journal should have commodity directive"
   assert ($content | str contains "account expenses:casa") "journal should declare accounts"
-  assert ($content | str contains "~ monthly") "journal should have periodic rules"
-  assert ($content | str contains "2025-07-01 Obras") "journal should have one-off entry"
+  assert ($content | str contains "account expenses:casa:eletricidade") "journal should declare sub-accounts"
+  assert ($content | str contains "account assets:savings:fundo-emergencia") "journal should declare savings accounts"
+  assert ($content | str contains "~ monthly") "journal should have monthly rules"
+  assert ($content | str contains "~ yearly") "journal should have yearly rules"
+  assert ($content | str contains "2025-07-01 Ferias") "journal should have one-off entry"
   assert ($content | str contains "Transfer joint") "journal should have split transfer"
+  assert ($content | str contains "expenses:transportes") "journal should have personal-only expenses"
 }
 
 # ── Formatting ──
