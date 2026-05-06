@@ -1,17 +1,17 @@
-category,description,amount,cadence,sub,month,split-joint
-salario,Salario liquido,2000,monthly,,,
-supermercado,Compras semanais,400,monthly,,,0.5
-casa,Renda,600,monthly,,,0.5
-casa,Eletricidade,50,monthly,eletricidade,,0.5
-casa,Internet,35,monthly,internet,,0.5
-casa,Agua,25,monthly,agua,,0.5
-transportes,Passe mensal,40,monthly,,,
-saude,Seguro saude,80,monthly,,,
-lazer,Ginasio,30,monthly,,,
-subscricoes,Streaming,15,monthly,,,0.5
-subscricoes,Cloud storage,3,monthly,,,
-fundo-emergencia,Reserva mensal,200,monthly,,,
-investimentos,ETF mensal,300,monthly,,,
-casa,Seguro habitacao,180,yearly,seguro,,0.5
-saude,Dentista,150,yearly,dentista,,
-lazer,Ferias,500,once,,2025-07,0.5
+category,description,amount,when,split-joint,kind
+Salário,Salário Base Líquido,2000,monthly,,income
+Supermercado,Compras semanais,400,monthly,0.5,expense
+Casa,Renda,600,monthly,0.5,expense
+Casa > Eletricidade,Eletricidade,50,monthly,0.5,expense
+Casa > Internet,Internet,35,monthly,0.5,expense
+Casa > Água,Água,25,monthly,0.5,expense
+Transportes,Passe mensal,40,monthly,,expense
+Saúde,Seguro saúde,80,monthly,,expense
+Lazer,Ginásio,30,monthly,,expense
+Subscrições,Streaming,15,monthly,0.5,expense
+Subscrições,Cloud storage,3,monthly,,expense
+Casa > Seguro,Seguro habitação,180,yearly,0.5,expense
+Saúde > Dentista,Dentista,150,yearly,,expense
+Lazer,Férias,500,2025-07,0.5,expense
+Fundo Emergência,Reserva mensal,200,monthly,,savings
+Investimentos,ETF mensal,300,monthly,,savings

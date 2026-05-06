@@ -2,7 +2,8 @@ use std assert
 
 use ../finlib/core.nu *
 use ../finlib/budget.nu *
-use ../finlib/ledger.nu [validate-source derive-account journal-path]
+use ../finlib/ledger.nu [validate-source journal-path]
+use ../finlib/markdown.nu [extract-budget write-if-changed sync-md]
 
 # ── Validation ──
 
@@ -13,20 +14,15 @@ def "test validate-source passes" [] {
 
 # ── Budget loading ──
 
-def "test load-categories" [] {
-  let cats = load-categories
-  assert equal ($cats | length) 9
-  assert equal ($cats | where kind == "income" | length) 1
-  assert equal ($cats | where kind == "expense" | length) 6
-  assert equal ($cats | where kind == "savings" | length) 2
-}
-
 def "test load-budget" [] {
   let b = load-budget
   assert equal ($b | length) 16
-  assert equal ($b | where cadence == "monthly" | length) 13
-  assert equal ($b | where cadence == "yearly" | length) 2
-  assert equal ($b | where cadence == "once" | length) 1
+  assert equal ($b | where kind == "income" | length) 1
+  assert equal ($b | where kind == "expense" | length) 13
+  assert equal ($b | where kind == "savings" | length) 2
+  assert equal ($b | where when == "monthly" | length) 13
+  assert equal ($b | where when == "yearly" | length) 2
+  assert equal ($b | where when =~ '^\d{4}-' | length) 1
 }
 
 def "test split-names" [] {
@@ -35,8 +31,7 @@ def "test split-names" [] {
 }
 
 def "test enrich-budget" [] {
-  let cats = load-categories
-  let enriched = load-budget | enrich-budget $cats
+  let enriched = load-budget | enrich-budget
   let splits = $enriched | where split_name != null
   assert (($splits | length) > 0) "should have split entries"
   for entry in $splits {
@@ -47,11 +42,12 @@ def "test enrich-budget" [] {
 
 # ── Account derivation ──
 
-def "test derive-account" [] {
-  assert equal (derive-account "casa" "" "expense") "expenses:casa"
-  assert equal (derive-account "casa" "seguro" "expense") "expenses:casa:seguro"
-  assert equal (derive-account "salario" "" "income") "revenues:salario"
-  assert equal (derive-account "investimentos" "" "savings") "assets:savings:investimentos"
+def "test category-to-account" [] {
+  assert equal (category-to-account "Casa" "expense") "expenses:casa"
+  assert equal (category-to-account "Casa > Seguro Casa" "expense") "expenses:casa:seguro-casa"
+  assert equal (category-to-account "Salário" "income") "revenues:salario"
+  assert equal (category-to-account "Fundo Emergência" "savings") "assets:savings:fundo-emergencia"
+  assert equal (category-to-account "Casa > Eletricidade" "expense") "expenses:casa:eletricidade"
 }
 
 # ── Journal generation ──
@@ -66,7 +62,7 @@ def "test journal-generates" [] {
   assert ($content | str contains "account assets:savings:fundo-emergencia") "journal should declare savings accounts"
   assert ($content | str contains "~ monthly") "journal should have monthly rules"
   assert ($content | str contains "~ yearly") "journal should have yearly rules"
-  assert ($content | str contains "2025-07-01 Ferias") "journal should have one-off entry"
+  assert ($content | str contains "2025-07-01") "journal should have one-off entry"
   assert ($content | str contains "Transfer joint") "journal should have split transfer"
   assert ($content | str contains "expenses:transportes") "journal should have personal-only expenses"
 }
@@ -85,17 +81,77 @@ def "test amt rounding" [] {
   assert equal (99.999 | amt) 100.0
 }
 
+# ── Slug ──
+
+def "test slug-segment" [] {
+  assert equal ("Eletricidade" | slug-segment) "eletricidade"
+  assert equal ("Seguro Casa" | slug-segment) "seguro-casa"
+  assert equal ("Subsídio Alimentação" | slug-segment) "subsidio-alimentacao"
+  assert equal ("Luz + Gás" | slug-segment) "luz-gas"
+}
+
+# ── Markdown extraction ──
+
+def "test extract-budget" [] {
+  let fixture_dir = ([($env.FIN_DIR) .. fixtures] | path join | path expand)
+  let csv = extract-budget $fixture_dir
+  let expected = open ([($env.FIN_DIR) budget.csv] | path join) --raw | str trim
+  assert equal $csv $expected "extracted budget should match fixture"
+}
+
+def "test write-if-changed" [] {
+  let tmp = ([$env.XDG_RUNTIME_DIR fin-test] | path join)
+  mkdir $tmp
+  let path = [$tmp test.csv] | path join
+  rm -f $path
+
+  let wrote1 = write-if-changed "a,b\n1,2" $path
+  assert $wrote1 "should write new file"
+
+  let wrote2 = write-if-changed "a,b\n1,2" $path
+  assert (not $wrote2) "should skip identical content"
+
+  let wrote3 = write-if-changed "a,b\n3,4" $path
+  assert $wrote3 "should overwrite changed content"
+
+  rm -rf $tmp
+}
+
+def "test sync-md roundtrip" [] {
+  let tmp = ([$env.XDG_RUNTIME_DIR fin-sync-test] | path join)
+  mkdir $tmp
+  let fixture_dir = ([($env.FIN_DIR) .. fixtures] | path join | path expand)
+
+  let old_fin_dir = $env.FIN_DIR
+  $env.FIN_DIR = $tmp
+  let changed = sync-md $fixture_dir
+  assert $changed "first sync should write files"
+
+  let changed2 = sync-md $fixture_dir
+  assert (not $changed2) "second sync should be no-op"
+
+  let synced = open ([$tmp budget.csv] | path join) --raw | str trim
+  let expected = open ([$old_fin_dir budget.csv] | path join) --raw | str trim
+  assert equal $synced $expected "synced budget should match fixture"
+
+  $env.FIN_DIR = $old_fin_dir
+  rm -rf $tmp
+}
+
 # ── Runner ──
 
 def main [] {
   test validate-source passes
-  test load-categories
   test load-budget
   test split-names
   test enrich-budget
-  test derive-account
+  test category-to-account
   test journal-generates
   test fmt-currency
   test amt rounding
+  test slug-segment
+  test extract-budget
+  test write-if-changed
+  test sync-md roundtrip
   print "All tests passed ✓"
 }

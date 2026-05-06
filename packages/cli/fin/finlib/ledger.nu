@@ -1,17 +1,13 @@
-use ./core.nu [fin-dir runtime-dir fmt-currency monetary-locale MONTH_RE KIND_PREFIX PRIMARY_BANK]
-use ./budget.nu [load-categories load-budget enrich-budget split-columns split-names shared-monthly-transfer shared-monthly-breakdown validate-categories validate-budget]
+use ./core.nu [fin-dir runtime-dir fmt-currency monetary-locale category-to-account KIND_PREFIX PRIMARY_BANK]
+use ./budget.nu [load-budget enrich-budget split-columns split-names shared-monthly-transfer shared-monthly-breakdown validate-budget]
 
-export def derive-account [category: string, sub: string, kind: string]: nothing -> string {
-  let prefix = ($KIND_PREFIX | get $kind)
-  if ($sub | is-empty) { $"($prefix):($category)" } else { $"($prefix):($category):($sub)" }
-}
+const WHEN_RE = '^\d{4}-(0[1-9]|1[0-2])$'
 
 # split-{name} → assets:banco:{name}:my-share
 def bank-for [split_name]: nothing -> string {
   if $split_name == null { $PRIMARY_BANK } else { $"assets:banco:($split_name):my-share" }
 }
 
-# Periodic cadences only — "once" is dispatched separately by render-row.
 def cadence-rule [cadence: string]: nothing -> string {
   match $cadence {
     "monthly" => "monthly"
@@ -31,16 +27,13 @@ def posting-pair [account: string, bank: string, amount: float, kind: string, lo
 }
 
 def render-row [entry: record, loc: record]: nothing -> string {
-  let account = derive-account $entry.row.category $entry.row.sub $entry.kind
+  let account = category-to-account $entry.row.category $entry.kind
   let bank = bank-for $entry.split_name
   let postings = posting-pair $account $bank $entry.effective_amount $entry.kind $loc
-  if $entry.row.cadence == "once" {
-    if ($entry.row.month | is-empty) or ($entry.row.month !~ $MONTH_RE) {
-      error make { msg: $"fin: once entry '($entry.row.description)' has invalid month '($entry.row.month)'" }
-    }
-    $"($entry.row.month)-01 ($entry.row.description)\n($postings)\n"
+  if ($entry.row.when =~ $WHEN_RE) {
+    $"($entry.row.when)-01 ($entry.row.description)\n($postings)\n"
   } else {
-    let rule = cadence-rule $entry.row.cadence
+    let rule = cadence-rule $entry.row.when
     $"~ ($rule)  ($entry.row.description)\n($postings)\n"
   }
 }
@@ -52,15 +45,14 @@ def render-block [entries: list, header: string, loc: record]: nothing -> list<s
 }
 
 def generate-journal []: nothing -> string {
-  let cats = load-categories
-  let all = load-budget | enrich-budget $cats
+  let all = load-budget | enrich-budget
   let splits = split-names
   let loc = monetary-locale
   let commodity_sample = fmt-currency 1000.00 $loc
 
   let split_banks = $splits | each { |s| bank-for $s }
   let all_accounts = $all
-    | each { |e| derive-account $e.row.category $e.row.sub $e.kind }
+    | each { |e| category-to-account $e.row.category $e.kind }
     | append $PRIMARY_BANK
     | append $split_banks
     | uniq | sort
@@ -79,18 +71,18 @@ def generate-journal []: nothing -> string {
     $parts = ($parts | append $"account ($acc)")
   }
 
-  # Personal periodic entries (no split)
-  let personal_periodic = $all | where split_name == null and row.cadence != "once"
+  # Personal periodic entries (no split, not once)
+  let personal_periodic = $all | where { |e| $e.split_name == null and $e.row.when in [monthly quarterly yearly] }
   $parts = ($parts | append (render-block $personal_periodic "Personal" $loc))
 
   # Split periodic entries, grouped by split name
   for name in $splits {
-    let entries = $all | where split_name == $name and row.cadence != "once"
+    let entries = $all | where { |e| $e.split_name == $name and $e.row.when in [monthly quarterly yearly] }
     let label = $name | str capitalize
     $parts = ($parts | append (render-block $entries $label $loc))
   }
 
-  # Transfers for each split
+  # Transfers for each split (monthly)
   for name in $splits {
     let transfer = shared-monthly-transfer $name
     if $transfer > 0 {
@@ -108,8 +100,8 @@ def generate-journal []: nothing -> string {
     }
   }
 
-  # One-off entries from all sources
-  let all_once = $all | where row.cadence == "once"
+  # One-off entries (when matches YYYY-MM)
+  let all_once = $all | where { |e| $e.row.when =~ $WHEN_RE }
   $parts = ($parts | append (render-block $all_once "One-off" $loc))
 
   $parts | str join "\n"
@@ -137,8 +129,7 @@ export def run-hledger [args: list<string>] {
 }
 
 export def validate-source []: nothing -> list<string> {
-  let cats = load-categories
-  (validate-categories $cats) | append (validate-budget $cats)
+  validate-budget
 }
 
 export def shared-transfer []: nothing -> float {

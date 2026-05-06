@@ -2,11 +2,21 @@ use finlib/core.nu *
 use finlib/ledger.nu *
 use finlib/reports.nu *
 use finlib/render.nu *
+use finlib/markdown.nu *
 
 const SHOW_SECTIONS = [summary expenses savings split]
 const VALID_PERIODS = [month year]
 
-def do-show [sections: list<string>, period: string] {
+def maybe-sync [] {
+  let md = md-source
+  if $md == "" { return }
+  if not ($md | path exists) {
+    error make { msg: $"fin: FIN_MARKDOWN '($md)' not accessible" }
+  }
+  sync-md $md
+}
+
+def render-dashboard [sections: list<string>, period: string] {
   let data = dashboard-data $period
   let loc = monetary-locale
   for section in $sections {
@@ -17,6 +27,11 @@ def do-show [sections: list<string>, period: string] {
       "split" => { render-split-table $data.split_rows $data.split_my_total $data.split_other_total $loc $period }
     }
   }
+}
+
+def do-show [sections: list<string>, period: string] {
+  maybe-sync
+  render-dashboard $sections $period
 }
 
 def parse-sections [input?: string]: nothing -> list<string> {
@@ -42,6 +57,7 @@ def parse-period [input?: string]: nothing -> string {
 }
 
 def do-check [] {
+  maybe-sync
   let errors = validate-source
 
   if ($errors | is-not-empty) {
@@ -53,78 +69,39 @@ def do-check [] {
   print $"(ansi green_bold)OK(ansi reset)"
 }
 
-def open-editor [csv_path: string] {
-  let editor = ($env.EDITOR? | default "vi")
-  ^sh -c $"($editor) \"($csv_path)\""
+def do-edit [] {
+  let md = md-source
+  let target = if $md != "" { $md } else { (fin-dir) }
+  let editor = ($env.FIN_EDITOR? | default ($env.EDITOR? | default "vi"))
+  ^sh -c $"($editor) \"($target)\""
 }
 
-def do-edit-with-sentinel [csv_path: string, sentinel: string] {
-  "" | save --force --raw $sentinel
-  let err = try {
-    open-editor $csv_path
-    null
-  } catch { |e| $e }
-  rm -f $sentinel
-  if $err != null { error make { msg: $"fin: editor failed: ($err.msg)" } }
-}
+def do-watch [md_source: string, period: string] {
+  let md_source = ($md_source | path expand)
+  if not ($md_source | path exists) {
+    print $"fin: not found: ($md_source)" --stderr
+    exit 1
+  }
+  let watch_dir = if ($md_source | path type) == "dir" { $md_source } else { $md_source | path dirname }
 
-def do-watch-dashboard [sentinel: string] {
   let render = {||
     print -e $"(ansi cursor_home)(ansi clear_entire_screen_plus_buffer)"
-    try { do-show $SHOW_SECTIONS "month" } catch { |e| print $e.msg --stderr }
+    try {
+      sync-md $md_source
+      render-dashboard $SHOW_SECTIONS $period
+    } catch { |e| print $e.msg --stderr }
     print -e (ansi cursor_home)
   }
 
-  if not ($sentinel | path exists) { return }
   do $render
 
   loop {
-    if not ($sentinel | path exists) { break }
-    let wait = (do { ^inotifywait -qq -t 2 -e close_write,moved_to (fin-dir) } | complete)
-    if not ($sentinel | path exists) { break }
+    let wait = (do { ^inotifywait -qq -e close_write,moved_to $watch_dir --include '.*\.md$' } | complete)
     match $wait.exit_code {
       0 => { sleep 200ms; do $render }
-      2 => { }
       _ => { break }
     }
   }
-}
-
-def do-edit [] {
-  let csv_path = [(fin-dir) budget.csv] | path join
-
-  if ($env.ZELLIJ? | default "" | is-not-empty) or (which zellij | is-empty) {
-    open-editor $csv_path
-    return
-  }
-
-  let sentinel = [(runtime-dir) fin $"edit.($nu.pid).alive"] | path join
-  mkdir ([(runtime-dir) fin] | path join)
-  let layout = $'layout {
-  default_tab_template {
-    pane size=1 borderless=true {
-      plugin location="zellij:compact-bar"
-    }
-    children
-  }
-  pane split_direction="vertical" {
-    pane size="50%" focus=true name="Editor" command="fin" close_on_exit=true {
-      args "__edit-with-sentinel" "($csv_path)" "($sentinel)"
-    }
-    pane size="50%" name="Dashboard" command="fin" close_on_exit=true {
-      args "__watch-dashboard" "($sentinel)"
-    }
-  }
-}
-pane_frames false
-default_mode "locked"'
-  ^zellij --layout-string $layout
-  rm -f $sentinel
-}
-
-def do-categories [] {
-  let csv_path = [(fin-dir) categories.csv] | path join
-  open-editor $csv_path
 }
 
 # ── Subcommands ──
@@ -135,13 +112,26 @@ def "main lint" [] { do-check }
 def "main l" [] { do-check }
 def "main edit" [] { do-edit }
 def "main e" [] { do-edit }
-def "main categories" [] { do-categories }
-def "main c" [] { do-categories }
-def "main __edit-with-sentinel" [csv_path: string, sentinel: string] { do-edit-with-sentinel $csv_path $sentinel }
-def "main __watch-dashboard" [sentinel: string] { do-watch-dashboard $sentinel }
+def "main watch" [md_path?: string, --period (-p): string = "month"] {
+  let path = $md_path | default (md-source)
+  if $path == "" {
+    print "fin: pass a markdown file or set FIN_MARKDOWN" --stderr
+    exit 1
+  }
+  do-watch $path (parse-period $period)
+}
+def "main w" [md_path?: string, --period (-p): string = "month"] {
+  let path = $md_path | default (md-source)
+  if $path == "" {
+    print "fin: pass a markdown file or set FIN_MARKDOWN" --stderr
+    exit 1
+  }
+  do-watch $path (parse-period $period)
+}
 
 def main [...args: string] {
   if ($args | length) > 0 and $args.0 == "--" {
+    maybe-sync
     let journal = journal-path
     ^hledger -f $journal ...($args | skip 1)
   } else {
@@ -150,21 +140,28 @@ def main [...args: string] {
     let r = ansi reset
     print $"($b)fin($r) — personal finance forecast CLI \(hledger\)
 
-  Reads budget.csv and categories.csv from FIN_DIR.
+  Set FIN_MARKDOWN to a file or directory with <!-- fin:* --> markers.
 
   ($b)[s]how($r) [month|year] [sections]  ($d)Show sections \(default: month, all\)
                                   Sections: summary,expenses,savings,split($r)
-  ($b)[e]dit($r)                          ($d)Edit budget.csv \(live preview with zellij\)($r)
-  ($b)[c]ategories($r)                    ($d)Edit categories.csv($r)
+  ($b)[e]dit($r)                          ($d)Open FIN_MARKDOWN or FIN_DIR in editor($r)
   ($b)[l]int($r)                          ($d)Validate CSVs and generated journal($r)
+  ($b)[w]atch($r) [path] [-p period]      ($d)Watch markdown file/dir, live dashboard($r)
   ($b)-- <args>($r)                       ($d)Pass-through to hledger($r)
+
+  ($d)Environment:($r)
+    FIN_MARKDOWN                                  ($d)file or directory with <!-- fin:* --> tables($r)
+    FIN_DIR                                       ($d)directory with budget.csv \(auto-generated\)($r)
+    FIN_EDITOR                                    ($d)editor for fin edit \(defaults to EDITOR\)($r)
 
   ($d)Examples:($r)
     fin s                                         ($d)monthly overview($r)
     fin s year                                    ($d)annual overview($r)
     fin s month summary,expenses                  ($d)summary + expenses only($r)
     fin s year split                              ($d)annual shared breakdown($r)
-    fin e                                         ($d)edit budget.csv($r)
+    fin e                                         ($d)open finances in editor($r)
+    fin w ~/vault/finance.md                      ($d)watch markdown, live dashboard($r)
+    fin w -p year                                 ($d)watch with annual view($r)
     fin -- balance -M --depth 3 expenses:casa     ($d)ad-hoc exploration($r)
     fin -- register expenses:supermercado         ($d)transaction list($r)
     fin -- ui --forecast='this year'              ($d)launch hledger-ui($r)

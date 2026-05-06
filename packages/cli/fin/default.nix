@@ -8,6 +8,7 @@ let
     cp ${./finlib/ledger.nu} $out/finlib/ledger.nu
     cp ${./finlib/reports.nu} $out/finlib/reports.nu
     cp ${./finlib/render.nu} $out/finlib/render.nu
+    cp ${./finlib/markdown.nu} $out/finlib/markdown.nu
     cd $out && ${lib.getExe pkgs.nushell} --no-config-file fin.nu --help > /dev/null
   '';
 in
@@ -20,8 +21,6 @@ pkgs.writeShellApplication {
     pkgs.hledger-web
     pkgs.youplot
     pkgs.inotify-tools
-    # zellij is optional — fin edit falls back to plain $EDITOR when absent.
-    # When installed via programs.zellij (see profiles/home-manager/development/zellij.nix), it is already on PATH.
   ];
   text = ''
     exec nu --no-config-file ${src}/fin.nu "$@"

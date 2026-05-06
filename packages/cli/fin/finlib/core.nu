@@ -1,13 +1,17 @@
-export const MONTH_RE = '^\d{4}-(0[1-9]|1[0-2])$'
 export const KIND_PREFIX = { income: "revenues", expense: "expenses", savings: "assets:savings" }
 export const PRIMARY_BANK = "assets:banco:conta-pessoal"
 
 export def fin-dir []: nothing -> string {
   let d = ($env.FIN_DIR? | default "")
-  if $d == "" or not ($d | path exists) {
-    error make { msg: "fin: FIN_DIR not set or not accessible" }
+  if $d != "" {
+    if not ($d | path exists) { error make { msg: $"fin: FIN_DIR '($d)' not accessible" } }
+    return $d
   }
-  $d
+  let md = ($env.FIN_MARKDOWN? | default "")
+  if $md == "" { error make { msg: "fin: set FIN_DIR or FIN_MARKDOWN" } }
+  let fallback = [(runtime-dir) fin data] | path join
+  mkdir $fallback
+  $fallback
 }
 
 export def runtime-dir []: nothing -> string {
@@ -16,6 +20,28 @@ export def runtime-dir []: nothing -> string {
     error make { msg: "fin: XDG_RUNTIME_DIR is not set" }
   }
   $d
+}
+
+export def md-source []: nothing -> string {
+  $env.FIN_MARKDOWN? | default ""
+}
+
+export def slug-segment []: string -> string {
+  str downcase | str trim
+    | str replace --all 'á' 'a' | str replace --all 'à' 'a' | str replace --all 'ã' 'a' | str replace --all 'â' 'a'
+    | str replace --all 'é' 'e' | str replace --all 'ê' 'e'
+    | str replace --all 'í' 'i'
+    | str replace --all 'ó' 'o' | str replace --all 'ô' 'o' | str replace --all 'õ' 'o'
+    | str replace --all 'ú' 'u'
+    | str replace --all 'ç' 'c'
+    | str replace --regex '[^a-z0-9]+' '-'
+    | str trim --char '-'
+}
+
+export def category-to-account [category: string, kind: string]: nothing -> string {
+  let prefix = ($KIND_PREFIX | get $kind)
+  let segments = $category | split row '>' | each { str trim | slug-segment } | where { |s| $s != "" }
+  [$prefix] | append $segments | str join ":"
 }
 
 export def amt []: number -> float {
