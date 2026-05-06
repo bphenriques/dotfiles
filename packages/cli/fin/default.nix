@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, nushell, hledger, hledger-ui, hledger-web, youplot, inotify-tools, ... }:
 let
   src = pkgs.runCommand "fin-checked" { } ''
     mkdir -p $out/finlib
@@ -9,18 +9,18 @@ let
     cp ${./finlib/reports.nu} $out/finlib/reports.nu
     cp ${./finlib/render.nu} $out/finlib/render.nu
     cp ${./finlib/markdown.nu} $out/finlib/markdown.nu
-    cd $out && ${lib.getExe pkgs.nushell} --no-config-file fin.nu --help > /dev/null
+    cd $out && ${lib.getExe nushell} --no-config-file fin.nu --help > /dev/null
   '';
 in
 pkgs.writeShellApplication {
   name = "fin";
   runtimeInputs = [
-    pkgs.nushell
-    pkgs.hledger
-    pkgs.hledger-ui
-    pkgs.hledger-web
-    pkgs.youplot
-    pkgs.inotify-tools
+    nushell
+    hledger
+    hledger-ui
+    hledger-web
+    youplot
+    inotify-tools
   ];
   text = ''
     exec nu --no-config-file ${src}/fin.nu "$@"

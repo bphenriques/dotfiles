@@ -1,7 +1,5 @@
-use ./core.nu [fin-dir runtime-dir fmt-currency monetary-locale category-to-account KIND_PREFIX PRIMARY_BANK]
-use ./budget.nu [load-budget enrich-budget split-columns split-names shared-monthly-transfer shared-monthly-breakdown validate-budget]
-
-const WHEN_RE = '^\d{4}-(0[1-9]|1[0-2])$'
+use ./core.nu [runtime-dir fin-dir fmt-currency category-to-account slug-segment KIND_PREFIX PRIMARY_BANK FREQUENCY_RE]
+use ./budget.nu [load-budget enrich-budget split-columns split-names split-monthly-transfer split-breakdown validate-budget]
 
 # split-{name} → assets:banco:{name}:my-share
 def bank-for [split_name]: nothing -> string {
@@ -17,8 +15,28 @@ def cadence-rule [cadence: string]: nothing -> string {
   }
 }
 
-def posting-pair [account: string, bank: string, amount: float, kind: string, loc: record]: nothing -> string {
-  let amt = fmt-currency $amount $loc
+def parse-wiki-links [text: string]: nothing -> record {
+  let refs = $text | parse --regex '\[\[([^\]]+)\]\]' | get capture0
+    | each { split row '|' | first | split row '#' | first | slug-segment }
+  let narration = $text | str replace --all --regex '\[\[[^\]]+\]\]' '' | str replace --all ';' '' | str replace --all --regex '\s+' ' ' | str trim
+  { narration: $narration, refs: $refs }
+}
+
+def entry-tags [entry: record]: nothing -> list<string> {
+  let parsed = parse-wiki-links $entry.row.description
+  mut tags = [source:budget $"kind:($entry.kind)" $"cadence:($entry.row.frequency)"]
+  if $entry.split_name != null {
+    let share = $entry.effective_amount / $entry.row.amount
+    $tags = ($tags | append [$"split:($entry.split_name)" $"share:($share)"])
+  }
+  for ref in $parsed.refs {
+    $tags = ($tags | append $"ref:($ref)")
+  }
+  $tags
+}
+
+def posting-pair [account: string, bank: string, amount: float, kind: string]: nothing -> string {
+  let amt = fmt-currency $amount
   if $kind == "income" {
     $"    ($bank)    ($amt)\n    ($account)"
   } else {
@@ -26,29 +44,31 @@ def posting-pair [account: string, bank: string, amount: float, kind: string, lo
   }
 }
 
-def render-row [entry: record, loc: record]: nothing -> string {
+def render-row [entry: record]: nothing -> string {
   let account = category-to-account $entry.row.category $entry.kind
   let bank = bank-for $entry.split_name
-  let postings = posting-pair $account $bank $entry.effective_amount $entry.kind $loc
-  if ($entry.row.when =~ $WHEN_RE) {
-    $"($entry.row.when)-01 ($entry.row.description)\n($postings)\n"
+  let postings = posting-pair $account $bank $entry.effective_amount $entry.kind
+  let tags = entry-tags $entry | str join ", "
+  let narration = (parse-wiki-links $entry.row.description).narration
+  if ($entry.row.frequency =~ $FREQUENCY_RE) {
+    # YYYY-MM emits one dated transaction; outside the forecast window once that month passes.
+    $"($entry.row.frequency)-01 ($narration) ; ($tags)\n($postings)\n"
   } else {
-    let rule = cadence-rule $entry.row.when
-    $"~ ($rule)  ($entry.row.description)\n($postings)\n"
+    let rule = cadence-rule $entry.row.frequency
+    $"~ ($rule)  ($narration) ; ($tags)\n($postings)\n"
   }
 }
 
-def render-block [entries: list, header: string, loc: record]: nothing -> list<string> {
+def render-block [entries: list, header: string]: nothing -> list<string> {
   if ($entries | is-empty) { return [] }
-  let body = $entries | each { |e| render-row $e $loc }
+  let body = $entries | each { |e| render-row $e }
   ["" $"; ── ($header) ──" ""] | append $body
 }
 
 def generate-journal []: nothing -> string {
   let all = load-budget | enrich-budget
   let splits = split-names
-  let loc = monetary-locale
-  let commodity_sample = fmt-currency 1000.00 $loc
+  let commodity_sample = fmt-currency 1000.00
 
   let split_banks = $splits | each { |s| bank-for $s }
   let all_accounts = $all
@@ -71,44 +91,38 @@ def generate-journal []: nothing -> string {
     $parts = ($parts | append $"account ($acc)")
   }
 
-  # Personal periodic entries (no split, not once)
-  let personal_periodic = $all | where { |e| $e.split_name == null and $e.row.when in [monthly quarterly yearly] }
-  $parts = ($parts | append (render-block $personal_periodic "Personal" $loc))
+  # Personal entries (no split)
+  let personal = $all | where { |e| $e.split_name == null }
+  $parts = ($parts | append (render-block $personal "Personal"))
 
-  # Split periodic entries, grouped by split name
+  # Split entries, grouped by split name
   for name in $splits {
-    let entries = $all | where { |e| $e.split_name == $name and $e.row.when in [monthly quarterly yearly] }
+    let entries = $all | where { |e| $e.split_name == $name }
     let label = $name | str capitalize
-    $parts = ($parts | append (render-block $entries $label $loc))
+    $parts = ($parts | append (render-block $entries $label))
   }
 
-  # Transfers for each split (monthly)
-  for name in $splits {
-    let transfer = shared-monthly-transfer $name
-    if $transfer > 0 {
-      let split_bank = bank-for $name
-      let label = $name | str capitalize
-      $parts = ($parts | append [
-        ""
-        $"; ── Transfer: ($label) ──"
-        ""
-        $"~ monthly  Transfer ($name)"
-        $"    ($split_bank)    (fmt-currency $transfer $loc)"
-        $"    ($PRIMARY_BANK)"
-        ""
-      ])
-    }
+  # Single monthly transfer per split (normalized: yearly/12, quarterly/3)
+  let transfers = split-monthly-transfer
+  for t in $transfers {
+    let split_bank = bank-for $t.split_name
+    let label = $t.split_name | str capitalize
+    $parts = ($parts | append [
+      ""
+      $"; ── Transfer: ($label) ──"
+      ""
+      $"~ monthly  Transfer ($t.split_name) ; source:budget"
+      $"    ($split_bank)    (fmt-currency $t.total)"
+      $"    ($PRIMARY_BANK)"
+      ""
+    ])
   }
-
-  # One-off entries (when matches YYYY-MM)
-  let all_once = $all | where { |e| $e.row.when =~ $WHEN_RE }
-  $parts = ($parts | append (render-block $all_once "One-off" $loc))
 
   $parts | str join "\n"
 }
 
 export def journal-path []: nothing -> string {
-  let errors = validate-source
+  let errors = validate-budget
   if ($errors | is-not-empty) {
     let msg = $errors | each { |e| $"  ✗ ($e)" } | str join "\n"
     error make { msg: $msg }
@@ -128,14 +142,5 @@ export def run-hledger [args: list<string>] {
   ^hledger -f $journal ...$args
 }
 
-export def validate-source []: nothing -> list<string> {
-  validate-budget
-}
 
-export def shared-transfer []: nothing -> float {
-  split-names | each { |s| shared-monthly-transfer $s } | append 0 | math sum
-}
 
-export def shared-breakdown []: nothing -> table {
-  split-names | each { |s| shared-monthly-breakdown $s } | flatten
-}

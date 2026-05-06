@@ -1,5 +1,6 @@
-use ./core.nu [prettify-slug pct amt KIND_PREFIX]
-use ./ledger.nu [run-hledger shared-transfer shared-breakdown]
+use ./core.nu [prettify-slug pct amt KIND_PREFIX MONTHLY_DIVISOR]
+use ./ledger.nu [run-hledger]
+use ./budget.nu [split-monthly-transfer split-breakdown]
 
 def hledger-amounts [args: list<string>]: nothing -> table<account: string, amount: float> {
   let json = (run-hledger ($args | append ["-O" "json"])) | from json
@@ -31,7 +32,7 @@ export def dashboard-data [period: string]: nothing -> record {
   let savings = (hledger-amounts [balance -E --depth 2 $forecast -p $time $KIND_PREFIX.savings])
     | where account == $KIND_PREFIX.savings | get amount | append 0.0 | first | amt
 
-  let transfer = shared-transfer
+  let transfer = split-monthly-transfer | get total | append 0 | math sum
 
   # Expense breakdown
   let exp_rows = (hledger-amounts [balance -E --depth 3 $forecast -p $time $KIND_PREFIX.expense])
@@ -39,7 +40,12 @@ export def dashboard-data [period: string]: nothing -> record {
     | each { |r|
       let parts = ($r.account | str replace $"($KIND_PREFIX.expense):" "" | split row ":")
       { category: ($parts | first | prettify-slug), sub: (if ($parts | length) > 1 { $parts | skip 1 | each { prettify-slug } | str join " " } else { "" }), amount: ($r.amount | amt) }
-    } | sort-by amount --reverse
+    }
+  let cat_totals = $exp_rows | group-by category | transpose key value | each { |g| { category: $g.key, total: ($g.value | get amount | math sum) } }
+  let exp_rows = $exp_rows | each { |r|
+    let cat_total = $cat_totals | where category == $r.category | first | get total
+    $r | insert _cat_total $cat_total
+  } | sort-by _cat_total amount --reverse | reject _cat_total
 
   # Savings breakdown
   let sav_rows = (hledger-amounts [balance -E --depth 3 $forecast -p $time $KIND_PREFIX.savings])
@@ -49,10 +55,10 @@ export def dashboard-data [period: string]: nothing -> record {
     } | sort-by value --reverse
 
   # Split breakdown
-  let split_rows = shared-breakdown
-  let my_total = $split_rows | get contribution | append 0 | math sum | amt
-  let full_total = $split_rows | get amount | append 0 | math sum | amt
-  let other_total = $full_total - $my_total | amt
+  let split_rows = split-breakdown
+  let periodic = $split_rows | where { |r| $r.frequency in [monthly quarterly yearly] }
+  let my_total = $periodic | each { |r| $r.contribution / ($MONTHLY_DIVISOR | get $r.frequency) } | append 0 | math sum | amt
+  let other_total = $periodic | each { |r| ($r.amount - $r.contribution) / ($MONTHLY_DIVISOR | get $r.frequency) } | append 0 | math sum | amt
 
   let free = $income - $expense - $savings | amt
 
