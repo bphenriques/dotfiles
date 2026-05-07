@@ -1,11 +1,10 @@
-{ lib, pkgs, nushell, hledger, hledger-ui, hledger-web, youplot, inotify-tools, ... }:
+{ lib, pkgs, nushell, inotify-tools, ... }:
 let
   src = pkgs.runCommand "fin-checked" { } ''
     mkdir -p $out/finlib
     cp ${./fin.nu} $out/fin.nu
     cp ${./finlib/core.nu} $out/finlib/core.nu
     cp ${./finlib/budget.nu} $out/finlib/budget.nu
-    cp ${./finlib/ledger.nu} $out/finlib/ledger.nu
     cp ${./finlib/reports.nu} $out/finlib/reports.nu
     cp ${./finlib/render.nu} $out/finlib/render.nu
     cp ${./finlib/markdown.nu} $out/finlib/markdown.nu
@@ -16,10 +15,6 @@ pkgs.writeShellApplication {
   name = "fin";
   runtimeInputs = [
     nushell
-    hledger
-    hledger-ui
-    hledger-web
-    youplot
     inotify-tools
   ];
   text = ''

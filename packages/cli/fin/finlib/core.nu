@@ -1,38 +1,7 @@
-export const KIND_PREFIX = { income: "revenues", expense: "expenses", savings: "assets:savings" }
-export const PRIMARY_BANK = "assets:banco:conta-pessoal"
-export const FREQUENCY_RE = '^\d{4}-(0[1-9]|1[0-2])$'
 export const MONTHLY_DIVISOR = { monthly: 1, quarterly: 3, yearly: 12 }
-
-export def runtime-dir []: nothing -> string {
-  $env.XDG_RUNTIME_DIR? | default ($env.TMPDIR? | default "/tmp")
-}
 
 export def fin-dir []: nothing -> string {
   $env.FIN_DIR? | default ""
-}
-
-export def health-path []: nothing -> string {
-  let p = ($env.FIN_HEALTH? | default "")
-  if $p != "" { return $p }
-  ([(runtime-dir) fin "fin-health.md"] | path join)
-}
-
-export def slug-segment []: string -> string {
-  str downcase | str trim
-    | str replace --all 'á' 'a' | str replace --all 'à' 'a' | str replace --all 'ã' 'a' | str replace --all 'â' 'a'
-    | str replace --all 'é' 'e' | str replace --all 'ê' 'e'
-    | str replace --all 'í' 'i'
-    | str replace --all 'ó' 'o' | str replace --all 'ô' 'o' | str replace --all 'õ' 'o'
-    | str replace --all 'ú' 'u'
-    | str replace --all 'ç' 'c'
-    | str replace --all --regex '[^a-z0-9]+' '-'
-    | str trim --char '-'
-}
-
-export def category-to-account [category: string, kind: string]: nothing -> string {
-  let prefix = ($KIND_PREFIX | get $kind)
-  let segments = $category | split row '>' | each { str trim | slug-segment } | where { |s| $s != "" }
-  [$prefix] | append $segments | str join ":"
 }
 
 export def amt []: number -> float {
@@ -61,8 +30,4 @@ export def fmt-currency [n: float]: nothing -> string {
 
 export def pct [part: float, total: float]: nothing -> float {
   if $total == 0 { 0.0 } else { ($part / $total * 100 | math round --precision 1) }
-}
-
-export def prettify-slug []: string -> string {
-  split row "-" | each { str capitalize } | str join " "
 }

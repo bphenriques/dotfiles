@@ -20,9 +20,6 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [
       cfg.package
-      pkgs.hledger
-      pkgs.hledger-ui
-      pkgs.puffin
     ];
     home.sessionVariables.FIN_DIR = cfg.directory;
   };

@@ -1,67 +1,54 @@
 use ./core.nu [fmt-currency pct]
 
-export def chart [title: string, color: string] {
-  $in | to tsv --noheaders | ^uplot bar -t $title -c $color -d "\t"
-}
+const ICON_INCOME = "↑"
+const ICON_EXPENSE = "↓"
+const ICON_SAVINGS = "●"
+const ICON_WALLET = "○"
+const ICON_EXPANDED = "▼"
+const ICON_COLLAPSED = "▶"
 
 export def render-summary [data: record] {
   let d = ansi white_dimmed
   let r = ansi reset
-  let bal_color = if $data.free >= 0 { ansi green } else { ansi red }
-  print $"\n  Income        (ansi green)(fmt-currency $data.income | fill -a right -w 12)($r)"
-  print $"  Expenses      (ansi red)(fmt-currency $data.expense | fill -a right -w 12)($r)   ($d)(pct $data.expense $data.income)%($r)"
-  print $"  Savings       (ansi blue)(fmt-currency $data.savings | fill -a right -w 12)($r)   ($d)(pct $data.savings $data.income)%($r)"
-  print $"  Transfer/mo   (fmt-currency $data.transfer | fill -a right -w 12)"
+  let bal_color = if $data.free >= 0 { ansi green_bold } else { ansi red_bold }
+  print $"\n  ($ICON_INCOME) Income        (ansi green_bold)(fmt-currency $data.income | fill -a right -w 12)($r)"
+  print $"  ($ICON_EXPENSE) Expenses      (ansi red_bold)(fmt-currency $data.expense | fill -a right -w 12)($r)   ($d)(pct $data.expense $data.income)%($r)"
+  print $"    ($d)Personal($r)    (fmt-currency $data.personal_expense | fill -a right -w 12)   ($d)(pct $data.personal_expense $data.income)%($r)"
+  print $"    ($d)Joint($r)       (ansi magenta)(fmt-currency $data.joint_expense | fill -a right -w 12)($r)   ($d)(pct $data.joint_expense $data.income)%($r)"
+  print $"  ($ICON_SAVINGS) Savings       (ansi blue_bold)(fmt-currency $data.savings | fill -a right -w 12)($r)   ($d)(pct $data.savings $data.income)%($r)"
   print $"  ($d)─────────────────────────($r)"
-  print $"  (ansi white_bold)Balance       ($bal_color)(fmt-currency $data.free | fill -a right -w 12)($r)"
+  print $"  ($ICON_WALLET) (ansi white_bold)Unallocated   ($bal_color)(fmt-currency $data.free | fill -a right -w 12)($r)"
 }
 
-export def render-expenses-table [rows: table] {
-  print ""
-  let cat_hdr = $"(ansi cyan)Category(ansi reset)"
-  let sub_hdr = $"(ansi cyan)Expense(ansi reset)"
-  let amt_hdr = $"(ansi cyan)Amount(ansi reset)"
-  $rows
-    | each { |r| { $cat_hdr: $r.category, $sub_hdr: $r.sub, $amt_hdr: (fmt-currency $r.amount) } }
-    | table --index false
-    | print
-}
-
-export def render-savings-chart [rows: table, label: string] {
-  $rows
-    | each { |r| { label: $"($r.label) (fmt-currency $r.value) \(($r.pct)%\)", value: $r.value } }
-    | chart $"Savings — ($label)" blue
-}
-
-export def render-split-table [rows: table, my_total: float, other_total: float] {
-  if ($rows | is-empty) {
-    print "  No shared expenses."
-    return
-  }
-  print ""
-  let groups = $rows | get group | uniq
-  let show_group = ($groups | length) > 1
-  let grp_hdr = $"(ansi cyan)Group(ansi reset)"
-  let desc_hdr = $"(ansi cyan)Split Expense(ansi reset)"
-  let amt_hdr = $"(ansi cyan)Amount(ansi reset)"
-  let share_hdr = $"(ansi cyan)Share(ansi reset)"
-  let freq_hdr = $"(ansi cyan)Frequency(ansi reset)"
-  let contrib_hdr = $"(ansi cyan)Contribution(ansi reset)"
-  $rows
-    | each { |r|
-        let base = {
-          $desc_hdr: $r.description,
-          $amt_hdr: (fmt-currency $r.amount),
-          $share_hdr: $"($r.share * 100 | math round | into int)%",
-          $freq_hdr: $r.frequency,
-          $contrib_hdr: (fmt-currency $r.contribution)
-        }
-        if $show_group { { $grp_hdr: ($r.group | str capitalize) } | merge $base } else { $base }
-      }
-    | table --index false
-    | print
+export def render-expenses-table [groups: table, income: float, detailed: bool] {
   let d = ansi white_dimmed
   let r = ansi reset
-  print $"\n  ($d)My transfer/mo:($r)    (fmt-currency $my_total)"
-  print $"  ($d)Other transfer/mo:($r) (fmt-currency $other_total)"
+  let icon = if $detailed { $ICON_EXPANDED } else { $ICON_COLLAPSED }
+  print ""
+  for g in $groups {
+    let g_pct = pct $g.total $income
+    print $"  (ansi red)($icon)($r) (ansi red_bold)($g.category)($r) — (ansi red_bold)(fmt-currency $g.total)($r) ($d)\(($g_pct)%\)($r)"
+    if $detailed {
+      let single_no_sub = ($g.items | length) == 1 and ($g.items.0.sub == "")
+      if not $single_no_sub {
+        for item in $g.items {
+          let label = if $item.sub == "" { "—" } else { $item.sub }
+          let row_pct = pct $item.amount $income
+          print $"      ($label | fill -a left -w 28) (fmt-currency $item.amount | fill -a right -w 12)   ($d)($row_pct)%($r)"
+        }
+      }
+    }
+  }
+}
+
+# Total appears in the summary section; only render the per-category breakdown on --detailed.
+export def render-savings-table [rows: table, income: float, detailed: bool] {
+  if not $detailed { return }
+  let d = ansi white_dimmed
+  let r = ansi reset
+  print ""
+  for row in $rows {
+    let row_pct = pct $row.value $income
+    print $"  (ansi blue)($ICON_EXPANDED)($r) (ansi blue_bold)($row.label)($r) — (ansi blue_bold)(fmt-currency $row.value)($r) ($d)\(($row_pct)%\)($r)"
+  }
 }

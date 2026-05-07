@@ -4,12 +4,8 @@ lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
 
     settings = {
-      # Locked mode by default: avoids keybinding collisions with Helix (Ctrl-o, Ctrl-s, etc.).
-      # Press Ctrl-g to unlock Zellij controls, then use shortcuts normally.
-      default_mode = "locked";
-
-      # Disable session serialization — Zellij is used for ephemeral workflows (e.g., fin edit), not persistent sessions.
-      session_serialization = false;
+      default_mode = "locked"; # Locked mode by default: avoids keybinding collisions with Helix. Ctrl-g to unlock.
+      session_serialization = false; # Dont use this feature.
 
       # Suppress first-run wizard and release notes.
       show_startup_tips = false;

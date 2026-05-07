@@ -1,5 +1,3 @@
-use ./core.nu [slug-segment]
-
 def normalize-decimal []: string -> string {
   let v = $in
   if ($v =~ '^-?\d+,\d{1,2}$') { $v | str replace ',' '.' } else { $v }
@@ -15,15 +13,11 @@ def parse-md-row []: string -> list<string> {
 
 def parse-marker-suffix [raw: string]: nothing -> record<kind: string, defaults: record> {
   let parts = $raw | split row ' ' | where { |p| $p != '' }
-  let kind = $parts | first
-  mut defaults = {}
-  for p in ($parts | skip 1) {
+  let defaults = $parts | skip 1 | reduce -f {} { |p, acc|
     let kv = $p | split row '=' | each { str trim }
-    if ($kv | length) == 2 {
-      $defaults = ($defaults | insert ($kv | get 0) ($kv | get 1))
-    }
+    if ($kv | length) == 2 { $acc | insert $kv.0 $kv.1 } else { $acc }
   }
-  { kind: $kind, defaults: $defaults }
+  { kind: ($parts | first), defaults: $defaults }
 }
 
 def extract-budget-tables [file: string]: nothing -> list {
@@ -33,8 +27,7 @@ def extract-budget-tables [file: string]: nothing -> list {
   let markers = $lines | enumerate | where { |e| ($e.item | str trim | str downcase | str starts-with $marker_re) }
 
   $markers | each { |m|
-    let marker_text = $m.item | str trim
-    let suffix = $marker_text | str replace --regex '(?i)<!-- fin:budget:' "" | str replace " -->" "" | str trim
+    let suffix = $m.item | str trim | str replace --regex '(?i)<!-- fin:budget:' "" | str replace " -->" "" | str trim
     let parsed = parse-marker-suffix $suffix
     let after = $lines | enumerate | skip ($m.index + 1)
       | skip while { |e| ($e.item | str trim) == "" }
@@ -75,14 +68,14 @@ export def extract-budget [source: string]: nothing -> table {
   let all_headers = $table_headers | append $default_keys | uniq
 
   $all_tables | each { |t|
+    let header_idx = $t.header | enumerate | reduce -f {} { |e, acc| $acc | insert $e.item $e.index }
     $t.rows | each { |entry|
       let rec = $all_headers | reduce -f {} { |col, acc|
-        let found = $t.header | enumerate | where { |e| $e.item == $col }
-        let val = if ($found | is-not-empty) { $entry.cells | get ($found | first | get index) } else { "" }
+        let val = if ($col in $header_idx) { $entry.cells | get ($header_idx | get $col) } else { "" }
         let final_val = if $val == "" and ($col in $t.defaults) { $t.defaults | get $col } else { $val }
         $acc | insert $col $final_val
       }
-      $rec | insert kind $t.kind | insert _file $t.file | insert _line $entry.line
+      $rec | insert kind $t.kind
     }
   } | flatten
 }

@@ -26,7 +26,6 @@
 | Saúde > Dentista | Dentista | 150 | yearly |  |
 | Lazer | Férias | 500 | yearly | 0.5 |
 | Animal > Veterinário | Veterinário | 90 | quarterly | 0.5 |
-| Prendas | Natal | 100 | 2025-12 |  |
 
 ## Savings
 <!-- fin:budget:savings frequency=monthly -->
