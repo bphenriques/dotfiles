@@ -35,10 +35,6 @@ in
   ];
 
   custom.dotfiles.enable = true;
-  custom.programs.fin = {
-    enable = true;
-    directory = "${nasPaths.users.bphenriques.notes}/finance";
-  };
   custom.programs.file-explorer = {
     enable = true;
     bookmarks = [

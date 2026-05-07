@@ -35,7 +35,6 @@ let
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
       scrape-roms = pkgs.callPackage ./cli/scrape-roms { };
-      fin = pkgs.callPackage ./cli/fin { };
       wg-manage = pkgs.callPackage ./homelab/wg-manage { };
       rustic-manage = pkgs.callPackage ./homelab/rustic-manage { };
       pocket-id-manage = pkgs.callPackage ./homelab/pocket-id-manage { };
