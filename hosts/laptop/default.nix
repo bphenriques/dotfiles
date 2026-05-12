@@ -49,13 +49,20 @@ in
     media.root = config.custom.homelab.smb.mounts.media.localMount;
     users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
   };
+
+  custom.ai.agents.recipeToCooklang = {
+    enable = true;
+    inboxDir = "${config.custom.homelab.paths.users.bphenriques.notes}/agent/recipes/inbox";
+    outputDir = config.custom.homelab.paths.media.recipes;
+  };
+
   custom.homelab.smb = {
     enable = true;
     hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
-      bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
-      media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
+      bphenriques = { inherit (config.users.users.bphenriques) uid; gid = 5190; };
+      media = { inherit (config.users.users.bphenriques) uid; gid = 5512; };
     };
   };
   sops = {

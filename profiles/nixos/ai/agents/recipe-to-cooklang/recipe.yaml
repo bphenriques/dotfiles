@@ -1,0 +1,43 @@
+version: "1.0.0"
+title: "URL to cooklang"
+description: "Fetch recipe + image from URL, write cooklang, hand off to the publish script"
+
+instructions: |
+  Do exactly these steps, in order. Only write files under {{ staging_dir }}.
+  Never move, copy, or delete files outside it — validation and publishing
+  are handled after you exit.
+
+  1. Run: {{ recipes_dir }}/.agent/fetch "{{ url }}" "{{ staging_dir }}"
+     This produces:
+       {{ staging_dir }}/raw.txt   — recipe text
+       {{ staging_dir }}/raw.jpg   — plate image
+     If it exits non-zero, stop and report its output.
+
+  2. Read {{ recipes_dir }}/AGENTS.md for the cooklang formatting rules.
+
+  3. Read {{ staging_dir }}/raw.txt.
+
+  4. Write {{ staging_dir }}/<slug>.cook following AGENTS.md.
+     Pick a kebab-case <slug> from the recipe title.
+
+  5. Rename {{ staging_dir }}/raw.jpg to {{ staging_dir }}/<slug>.jpg
+     (same slug as the .cook file).
+
+  6. Reply with the slug. You are done.
+
+prompt: "Process {{ url }}."
+
+parameters:
+  - key: url
+    input_type: string
+    requirement: required
+  - key: recipes_dir
+    input_type: string
+    requirement: required
+  - key: staging_dir
+    input_type: string
+    requirement: required
+
+extensions:
+  - type: builtin
+    name: developer

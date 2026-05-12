@@ -14,6 +14,7 @@ in
     ../../../profiles/home-manager/desktop-environment
     ../../../profiles/home-manager/desktop
     ../../../profiles/home-manager/development
+    ../../../profiles/home-manager/ai
     ../../../profiles/home-manager/gaming
     ./kanshi.nix
   ];

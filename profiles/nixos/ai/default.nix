@@ -1,18 +1,24 @@
 { config, pkgs, ... }:
 {
+  imports = [
+    ./agents/recipe-to-cooklang
+  ];
+
   # Ollama — local LLM inference with CUDA
   services.ollama = {
     enable = true;
     package = pkgs.ollama-cuda;
-    loadModels = [ "qwen3:8b" "qwen2.5:7b" "qwen2.5vl:3b" ];
+    loadModels = [ "qwen3:8b" "qwen2.5vl:3b" "nomic-embed-text" ];
     environmentVariables = {
-      OLLAMA_KEEP_ALIVE = "10m";
+      # 8 GB VRAM is shared with PRIME-sync desktop (Firefox/IDE). 2 min keeps
+      # the model warm during interactive bursts but frees VRAM soon after.
+      OLLAMA_KEEP_ALIVE = "2m";
       OLLAMA_MAX_LOADED_MODELS = "1";
       OLLAMA_NUM_PARALLEL = "1";
     };
   };
 
-  # Open WebUI — web chat interface with built-in local Whisper STT
+  # Open WebUI — local chat surface (localhost only).
   services.open-webui = {
     enable = true;
     port = 8080;
