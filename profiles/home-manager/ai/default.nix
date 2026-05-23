@@ -1,6 +1,6 @@
 { ... }:
 {
   imports = [
-    ./goose.nix           # AI Agent runtime with MCP servers
+    ./hermes-client.nix   # thin CLI client → compute's Hermes API
   ];
 }

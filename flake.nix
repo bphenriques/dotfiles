@@ -35,6 +35,9 @@
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.5.16"; # Personal assistant brain on compute
+    hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:

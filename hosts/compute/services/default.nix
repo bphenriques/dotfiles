@@ -29,6 +29,8 @@ in
     ./papra.nix
     ./bentopdf.nix
     ./mympd.nix
+    ./hermes.nix
+    ./nextchat.nix
   ];
 
   custom.homelab = {

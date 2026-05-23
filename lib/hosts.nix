@@ -6,6 +6,7 @@ in
   mkNixosHost = { hostName, system, configPath, extraOverlays ? [], extraHmModules ? [] }:
     let
       sharedSpecialArgs = {
+        inherit inputs;
         private = inputs.dotfiles-private.hosts.${hostName};
         self = self // {
           packages = self.packages.${system} // inputs.dotfiles-private.packages.${system};

@@ -1,7 +1,8 @@
-{ config, pkgs, private, ... }:
+{ config, pkgs, lib, private, ... }:
 let
   primaryUser = "bphenriques";
   rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
+  hermesApiHost = lib.removePrefix "https://" private.settings.services.hermes-api;
 in
 {
   imports = [
@@ -44,16 +45,15 @@ in
     };
   };
 
+  # Resolve the Hermes API FQDN to compute's LAN IP so the laptop's HTTPS
+  # connection stays on the home network (no public DNS lookup), while SNI
+  # still matches the *.{domain} wildcard cert served by compute's Traefik.
+  networking.hosts."${config.custom.fleet.lan.hosts.compute}" = [ hermesApiHost ];
+
   # Homelab integration
   custom.homelab.paths = {
     media.root = config.custom.homelab.smb.mounts.media.localMount;
     users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
-  };
-
-  custom.ai.agents.recipeToCooklang = {
-    enable = true;
-    inboxDir = "${config.custom.homelab.paths.users.bphenriques.notes}/agent/recipes/inbox";
-    outputDir = config.custom.homelab.paths.media.recipes;
   };
 
   custom.homelab.smb = {
