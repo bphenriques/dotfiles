@@ -64,7 +64,7 @@ let
 
     templatesList = lib.mapAttrsToList (name: tmpl: {
       inherit name;
-      inherit (tmpl) path content;
+      inherit (tmpl) path content mode;
       srcPath = pkgs.writeText "homelab-template-${ownerName}-${name}" tmpl.content;
     }) ownerCfg.templates;
 
@@ -96,7 +96,7 @@ let
       in ''
         echo "Rendering template: ${tmpl.name}"
         mkdir -p "$(dirname '${tmpl.path}')"
-        install -m 640 -o root -g "$group" "${tmpl.srcPath}" "${tmpl.path}"
+        install -m ${tmpl.mode} -o root -g "$group" "${tmpl.srcPath}" "${tmpl.path}"
         ${lib.concatStringsSep "\n" (lib.mapAttrsToList (placeholder: filePath: ''
           ${pkgs.replace-secret}/bin/replace-secret \
             '${placeholder}' \

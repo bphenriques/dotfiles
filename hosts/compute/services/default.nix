@@ -30,6 +30,7 @@ in
     ./bentopdf.nix
     ./mympd.nix
     ./hermes.nix
+    ./hermes-vm-api.nix
     ./nextchat.nix
   ];
 

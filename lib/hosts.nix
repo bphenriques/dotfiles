@@ -3,6 +3,22 @@ let
   inherit (nixpkgs.lib.attrsets) attrValues;
 in
 {
+  # Lean builder for microvm guests: no home-manager, no
+  # dotfiles-private dependency, just nixpkgs + our overlays + the
+  # guest config. The guest typically imports
+  # `inputs.microvm.nixosModules.microvm` and any service modules it
+  # needs directly.
+  mkMicrovmGuest = { hostName, system, configPath }:
+    nixpkgs.lib.nixosSystem {
+      inherit system;
+      specialArgs = { inherit inputs self; };
+      modules = [
+        { nixpkgs.overlays = attrValues self.overlays; }
+        { networking.hostName = nixpkgs.lib.mkDefault hostName; }
+        configPath
+      ];
+    };
+
   mkNixosHost = { hostName, system, configPath, extraOverlays ? [], extraHmModules ? [] }:
     let
       sharedSpecialArgs = {

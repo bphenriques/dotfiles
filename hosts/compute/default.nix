@@ -8,6 +8,7 @@
     ./services
     ./monitoring
     ./tasks
+    ./microvm.nix          # Bridge + microvm.vms.hermes-vm (blue/green migration: hosts the green VM)
     ../../profiles/nixos
     ../../profiles/nixos/headless
 

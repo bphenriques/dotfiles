@@ -35,7 +35,10 @@
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    microvm.url = "github:astro/microvm.nix";
+    microvm.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Custom software
     hermes-agent.url = "github:NousResearch/hermes-agent/v2026.5.16"; # Personal assistant brain on compute
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -45,7 +48,7 @@
       generators = import ./lib/generators.nix { inherit (nixpkgs) lib; };
       inherit (generators) forAllSystems readModulesAttrs;
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
-      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost;
+      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost mkMicrovmGuest;
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -72,17 +75,24 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      nixosConfigurations.compute = mkNixosHost {
-        hostName = "compute";
-        system = "x86_64-linux";
-        configPath = ./hosts/compute;
-      };
-      nixosConfigurations.laptop = mkNixosHost {
-        hostName = "laptop";
-        system = "x86_64-linux";
-        configPath = ./hosts/laptop;
-        extraOverlays = [ inputs.nur.overlays.default ];
-        extraHmModules = [ inputs.stylix.homeModules.stylix ];
+      nixosConfigurations = {
+        laptop = mkNixosHost {
+          hostName = "laptop";
+          system = "x86_64-linux";
+          configPath = ./hosts/laptop;
+          extraOverlays = [ inputs.nur.overlays.default ];
+          extraHmModules = [ inputs.stylix.homeModules.stylix ];
+        };
+        compute = mkNixosHost {
+          hostName = "compute";
+          system = "x86_64-linux";
+          configPath = ./hosts/compute;
+        };
+        hermes-vm = mkMicrovmGuest {
+          hostName = "hermes-vm";
+          system = "x86_64-linux";
+          configPath = ./hosts/hermes-vm;
+        };
       };
     };
 }
