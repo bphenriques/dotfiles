@@ -72,7 +72,7 @@ in
   options.custom.homelab.wireguard.trustedForwardInterfaces = lib.mkOption {
     type = lib.types.listOf lib.types.str;
     default = [ ];
-    example = [ "br-hermes" ];
+    example = [ "compute-microvm" ];
     description = ''
       Interface names whose forwarded traffic should be unconditionally
       accepted by the wireguard-access forward chain. Use this to grant

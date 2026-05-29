@@ -29,8 +29,7 @@ in
     ./papra.nix
     ./bentopdf.nix
     ./mympd.nix
-    ./hermes.nix
-    ./hermes-vm-api.nix
+    ./hermes-api.nix
     ./nextchat.nix
   ];
 

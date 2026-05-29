@@ -17,4 +17,18 @@
       jetkvm = "192.168.1.195";
     };
   };
+
+  # Microvm guests hosted on compute. The bridge is internal to compute;
+  # VMs are reachable from the rest of the fleet only via compute as a
+  # jump host (SSH ProxyJump, Traefik reverse-proxy).
+  microvm = {
+    bridge = {
+      name = "compute-microvm";   # interface name on compute (also the iifname in nftables)
+      gateway = "10.20.1.1";      # compute's IP on the bridge
+      prefixLength = 24;          # subnet is implicitly 10.20.1.0/24
+    };
+    hosts = {
+      hermes-vm = "10.20.1.10";
+    };
+  };
 }

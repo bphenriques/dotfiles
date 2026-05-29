@@ -1,21 +1,41 @@
 # Hermes VM — guest-side NixOS configuration.
 #
-# Phase 1 (blue/green migration): minimal VM running hermes-agent, no
-# external API server, no Traefik route. SSH-accessible from compute
-# (10.20.1.1) for smoke testing. Once verified, phase 2 adds the API
-# server (sops in VM), Traefik routing, and decommissions the
-# compute-side hermes-agent (blue).
-{ config, pkgs, inputs, ... }:
+# Runs hermes-agent (Nous personal assistant) as a service user with no
+# shell or sudo. Human admin access is via the `bphenriques` account,
+# reachable over SSH (ProxyJump through compute) on the bridge IP.
+{ config, pkgs, inputs, private, ... }:
 let
   fleet = import ../shared.nix;
   laptopIP = fleet.lan.hosts.laptop;
-  # Vault is virtiofs-shared from compute at this mount point — same
-  # absolute path as on the host so SOUL.md / AGENTS.md guidance stays
-  # source-of-truth without per-host string juggling.
-  vaultPath = "/mnt/homelab-bphenriques/notes";
-  mcpvault = pkgs.writeShellScript "mcpvault" ''
-    exec ${pkgs.nodejs}/bin/npx -y @bitbonsai/mcpvault@0.11.0 "$@"
-  '';
+  # Local clone of the obsidian vault from gitea (see vault-sync below).
+  # The hermes user can read but not mutate (clone is owned root:hermes,
+  # 0750 — git operations run as root via vault-sync.service).
+  vaultPath = "/var/lib/hermes/vault";
+  # Domain comes from compute's private settings — hermes-vm is hosted on
+  # compute and shares the same homelab, so the gitea URL is identical.
+  homelabDomain = inputs.dotfiles-private.hosts.compute.settings.domain;
+  vaultRepoUrl = "https://hermes-agent@git.${homelabDomain}/bphenriques/notes.git";
+  vaultSync = pkgs.writeShellApplication {
+    name = "vault-sync";
+    runtimeInputs = [ pkgs.git ];
+    text = ''
+      set -euo pipefail
+      export GIT_ASKPASS=${pkgs.writeShellScript "gitea-askpass" ''
+        cat ${config.sops.secrets."hermes-agent/gitea-token".path}
+      ''}
+      export GIT_TERMINAL_PROMPT=0
+      if [ -d ${vaultPath}/.git ]; then
+        git -C ${vaultPath} fetch --quiet --depth 1 origin
+        git -C ${vaultPath} reset --hard --quiet FETCH_HEAD
+      else
+        git clone --quiet --depth 1 ${vaultRepoUrl} ${vaultPath}
+      fi
+      # Re-apply on every sync — git can create new files/dirs with
+      # default perms; we want them readable by the hermes group only.
+      chown -R root:hermes ${vaultPath}
+      chmod -R u=rwX,g=rX,o= ${vaultPath}
+    '';
+  };
 in
 {
   imports = [
@@ -25,18 +45,17 @@ in
   ];
 
   networking.hostName = "hermes-vm";
-  system.stateVersion = "25.05";
+  system.stateVersion = "26.05";
 
   # Boot, root, time, locale — minimal headless server defaults.
   time.timeZone = "Europe/Lisbon";
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "pt-latin1";
 
-  # SSH for interactive access. `microvm -c` and `microvm -l` require
-  # the host to evaluate the flake, which our build-on-laptop /
-  # deploy-closure-to-compute model rules out. SSH is the practical
-  # workaround — VM is reachable only at 10.20.1.10 on the bridge, so
-  # this isn't an externally-visible service.
+  # SSH is for the human admin (bphenriques), not for the agent. The VM
+  # is reachable only on the compute-microvm bridge, so SSH is gated
+  # behind ProxyJump-through-compute and the fleet-wide hardening
+  # profile (key-only, no forwarding) still applies.
   services.openssh = {
     enable = true;
     settings = {
@@ -48,86 +67,44 @@ in
     # them and laptop's known_hosts has to be cleared each time.
     hostKeys = [
       { path = "/var/lib/hermes/.ssh-host-keys/ssh_host_ed25519_key"; type = "ed25519"; }
-      { path = "/var/lib/hermes/.ssh-host-keys/ssh_host_rsa_key"; type = "rsa"; bits = 4096; }
     ];
   };
 
-  # Let the hermes user read the system journal so debugging
-  # hermes-agent doesn't require sudo. systemd-journal is the
-  # least-privilege group for this; wheel would also grant sudo.
-  users.users.hermes.extraGroups = [ "systemd-journal" ];
-  # Public key copied from the laptop user (same key used historically
-  # for the `auth` microvm). Pubkeys are public — no secret-management
-  # needed.
-  users.users.hermes.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3"
-  ];
+  # Human admin account: only bphenriques can perform rootful operations
+  # on the VM for inspection. The hermes service user (created by the
+  # upstream module) stays minimal — no shell, no sudo, no SSH.
+  users.users.bphenriques = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "systemd-journal" ];
+    openssh.authorizedKeys.keys = fleet.authorizedSSHKeys;
+  };
+  # Passwordless sudo is acceptable here: SSH is key-only and the VM is
+  # unreachable from outside compute's bridge.
+  security.sudo.wheelNeedsPassword = false;
 
-  # Hermes user needs a writable HOME for the npx cache (mcpvault) and
-  # state directories. /var/lib/hermes is on its own volume (see
-  # microvm.nix) so it persists across VM rebuilds.
-
-  # Hermes Agent service. Same shape as compute's config minus the
-  # homelab framework wrapping — VM doesn't run Traefik, secrets, or
-  # the dashboard for now. Phase 2 layers those back in.
+  # Hermes Agent service. Traefik routing happens on compute via
+  # hosts/compute/services/hermes-api.nix — the VM only exposes the
+  # raw OpenAI-compatible API on 0.0.0.0:8642.
   services.hermes-agent = {
     enable = true;
     addToSystemPackages = true;
     # "web" → FastAPI/Uvicorn (the API server); "pty" → embedded TUI chat.
     extraDependencyGroups = [ "web" "pty" ];
-    # API_SERVER_* (incl. API_SERVER_KEY) come from a template rendered on
-    # compute and virtiofs-shared into the VM at /run/host-secrets/env.
-    # See hosts/compute/services/hermes-vm-api.nix.
-    environmentFiles = [ "/run/host-secrets/env" ];
+    # API_SERVER_* are rendered from sops-decrypted secrets via the
+    # `env` template below. The path is set as systemd EnvironmentFile=.
+    # See hosts/hermes-vm/README.md for the bootstrap.
+    environmentFiles = [ config.sops.templates."hermes-env".path ];
 
     mcpServers = {
       fetch.command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
       time.command = "${pkgs.mcp-server-time}/bin/mcp-server-time";
       vault = {
-        command = "${mcpvault}";
-        args = [ vaultPath ];
+        command = "${pkgs.nodejs}/bin/npx";
+        args = [ "-y" "@bitbonsai/mcpvault@0.11.0" vaultPath ];
       };
     };
 
-    # SOUL.md copied verbatim from compute's blue config so we're
-    # comparing apples to apples during blue/green. Once green wins,
-    # we'll dedupe by extracting to a shared file or moving the
-    # canonical source here.
-    documents."SOUL.md" = ''
-      # Hermes Persona
-
-      You are the user's personal assistant on their home infrastructure.
-
-      ## User context
-      - Portugal, Europe/Lisbon, EUR. Notes may be in Portuguese or English.
-      - Software engineer; comfortable with NixOS, CLI, self-hosted services.
-      - Privacy-first: prefer local/self-hosted over cloud. No data leaves
-        the home network without reason.
-
-      ## Response style
-      - Terse. Lead with the answer. One sentence often suffices.
-      - Markdown structure when it helps. Dates `YYYY-MM-DD`, 24h time, EUR.
-      - Voice inputs (Pebble watch) may have dictation errors — infer intent
-        liberally; only ask for clarification when ambiguous. Keep replies
-        short (push-notification delivery).
-
-      ## Vault
-      - Obsidian vault is reachable via the `vault` MCP server using
-        vault-relative paths. Read the root `AGENTS.md` first — it points
-        to `README.md` for layout and adds agent-specific guidance
-        (skip-list, language hints, table conventions).
-      - Always skip `.trash/` and dotfile-prefixed folders (`.obsidian/`,
-        `.git/`, etc.) — sync/system state, not notes.
-      - When `search_notes` underperforms (tables, cross-language hits),
-        fall back to listing and reading the relevant subfolder directly.
-      - Use Obsidian Markdown when writing (wikilinks, callouts,
-        frontmatter, tags). Respect existing folder/naming conventions.
-
-      ## Memory
-      - Sole-user local deployment — default to remembering preferences,
-        tooling choices, projects, recurring patterns.
-      - Honour explicit "forget X" / "don't remember Y" as durable.
-    '';
+    documents."SOUL.md" = builtins.readFile ./SOUL.md;
 
     settings = {
       model = {
@@ -149,23 +126,103 @@ in
     };
   };
 
-  systemd.services.hermes-agent.serviceConfig = {
-    TimeoutStopSec = "210s";
-    # The upstream module concatenates `services.hermes-agent.environmentFiles`
-    # into $HERMES_HOME/.env via an activation script — but the volume
-    # mount at /var/lib/hermes shadows that write, so it never appears.
-    # Inject the host-shared env file as a real systemd EnvironmentFile=
-    # so API_SERVER_* reach the process directly. Python-dotenv's
-    # default doesn't override existing env vars, so the systemd path
-    # wins regardless of whether .env is also present.
-    EnvironmentFile = [ "/run/host-secrets/env" ];
-    # Same volume-shadow issue affects config.yaml. The host renders it
-    # into the host-secrets share (see hermes-vm-api.nix); we copy it
-    # into $HERMES_HOME on every service start, post-mount.
-    # `+` prefix lets the command run as root (needed to chown to the
-    # hermes user; the service itself runs as hermes).
-    ExecStartPre = [
-      "+${pkgs.coreutils}/bin/install -D -m 0640 -o hermes -g hermes /run/host-secrets/config.yaml /var/lib/hermes/.hermes/config.yaml"
-    ];
+  # sops-nix's activation runs in initrd, but /var/lib/hermes (where the
+  # SSH host key sops uses as its age identity lives) isn't mounted yet
+  # there. Re-run activation in stage 2 once local-fs is up; activation
+  # is idempotent.
+  systemd.services.sops-late-activate = {
+    description = "Re-run NixOS activation in stage 2 so sops can decrypt off the SSH host key on /var/lib/hermes";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "vault-sync.service" "hermes-agent.service" ];
+    unitConfig.ConditionPathExists = "/var/lib/hermes/.ssh-host-keys/ssh_host_ed25519_key";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "/run/current-system/activate";
+    };
   };
+
+  # Pull the vault from gitea at boot (before hermes-agent) and refresh
+  # every 5 min. Runs as root so the clone can be owned root:hermes
+  # 0750 — hermes reads only. There is no push path; local edits get
+  # blown away on the next sync.
+  systemd.services.vault-sync = {
+    description = "Sync hermes vault from gitea";
+    after = [ "network-online.target" "sops-late-activate.service" ];
+    wants = [ "network-online.target" ];
+    requires = [ "sops-late-activate.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${vaultSync}/bin/vault-sync";
+    };
+  };
+
+  systemd.timers.vault-sync = {
+    description = "Periodic vault sync from gitea";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitActiveSec = "5min";
+    };
+  };
+
+  systemd.services.hermes-agent = {
+    # Make sure the vault is on disk before the agent starts.
+    requires = [ "vault-sync.service" ];
+    after = [ "vault-sync.service" ];
+    serviceConfig = {
+      TimeoutStopSec = "210s";
+      # The upstream module concatenates `environmentFiles` into
+      # $HERMES_HOME/.env via an activation script — but the volume
+      # mount at /var/lib/hermes shadows that write, so it never appears.
+      # Inject the env file as a real systemd EnvironmentFile= so the
+      # API_SERVER_* values reach the process directly. Python-dotenv's
+      # default doesn't override existing env vars, so the systemd path
+      # wins regardless of what hermes-agent does with .env itself.
+      EnvironmentFile = [ config.sops.templates."hermes-env".path ];
+      # Same volume-shadow issue affects config.yaml. The settings are
+      # rendered to a path inside the VM's own /etc (in-VM closure, no
+      # host coupling); ExecStartPre installs them into $HERMES_HOME on
+      # every service start, post-mount. `+` prefix runs as root so we
+      # can chown to hermes.
+      ExecStartPre = [
+        "+${pkgs.coreutils}/bin/install -D -m 0640 -o hermes -g hermes /etc/hermes-agent/config.yaml /var/lib/hermes/.hermes/config.yaml"
+      ];
+    };
+  };
+
+  # sops-nix: this VM decrypts its own secrets using its ed25519 SSH host
+  # key as the age identity (sops-nix converts ssh-ed25519 keys to age
+  # automatically). The host key lives on /var/lib/hermes and is also
+  # used as the SSH identity, so there's a single key to manage.
+  # The encrypted file lives in dotfiles-private/hosts/hermes-vm/secrets.yaml.
+  sops = {
+    defaultSopsFile = private.sopsSecretsFile;
+    age.sshKeyPaths = [ "/var/lib/hermes/.ssh-host-keys/ssh_host_ed25519_key" ];
+    secrets."hermes-agent/api-server-key" = { };
+    # Personal access token for vault-sync's git clone. Generated once on
+    # compute (see hermes-vm/README.md); stored as plaintext in the VM's
+    # sops file. Read-only repo scope.
+    secrets."hermes-agent/gitea-token" = {
+      owner = "hermes";
+      mode = "0400";
+    };
+    templates."hermes-env" = {
+      content = ''
+        API_SERVER_ENABLED=true
+        API_SERVER_PORT=8642
+        API_SERVER_HOST=0.0.0.0
+        API_SERVER_KEY=${config.sops.placeholder."hermes-agent/api-server-key"}
+      '';
+      owner = "hermes";
+      mode = "0400";
+    };
+  };
+
+  # Render config.yaml from the VM's own evaluated settings, baked into
+  # the closure as a non-secret static file. ExecStartPre (above)
+  # installs it into $HERMES_HOME after the volume mounts.
+  environment.etc."hermes-agent/config.yaml".source =
+    pkgs.writeText "hermes-config.yaml"
+      (builtins.toJSON config.services.hermes-agent.settings);
 }

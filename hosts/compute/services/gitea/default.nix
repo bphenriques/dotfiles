@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   serviceCfg = config.custom.homelab.services.gitea;
   oidcCfg = config.custom.homelab.oidc;
@@ -6,6 +6,30 @@ in
 {
   imports = [ ./configure.nix ];
 
+  options.custom.homelab.users = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.services.gitea = {
+        enable = lib.mkEnableOption "Gitea account for this user (provisioned at configure time)";
+        passwordFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = ''
+            Path to a file containing the user's Gitea password. Used both for
+            initial creation and to keep the password in sync across rebuilds.
+            Required when `enable = true` unless the account is meant for
+            OIDC-only login (no local password).
+          '';
+        };
+        isAdmin = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Grant Gitea site-admin to this user.";
+        };
+      };
+    });
+  };
+
+  config = {
   custom.homelab.services.gitea = {
     displayName = "Gitea";
     metadata.description = "Git Server";
@@ -76,4 +100,5 @@ in
   };
 
   systemd.services.gitea.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
+  };
 }

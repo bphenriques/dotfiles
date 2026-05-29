@@ -19,16 +19,24 @@ in
     access.allowedGroups = with cfg.groups; [ admin ];
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
-    secrets = {
-      # OPENAI_API_KEY = bearer token belonging to the hermes-api service.
-      # Cross-service placeholder: the framework detects the dependency
-      # automatically and orders homelab-secrets-hermes-api before
-      # homelab-secrets-nextchat.
-      templates."env".content = ''
-        OPENAI_API_KEY=${hermesApiCfg.secrets.placeholder.api-token}
-      '';
-      systemd.dependentServices = [ "podman-nextchat" ];
-    };
+    # No homelab-secrets template here anymore — the api-server-key
+    # lives in sops (shared with hermes-vm), so we render the env file
+    # via sops.templates below instead.
+  };
+
+  # Decrypt the VM's API token on compute (multi-recipient sops file
+  # has both compute's and hermes-vm's age keys listed).
+  sops.secrets."hermes-agent/api-server-key" = {
+    owner = "root";
+    mode = "0440";
+  };
+  # NextChat env file — sops renders the placeholder at decryption time.
+  sops.templates."nextchat-env" = {
+    content = ''
+      OPENAI_API_KEY=${config.sops.placeholder."hermes-agent/api-server-key"}
+    '';
+    owner = "root";
+    mode = "0440";
   };
 
   virtualisation.oci-containers.containers.nextchat = {
@@ -43,8 +51,9 @@ in
       HOSTNAME = "127.0.0.1";
       PORT = toString serviceCfg.port;
 
-      # Hermes as the OpenAI-compatible backend on host loopback.
-      BASE_URL = "http://127.0.0.1:${toString hermesApiCfg.port}";
+      # Hermes lives in the microvm now. NextChat reaches it via the
+      # compute-microvm bridge (no loopback), no Traefik / TLS in the way.
+      BASE_URL = "http://${hermesApiCfg.host}:${toString hermesApiCfg.port}";
       CUSTOM_MODELS = "-all,+hermes-agent";
       DEFAULT_MODEL = "hermes-agent";
 
@@ -56,10 +65,10 @@ in
       WHITE_WEBDAV_ENDPOINTS = "";  # disable third-party WebDAV sync
     };
 
-    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
+    environmentFiles = [ config.sops.templates."nextchat-env".path ];
 
     extraOptions = [
-      "--network=host"  # reach Hermes API on compute's 127.0.0.1
+      "--network=host"  # reach Hermes API on the compute-microvm bridge (10.20.1.x)
       # 1G — 512m was tight; Next.js standalone can OOM-restart under sustained sessions.
       "--memory=1g"
     ];

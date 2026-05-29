@@ -74,10 +74,49 @@ def ensure_oidc_source [] {
     msg: $"Failed to configure OIDC source: ($r.stderr)"
   }
 }
+def ensure_user [user: record] {
+  # user record: { username, email, firstName, lastName, isAdmin, passwordFile }
+  let listing = (^gitea $config_flag admin user list | complete).stdout | str trim | lines | skip 1
+  let exists = $listing | any { |line| (($line | split row " " | where ($it | str length) > 0) | get 1? | default "") == $user.username }
+
+  let password = (open $user.passwordFile | str trim)
+
+  if not $exists {
+    let create_args = [--username $user.username --password $password --email $user.email --must-change-password=false]
+    let admin_flag = if $user.isAdmin { [--admin] } else { [] }
+    ^gitea $config_flag admin user create ...$create_args ...$admin_flag
+    print $"Created user '($user.username)'"
+  } else {
+    # Keep password in sync with the file; tolerate failures (e.g. user
+    # changed password via UI — leave it alone, just log).
+    let r = (^gitea $config_flag admin user change-password --username $user.username --password $password --must-change-password=false | complete)
+    if $r.exit_code == 0 {
+      print $"User '($user.username)' password synced"
+    } else {
+      print $"User '($user.username)' exists; password sync skipped: ($r.stderr | str trim)"
+    }
+  }
+}
+
+def ensure_users [] {
+  let users_file = $env.GITEA_USERS_FILE
+  if not ($users_file | path exists) {
+    print "No declarative users file — skipping user provisioning"
+    return
+  }
+  let users = open $users_file
+  if ($users | length) == 0 {
+    print "No declarative users configured"
+    return
+  }
+  for u in $users { ensure_user $u }
+}
+
 def main [] {
   wait_ready
   print "Gitea is ready"
   ensure_admin
   ensure_oidc_source
+  ensure_users
   print "Gitea configuration complete"
 }
