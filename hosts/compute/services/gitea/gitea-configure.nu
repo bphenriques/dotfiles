@@ -75,26 +75,21 @@ def ensure_oidc_source [] {
   }
 }
 def ensure_user [user: record] {
-  # user record: { username, email, firstName, lastName, isAdmin, passwordFile }
+  # user record: { username, email, firstName, lastName, isAdmin, sshKeys }
+  # gitea's user schema requires a password to create the row, but we never
+  # sync it after — auth in this homelab is OIDC for humans, SSH key/PAT for
+  # service accounts. The random password below is throw-away.
   let listing = (^gitea $config_flag admin user list | complete).stdout | str trim | lines | skip 1
   let exists = $listing | any { |line| (($line | split row " " | where ($it | str length) > 0) | get 1? | default "") == $user.username }
 
-  let password = (open $user.passwordFile | str trim)
-
   if not $exists {
+    let password = (random chars --length 32)
     let create_args = [--username $user.username --password $password --email $user.email --must-change-password=false]
     let admin_flag = if $user.isAdmin { [--admin] } else { [] }
     ^gitea $config_flag admin user create ...$create_args ...$admin_flag
     print $"Created user '($user.username)'"
   } else {
-    # Keep password in sync with the file; tolerate failures (e.g. user
-    # changed password via UI — leave it alone, just log).
-    let r = (^gitea $config_flag admin user change-password --username $user.username --password $password --must-change-password=false | complete)
-    if $r.exit_code == 0 {
-      print $"User '($user.username)' password synced"
-    } else {
-      print $"User '($user.username)' exists; password sync skipped: ($r.stderr | str trim)"
-    }
+    print $"User '($user.username)' exists; password unmanaged"
   }
 }
 

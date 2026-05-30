@@ -3,34 +3,39 @@ let
   serviceCfg = config.custom.homelab.services.gitea;
   oidcCfg = config.custom.homelab.oidc;
 
+  # Pass identities (human users + service accounts) as JSON to the configure
+  # script. Auth is OIDC for humans, SSH key/PAT for service accounts — no
+  # passwords flow through this script. Repo permissions are intentionally
+  # NOT provisioned here; granted by hand in the gitea UI.
   enabledUsers = lib.filterAttrs (_: u: u.services.gitea.enable) config.custom.homelab.users;
+  enabledServiceAccounts = lib.filterAttrs (_: a: a.services.gitea.enable) config.custom.homelab.serviceAccounts;
 
-  # Pass the user list as JSON to the configure script. Password values
-  # stay on the filesystem (referenced by path, never inlined). Repo
-  # permissions are intentionally NOT provisioned here — the user adds
-  # accounts to specific repos via the Gitea UI.
-  #
-  # Each user's `passwordFile` must be readable by the gitea service
-  # user. Set that up where the secret is declared, the same way other
-  # services (jellyfin, kavita) do it (e.g. `sops.secrets."gitea/agent/password".owner = "gitea";`).
-  userList = lib.mapAttrsToList (_: u: {
+  humanRecords = lib.mapAttrsToList (_: u: {
     inherit (u) username email firstName lastName;
-    inherit (u.services.gitea) isAdmin passwordFile;
+    inherit (u.services.gitea) isAdmin;
+    sshKeys = [ ];
   }) enabledUsers;
+
+  # Service accounts get derived placeholder identity fields — gitea's user
+  # schema requires email/firstName/lastName, but nothing in the homelab
+  # reads them for these accounts.
+  serviceRecords = lib.mapAttrsToList (name: a: {
+    username = name;
+    email = "${name}@service.localhost";
+    firstName = name;
+    lastName = "Service";
+    isAdmin = false;
+    inherit (a.services.gitea) sshKeys;
+  }) enabledServiceAccounts;
+
+  userList = humanRecords ++ serviceRecords;
 
   userListFile = pkgs.writeText "gitea-users.json" (builtins.toJSON userList);
 
-  # Wrapper that hides the `-c $config_path` and the `sudo -u gitea` plumbing
-  # so admin one-offs (e.g. `gitea-admin user generate-access-token ...`)
-  # are a single command instead of a flag soup.
   gitea-admin = pkgs.writeShellApplication {
     name = "gitea-admin";
     runtimeInputs = [ config.services.gitea.package ];
-    text = ''
-      exec sudo -u ${config.services.gitea.user} -- \
-        ${config.services.gitea.package}/bin/gitea \
-        -c ${config.services.gitea.stateDir}/custom/conf/app.ini "$@"
-    '';
+    text = ''exec sudo -u ${config.services.gitea.user} -- ${config.services.gitea.package}/bin/gitea -c ${config.services.gitea.stateDir}/custom/conf/app.ini "$@"'';
   };
 in
 {

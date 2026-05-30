@@ -2,12 +2,12 @@
 # network interface, virtiofs shares, persistent volume.
 #
 # Host-side counterpart lives in hosts/compute/microvm.nix (bridge,
-# firewall, microvm.vms.hermes-vm = { flake = self; ... }).
+# firewall, microvm.vms.personal-agent = { flake = self; ... }).
 { ... }:
 let
   inherit (import ../shared.nix) microvm;
-  inherit (microvm) bridge;
-  vmIp = microvm.hosts.hermes-vm;
+  vmBridge = microvm.bridge;
+  vmIp = microvm.hosts.personal-agent;
   vmMac = "02:00:00:00:01:10";  # also referenced by microvm.interfaces below
 in
 {
@@ -28,8 +28,8 @@ in
       # canonical shorthand keys. Avoids the NixOS-version-specific
       # `address = [...]` / `routes = [...]` helpers.
       networkConfig = {
-        Address = "${vmIp}/${toString bridge.prefixLength}";
-        Gateway = bridge.gateway;
+        Address = "${vmIp}/${toString vmBridge.prefixLength}";
+        Gateway = vmBridge.gateway;
         DNS = "1.1.1.1 9.9.9.9";
       };
     };
@@ -47,7 +47,7 @@ in
       type = "bridge";  # microvm.nix attaches the tap to `bridge` for us
       id = "vm-hermes";
       mac = vmMac;      # same value matched by systemd.network above
-      bridge = bridge.name;
+      bridge = vmBridge.name;
     }];
 
     # Read-only /nix/store from host — saves disk and avoids rebuilding

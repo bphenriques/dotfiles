@@ -10,23 +10,39 @@ in
     type = lib.types.attrsOf (lib.types.submodule {
       options.services.gitea = {
         enable = lib.mkEnableOption "Gitea account for this user (provisioned at configure time)";
-        passwordFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          description = ''
-            Path to a file containing the user's Gitea password. Used both for
-            initial creation and to keep the password in sync across rebuilds.
-            Required when `enable = true` unless the account is meant for
-            OIDC-only login (no local password).
-          '';
-        };
         isAdmin = lib.mkOption {
           type = lib.types.bool;
           default = false;
-          description = "Grant Gitea site-admin to this user.";
+          description = ''
+            Grant Gitea site-admin to this user. Honored only at user creation;
+            once the row exists, gitea-configure does not promote/demote.
+          '';
         };
       };
     });
+  };
+
+  # Non-human identities (microvm agents, CI bots, …). Distinct from `users`
+  # because the concerns differ: no UI, no group permissions, no OIDC — just
+  # "this machine needs to authenticate against service X."
+  options.custom.homelab.serviceAccounts = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options = {
+        description = lib.mkOption {
+          type = lib.types.str;
+          description = "Human-readable note on what this identity is for.";
+        };
+        services.gitea = {
+          enable = lib.mkEnableOption "Gitea account for this service identity";
+          sshKeys = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+            description = "Public SSH keys (authorized_keys format) registered to this account for git operations.";
+          };
+        };
+      };
+    });
+    default = { };
   };
 
   config = {
@@ -65,6 +81,13 @@ in
         HTTP_PORT = serviceCfg.port;
         ROOT_URL = serviceCfg.publicUrl;
         DOMAIN = serviceCfg.publicHost;
+        # Built-in SSH server for git operations — reachable on the LAN
+        # (or via wireguard from outside). 2222 to avoid clashing with
+        # compute's host sshd; clone URLs become ssh://git@host:2222/...
+        START_SSH_SERVER = true;
+        SSH_LISTEN_HOST = "0.0.0.0";
+        SSH_LISTEN_PORT = 2222;
+        SSH_PORT = 2222;
       };
       service = {
         DISABLE_REGISTRATION = true;
@@ -100,5 +123,9 @@ in
   };
 
   systemd.services.gitea.serviceConfig.SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
+
+  # Gitea's built-in SSH server on the LAN interface — reachable from the
+  # microvm bridge (trusted) and over wireguard. Not exposed to the WAN.
+  networking.firewall.interfaces.bond0.allowedTCPPorts = [ 2222 ];
   };
 }

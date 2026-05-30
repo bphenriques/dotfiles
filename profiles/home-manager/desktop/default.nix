@@ -57,9 +57,9 @@
       "pi-zero".user = "pi";
       "rg353m".user = "ark";
       "pixel".user = "bruno";
-      # Hermes microvm on compute — reachable only on the internal bridge
-      # (10.20.1.0/24), so we always jump through compute.
-      "hermes-vm" = {
+      # Personal-agent microvm on compute — reachable only on the internal
+      # bridge (10.20.1.0/24), so we always jump through compute.
+      "personal-agent" = {
         hostname = "10.20.1.10";
         user = "bphenriques";
         proxyJump = "compute";

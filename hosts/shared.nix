@@ -28,7 +28,13 @@
       prefixLength = 24;          # subnet is implicitly 10.20.1.0/24
     };
     hosts = {
-      hermes-vm = "10.20.1.10";
+      personal-agent = "10.20.1.10";
     };
+  };
+
+  # Fleet-wide AI defaults. Ollama pulls it, Hermes serves it, NextChat advertises it —
+  # single source of truth so all three agree without per-host string juggling.
+  ai = {
+    model = "gemma4:e4b";  # MoE 4B-active, Q4 ~9.6GB — fits an RTX 4060 with q8_0 KV cache.
   };
 }

@@ -44,5 +44,16 @@
         description = "Microvm guest hostname to IP address mappings.";
       };
     };
+
+    ai = {
+      model = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+          Fleet-wide default LLM model identifier (Ollama format, e.g. `gemma4:e4b`).
+          Pulled by the Ollama host, served as `model.default` to the Hermes runtime,
+          and advertised by the NextChat UI. Keeping it fleet-level avoids drift.
+        '';
+      };
+    };
   };
 }

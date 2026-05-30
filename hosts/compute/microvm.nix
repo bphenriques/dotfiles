@@ -3,8 +3,8 @@
 # Defines:
 #   - The `compute-microvm` bridge connecting compute to its guest VMs.
 #   - NAT for VM egress through compute's uplink (`bond0`).
-#   - The `hermes-vm` guest declaration pointing at
-#     `nixosConfigurations.hermes-vm` in this flake.
+#   - The `personal-agent` guest declaration pointing at
+#     `nixosConfigurations.personal-agent` in this flake.
 #
 # Bridge name, network, and VM IPs are pinned in `hosts/shared.nix`
 # (`custom.fleet.microvm.*`) so the VM and host agree without duplication.
@@ -15,9 +15,7 @@ in
 {
   imports = [ inputs.microvm.nixosModules.host ];
 
-  # VMs that should start at boot. Without this, the unit is generated
-  # but never enabled — the VM has to be hand-started after every reboot.
-  microvm.autostart = [ "hermes-vm" ];
+  microvm.autostart = [ "personal-agent" ];
 
   # Narrow override of the fleet-wide sshd hardening (which disables
   # AllowTcpForwarding globally) — re-enable for the human user only,
@@ -52,37 +50,24 @@ in
   custom.homelab.wireguard.trustedForwardInterfaces = [ bridge.name ];
 
   # Guest VM declaration. `flake = self` makes the guest's config live
-  # in this same flake as nixosConfigurations.hermes-vm.
+  # in this same flake as nixosConfigurations.personal-agent.
   #
   # `updateFlake` deliberately unset: compute is built from a laptop
   # checkout via `nixos-rebuild switch`, so VM updates flow through
   # that rebuild path. Setting `updateFlake` would point at a checkout
   # compute doesn't have, breaking `microvm -l`'s freshness check.
-  microvm.vms.hermes-vm = {
+  microvm.vms.personal-agent = {
     flake = self;
     restartIfChanged = true;
   };
 
-  # gitea-configure on compute uses this to set hermes-agent's gitea login password.
-  # The VM doesn't see it — vault-sync authenticates via a PAT (see hermes-agent/gitea-token in the VM).
-  sops.secrets."hermes-agent/gitea-password" = {
-    owner = "gitea";
-    mode = "0440";
-  };
-
-  # Gitea account for hermes-agent. Provisioned by gitea-configure from the
-  # password secret above. Repo-level read permission is granted by hand in the Gitea UI.
-  custom.homelab.users.hermes-agent = {
-    email = "hermes-agent@localhost";
-    firstName = "Hermes";
-    lastName = "Agent";
-    groups = [ ];
-    services = {
-      oidc.enable = false;
-      gitea = {
-        enable = true;
-        passwordFile = config.sops.secrets."hermes-agent/gitea-password".path;
-      };
-    };
+  # Gitea service account for vault-sync. gitea-configure generates a
+  # throw-away random password on user creation; basic auth is disabled.
+  # Auth from the VM is via the read-only PAT in the VM's sops file
+  # (`hermes-agent/gitea-token` — see hosts/personal-agent/default.nix).
+  # Repo-level read permission is granted by hand in the Gitea UI.
+  custom.homelab.serviceAccounts.personal-agent = {
+    description = "vault-sync identity for personal-agent";
+    services.gitea.enable = true;
   };
 }

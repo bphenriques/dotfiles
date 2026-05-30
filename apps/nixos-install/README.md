@@ -17,7 +17,7 @@
 
 3. Create host directory: `hosts/<name>/` with `config.nix`, `hardware-configuration.nix`, `disko.nix`
 
-4. Bootstrap secrets in Bitwarden: `dotfiles-secrets init-host <BITWARDEN_EMAIL> <host> [--luks]` (microvm guests bootstrap off their SSH host key instead — see [`hosts/hermes-vm/README.md`](../../hosts/hermes-vm/README.md))
+4. Bootstrap secrets in Bitwarden: `dotfiles-secrets init-host <BITWARDEN_EMAIL> <host> [--luks]`
 
 5. Update `.sops.yaml` with the public key from step 2
 

@@ -1,9 +1,9 @@
-# Hermes VM — guest-side NixOS configuration.
+# personal-agent — guest-side NixOS configuration for the assistant microvm.
 #
-# Runs hermes-agent (Nous personal assistant) as a service user with no
-# shell or sudo. Human admin access is via the `bphenriques` account,
+# Runs the assistant runtime (currently hermes-agent) as a service user with
+# no shell or sudo. Human admin access is via the `bphenriques` account,
 # reachable over SSH (ProxyJump through compute) on the bridge IP.
-{ config, pkgs, inputs, private, ... }:
+{ config, pkgs, inputs, self, private, ... }:
 let
   fleet = import ../shared.nix;
   laptopIP = fleet.lan.hosts.laptop;
@@ -11,20 +11,31 @@ let
   # The hermes user can read but not mutate (clone is owned root:hermes,
   # 0750 — git operations run as root via vault-sync.service).
   vaultPath = "/var/lib/hermes/vault";
-  # Domain comes from compute's private settings — hermes-vm is hosted on
+  # Domain comes from compute's private settings — personal-agent is hosted on
   # compute and shares the same homelab, so the gitea URL is identical.
   homelabDomain = inputs.dotfiles-private.hosts.compute.settings.domain;
-  vaultRepoUrl = "https://hermes-agent@git.${homelabDomain}/bphenriques/notes.git";
+  vaultRepoUrl = "ssh://gitea@git.${homelabDomain}:2222/bphenriques/notes.git";
+  # ssh wrapper for vault-sync: pin the identity to the VM's host key
+  # (also the sops age key — single trust anchor), put known_hosts on
+  # the persistent volume, accept the gitea host key on first contact.
+  vaultSshCommand = pkgs.writeShellScript "vault-sync-ssh" ''
+    exec ${pkgs.openssh}/bin/ssh \
+      -i /var/lib/hermes/.ssh-host-keys/ssh_host_ed25519_key \
+      -o UserKnownHostsFile=/var/lib/hermes/.ssh-host-keys/known_hosts \
+      -o StrictHostKeyChecking=accept-new \
+      -o BatchMode=yes \
+      "$@"
+  '';
   vaultSync = pkgs.writeShellApplication {
     name = "vault-sync";
     runtimeInputs = [ pkgs.git ];
     text = ''
       set -euo pipefail
-      export GIT_ASKPASS=${pkgs.writeShellScript "gitea-askpass" ''
-        cat ${config.sops.secrets."hermes-agent/gitea-token".path}
-      ''}
-      export GIT_TERMINAL_PROMPT=0
+      export GIT_SSH_COMMAND=${vaultSshCommand}
       if [ -d ${vaultPath}/.git ]; then
+        # Re-point on every sync so a Nix-level URL change (transport swap,
+        # repo rename, …) flows into .git/config without manual surgery.
+        git -C ${vaultPath} remote set-url origin ${vaultRepoUrl}
         git -C ${vaultPath} fetch --quiet --depth 1 origin
         git -C ${vaultPath} reset --hard --quiet FETCH_HEAD
       else
@@ -40,12 +51,20 @@ in
 {
   imports = [
     inputs.microvm.nixosModules.microvm
-    inputs.hermes-agent.nixosModules.default
+    # mkMicrovmGuest deliberately doesn't load all self.nixosModules
+    # (would pull in homelab too); pick the two we need explicitly.
+    self.nixosModules.ai             # pulls in inputs.hermes-agent transitively
+    self.nixosModules.fleet-shared   # `custom.fleet.*` options, used by `custom.ai.model`'s default
     ./microvm.nix
   ];
 
-  networking.hostName = "hermes-vm";
+  networking.hostName = "personal-agent";
   system.stateVersion = "26.05";
+
+  # Fleet config — populates the `custom.fleet.*` options the AI module
+  # reads (specifically `custom.fleet.ai.model` as the default for
+  # `custom.ai.model`).
+  custom.fleet = import ../shared.nix;
 
   # Boot, root, time, locale — minimal headless server defaults.
   time.timeZone = "Europe/Lisbon";
@@ -82,48 +101,15 @@ in
   # unreachable from outside compute's bridge.
   security.sudo.wheelNeedsPassword = false;
 
-  # Hermes Agent service. Traefik routing happens on compute via
-  # hosts/compute/services/hermes-api.nix — the VM only exposes the
-  # raw OpenAI-compatible API on 0.0.0.0:8642.
-  services.hermes-agent = {
+  # Hermes runtime via the AI module. Traefik routing happens on compute
+  # (`hosts/compute/services/hermes-api.nix`); the VM only exposes the raw
+  # OpenAI-compatible API. Model defaults to fleet config (gemma4:e4b).
+  custom.ai.hermes = {
     enable = true;
-    addToSystemPackages = true;
-    # "web" → FastAPI/Uvicorn (the API server); "pty" → embedded TUI chat.
-    extraDependencyGroups = [ "web" "pty" ];
-    # API_SERVER_* are rendered from sops-decrypted secrets via the
-    # `env` template below. The path is set as systemd EnvironmentFile=.
-    # See hosts/hermes-vm/README.md for the bootstrap.
-    environmentFiles = [ config.sops.templates."hermes-env".path ];
-
-    mcpServers = {
-      fetch.command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
-      time.command = "${pkgs.mcp-server-time}/bin/mcp-server-time";
-      vault = {
-        command = "${pkgs.nodejs}/bin/npx";
-        args = [ "-y" "@bitbonsai/mcpvault@0.11.0" vaultPath ];
-      };
-    };
-
-    documents."SOUL.md" = builtins.readFile ./SOUL.md;
-
-    settings = {
-      model = {
-        default = "gemma4:e4b";
-        provider = "custom";
-        api_key = "ollama";
-        base_url = "http://${laptopIP}:11434/v1";
-        context_length = 65536;  # Hermes Agent enforces a 64K minimum.
-        max_tokens = 8192;
-      };
-      auxiliary.compression.context_length = 65536;
-      dashboard.theme = "mono";
-      display.theme = "mono";
-      honcho.mode = "local";
-      platform_toolsets = {
-        cli        = [ "vault" "fetch" "time" ];
-        api_server = [ "vault" "fetch" "time" ];
-      };
-    };
+    ollamaUrl = "http://${laptopIP}:11434/v1";
+    apiKeyFile = config.sops.templates."hermes-env".path;
+    vaultPath = vaultPath;
+    soul = builtins.readFile ./SOUL.md;
   };
 
   # sops-nix's activation runs in initrd, but /var/lib/hermes (where the
@@ -166,47 +152,23 @@ in
     };
   };
 
+  # VM-specific ordering: the vault must be cloned before the agent loads
+  # the vault MCP server. Other hermes-agent service tweaks (Env, ExecStartPre,
+  # TimeoutStopSec) come from the AI module.
   systemd.services.hermes-agent = {
-    # Make sure the vault is on disk before the agent starts.
     requires = [ "vault-sync.service" ];
     after = [ "vault-sync.service" ];
-    serviceConfig = {
-      TimeoutStopSec = "210s";
-      # The upstream module concatenates `environmentFiles` into
-      # $HERMES_HOME/.env via an activation script — but the volume
-      # mount at /var/lib/hermes shadows that write, so it never appears.
-      # Inject the env file as a real systemd EnvironmentFile= so the
-      # API_SERVER_* values reach the process directly. Python-dotenv's
-      # default doesn't override existing env vars, so the systemd path
-      # wins regardless of what hermes-agent does with .env itself.
-      EnvironmentFile = [ config.sops.templates."hermes-env".path ];
-      # Same volume-shadow issue affects config.yaml. The settings are
-      # rendered to a path inside the VM's own /etc (in-VM closure, no
-      # host coupling); ExecStartPre installs them into $HERMES_HOME on
-      # every service start, post-mount. `+` prefix runs as root so we
-      # can chown to hermes.
-      ExecStartPre = [
-        "+${pkgs.coreutils}/bin/install -D -m 0640 -o hermes -g hermes /etc/hermes-agent/config.yaml /var/lib/hermes/.hermes/config.yaml"
-      ];
-    };
   };
 
   # sops-nix: this VM decrypts its own secrets using its ed25519 SSH host
   # key as the age identity (sops-nix converts ssh-ed25519 keys to age
   # automatically). The host key lives on /var/lib/hermes and is also
   # used as the SSH identity, so there's a single key to manage.
-  # The encrypted file lives in dotfiles-private/hosts/hermes-vm/secrets.yaml.
+  # The encrypted file lives in dotfiles-private/hosts/personal-agent/secrets.yaml.
   sops = {
     defaultSopsFile = private.sopsSecretsFile;
     age.sshKeyPaths = [ "/var/lib/hermes/.ssh-host-keys/ssh_host_ed25519_key" ];
     secrets."hermes-agent/api-server-key" = { };
-    # Personal access token for vault-sync's git clone. Generated once on
-    # compute (see hermes-vm/README.md); stored as plaintext in the VM's
-    # sops file. Read-only repo scope.
-    secrets."hermes-agent/gitea-token" = {
-      owner = "hermes";
-      mode = "0400";
-    };
     templates."hermes-env" = {
       content = ''
         API_SERVER_ENABLED=true
@@ -219,10 +181,4 @@ in
     };
   };
 
-  # Render config.yaml from the VM's own evaluated settings, baked into
-  # the closure as a non-secret static file. ExecStartPre (above)
-  # installs it into $HERMES_HOME after the volume mounts.
-  environment.etc."hermes-agent/config.yaml".source =
-    pkgs.writeText "hermes-config.yaml"
-      (builtins.toJSON config.services.hermes-agent.settings);
 }

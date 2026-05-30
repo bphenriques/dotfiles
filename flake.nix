@@ -88,10 +88,10 @@
           system = "x86_64-linux";
           configPath = ./hosts/compute;
         };
-        hermes-vm = mkMicrovmGuest {
-          hostName = "hermes-vm";
+        personal-agent = mkMicrovmGuest {
+          hostName = "personal-agent";
           system = "x86_64-linux";
-          configPath = ./hosts/hermes-vm;
+          configPath = ./hosts/personal-agent;
         };
       };
     };
