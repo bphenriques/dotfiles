@@ -1,18 +1,9 @@
-# personal-agent — guest-side NixOS configuration for the assistant microvm.
-#
-# Runs the assistant runtime (currently hermes-agent) as a service user with
-# no shell or sudo. Human admin access is via the `bphenriques` account,
-# reachable over SSH (ProxyJump through compute) on the bridge IP.
 { config, pkgs, inputs, self, private, ... }:
 let
   fleet = import ../shared.nix;
   laptopIP = fleet.lan.hosts.laptop;
-  # Local clone of the obsidian vault from gitea (see vault-sync below).
-  # The hermes user can read but not mutate (clone is owned root:hermes,
-  # 0750 — git operations run as root via vault-sync.service).
-  vaultPath = "/var/lib/hermes/vault";
-  # Domain comes from compute's private settings — personal-agent is hosted on
-  # compute and shares the same homelab, so the gitea URL is identical.
+
+  vaultPath = "/var/lib/hermes/vault"; # my read-only vault stored in gitea.
   homelabDomain = inputs.dotfiles-private.hosts.compute.settings.domain;
   vaultRepoUrl = "ssh://gitea@git.${homelabDomain}:2222/bphenriques/notes.git";
   # ssh wrapper for vault-sync: pin the identity to the VM's host key

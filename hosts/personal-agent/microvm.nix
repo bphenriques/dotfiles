@@ -1,8 +1,3 @@
-# Guest-side microvm declaration: hypervisor flavour, virtual hardware,
-# network interface, virtiofs shares, persistent volume.
-#
-# Host-side counterpart lives in hosts/compute/microvm.nix (bridge,
-# firewall, microvm.vms.personal-agent = { flake = self; ... }).
 { ... }:
 let
   inherit (import ../shared.nix) microvm;

@@ -3,34 +3,22 @@ let
   serviceCfg = config.custom.homelab.services.gitea;
   oidcCfg = config.custom.homelab.oidc;
 
-  # Pass identities (human users + service accounts) as JSON to the configure
-  # script. Auth is OIDC for humans, SSH key/PAT for service accounts — no
-  # passwords flow through this script. Repo permissions are intentionally
-  # NOT provisioned here; granted by hand in the gitea UI.
-  enabledUsers = lib.filterAttrs (_: u: u.services.gitea.enable) config.custom.homelab.users;
-  enabledServiceAccounts = lib.filterAttrs (_: a: a.services.gitea.enable) config.custom.homelab.serviceAccounts;
-
-  humanRecords = lib.mapAttrsToList (_: u: {
+  userAccounts = lib.mapAttrsToList (_: u: {
     inherit (u) username email firstName lastName;
     inherit (u.services.gitea) isAdmin;
     sshKeys = [ ];
-  }) enabledUsers;
+  }) (lib.filterAttrs (_: u: u.services.gitea.enable) config.custom.homelab.users);
 
-  # Service accounts get derived placeholder identity fields — gitea's user
-  # schema requires email/firstName/lastName, but nothing in the homelab
-  # reads them for these accounts.
-  serviceRecords = lib.mapAttrsToList (name: a: {
+  serviceAccounts = lib.mapAttrsToList (name: a: {
     username = name;
     email = "${name}@service.localhost";
     firstName = name;
     lastName = "Service";
     isAdmin = false;
     inherit (a.services.gitea) sshKeys;
-  }) enabledServiceAccounts;
+  }) (lib.filterAttrs (_: a: a.services.gitea.enable) config.custom.homelab.serviceAccounts);
 
-  userList = humanRecords ++ serviceRecords;
-
-  userListFile = pkgs.writeText "gitea-users.json" (builtins.toJSON userList);
+  userListFile = pkgs.writeText "gitea-users.json" (builtins.toJSON (userAccounts ++ serviceAccounts));
 
   gitea-admin = pkgs.writeShellApplication {
     name = "gitea-admin";

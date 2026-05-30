@@ -6,8 +6,6 @@ let
   img = pkgs.containerImages.nextchat;
 in
 {
-  # Friendly chat surface fronting the Hermes API. The Hermes built-in
-  # dashboard at hermes.{domain} keeps the admin/TUI view.
   custom.homelab.services.nextchat = {
     displayName = "Chat";
     metadata.description = "Chat UI for the Hermes assistant";
@@ -21,24 +19,20 @@ in
     integrations.homepage.enable = true;
   };
 
-  # Decrypt the VM's API token on compute — the same plaintext lives in
-  # both compute's and personal-agent's sops files (the VM accepts it as bearer,
-  # NextChat sends it). Keep them in sync at rotation time.
-  sops.secrets."hermes-agent/api-server-key" = {
-    owner = "root";
-    mode = "0440";
-  };
-  sops.templates."nextchat-env" = {
-    content = ''
-      OPENAI_API_KEY=${config.sops.placeholder."hermes-agent/api-server-key"}
-    '';
-    owner = "root";
-    mode = "0440";
+  sops = {
+    secrets."hermes-agent/api-server-key" = {
+      owner = "root";
+      mode = "0440";
+    };
+    templates."nextchat-env" = {
+      content = ''
+        OPENAI_API_KEY=${config.sops.placeholder."hermes-agent/api-server-key"}
+      '';
+      owner = "root";
+      mode = "0440";
+    };
   };
 
-  # Container runtime, env wiring, and resource limits live in the AI
-  # module. This file owns the homelab framework registration (Traefik
-  # routing, ACLs) + the secret plumbing.
   custom.ai.chat = {
     enable = true;
     port = serviceCfg.port;

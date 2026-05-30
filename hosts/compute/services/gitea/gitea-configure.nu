@@ -74,11 +74,10 @@ def ensure_oidc_source [] {
     msg: $"Failed to configure OIDC source: ($r.stderr)"
   }
 }
+
+# user record: { username, email, firstName, lastName, isAdmin, sshKeys }
 def ensure_user [user: record] {
-  # user record: { username, email, firstName, lastName, isAdmin, sshKeys }
-  # gitea's user schema requires a password to create the row, but we never
-  # sync it after — auth in this homelab is OIDC for humans, SSH key/PAT for
-  # service accounts. The random password below is throw-away.
+  # Throw away password as it is required and we do not need it (OIDC or SSH key)
   let listing = (^gitea $config_flag admin user list | complete).stdout | str trim | lines | skip 1
   let exists = $listing | any { |line| (($line | split row " " | where ($it | str length) > 0) | get 1? | default "") == $user.username }
 
