@@ -33,7 +33,7 @@ in
     };
   };
 
-  custom.ai.chat = {
+  custom.ai.nextchat = {
     enable = true;
     port = serviceCfg.port;
     hermesUrl = "http://${hermesApiCfg.host}:${toString hermesApiCfg.port}";

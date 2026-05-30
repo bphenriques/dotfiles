@@ -54,6 +54,21 @@
           and advertised by the NextChat UI. Keeping it fleet-level avoids drift.
         '';
       };
+      contextLength = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 65536;
+        description = ''
+          Token context window shared between Ollama (`OLLAMA_CONTEXT_LENGTH`)
+          and Hermes (`model.context_length`, `auxiliary.compression.context_length`).
+          Must agree across the stack — Hermes enforces a 64K minimum and rejects
+          requests where the upstream advertises less.
+        '';
+      };
+      maxTokens = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 8192;
+        description = "Maximum output tokens per Hermes response.";
+      };
     };
   };
 }
