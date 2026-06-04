@@ -39,7 +39,7 @@
     microvm.inputs.nixpkgs.follows = "nixpkgs";
 
     # Custom software
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.5.16"; # Personal assistant brain on compute
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.5.29.2"; # Personal assistant brain on compute
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
   };
 

@@ -31,6 +31,7 @@ in
     ./mympd.nix
     ./hermes-api.nix
     ./nextchat.nix
+    ./compute-q.nix
   ];
 
   custom.homelab = {

@@ -1,6 +1,4 @@
 _:
 {
-  imports = [
-    ./hermes-client.nix
-  ];
+  imports = [ ];
 }

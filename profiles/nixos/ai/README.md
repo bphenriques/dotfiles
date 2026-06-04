@@ -1,15 +1,12 @@
 # AI profile
 
-Local Ollama on the laptop's GPU. Inference backend for Hermes Agent,
-which runs on compute (not here).
+Local Ollama on the laptop's GPU. Inference backend for the homelab
+Hermes Agent (which runs on the `personal-agent` microvm hosted on
+compute, not here).
 
 - `services.ollama` listens on `0.0.0.0:11434` with
-  `OLLAMA_CONTEXT_LENGTH=65536` so models default to a context window
-  large enough for Hermes (which requires ≥64K).
+  `OLLAMA_CONTEXT_LENGTH=65536` (Hermes requires ≥64K).
 - Firewall scoped by source IP (compute only) via `extraCommands`, not
   interface — survives WiFi/ethernet name changes.
-- Pre-loaded models: `qwen2.5:7b` (primary, 128K native context),
+- Pre-loaded models: `gemma4:e4b` (primary, via `config.custom.fleet.ai.model`),
   `qwen2.5vl:3b` (vision), `nomic-embed-text` (embeddings).
-
-The design and rationale (brain on compute, surfaces, MCP tools, etc.)
-live in `bphenriques-tools/agent-design-hermes-v10.md`.

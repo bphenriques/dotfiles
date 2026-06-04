@@ -8,6 +8,8 @@ let
     download.public = false;
     admin.public = false;
     backups.public = false;
+    personal-agent.public = false;        # Outbound: Hermes-on-VM → phone (cron, replies).
+    personal-agent-inbox.public = false;  # Inbound: phone → ntfy → Hermes adapter subscribes.
   };
 
   tasksWithNtfy = lib.filterAttrs (_: task:

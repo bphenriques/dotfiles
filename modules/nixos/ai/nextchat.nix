@@ -30,6 +30,22 @@ in
       type = lib.types.path;
       description = "Env file containing OPENAI_API_KEY=<hermes-api-key>. Typically a sops.templates path.";
     };
+    customModels = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ "hermes-agent" ];
+      description = ''
+        Model identifiers exposed in NextChat's dropdown. Each entry is
+        passed verbatim to Hermes' API in the `model` field of the request,
+        so use the routing strings Hermes recognises (e.g. bare
+        `gemma4:e4b` for the default backend, `<provider>/<model>` for
+        an additional `custom_providers` entry like `compute_q/gemma4:e2b`).
+      '';
+    };
+    defaultModel = lib.mkOption {
+      type = lib.types.str;
+      default = "hermes-agent";
+      description = "Model identifier selected by default in NextChat's dropdown. Must be present in `customModels`.";
+    };
   };
 
   config = lib.mkIf cfg.enable (let
@@ -42,12 +58,11 @@ in
         HOSTNAME = cfg.listenAddress;
         PORT = toString cfg.port;
         BASE_URL = cfg.hermesUrl;
-        # Hermes presents itself as model "hermes-agent" regardless of the
-        # underlying LLM. NextChat talks to Hermes, not Ollama, so the model
-        # advertised here is a constant — `custom.fleet.ai.model` (the Ollama
-        # identifier) doesn't apply.
-        CUSTOM_MODELS = "-all,+hermes-agent";
-        DEFAULT_MODEL = "hermes-agent";
+        # NextChat sends `model` verbatim to Hermes' OpenAI-compatible API.
+        # Hermes routes by provider prefix (anthropic/X, custom:Y/X, …) or
+        # falls back to `settings.model.default` for unprefixed names.
+        CUSTOM_MODELS = "-all,${lib.concatMapStringsSep "," (m: "+${m}") cfg.customModels}";
+        DEFAULT_MODEL = cfg.defaultModel;
         # Minimal/locked-down UX — single backend, no per-user overrides.
         HIDE_USER_API_KEY = "1";
         HIDE_BALANCE_QUERY = "1";  # Hermes has no balance endpoint

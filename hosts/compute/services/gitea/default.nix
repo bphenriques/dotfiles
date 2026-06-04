@@ -22,26 +22,29 @@ in
           };
         };
       });
+    };
 
-      serviceAccounts = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submodule {
-          options = {
-            description = lib.mkOption {
-              type = lib.types.str;
-              description = "Human-readable note on what this identity is for.";
-            };
-            services.gitea = {
-              enable = lib.mkEnableOption "Gitea account for this service identity";
-              sshKeys = lib.mkOption {
-                type = lib.types.listOf lib.types.str;
-                default = [ ];
-                description = "Public SSH keys (authorized_keys format) registered to this account for git operations.";
-              };
+    # Non-human identities (microvm agents, CI bots, …). Distinct from `users`
+    # because the concerns differ: no UI, no group permissions, no OIDC — just
+    # "this machine needs to authenticate against service X."
+    serviceAccounts = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          description = lib.mkOption {
+            type = lib.types.str;
+            description = "Human-readable note on what this identity is for.";
+          };
+          services.gitea = {
+            enable = lib.mkEnableOption "Gitea account for this service identity";
+            sshKeys = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "Public SSH keys (authorized_keys format) registered to this account for git operations.";
             };
           };
-        });
-        default = { };
-      };
+        };
+      });
+      default = { };
     };
   };
 

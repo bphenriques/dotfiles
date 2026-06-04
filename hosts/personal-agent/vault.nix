@@ -1,11 +1,10 @@
 # Vault: depth-1 SSH clone of bphenriques/notes from gitea, refreshed every 5
 # minutes. The agent reads (mode 0750 root:hermes); writes are not supported on
 # this path — see voice-memo-pipeline.md for the PR-based write flow.
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, private, ... }:
 let
   vaultPath = "/var/lib/hermes/vault";
-  homelabDomain = inputs.dotfiles-private.hosts.compute.settings.domain;
-  vaultRepoUrl = "ssh://gitea@git.${homelabDomain}:2222/bphenriques/notes.git";
+  vaultRepoUrl = "ssh://gitea@git.${private.settings.domain}:2222/bphenriques/notes.git";
 
   # ssh wrapper: pin identity to the VM's host key (also the sops age key —
   # single trust anchor), persist known_hosts on the volume, accept gitea's

@@ -13,6 +13,27 @@ in
           description = "Notification topic this service/task publishes to";
         };
 
+        access = lib.mkOption {
+          type = lib.types.enum [ "ro" "wo" "rw" ];
+          default = "wo";
+          description = ''
+            ACL granted to this publisher on the primary `topic`. `wo`
+            (default) is publish-only.
+          '';
+        };
+
+        extraAccess = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.enum [ "ro" "wo" "rw" ]);
+          default = { };
+          description = ''
+            Additional ACLs for this publisher on topics other than `topic`.
+            Keyed by topic name. Useful when a single ntfy user (one token)
+            needs to publish to one topic and subscribe to another, e.g.
+            an adapter whose outbound goes to `personal-agent` and whose
+            subscriber loop reads from `personal-agent-inbox`.
+          '';
+        };
+
         tokenFile = lib.mkOption {
           type = lib.types.str;
           default = "${tokenDir}/${name}";

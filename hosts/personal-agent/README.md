@@ -2,7 +2,9 @@
 
 Microvm hosting the homelab's personal assistant (currently [hermes-agent](https://hermes-agent.nousresearch.com/)). Isolated from compute via its own kernel (qemu); reads the Obsidian vault by cloning over SSH from gitea; separate sops trust domain.
 
-For the broader microvm rationale, see [`bphenriques-tools/microvm.md`](../../bphenriques-tools/microvm.md). For the assistant routing model and future voice-memo pipeline, see [`voice-memo-pipeline.md`](../../bphenriques-tools/voice-memo-pipeline.md) and [`hermes-cloud-bridge.md`](../../bphenriques-tools/hermes-cloud-bridge.md).
+> **Status (2026-06):** Experimental, paused. Compute-tier inference on the N150 is too slow for interactive use; the work is paused pending hardware upgrade or shift to on-device models. The microvm + ntfy + Traefik infrastructure remains as a foundation if/when the workload returns.
+
+For the routing model, hardware constraints, and the voice-memo pipeline design that this VM was built around, see [`voice-memo-pipeline.md`](../../voice-memo-pipeline.md) at the repo root.
 
 ## Hardware
 

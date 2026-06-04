@@ -7,13 +7,13 @@ let
   # Derive publishers from services and tasks with ntfy integration
   ntfyServices = lib.filterAttrs (_: s: s.integrations.ntfy.enable) homelabCfg.services;
   servicePublishers = lib.mapAttrs (name: s: {
-    inherit (s.integrations.ntfy) topic tokenFile;
+    inherit (s.integrations.ntfy) topic tokenFile access extraAccess;
     owner = name;
   }) ntfyServices;
 
   ntfyTasks = lib.filterAttrs (_: t: t.integrations.ntfy.enable) homelabCfg.tasks;
   taskPublishers = lib.mapAttrs (name: t: {
-    inherit (t.integrations.ntfy) topic tokenFile;
+    inherit (t.integrations.ntfy) topic tokenFile access extraAccess;
     owner = name;
   }) ntfyTasks;
 

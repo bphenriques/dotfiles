@@ -32,6 +32,17 @@ in
       default = [ ];
       description = "Source IPs allowed through the firewall to the Ollama port (iptables backend).";
     };
+    keepAlive = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Override how long Ollama keeps a model in memory after the last
+        request (`OLLAMA_KEEP_ALIVE`). Accepts a duration string (`"2m"`,
+        `"1h"`, …), `"-1"` for indefinite, or `"0"` to unload immediately.
+        `null` (default) means don't set the env var — Ollama uses its own
+        default (5 minutes upstream).
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -42,12 +53,13 @@ in
       port = cfg.port;
       loadModels = cfg.loadModels;
       environmentVariables = {
-        OLLAMA_KEEP_ALIVE = "2m";
         OLLAMA_MAX_LOADED_MODELS = "1";
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_KV_CACHE_TYPE = "q8_0";  # halves VRAM on 8GB cards
         OLLAMA_CONTEXT_LENGTH = toString config.custom.fleet.ai.contextLength;
+      } // lib.optionalAttrs (cfg.keepAlive != null) {
+        OLLAMA_KEEP_ALIVE = cfg.keepAlive;
       };
     };
 
