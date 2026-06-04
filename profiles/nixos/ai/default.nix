@@ -1,28 +1,19 @@
-{ config, pkgs, ... }:
+# Laptop's role in the AI stack: host the local LLM. gemma4:e4b runs ~9.6 GB Q4 —
+# mostly fits an RTX 4060 8 GB with q8_0 KV cache; small CPU spill keeps it snappy
+# (~15–22 t/s). Sized for note-taking / calendar / fetch / summarisation, not deep
+# code reasoning. Step up to gemma4:26b if that workload grows.
+{ config, ... }:
 {
-  # Ollama — local LLM inference with CUDA
-  services.ollama = {
+  custom.ai.ollama = {
     enable = true;
-    package = pkgs.ollama-cuda;
-    loadModels = [ "qwen3:8b" "qwen2.5:7b" "qwen2.5vl:3b" ];
-    environmentVariables = {
-      OLLAMA_KEEP_ALIVE = "10m";
-      OLLAMA_MAX_LOADED_MODELS = "1";
-      OLLAMA_NUM_PARALLEL = "1";
-    };
-  };
-
-  # Open WebUI — web chat interface with built-in local Whisper STT
-  services.open-webui = {
-    enable = true;
-    port = 8080;
-    environment = {
-      ANONYMIZED_TELEMETRY = "False";
-      DO_NOT_TRACK = "True";
-      SCARF_NO_ANALYTICS = "True";
-      ENABLE_COMMUNITY_SHARING = "False";
-      OLLAMA_BASE_URL = "http://127.0.0.1:11434";
-      WEBUI_AUTH = "False";
-    };
+    listenAddress = "0.0.0.0";
+    loadModels = [
+      config.custom.fleet.ai.model
+      "qwen2.5vl:3b"
+      "nomic-embed-text"
+    ];
+    # Compute reaches Ollama over LAN. Compute is the homelab gateway;
+    # the laptop is never directly exposed externally.
+    allowFromHosts = [ config.custom.fleet.lan.hosts.compute ];
   };
 }

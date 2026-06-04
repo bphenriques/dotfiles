@@ -4,6 +4,7 @@
     # Base
     ./hardware
     ./disko.nix
+    ./microvm.nix
     ./datastores
     ./services
     ./monitoring

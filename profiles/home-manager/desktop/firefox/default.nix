@@ -94,25 +94,20 @@ lib.mkIf pkgs.stdenv.isLinux {
 
   custom.programs.niri = {
     spawnAtStartup = [ "${lib.getExe pkgs.firefox}" ];
-    windowRules = {
-      byType.popups = [
-        ''app-id="firefox" title="^Extension: "''
-      ];
-      byApp = [
-        ''
-          window-rule {
-            match app-id="firefox" at-startup=true  // Placement only on login
-            open-on-workspace "${niriWorkspaces.browser.name}"
-            open-focused true
-          }
-        ''
-        ''
-          window-rule {
-            match app-id="firefox"
-            open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
-          }
-        ''
-      ];
-    };
+    windowRules.byApp = [
+      ''
+        window-rule {
+          match app-id="firefox" at-startup=true
+          open-on-workspace "${niriWorkspaces.browser.name}"
+          open-focused true
+        }
+      ''
+      ''
+        window-rule {
+          match app-id="firefox"
+          open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
+        }
+      ''
+    ];
   };
 }

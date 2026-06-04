@@ -29,7 +29,10 @@ def setup_publishers [] {
     with-env { NTFY_PASSWORD: $random_pass } {
       ^ntfy user add --ignore-exists $name
     }
-    ^ntfy access $name $pub.topic wo
+    ^ntfy access $name $pub.topic ($pub.access? | default "wo")
+    for entry in (($pub.extraAccess? | default {}) | transpose topic access) {
+      ^ntfy access $name $entry.topic $entry.access
+    }
     if ($pub.tokenFile | path exists) {
       print $"  ($name) → ($pub.topic) \(token exists\)"
     } else {

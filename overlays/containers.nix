@@ -32,6 +32,12 @@ _final: prev: let
       homepage = "https://github.com/rommapp/romm";
       updateInfo = { repo = "rommapp/romm"; };
     };
+    nextchat = {
+      image = "yidadaa/chatgpt-next-web";
+      version = "2.16.1";
+      homepage = "https://github.com/ChatGPTNextWeb/NextChat";
+      updateInfo = { repo = "ChatGPTNextWeb/NextChat"; stripPrefix = "v"; };
+    };
   };
 in {
   containerImages = images;

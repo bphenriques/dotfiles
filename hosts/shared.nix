@@ -17,4 +17,24 @@
       jetkvm = "192.168.1.195";
     };
   };
+
+  # Microvm guests hosted on compute. The bridge is internal to compute;
+  # VMs are reachable from the rest of the fleet only via compute as a
+  # jump host (SSH ProxyJump, Traefik reverse-proxy).
+  microvm = {
+    bridge = {
+      name = "compute-microvm";   # interface name on compute (also the iifname in nftables)
+      gateway = "10.20.1.1";      # compute's IP on the bridge
+      prefixLength = 24;          # subnet is implicitly 10.20.1.0/24
+    };
+    hosts = {
+      personal-agent = "10.20.1.10";
+    };
+  };
+
+  # Fleet-wide AI defaults. Ollama pulls it, Hermes serves it, NextChat advertises it —
+  # single source of truth so all three agree without per-host string juggling.
+  ai = {
+    model = "gemma4:e4b";  # MoE 4B-active, Q4 ~9.6GB — fits an RTX 4060 with q8_0 KV cache.
+  };
 }

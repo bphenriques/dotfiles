@@ -3,6 +3,7 @@
 let
   cfg = config.custom.homelab;
   enabledUsers = lib.filterAttrs (_: u: u.services.wireguard.enable) cfg.users;
+  trustedForwardIfs = config.custom.homelab.wireguard.trustedForwardInterfaces or [];
 
   # Podman networks: default bridge uses 10.88.0.0/16, user-created networks
   # use 10.89.0.0/16. Using /15 covers both ranges for container traffic.
@@ -68,6 +69,20 @@ let
   };
 in
 {
+  options.custom.homelab.wireguard.trustedForwardInterfaces = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "compute-microvm" ];
+    description = ''
+      Interface names whose forwarded traffic should be unconditionally
+      accepted by the wireguard-access forward chain. Use this to grant
+      forwarding permission to local bridges (microvm, container, etc.)
+      that would otherwise be caught by the chain's deny-by-default
+      policy. The hardening for wg0 ingress (only fullAccess clients)
+      is unaffected.
+    '';
+  };
+
   options.custom.homelab.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options.services.wireguard = {
@@ -183,6 +198,11 @@ in
           # explicitly allow forwarding to/from container subnets.
           ip saddr ${podmanSubnet} accept
           ip daddr ${podmanSubnet} accept
+
+          # Trusted forward interfaces declared by other modules (e.g. microvm
+          # bridges). Without these, deny-by-default catches their traffic too.
+          ${lib.concatMapStringsSep "\n        " (i: "iifname \"${i}\" accept") trustedForwardIfs}
+          ${lib.concatMapStringsSep "\n        " (i: "oifname \"${i}\" accept") trustedForwardIfs}
 
           # Allow fullAccess WireGuard clients to forward to LAN
           ${lib.concatMapStringsSep "\n        " (c: "iifname \"${interface}\" ip saddr ${c.ip} accept") fullAccessClients}

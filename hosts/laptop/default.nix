@@ -1,7 +1,8 @@
-{ config, pkgs, private, ... }:
+{ config, pkgs, lib, private, ... }:
 let
   primaryUser = "bphenriques";
   rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
+  hermesApiHost = lib.removePrefix "https://" private.settings.services.hermes-api;
 in
 {
   imports = [
@@ -44,18 +45,24 @@ in
     };
   };
 
+  # Resolve the Hermes API FQDN to compute's LAN IP so the laptop's HTTPS
+  # connection stays on the home network (no public DNS lookup), while SNI
+  # still matches the *.{domain} wildcard cert served by compute's Traefik.
+  networking.hosts."${config.custom.fleet.lan.hosts.compute}" = [ hermesApiHost ];
+
   # Homelab integration
   custom.homelab.paths = {
     media.root = config.custom.homelab.smb.mounts.media.localMount;
     users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
   };
+
   custom.homelab.smb = {
     enable = true;
     hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
     mounts = {
-      bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
-      media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
+      bphenriques = { inherit (config.users.users.bphenriques) uid; gid = 5190; };
+      media = { inherit (config.users.users.bphenriques) uid; gid = 5512; };
     };
   };
   sops = {

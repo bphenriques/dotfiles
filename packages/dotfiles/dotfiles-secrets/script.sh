@@ -94,7 +94,19 @@ usage() {
   cat <<'EOF'
 Manage Bitwarden secrets for NixOS provisioning.
 
-Usage: dotfiles-secrets <command> [args]
+Usage: dotfiles-secrets <bw-email> <command> [args]
+
+The first argument is always your Bitwarden email — it's used to unlock
+the vault before any command runs.
+
+Escape hatch — when bw's interactive password prompt misbehaves or its
+implicit sync hangs:
+
+  export BW_SESSION="$(bw unlock --raw)"   # one-time manual unlock
+  dotfiles-secrets <bw-email> <command> [args]
+
+With BW_SESSION already set, the unlock step is skipped and bw calls
+hit the local cache without re-syncing.
 
 Commands:
   init-host <host> [--luks]    Set up secrets for a new host
@@ -108,10 +120,10 @@ Secret Types:
   gpg-public-key    GPG public key (shared)
 
 Examples:
-  dotfiles-secrets init-host laptop              # New host without LUKS
-  dotfiles-secrets init-host homelab/compute --luks
-  dotfiles-secrets fetch sops-secret laptop
-  dotfiles-secrets fetch gpg-private-key
+  dotfiles-secrets me@example.com init-host laptop
+  dotfiles-secrets me@example.com init-host homelab/compute --luks
+  dotfiles-secrets me@example.com fetch sops-secret laptop
+  dotfiles-secrets me@example.com fetch gpg-private-key
 
 Bitwarden Structure:
   Host "homelab/compute" creates item "system-nixos-homelab-compute" with fields:

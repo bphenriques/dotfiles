@@ -60,6 +60,19 @@ in
                 default = "${secretsBaseDir}/${ownerName}/${name}";
                 description = "Path where the rendered template will be written";
               };
+
+              mode = lib.mkOption {
+                type = lib.types.str;
+                default = "0640";
+                example = "0644";
+                description = ''
+                  Octal file mode for the rendered template. Default `0640`
+                  restricts to the owner group. Override to `0644` only when
+                  the file must be readable across a trust boundary
+                  (e.g. a virtiofs share into a microvm where UIDs/GIDs
+                  don't line up with host groups).
+                '';
+              };
             };
           }));
           default = { };
