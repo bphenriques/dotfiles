@@ -20,32 +20,38 @@ let
   };
 in
 {
-  custom.homelab.services.papra = {
-    displayName = "Papra";
-    metadata.description = "Document Management";
-    metadata.version = img.version;
-    metadata.homepage = img.homepage;
-    metadata.category = "Productivity";
-    port = 1221;
-    access.allowedGroups = [ cfg.groups.admin ];
-    oidc = {
-      enable = true;
-      callbackURLs = [ "${serviceCfg.publicUrl}/api/auth/oauth2/callback/${providerId}" ];
-      systemd.dependentServices = [ "podman-papra" ];
+  custom.homelab = {
+    services.papra = {
+      displayName = "Papra";
+      metadata.description = "Document Management";
+      metadata.version = img.version;
+      metadata.homepage = img.homepage;
+      metadata.category = "Productivity";
+      port = 1221;
+      access.allowedGroups = [ cfg.groups.admin ];
+      oidc = {
+        enable = true;
+        callbackURLs = [ "${serviceCfg.publicUrl}/api/auth/oauth2/callback/${providerId}" ];
+        systemd.dependentServices = [ "podman-papra" ];
+      };
+      healthcheck.path = "/";
+      healthcheck.probeModule = "http_any";
+      integrations.homepage.enable = true;
+      storage.smb = [ "bphenriques" ];
     };
-    healthcheck.path = "/";
-    healthcheck.probeModule = "http_any";
-    integrations.homepage.enable = true;
 
-    secrets = {
-      files.auth-secret = { rotatable = true; bytes = 48; };
-      templates.env.content = ''
-        AUTH_SECRET=${serviceCfg.secrets.placeholder.auth-secret}
-        AUTH_PROVIDERS_CUSTOMS=[{"providerId":"${providerId}","providerName":"${oidcCfg.provider.displayName}","type":"oidc","discoveryUrl":"${oidcCfg.provider.issuerUrl}/.well-known/openid-configuration","clientId":"${serviceCfg.oidc.id.placeholder}","clientSecret":"${serviceCfg.oidc.secret.placeholder}","scopes":["openid","profile","email"]}]
-      '';
-      systemd.dependentServices = [ "podman-papra" ];
+    runtimeSecrets.papra-auth-secret = {
+      bytes = 48;
+      restartUnits = [ "podman-papra.service" ];
     };
-    storage.smb = [ "bphenriques" ];
+
+    runtimeTemplates."papra.env" = {
+      content = ''
+        AUTH_SECRET=${cfg.runtimePlaceholder.papra-auth-secret}
+        AUTH_PROVIDERS_CUSTOMS=[{"providerId":"${providerId}","providerName":"${oidcCfg.provider.displayName}","type":"oidc","discoveryUrl":"${oidcCfg.provider.issuerUrl}/.well-known/openid-configuration","clientId":"${cfg.oidcPlaceholder.papra.id}","clientSecret":"${cfg.oidcPlaceholder.papra.secret}","scopes":["openid","profile","email"]}]
+      '';
+      restartUnits = [ "podman-papra.service" ];
+    };
   };
 
   # Allow container bridge to reach Traefik for OIDC discovery/token exchange
@@ -113,7 +119,7 @@ in
       # Privacy
       POSTHOG_ENABLED = "false";
     };
-    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
+    environmentFiles = [ cfg.runtimeTemplates."papra.env".path ];
     ports = [ "127.0.0.1:${toString serviceCfg.port}:${toString serviceCfg.port}" ];
     volumes = [
       "${dataDir}/db:/data/db"

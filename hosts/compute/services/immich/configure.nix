@@ -12,7 +12,7 @@ let
     admin = {
       email = "admin@immich.local";
       name = "Immich Admin";
-      passwordFile = serviceCfg.secrets.files.admin-password.path;
+      passwordFile = config.custom.homelab.runtimeSecrets.immich-admin-password.path;
     };
     users = lib.mapAttrsToList (_: u: { inherit (u) email name isAdmin; }) enabledUsers;
 
@@ -32,11 +32,20 @@ let
   ) usersWithMounts);
 in
 {
+  custom.homelab = {
+    runtimeSecrets.immich-admin-password = {
+      regenerateIfMissing = false;
+      owner = config.services.immich.user;
+      restartUnits = [ "immich-configure.service" ];
+    };
+
+    smb.mounts = lib.mapAttrs' (username: _:
+      lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
+    ) enabledUsers;
+  };
+
   # Ensure immich has access to the mounted directories and is set as dependant
   users.users.immich.extraGroups = lib.mapAttrsToList (username: _: homelabMounts.${username}.group) usersWithMounts;
-  custom.homelab.smb.mounts = lib.mapAttrs' (username: _:
-    lib.nameValuePair username { systemd.dependentServices = [ "immich-server" ]; }
-  ) enabledUsers;
 
   systemd.services.immich-server.serviceConfig.ReadWritePaths = photoPaths;
 

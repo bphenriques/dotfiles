@@ -49,10 +49,11 @@ let
   initConfigFile = pkgs.writeText "seerr-config.json" (builtins.toJSON initConfig);
 in
 {
-  # Cross-service: extend other services' secrets to include this service as dependent
-  custom.homelab.services.jellyfin.secrets.systemd.dependentServices = [ "seerr-configure" ];
-  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "seerr-configure" ];
-  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "seerr-configure" ];
+  custom.homelab.runtimeSecrets = {
+    jellyfin-admin-password.restartUnits = [ "seerr-configure.service" ];
+    radarr-api-key.restartUnits = [ "seerr-configure.service" ];
+    sonarr-api-key.restartUnits = [ "seerr-configure.service" ];
+  };
 
   systemd.services.seerr-configure = {
     description = "Seerr setup";
@@ -73,12 +74,12 @@ in
     };
     environment = {
       SEERR_URL = serviceCfg.url;
-      SEERR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
+      SEERR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.seerr-api-key.path;
       SEERR_CONFIG_FILE = initConfigFile;
       JELLYFIN_ADMIN_USERNAME_FILE = pkgs.writeText "jellyfin-admin-username" "admin";
-      JELLYFIN_ADMIN_PASSWORD_FILE = jellyfinCfg.secrets.files.admin-password.path;
-      RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
-      SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;
+      JELLYFIN_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.jellyfin-admin-password.path;
+      RADARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.radarr-api-key.path;
+      SONARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.sonarr-api-key.path;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "seerr-configure" ./configure.nu}'';

@@ -18,12 +18,13 @@ in
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/callback/pocketid" ];
         systemd.dependentServices = [ "tinyauth" ];
       };
-      secrets = {
-        templates.env.content = ''
-          TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${serviceCfg.oidc.id.placeholder}
-        '';
-        systemd.dependentServices = [ "tinyauth" ];
-      };
+    };
+
+    runtimeTemplates."tinyauth.env" = {
+      content = ''
+        TINYAUTH_OAUTH_PROVIDERS_POCKETID_CLIENTID=${cfg.oidcPlaceholder.tinyauth.id}
+      '';
+      restartUnits = [ "tinyauth.service" ];
     };
 
     ingress.forwardAuth = {
@@ -34,7 +35,7 @@ in
 
   services.tinyauth = {
     enable = true;
-    environmentFile = serviceCfg.secrets.templates.env.path;
+    environmentFile = cfg.runtimeTemplates."tinyauth.env".path;
     settings = {
       APPURL = serviceCfg.publicUrl;
       SERVER_ADDRESS = serviceCfg.host;

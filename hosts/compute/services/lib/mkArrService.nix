@@ -61,41 +61,47 @@ let
   settingsFile = pkgs.writeText "${name}-config.json" (builtins.toJSON settings);
 in
 {
-  custom.homelab.services.${name} = {
-    displayName = upperName;
-    inherit port;
-    metadata.description = description;
-    metadata.version = config.services.${name}.package.version;
-    metadata.homepage = config.services.${name}.package.meta.homepage;
-    metadata.category = "Media";
-    access.allowedGroups = [ (forwardAuthGroup config) ];
-    forwardAuth.enable = true;
-    secrets = {
-      files.api-key = { rotatable = true; };
-      templates."${name}.env".content = ''
-        ${envPrefix}__AUTH__APIKEY=${serviceCfg.secrets.placeholder.api-key}
+  custom.homelab = {
+    services.${name} = {
+      displayName = upperName;
+      inherit port;
+      metadata.description = description;
+      metadata.version = config.services.${name}.package.version;
+      metadata.homepage = config.services.${name}.package.meta.homepage;
+      metadata.category = "Media";
+      access.allowedGroups = [ (forwardAuthGroup config) ];
+      forwardAuth.enable = true;
+      healthcheck.path = "/ping";
+      integrations.homepage.enable = true;
+      integrations.homepage.tab = "Home";
+      integrations.homepage.extraConfig.widget = {
+        type = name;
+        inherit (serviceCfg) url;
+        key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
+        fields = []; # Omit all fields because we already have the calendar view
+      };
+      integrations.ntfy.enable = true;
+      integrations.ntfy.topic = "media";
+      storage.smb = [ "media" ];
+    };
+
+    runtimeSecrets."${name}-api-key" = {
+      restartUnits = [ "${name}.service" "${name}-configure.service" ];
+    };
+
+    runtimeTemplates."${name}.env" = {
+      content = ''
+        ${envPrefix}__AUTH__APIKEY=${config.custom.homelab.runtimePlaceholder."${name}-api-key"}
       '';
-      systemd.dependentServices = [ name "${name}-configure" ];
+      restartUnits = [ "${name}.service" ];
     };
-    healthcheck.path = "/ping";
-    integrations.homepage.enable = true;
-    integrations.homepage.tab = "Home";
-    integrations.homepage.extraConfig.widget = {
-      type = name;
-      inherit (serviceCfg) url;
-      key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
-      fields = []; # Omit all fields because we already have the calendar view
-    };
-    integrations.ntfy.enable = true;
-    integrations.ntfy.topic = "media";
-    storage.smb = [ "media" ];
   };
 
   services.${name} = {
     enable = true;
     settings.server.port = serviceCfg.port;
     settings.server.bindaddress = "127.0.0.1";
-    environmentFiles = [ serviceCfg.secrets.templates."${name}.env".path ];
+    environmentFiles = [ config.custom.homelab.runtimeTemplates."${name}.env".path ];
   };
 
   systemd.services.${name} = {
@@ -134,7 +140,7 @@ in
     environment = {
       ARR_NAME = upperName;
       ARR_URL = serviceCfg.url;
-      ARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
+      ARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets."${name}-api-key".path;
       ARR_CONFIG_FILE = settingsFile;
       ARR_CATEGORY_FIELD = categoryField;
       NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;

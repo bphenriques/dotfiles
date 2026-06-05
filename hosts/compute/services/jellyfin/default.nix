@@ -25,29 +25,32 @@ in
   };
 
   config = {
-    custom.homelab.services.jellyfin = {
-      displayName = "Jellyfin";
-      metadata.description = "Media Player";
-      metadata.version = config.services.jellyfin.package.version;
-      metadata.homepage = config.services.jellyfin.package.meta.homepage;
-      metadata.category = "Media";
-      port = 8096;
-      secrets = {
-        files.admin-password = { rotatable = false; };
-        systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
+    custom.homelab = {
+      services.jellyfin = {
+        displayName = "Jellyfin";
+        metadata.description = "Media Player";
+        metadata.version = config.services.jellyfin.package.version;
+        metadata.homepage = config.services.jellyfin.package.meta.homepage;
+        metadata.category = "Media";
+        port = 8096;
+        access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
+        oidc = {
+          enable = true;
+          callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
+          systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
+        };
+        healthcheck.path = "/health";
+        integrations.homepage.enable = true;
+        storage.smb = [ "media" ];
+        resourceControl = {
+          slice = "throttled";
+          systemdServices = [ "jellyfin" ];
+        };
       };
-      access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
-      oidc = {
-        enable = true;
-        callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
-        systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
-      };
-      healthcheck.path = "/health";
-      integrations.homepage.enable = true;
-      storage.smb = [ "media" ];
-      resourceControl = {
-        slice = "throttled";
-        systemdServices = [ "jellyfin" ];
+
+      runtimeSecrets.jellyfin-admin-password = {
+        regenerateIfMissing = false;
+        restartUnits = [ "jellyfin-configure.service" "jellyfin-sso-configure.service" ];
       };
     };
 

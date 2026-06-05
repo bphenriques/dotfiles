@@ -3,17 +3,19 @@ let
   serviceCfg = config.custom.homelab.services.radarr;
 in
 {
-  custom.homelab.services.radarr.backup.package = pkgs.writeShellApplication {
-    name = "backup-radarr";
-    runtimeInputs = [ pkgs.curl ];
-    text = ''
-      export ARR_URL="${serviceCfg.url}"
-      export ARR_API_KEY_FILE="${serviceCfg.secrets.files.api-key.path}"
+  custom.homelab = {
+    services.radarr.backup.package = pkgs.writeShellApplication {
+      name = "backup-radarr";
+      runtimeInputs = [ pkgs.curl ];
+      text = ''
+        export ARR_URL="${serviceCfg.url}"
+        export ARR_API_KEY_FILE="${config.custom.homelab.runtimeSecrets.radarr-api-key.path}"
 
-      # shellcheck disable=SC1091
-      source ${./backup.sh}
-    '';
+        # shellcheck disable=SC1091
+        source ${./backup.sh}
+      '';
+    };
+
+    runtimeSecrets.radarr-api-key.restartUnits = [ "homelab-backup-backblaze-radarr.service" ];
   };
-
-  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "homelab-backup-backblaze-radarr" ];
 }

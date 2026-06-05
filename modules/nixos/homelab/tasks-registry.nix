@@ -24,7 +24,6 @@ in
       specialArgs = { homelabCfg = cfg; };
       modules = [
         baseTaskModule
-        ./schemas/secrets.nix
         ./schemas/ntfy.nix
         ./schemas/task-storage.nix
       ];

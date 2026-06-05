@@ -73,35 +73,48 @@ in
     "romm/screenscraper/password" = { owner = rommUser.name; };
   };
 
-  custom.homelab.services.romm = {
-    displayName = "RomM";
-    metadata.description = "ROM Manager";
-    metadata.version = img.version;
-    metadata.homepage = img.homepage;
-    metadata.category = "Media";
-    port = 8095;
+  custom.homelab = {
+    services.romm = {
+      displayName = "RomM";
+      metadata.description = "ROM Manager";
+      metadata.version = img.version;
+      metadata.homepage = img.homepage;
+      metadata.category = "Media";
+      port = 8095;
 
-    secrets = {
-      gid = 970; # Fixed GIDs required for container supplementary group access (--group-add). Group names are not possible.
-      files = {
-        auth-secret-key = { rotatable = true; bytes = 64; };
-        db-password = { rotatable = false; };
+      access.allowedGroups = with cfg.groups; [ guests users admin ];
+      oidc = {
+        enable = true;
+        gid = 971;  # Fixed GID for container access
+        callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
+        systemd.dependentServices = [ "podman-romm" ];
       };
-      systemd.dependentServices = [ "podman-romm" "romm-db-setup" ];
-      templates.env.content = ''
-        ROMM_AUTH_SECRET_KEY=${serviceCfg.secrets.placeholder.auth-secret-key}
+      healthcheck.path = "/api/heartbeat";
+      integrations.homepage.enable = true;
+      storage.smb = [ "media" ];
+    };
+
+    runtimeSecrets = {
+      romm-auth-secret-key = {
+        bytes = 64;
+        restartUnits = [ "podman-romm.service" ];
+      };
+
+      # Mounted into container as a volume; container's primary group needs read.
+      romm-db-password = {
+        regenerateIfMissing = false;
+        group = "romm";
+        mode = "0440";
+        restartUnits = [ "podman-romm.service" "romm-db-setup.service" ];
+      };
+    };
+
+    runtimeTemplates."romm.env" = {
+      content = ''
+        ROMM_AUTH_SECRET_KEY=${cfg.runtimePlaceholder.romm-auth-secret-key}
       '';
+      restartUnits = [ "podman-romm.service" ];
     };
-    access.allowedGroups = with cfg.groups; [ guests users admin ];
-    oidc = {
-      enable = true;
-      gid = 971;  # Fixed GID for container access
-      callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
-      systemd.dependentServices = [ "podman-romm" ];
-    };
-    healthcheck.path = "/api/heartbeat";
-    integrations.homepage.enable = true;
-    storage.smb = [ "media" ];
   };
 
   # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
@@ -119,7 +132,7 @@ in
     };
     script = ''
       set -euo pipefail
-      PASSWORD=$(cat ${serviceCfg.secrets.files.db-password.path})
+      PASSWORD=$(cat ${config.custom.homelab.runtimeSecrets.romm-db-password.path})
       # Idempotent: create user if missing, set password, grant privileges
       # Password is hex-only (openssl rand -hex), so SQL interpolation is safe
       ${config.services.mysql.package}/bin/mysql -u root <<SQL
@@ -136,7 +149,7 @@ in
     inherit (rommUser) uid;
     inherit (rommUser) group;
     isSystemUser = true;
-    extraGroups = [ homelabMounts.media.group serviceCfg.secrets.group ];
+    extraGroups = [ homelabMounts.media.group ];
   };
 
   systemd.tmpfiles.rules = [
@@ -188,7 +201,7 @@ in
       OIDC_ROLE_VIEWER = groupsCfg.guests;
     };
 
-    environmentFiles = [ serviceCfg.secrets.templates.env.path ];
+    environmentFiles = [ cfg.runtimeTemplates."romm.env".path ];
 
     volumes = [
       # Setup
@@ -197,7 +210,7 @@ in
       "${dataDir}/assets:/romm/assets"
 
       # Secrets
-      "${serviceCfg.secrets.files.db-password.path}:/run/secrets/db_password:ro"
+      "${config.custom.homelab.runtimeSecrets.romm-db-password.path}:/run/secrets/db_password:ro"
       "${serviceCfg.oidc.id.file}:/run/secrets/oidc_client_id:ro"
       "${serviceCfg.oidc.secret.file}:/run/secrets/oidc_client_secret:ro"
       "${config.sops.secrets."romm/mobygames/api-key".path}:/run/secrets/mobygames_api_key:ro"
@@ -215,7 +228,6 @@ in
       "--network=host"  # Use host network for MySQL access
       "--group-add=${toString homelabMounts.media.gid}"
       "--group-add=${toString serviceCfg.oidc.gid}"
-      "--group-add=${toString serviceCfg.secrets.gid}"
       "--memory=512m"
     ];
   };

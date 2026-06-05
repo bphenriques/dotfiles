@@ -60,20 +60,26 @@ in
   };
 
   config = {
-    custom.homelab.services.syncthing = {
-      displayName = "Syncthing";
-      metadata.description = "File Sync";
-      metadata.version = config.services.syncthing.package.version;
-      metadata.homepage = config.services.syncthing.package.meta.homepage;
-      metadata.category = "Home";
-      port = 8384;
-      healthcheck.path = "/rest/noauth/health";
-      access.allowedGroups = [ config.custom.homelab.groups.admin ];
-      forwardAuth.enable = true;
-      secrets.files.gui-password = { rotatable = true; };
-      integrations.homepage.enable = true;
-      integrations.homepage.tab = "Admin";
-      storage.smb = [ "media" "bphenriques" ];
+    custom.homelab = {
+      services.syncthing = {
+        displayName = "Syncthing";
+        metadata.description = "File Sync";
+        metadata.version = config.services.syncthing.package.version;
+        metadata.homepage = config.services.syncthing.package.meta.homepage;
+        metadata.category = "Home";
+        port = 8384;
+        healthcheck.path = "/rest/noauth/health";
+        access.allowedGroups = [ config.custom.homelab.groups.admin ];
+        forwardAuth.enable = true;
+        integrations.homepage.enable = true;
+        integrations.homepage.tab = "Admin";
+        storage.smb = [ "media" "bphenriques" ];
+      };
+
+      runtimeSecrets.syncthing-gui-password = {
+        owner = "syncthing";
+        restartUnits = [ "syncthing.service" ];
+      };
     };
 
     users.users.syncthing.extraGroups = [
@@ -91,7 +97,7 @@ in
 
       openDefaultPorts = false;
       guiAddress = "${serviceCfg.host}:${toString serviceCfg.port}";
-      guiPasswordFile = serviceCfg.secrets.files.gui-password.path;
+      guiPasswordFile = config.custom.homelab.runtimeSecrets.syncthing-gui-password.path;
 
       settings = {
         devices = lib.listToAttrs (map (d: lib.nameValuePair d.name { inherit (d) id; }) allSyncthingDevices);

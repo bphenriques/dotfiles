@@ -26,9 +26,8 @@ let
 in
 {
   config = {
-    custom.homelab.services.ntfy.secrets = {
-      files.admin-password = { rotatable = true; };
-      systemd.dependentServices = [ "ntfy-sh" "ntfy-configure" ];
+    custom.homelab.runtimeSecrets.ntfy-admin-password = {
+      restartUnits = [ "ntfy-sh.service" "ntfy-configure.service" ];
     };
 
     systemd.tmpfiles.rules = [
@@ -53,7 +52,7 @@ in
         UMask = "0077";
       };
       environment = {
-        NTFY_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
+        NTFY_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.ntfy-admin-password.path;
         NTFY_PROVISION_FILE = configFile;
       };
       path = [ config.services.ntfy-sh.package pkgs.nushell pkgs.coreutils ];

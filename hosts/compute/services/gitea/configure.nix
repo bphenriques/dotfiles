@@ -27,9 +27,10 @@ let
   };
 in
 {
-  custom.homelab.services.gitea.secrets = {
-    files.admin-password = { rotatable = false; };
-    systemd.dependentServices = [ "gitea" "gitea-configure" ];
+  custom.homelab.runtimeSecrets.gitea-admin-password = {
+    regenerateIfMissing = false;
+    owner = "gitea";
+    restartUnits = [ "gitea-configure.service" ];
   };
 
   environment.systemPackages = [ gitea-admin ];
@@ -56,7 +57,7 @@ in
     };
     environment = {
       GITEA_URL = serviceCfg.url;
-      GITEA_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
+      GITEA_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.gitea-admin-password.path;
       GITEA_CONFIG = "${config.services.gitea.stateDir}/custom/conf/app.ini";
       OIDC_PROVIDER_NAME = oidcCfg.provider.internalName;
       OIDC_DISPLAY_NAME = oidcCfg.provider.displayName;

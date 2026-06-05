@@ -20,22 +20,29 @@ in
 
   # Auth is delegated to Jellyfin (users sign in via Jellyfin credentials, not direct OIDC/forwardAuth)
   config = {
-    custom.homelab.services.seerr = {
-      displayName = "Seerr";
-      metadata.category = "Media";
-      metadata.description = "TV / Movie Finder";
-      metadata.version = config.services.seerr.package.version;
-      metadata.homepage = config.services.seerr.package.meta.homepage;
-      port = 9099;
-      secrets = {
-        files.api-key = { rotatable = true; };
-        templates."seerr.env".content = ''
-          API_KEY=${serviceCfg.secrets.placeholder.api-key}
-        '';
-        systemd.dependentServices = [ "seerr" "seerr-configure" ];
+    custom.homelab = {
+      services.seerr = {
+        displayName = "Seerr";
+        metadata.category = "Media";
+        metadata.description = "TV / Movie Finder";
+        metadata.version = config.services.seerr.package.version;
+        metadata.homepage = config.services.seerr.package.meta.homepage;
+        port = 9099;
+        healthcheck.path = "/api/v1/status";
+        integrations.homepage.enable = true;
       };
-      healthcheck.path = "/api/v1/status";
-      integrations.homepage.enable = true;
+
+      # Upstream uses DynamicUser; EnvironmentFile loads as root before user drop.
+      runtimeSecrets.seerr-api-key = {
+        restartUnits = [ "seerr.service" "seerr-configure.service" ];
+      };
+
+      runtimeTemplates."seerr.env" = {
+        content = ''
+          API_KEY=${config.custom.homelab.runtimePlaceholder.seerr-api-key}
+        '';
+        restartUnits = [ "seerr.service" ];
+      };
     };
 
     services.seerr = {
@@ -43,6 +50,6 @@ in
       inherit (serviceCfg) port;
     };
 
-    systemd.services.seerr.serviceConfig.EnvironmentFile = serviceCfg.secrets.templates."seerr.env".path;
+    systemd.services.seerr.serviceConfig.EnvironmentFile = config.custom.homelab.runtimeTemplates."seerr.env".path;
   };
 }

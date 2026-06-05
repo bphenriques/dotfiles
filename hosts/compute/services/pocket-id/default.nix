@@ -16,13 +16,6 @@ in
       metadata.category = "Administration";
       subdomain = "auth";
       inherit port;
-      secrets = {
-        files = {
-          encryption-key = { rotatable = true; };
-          api-key = { rotatable = true; };
-        };
-        systemd.dependentServices = [ "pocket-id" ];
-      };
       healthcheck.path = "/health";
       integrations.homepage.enable = true;
       integrations.homepage.tab = "Home";
@@ -32,7 +25,18 @@ in
       displayName = "Pocket-ID";
       internalName = "PocketID";
       issuerUrl = serviceCfg.publicUrl;
-      apiKeyFile = serviceCfg.secrets.files.api-key.path;
+      apiKeyFile = config.custom.homelab.runtimeSecrets.pocket-id-api-key.path;
+    };
+
+    runtimeSecrets = {
+      pocket-id-encryption-key = {
+        owner = config.services.pocket-id.user;
+        restartUnits = [ "pocket-id.service" ];
+      };
+      pocket-id-api-key = {
+        owner = config.services.pocket-id.user;
+        restartUnits = [ "pocket-id.service" ];
+      };
     };
   };
 
@@ -44,9 +48,9 @@ in
       HOST = "127.0.0.1";
       TRUST_PROXY = true;
       ANALYTICS_DISABLED = true;
-      ENCRYPTION_KEY_FILE = serviceCfg.secrets.files.encryption-key.path;
+      ENCRYPTION_KEY_FILE = config.custom.homelab.runtimeSecrets.pocket-id-encryption-key.path;
       ACCENT_COLOR = "default";
-      STATIC_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
+      STATIC_API_KEY_FILE = config.custom.homelab.runtimeSecrets.pocket-id-api-key.path;
       UI_CONFIG_DISABLED = true;
 
       # SMTP configuration

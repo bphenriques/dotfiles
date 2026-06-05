@@ -34,6 +34,7 @@ in
     passwordFile = config.sops.secrets."backup/rustic/password".path;
     secretsFile = config.sops.templates."homelab-backup-secrets.toml".path;
     bindings = {
+      "/system/homelab-secrets"               = config.custom.homelab.runtimeSecretsDir;
       "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;
       "/nas/bphenriques/notes"                = paths.users.bphenriques.notes;
       "/nas/bphenriques/private"              = paths.users.bphenriques.private;

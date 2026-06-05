@@ -11,17 +11,23 @@ let
   ) enabledUsers));
 in
 {
-  custom.homelab.services.miniflux.secrets = {
-    files.admin-password = { rotatable = false; };
-    templates."admin-credentials.env".content = ''
-      ADMIN_USERNAME=admin
-      ADMIN_PASSWORD=${serviceCfg.secrets.placeholder.admin-password}
-    '';
-    systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
+  custom.homelab = {
+    runtimeSecrets.miniflux-admin-password = {
+      regenerateIfMissing = false;
+      restartUnits = [ "miniflux-configure.service" ];
+    };
+
+    runtimeTemplates."miniflux-admin-credentials.env" = {
+      content = ''
+        ADMIN_USERNAME=admin
+        ADMIN_PASSWORD=${config.custom.homelab.runtimePlaceholder.miniflux-admin-password}
+      '';
+      restartUnits = [ "miniflux.service" ];
+    };
   };
 
   services.miniflux = {
-    adminCredentialsFile = serviceCfg.secrets.templates."admin-credentials.env".path;
+    adminCredentialsFile = config.custom.homelab.runtimeTemplates."miniflux-admin-credentials.env".path;
     config = {
       DISABLE_LOCAL_AUTH = 0;
       CREATE_ADMIN = true;
@@ -47,7 +53,7 @@ in
     environment = {
       MINIFLUX_URL = serviceCfg.url;
       MINIFLUX_ADMIN_USERNAME_FILE = adminUsernameFile;
-      MINIFLUX_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
+      MINIFLUX_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.miniflux-admin-password.path;
       MINIFLUX_USER_SETTINGS_FILE = userSettingsFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile;
     };

@@ -24,37 +24,45 @@ in
   };
 
   config = {
-    custom.homelab.services.kavita = {
-      displayName = "Kavita";
-      metadata.description = "Book Server";
-      metadata.version = config.services.kavita.package.version;
-      metadata.homepage = config.services.kavita.package.meta.homepage;
-      metadata.category = "Media";
-      port = 8097;
-      secrets = {
-        files = {
-          token-key = { rotatable = true; bytes = 64; };
-          admin-password = { rotatable = false; }; # For API bootstrapping only
+    custom.homelab = {
+      services.kavita = {
+        displayName = "Kavita";
+        metadata.description = "Book Server";
+        metadata.version = config.services.kavita.package.version;
+        metadata.homepage = config.services.kavita.package.meta.homepage;
+        metadata.category = "Media";
+        port = 8097;
+        access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
+        oidc = {
+          enable = true;
+          callbackURLs = [
+            "${serviceCfg.publicUrl}/signin-oidc"
+            "${serviceCfg.publicUrl}/signout-callback-oidc"
+          ];
+          systemd.dependentServices = [ "kavita" ];
         };
-        systemd.dependentServices = [ "kavita" "kavita-configure" ];
+        healthcheck.path = "/api/health";
+        integrations.homepage.enable = true;
+        storage.smb = [ "media" ];
       };
-      access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
-      oidc = {
-        enable = true;
-        callbackURLs = [
-          "${serviceCfg.publicUrl}/signin-oidc"
-          "${serviceCfg.publicUrl}/signout-callback-oidc"
-        ];
-        systemd.dependentServices = [ "kavita" ];
+
+      runtimeSecrets = {
+        kavita-token-key = {
+          bytes = 64;
+          owner = "kavita";
+          restartUnits = [ "kavita.service" ];
+        };
+        kavita-admin-password = {
+          regenerateIfMissing = false;
+          owner = "kavita";
+          restartUnits = [ "kavita-configure.service" ];
+        };
       };
-      healthcheck.path = "/api/health";
-      integrations.homepage.enable = true;
-      storage.smb = [ "media" ];
     };
 
     services.kavita = {
       enable = true;
-      tokenKeyFile = serviceCfg.secrets.files.token-key.path;
+      tokenKeyFile = config.custom.homelab.runtimeSecrets.kavita-token-key.path;
       settings.Port = serviceCfg.port;
       settings.IpAddresses = "127.0.0.1";
       settings.OpenIdConnectSettings = {

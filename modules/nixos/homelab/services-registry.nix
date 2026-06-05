@@ -175,7 +175,6 @@ in
         modules = [
           baseServiceModule
           ./schemas/oidc.nix
-          ./schemas/secrets.nix
           ./schemas/backup.nix
           ./schemas/resource-control.nix
           ./schemas/storage.nix

@@ -69,7 +69,7 @@ in
     environment = {
       JELLYFIN_URL = serviceCfg.url;
       JELLYFIN_ADMIN_USERNAME_FILE = pkgs.writeText "jellyfin-admin-username" "admin";  # Not a secret but keeps consistency.
-      JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
+      JELLYFIN_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.jellyfin-admin-password.path;
       JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
       OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # Validates non-local users exist in OIDC provider
     };

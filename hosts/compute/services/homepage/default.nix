@@ -19,18 +19,21 @@ let
 in
 {
   # Unauthenticated: aggregates links and health status.
-  custom.homelab.services.homepage = {
-    metadata.description = "Dashboard";
-    metadata.version = config.services.homepage-dashboard.package.version;
-    metadata.homepage = config.services.homepage-dashboard.package.meta.homepage;
-    metadata.category = "Infrastructure";
-    port = 3001;
-    secrets = {
-      templates."homepage.env".content = lib.concatStringsSep "\n" [
-        "HOMEPAGE_VAR_SONARR_API_KEY=${sonarrCfg.secrets.placeholder.api-key}"
-        "HOMEPAGE_VAR_RADARR_API_KEY=${radarrCfg.secrets.placeholder.api-key}"
+  custom.homelab = {
+    services.homepage = {
+      metadata.description = "Dashboard";
+      metadata.version = config.services.homepage-dashboard.package.version;
+      metadata.homepage = config.services.homepage-dashboard.package.meta.homepage;
+      metadata.category = "Infrastructure";
+      port = 3001;
+    };
+
+    runtimeTemplates."homepage.env" = {
+      content = lib.concatStringsSep "\n" [
+        "HOMEPAGE_VAR_SONARR_API_KEY=${cfg.runtimePlaceholder.sonarr-api-key}"
+        "HOMEPAGE_VAR_RADARR_API_KEY=${cfg.runtimePlaceholder.radarr-api-key}"
       ];
-      systemd.dependentServices = [ "homepage-dashboard" ];
+      restartUnits = [ "homepage-dashboard.service" ];
     };
   };
 
@@ -112,7 +115,7 @@ in
     ];
 
     environmentFiles = [
-      serviceCfg.secrets.templates."homepage.env".path
+      cfg.runtimeTemplates."homepage.env".path
     ];
   };
 }

@@ -18,7 +18,7 @@ let
   kavitaConfigFile = pkgs.writeText "kavita-config.json" (builtins.toJSON {
     kavitaUrl = serviceCfg.url;
     adminUsername = "admin";
-    adminPasswordFile = serviceCfg.secrets.files.admin-password.path;
+    adminPasswordFile = config.custom.homelab.runtimeSecrets.kavita-admin-password.path;
 
     server = {
       hostName = serviceCfg.publicUrl;

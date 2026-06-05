@@ -21,11 +21,6 @@ in
       metadata.category = "Media";
       port = 2283;
       subdomain = "photos";
-      secrets = {
-        files.admin-password = { rotatable = false; };
-        systemd.dependentServices = [ "immich-configure" ];
-      };
-
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];
       oidc = {
         enable = true;

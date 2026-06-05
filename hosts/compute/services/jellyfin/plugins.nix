@@ -93,7 +93,7 @@ in
     environment = {
       JELLYFIN_URL = serviceCfg.url;
       JELLYFIN_ADMIN_USERNAME_FILE = adminUsernameFile;
-      JELLYFIN_ADMIN_PASSWORD_FILE = serviceCfg.secrets.files.admin-password.path;
+      JELLYFIN_ADMIN_PASSWORD_FILE = config.custom.homelab.runtimeSecrets.jellyfin-admin-password.path;
       SSO_CONFIG_FILE = ssoConfigFile;
       OIDC_CLIENT_ID_FILE = serviceCfg.oidc.id.file;
       OIDC_CLIENT_SECRET_FILE = serviceCfg.oidc.secret.file;

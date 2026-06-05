@@ -27,15 +27,14 @@ let
   configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
-  custom.homelab.tasks.recyclarr.secrets = {
-    templates."secrets.yml" = {
-      content = ''
-        movies_api_key: ${radarrCfg.secrets.placeholder.api-key}
-        tv_api_key: ${sonarrCfg.secrets.placeholder.api-key}
-      '';
-      path = "${appDataDir}/secrets.yml";
-    };
-    systemd.dependentServices = [ "recyclarr" ];
+  # Override path: recyclarr reads from its config dir, not the default /run/homelab-secrets/templates/.
+  custom.homelab.runtimeTemplates."recyclarr-secrets.yml" = {
+    content = ''
+      movies_api_key: ${config.custom.homelab.runtimePlaceholder.radarr-api-key}
+      tv_api_key: ${config.custom.homelab.runtimePlaceholder.sonarr-api-key}
+    '';
+    path = "${appDataDir}/secrets.yml";
+    restartUnits = [ "recyclarr.service" ];
   };
 
   # Runs once at boot (to apply config on deploy) and daily at 3 AM via timer

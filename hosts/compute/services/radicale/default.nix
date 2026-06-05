@@ -16,42 +16,45 @@ in
   };
 
   config = {
-  custom.homelab.services.radicale = {
-    displayName = "Radicale";
-    metadata.description = "CalDAV & CardDAV";
-    metadata.version = pkgs.radicale.version;
-    metadata.homepage = pkgs.radicale.meta.homepage;
-    metadata.category = "General";
-    port = 5232;
-    subdomain = "radicale";
-    access.allowedGroups = [ config.custom.homelab.groups.admin ];
-    forwardAuth.enable = true;
-    integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
-    healthcheck.path = "/.web/";
-    healthcheck.probeModule = "http_any"; # Radicale requires htpasswd auth on all endpoints; 401 confirms service is up
+    custom.homelab = {
+      services.radicale = {
+        displayName = "Radicale";
+        metadata.description = "CalDAV & CardDAV";
+        metadata.version = pkgs.radicale.version;
+        metadata.homepage = pkgs.radicale.meta.homepage;
+        metadata.category = "General";
+        port = 5232;
+        subdomain = "radicale";
+        access.allowedGroups = [ config.custom.homelab.groups.admin ];
+        forwardAuth.enable = true;
+        integrations.homepage.enable = true;
+        integrations.homepage.tab = "Admin";
+        healthcheck.path = "/.web/";
+        healthcheck.probeModule = "http_any"; # Radicale requires htpasswd auth on all endpoints; 401 confirms service is up
 
-    secrets = {
-      files = lib.listToAttrs (map (uname: {
-        name = "password-${uname}";
-        value = { rotatable = false; bytes = 24; };
-      }) usernames);
-      systemd.dependentServices = [ "radicale" "radicale-configure" ];
-    };
+        backup = {
+          package = pkgs.writeShellApplication {
+            name = "backup-radicale";
+            text = ''
+              export RADICALE_DATA="/var/lib/radicale/collections"
 
-    backup = {
-      package = pkgs.writeShellApplication {
-        name = "backup-radicale";
-        text = ''
-          export RADICALE_DATA="/var/lib/radicale/collections"
-
-          # shellcheck disable=SC1091
-          source ${./backup.sh}
-        '';
+              # shellcheck disable=SC1091
+              source ${./backup.sh}
+            '';
+          };
+          after = [ "radicale.service" ];
+        };
       };
-      after = [ "radicale.service" ];
+
+      runtimeSecrets = lib.listToAttrs (map (uname: {
+        name = "radicale-password-${uname}";
+        value = {
+          bytes = 24;
+          regenerateIfMissing = false;
+          restartUnits = [ "radicale-configure.service" ];
+        };
+      }) usernames);
     };
-  };
 
   # CalDAV/CardDAV endpoint without forwardAuth for regular sync. Uses Radicale's own htpasswd auth instead.
   # Includes .well-known redirects (RFC 6764) so DAVx5 and other clients can auto-discover the server.

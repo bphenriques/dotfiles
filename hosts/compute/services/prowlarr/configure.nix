@@ -56,17 +56,18 @@ in
     };
     environment = {
       PROWLARR_URL = serviceCfg.url;
-      PROWLARR_API_KEY_FILE = serviceCfg.secrets.files.api-key.path;
+      PROWLARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.prowlarr-api-key.path;
       PROWLARR_CONFIG_FILE = settingsFile;
-      RADARR_API_KEY_FILE = radarrCfg.secrets.files.api-key.path;
-      SONARR_API_KEY_FILE = sonarrCfg.secrets.files.api-key.path;
+      RADARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.radarr-api-key.path;
+      SONARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.sonarr-api-key.path;
       NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-configure" ./prowlarr-configure.nu}'';
   };
 
-  # Cross-service dependencies
-  custom.homelab.services.radarr.secrets.systemd.dependentServices = [ "prowlarr-configure" ];
-  custom.homelab.services.sonarr.secrets.systemd.dependentServices = [ "prowlarr-configure" ];
+  custom.homelab.runtimeSecrets = {
+    radarr-api-key.restartUnits = [ "prowlarr-configure.service" ];
+    sonarr-api-key.restartUnits = [ "prowlarr-configure.service" ];
+  };
 }

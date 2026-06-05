@@ -5,34 +5,40 @@ in
 {
   imports = [ ./configure.nix ];
 
-  custom.homelab.services.prowlarr = {
-    displayName = "Prowlarr";
-    metadata.description = "Manage *rr services";
-    metadata.version = config.services.prowlarr.package.version;
-    metadata.homepage = config.services.prowlarr.package.meta.homepage;
-    metadata.category = "Media";
-    port = 9096;
-    secrets = {
-      files.api-key = { rotatable = true; };
-      templates."prowlarr.env".content = ''
-        PROWLARR__AUTH__APIKEY=${serviceCfg.secrets.placeholder.api-key}
-      '';
-      systemd.dependentServices = [ "prowlarr" "prowlarr-configure" ];
+  custom.homelab = {
+    services.prowlarr = {
+      displayName = "Prowlarr";
+      metadata.description = "Manage *rr services";
+      metadata.version = config.services.prowlarr.package.version;
+      metadata.homepage = config.services.prowlarr.package.meta.homepage;
+      metadata.category = "Media";
+      port = 9096;
+      healthcheck.path = "/ping";
+      access.allowedGroups = [ config.custom.homelab.groups.admin ];
+      forwardAuth.enable = true;
+      integrations.homepage.enable = true;
+      integrations.homepage.tab = "Admin";
+      integrations.ntfy.enable = true;
+      integrations.ntfy.topic = "admin";
     };
-    healthcheck.path = "/ping";
-    access.allowedGroups = [ config.custom.homelab.groups.admin ];
-    forwardAuth.enable = true;
-    integrations.homepage.enable = true;
-    integrations.homepage.tab = "Admin";
-    integrations.ntfy.enable = true;
-    integrations.ntfy.topic = "admin";
+
+    runtimeSecrets.prowlarr-api-key = {
+      restartUnits = [ "prowlarr.service" "prowlarr-configure.service" ];
+    };
+
+    runtimeTemplates."prowlarr.env" = {
+      content = ''
+        PROWLARR__AUTH__APIKEY=${config.custom.homelab.runtimePlaceholder.prowlarr-api-key}
+      '';
+      restartUnits = [ "prowlarr.service" ];
+    };
   };
 
   services.prowlarr = {
     enable = true;
     settings.server.port = serviceCfg.port;
     settings.server.bindaddress = "127.0.0.1";
-    environmentFiles = [ serviceCfg.secrets.templates."prowlarr.env".path ];
+    environmentFiles = [ config.custom.homelab.runtimeTemplates."prowlarr.env".path ];
   };
 
   # Prowlarr is an indexer manager: it talks to APIs, not the filesystem. No media mount needed.

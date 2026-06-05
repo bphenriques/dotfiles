@@ -7,20 +7,23 @@ let
   systemDashboard = json.generate "system.json" (import ./grafana-dashboard.nix);
 in
 {
-  custom.homelab.services.grafana = {
-    displayName = "Grafana";
-    metadata.description = "Dashboards";
-    metadata.version = pkgs.grafana.version;
-    metadata.homepage = pkgs.grafana.meta.homepage;
-    metadata.category = "Monitoring";
-    port = 3010;
-    secrets = {
-      files.secret-key.rotatable = true;
-      systemd.dependentServices = [ "grafana" ];
+  custom.homelab = {
+    services.grafana = {
+      displayName = "Grafana";
+      metadata.description = "Dashboards";
+      metadata.version = pkgs.grafana.version;
+      metadata.homepage = pkgs.grafana.meta.homepage;
+      metadata.category = "Monitoring";
+      port = 3010;
+      healthcheck.path = "/api/health";
+      forwardAuth.enable = true;
+      integrations.homepage.enable = true;
     };
-    healthcheck.path = "/api/health";
-    forwardAuth.enable = true;
-    integrations.homepage.enable = true;
+
+    runtimeSecrets.grafana-secret-key = {
+      owner = "grafana";
+      restartUnits = [ "grafana.service" ];
+    };
   };
 
   services.grafana = {
@@ -36,7 +39,7 @@ in
       "unified_alerting".enabled = false;
       alerting.enabled = false; # Already using Alert Manager
       dashboards.default_home_dashboard_path = "${systemDashboard}";
-      security.secret_key = "$__file{${serviceCfg.secrets.files.secret-key.path}}";
+      security.secret_key = "$__file{${config.custom.homelab.runtimeSecrets.grafana-secret-key.path}}";
       users.allow_sign_up = false;
 
       # Anonymous auth is safe here: Grafana is behind forwardAuth, so all users are already

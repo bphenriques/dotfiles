@@ -8,7 +8,7 @@ let
     inherit htpasswdFile;
     users = lib.listToAttrs (map (uname: {
       name = uname;
-      value = { passwordFile = serviceCfg.secrets.files."password-${uname}".path; };
+      value = { passwordFile = config.custom.homelab.runtimeSecrets."radicale-password-${uname}".path; };
     }) usernames);
   });
 in
