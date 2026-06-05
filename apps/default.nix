@@ -12,7 +12,6 @@ let
     in pkgsToApps {
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
       host-secrets = pkgs.callPackage ./host-secrets { };
-      service-catalogue = pkgs.callPackage ./service-catalogue { };
       check-updates = pkgsWithOverlays.callPackage ./check-updates {
         inherit (self.lib.builders.${system}) writeNushellScript;
       };

@@ -56,7 +56,7 @@ BIOS tweaks to ensure thermal stability as sustained workloads caused thermal sh
 
 Services bind to `127.0.0.1` where possible; the firewall default-denies all other ports. Only Traefik and services that by nature require direct network access (e.g., Wireguard, Syncthing) are reachable on specific interfaces.
 
-Full service list in [`services.md`](./services.md) (auto-generated via `nix run .#service-catalogue`) and installation [here](install.md).
+Installation: [here](install.md).
 
 ## Design
 

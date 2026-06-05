@@ -21,7 +21,7 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https:
 
 | Host                       | Platform            | Description                                                                                            |
 | -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| [compute](./hosts/compute) | NixOS               | Self-hosted homelab ([service catalogue](./hosts/compute/services.md), OIDC SSO, secret provisioning). |
+| [compute](./hosts/compute) | NixOS               | Self-hosted homelab (OIDC SSO, secret provisioning). |
 | [laptop](./hosts/laptop)   | NixOS               | Personal workstation                                                                                   |
 | [inky](./hosts/inky)       | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
 

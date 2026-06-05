@@ -28,7 +28,7 @@ let
 
             category = lib.mkOption {
               type = categoryType;
-              description = "Service category for catalogue and homepage grouping";
+              description = "Service category for homepage grouping";
             };
 
             version = lib.mkOption {
@@ -181,7 +181,6 @@ in
           ./schemas/homepage.nix
           ./schemas/ntfy.nix
           ./schemas/monitoring.nix
-          ./schemas/catalogue.nix
         ];
       });
       default = { };
