@@ -11,7 +11,7 @@ in
 
         tab = lib.mkOption {
           type = lib.types.enum [ "Home" "Admin" ];
-          default = defaultTab config.metadata.category;
+          default = defaultTab config.category;
           description = "Homepage tab to display this service on";
         };
 

@@ -18,31 +18,14 @@ let
         description = "Human-readable service name (defaults to attribute name)";
       };
 
-      metadata = lib.mkOption {
-        type = lib.types.submodule {
-          options = {
-            description = lib.mkOption {
-              type = lib.types.str;
-              description = "Short description of the service";
-            };
+      description = lib.mkOption {
+        type = lib.types.str;
+        description = "Short description of the service";
+      };
 
-            category = lib.mkOption {
-              type = categoryType;
-              description = "Service category for homepage grouping";
-            };
-
-            version = lib.mkOption {
-              type = lib.types.str;
-              description = "Service version (e.g. '4.7.0')";
-            };
-
-            homepage = lib.mkOption {
-              type = lib.types.str;
-              description = "Upstream project URL";
-            };
-          };
-        };
-        description = "Service metadata: description, category, version, and upstream homepage";
+      category = lib.mkOption {
+        type = categoryType;
+        description = "Service category for homepage grouping";
       };
 
       # Routing (backend)
@@ -156,13 +139,6 @@ in
 {
   options.custom.homelab = {
     enable = lib.mkEnableOption "home-server services";
-
-    categories = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = categories;
-      readOnly = true;
-      description = "Valid service categories";
-    };
 
     domain = lib.mkOption {
       type = lib.types.str;

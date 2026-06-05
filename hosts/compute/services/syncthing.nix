@@ -63,10 +63,8 @@ in
     custom.homelab = {
       services.syncthing = {
         displayName = "Syncthing";
-        metadata.description = "File Sync";
-        metadata.version = config.services.syncthing.package.version;
-        metadata.homepage = config.services.syncthing.package.meta.homepage;
-        metadata.category = "Home";
+        description = "File Sync";
+        category = "Home";
         port = 8384;
         healthcheck.path = "/rest/noauth/health";
         access.allowedGroups = [ config.custom.homelab.groups.admin ];

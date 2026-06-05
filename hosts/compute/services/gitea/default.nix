@@ -49,10 +49,8 @@ in
   config = {
     custom.homelab.services.gitea = {
       displayName = "Gitea";
-      metadata.description = "Git Server";
-      metadata.version = config.services.gitea.package.version;
-      metadata.homepage = config.services.gitea.package.meta.homepage;
-      metadata.category = "Productivity";
+      description = "Git Server";
+      category = "Productivity";
       port = 3100;
       subdomain = "git";
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];

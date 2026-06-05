@@ -21,10 +21,8 @@ in
   # Unauthenticated: aggregates links and health status.
   custom.homelab = {
     services.homepage = {
-      metadata.description = "Dashboard";
-      metadata.version = config.services.homepage-dashboard.package.version;
-      metadata.homepage = config.services.homepage-dashboard.package.meta.homepage;
-      metadata.category = "Infrastructure";
+      description = "Dashboard";
+      category = "Infrastructure";
       port = 3001;
     };
 

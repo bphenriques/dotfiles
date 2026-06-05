@@ -65,9 +65,9 @@ reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenan
 
 - **Service registry**: [`custom.homelab.services.*`](../../modules/nixos/homelab/services-registry.nix): routing, auth, secrets, and integrations from a single declaration
 - **[Layered access control](#access-control)**: Three tiers (`admin`, `users`, `guests`) enforced via OIDC per-client group restriction or ForwardAuth, never both on the same service
-- **Secret provisioning** with per-service group isolation and systemd ordering:
+- **Secret provisioning** with systemd ordering:
   - **OIDC Clients** [provisioned from declarations](../../modules/nixos/homelab/security/oidc.nix)
-  - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/secrets.nix)
+  - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/runtime-secrets.nix)
 - **[Monitoring registry](#monitoring)**: Custom extensions for exporters, scrape configs, and alert rules
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
 - **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
@@ -78,7 +78,8 @@ A single [service registration](./services/miniflux/default.nix) drives routing,
 
 ```nix
 custom.homelab.services.miniflux = {
-  metadata = { description = "RSS Server"; category = "General"; /* ... */ };
+  description = "RSS Server";
+  category = "General";
   port = 8081;
   healthcheck.path = "/healthcheck";
   access.allowedGroups = with config.custom.homelab.groups; [ admin ];

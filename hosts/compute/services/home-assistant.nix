@@ -11,10 +11,8 @@ in
 {
   custom.homelab.services.home-assistant = {
     displayName = "Home Assistant";
-    metadata.description = "Home Automation";
-    metadata.version = config.services.home-assistant.package.version;
-    metadata.homepage = config.services.home-assistant.package.meta.homepage;
-    metadata.category = "Home";
+    description = "Home Automation";
+    category = "Home";
     port = 8123;
     subdomain = "home";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

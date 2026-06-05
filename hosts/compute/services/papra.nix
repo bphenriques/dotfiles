@@ -23,10 +23,8 @@ in
   custom.homelab = {
     services.papra = {
       displayName = "Papra";
-      metadata.description = "Document Management";
-      metadata.version = img.version;
-      metadata.homepage = img.homepage;
-      metadata.category = "Productivity";
+      description = "Document Management";
+      category = "Productivity";
       port = 1221;
       access.allowedGroups = [ cfg.groups.admin ];
       oidc = {

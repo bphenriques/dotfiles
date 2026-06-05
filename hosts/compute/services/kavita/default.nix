@@ -27,10 +27,8 @@ in
     custom.homelab = {
       services.kavita = {
         displayName = "Kavita";
-        metadata.description = "Book Server";
-        metadata.version = config.services.kavita.package.version;
-        metadata.homepage = config.services.kavita.package.meta.homepage;
-        metadata.category = "Media";
+        description = "Book Server";
+        category = "Media";
         port = 8097;
         access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
         oidc = {

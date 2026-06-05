@@ -6,10 +6,8 @@ in
 {
   custom.homelab.services.cook-recipes = {
     displayName = "Recipes";
-    metadata.description = "Recipe Collection";
-    metadata.version = pkgs.cook-cli.version;
-    metadata.homepage = pkgs.cook-cli.meta.homepage;
-    metadata.category = "Home";
+    description = "Recipe Collection";
+    category = "Home";
     subdomain = "recipes";
     port = 9080;
     access.allowedGroups = [ config.custom.homelab.groups.users ];

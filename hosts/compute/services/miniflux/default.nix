@@ -26,10 +26,8 @@ in
   config = {
     custom.homelab.services.miniflux = {
       displayName = "Miniflux";
-      metadata.description = "RSS Server";
-      metadata.version = config.services.miniflux.package.version;
-      metadata.homepage = config.services.miniflux.package.meta.homepage;
-      metadata.category = "General";
+      description = "RSS Server";
+      category = "General";
       port = 8081;
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];
       oidc = {

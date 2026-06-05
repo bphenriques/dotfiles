@@ -10,10 +10,8 @@ in
   custom.homelab = {
     services.pocket-id = {
       displayName = "Pocket ID";
-      metadata.description = "OIDC Provider";
-      metadata.version = config.services.pocket-id.package.version;
-      metadata.homepage = config.services.pocket-id.package.meta.homepage;
-      metadata.category = "Administration";
+      description = "OIDC Provider";
+      category = "Administration";
       subdomain = "auth";
       inherit port;
       healthcheck.path = "/health";

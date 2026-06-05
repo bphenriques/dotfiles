@@ -8,10 +8,8 @@ in
   custom.homelab = {
     services.prowlarr = {
       displayName = "Prowlarr";
-      metadata.description = "Manage *rr services";
-      metadata.version = config.services.prowlarr.package.version;
-      metadata.homepage = config.services.prowlarr.package.meta.homepage;
-      metadata.category = "Media";
+      description = "Manage *rr services";
+      category = "Media";
       port = 9096;
       healthcheck.path = "/ping";
       access.allowedGroups = [ config.custom.homelab.groups.admin ];

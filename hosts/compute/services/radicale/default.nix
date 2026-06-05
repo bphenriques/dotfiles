@@ -19,10 +19,8 @@ in
     custom.homelab = {
       services.radicale = {
         displayName = "Radicale";
-        metadata.description = "CalDAV & CardDAV";
-        metadata.version = pkgs.radicale.version;
-        metadata.homepage = pkgs.radicale.meta.homepage;
-        metadata.category = "General";
+        description = "CalDAV & CardDAV";
+        category = "General";
         port = 5232;
         subdomain = "radicale";
         access.allowedGroups = [ config.custom.homelab.groups.admin ];

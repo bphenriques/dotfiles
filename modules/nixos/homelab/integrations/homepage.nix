@@ -12,7 +12,7 @@ let
   mkServiceEntry = service:
     {
       "${service.displayName}" = {
-        inherit (service.metadata) description;
+        inherit (service) description;
       } // lib.optionalAttrs service.ingress.enable {
         href = service.publicUrl;
         siteMonitor = "${service.publicUrl}${service.healthcheck.path}";

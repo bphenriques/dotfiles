@@ -76,10 +76,8 @@ in
   custom.homelab = {
     services.romm = {
       displayName = "RomM";
-      metadata.description = "ROM Manager";
-      metadata.version = img.version;
-      metadata.homepage = img.homepage;
-      metadata.category = "Media";
+      description = "ROM Manager";
+      category = "Media";
       port = 8095;
 
       access.allowedGroups = with cfg.groups; [ guests users admin ];

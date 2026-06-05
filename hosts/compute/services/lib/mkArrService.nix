@@ -65,10 +65,8 @@ in
     services.${name} = {
       displayName = upperName;
       inherit port;
-      metadata.description = description;
-      metadata.version = config.services.${name}.package.version;
-      metadata.homepage = config.services.${name}.package.meta.homepage;
-      metadata.category = "Media";
+      description = description;
+      category = "Media";
       access.allowedGroups = [ (forwardAuthGroup config) ];
       forwardAuth.enable = true;
       healthcheck.path = "/ping";

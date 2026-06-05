@@ -7,10 +7,8 @@ in
 {
   custom.homelab = {
     services.tinyauth = {
-      metadata.description = "ForwardAuth Gateway";
-      metadata.category = "Infrastructure";
-      metadata.version = config.services.tinyauth.package.version;
-      metadata.homepage = config.services.tinyauth.package.meta.homepage;
+      description = "ForwardAuth Gateway";
+      category = "Infrastructure";
       port = 3000;
       access.allowedGroups = with cfg.groups; [ users admin ];
       oidc = {

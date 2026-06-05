@@ -96,10 +96,8 @@ in
 
   config = {
     custom.homelab.services.wireguard = {
-      metadata.description = "VPN";
-      metadata.version = "N/A";
-      metadata.homepage = "https://www.wireguard.com/";
-      metadata.category = "Administration";
+      description = "VPN";
+      category = "Administration";
       inherit port;
       ingress.enable = false;
       integrations.monitoring = {

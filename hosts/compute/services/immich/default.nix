@@ -15,10 +15,8 @@ in
   config = {
     custom.homelab.services.immich = {
       displayName = "Immich";
-      metadata.description = "Photo & Video Gallery";
-      metadata.version = config.services.immich.package.version;
-      metadata.homepage = config.services.immich.package.meta.homepage;
-      metadata.category = "Media";
+      description = "Photo & Video Gallery";
+      category = "Media";
       port = 2283;
       subdomain = "photos";
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];

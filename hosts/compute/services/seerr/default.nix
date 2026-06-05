@@ -23,10 +23,8 @@ in
     custom.homelab = {
       services.seerr = {
         displayName = "Seerr";
-        metadata.category = "Media";
-        metadata.description = "TV / Movie Finder";
-        metadata.version = config.services.seerr.package.version;
-        metadata.homepage = config.services.seerr.package.meta.homepage;
+        category = "Media";
+        description = "TV / Movie Finder";
         port = 9099;
         healthcheck.path = "/api/v1/status";
         integrations.homepage.enable = true;

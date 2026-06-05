@@ -28,10 +28,8 @@ in
     custom.homelab = {
       services.jellyfin = {
         displayName = "Jellyfin";
-        metadata.description = "Media Player";
-        metadata.version = config.services.jellyfin.package.version;
-        metadata.homepage = config.services.jellyfin.package.meta.homepage;
-        metadata.category = "Media";
+        description = "Media Player";
+        category = "Media";
         port = 8096;
         access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
         oidc = {

@@ -10,10 +10,8 @@ in
   custom.homelab = {
     services.grafana = {
       displayName = "Grafana";
-      metadata.description = "Dashboards";
-      metadata.version = pkgs.grafana.version;
-      metadata.homepage = pkgs.grafana.meta.homepage;
-      metadata.category = "Monitoring";
+      description = "Dashboards";
+      category = "Monitoring";
       port = 3010;
       healthcheck.path = "/api/health";
       forwardAuth.enable = true;

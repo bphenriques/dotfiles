@@ -5,10 +5,8 @@ in
 {
   custom.homelab.services.bentopdf = {
     displayName = "Bentopdf";
-    metadata.description = "PDF Generator";
-    metadata.version = pkgs.bentopdf.version;
-    metadata.homepage = pkgs.bentopdf.meta.homepage;
-    metadata.category = "General";
+    description = "PDF Generator";
+    category = "General";
     port = 8092;
     access.allowedGroups = [ config.custom.homelab.groups.users ];
     forwardAuth.enable = true;

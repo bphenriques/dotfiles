@@ -31,10 +31,8 @@ in
   config = {
     custom.homelab.services.filebrowser = {
       displayName = "File Browser";
-      metadata.description = "File Browser";
-      metadata.version = pkgs.filebrowser.version;
-      metadata.homepage = pkgs.filebrowser.meta.homepage;
-      metadata.category = "Home";
+      description = "File Browser";
+      category = "Home";
       port = 8085;
       subdomain = "files";
       access.allowedGroups = with cfg.groups; [ guests users admin ];

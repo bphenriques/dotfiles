@@ -29,10 +29,8 @@ in
 
   custom.homelab.services.mympd = {
     displayName = "My MPD";
-    metadata.description = "Remote MPD Client";
-    metadata.version = pkgs.mympd.version;
-    metadata.homepage = pkgs.mympd.meta.homepage;
-    metadata.category = "General";
+    description = "Remote MPD Client";
+    category = "General";
     port = 8093;
     access.allowedGroups = [ config.custom.homelab.groups.users ];
     forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
