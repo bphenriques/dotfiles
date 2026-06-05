@@ -3,9 +3,8 @@
 [![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
-[![Darwin Install](https://img.shields.io/badge/Darwin_Install-docs-blue)](./apps/darwin-install/README.md)
 
-Hi! 👋 This is my personal [NixOS](https://nixos.org/) and [nix-darwin](https://github.com/LnL7/nix-darwin) flake that works _for me_. I hope this helps you!
+Hi! 👋 This is my personal [NixOS](https://nixos.org/) flake that works _for me_. I hope this helps you!
 
 <p float="center">
   <img src="hosts/compute/screenshots/homepage.png" width="49%" />

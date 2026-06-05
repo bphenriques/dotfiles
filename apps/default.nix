@@ -1,6 +1,6 @@
 { nixpkgs, generators, self }:
 let
-  inherit (generators) forAllSystems forLinuxSystems forDarwinSystems mergeAllSystems;
+  inherit (generators) forAllSystems forLinuxSystems mergeAllSystems;
   inherit (nixpkgs) lib;
   pkgsToApps = attrs: lib.mapAttrs (_: pkg: { type = "app"; program = lib.getExe pkg; meta = pkg.meta or {}; } ) attrs;
 
@@ -24,12 +24,4 @@ let
     in pkgsToApps {
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
     });
-
-  darwin = forDarwinSystems (system:
-    let
-      pkgs = nixpkgs.legacyPackages.${system};
-      selfPkgs = self.packages.${system};
-    in pkgsToApps {
-      darwin-install = pkgs.callPackage ./darwin-install { inherit selfPkgs; };
-    });
-in mergeAllSystems [ crossPlatform linux darwin ]
+in mergeAllSystems [ crossPlatform linux ]

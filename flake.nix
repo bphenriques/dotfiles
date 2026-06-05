@@ -15,9 +15,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
 
-    darwin.url = "github:lnl7/nix-darwin/master";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
-
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -67,7 +64,6 @@
       # Modules
       nixosModules        = readModulesAttrs ./modules/nixos;
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
-      darwinModules       = readModulesAttrs ./modules/darwin;
 
       nixosConfigurations = {
         laptop = mkNixosHost {

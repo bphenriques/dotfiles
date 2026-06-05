@@ -1,6 +1,6 @@
 # Agent Instructions
 
-NixOS/Darwin dotfiles flake. See [README.md](./README.md) for overview.
+NixOS dotfiles flake. See [README.md](./README.md) for overview.
 
 ## Naming Conventions
 

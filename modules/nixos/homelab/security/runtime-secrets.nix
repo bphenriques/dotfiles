@@ -1,6 +1,5 @@
 # Runtime secret generation + template rendering, sops-shaped.
 # One systemd unit generates random files and renders templates from a flat namespace.
-# See hosts/compute/README.md.
 { lib, config, pkgs, ... }:
 let
   cfg = config.custom.homelab;
