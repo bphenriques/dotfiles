@@ -16,7 +16,7 @@ NixOS homelab server optimised for low maintenance, small attack surface, and de
 BIOS tweaks to ensure thermal stability as sustained workloads caused thermal shutdowns (~84°C):
 
 - **BIOS fan curve** (`Del` → `Advanced → Hardware Monitor → Smart Fan Function`): adjust to run fans at full-speed at **80°C** (default is 90°C) and to start earlier with slope of 4 PWM/°C. Temperatures dropped from 83°C to ~65°C under identical load.
-- **Systemd `throttled.slice`**: heavy services (Immich, Jellyfin, Whisper, Ollama) pinned to cores 1-2 (`AllowedCPUs`), hard-capped (`CPUQuota=150%`).
+- **Systemd `throttled.slice`**: heavy services (Immich, Jellyfin) pinned to cores 1-2 (`AllowedCPUs`), hard-capped (`CPUQuota=150%`).
 - **Systemd `critical.slice`**: SSH/DHCP.
 
 ## Architecture
@@ -68,7 +68,7 @@ reasonable. Above all, I love reproducibility (hence `NixOS`), and low-maintenan
 - **Secret provisioning** with systemd ordering:
   - **OIDC Clients** [provisioned from declarations](../../modules/nixos/homelab/security/oidc.nix)
   - **Runtime Secrets** such as API keys [generated at boot](../../modules/nixos/homelab/security/runtime-secrets.nix)
-- **[Monitoring registry](#monitoring)**: Custom extensions for exporters, scrape configs, and alert rules
+- **[Monitoring registry](../../modules/nixos/homelab/monitoring.nix)**: Custom extensions for exporters, scrape configs, and alert rules
 - **Reasonable hardening**: leans on NixOS and systemd defaults for service isolation
 - **[User provisioning](../../modules/nixos/homelab/users.nix)**: central module to configure what each user has access to. Guest users managed via `pocket-id-manage` CLI
 
@@ -99,6 +99,7 @@ custom.homelab.users.alice = {
   email = "alice@example.com";
   firstName = "Alice";
   lastName = "Smith";
+  groups = [ config.custom.homelab.groups.users ];
   services.miniflux.enable = true;
   services.jellyfin.enable = true;
   services.immich.enable = true;
