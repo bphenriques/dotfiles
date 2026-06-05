@@ -35,7 +35,7 @@
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-  };
+ };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
     let
@@ -69,17 +69,19 @@
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
       darwinModules       = readModulesAttrs ./modules/darwin;
 
-      nixosConfigurations.compute = mkNixosHost {
-        hostName = "compute";
-        system = "x86_64-linux";
-        configPath = ./hosts/compute;
-      };
-      nixosConfigurations.laptop = mkNixosHost {
-        hostName = "laptop";
-        system = "x86_64-linux";
-        configPath = ./hosts/laptop;
-        extraOverlays = [ inputs.nur.overlays.default ];
-        extraHmModules = [ inputs.stylix.homeModules.stylix ];
-      };
+      nixosConfigurations = {
+        laptop = mkNixosHost {
+          hostName = "laptop";
+          system = "x86_64-linux";
+          configPath = ./hosts/laptop;
+          extraOverlays = [ inputs.nur.overlays.default ];
+          extraHmModules = [ inputs.stylix.homeModules.stylix ];
+        };
+        compute = mkNixosHost {
+          hostName = "compute";
+          system = "x86_64-linux";
+          configPath = ./hosts/compute;
+        };
+       };
     };
 }

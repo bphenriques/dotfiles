@@ -11,7 +11,6 @@ in
     ../../profiles/nixos/desktop
     ../../profiles/nixos/development
     ../../profiles/nixos/gaming
-    ../../profiles/nixos/ai
     # Users
     ./bphenriques
   ];
