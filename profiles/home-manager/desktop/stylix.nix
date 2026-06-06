@@ -53,7 +53,6 @@
 
     targets = {
       font-packages.enable = true;
-      qt.platform = "gnome"; # Stylix does not support adwaita.
     };
   };
 }

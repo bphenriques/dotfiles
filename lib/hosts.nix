@@ -23,7 +23,7 @@ in
         {
           home-manager = {
             sharedModules = attrValues self.homeManagerModules ++ [
-              inputs.nix-index-database.hmModules.nix-index
+              inputs.nix-index-database.homeModules.nix-index
             ] ++ extraHmModules;
             extraSpecialArgs = sharedSpecialArgs;
           };

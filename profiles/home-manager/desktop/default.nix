@@ -45,18 +45,18 @@
     enable = true;
     enableDefaultConfig = false;
     includes = [ "$HOME/.ssh/config.local" ];
-    matchBlocks = {
+    settings = {
       "*" = {
-        extraOptions.SetEnv = "TERM=xterm-256color";  # Sane default across different terminals. Don't need more.
-        addKeysToAgent = "4h";  # Cache the keys temporarily but expire after 4 hours.
+        SetEnv.TERM = "xterm-256color";  # Sane default across different terminals. Don't need more.
+        AddKeysToAgent = "4h";  # Cache the keys temporarily but expire after 4 hours.
       };
       "bruno-home-nas" = {
-        user = "Bruno-Admin";
-        port = 6188;
+        User = "Bruno-Admin";
+        Port = 6188;
       };
-      "pi-zero".user = "pi";
-      "rg353m".user = "ark";
-      "pixel".user = "bruno";
+      "pi-zero".User = "pi";
+      "rg353m".User = "ark";
+      "pixel".User = "bruno";
     };
   };
 

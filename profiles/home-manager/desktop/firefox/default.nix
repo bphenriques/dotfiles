@@ -6,6 +6,7 @@ in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
     enable = true;
+    configPath = ".mozilla/firefox";  # TODO: drop once home.stateVersion >= 26.05 makes the XDG path the default.
     profiles = {
       default = {
         name = "Bruno";
