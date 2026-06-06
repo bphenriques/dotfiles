@@ -10,6 +10,7 @@
     ./tasks
     ../../profiles/nixos
     ../../profiles/nixos/headless
+    ../../profiles/nixos/homelab-smb-client.nix
 
     # Users
     ./bphenriques
@@ -29,23 +30,18 @@
   };
 
   # Homelab integration
-  custom.homelab.paths = {
-    media.root = config.custom.homelab.smb.mounts.media.localMount;
-    users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
-  };
-  custom.homelab.smb = {
-    enable = true;
-    hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
-    credentialsPath = config.sops.templates."homelab-samba-credentials".path;
-    mounts = {
-      bphenriques = { gid = 5000; };
-      media = { gid = 5001; };
-      shared = { gid = 5002; };
-    };
+  custom.homelab.smb.mounts = {
+    bphenriques = { gid = 5000; };
+    media = { gid = 5001; };
+    shared = { gid = 5002; };
   };
   custom.homelab.ingress = {
     allowedInterfaces = [ "bond0" "wg0" ];
-    cloudflareTokenEnvFile = config.sops.templates."traefik-cloudflare".path;
+    acme = {
+      dnsProvider = "cloudflare";
+      email = private.settings.cloudflare.email;
+      credentialsEnvFile = config.sops.templates."traefik-cloudflare".path;
+    };
   };
 
   virtualisation = {
@@ -59,25 +55,15 @@
   };
 
   # Secrets
-  sops.defaultSopsFile = private.sopsSecretsFile;
-  sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   sops = {
-    secrets."homelab/samba/username" = { };
-    secrets."homelab/samba/password" = { };
+    defaultSopsFile = private.sopsSecretsFile;
+    age.keyFile = "/var/lib/sops-nix/system-keys.txt";
     secrets.cloudflare_dns_api_token = { };
-    templates."homelab-samba-credentials" = {
-      owner = "root";
-      group = "root";
-      mode = "0400";
-      content = ''
-        username=${config.sops.placeholder."homelab/samba/username"}
-        password=${config.sops.placeholder."homelab/samba/password"}
-      '';
-    };
     templates."traefik-cloudflare" = {
       owner = "traefik";
       content = ''
         CF_DNS_API_TOKEN=${config.sops.placeholder.cloudflare_dns_api_token}
+        CF_API_EMAIL=${private.settings.cloudflare.email}
       '';
     };
   };

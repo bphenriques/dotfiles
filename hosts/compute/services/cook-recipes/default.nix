@@ -7,7 +7,6 @@ in
   custom.homelab.services.cook-recipes = {
     displayName = "Recipes";
     description = "Recipe Collection";
-    category = "Home";
     subdomain = "recipes";
     port = 9080;
     access.allowedGroups = [ config.custom.homelab.groups.users ];

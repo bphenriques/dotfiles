@@ -102,12 +102,12 @@ in {
         to ensure reliable resolution at boot time (before mDNS/Avahi is ready).
       '';
     };
-    
+
     credentialsPath = mkOption {
       type = types.str;
       description = "Path to the SMB credentials file (must be provided by the host, e.g. via sops-nix)";
     };
-    
+
     mounts = mkOption {
       type = types.attrsOf smbMountCfg;
       default = {};
@@ -151,7 +151,7 @@ in {
     ];
 
     environment.systemPackages = [ pkgs.cifs-utils ];
-    
+
     users.groups = lib.mapAttrs' (_name: mountCfg: lib.nameValuePair mountCfg.group { inherit (mountCfg) gid; } ) cfg.mounts;
 
     fileSystems = lib.mapAttrs' (name: mountCfg:
@@ -165,11 +165,11 @@ in {
           "file_mode=0660"
           "dir_mode=0770"
 
-          # Security: nosuid/nodev/noexec, SMB3 for encryption
+          # Security: nosuid/nodev/noexec; vers=default negotiates the highest SMB2+ dialect (>=2.1, never SMB1)
           "nosuid"
           "nodev"
           "noexec"
-          "vers=3.0"
+          "vers=default"
 
           "credentials=${cfg.credentialsPath}"
 

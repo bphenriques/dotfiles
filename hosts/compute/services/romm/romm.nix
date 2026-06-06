@@ -77,7 +77,6 @@ in
     services.romm = {
       displayName = "RomM";
       description = "ROM Manager";
-      category = "Media";
       port = 8095;
 
       access.allowedGroups = with cfg.groups; [ guests users admin ];

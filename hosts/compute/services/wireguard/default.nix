@@ -97,7 +97,6 @@ in
   config = {
     custom.homelab.services.wireguard = {
       description = "VPN";
-      category = "Administration";
       inherit port;
       ingress.enable = false;
       integrations.monitoring = {

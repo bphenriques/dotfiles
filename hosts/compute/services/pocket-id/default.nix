@@ -11,7 +11,6 @@ in
     services.pocket-id = {
       displayName = "Pocket ID";
       description = "OIDC Provider";
-      category = "Administration";
       subdomain = "auth";
       inherit port;
       healthcheck.path = "/health";

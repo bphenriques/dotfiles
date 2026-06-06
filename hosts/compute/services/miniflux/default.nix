@@ -27,7 +27,6 @@ in
     custom.homelab.services.miniflux = {
       displayName = "Miniflux";
       description = "RSS Server";
-      category = "General";
       port = 8081;
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];
       oidc = {

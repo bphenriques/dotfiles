@@ -20,7 +20,6 @@ in
       services.radicale = {
         displayName = "Radicale";
         description = "CalDAV & CardDAV";
-        category = "General";
         port = 5232;
         subdomain = "radicale";
         access.allowedGroups = [ config.custom.homelab.groups.admin ];

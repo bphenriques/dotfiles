@@ -41,7 +41,6 @@ in
       latitude = 38.736946;
       longitude = -9.142685;
     };
-    ingress.cloudflareEmail = private.settings.cloudflare.email;
     smtp = private.settings.smtp // {
       passwordFile = config.sops.secrets."smtp-password".path;
     };
@@ -50,21 +49,20 @@ in
       synology-dsm = {
         displayName = "Synology";
         description = "NAS";
-        category = "Administration";
         url = "http://${hosts.bruno-home-nas}:5000";
+        integrations.homepage.tab = "Admin";
       };
       inky = {
         displayName = "Inky";
         description = "E-Ink Display";
-        category = "Media";
         url = "http://${hosts.inky}";
-        tab = "Admin";
+        integrations.homepage.tab = "Admin";
       };
       jetkvm = {
         displayName = "JetKVM";
         description = "Remote KVM";
-        category = "Administration";
         url = "http://${hosts.jetkvm}";
+        integrations.homepage.tab = "Admin";
       };
     };
 

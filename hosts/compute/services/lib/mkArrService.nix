@@ -66,7 +66,6 @@ in
       displayName = upperName;
       inherit port;
       description = description;
-      category = "Media";
       access.allowedGroups = [ (forwardAuthGroup config) ];
       forwardAuth.enable = true;
       healthcheck.path = "/ping";

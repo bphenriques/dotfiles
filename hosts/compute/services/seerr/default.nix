@@ -23,7 +23,6 @@ in
     custom.homelab = {
       services.seerr = {
         displayName = "Seerr";
-        category = "Media";
         description = "TV / Movie Finder";
         port = 9099;
         healthcheck.path = "/api/v1/status";

@@ -1,6 +1,5 @@
 { config, pkgs, lib, self, ... }:
 let
-  serviceCfg = config.custom.homelab.services.radicale;
   usernames = builtins.attrNames (lib.filterAttrs (_: u: u.services.radicale.enable) config.custom.homelab.users);
 
   htpasswdFile = "/var/lib/radicale/users";

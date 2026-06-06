@@ -2,9 +2,6 @@
 let
   cfg = config.custom.homelab;
 
-  adminCategories = [ "Monitoring" "Administration" ];
-  defaultTab = category: if lib.elem category adminCategories then "Admin" else "Home";
-
   homepageServices = lib.filter
     (s: s.integrations.homepage.enable)
     (lib.attrValues cfg.services);
@@ -21,18 +18,22 @@ let
       } // service.integrations.homepage.extraConfig;
     };
 
+  homepageExternals = lib.filter
+    (e: e.integrations.homepage.enable)
+    (lib.attrValues cfg.external);
+
   mkExternalEntry = entry:
     {
       "${entry.displayName}" = {
         inherit (entry) description;
         href = entry.url;
-      } // lib.optionalAttrs (entry.icon != null) {
-        inherit (entry) icon;
+      } // lib.optionalAttrs (entry.integrations.homepage.icon != null) {
+        inherit (entry.integrations.homepage) icon;
       };
     };
 
   servicesByTab = builtins.groupBy (s: s.integrations.homepage.tab) homepageServices;
-  externalsByTab = builtins.groupBy (e: e.tab) (lib.attrValues cfg.external);
+  externalsByTab = builtins.groupBy (e: e.integrations.homepage.tab) homepageExternals;
 
   mkTabServices = tab: let
     svcs = servicesByTab.${tab} or [];

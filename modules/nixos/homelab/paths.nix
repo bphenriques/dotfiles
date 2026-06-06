@@ -1,7 +1,7 @@
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
-  
+
   cfg = config.custom.homelab.paths;
 
   userPathsOpt = types.submodule ({ config, ... }: {
@@ -15,18 +15,18 @@ let
         root = mkOption { type = types.str; default = "${config.root}/backups"; };
         phone = mkOption { type = types.str; default = "${config.root}/backups/phone"; };
       };
-      
+
       photos = {
         root = mkOption { type = types.str; default = "${config.root}/photos"; };
         library = mkOption { type = types.str; default = "${config.root}/photos/library"; };
         inbox = mkOption { type = types.str; default = "${config.root}/photos/inbox"; };
       };
-      
+
       documents = {
         root = mkOption { type = types.str; default = "${config.root}/documents"; };
         inbox = mkOption { type = types.str; default = "${config.root}/documents/inbox"; };
       };
-      
+
       notes = mkOption { type = types.str; default = "${config.root}/notes"; };
       private = mkOption { type = types.str; default = "${config.root}/private"; };
       finance = mkOption { type = types.str; default = "${config.root}/finance"; };
@@ -78,11 +78,11 @@ in {
           bios = mkOption { type = types.str; default = "${cfg.media.root}/gaming/emulation/bios"; };
         };
       };
-      
+
       recipes = mkOption { type = types.str; default = "${cfg.media.root}/recipes"; };
       movies = mkOption { type = types.str; default = "${cfg.media.root}/movies"; };
       tv = mkOption { type = types.str; default = "${cfg.media.root}/tv"; };
-      
+
       downloads = {
         root = mkOption { type = types.str; default = "${cfg.media.root}/downloads"; };
         incomplete = mkOption { type = types.str; default = "${cfg.media.root}/downloads/incomplete"; };

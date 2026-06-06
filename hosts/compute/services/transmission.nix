@@ -18,7 +18,6 @@ in
   custom.homelab.services.transmission = {
     displayName = "Transmission";
     description = "Torrent Client";
-    category = "Media";
     port = 9091;
     healthcheck.path = "/transmission/web/";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

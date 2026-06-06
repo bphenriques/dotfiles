@@ -122,30 +122,25 @@ let
     ];
   }];
 
-  # Collect all exporters (shallow merge — duplicates caught by assertion)
-  allExporters = lib.foldl' (acc: x: acc // x) { }
-    (map (s: s.exporters) enabledScopes
-     ++ map (s: s.exporters) serviceMonitoringScopes
-     ++ [ blackboxExporters ]);
+  # Normalize blackbox into a scope so every collector folds over one list.
+  blackboxScope = {
+    exporters = blackboxExporters;
+    scrapeConfigs = blackboxScrapeConfigs;
+    rules = blackboxRules;
+    systemdOverrides = { };
+  };
 
-  allExporterNames = lib.concatMap lib.attrNames
-    (map (s: s.exporters) enabledScopes
-     ++ map (s: s.exporters) serviceMonitoringScopes
-     ++ [ blackboxExporters ]);
+  allScopes = enabledScopes ++ serviceMonitoringScopes ++ [ blackboxScope ];
 
+  # Shallow merge for exporters (duplicates caught by the assertion below).
+  allExporters = lib.foldl' (acc: s: acc // s.exporters) { } allScopes;
+  allExporterNames = lib.concatMap (s: lib.attrNames s.exporters) allScopes;
   dupExporterNames = lib.filter (n: lib.count (m: m == n) allExporterNames > 1)
     (lib.unique allExporterNames);
 
-  allScrapeConfigs = lib.concatMap (s: s.scrapeConfigs) enabledScopes
-    ++ lib.concatMap (s: s.scrapeConfigs) serviceMonitoringScopes
-    ++ blackboxScrapeConfigs;
-
-  allRules = lib.concatMap (s: s.rules) enabledScopes
-    ++ lib.concatMap (s: s.rules) serviceMonitoringScopes
-    ++ blackboxRules;
-
-  allSystemdOverrides = map (s: s.systemdOverrides) enabledScopes
-    ++ map (s: s.systemdOverrides) serviceMonitoringScopes;
+  allScrapeConfigs = lib.concatMap (s: s.scrapeConfigs) allScopes;
+  allRules = lib.concatMap (s: s.rules) allScopes;
+  allSystemdOverrides = map (s: s.systemdOverrides) allScopes;
 
   # Port collision detection (best-effort: exporter↔exporter + exporter↔service; service↔service is in services-registry.nix)
   allPortEntries = let

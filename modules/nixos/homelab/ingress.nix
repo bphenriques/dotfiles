@@ -28,14 +28,21 @@ let
 in
 {
   options.custom.homelab.ingress = {
-    cloudflareEmail = lib.mkOption {
-      type = lib.types.str;
-      description = "Cloudflare account email for DNS challenge and ACME registration";
-    };
+    acme = {
+      email = lib.mkOption {
+        type = lib.types.str;
+        description = "ACME account email for certificate registration";
+      };
 
-    cloudflareTokenEnvFile = lib.mkOption {
-      type = lib.types.str;
-      description = "Path to env file containing CF_DNS_API_TOKEN (must be provided by the host, e.g. via sops-nix)";
+      dnsProvider = lib.mkOption {
+        type = lib.types.str;
+        description = "lego DNS-01 challenge provider name (e.g. 'cloudflare'); see the Traefik/lego provider list";
+      };
+
+      credentialsEnvFile = lib.mkOption {
+        type = lib.types.str;
+        description = "Path to an env file with the DNS provider's credentials (e.g. CF_DNS_API_TOKEN). Provided by the host, e.g. via sops-nix.";
+      };
     };
 
     metricsPort = lib.mkOption {
@@ -89,7 +96,7 @@ in
 
     systemd.services.traefik = {
       serviceConfig = {
-        EnvironmentFile = ingressCfg.cloudflareTokenEnvFile;
+        EnvironmentFile = ingressCfg.acme.credentialsEnvFile;
         Restart = "on-failure";
         RestartSec = "10s";
         RestartMaxDelaySec = "5min";
@@ -97,7 +104,6 @@ in
       };
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
-      environment.CF_API_EMAIL = ingressCfg.cloudflareEmail;
     };
 
     # No rate limiting: all services are behind WireGuard/LAN, keeping config simple.
@@ -140,9 +146,9 @@ in
         };
 
         certificatesResolvers.default.acme = {
-          email = ingressCfg.cloudflareEmail;
+          email = ingressCfg.acme.email;
           storage = "/var/lib/traefik/acme.json";
-          dnsChallenge.provider = "cloudflare";
+          dnsChallenge.provider = ingressCfg.acme.dnsProvider;
         };
       };
 

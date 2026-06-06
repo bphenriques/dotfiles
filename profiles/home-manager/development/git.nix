@@ -27,7 +27,7 @@ in
   };
   programs.git = {
     enable = true;
-    settings = {      
+    settings = {
       user.name = "Bruno Henriques";
       user.email = "4727729+bphenriques" + "@" + "users.noreply.github.com"; # Minor obfuscation to prevent webscrappers
       alias = {

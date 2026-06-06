@@ -64,7 +64,6 @@ in
       services.syncthing = {
         displayName = "Syncthing";
         description = "File Sync";
-        category = "Home";
         port = 8384;
         healthcheck.path = "/rest/noauth/health";
         access.allowedGroups = [ config.custom.homelab.groups.admin ];

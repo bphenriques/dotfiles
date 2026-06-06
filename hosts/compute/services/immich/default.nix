@@ -16,7 +16,6 @@ in
     custom.homelab.services.immich = {
       displayName = "Immich";
       description = "Photo & Video Gallery";
-      category = "Media";
       port = 2283;
       subdomain = "photos";
       access.allowedGroups = with config.custom.homelab.groups; [ admin ];

@@ -11,35 +11,6 @@ let
   # Derive clients from services
   derivedClients = lib.mapAttrs (_: svc: svc.oidc // { inherit (svc.access) allowedGroups; }) oidcServices;
 
-  # Read-only projection type for oidc.clients. Intentionally re-declares fields from schemas/oidc.nix.
-  # This is a typed contract for consumers (e.g. pocket-id provisioning), not a shared schema with defaults.
-  # It also adds allowedGroups which doesn't exist in schemas/oidc.nix.
-  oidcClientView = lib.types.submodule {
-    options = {
-      enable = lib.mkOption { type = lib.types.bool; };
-      name = lib.mkOption { type = lib.types.str; };
-      callbackURLs = lib.mkOption { type = lib.types.listOf lib.types.str; };
-      pkce = lib.mkOption { type = lib.types.bool; };
-      gid = lib.mkOption { type = lib.types.nullOr lib.types.int; };
-      group = lib.mkOption { type = lib.types.str; };
-      credentialsDir = lib.mkOption { type = lib.types.str; };
-      allowedGroups = lib.mkOption { type = lib.types.listOf lib.types.str; };
-      id = {
-        file = lib.mkOption { type = lib.types.str; };
-        placeholder = lib.mkOption { type = lib.types.str; };
-      };
-      secret = {
-        file = lib.mkOption { type = lib.types.str; };
-        placeholder = lib.mkOption { type = lib.types.str; };
-      };
-      systemd = {
-        dependentServices = lib.mkOption { type = lib.types.listOf lib.types.str; };
-        loadCredentials = lib.mkOption { type = lib.types.listOf lib.types.str; };
-        supplementaryGroups = lib.mkOption { type = lib.types.listOf lib.types.str; };
-      };
-    };
-  };
-
   # Users enabled for OIDC
   enabledUsers = lib.filterAttrs (_: u: u.services.oidc.enable) homelabCfg.users;
 
@@ -90,7 +61,9 @@ in
     };
 
     clients = lib.mkOption {
-      type = lib.types.attrsOf oidcClientView;
+      # Raw passthrough: mirrors the already-typed schemas/oidc.nix submodule, so re-declaring
+      # the fields here only risked drift. Read-only; consumers read attrs directly.
+      type = lib.types.attrsOf lib.types.raw;
       default = derivedClients;
       readOnly = true;
       description = "Derived OIDC client configs keyed by service name (read-only)";

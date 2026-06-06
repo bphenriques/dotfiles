@@ -1,8 +1,4 @@
-{ name, config, lib, ... }:
-let
-  adminCategories = [ "Monitoring" "Administration" ];
-  defaultTab = category: if lib.elem category adminCategories then "Admin" else "Home";
-in
+{ name, lib, ... }:
 {
   options.integrations.homepage = lib.mkOption {
     type = lib.types.submodule {
@@ -11,7 +7,7 @@ in
 
         tab = lib.mkOption {
           type = lib.types.enum [ "Home" "Admin" ];
-          default = defaultTab config.category;
+          default = "Home";
           description = "Homepage tab to display this service on";
         };
 

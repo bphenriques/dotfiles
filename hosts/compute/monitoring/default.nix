@@ -11,11 +11,10 @@ in
   custom.homelab.services.prometheus = {
     displayName = "Prometheus";
     description = "Metrics";
-    category = "Monitoring";
     port = 9090;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;
-    integrations.homepage.enable = true;
+    integrations.homepage = { enable = true; tab = "Admin"; };
     integrations.monitoring = {
       scrapeConfigs = [{
         job_name = "prometheus";

@@ -29,7 +29,6 @@ in
       services.jellyfin = {
         displayName = "Jellyfin";
         description = "Media Player";
-        category = "Media";
         port = 8096;
         access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
         oidc = {

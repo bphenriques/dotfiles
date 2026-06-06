@@ -28,7 +28,6 @@ in
       services.kavita = {
         displayName = "Kavita";
         description = "Book Server";
-        category = "Media";
         port = 8097;
         access.allowedGroups = with config.custom.homelab.groups; [ guests users admin ];
         oidc = {

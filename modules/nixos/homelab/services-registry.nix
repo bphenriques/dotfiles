@@ -1,8 +1,6 @@
 { lib, config, ... }:
 let
   cfg = config.custom.homelab;
-  categories = [ "General" "Home" "Media" "Monitoring" "Administration" "Infrastructure" "Productivity" ];
-  categoryType = lib.types.enum categories;
 
   baseServiceModule = { name, config, ... }: {
     options = {
@@ -21,11 +19,6 @@ let
       description = lib.mkOption {
         type = lib.types.str;
         description = "Short description of the service";
-      };
-
-      category = lib.mkOption {
-        type = categoryType;
-        description = "Service category for homepage grouping";
       };
 
       # Routing (backend)
@@ -98,7 +91,7 @@ let
       };
 
       # Ingress
-      ingress.enable = lib.mkEnableOption "Traefik ingress route for this service" // { default = true; };
+      ingress.enable = lib.mkEnableOption "HTTP ingress route for this service" // { default = true; };
 
       # Access control policy (consumed by whichever auth mechanism is active). Empty = any authenticated user.
       access.allowedGroups = lib.mkOption {
@@ -106,9 +99,6 @@ let
         default = [ ];
         description = "Groups authorized to access this service. Empty means unrestricted (any authenticated user).";
       };
-
-      # Ingress-level authentication (Traefik forwardAuth, mutually exclusive with OIDC)
-      forwardAuth.enable = lib.mkEnableOption "ingress-level access control via Traefik forwardAuth";
 
       # Pre-backup hook (consumed by backup.nix)
       backup = {
@@ -124,13 +114,6 @@ let
           description = "Systemd services this backup hook requires and orders after.";
         };
 
-      };
-
-      # Per-service Traefik middlewares (consumed by ingress.nix)
-      traefik.middlewares = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.attrsOf lib.types.unspecified);
-        default = { };
-        description = "Extra Traefik middleware definitions to attach to this service's router";
       };
 
     };
@@ -150,6 +133,7 @@ in
         specialArgs = { homelabCfg = cfg; };
         modules = [
           baseServiceModule
+          ./schemas/ingress.nix
           ./schemas/oidc.nix
           ./schemas/backup.nix
           ./schemas/resource-control.nix
@@ -168,50 +152,39 @@ in
     };
 
     external = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule ({ name, config, ... }: {
-        options = {
-          name = lib.mkOption {
-            type = lib.types.str;
-            default = name;
-            description = "Entry identifier (defaults to attribute name)";
+      type = lib.types.attrsOf (lib.types.submodule [
+        ./schemas/homepage.nix
+        ({ name, ... }: {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              default = name;
+              description = "Entry identifier (defaults to attribute name)";
+            };
+
+            displayName = lib.mkOption {
+              type = lib.types.str;
+              default = name;
+              description = "Human-readable entry name (defaults to attribute name)";
+            };
+
+            description = lib.mkOption {
+              type = lib.types.str;
+              description = "Short description";
+            };
+
+            url = lib.mkOption {
+              type = lib.types.str;
+              description = "Direct URL to the external service";
+            };
           };
 
-          displayName = lib.mkOption {
-            type = lib.types.str;
-            default = name;
-            description = "Human-readable entry name (defaults to attribute name)";
-          };
-
-          description = lib.mkOption {
-            type = lib.types.str;
-            description = "Short description";
-          };
-
-          category = lib.mkOption {
-            type = categoryType;
-            description = "Category for homepage grouping";
-          };
-
-          url = lib.mkOption {
-            type = lib.types.str;
-            description = "Direct URL to the external service";
-          };
-
-          tab = lib.mkOption {
-            type = lib.types.enum [ "Home" "Admin" ];
-            default = if lib.elem config.category [ "Monitoring" "Administration" ] then "Admin" else "Home";
-            description = "Homepage tab to display this entry on";
-          };
-
-          icon = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = "${name}.svg";
-            description = "Icon name from dashboard-icons";
-          };
-        };
-      }));
+          # External entries exist solely to appear on the dashboard.
+          config.integrations.homepage.enable = lib.mkDefault true;
+        })
+      ]);
       default = { };
-      description = "External services not managed by this host (shown on homepage dashboard)";
+      description = "External services not managed by this host (shown on homepage dashboard via integrations.homepage)";
     };
 
   };

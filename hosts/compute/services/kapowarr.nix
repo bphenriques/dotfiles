@@ -10,7 +10,6 @@ in
   custom.homelab.services.kapowarr = {
     displayName = "Kapowarr";
     description = "Comic Book Manager";
-    category = "Media";
     port = 5656;
     access.allowedGroups = with config.custom.homelab.groups; [ users admin ];
     forwardAuth.enable = true;

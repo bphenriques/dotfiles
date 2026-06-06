@@ -11,6 +11,7 @@ in
     ../../profiles/nixos/desktop
     ../../profiles/nixos/development
     ../../profiles/nixos/gaming
+    ../../profiles/nixos/homelab-smb-client.nix
     # Users
     ./bphenriques
   ];
@@ -44,36 +45,16 @@ in
   };
 
   # Homelab integration
-  custom.homelab.paths = {
-    media.root = config.custom.homelab.smb.mounts.media.localMount;
-    users.bphenriques.root = config.custom.homelab.smb.mounts.bphenriques.localMount;
-  };
-  custom.homelab.smb = {
-    enable = true;
-    hostname = config.custom.fleet.lan.hosts.bruno-home-nas;
-    credentialsPath = config.sops.templates."homelab-samba-credentials".path;
-    mounts = {
-      bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
-      media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
-    };
-  };
-  sops = {
-    secrets."homelab/samba/username" = { };
-    secrets."homelab/samba/password" = { };
-    templates."homelab-samba-credentials" = {
-      owner = "root";
-      group = "root";
-      mode = "0400";
-      content = ''
-        username=${config.sops.placeholder."homelab/samba/username"}
-        password=${config.sops.placeholder."homelab/samba/password"}
-      '';
-    };
+  custom.homelab.smb.mounts = {
+    bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
+    media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
   };
 
   # Secrets
-  sops.defaultSopsFile = private.sopsSecretsFile;
-  sops.age.keyFile = "/var/lib/sops-nix/system-keys.txt";
+  sops = {
+    defaultSopsFile = private.sopsSecretsFile;
+    age.keyFile = "/var/lib/sops-nix/system-keys.txt";
+  };
 
   # Users
   users.mutableUsers = false;

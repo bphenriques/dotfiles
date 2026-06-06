@@ -22,7 +22,6 @@ in
   custom.homelab = {
     services.homepage = {
       description = "Dashboard";
-      category = "Infrastructure";
       port = 3001;
     };
 

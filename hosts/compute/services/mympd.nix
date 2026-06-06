@@ -30,7 +30,6 @@ in
   custom.homelab.services.mympd = {
     displayName = "My MPD";
     description = "Remote MPD Client";
-    category = "General";
     port = 8093;
     access.allowedGroups = [ config.custom.homelab.groups.users ];
     forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions

@@ -12,7 +12,6 @@ in
   custom.homelab.services.home-assistant = {
     displayName = "Home Assistant";
     description = "Home Automation";
-    category = "Home";
     port = 8123;
     subdomain = "home";
     access.allowedGroups = [ config.custom.homelab.groups.admin ];

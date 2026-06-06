@@ -37,7 +37,7 @@ in
     dedicatedServer.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
   };
-  
+
   environment.systemPackages = [
     steam-desktop-item
   ];

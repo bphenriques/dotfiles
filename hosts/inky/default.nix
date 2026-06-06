@@ -10,7 +10,7 @@ let
   };
 
   smbOpts = [
-    "vers=3.0" "credentials=/root/.smb-credentials" "uid=0"
+    "vers=default" "credentials=/root/.smb-credentials" "uid=0"
     "nosuid" "nodev" "noexec"
     "_netdev" "x-systemd.automount" "noauto"
     "x-systemd.device-timeout=5s" "x-systemd.mount-timeout=5s"

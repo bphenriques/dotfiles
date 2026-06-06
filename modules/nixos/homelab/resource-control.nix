@@ -2,7 +2,6 @@
 let
   inherit (config.custom) homelab;
   rcCfg = homelab.resourceControl;
-  sliceNames = lib.attrNames rcCfg.slices;
 
   collectUnits = sliceName:
     let

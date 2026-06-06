@@ -7,11 +7,10 @@ in
   custom.homelab.services.alertmanager = {
     displayName = "Alertmanager";
     description = "Alert Routing";
-    category = "Monitoring";
     port = 9093;
     healthcheck.path = "/-/healthy";
     forwardAuth.enable = true;
-    integrations.homepage.enable = true;
+    integrations.homepage = { enable = true; tab = "Admin"; };
     integrations.ntfy = {
       enable = true;
       topic = "admin";

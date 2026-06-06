@@ -32,7 +32,6 @@ in
     custom.homelab.services.filebrowser = {
       displayName = "File Browser";
       description = "File Browser";
-      category = "Home";
       port = 8085;
       subdomain = "files";
       access.allowedGroups = with cfg.groups; [ guests users admin ];
@@ -47,9 +46,8 @@ in
     custom.homelab.external.shared-files = {
       displayName = "Shared Files";
       description = "Shared Files";
-      category = "General";
       url = "https://shared.${cfg.domain}";
-      icon = "filebrowser.svg";
+      integrations.homepage.icon = "filebrowser.svg";
     };
 
     # Guest access: separate subdomain with BasicAuth (no Pocket-ID required).

@@ -11,11 +11,10 @@ in
     services.grafana = {
       displayName = "Grafana";
       description = "Dashboards";
-      category = "Monitoring";
       port = 3010;
       healthcheck.path = "/api/health";
       forwardAuth.enable = true;
-      integrations.homepage.enable = true;
+      integrations.homepage = { enable = true; tab = "Admin"; };
     };
 
     runtimeSecrets.grafana-secret-key = {

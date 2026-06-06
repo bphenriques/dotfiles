@@ -11,7 +11,6 @@ in
 {
   custom.homelab.services.coturn = {
     description = "STUN/TURN Server";
-    category = "Media";
     port = listenPort;
     ingress.enable = false;
     integrations.monitoring.enable = false;

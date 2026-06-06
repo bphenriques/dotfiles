@@ -1,6 +1,5 @@
 { lib, config, pkgs, ... }:
 let
-  cfg = config.custom.homelab.ntfy;
   ntfyCfg = config.custom.homelab.services.ntfy;
 
   defaultTopics = {

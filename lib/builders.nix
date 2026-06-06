@@ -15,7 +15,7 @@
         #shellcheck shell=bash
 
         chosen="$(printf '%s' "${options}" | ${exec})"
-        case ''${chosen} in
+        case "''${chosen}" in
           ${lib.concatMapStringsSep "\n" (entry: ''"${entry.label}") ${entry.exec} ;;'') entries}
         esac
       '';

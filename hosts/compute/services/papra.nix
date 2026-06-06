@@ -24,7 +24,6 @@ in
     services.papra = {
       displayName = "Papra";
       description = "Document Management";
-      category = "Productivity";
       port = 1221;
       access.allowedGroups = [ cfg.groups.admin ];
       oidc = {

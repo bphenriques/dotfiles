@@ -9,7 +9,6 @@ in
     services.prowlarr = {
       displayName = "Prowlarr";
       description = "Manage *rr services";
-      category = "Media";
       port = 9096;
       healthcheck.path = "/ping";
       access.allowedGroups = [ config.custom.homelab.groups.admin ];

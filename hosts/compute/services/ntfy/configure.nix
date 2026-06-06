@@ -1,6 +1,5 @@
 { config, lib, pkgs, self, ... }:
 let
-  serviceCfg = config.custom.homelab.services.ntfy;
   homelabCfg = config.custom.homelab;
   inherit (homelabCfg.ntfy) topics;
 
