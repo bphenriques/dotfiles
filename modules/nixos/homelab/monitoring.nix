@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.custom.homelab;
+  mon = cfg.monitoring;
+  prometheusCfg = cfg.services.prometheus;
+  alertmanagerCfg = cfg.services.alertmanager;
   yaml = pkgs.formats.yaml { };
 
   monitoringScopeModule = _: {
@@ -65,7 +68,7 @@ let
             timeout = "5s";
             http = {
               valid_http_versions = [ "HTTP/1.1" "HTTP/2.0" ];
-              valid_status_codes = [];
+              valid_status_codes = [ ];
               follow_redirects = true;
               preferred_ip_protocol = "ip4";
             };
@@ -169,34 +172,153 @@ let
   ) allPortEntries;
 in
 {
-  options.custom.homelab.monitoring.scopes = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule monitoringScopeModule);
-    default = { };
-    description = "Monitoring scopes: infrastructure, hardware, and other non-service metric sources";
-  };
+  options.custom.homelab.monitoring = {
+    enable = lib.mkEnableOption "Prometheus monitoring (metrics, healthchecks, alert rules)";
 
-  config = lib.mkIf (cfg.enable && config.services.prometheus.enable) {
-    assertions = [
-      {
-        assertion = dupExporterNames == [ ];
-        message = "Duplicate Prometheus exporter names across scopes: ${toString dupExporterNames}";
-      }
-      {
-        assertion = dupPorts == [ ];
-        message = "Monitoring port collisions: ${
-          lib.concatMapStringsSep ", " (e: "${e.name} (${e.listenAddress}:${toString e.port})") dupPorts
-        }";
-      }
-    ];
+    alertmanager.enable = lib.mkEnableOption "Alertmanager alert delivery (routes fired alerts to notify)";
 
-    services.prometheus = {
-      exporters = allExporters;
-      scrapeConfigs = allScrapeConfigs;
-      ruleFiles = lib.optional (allRules != [ ]) (
-        yaml.generate "alerts.yml" { groups = allRules; }
-      );
+    retentionTime = lib.mkOption {
+      type = lib.types.str;
+      default = "365d";
+      description = "Prometheus metrics retention time.";
     };
 
-    systemd.services = lib.foldl' lib.recursiveUpdate { } allSystemdOverrides;
+    retentionSize = lib.mkOption {
+      type = lib.types.str;
+      default = "5GB";
+      description = "Prometheus metrics retention size cap (the effective bound).";
+    };
+
+    scrapeInterval = lib.mkOption {
+      type = lib.types.str;
+      default = "60s";
+      description = "Global Prometheus scrape and evaluation interval.";
+    };
+
+    scopes = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule monitoringScopeModule);
+      default = { };
+      description = "Monitoring scopes: infrastructure, hardware, and other non-service metric sources";
+    };
   };
+
+  config = lib.mkMerge [
+    (lib.mkIf mon.enable {
+      assertions = [
+        {
+          assertion = dupExporterNames == [ ];
+          message = "Duplicate Prometheus exporter names across scopes: ${toString dupExporterNames}";
+        }
+        {
+          assertion = dupPorts == [ ];
+          message = "Monitoring port collisions: ${
+            lib.concatMapStringsSep ", " (e: "${e.name} (${e.listenAddress}:${toString e.port})") dupPorts
+          }";
+        }
+      ];
+
+      custom.homelab.services.prometheus = {
+        displayName = "Prometheus";
+        description = "Metrics";
+        port = 9090;
+        healthcheck.path = "/-/healthy";
+        forwardAuth.enable = true;
+        integrations.homepage = { enable = true; tab = "Admin"; };
+        integrations.monitoring = {
+          scrapeConfigs = [{
+            job_name = "prometheus";
+            scrape_interval = "300s";
+            static_configs = [{ targets = [ "127.0.0.1:${toString prometheusCfg.port}" ]; }];
+          }];
+          rules = [{
+            name = "prometheus";
+            rules = [{
+              alert = "PrometheusTargetDown";
+              expr = "up == 0";
+              "for" = "10m";
+              labels.severity = "warning";
+              annotations.summary = "{{ $labels.job }}/{{ $labels.instance }} down";
+            }];
+          }];
+        };
+      };
+
+      # Writes directly to NVMe; SSD wear is negligible at 60s with a small alert set.
+      services.prometheus = {
+        enable = true;
+        listenAddress = prometheusCfg.host;
+        inherit (prometheusCfg) port;
+        inherit (mon) retentionTime;
+        extraFlags = [ "--storage.tsdb.retention.size=${mon.retentionSize}" "--storage.tsdb.wal-compression" ];
+        globalConfig = { scrape_interval = mon.scrapeInterval; evaluation_interval = mon.scrapeInterval; };
+        exporters = allExporters;
+        scrapeConfigs = allScrapeConfigs;
+        ruleFiles = lib.optional (allRules != [ ]) (
+          yaml.generate "alerts.yml" { groups = allRules; }
+        );
+      };
+
+      systemd.services = lib.foldl' lib.recursiveUpdate { } allSystemdOverrides;
+    })
+
+    (lib.mkIf mon.alertmanager.enable {
+      assertions = [{
+        assertion = mon.enable;
+        message = "custom.homelab.monitoring.alertmanager.enable requires custom.homelab.monitoring.enable";
+      }];
+
+      custom.homelab.services.alertmanager = {
+        displayName = "Alertmanager";
+        description = "Alert Routing";
+        port = 9093;
+        healthcheck.path = "/-/healthy";
+        forwardAuth.enable = true;
+        integrations.homepage = { enable = true; tab = "Admin"; };
+        integrations.notify = {
+          enable = true;
+          topic = lib.mkDefault "homelab-alert";
+        };
+      };
+
+      custom.homelab.notify.topics."homelab-alert".public = lib.mkDefault false;
+
+      services.prometheus = {
+        alertmanagers = [{
+          static_configs = [{ targets = [ "127.0.0.1:${toString alertmanagerCfg.port}" ]; }];
+        }];
+
+        alertmanager = {
+          enable = true;
+          listenAddress = alertmanagerCfg.host;
+          inherit (alertmanagerCfg) port;
+          configuration = {
+            route = {
+              receiver = "notify";
+              group_by = [ "alertname" ];
+              group_wait = "30s";
+              group_interval = "5m";
+              repeat_interval = "4h";
+            };
+            receivers = [{
+              name = "notify";
+              webhook_configs = [{
+                url = "${cfg.notify.url}/${alertmanagerCfg.integrations.notify.topic}?template=alertmanager";
+                send_resolved = true;
+                http_config.authorization = {
+                  type = "Bearer";
+                  credentials_file = "/run/credentials/alertmanager.service/notify-token";
+                };
+              }];
+            }];
+          };
+        };
+      };
+
+      systemd.services.alertmanager = {
+        after = [ "ntfy-configure.service" ];
+        wants = [ "ntfy-configure.service" ];
+        serviceConfig.LoadCredential = [ "notify-token:${alertmanagerCfg.integrations.notify.tokenFile}" ];
+      };
+    })
+  ];
 }

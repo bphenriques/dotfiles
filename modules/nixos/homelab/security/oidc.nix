@@ -120,7 +120,7 @@ in
       clientProvisionUnitPrefix = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Prefix for per-client provisioning unit names (e.g. 'pocket-id-provision-client-' yields 'pocket-id-provision-client-<name>.service')";
+        description = "Prefix for per-client provisioning unit names (provider sets this; e.g. '<provider>-provision-client-' yields '<provider>-provision-client-<name>.service').";
       };
     };
   };

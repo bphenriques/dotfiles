@@ -15,8 +15,8 @@ in
       forwardAuth.enable = true;
       integrations.homepage.enable = true;
       integrations.homepage.tab = "Admin";
-      integrations.ntfy.enable = true;
-      integrations.ntfy.topic = "admin";
+      integrations.notify.enable = true;
+      integrations.notify.topic = "admin";
     };
 
     runtimeSecrets.prowlarr-api-key = {

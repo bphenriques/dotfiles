@@ -3,15 +3,14 @@ let
   serviceCfg = config.custom.homelab.services.transmission;
   pathsCfg = config.custom.homelab.paths;
   homelabMounts = config.custom.homelab.smb.mounts;
-  ntfyCfg = config.custom.homelab.services.ntfy;
-  # Token read via cat: BindReadOnlyPaths ensures access; LoadCredential won't work for Transmission subprocesses.
-  ntfyNotify = { title, tags }: pkgs.writeShellScript "torrent-notify" ''
-    ${pkgs.curl}/bin/curl -s \
-      -H "Authorization: Bearer $(cat ${serviceCfg.integrations.ntfy.tokenFile})" \
-      -H "Title: ${title}" \
-      -H "Tags: ${tags}" \
-      -d "$TR_TORRENT_NAME" \
-      "${ntfyCfg.url}/${serviceCfg.integrations.ntfy.topic}"
+  notifyCfg = config.custom.homelab.notify;
+  serviceNotify = serviceCfg.integrations.notify;
+  # Transmission runs these as subprocesses where LoadCredential isn't visible; the token file is
+  # bind-mounted in (BindReadOnlyPaths below) so send-notification can read NOTIFY_TOKEN_FILE.
+  torrentNotify = { title, tags }: pkgs.writeShellScript "torrent-notify" ''
+    NOTIFY_URL=${notifyCfg.url} NOTIFY_TOKEN_FILE=${serviceNotify.tokenFile} \
+      ${notifyCfg.package}/bin/send-notification \
+      --topic ${serviceNotify.topic} --title "${title}" --tags "${tags}" --message "$TR_TORRENT_NAME"
   '';
 in
 {
@@ -23,8 +22,8 @@ in
     access.allowedGroups = [ config.custom.homelab.groups.admin ];
     forwardAuth.enable = true;
     integrations.homepage.enable = true;
-    integrations.ntfy.enable = true;
-    integrations.ntfy.topic = "download";
+    integrations.notify.enable = true;
+    integrations.notify.topic = "download";
     storage.smb = [ "media" ];
   };
 
@@ -45,9 +44,9 @@ in
       idle_seeding_limit = 1;
       umask = 2;
       script-torrent-added-enabled = true;
-      script-torrent-added-filename = toString (ntfyNotify { title = "Download Started"; tags = "arrow_down"; });
+      script-torrent-added-filename = toString (torrentNotify { title = "Download Started"; tags = "arrow_down"; });
       script-torrent-done-enabled = true;
-      script-torrent-done-filename = toString (ntfyNotify { title = "Download Complete"; tags = "white_check_mark"; });
+      script-torrent-done-filename = toString (torrentNotify { title = "Download Complete"; tags = "white_check_mark"; });
     };
   };
 
@@ -58,6 +57,6 @@ in
     RestartSec = "10s";
     RestartMaxDelaySec = "5min";
     RestartSteps = 5;
-    BindReadOnlyPaths = [ serviceCfg.integrations.ntfy.tokenFile ];
+    BindReadOnlyPaths = [ serviceCfg.integrations.notify.tokenFile ];
   };
 }

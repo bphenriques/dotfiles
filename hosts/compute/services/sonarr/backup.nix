@@ -15,7 +15,5 @@ in
         source ${./backup.sh}
       '';
     };
-
-    runtimeSecrets.sonarr-api-key.restartUnits = [ "homelab-backup-backblaze-sonarr.service" ];
   };
 }

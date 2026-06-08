@@ -1,15 +1,15 @@
 { name, lib, homelabCfg, ... }:
 let
-  tokenDir = "/var/lib/homelab-secrets/ntfy-publishers";
+  tokenDir = "/var/lib/homelab-secrets/notify-publishers";
 in
 {
-  options.integrations.ntfy = lib.mkOption {
+  options.integrations.notify = lib.mkOption {
     type = lib.types.submodule {
       options = {
-        enable = lib.mkEnableOption "ntfy notifications";
+        enable = lib.mkEnableOption "notifications";
 
         topic = lib.mkOption {
-          type = lib.types.enum (lib.attrNames homelabCfg.ntfy.topics);
+          type = lib.types.enum (lib.attrNames homelabCfg.notify.topics);
           description = "Notification topic this service/task publishes to";
         };
 
@@ -22,6 +22,6 @@ in
       };
     };
     default = { };
-    description = "ntfy notification integration";
+    description = "notification integration";
   };
 }

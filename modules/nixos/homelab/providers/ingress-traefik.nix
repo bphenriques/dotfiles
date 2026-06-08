@@ -28,6 +28,8 @@ let
 in
 {
   options.custom.homelab.ingress = {
+    traefik.enable = lib.mkEnableOption "Traefik reverse-proxy ingress implementation";
+
     acme = {
       email = lib.mkOption {
         type = lib.types.str;
@@ -67,7 +69,7 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.ingress.traefik.enable {
     custom.homelab.monitoring.scopes.traefik = {
       scrapeConfigs = [{
         job_name = "traefik";

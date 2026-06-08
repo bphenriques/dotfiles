@@ -38,6 +38,8 @@ let
       wg-manage = pkgs.callPackage ./homelab/wg-manage { };
       rustic-manage = pkgs.callPackage ./homelab/rustic-manage { };
       pocket-id-manage = pkgs.callPackage ./homelab/pocket-id-manage { };
+      send-notification = pkgs.callPackage ./homelab/send-notification { };
+      ntfy-manage = pkgs.callPackage ./homelab/ntfy-manage { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

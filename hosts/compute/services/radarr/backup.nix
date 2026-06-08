@@ -15,7 +15,5 @@ in
         source ${./backup.sh}
       '';
     };
-
-    runtimeSecrets.radarr-api-key.restartUnits = [ "homelab-backup-backblaze-radarr.service" ];
   };
 }

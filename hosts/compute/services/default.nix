@@ -11,7 +11,6 @@ in
     ./kapowarr.nix
     ./kavita
     ./miniflux
-    ./pocket-id
     ./seerr
     ./prowlarr
     ./romm
@@ -19,7 +18,6 @@ in
     ./syncthing.nix
     ./tinyauth.nix
     ./transmission.nix
-    ./ntfy
     ./wireguard
     ./home-assistant.nix
     ./radicale
@@ -33,6 +31,14 @@ in
 
   custom.homelab = {
     enable = true;
+    ingress.traefik.enable = true;
+    oidc.pocket-id.enable = true;
+    notify.ntfy.enable = true;
+    notify.topics = {
+      media.public = true;
+      download.public = false;
+      admin.public = false;
+    };
     inherit (private.settings) domain;
     locale = {
       timezone = config.time.timeZone;

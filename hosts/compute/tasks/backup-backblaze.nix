@@ -3,10 +3,7 @@ let
   inherit (config.custom.homelab) paths;
 in
 {
-  custom.homelab.tasks."backup-backblaze".integrations.ntfy = {
-    enable = true;
-    topic = "backups";
-  };
+  custom.homelab.tasks.backup.integrations.notify.enable = true;
 
   sops = {
     secrets."backup/b2/bucket" = { };
@@ -28,23 +25,32 @@ in
     };
   };
 
-  custom.homelab.backup.backblaze = {
-    enable = true;
+  custom.homelab.backup = {
     package = self.packages.rustic-manage;
-    passwordFile = config.sops.secrets."backup/rustic/password".path;
-    secretsFile = config.sops.templates."homelab-backup-secrets.toml".path;
-    bindings = {
-      "/system/homelab-secrets"               = config.custom.homelab.runtimeSecretsDir;
-      "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;
-      "/nas/bphenriques/notes"                = paths.users.bphenriques.notes;
-      "/nas/bphenriques/private"              = paths.users.bphenriques.private;
-      "/nas/bphenriques/documents"            = paths.users.bphenriques.documents.root;
-      "/nas/bphenriques/photos/library"       = paths.users.bphenriques.photos.library;
-      "/nas/bphenriques/photos/inbox"         = paths.users.bphenriques.photos.inbox;
-      "/nas/media/music/library"              = paths.media.music.library;
-      "/nas/media/music/playlists"            = paths.media.music.playlists;
-      "/nas/media/gaming/emulation/roms"      = paths.media.gaming.emulation.roms;
-      "/nas/media/gaming/emulation/bios"      = paths.media.gaming.emulation.bios;
+    targets.backblaze = {
+      repository = "opendal:b2";
+      backendCredentialsFile = config.sops.templates."homelab-backup-secrets.toml".path;
+      passwordFile = config.sops.secrets."backup/rustic/password".path;
+      retention = {
+        daily = "7 days";
+        weekly = "1 month";
+        monthly = "1 year";
+        yearly = "2 years";
+      };
+      services = [ "gitea" "home-assistant" "miniflux" "radarr" "radicale" "sonarr" ];
+      bindings = {
+        "/system/homelab-secrets"               = config.custom.homelab.runtimeSecretsDir;
+        "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;
+        "/nas/bphenriques/notes"                = paths.users.bphenriques.notes;
+        "/nas/bphenriques/private"              = paths.users.bphenriques.private;
+        "/nas/bphenriques/documents"            = paths.users.bphenriques.documents.root;
+        "/nas/bphenriques/photos/library"       = paths.users.bphenriques.photos.library;
+        "/nas/bphenriques/photos/inbox"         = paths.users.bphenriques.photos.inbox;
+        "/nas/media/music/library"              = paths.media.music.library;
+        "/nas/media/music/playlists"            = paths.media.music.playlists;
+        "/nas/media/gaming/emulation/roms"      = paths.media.gaming.emulation.roms;
+        "/nas/media/gaming/emulation/bios"      = paths.media.gaming.emulation.bios;
+      };
     };
   };
 }

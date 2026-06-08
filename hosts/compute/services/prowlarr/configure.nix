@@ -29,7 +29,7 @@ let
     ];
     notification = {
       serverUrl = ntfyCfg.url;
-      inherit (serviceCfg.integrations.ntfy) topic;
+      inherit (serviceCfg.integrations.notify) topic;
       tags = "mag";
     };
   };
@@ -60,7 +60,7 @@ in
       PROWLARR_CONFIG_FILE = settingsFile;
       RADARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.radarr-api-key.path;
       SONARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets.sonarr-api-key.path;
-      NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;
+      NTFY_TOKEN_FILE = serviceCfg.integrations.notify.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "prowlarr-configure" ./prowlarr-configure.nu}'';

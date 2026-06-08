@@ -45,7 +45,7 @@ let
     defaultQualityProfile = mediaCfg.profiles.default.name;
     notification = {
       serverUrl = ntfyCfg.url;
-      inherit (serviceCfg.integrations.ntfy) topic;
+      inherit (serviceCfg.integrations.notify) topic;
       tags = ntfyTags;
     };
     defaultDelayProfile = {
@@ -77,8 +77,8 @@ in
         key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
         fields = []; # Omit all fields because we already have the calendar view
       };
-      integrations.ntfy.enable = true;
-      integrations.ntfy.topic = "media";
+      integrations.notify.enable = true;
+      integrations.notify.topic = "media";
       storage.smb = [ "media" ];
     };
 
@@ -140,7 +140,7 @@ in
       ARR_API_KEY_FILE = config.custom.homelab.runtimeSecrets."${name}-api-key".path;
       ARR_CONFIG_FILE = settingsFile;
       ARR_CATEGORY_FIELD = categoryField;
-      NTFY_TOKEN_FILE = serviceCfg.integrations.ntfy.tokenFile;
+      NTFY_TOKEN_FILE = serviceCfg.integrations.notify.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "arr-configure" ./arr-configure.nu}'';

@@ -7,7 +7,6 @@
     # Ingress-level authentication (Traefik forwardAuth, mutually exclusive with OIDC)
     forwardAuth.enable = lib.mkEnableOption "ingress-level access control via Traefik forwardAuth";
 
-    # Per-service Traefik middlewares (consumed by the Traefik ingress implementation)
     traefik.middlewares = lib.mkOption {
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.unspecified);
       default = { };

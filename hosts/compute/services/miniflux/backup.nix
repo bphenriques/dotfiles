@@ -15,7 +15,5 @@ in
         source ${./backup.sh}
       '';
     };
-
-    runtimeSecrets.miniflux-admin-password.restartUnits = [ "homelab-backup-backblaze-miniflux.service" ];
   };
 }
