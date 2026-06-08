@@ -36,10 +36,8 @@ let
     };
   };
 
-  # Standalone monitoring scopes (infrastructure, hardware, etc.)
   enabledScopes = lib.filter (s: s.enable) (lib.attrValues cfg.monitoring.scopes);
 
-  # Service-level monitoring scopes (custom exporters per service)
   servicesWithMonitoring = lib.filter
     (s: s.integrations.monitoring.enable)
     (lib.attrValues cfg.services);
@@ -48,14 +46,12 @@ let
     inherit (s.integrations.monitoring) exporters scrapeConfigs rules systemdOverrides;
   }) servicesWithMonitoring;
 
-  # Services with healthcheck probes
   healthcheckedServices = lib.filter
     (s: s.integrations.monitoring.healthcheck)
     servicesWithMonitoring;
 
   hasHealthchecks = healthcheckedServices != [ ];
 
-  # Blackbox exporter scope (auto-generated from healthchecked services)
   blackboxExporters = lib.optionalAttrs hasHealthchecks {
     blackbox = {
       enable = true;

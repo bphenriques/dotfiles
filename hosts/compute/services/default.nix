@@ -16,7 +16,6 @@ in
     ./romm
     ./homepage
     ./syncthing.nix
-    ./tinyauth.nix
     ./transmission.nix
     ./wireguard
     ./home-assistant.nix
@@ -33,6 +32,7 @@ in
     enable = true;
     ingress.traefik.enable = true;
     oidc.pocket-id.enable = true;
+    forwardAuth.tinyauth.enable = true;
     notify.ntfy.enable = true;
     notify.topics = {
       media.public = true;

@@ -1,11 +1,10 @@
 #!/usr/bin/env nu
-# WireGuard client management (IPv4 only).
+# WireGuard client management (IPv4 only). The server generates each client keypair and stores it
+# (0600, root); `show` renders the config QR to scan onto the device in person. No email delivery.
 def require_env [name: string] {
   let val = ($env | get -o $name)
   if ($val == null or ($val | is-empty)) {
-    error make {
-      msg: $"($name) required"
-    }
+    error make { msg: $"($name) required" }
   } else {
     $val
   }
@@ -13,7 +12,6 @@ def require_env [name: string] {
 let data_dir = require_env "WG_DATA_DIR"
 let interface = require_env "WG_INTERFACE"
 let endpoint = require_env "WG_SERVER_ENDPOINT"
-let server_ip = require_env "WG_SERVER_IP"
 let client_subnet = require_env "WG_CLIENT_SUBNET"
 let client_dns = require_env "WG_CLIENT_DNS"
 let homelab_name = require_env "WG_HOMELAB_NAME"
@@ -30,14 +28,10 @@ def get_live_peers [] {
 def validate_iface_name [device: string] {
   let iface_name = $"($homelab_name)-($device)"
   if ($iface_name | str length) > 15 {
-    error make {
-      msg: $"Interface name '($iface_name)' exceeds 15 chars"
-    }
+    error make { msg: $"Interface name '($iface_name)' exceeds 15 chars" }
   }
   if ($iface_name | str replace --all --regex '[a-z0-9-]' '' | is-not-empty) {
-    error make {
-      msg: $"Interface name '($iface_name)' contains invalid characters [allowed: a-z, 0-9, -]"
-    }
+    error make { msg: $"Interface name '($iface_name)' contains invalid characters [allowed: a-z, 0-9, -]" }
   }
 }
 def conf_file [name: string, device: string] {
@@ -47,9 +41,7 @@ def conf_file [name: string, device: string] {
 def get_client [name: string] {
   let dir = $"($clients_dir)/($name)"
   if not ($dir | path exists) {
-    error make {
-      msg: $"Client '($name)' not found"
-    }
+    error make { msg: $"Client '($name)' not found" }
   }
   open $"($dir)/meta.json"
 }
@@ -67,13 +59,9 @@ def next_ip [] {
   let base_ip = ($parts | get 0)
   let cidr = ($parts | get 1 | into int)
   if $cidr != 24 {
-    error make {
-      msg: $"Only /24 subnets supported (got /($cidr))"
-    }
+    error make { msg: $"Only /24 subnets supported (got /($cidr))" }
   }
-  let prefix = (
-    $base_ip | split row "." | slice 0..2 | str join "."
-  )
+  let prefix = ($base_ip | split row "." | slice 0..2 | str join ".")
   let used = (
     list_clients | get -o ip | default [] | each {|ip| $ip | split row "." | get 3 | into int }
   )
@@ -95,33 +83,9 @@ Endpoint = ($endpoint)
 AllowedIPs = ($allowed_ips_full)
 PersistentKeepalive = 25
 " }
-def send_email [name: string, to: string] {
-  let smtp_url_file = require_env "WG_SMTP_URL_FILE"
-  let smtp_url = (open --raw $smtp_url_file | str trim)
-  let from = require_env "WG_SMTP_FROM"
-  let template_file = require_env "WG_EMAIL_TEMPLATE_FILE"
-  let subject = require_env "WG_EMAIL_SUBJECT"
-  let meta = get_client $name
-  let conf = conf_file $name $meta.device
-  let tmpdir = (mktemp --tmpdir -d | str trim)
-  let qr = $"($tmpdir)/wireguard.png"
-  open --raw $conf | qrencode -s 6 -o $qr # double the size to make the QR code bigger
-  # Template is pre-rendered HTML at build time; just substitute the name
-  let body = (open --raw $template_file | str replace --all "{{NAME}}" $name)
-  let mutt_cfg = $"set from=($from); set smtp_url=($smtp_url); set ssl_starttls=yes; set content_type=text/html"
-  echo $body | mutt -s $subject -e $mutt_cfg -a $conf -a $qr -- $to
-  let exit_code = $env.LAST_EXIT_CODE
-  rm -r $tmpdir
-  if $exit_code != 0 {
-    print $"Error sending email to ($to) \(exit code: ($exit_code)\)"
-  } else {
-    print $"Email sent to ($to)"
-  }
-}
 # Not thread-safe: concurrent calls may assign the same IP
 def create_client [
   name: string
-  --email: string
   --ip: string
   --device: string
 ] {
@@ -134,14 +98,7 @@ def create_client [
   let pub_key = ($priv_key | wg pubkey | str trim)
   $priv_key | save -f $"($dir)/private.key"
   chmod 0600 $"($dir)/private.key"
-  mut meta = {
-    name: $name
-    device: $dev
-    ip: $client_ip
-    pub_key: $pub_key
-  }
-  if $email != null { $meta = ($meta | insert email $email) }
-  $meta | save -f $"($dir)/meta.json"
+  { name: $name, device: $dev, ip: $client_ip, pub_key: $pub_key } | save -f $"($dir)/meta.json"
   let conf = conf_file $name $dev
   render_conf $priv_key $client_ip | save -f $conf
   chmod 0600 $conf
@@ -192,31 +149,14 @@ def "main status" [] {
   }
 }
 def "main show" [name: string] { show_qr $name }
-def "main email" [name: string] {
-  let client = get_client $name
-  let email = $client.email? | if ($in == null or ($in | is-empty)) {
-    error make {
-      msg: $"Client '($name)' has no email"
-    }
-  } else { $in }
-  send_email $name $email
-}
-def "main add" [name: string, email?: string, --device: string] {
+def "main add" [name: string, --device: string, --ip: string] {
   let dir = $"($clients_dir)/($name)"
   if ($dir | path exists) {
     print $"Client '($name)' exists"
   } else {
-    if $email != null {
-      create_client $name --email $email --device $device
-    } else {
-      create_client $name --device $device
-    }
+    create_client $name --device $device --ip $ip
   }
-  if $email != null {
-    send_email $name $email
-  } else {
-    show_qr $name
-  }
+  show_qr $name
 }
 def "main remove" [...names: string] {
   for name in $names {
@@ -232,19 +172,15 @@ def "main remove" [...names: string] {
   }
 }
 def "main bootstrap" [config_file: path] {
-  # Create clients from config (skips existing)
   for entry in (open $config_file) {
     let dir = $"($clients_dir)/($entry.name)"
     if ($dir | path exists) {
       print $"Skipping '($entry.name)'"
       continue
     }
-    let email = $entry.email? | if ($in == null or ($in | is-empty)) { null } else { $in }
     let device = $entry.device? | if ($in == null or ($in | is-empty)) { null } else { $in }
-    create_client $entry.name --ip $entry.ip --email $email --device $device
-    if $email != null { send_email $entry.name $email }
+    create_client $entry.name --ip $entry.ip --device $device
   }
-  # Sync peers to WireGuard interface
   let live_peers = get_live_peers
   let clients = list_clients
   let file_pubkeys = ($clients | get -o pub_key | default [])
@@ -256,10 +192,9 @@ def "main bootstrap" [config_file: path] {
 }
 def main [] { print "wg-manage - WireGuard client management
 
-  list                   List clients
-  status                 Show connection status of all clients
-  add <name> [email] [--device]  Add client (restricted access, email/device optional)
-  show <name>            Show QR code for client
-  email <name>           Send config email (client must have email)
-  remove <name>...       Remove one or more clients
-  bootstrap <file>       Bootstrap clients from JSON and sync peers" }
+  list                       List clients
+  status                     Show connection status of all clients
+  add <name> [--device] [--ip]  Add client (server-generated key)
+  show <name>                Show the config QR for a client (scan onto the device)
+  remove <name>...           Remove one or more clients
+  bootstrap <file>           Create clients from JSON and sync peers" }

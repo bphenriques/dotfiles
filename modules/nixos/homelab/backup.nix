@@ -94,7 +94,7 @@ let
       serviceConfig = hardenedServiceConfig // {
         ExecStartPre = lib.getExe (mkAssembleScript name hooks);
         ExecStart = "${rusticManage} backup ${name}";
-        # Runs on failure too; list so it merges with the ntfy failure-notify ExecStopPost.
+        # Runs on failure too; list form merges with the failure-notify ExecStopPost.
         ExecStopPost = [ "${pkgs.findutils}/bin/find ${targetExtras name} -mindepth 1 -maxdepth 1 -exec ${pkgs.coreutils}/bin/rm -rf -- {} +" ];
         TimeoutStartSec = "6h";
         BindReadOnlyPaths = lib.mapAttrsToList (dst: src: "${src}:${targetSrc name}${dst}") t.bindings;

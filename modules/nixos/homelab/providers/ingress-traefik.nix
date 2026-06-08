@@ -58,15 +58,6 @@ in
       default = [];
       description = "Network interfaces to allow HTTP/HTTPS traffic on. If empty, allows on all interfaces (not recommended).";
     };
-
-    forwardAuth = {
-      enable = lib.mkEnableOption "forwardAuth middleware";
-
-      url = lib.mkOption {
-        type = lib.types.str;
-        description = "URL of the forward auth service";
-      };
-    };
   };
 
   config = lib.mkIf cfg.ingress.traefik.enable {
@@ -85,8 +76,8 @@ in
       forwardAuthServices = lib.filter (s: s.forwardAuth.enable && s.ingress.enable) (lib.attrValues cfg.services);
     in [
       {
-        assertion = forwardAuthServices == [ ] || ingressCfg.forwardAuth.enable;
-        message = "Services have forwardAuth enabled but custom.homelab.ingress.forwardAuth.enable is false: ${
+        assertion = forwardAuthServices == [ ] || cfg.forwardAuth.url != "";
+        message = "Services enable forwardAuth but no forward-auth provider is active (custom.homelab.forwardAuth.url is unset): ${
           lib.concatMapStringsSep ", " (s: s.name) forwardAuthServices
         }. Traefik would silently skip auth for these services.";
       }
@@ -157,9 +148,9 @@ in
       dynamicConfigOptions = lib.pipe (lib.attrValues cfg.services) [
         (lib.filter (s: s.ingress.enable))
         (map mkTraefikRoute)
-        (routes: routes ++ lib.optional ingressCfg.forwardAuth.enable {
+        (routes: routes ++ lib.optional (cfg.forwardAuth.url != "") {
           http.middlewares.forwardAuth.forwardAuth = {
-            address = "${ingressCfg.forwardAuth.url}/api/auth/traefik";
+            address = "${cfg.forwardAuth.url}${cfg.forwardAuth.path}";
             trustForwardHeader = true;
             authResponseHeaders = [
               "Remote-User"
