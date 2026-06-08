@@ -35,11 +35,6 @@ let
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
       scrape-roms = pkgs.callPackage ./cli/scrape-roms { };
-      wg-manage = pkgs.callPackage ./homelab/wg-manage { };
-      rustic-manage = pkgs.callPackage ./homelab/rustic-manage { };
-      pocket-id-manage = pkgs.callPackage ./homelab/pocket-id-manage { };
-      send-notification = pkgs.callPackage ./homelab/send-notification { };
-      ntfy-manage = pkgs.callPackage ./homelab/ntfy-manage { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

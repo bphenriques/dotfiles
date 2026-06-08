@@ -2,7 +2,7 @@
 let
   shared = import ../shared.nix;
 
-  # SMB mounts: share name → gid (mirrors modules/nixos/homelab/smb.nix conventions)
+  # SMB mounts: share name → gid (mirrors selfhost-nix storage/smb.nix conventions)
   nasIP = shared.lan.hosts.bruno-home-nas;
 
   mounts = {

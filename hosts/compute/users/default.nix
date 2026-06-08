@@ -1,0 +1,22 @@
+{ lib, config, ... }:
+let
+  smbCfg = config.selfhost.storage.smb;
+in
+{
+  sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
+  users.users.bphenriques = {
+    isNormalUser = true;
+    uid = 1000;
+    hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path;
+    extraGroups = [ "wheel" ]
+      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
+      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
+
+    openssh.authorizedKeys.keys = config.custom.fleet.authorizedSSHKeys;
+  };
+
+  home-manager.users.bphenriques = {
+    imports = [ ../../../profiles/home-manager ];
+    home.stateVersion = "25.11";
+  };
+}

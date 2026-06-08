@@ -12,7 +12,7 @@ lib.mkIf pkgs.stdenv.isLinux {
     services.sync-steam-shortcuts = {
       Unit = {
         Description = "Sync ROM shortcuts to Steam via Steam ROM Manager";
-        RequiresMountsFor = [ osConfig.custom.homelab.paths.media.gaming.emulation.roms ];
+        RequiresMountsFor = [ osConfig.selfhost.paths.media.gaming.emulation.roms ];
       };
       Service = {
         Type = "oneshot";

@@ -1,6 +1,6 @@
 { lib, pkgs, config, osConfig, ... }:
 let
-  emulationPaths = osConfig.custom.homelab.paths.media.gaming.emulation;
+  emulationPaths = osConfig.selfhost.paths.media.gaming.emulation;
   stateDir = "${config.xdg.stateHome}/retroarch";
 
 
@@ -9,7 +9,7 @@ let
   };
 
   shaderPath = "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang";
-  # Shared shader presets — slang format requires video_driver = "vulkan" (or d3d)
+  # Shared shader presets: slang format requires video_driver = "vulkan" (or d3d)
   lcdShader = ''
     shaders = 1
     shader0 = ${shaderPath}/handheld/shaders/lcd3x.slang
@@ -84,7 +84,7 @@ let
         flycast_anistropic_filtering = "2";
         flycast_enable_rtt = "On";
       };
-      overrides = nonIntegerScaleOverrides; # Do NOT enable rewind — causes corruption (https://github.com/flyinghead/flycast/issues/471)
+      overrides = nonIntegerScaleOverrides; # Causes corruption (https://github.com/flyinghead/flycast/issues/471)
       shader = crt3dShader;
     };
     desmume = {

@@ -355,9 +355,31 @@
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs",
         "nur": "nur",
+        "selfhost-nix": "selfhost-nix",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
+        "treefmt-nix": "treefmt-nix_2"
+      }
+    },
+    "selfhost-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "treefmt-nix": "treefmt-nix"
+      },
+      "locked": {
+        "lastModified": 1780959442,
+        "narHash": "sha256-w5MHHSAu+ZP5LYKgjTQChG7PxKDAHSDCVo3FOTtUV3Y=",
+        "ref": "refs/heads/main",
+        "rev": "5861ea85fb89e391fc85704bc28a78738ab38150",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/selfhost-nix"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/selfhost-nix"
       }
     },
     "sops-nix": {
@@ -491,6 +513,27 @@
       }
     },
     "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "selfhost-nix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": "nixpkgs_4"
       },

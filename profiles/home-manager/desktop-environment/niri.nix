@@ -143,7 +143,7 @@ in
         ''
       ];
 
-      # Generic overrides — cross-cutting rules not tied to any app profile
+      # Generic overrides. Cross-cutting rules not tied to any app profile
       overrides = [
         ''
           window-rule {

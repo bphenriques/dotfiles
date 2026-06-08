@@ -4,7 +4,7 @@ set -eu
 WG_ENV="/etc/wireguard/wg-ctl.env"
 ENDPOINT_FILE="/etc/wireguard/endpoint"
 [ -f "$WG_ENV" ] || { echo "Missing $WG_ENV" >&2; exit 1; }
-[ -f "$ENDPOINT_FILE" ] || { echo "Missing $ENDPOINT_FILE — write your public IP/DDNS:port" >&2; exit 1; }
+[ -f "$ENDPOINT_FILE" ] || { echo "Missing $ENDPOINT_FILE. Write your public IP/DDNS:port" >&2; exit 1; }
 . "$WG_ENV"
 
 DIR="/var/lib/wireguard"

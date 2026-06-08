@@ -2,6 +2,7 @@
 
 [![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
+[![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Framework-purple)](https://github.com/bphenriques/selfhost-nix)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
 
 Hi! 👋 This is my personal [NixOS](https://nixos.org/) flake that works _for me_. I hope this helps you!
@@ -18,31 +19,20 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) flake that works _for m
 
 ## Hosts
 
-| Host                       | Platform            | Description                                                                                            |
-| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| [compute](./hosts/compute) | NixOS               | Self-hosted homelab (OIDC SSO, secret provisioning). |
-| [laptop](./hosts/laptop)   | NixOS               | Personal workstation                                                                                   |
-| [inky](./hosts/inky)       | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                         |
+| Host                       | Platform            | Description                                                    |
+| -------------------------- | ------------------- | -------------------------------------------------------------- |
+| [compute](./hosts/compute) | NixOS               | Self-hosted homelab (OIDC SSO, secret provisioning).           |
+| [laptop](./hosts/laptop)   | NixOS               | Personal workstation                                           |
+| [inky](./hosts/inky)       | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers |
 
-The [`compute`](./hosts/compute) host uses a [declarative service framework](./hosts/compute/README.md) where a single registration drives ingress, OIDC, secrets, monitoring, homepage, and backups:
-
-```nix
-custom.homelab.services.miniflux = {
-  metadata = { description = "RSS"; category = "General"; /* ... */ };
-  port = 8081;
-  oidc.enable = true;
-  integrations.homepage.enable = true;
-  healthcheck.path = "/healthcheck";
-  backup.package = /* pre-backup hook script */;
-};
-```
+The [`compute`](./hosts/compute) host runs **[selfhost-nix](https://github.com/bphenriques/selfhost-nix)**, my declarative service framework: a single service registration drives ingress, OIDC, secrets, monitoring, homepage, and backups.
 
 ## Nix Stack
 
 Layout:
 
 - [`hosts/`](./hosts): per-host configurations (hardware, services, users)
-- [`modules/`](./modules): reusable modules that *define* options (e.g., `custom.homelab.*`)
+- [`modules/`](./modules): personal NixOS/home-manager modules (the `selfhost.*` framework lives in [selfhost-nix](https://github.com/bphenriques/selfhost-nix))
 - [`profiles/`](./profiles): shared opinionated configuration that *sets* standard options (imported by hosts)
 - [`packages/`](./packages): custom packages and scripts
 - [`lib/`](./lib): custom helpers and builders

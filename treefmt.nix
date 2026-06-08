@@ -39,7 +39,7 @@
     "packages/*/*/script.sh"
   ];
 
-  # Nushell formatter (not yet in treefmt-nix: https://github.com/numtide/treefmt-nix/issues — no upstream issue exists yet)
+  # Nushell formatter (not yet in treefmt-nix)
   settings.formatter.nufmt =
     let
       config = pkgs.writeText "nufmt.nuon" "{ indent: 2, line_length: 120 }";

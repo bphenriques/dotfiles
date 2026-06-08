@@ -269,7 +269,7 @@ in
       // 2. App-specific rules
       ${lib.concatStringsSep "\n\n" cfg.windowRules.byApp}
 
-      // 3. Window-kind overrides (byType) — override app defaults
+      // 3. Window-kind overrides (byType). Override app defaults
       ${lib.optionalString (cfg.windowRules.byType.popups != []) ''
       window-rule {
         ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.windowRules.byType.popups}

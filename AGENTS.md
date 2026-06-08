@@ -15,6 +15,8 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - Ensure consistency with existing patterns—read neighboring files before writing new code
 - Inline host-specific logic rather than creating non-reusable modules
 - Single-responsibility modules; split into schema + consumers when needed
+- Avoid redundant comments if the code is self-explanatory
+- If there is a need for comment, try to keep them one-line. Should be clear yet brief.
 
 ## Shell Scripts
 

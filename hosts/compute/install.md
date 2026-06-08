@@ -4,13 +4,13 @@
 
 Ensure the following are ready before installation:
 
-| Dependency   | What                                                   | Reference                                                  |
-| ------------ | ------------------------------------------------------ | ---------------------------------------------------------- |
-| SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                   |
-| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                     |
-| SMTP         | Account credentials for transactional email            | —                                                          |
-| Backblaze B2 | Bucket + application key for off-site backups          | —                                                          |
-| ZBT-2 Dongle | Nabu Casa Connect ZBT-2 (Thread/Matter radio)          | Flash OpenThread RCP firmware post-install                 |
+| Dependency   | What                                                   | Reference                                                |
+| ------------ | ------------------------------------------------------ | -------------------------------------------------------- |
+| SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                 |
+| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                   |
+| SMTP         | Account credentials for transactional email            |                                                          |
+| Backblaze B2 | Bucket + application key for off-site backups          |                                                          |
+| ZBT-2 Dongle | Nabu Casa Connect ZBT-2 (Thread/Matter radio)          | Flash OpenThread RCP firmware post-install               |
 | Secrets      | Bootstrap via `dotfiles-secrets init-host` (Bitwarden) | [`apps/nixos-install`](../../apps/nixos-install/README.md) |
 
 ## Installation
@@ -41,13 +41,6 @@ Register admin passkey via browser (accept the invite received via email)
 5. Add Matter integration: accept default websocket URL
 6. Sync Thread credentials in companion app, then commission Matter devices by scanning QR codes
 7. Configure backup scheduler (UI): write backups to `/var/lib/hass/backups/` for off-site pickup
-8. **eufy S350 camera** (local RTSP streaming):
-   1. In eufy Security app (one-time): ensure firmware ≥ 1.3.2.8, then Camera Settings → Storage → NAS/RTSP Stream → enable RTSP
-   2. Note the RTSP URL (typically `rtsp://user:pass@<camera-ip>:554/live0`)
-   3. Add the RTSP URL to the host's SOPS secrets file under key `home-assistant/eufy-s350-rtsp-url`
-   4. Deploy and restart HA — go2rtc picks up the stream automatically (secrets.yaml is rendered by sops-nix)
-   5. Create a dashboard: Settings → Dashboards → Add Dashboard → new from scratch
-   6. Add a **Picture Entity card** → select the camera entity → set camera view to **Live** (WebRTC via go2rtc, ~0.5s latency)
 
 ### Kapowarr
 

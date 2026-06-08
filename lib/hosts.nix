@@ -16,6 +16,7 @@ in
       inherit system;
       specialArgs = sharedSpecialArgs;
       modules = attrValues self.nixosModules ++ [
+        inputs.selfhost-nix.nixosModules.default
         inputs.sops-nix.nixosModules.sops
         inputs.disko.nixosModules.disko
         inputs.home-manager.nixosModules.home-manager

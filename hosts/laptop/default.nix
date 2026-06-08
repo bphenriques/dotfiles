@@ -11,7 +11,7 @@ in
     ../../profiles/nixos/desktop
     ../../profiles/nixos/development
     ../../profiles/nixos/gaming
-    ../../profiles/nixos/homelab-smb-client.nix
+    ../../profiles/nixos/selfhost-smb-client.nix
     # Users
     ./bphenriques
   ];
@@ -45,7 +45,7 @@ in
   };
 
   # Homelab integration
-  custom.homelab.smb.mounts = {
+  selfhost.storage.smb.mounts = {
     bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
     media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
   };

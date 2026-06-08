@@ -22,6 +22,10 @@
     dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private";
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Personal modules version controlled separately
+    selfhost-nix.url = "git+ssh://git@github.com/bphenriques/selfhost-nix";
+    selfhost-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     # Community flakes
     stylix.url = "github:danth/stylix";           # Consistent coloring across my system. I can still tweak manually.
     nur.url = "github:nix-community/nur";         # Collection of packages. Use it for Firefox extensions

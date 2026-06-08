@@ -112,7 +112,7 @@ setup_users() {
 setup_inkypi() {
   info "Setting up InkyPi..."
 
-  # Pinned versions — update SHAs after testing new releases.
+  # Pinned versions. Update SHAs after testing new releases.
   local inkypi_sha="73c21a1ba5b565cace7d65aa8f788712067644ab"
   local immich_sha="af6b48e98fd0b5a842ce20b8e6cd61af41908749"
   local hardwarebuttons_sha="e208ed63b767278262c8dcd957ec890a22001046"
@@ -147,7 +147,7 @@ setup_inkypi() {
   if grep -qF 'self._spi_bus.xfer3(data)' "$inky_e673"; then
     sed -i 's/            self._spi_bus.xfer3(data)/            for _i in range(((len(data) - 1) \/\/ _SPI_CHUNK_SIZE) + 1):\n                _off = _i * _SPI_CHUNK_SIZE\n                self._spi_bus.xfer(data[_off:_off + _SPI_CHUNK_SIZE])/' "$inky_e673"
   elif ! grep -qF '_SPI_CHUNK_SIZE' "$inky_e673"; then
-    fatal "inky SPI chunk patch: expected pattern not found — upstream may have changed"
+    fatal "inky SPI chunk patch: expected pattern not found. upstream may have changed"
   fi
 
   # Image saturation: 0 gives vivid colors (default 0.5 is washed out). Ref: https://github.com/fatihak/InkyPi/issues/502

@@ -2,7 +2,7 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
-  nasPaths = osConfig.custom.homelab.paths;
+  nasPaths = osConfig.selfhost.paths;
   mounts = {
     nasPrivate = nasPaths.users.bphenriques.root;
     nasMedia = nasPaths.media.root;
@@ -18,7 +18,7 @@ in
     ./kanshi.nix
   ];
 
-  # NAS symlinks — avoid mounting directly to $HOME to prevent slowdowns when offline
+  # NAS symlinks. Avoid mounting directly to $HOME to prevent slowdowns when offline
   systemd.user.tmpfiles.rules = [
     "L ${config.xdg.userDirs.pictures}/nas  - - - - ${mounts.nasPrivate}/photos"
     "L ${config.xdg.userDirs.music}/nas     - - - - ${mounts.nasMedia}/music"

@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  smbCfg = config.custom.homelab.smb;
+  smbCfg = config.selfhost.storage.smb;
 in
 {
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
