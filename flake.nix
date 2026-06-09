@@ -72,14 +72,12 @@
       nixosConfigurations = {
         laptop = mkNixosHost {
           hostName = "laptop";
-          system = "x86_64-linux";
           configPath = ./hosts/laptop;
           extraOverlays = [ inputs.nur.overlays.default ];
           extraHmModules = [ inputs.stylix.homeModules.stylix ];
         };
         compute = mkNixosHost {
           hostName = "compute";
-          system = "x86_64-linux";
           configPath = ./hosts/compute;
         };
        };

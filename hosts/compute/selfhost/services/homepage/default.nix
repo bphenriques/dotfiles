@@ -4,7 +4,7 @@ let
   serviceCfg = cfg.services.homepage;
   sonarrCfg = cfg.services.sonarr;
   radarrCfg = cfg.services.radarr;
-  homepageCfg = cfg.homepage;
+  homepageCfg = cfg.dashboards;
 
   # Custom package with wallpaper/favicon
   wallpaper = self.packages.wallpapers.files.sky-sunset;

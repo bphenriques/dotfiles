@@ -1,11 +1,11 @@
-# bphenriques's fleet (Homelab & Laptops & Misc)
+# bphenriques's fleet
 
+[![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Framework-purple)](https://github.com/bphenriques/selfhost-nix)
 [![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
-[![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Framework-purple)](https://github.com/bphenriques/selfhost-nix)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
 
-Hi! 👋 This is my personal [NixOS](https://nixos.org/) flake that works _for me_. I hope this helps you!
+Hi! 👋 This is how I am managing my personal machines using [NixOS](https://nixos.org/). I hope this helps you!
 
 <p float="center">
   <img src="hosts/compute/screenshots/homepage.png" width="49%" />
@@ -19,13 +19,11 @@ Hi! 👋 This is my personal [NixOS](https://nixos.org/) flake that works _for m
 
 ## Hosts
 
-| Host                       | Platform            | Description                                                    |
-| -------------------------- | ------------------- | -------------------------------------------------------------- |
-| [compute](./hosts/compute) | NixOS               | Self-hosted homelab (OIDC SSO, secret provisioning).           |
-| [laptop](./hosts/laptop)   | NixOS               | Personal workstation                                           |
-| [inky](./hosts/inky)       | Raspberry Pi Imager | Raspberry Pi Zero 2W connected to Inky Impression and speakers |
-
-The [`compute`](./hosts/compute) host runs **[selfhost-nix](https://github.com/bphenriques/selfhost-nix)**, my declarative service framework: a single service registration drives ingress, OIDC, secrets, monitoring, homepage, and backups.
+| Host                       | Platform     | Description                                                                                                                    |
+|----------------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------|
+| [compute](./hosts/compute) | NixOS        | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake (Traefik + OIDC SSO + Automated Secrets). |
+| [laptop](./hosts/laptop)   | NixOS        | Personal workstation                                                                                                           |
+| [inky](./hosts/inky)       | Raspberry Pi | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                                                 |
 
 ## Nix Stack
 
@@ -44,15 +42,10 @@ Key dependencies:
 - [`stylix`](https://github.com/danth/stylix) for consistent theming
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
+- [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) that abstracts most concerns about basic self-hosting
+- `dotfiles-private` that is a private repository containing private information
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
-
-## Sensitive Configuration
-
-I use a companion private `dotfiles-private` repository as a flake input for private configuration mapped to `self.private` because:
-
-- I do not want to expose private information such as public domain, user definitions, and SMTP settings.
-- I do not want to overexpose the sops encrypted file nor the `.sops.yaml`.
 
 <details>
 <summary>Structure of <code>dotfiles-private</code></summary>
@@ -100,7 +93,7 @@ dot compute c        # show changelog for the compute host
 
 ## AI Disclaimer
 
-AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster, not to replace understanding. I drive the architecture, review and own every line.
+AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster. I drive the architecture, review and own every line.
 
 ## Acknowledgements
 

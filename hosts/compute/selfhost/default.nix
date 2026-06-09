@@ -153,7 +153,9 @@
     };
   };
 
-  sops.secrets."smtp-password" = { };
+  # Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so own the secret by its
+  # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
+  sops.secrets."smtp-password".owner = config.services.pocket-id.user;
   sops.secrets."jellyfin/home/password" = { };
   sops.secrets."guest/password" = { };
 }

@@ -3,7 +3,7 @@ let
   inherit (nixpkgs.lib.attrsets) attrValues;
 in
 {
-  mkNixosHost = { hostName, system, configPath, extraOverlays ? [], extraHmModules ? [] }:
+  mkNixosHost = { hostName, system ? "x86_64-linux", configPath, extraOverlays ? [], extraHmModules ? [] }:
     let
       sharedSpecialArgs = {
         private = inputs.dotfiles-private.hosts.${hostName};
