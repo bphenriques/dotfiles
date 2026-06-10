@@ -1,11 +1,11 @@
 # bphenriques's fleet
 
+[![Nix Flakes](https://img.shields.io/badge/Nix-flakes-5277C3?logo=nixos&logoColor=white)](https://nixos.org/)
 [![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Flake-purple)](https://github.com/bphenriques/selfhost-nix)
-[![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
-[![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](./LICENSE.md)
 
-Hi! 👋 This is how I am managing my personal machines using [NixOS](https://nixos.org/). I hope this helps you!
+Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), including a self-hosted homelab running many services with SSO, a reverse proxy, monitoring, and automated off-site encrypted backups (see [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) and [`compute`'s architecture](./hosts/compute/README.md#architecture)). I hope this helps you!
 
 <p float="center">
   <img src="hosts/compute/screenshots/homepage.png" width="49%" />
@@ -46,6 +46,9 @@ Key dependencies:
 - `dotfiles-private` to store private information (SOPS secrets, personal information, and wallpapers)
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
+
+> [!NOTE]
+> This won't build as-is as it depends on `dotfiles-private`. Let me know if you need help!
 
 ## `dot` cli
 

@@ -46,7 +46,8 @@ nix_build() {
   fi
 }
 
-get_host_ip() { jq -re --arg h "$1" '.[$h] // empty' "$FLEET_HOST_IPS" || fatal "Could not find IP for host '$1'."; }
+# Prints the host's IP, or exits non-zero (callers handle the failure so `exit` runs outside any subshell).
+get_host_ip() { jq -re --arg h "$1" '.[$h] // empty' "$FLEET_HOST_IPS"; }
 
 _show_changelog() {
   [[ -e /run/current-system && -e ./result ]] || return 0
@@ -95,7 +96,7 @@ _darwin_update() {
 _nixos_deploy() {
   local host="$1"
   local target_ip
-  target_ip=$(get_host_ip "$host")
+  target_ip=$(get_host_ip "$host") || fatal "Could not find IP for host '$host'."
 
   info "Deploying '$host' to root@${target_ip}..."
   case "${2:-}" in
@@ -177,7 +178,8 @@ case "${1:-}" in
       have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
       _nvd_diff_generations "${1:-2}"
     else
-      _nvd_diff_generations "${1:-2}" ssh "root@$(get_host_ip "$target")"
+      target_ip=$(get_host_ip "$target") || fatal "Could not find IP for host '$target'."
+      _nvd_diff_generations "${1:-2}" ssh "root@$target_ip"
     fi
     ;;
   update | u)
