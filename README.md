@@ -1,6 +1,6 @@
 # bphenriques's fleet
 
-[![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Framework-purple)](https://github.com/bphenriques/selfhost-nix)
+[![selfhost-nix](https://img.shields.io/badge/selfhost--nix-Flake-purple)](https://github.com/bphenriques/selfhost-nix)
 [![Modules](https://img.shields.io/badge/Modules-Flake-purple)](./modules)
 [![Packages](https://img.shields.io/badge/Packages-Flake-purple)](./packages)
 [![NixOS Install](https://img.shields.io/badge/NixOS_Install-docs-blue)](./apps/nixos-install/README.md)
@@ -19,11 +19,11 @@ Hi! 👋 This is how I am managing my personal machines using [NixOS](https://ni
 
 ## Hosts
 
-| Host                       | Platform     | Description                                                                                                                    |
-|----------------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------|
-| [compute](./hosts/compute) | NixOS        | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake (Traefik + OIDC SSO + Automated Secrets). |
-| [laptop](./hosts/laptop)   | NixOS        | Personal workstation                                                                                                           |
-| [inky](./hosts/inky)       | Raspberry Pi | Raspberry Pi Zero 2W connected to Inky Impression and speakers                                                                 |
+| Host                       | Platform     | Description                                                                          |
+|----------------------------|--------------|--------------------------------------------------------------------------------------|
+| [compute](./hosts/compute) | NixOS        | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake |
+| [laptop](./hosts/laptop)   | NixOS        | Personal workstation                                                                 |
+| [inky](./hosts/inky)       | Raspberry Pi | Raspberry Pi Zero 2W connected to Inky Impression and speakers                       |
 
 ## Nix Stack
 
@@ -42,45 +42,14 @@ Key dependencies:
 - [`stylix`](https://github.com/danth/stylix) for consistent theming
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
-- [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) that abstracts most concerns about basic self-hosting
-- `dotfiles-private` that is a private repository containing private information
+- [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) that abstracts common concerns around self-hosting (Reverse Proxy, OIDC, and Secrets)
+- `dotfiles-private` to store private information (SOPS secrets, personal information, and wallpapers)
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
-<details>
-<summary>Structure of <code>dotfiles-private</code></summary>
+## `dot` cli
 
-```
-.
-├── flake.lock
-├── flake.nix
-├── hosts
-│   ├── compute
-│   │   ├── default.nix
-│   │   ├── secrets.yaml    <- Encrypted
-│   │   ├── settings.nix
-│   │   └── users
-│   │       ├── bphenriques.nix
-│   │       └── johndoe.nix
-│   └── laptop
-│       ├── default.nix
-│       └── secrets.yaml    <- Encrypted
-├── packages
-│   └── wallpapers
-│       ├── default.nix
-│       └── src
-│           ├── beach-night-sky.jpg
-│           ├── ...
-│           └── watch-tower.png
-├── README.md
-└── shell.nix               <- With sops package inside
-```
-
-</details>
-
-## Workflow
-
-A [`dot`](./packages/dotfiles/dotfiles) CLI wraps the native rebuild tools:
+Using a personal wrapper to manage both local and remote machines called [`dot`](./packages/dotfiles/dotfiles):
 
 ```bash
 dot . s              # build, preview changes, and apply to the current host
