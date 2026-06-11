@@ -4,9 +4,8 @@ let
   serviceCfg = cfg.services.homepage;
   sonarrCfg = cfg.services.sonarr;
   radarrCfg = cfg.services.radarr;
-  homepageCfg = cfg.dashboards;
 
-  # Custom package with wallpaper/favicon
+  # Custom package with wallpaper/favicon, set on the upstream module below.
   wallpaper = self.packages.wallpapers.files.sky-sunset;
   favicon = ./compass.svg;
   customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
@@ -18,30 +17,31 @@ let
   });
 in
 {
-  # Unauthenticated: aggregates links and health status.
-  selfhost = {
-    services.homepage = {
-      description = "Dashboard";
-      port = 3001;
-    };
+  # Data tier: bundle off, we own homepage-dashboard and feed it cfg.dashboards.generatedTiles.
+  selfhost.services.homepage = {
+    description = "Dashboard";
+    port = 3001;
+    integrations.homepage.enable = false; # The dashboard doesn't list itself.
+  };
 
-    runtimeTemplates."homepage.env" = {
-      content = lib.concatStringsSep "\n" [
-        "HOMEPAGE_VAR_SONARR_API_KEY=${cfg.runtimePlaceholder.sonarr-api-key}"
-        "HOMEPAGE_VAR_RADARR_API_KEY=${cfg.runtimePlaceholder.radarr-api-key}"
-      ];
-      restartUnits = [ "homepage-dashboard.service" ];
-    };
+  selfhost.runtimeTemplates."homepage.env" = {
+    content = lib.concatStringsSep "\n" [
+      "HOMEPAGE_VAR_SONARR_API_KEY=${cfg.runtimePlaceholder.sonarr-api-key}"
+      "HOMEPAGE_VAR_RADARR_API_KEY=${cfg.runtimePlaceholder.radarr-api-key}"
+    ];
+    restartUnits = [ "homepage-dashboard.service" ];
   };
 
   services.homepage-dashboard = {
     enable = true;
-    package = customPackage;
     listenPort = serviceCfg.port;
     allowedHosts = serviceCfg.publicHost;
-    bookmarks = [ ]; # No use yet, but considering.
+    package = customPackage;
+    bookmarks = [ ];
+
+    # Registry tiles + our custom calendar group; order/tabs come from settings.layout below.
     services =
-      lib.optional (homepageCfg.generatedHomeServices != []) { "Services" = homepageCfg.generatedHomeServices; }
+      lib.mapAttrsToList (group: tiles: { ${group} = tiles; }) cfg.dashboards.generatedTiles
       ++ [{
         "Movie/TV Agenda" = [{
           "" = {
@@ -51,7 +51,7 @@ in
               maxEvents = 10;
               showTime = true;
               previousDays = 3;
-              inherit (cfg.locale) timezone;
+              inherit (config.custom.locale) timezone;
               integrations = [
                 { type = "sonarr"; service_group = "Services"; service_name = sonarrCfg.displayName; }
                 { type = "radarr"; service_group = "Services"; service_name = radarrCfg.displayName; }
@@ -59,8 +59,7 @@ in
             };
           };
         }];
-      }]
-      ++ lib.optional (homepageCfg.generatedAdminServices != []) { "Admin" = homepageCfg.generatedAdminServices; };
+      }];
 
     settings = {
       title = "Home";
@@ -102,9 +101,9 @@ in
       {
         openmeteo = { # City location
           label = "Lisbon";
-          inherit (cfg.locale) latitude;
-          inherit (cfg.locale) longitude;
-          inherit (cfg.locale) timezone;
+          inherit (config.custom.locale) latitude;
+          inherit (config.custom.locale) longitude;
+          inherit (config.custom.locale) timezone;
           units = "metric";
           cache = 300;
         };

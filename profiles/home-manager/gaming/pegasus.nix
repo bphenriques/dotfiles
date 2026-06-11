@@ -43,7 +43,7 @@ let
     then "${lib.getExe retroarchWithCore} ${sys.core} \"{file.path}\""
     else sys.launch;
   configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
-    romsDir = osConfig.selfhost.paths.media.gaming.emulation.roms;
+    romsDir = osConfig.custom.paths.media.gaming.emulation.roms;
 
     # Maps Skyscraper folder to Pegasus asset
     artworkMapping = [

@@ -4,7 +4,7 @@ let
   radarrCfg = config.selfhost.services.radarr;
   sonarrCfg = config.selfhost.services.sonarr;
   jellyfinCfg = config.selfhost.services.jellyfin;
-  mediaCfg = config.selfhost.media;
+  mediaCfg = config.custom.media;
   seerrUsers = lib.filterAttrs (_: u: u.services.seerr.enable) config.selfhost.users;
 
   initConfig = {
@@ -21,7 +21,7 @@ let
       inherit (radarrCfg) port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.selfhost.paths.media.movies;
+      activeDirectory = config.custom.paths.media.movies;
       activeProfileName = mediaCfg.radarr.profiles.default.name;
       is4k = false;
       minimumAvailability = "released";
@@ -34,7 +34,7 @@ let
       inherit (sonarrCfg) port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.selfhost.paths.media.tv;
+      activeDirectory = config.custom.paths.media.tv;
       activeProfileName = mediaCfg.sonarr.profiles.default.name;
       is4k = false;
       isDefault = true;

@@ -24,8 +24,7 @@ in
         subdomain = "radicale";
         access.allowedGroups = [ config.selfhost.groups.admin ];
         forwardAuth.enable = true;
-        integrations.homepage.enable = true;
-        integrations.homepage.tab = "Admin";
+        integrations.homepage.group = "Admin";
         healthcheck.path = "/.web/";
         healthcheck.probeModule = "http_any"; # Radicale requires htpasswd auth on all endpoints; 401 confirms service is up
 

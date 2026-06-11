@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
   serviceCfg = config.selfhost.services.jellyfin;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
 in
 {
@@ -37,7 +37,6 @@ in
           systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
         };
         healthcheck.path = "/health";
-        integrations.homepage.enable = true;
         storage.smb = [ "media" ];
         resourceControl = {
           slice = "throttled";

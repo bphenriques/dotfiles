@@ -2,7 +2,7 @@
 let
   inherit (lib) mkOption types;
 
-  cfg = config.selfhost.paths;
+  cfg = config.custom.paths;
 
   userPathsOpt = types.submodule ({ config, ... }: {
     options = {
@@ -33,7 +33,7 @@ let
     };
   });
 in {
-  options.selfhost.paths = {
+  options.custom.paths = {
     users = mkOption {
       type = types.attrsOf userPathsOpt;
       default = { };

@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, ... }:
 let
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
   serviceCfg = config.selfhost.services.immich;
 

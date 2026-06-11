@@ -30,7 +30,6 @@ in
       };
 
       healthcheck.path = "/api/server/ping";
-      integrations.homepage.enable = true;
       resourceControl = {
         slice = "throttled";
         systemdServices = [ "immich-server" "immich-machine-learning" ];

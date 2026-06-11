@@ -17,8 +17,7 @@ in
     access.allowedGroups = [ config.selfhost.groups.admin ];
     forwardAuth.enable = false; # Home-Assistant mobile apps breaks. Relying on built-in authentication.
     healthcheck.path = "/manifest.json";
-    integrations.homepage.enable = true;
-    integrations.homepage.tab = "Home";
+    integrations.homepage.group = "Services";
     backup = {
       package = pkgs.writeShellApplication {
         name = "backup-home-assistant";
@@ -48,9 +47,9 @@ in
       homeassistant = {
         name = "Home";
         unit_system = "metric";
-        time_zone = cfg.locale.timezone;
-        inherit (cfg.locale) latitude;
-        inherit (cfg.locale) longitude;
+        time_zone = config.custom.locale.timezone;
+        inherit (config.custom.locale) latitude;
+        inherit (config.custom.locale) longitude;
         external_url = serviceCfg.publicUrl;
         internal_url = serviceCfg.url;
       };
@@ -93,7 +92,7 @@ in
       OT_REST_LISTEN_ADDR = "127.0.0.1";
       OT_REST_LISTEN_PORT = "8091";
       OT_LOG_LEVEL = "5";
-      TZ = cfg.locale.timezone;
+      TZ = config.custom.locale.timezone;
     };
 
     volumes = [ "${otbrDataDir}:/data" ];

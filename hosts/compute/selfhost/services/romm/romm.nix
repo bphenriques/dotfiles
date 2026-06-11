@@ -87,7 +87,6 @@ in
         systemd.dependentServices = [ "podman-romm" ];
       };
       healthcheck.path = "/api/heartbeat";
-      integrations.homepage.enable = true;
       storage.smb = [ "media" ];
     };
 
@@ -216,8 +215,8 @@ in
 
       # Data
       "${configFile}:/romm/config/config.yml:ro"
-      "${config.selfhost.paths.media.gaming.emulation.roms}:/romm/library/roms:ro"
-      "${config.selfhost.paths.media.gaming.emulation.bios}:/romm/library/bios:ro"
+      "${config.custom.paths.media.gaming.emulation.roms}:/romm/library/roms:ro"
+      "${config.custom.paths.media.gaming.emulation.bios}:/romm/library/bios:ro"
     ];
 
     user = "${toString rommUser.uid}:${toString rommUser.gid}";

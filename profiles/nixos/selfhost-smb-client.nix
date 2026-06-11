@@ -12,7 +12,7 @@ in
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
   };
 
-  selfhost.paths = lib.mkMerge [
+  custom.paths = lib.mkMerge [
     (lib.mkIf (hasMount "media") { media.root = cfg.mounts.media.localMount; })
     (lib.mkIf (hasMount "bphenriques") { users.bphenriques.root = cfg.mounts.bphenriques.localMount; })
   ];

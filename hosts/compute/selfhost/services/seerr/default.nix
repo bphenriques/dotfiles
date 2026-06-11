@@ -26,7 +26,6 @@ in
         description = "TV / Movie Finder";
         port = 9099;
         healthcheck.path = "/api/v1/status";
-        integrations.homepage.enable = true;
       };
 
       # Upstream uses DynamicUser; EnvironmentFile loads as root before user drop.

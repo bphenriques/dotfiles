@@ -9,6 +9,13 @@
   ];
 
   custom.fleet = import ../../shared.nix;
+  custom.locale = {
+    timezone = config.time.timeZone;
+    language = "pt-PT";
+    currency = "EUR";
+    latitude = 38.736946;
+    longitude = -9.142685;
+  };
 
   selfhost = {
     enable = true;
@@ -24,14 +31,6 @@
     };
 
     inherit (private.settings) domain;
-
-    locale = {
-      timezone = config.time.timeZone;
-      language = "pt-PT";
-      currency = "EUR";
-      latitude = 38.736946;
-      longitude = -9.142685;
-    };
 
     mail = private.settings.smtp // {
       passwordFile = config.sops.secrets."smtp-password".path;

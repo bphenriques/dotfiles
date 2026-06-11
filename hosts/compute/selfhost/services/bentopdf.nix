@@ -9,7 +9,6 @@ in
     port = 8092;
     access.allowedGroups = [ config.selfhost.groups.users ];
     forwardAuth.enable = true;
-    integrations.homepage.enable = true;
   };
 
   # Upstream NixOS module only serves static files via nginx/caddy.

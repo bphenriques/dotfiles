@@ -19,8 +19,8 @@ let
   };
 
   recyclarrConfig = {
-    radarr.movies = mkServiceConfig config.selfhost.media.radarr radarrCfg;
-    sonarr.tv = mkServiceConfig config.selfhost.media.sonarr sonarrCfg;
+    radarr.movies = mkServiceConfig config.custom.media.radarr radarrCfg;
+    sonarr.tv = mkServiceConfig config.custom.media.sonarr sonarrCfg;
   };
 
   yamlFormat = pkgs.formats.yaml { };

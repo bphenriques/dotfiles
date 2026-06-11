@@ -4,7 +4,7 @@ _: {
       name = "sonarr";
       port = 9097;
       description = "TV Tracker";
-      rootPath = config: config.selfhost.paths.media.tv;
+      rootPath = config: config.custom.paths.media.tv;
       categoryField = "tvCategory";
       forwardAuthGroup = config: config.selfhost.groups.admin;
     })
@@ -13,7 +13,7 @@ _: {
 
   # Recyclarr v8 configuration using guide-backed quality profiles
   # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
-  selfhost.media.sonarr = {
+  custom.media.sonarr = {
     qualityDefinitionType = "series";
     profiles = {
       default = {

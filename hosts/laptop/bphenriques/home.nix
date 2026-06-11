@@ -2,7 +2,7 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
-  nasPaths = osConfig.selfhost.paths;
+  nasPaths = osConfig.custom.paths;
   mounts = {
     nasPrivate = nasPaths.users.bphenriques.root;
     nasMedia = nasPaths.media.root;

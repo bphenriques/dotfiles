@@ -4,7 +4,7 @@ _: {
       name = "radarr";
       port = 9098;
       description = "Movie Tracker";
-      rootPath = config: config.selfhost.paths.media.movies;
+      rootPath = config: config.custom.paths.media.movies;
       categoryField = "movieCategory";
       forwardAuthGroup = config: config.selfhost.groups.admin;
     })
@@ -14,7 +14,7 @@ _: {
   # Recyclarr v8 configuration using guide-backed quality profiles
   # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
   # See: https://trash-guides.info/
-  selfhost.media.radarr = {
+  custom.media.radarr = {
     qualityDefinitionType = "movie";
     profiles = {
       default = {

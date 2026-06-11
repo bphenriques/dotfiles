@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  inherit (config.selfhost) paths;
+  inherit (config.custom) paths;
 in
 {
   selfhost.tasks.backup.integrations.notify.enable = true;

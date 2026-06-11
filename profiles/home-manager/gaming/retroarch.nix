@@ -1,6 +1,6 @@
 { lib, pkgs, config, osConfig, ... }:
 let
-  emulationPaths = osConfig.selfhost.paths.media.gaming.emulation;
+  emulationPaths = osConfig.custom.paths.media.gaming.emulation;
   stateDir = "${config.xdg.stateHome}/retroarch";
 
 

@@ -16,7 +16,7 @@ let
     lastName = "Service";
     isAdmin = false;
     inherit (a.services.gitea) sshKeys;
-  }) (lib.filterAttrs (_: a: a.services.gitea.enable) config.selfhost.serviceAccounts);
+  }) (lib.filterAttrs (_: a: a.services.gitea.enable) config.custom.serviceAccounts);
 
   userListFile = pkgs.writeText "gitea-users.json" (builtins.toJSON (userAccounts ++ serviceAccounts));
 

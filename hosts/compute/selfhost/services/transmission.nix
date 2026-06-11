@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.transmission;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
   notifyCfg = config.selfhost.notify;
   serviceNotify = serviceCfg.integrations.notify;
@@ -21,7 +21,6 @@ in
     healthcheck.path = "/transmission/web/";
     access.allowedGroups = [ config.selfhost.groups.admin ];
     forwardAuth.enable = true;
-    integrations.homepage.enable = true;
     integrations.notify.enable = true;
     integrations.notify.topic = "download";
     storage.smb = [ "media" ];

@@ -3,14 +3,14 @@
 # Assumptions:
 # - Transmission is the only download client used
 # - config.selfhost.services.transmission.port is defined
-# - config.selfhost.media.${name}.profiles.default exists
+# - config.custom.media.${name}.profiles.default exists
 #
 # Usage (in imports):
 #   (import ./lib/mkArrService.nix {
 #     name = "radarr";
 #     port = 9098;
 #     description = "Movie Tracker";
-#     rootPath = config: config.selfhost.paths.media.movies;
+#     rootPath = config: config.custom.paths.media.movies;
 #     categoryField = "movieCategory";
 #     forwardAuthGroup = config: config.selfhost.groups.admin;
 #   })
@@ -28,7 +28,7 @@ let
   envPrefix = lib.toUpper name;
 
   serviceCfg = config.selfhost.services.${name};
-  mediaCfg = config.selfhost.media.${name};
+  mediaCfg = config.custom.media.${name};
   selfhostMounts = config.selfhost.storage.smb.mounts;
   ntfyCfg = config.selfhost.services.ntfy;
   ntfyTags = { radarr = "movie_camera"; sonarr = "tv"; }.${name} or name;
@@ -69,8 +69,7 @@ in
       access.allowedGroups = [ (forwardAuthGroup config) ];
       forwardAuth.enable = true;
       healthcheck.path = "/ping";
-      integrations.homepage.enable = true;
-      integrations.homepage.tab = "Home";
+      integrations.homepage.group = "Services";
       integrations.homepage.extraConfig.widget = {
         type = name;
         inherit (serviceCfg) url;

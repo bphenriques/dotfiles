@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.cook-recipes;
-  recipesDir = config.selfhost.paths.media.recipes;
+  recipesDir = config.custom.paths.media.recipes;
 in
 {
   selfhost.services.cook-recipes = {
@@ -11,7 +11,6 @@ in
     port = 9080;
     access.allowedGroups = [ config.selfhost.groups.users ];
     forwardAuth.enable = true;
-    integrations.homepage.enable = true;
     storage.smb = [ "media" ];
   };
 

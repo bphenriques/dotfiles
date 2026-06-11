@@ -14,7 +14,7 @@ in
       port = 3010;
       healthcheck.path = "/api/health";
       forwardAuth.enable = true;
-      integrations.homepage = { enable = true; tab = "Admin"; };
+      integrations.homepage.group = "Admin";
     };
 
     runtimeSecrets.grafana-secret-key = {

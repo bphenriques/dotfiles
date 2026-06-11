@@ -13,8 +13,7 @@ in
       healthcheck.path = "/ping";
       access.allowedGroups = [ config.selfhost.groups.admin ];
       forwardAuth.enable = true;
-      integrations.homepage.enable = true;
-      integrations.homepage.tab = "Admin";
+      integrations.homepage.group = "Admin";
       integrations.notify.enable = true;
       integrations.notify.topic = "admin";
     };

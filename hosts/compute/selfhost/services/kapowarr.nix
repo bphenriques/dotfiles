@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.kapowarr;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
 
   dataDir = "/var/lib/kapowarr";
   img = pkgs.containerImages.kapowarr;
@@ -15,7 +15,6 @@ in
     forwardAuth.enable = true;
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any";
-    integrations.homepage.enable = true;
     storage.smb = [ "media" ];
   };
 
@@ -35,7 +34,7 @@ in
     environment = {
       PUID = "0";
       PGID = "0";
-      TZ = config.selfhost.locale.timezone;
+      TZ = config.custom.locale.timezone;
     };
 
     volumes = [

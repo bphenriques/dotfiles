@@ -2,7 +2,7 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   kavitaCfg = config.services.kavita;
 
   # Default roles for new users (OIDC provisioned)

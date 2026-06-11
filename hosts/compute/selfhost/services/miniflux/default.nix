@@ -34,7 +34,6 @@ in
         systemd.dependentServices = [ "miniflux" "miniflux-configure" ];
       };
       healthcheck.path = "/healthcheck";
-      integrations.homepage.enable = true;
     };
 
     services.miniflux = {

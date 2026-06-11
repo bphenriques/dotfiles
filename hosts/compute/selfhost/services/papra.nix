@@ -6,7 +6,7 @@ let
   serviceCfg = cfg.services.papra;
   oidcCfg = cfg.auth.oidc;
   selfhostMounts = cfg.storage.smb.mounts;
-  pathsCfg = cfg.paths;
+  pathsCfg = config.custom.paths;
   dataDir = "/var/lib/papra";
   img = pkgs.containerImages.papra;
 
@@ -33,7 +33,6 @@ in
       };
       healthcheck.path = "/";
       healthcheck.probeModule = "http_any";
-      integrations.homepage.enable = true;
       storage.smb = [ "bphenriques" ];
     };
 

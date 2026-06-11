@@ -2,7 +2,7 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
 
   kavitaCfg = config.services.kavita;
@@ -39,7 +39,6 @@ in
           systemd.dependentServices = [ "kavita" ];
         };
         healthcheck.path = "/api/health";
-        integrations.homepage.enable = true;
         storage.smb = [ "media" ];
       };
 

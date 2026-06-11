@@ -1,6 +1,6 @@
 { config, self, lib, pkgs, utils, ... }:
 let
-  romsDir = config.selfhost.paths.media.gaming.emulation.roms;
+  romsDir = config.custom.paths.media.gaming.emulation.roms;
   stateDir = "/var/lib/skyscraper";
   skyscraperConfig = config.sops.templates."skyscraper-config.ini".path;
 

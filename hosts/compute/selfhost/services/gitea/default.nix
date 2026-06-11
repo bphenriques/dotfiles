@@ -23,7 +23,9 @@ in
         };
       });
     };
+  };
 
+  options.custom = {
     serviceAccounts = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
@@ -59,7 +61,6 @@ in
         systemd.dependentServices = [ "gitea" "gitea-configure" ];
       };
       healthcheck.path = "/api/healthz";
-      integrations.homepage.enable = true;
 
       backup = {
         package = pkgs.writeShellApplication {

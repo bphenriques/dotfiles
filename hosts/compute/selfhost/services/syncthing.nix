@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
   serviceCfg = config.selfhost.services.syncthing;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
   syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.selfhost.users;
 
@@ -68,8 +68,7 @@ in
         healthcheck.path = "/rest/noauth/health";
         access.allowedGroups = [ config.selfhost.groups.admin ];
         forwardAuth.enable = true;
-        integrations.homepage.enable = true;
-        integrations.homepage.tab = "Admin";
+        integrations.homepage.group = "Admin";
         storage.smb = [ "media" "bphenriques" ];
       };
 

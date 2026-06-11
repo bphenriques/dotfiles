@@ -33,6 +33,5 @@ in
     port = 8093;
     access.allowedGroups = [ config.selfhost.groups.users ];
     forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
-    integrations.homepage.enable = true;
   };
 }

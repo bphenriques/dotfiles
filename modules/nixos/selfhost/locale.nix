@@ -1,6 +1,6 @@
 { lib, ... }:
 {
-  options.selfhost.locale = {
+  options.custom.locale = {
     timezone = lib.mkOption {
       type = lib.types.str;
       description = "Timezone for services (e.g. 'Europe/Lisbon')";

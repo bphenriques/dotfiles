@@ -1,7 +1,7 @@
 { config, pkgs, lib, self, ... }:
 let
   serviceCfg = config.selfhost.services.jellyfin;
-  pathsCfg = config.selfhost.paths;
+  pathsCfg = config.custom.paths;
   oidcCfg = config.selfhost.auth.oidc;
   enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.selfhost.users;
 
@@ -48,7 +48,7 @@ let
   jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
 in
 {
-  selfhost.media.jellyfin.serverId = jellyfinConfig.serverName;
+  custom.media.jellyfin.serverId = jellyfinConfig.serverName;
 
   systemd.services.jellyfin-configure = {
     description = "Jellyfin setup";
