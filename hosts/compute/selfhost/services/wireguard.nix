@@ -1,5 +1,3 @@
-# WireGuard opt-in. Access control via the framework's server-side nftables (lanAccess), not
-# client AllowedIPs. The framework owns the interface/keys/registry/onboarding/routing.
 { config, private, ... }:
 {
   selfhost.vpn.wireguard = {

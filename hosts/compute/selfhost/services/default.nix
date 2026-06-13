@@ -17,10 +17,10 @@ in
     ./homepage
     ./syncthing.nix
     ./transmission.nix
-    ./wireguard
+    ./wireguard.nix
     ./home-assistant.nix
     ./radicale
-    ./cook-recipes
+    ./cook-recipes.nix
     ./filebrowser
     ./gitea
     ./papra.nix

@@ -5,7 +5,7 @@ let
   sonarrCfg = cfg.services.sonarr;
   radarrCfg = cfg.services.radarr;
 
-  # Custom package with wallpaper/favicon, set on the upstream module below.
+  # Custom package with wallpaper/favicon
   wallpaper = self.packages.wallpapers.files.sky-sunset;
   favicon = ./compass.svg;
   customPackage = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
@@ -17,7 +17,6 @@ let
   });
 in
 {
-  # Data tier: bundle off, we own homepage-dashboard and feed it cfg.dashboards.generatedTiles.
   selfhost.services.homepage = {
     description = "Dashboard";
     port = 3001;

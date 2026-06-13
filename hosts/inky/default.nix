@@ -29,7 +29,7 @@ let
     inkySaturation = 0;
   };
 
-  # WireGuard backup VPN server (separate subnet from compute's 10.100.0.0/24)
+  # WireGuard backup VPN server
   wireguard = {
     port = 51821;
     address = "10.100.1.1/24";

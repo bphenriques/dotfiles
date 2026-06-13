@@ -19,6 +19,7 @@
 
   selfhost = {
     enable = true;
+    inherit (private.settings) domain;
 
     auth.oidc.pocket-id.enable = true;
     auth.forwardAuth.tinyauth.enable = true;
@@ -29,8 +30,6 @@
       download.public = false;
       admin.public = false;
     };
-
-    inherit (private.settings) domain;
 
     mail = private.settings.smtp // {
       passwordFile = config.sops.secrets."smtp-password".path;
@@ -152,7 +151,7 @@
     };
   };
 
-  # Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so own the secret by its
+  # FIXME: Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so own the secret by its
   # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
   sops.secrets."jellyfin/home/password" = { };

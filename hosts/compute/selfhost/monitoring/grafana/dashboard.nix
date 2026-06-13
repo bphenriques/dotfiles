@@ -1,4 +1,3 @@
-# System dashboard: traffic, CPU, memory, power, network, disk, NVMe health
 let
   datasource = { type = "prometheus"; uid = "prometheus"; };
 
