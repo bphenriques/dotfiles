@@ -23,9 +23,9 @@ _round_level() {
 }
 
 get_discharge_icon() { echo "$UPOWER_DISCHARGE_ICON_DIR/$(_round_level "$1")"; }
-get_charge_icon()    { echo "$UPOWER_CHARGE_ICON_DIR/$(_round_level "$1")"; }
+get_charge_icon() { echo "$UPOWER_CHARGE_ICON_DIR/$(_round_level "$1")"; }
 get_discharge_glyph() { echo -n "${UPOWER_DISCHARGE_GLYPH[$(_round_level "$1")]}"; }
-get_charge_glyph()    { echo -n "${UPOWER_CHARGE_GLYPH[$(_round_level "$1")]}"; }
+get_charge_glyph() { echo -n "${UPOWER_CHARGE_GLYPH[$(_round_level "$1")]}"; }
 
 notify_current_battery() {
   local percentage="$1"

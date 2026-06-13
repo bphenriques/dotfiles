@@ -19,10 +19,10 @@ if [ -n "$active" ]; then
   net_type="${active%%:*}"
   net_name="${active#*:}"
   case "$net_type" in
-    *wireless*|*wifi*)   network_line="󰖩  ${net_name}" ;;
-    *ethernet*)          network_line="󰈀  Ethernet" ;;
-    *vpn*|*wireguard*)   network_line="󰌾  VPN (${net_name})" ;;
-    *)                   network_line="󰛳  ${net_name}" ;;
+    *wireless* | *wifi*) network_line="󰖩  ${net_name}" ;;
+    *ethernet*) network_line="󰈀  Ethernet" ;;
+    *vpn* | *wireguard*) network_line="󰌾  VPN (${net_name})" ;;
+    *) network_line="󰛳  ${net_name}" ;;
   esac
 fi
 
@@ -48,8 +48,8 @@ time="$(date +'%a, %d %b  %H:%M')"
 lines=()
 [ -n "$battery_line" ] && lines+=("$battery_line")
 [ -n "$network_line" ] && lines+=("$network_line")
-[ -n "$audio_line" ]   && lines+=("$audio_line")
-[ -n "$layout_line" ]  && lines+=("$layout_line")
+[ -n "$audio_line" ] && lines+=("$audio_line")
+[ -n "$layout_line" ] && lines+=("$layout_line")
 
 body="$(printf '%s\n' "${lines[@]}")"
 body="${body%$'\n'}"

@@ -4,9 +4,7 @@ let config = open $env.FILEBROWSER_CONFIG_FILE
 def fb [...args] {
   let r = ^filebrowser -d $env.FILEBROWSER_DB ...$args | complete
   if $r.exit_code != 0 {
-    error make {
-      msg: $"filebrowser failed: ($args | str join ' ')\n($r.stderr)"
-    }
+    error make {msg: $"filebrowser failed: ($args | str join ' ')\n($r.stderr)"}
   }
   $r.stdout
 }
@@ -19,8 +17,7 @@ def configure_defaults [] {
   let args = [
     $"--root=($env.FILEBROWSER_ROOT)"
     "--auth.method=proxy"
-    "--auth.header=Remote-User"
-    $"--scope=($d.scope)"
+    "--auth.header=Remote-User" $"--scope=($d.scope)"
     $"--perm.create=($p.create)"
     $"--perm.delete=($p.delete)"
     $"--perm.rename=($p.rename)"
@@ -29,8 +26,7 @@ def configure_defaults [] {
     $"--perm.share=($p.share)"
     $"--perm.download=($p.download)"
     "--perm.admin=false"
-    "--hideLoginButton"
-    $"--branding.name=($config.branding.name)"
+    "--hideLoginButton" $"--branding.name=($config.branding.name)"
     $"--branding.disableExternal=($config.branding.disableExternal)"
     $"--branding.disableUsedPercentage=($config.branding.disableUsedPercentage)"
     $"--viewMode=($config.viewMode)"
@@ -81,6 +77,6 @@ def main [] {
   init_db
   configure_defaults
   print "Configuring users..."
-  $config.users | each { |user| ensure_user $user } | ignore
+  $config.users | each {|user| ensure_user $user } | ignore
   print "FileBrowser configuration complete"
 }

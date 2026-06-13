@@ -34,7 +34,7 @@ let
     port = 51821;
     address = "10.100.1.1/24";
     clientSubnet = "10.100.1.0/24";
-    dns = shared.dns;
+    inherit (shared) dns;
     clientIP = "10.100.1.2";
     allowedIPs = "${wireguard.clientSubnet},${shared.lan.subnet}";
   };

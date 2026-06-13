@@ -14,7 +14,7 @@
   ...
 }:
 let
-  mkIconDir = name: attrs: pkgs.linkFarm name (lib.mapAttrsToList (n: path: { name = n; path = path; }) attrs);
+  mkIconDir = name: attrs: pkgs.linkFarm name (lib.mapAttrsToList (n: path: { name = n; inherit path; }) attrs);
   mkBashAssocArray = attrs: lib.concatStringsSep " " (lib.mapAttrsToList (k: v: ''[${k}]="${v}"'') attrs);
 in
 pkgs.writeShellApplication {

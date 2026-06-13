@@ -30,15 +30,10 @@ def complete_setup_wizard [] {
   if ($public_settings.mediaServerType? | default 0) == $jellyfinServerType {
     print "Jellyfin already configured, completing initialization..."
     # Just need to login (without hostname) and mark as initialized
-    let payload = {
-      username: $jellyfin_admin_username
-      password: $jellyfin_admin_password
-    }
+    let payload = {username: $jellyfin_admin_username, password: $jellyfin_admin_password}
     let r = http post $"($base_url)/api/v1/auth/jellyfin" $payload --content-type application/json --full --allow-errors
     if $r.status not-in [200, 201] {
-      error make {
-        msg: $"Failed to login to Jellyfin: ($r.status) - ($r.body)"
-      }
+      error make {msg: $"Failed to login to Jellyfin: ($r.status) - ($r.body)"}
     }
     print "  Logged in successfully"
   } else {
@@ -56,33 +51,25 @@ def complete_setup_wizard [] {
     }
     let r = http post $"($base_url)/api/v1/auth/jellyfin" $payload --content-type application/json --full --allow-errors
     if $r.status not-in [200, 201] {
-      error make {
-        msg: $"Failed to complete Jellyfin setup: ($r.status) - ($r.body)"
-      }
+      error make {msg: $"Failed to complete Jellyfin setup: ($r.status) - ($r.body)"}
     }
     print "  Jellyfin configured and admin user created"
   }
   # Mark as initialized
   let init_r = http post $"($base_url)/api/v1/settings/initialize" {} --headers $headers --content-type application/json --full --allow-errors
   if $init_r.status not-in [200, 204] {
-    error make {
-      msg: $"  Warning: Failed to mark as initialized: ($init_r.status) - ($init_r.body)"
-    }
+    error make {msg: $"  Warning: Failed to mark as initialized: ($init_r.status) - ($init_r.body)"}
   }
   print "  Setup wizard completed"
 }
 def get_quality_profile_id [service_url: string, service_api_key: string, profile_name: string] {
   let profiles = http get $"($service_url)/api/v3/qualityprofile" --headers [X-Api-Key, $service_api_key] --full --allow-errors
   if $profiles.status != 200 {
-    error make {
-      msg: $"Failed to get quality profiles: ($profiles.status) - ($profiles.body)"
-    }
+    error make {msg: $"Failed to get quality profiles: ($profiles.status) - ($profiles.body)"}
   }
-  let profile = ($profiles.body | where name == $profile_name | get 0?)
+  let profile = $profiles.body | where name == $profile_name | get 0?
   if $profile == null {
-    error make {
-      msg: $"Quality profile '($profile_name)' not found"
-    }
+    error make {msg: $"Quality profile '($profile_name)' not found"}
   }
   $profile.id
 }
@@ -91,9 +78,7 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   print $"Configuring ($kind) server..."
   let existing = http get $"($base_url)/api/v1/settings/($endpoint)" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make {
-      msg: $"Failed to get ($kind) servers: ($existing.status) - ($existing.body)"
-    }
+    error make {msg: $"Failed to get ($kind) servers: ($existing.status) - ($existing.body)"}
   }
   let existing_names = (
     $existing.body | default [] | get -o name | default []
@@ -125,9 +110,7 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   }
   let r = http post $"($base_url)/api/v1/settings/($endpoint)" $payload --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201] {
-    error make {
-      msg: $"Failed to create ($kind) server ($cfg.name): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create ($kind) server ($cfg.name): ($r.status) - ($r.body)"}
   }
   print $"  Created ($kind) server: ($cfg.name)"
 }
@@ -136,9 +119,7 @@ def set_application_url [app_url: string] {
   let payload = {applicationUrl: $app_url}
   let r = http post $"($base_url)/api/v1/settings/main" $payload --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 204] {
-    error make {
-      msg: $"Failed to set Application URL: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to set Application URL: ($r.status) - ($r.body)"}
   }
   print $"  Application URL set to: ($app_url)"
 }
@@ -153,12 +134,10 @@ def sync_jellyfin_users [users: record] {
   # Get list of Jellyfin users from settings endpoint
   let jf_users = http get $"($base_url)/api/v1/settings/jellyfin/users" --headers $headers --full --allow-errors
   if $jf_users.status != 200 {
-    error make {
-      msg: $"Failed to get Jellyfin users: ($jf_users.status) - ($jf_users.body)"
-    }
+    error make {msg: $"Failed to get Jellyfin users: ($jf_users.status) - ($jf_users.body)"}
   }
   # Only import users that are in our Nix config
-  let jf_to_import = $jf_users.body | where { |u| ($u.username? | default "") in $wanted_usernames }
+  let jf_to_import = $jf_users.body | where {|u| ($u.username? | default "") in $wanted_usernames }
   let jf_user_ids = $jf_to_import | get id
   if ($jf_user_ids | is-empty) {
     print "  No matching Jellyfin users to sync"
@@ -167,11 +146,9 @@ def sync_jellyfin_users [users: record] {
   let payload = {jellyfinUserIds: $jf_user_ids}
   let r = http post $"($base_url)/api/v1/user/import-from-jellyfin" $payload --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201] {
-    error make {
-      msg: $"Failed to sync Jellyfin users: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to sync Jellyfin users: ($r.status) - ($r.body)"}
   }
-  let imported = ($r.body | default [])
+  let imported = $r.body | default []
   if ($imported | length) > 0 {
     print $"  Imported ($imported | length) users from Jellyfin"
   } else {
@@ -192,7 +169,11 @@ const PERM_AUTO_APPROVE_4K_TV = 131072
 const PERM_RECENT_VIEW = 67108864
 # Composite permission sets
 const REQUEST_ALL = $PERM_REQUEST bit-or $PERM_REQUEST_4K
-const AUTO_APPROVE_ALL = ($PERM_AUTO_APPROVE bit-or $PERM_AUTO_APPROVE_MOVIE bit-or $PERM_AUTO_APPROVE_TV bit-or $PERM_AUTO_APPROVE_4K bit-or $PERM_AUTO_APPROVE_4K_MOVIE bit-or $PERM_AUTO_APPROVE_4K_TV)
+const AUTO_APPROVE_ALL = (
+  (
+    $PERM_AUTO_APPROVE bit-or $PERM_AUTO_APPROVE_MOVIE bit-or $PERM_AUTO_APPROVE_TV bit-or $PERM_AUTO_APPROVE_4K bit-or $PERM_AUTO_APPROVE_4K_MOVIE bit-or $PERM_AUTO_APPROVE_4K_TV
+  )
+)
 # Mask of all bits managed by this script (used to clear before applying desired state)
 const MANAGED_MASK = ($REQUEST_ALL bit-or $PERM_REQUEST_ADVANCED bit-or $AUTO_APPROVE_ALL bit-or $PERM_RECENT_VIEW)
 def configure_user_permissions [users: record] {
@@ -200,18 +181,14 @@ def configure_user_permissions [users: record] {
   # Get all Seerr users
   let all_users = http get $"($base_url)/api/v1/user" --headers $headers --full --allow-errors
   if $all_users.status != 200 {
-    error make {
-      msg: $"Failed to get users: ($all_users.status) - ($all_users.body)"
-    }
+    error make {msg: $"Failed to get users: ($all_users.status) - ($all_users.body)"}
   }
   let users_list = $all_users.body.results? | default []
   for entry in ($users | transpose key value) {
     let username = $entry.value.username
-    let user = $users_list | where { |u| ($u.jellyfinUsername? | default "") == $username } | get 0?
+    let user = $users_list | where {|u| ($u.jellyfinUsername? | default "") == $username } | get 0?
     if $user == null {
-      error make {
-        msg: $"Failed to find user: ($username)"
-      }
+      error make {msg: $"Failed to find user: ($username)"}
     }
     # Build desired permissions from config
     mut managed_perms = $REQUEST_ALL
@@ -235,9 +212,7 @@ def configure_user_permissions [users: record] {
     let user_id = $user.id
     let r = http put $"($base_url)/api/v1/user/($user_id)" { permissions: $desired_perms } --headers $headers --content-type application/json --full --allow-errors
     if $r.status not-in [200, 204] {
-      error make {
-        msg: $"Failed to update permissions for '($username)': ($r.status) - ($r.body)"
-      }
+      error make {msg: $"Failed to update permissions for '($username)': ($r.status) - ($r.body)"}
     }
     print $"  Updated permissions for '($username)'"
   }

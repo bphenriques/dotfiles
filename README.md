@@ -20,7 +20,7 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 ## Hosts
 
 | Host                       | Platform     | Description                                                                          |
-|----------------------------|--------------|--------------------------------------------------------------------------------------|
+| -------------------------- | ------------ | ------------------------------------------------------------------------------------ |
 | [compute](./hosts/compute) | NixOS        | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake |
 | [laptop](./hosts/laptop)   | NixOS        | Personal workstation                                                                 |
 | [inky](./hosts/inky)       | Raspberry Pi | Raspberry Pi Zero 2W connected to Inky Impression and speakers                       |

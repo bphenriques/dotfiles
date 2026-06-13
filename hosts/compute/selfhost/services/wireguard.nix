@@ -11,8 +11,6 @@
       enable = true;
       subnet = config.custom.fleet.lan.subnet;
       masquerade = true;
-      # Podman: default bridge 10.88.0.0/16 + user networks 10.89.0.0/16; /15 covers both.
-      extraAllowedSubnets = [ "10.88.0.0/15" ];
     };
   };
 }

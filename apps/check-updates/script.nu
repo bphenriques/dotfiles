@@ -1,7 +1,5 @@
 let headers = if "GITHUB_TOKEN" in $env {
-  {
-    Authorization: $"Bearer ($env.GITHUB_TOKEN)"
-  }
+  {Authorization: $"Bearer ($env.GITHUB_TOKEN)"}
 } else {
   {}
 }
@@ -31,7 +29,7 @@ def query-latest [pkg: record]: nothing -> record {
   }
 }
 def check-group [entries: list<any>, label: string]: nothing -> list<any> {
-  let results = $entries | each { |e| query-latest $e }
+  let results = $entries | each {|e| query-latest $e }
   let max_name = $results | get name | str length | math max
   let max_ver = $results | get version | str length | math max
   print $"($label):"
@@ -52,7 +50,7 @@ print "Checking for updates...\n"
 let pkg_results = check-group (open $env.PACKAGES_FILE) "Pinned packages (overlays/default.nix)"
 print ""
 let container_results = check-group (open $env.CONTAINERS_FILE) "Container images (overlays/default.nix)"
-let all_results = ($pkg_results | append $container_results)
+let all_results = $pkg_results | append $container_results
 print ""
 if ($all_results | any { $in.outdated }) {
   print "Some pinned versions are outdated."

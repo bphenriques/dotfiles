@@ -19,9 +19,7 @@ def wait_ready [] {
 def get_users [] {
   let r = http get $"($base_url)/v1/users" --user $admin_username --password $admin_password --full --allow-errors
   if $r.status != 200 {
-    error make {
-      msg: $"Failed to list users: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to list users: ($r.status) - ($r.body)"}
   }
   $r.body
 }
@@ -34,18 +32,14 @@ def create_user [username: string, openid_connect_id: string, is_admin: bool] {
   }
   let r = http post $"($base_url)/v1/users" $body --user $admin_username --password $admin_password --content-type application/json --full --allow-errors
   if $r.status != 201 {
-    error make {
-      msg: $"Failed to create user ($username): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create user ($username): ($r.status) - ($r.body)"}
   }
   $r.body
 }
 def update_user [user_id: int, settings: record] {
   let r = http put $"($base_url)/v1/users/($user_id)" $settings --user $admin_username --password $admin_password --content-type application/json --full --allow-errors
   if $r.status != 201 {
-    error make {
-      msg: $"Failed to update user ($user_id): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to update user ($user_id): ($r.status) - ($r.body)"}
   }
 }
 def main [] {
@@ -65,7 +59,7 @@ def main [] {
       let openid_connect_id = $oidc_user.id
       let miniflux_user = $miniflux_users | where username == $cfg.username | get 0?
 
-      let is_admin = ($cfg.is_admin? | default false)
+      let is_admin = $cfg.is_admin? | default false
       let user_id = if $miniflux_user == null {
         let created = create_user $cfg.username $openid_connect_id $is_admin
         print $"  ($cfg.username): created with openid_connect_id, admin=($is_admin)"

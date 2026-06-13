@@ -4,13 +4,13 @@
 
 Ensure the following are ready before installation:
 
-| Dependency   | What                                                   | Reference                                                |
-| ------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                 |
-| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                   |
-| SMTP         | Account credentials for transactional email            |                                                          |
-| Backblaze B2 | Bucket + application key for off-site backups          |                                                          |
-| ZBT-2 Dongle | Nabu Casa Connect ZBT-2 (Thread/Matter radio)          | Flash OpenThread RCP firmware post-install               |
+| Dependency   | What                                                   | Reference                                                  |
+| ------------ | ------------------------------------------------------ | ---------------------------------------------------------- |
+| SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                   |
+| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                     |
+| SMTP         | Account credentials for transactional email            |                                                            |
+| Backblaze B2 | Bucket + application key for off-site backups          |                                                            |
+| ZBT-2 Dongle | Nabu Casa Connect ZBT-2 (Thread/Matter radio)          | Flash OpenThread RCP firmware post-install                 |
 | Secrets      | Bootstrap via `dotfiles-secrets init-host` (Bitwarden) | [`apps/nixos-install`](../../apps/nixos-install/README.md) |
 
 ## Installation

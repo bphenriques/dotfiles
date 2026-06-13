@@ -20,9 +20,7 @@ def authenticate []: nothing -> record<headers: list<any>, api_key: string> {
   print $"Authenticating as: ($admin_username)"
   let r = http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers [Authorization, "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""] --full --allow-errors
   if $r.status != 200 {
-    error make {
-      msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)"
-    }
+    error make {msg: $"Failed to authenticate: ($r.status) - ($r.body | to json)"}
   }
   let headers = [
     Authorization
@@ -38,11 +36,9 @@ def authenticate []: nothing -> record<headers: list<any>, api_key: string> {
       }
     }
   }
-  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-sso-configure" { } --headers $headers --content-type application/json --full --allow-errors
+  let create = http post $"($base_url)/Auth/Keys?app=jellyfin-sso-configure" {} --headers $headers --content-type application/json --full --allow-errors
   if $create.status != 204 {
-    error make {
-      msg: $"Failed to create API key: ($create.status)"
-    }
+    error make {msg: $"Failed to create API key: ($create.status)"}
   }
   let keys = http get $"($base_url)/Auth/Keys" --headers $headers --full --allow-errors
   let matches = $keys.body.Items | where AppName == "jellyfin-sso-configure"
@@ -56,9 +52,7 @@ def ensure_branding [headers: list<any>] {
   print "Configuring branding..."
   let r = http post $"($base_url)/System/Configuration/Branding" $config.brandingConfig --content-type application/json --headers $headers --full --allow-errors
   if $r.status != 204 {
-    error make {
-      msg: $"Failed to configure branding: ($r.status)"
-    }
+    error make {msg: $"Failed to configure branding: ($r.status)"}
   }
   print "  Branding configured"
 }
@@ -68,17 +62,13 @@ def ensure_sso [api_key: string] {
   let r = http get $"($base_url)/sso/OID/Get?api_key=($api_key)" --full --allow-errors
   if $r.status == 404 { error make {msg: "SSO plugin not installed"} }
   if $r.status != 200 {
-    error make {
-      msg: $"Failed to query SSO providers: ($r.status)"
-    }
+    error make {msg: $"Failed to query SSO providers: ($r.status)"}
   }
   # OID/Add creates or overwrites the provider config
   let sso_config = $config.ssoConfig | update oidClientId $oidc_client_id | update oidSecret $oidc_client_secret
   let r2 = http post $"($base_url)/sso/OID/Add/($provider_name | url encode)?api_key=($api_key)" $sso_config --content-type application/json --full --allow-errors
   if $r2.status not-in [200, 204] {
-    error make {
-      msg: $"Failed to configure SSO provider ($provider_name): ($r2.status)"
-    }
+    error make {msg: $"Failed to configure SSO provider ($provider_name): ($r2.status)"}
   }
   print $"  SSO provider ($provider_name) configured"
 }

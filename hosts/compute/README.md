@@ -14,6 +14,7 @@ NixOS selfhost server built using my **[`selfhost-nix`](https://github.com/bphen
 - **RAM**: 32GB
 
 Made some tweaks to ensure thermal stability with sustained workloads:
+
 - **BIOS fan curve** (`Del` → `Advanced → Hardware Monitor → Smart Fan Function`): adjust to run fans at full-speed at **80°C** (default is 90°C) and to start earlier with slope of 4 PWM/°C. Temperatures dropped from 83°C to ~65°C under identical load.
 - **Systemd `throttled.slice`**: heavy services (Immich, Jellyfin) pinned to cores 1-2 (`AllowedCPUs`), hard-capped (`CPUQuota=150%`).
 - **Systemd `critical.slice`**: SSH/DHCP.
@@ -47,8 +48,8 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 
 ## Access Control
 
-| Group    | Target          | Example access     |
-| -------- |---------------------| ------------------ |
+| Group    | Target              | Example access     |
+| -------- | ------------------- | ------------------ |
 | `admin`  | Homelab owner       | Everything         |
 | `users`  | Family              | Media, recipes     |
 | `guests` | Friends, colleagues | Romm only (viewer) |

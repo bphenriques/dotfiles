@@ -29,7 +29,7 @@ def find_auth_source_id [name: string] {
   let r = ^gitea $config_flag admin auth list --vertical-bars | complete
   if $r.exit_code != 0 { return null }
   $r.stdout | str trim | lines | skip 1 | each { |line|
-    let cols = $line | split row "|" | each { |c| $c | str trim }
+    let cols = $line | split row "|" | each {|c| $c | str trim }
     if ($cols | length) >= 4 and $cols.1 == $name {
       $cols.0 | into int
     }
@@ -70,20 +70,26 @@ def ensure_oidc_source [] {
       return
     }
   }
-  error make {
-    msg: $"Failed to configure OIDC source: ($r.stderr)"
-  }
+  error make {msg: $"Failed to configure OIDC source: ($r.stderr)"}
 }
 
 # user record: { username, email, firstName, lastName, isAdmin, sshKeys }
 def ensure_user [user: record] {
   # Throw away password as it is required and we do not need it (OIDC or SSH key)
   let listing = (^gitea $config_flag admin user list | complete).stdout | str trim | lines | skip 1
-  let exists = $listing | any { |line| (($line | split row " " | where ($it | str length) > 0) | get 1? | default "") == $user.username }
+  let exists = $listing | any {|line| (($line | split row " " | where ($it | str length) > 0) | get 1? | default "") == $user.username }
 
   if not $exists {
     let password = (random chars --length 32)
-    let create_args = [--username $user.username --password $password --email $user.email --must-change-password=false]
+    let create_args = [
+      --username
+      $user.username
+      --password
+      $password
+      --email
+      $user.email
+      --must-change-password=false
+    ]
     let admin_flag = if $user.isAdmin { [--admin] } else { [] }
     ^gitea $config_flag admin user create ...$create_args ...$admin_flag
     print $"Created user '($user.username)'"

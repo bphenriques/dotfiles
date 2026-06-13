@@ -52,9 +52,9 @@ friendly_device_name() {
 _device_label() {
   case "$1" in
     microphone) echo -n "MICROPHONE" ;;
-    internal)   echo -n "INTERNAL_SPEAKERS" ;;
-    external)   echo -n "EXTERNAL_SPEAKERS" ;;
-    headset)    echo -n "HEADSET" ;;
+    internal) echo -n "INTERNAL_SPEAKERS" ;;
+    external) echo -n "EXTERNAL_SPEAKERS" ;;
+    headset) echo -n "HEADSET" ;;
     headphones) echo -n "HEADPHONES" ;;
   esac
 }

@@ -12,20 +12,14 @@ def wait_ready [] {
   error make {msg: "Immich failed to start after 60 attempts"}
 }
 def admin_signup [admin: record, password: string] {
-  let body = {
-    email: $admin.email
-    name: $admin.name
-    password: $password
-  }
+  let body = {email: $admin.email, name: $admin.name, password: $password}
   let r = http post $"($base_url)/api/auth/admin-sign-up" $body --content-type application/json --full --allow-errors
   if $r.status == 201 {
     print $"Admin user ($admin.email) registered successfully"
   } else if $r.status == 400 and ($r.body | to text | str contains "admin") {
     print "Admin already exists, skipping signup"
   } else {
-    error make {
-      msg: $"Failed to register admin: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to register admin: ($r.status) - ($r.body)"}
   }
 }
 def complete_admin_onboarding [headers: record] {
@@ -40,38 +34,29 @@ def complete_admin_onboarding [headers: record] {
   }
 }
 def login [email: string, password: string] {
-  let body = {
-    email: $email
-    password: $password
-  }
+  let body = {email: $email, password: $password}
   let r = http post $"($base_url)/api/auth/login" $body --content-type application/json --full --allow-errors
   if $r.status != 201 {
-    error make {
-      msg: $"Failed to login: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to login: ($r.status) - ($r.body)"}
   }
   $r.body.accessToken
 }
 def get_all [endpoint: string, headers: record] {
   let r = http get $"($base_url)/api($endpoint)" --headers $headers --full --allow-errors
   if $r.status != 200 {
-    error make {
-      msg: $"Failed to get ($endpoint): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to get ($endpoint): ($r.status) - ($r.body)"}
   }
   $r.body
 }
 def ensure_user [user: record, existing: list<any>, headers: record] {
-  let is_admin = ($user.isAdmin? | default false)
+  let is_admin = $user.isAdmin? | default false
   let found = $existing | where email == $user.email | get 0?
   if $found != null {
-    if ($found.isAdmin != $is_admin) {
+    if $found.isAdmin != $is_admin {
       let body = {isAdmin: $is_admin}
       let r = http put $"($base_url)/api/admin/users/($found.id)" $body --headers $headers --content-type application/json --full --allow-errors
       if $r.status != 200 {
-        error make {
-          msg: $"Failed to update user ($user.email): ($r.status) - ($r.body)"
-        }
+        error make {msg: $"Failed to update user ($user.email): ($r.status) - ($r.body)"}
       }
       print $"User ($user.email) admin status updated to ($is_admin)"
     } else {
@@ -87,9 +72,7 @@ def ensure_user [user: record, existing: list<any>, headers: record] {
   }
   let r = http post $"($base_url)/api/admin/users" $body --headers $headers --content-type application/json --full --allow-errors
   if $r.status != 201 {
-    error make {
-      msg: $"Failed to create user ($user.email): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create user ($user.email): ($r.status) - ($r.body)"}
   }
   print $"Created user ($user.email)"
   $r.body.id
@@ -103,16 +86,10 @@ def ensure_library [
   let found = $existing | where name == $lib.name and ownerId == $owner_id | get 0?
   if $found != null {
     if ($found.importPaths | sort) != ($lib.importPaths | sort) {
-      let body = {
-        name: $lib.name
-        importPaths: $lib.importPaths
-        exclusionPatterns: $lib.exclusionPatterns
-      }
+      let body = {name: $lib.name, importPaths: $lib.importPaths, exclusionPatterns: $lib.exclusionPatterns}
       let r = http put $"($base_url)/api/libraries/($found.id)" $body --headers $headers --content-type application/json --full --allow-errors
       if $r.status != 200 {
-        error make {
-          msg: $"Failed to update library ($lib.name): ($r.status) - ($r.body)"
-        }
+        error make {msg: $"Failed to update library ($lib.name): ($r.status) - ($r.body)"}
       }
       print $"Updated library ($lib.name) import paths"
     } else {
@@ -128,9 +105,7 @@ def ensure_library [
   }
   let r = http post $"($base_url)/api/libraries" $body --headers $headers --content-type application/json --full --allow-errors
   if $r.status != 201 {
-    error make {
-      msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)"}
   }
   print $"Created library ($lib.name)"
   let scan = http post $"($base_url)/api/libraries/($r.body.id)/scan" "{}" --headers $headers --content-type application/json --full --allow-errors
@@ -150,9 +125,7 @@ def main [] {
   admin_signup $admin $password
   # Login and use access token for API operations
   let token = login $admin.email $password
-  let headers = {
-    "Authorization": $"Bearer ($token)"
-  }
+  let headers = {"Authorization": $"Bearer ($token)"}
   # Complete admin onboarding to skip the getting started wizard
   complete_admin_onboarding $headers
   # Create users and complete their onboarding

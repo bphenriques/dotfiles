@@ -65,7 +65,7 @@ in
     services.${name} = {
       displayName = upperName;
       inherit port;
-      description = description;
+      inherit description;
       access.allowedGroups = [ (forwardAuthGroup config) ];
       forwardAuth.enable = true;
       healthcheck.path = "/ping";

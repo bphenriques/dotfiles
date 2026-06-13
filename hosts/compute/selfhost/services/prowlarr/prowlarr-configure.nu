@@ -24,9 +24,7 @@ def wait_ready [] {
 def ensure_tag [tag_name: string]: nothing -> int {
   let existing = http get $"($base_url)/api/v1/tag" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make {
-      msg: $"Failed to get tags: ($existing.status) - ($existing.body)"
-    }
+    error make {msg: $"Failed to get tags: ($existing.status) - ($existing.body)"}
   }
   let tag = (
     $existing.body | default [] | where label == $tag_name | get 0?
@@ -36,9 +34,7 @@ def ensure_tag [tag_name: string]: nothing -> int {
   }
   let r = http post $"($base_url)/api/v1/tag" { label: $tag_name } --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201] {
-    error make {
-      msg: $"Failed to create tag ($tag_name): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create tag ($tag_name): ($r.status) - ($r.body)"}
   }
   print $"  Created tag: ($tag_name)"
   $r.body.id
@@ -46,11 +42,9 @@ def ensure_tag [tag_name: string]: nothing -> int {
 def get_default_app_profile_id [] {
   let profiles = http get $"($base_url)/api/v1/appprofile" --headers $headers --full --allow-errors
   if $profiles.status != 200 {
-    error make {
-      msg: $"Failed to get app profiles: ($profiles.status) - ($profiles.body)"
-    }
+    error make {msg: $"Failed to get app profiles: ($profiles.status) - ($profiles.body)"}
   }
-  let profile = ($profiles.body | get 0?)
+  let profile = $profiles.body | get 0?
   if $profile == null {
     error make {msg: "No app profiles found in Prowlarr"}
   }
@@ -60,15 +54,11 @@ def ensure_indexers [] {
   print "Configuring indexers..."
   let indexers = ($config | get -o indexers) | default []
   if ($indexers | is-empty) {
-    error make {
-      msg: $"No indexers defined."
-    }
+    error make {msg: $"No indexers defined."}
   }
   let existing = http get $"($base_url)/api/v1/indexer" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make {
-      msg: $"Failed to get indexers: ($existing.status) - ($existing.body)"
-    }
+    error make {msg: $"Failed to get indexers: ($existing.status) - ($existing.body)"}
   }
   let existing_names = (
     $existing.body | default [] | get -o name | default []
@@ -76,9 +66,7 @@ def ensure_indexers [] {
   # Get available indexer schemas
   let schemas = http get $"($base_url)/api/v1/indexer/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
-    error make {
-      msg: $"Failed to get indexer schemas: ($schemas.status)"
-    }
+    error make {msg: $"Failed to get indexer schemas: ($schemas.status)"}
   }
   let app_profile_id = get_default_app_profile_id
   mut failed = []
@@ -88,7 +76,7 @@ def ensure_indexers [] {
       continue
     }
     # Find the schema for this indexer
-    let schema = ($schemas.body | where definitionName == $idx.definitionName | get 0?)
+    let schema = $schemas.body | where definitionName == $idx.definitionName | get 0?
     if $schema == null {
       print $"  Indexer schema not found: ($idx.definitionName), skipping"
       continue
@@ -101,7 +89,7 @@ def ensure_indexers [] {
     }
     # Resolve tag names to IDs
     let tag_names = ($idx | get -o tags) | default []
-    let tag_ids = $tag_names | each { |t| ensure_tag $t }
+    let tag_ids = $tag_names | each {|t| ensure_tag $t }
     let payload = $schema | merge {
       name: $idx.name
       enable: true
@@ -130,15 +118,11 @@ def ensure_applications [] {
   }
   let existing = http get $"($base_url)/api/v1/applications" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make {
-      msg: $"Failed to get applications: ($existing.status) - ($existing.body)"
-    }
+    error make {msg: $"Failed to get applications: ($existing.status) - ($existing.body)"}
   }
   let schemas = http get $"($base_url)/api/v1/applications/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
-    error make {
-      msg: $"Failed to get application schemas: ($schemas.status)"
-    }
+    error make {msg: $"Failed to get application schemas: ($schemas.status)"}
   }
   for app in $applications {
     let existing_app = (
@@ -146,15 +130,15 @@ def ensure_applications [] {
     )
     # Get the appropriate API key
     let app_api_key = match $app.implementation {
-      "Radarr" => $radarr_api_key
-      "Sonarr" => $sonarr_api_key
+      Radarr => $radarr_api_key
+      Sonarr => $sonarr_api_key
       _ => {
         print $"  Unsupported application implementation: ($app.implementation), skipping"
         continue
       }
     }
     # Find schema for this implementation
-    let schema = ($schemas.body | where implementation == $app.implementation | get 0?)
+    let schema = $schemas.body | where implementation == $app.implementation | get 0?
     if $schema == null {
       print $"  Application schema not found: ($app.implementation), skipping"
       continue
@@ -177,9 +161,7 @@ def ensure_applications [] {
       })
       let r = http put $"($base_url)/api/v1/applications/($existing_app.id)" $payload --headers $headers --content-type application/json --full --allow-errors
       if $r.status not-in [200, 202] {
-        error make {
-          msg: $"Failed to update application ($app.name): ($r.status) - ($r.body)"
-        }
+        error make {msg: $"Failed to update application ($app.name): ($r.status) - ($r.body)"}
       }
       print $"  Updated application: ($app.name)"
     } else {
@@ -191,9 +173,7 @@ def ensure_applications [] {
       })
       let r = http post $"($base_url)/api/v1/applications" $payload --headers $headers --content-type application/json --full --allow-errors
       if $r.status not-in [200, 201] {
-        error make {
-          msg: $"Failed to create application ($app.name): ($r.status) - ($r.body)"
-        }
+        error make {msg: $"Failed to create application ($app.name): ($r.status) - ($r.body)"}
       }
       print $"  Created application: ($app.name)"
     }
@@ -203,9 +183,7 @@ def ensure_notification [] {
   print "Configuring ntfy notification..."
   let existing = http get $"($base_url)/api/v1/notification" --headers $headers --full --allow-errors
   if $existing.status != 200 {
-    error make {
-      msg: $"Failed to get notifications: ($existing.status) - ($existing.body)"
-    }
+    error make {msg: $"Failed to get notifications: ($existing.status) - ($existing.body)"}
   }
   let notification_name = "ntfy"
   let existing_names = (
@@ -217,11 +195,9 @@ def ensure_notification [] {
   }
   let schemas = http get $"($base_url)/api/v1/notification/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
-    error make {
-      msg: $"Failed to get notification schemas: ($schemas.status)"
-    }
+    error make {msg: $"Failed to get notification schemas: ($schemas.status)"}
   }
-  let ntfy_schema = ($schemas.body | where implementation == "Ntfy" | get 0?)
+  let ntfy_schema = $schemas.body | where implementation == "Ntfy" | get 0?
   if $ntfy_schema == null {
     error make {msg: "Ntfy notification schema not found"}
   }
@@ -249,9 +225,7 @@ def ensure_notification [] {
   }
   let r = http post $"($base_url)/api/v1/notification" $payload --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201] {
-    error make {
-      msg: $"Failed to create notification ($notification_name): ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to create notification ($notification_name): ($r.status) - ($r.body)"}
   }
   print $"  Created notification: ($notification_name)"
 }
@@ -259,9 +233,7 @@ def sync_indexers [] {
   print "Syncing indexers to applications..."
   let r = http post $"($base_url)/api/v1/command" { name: "ApplicationIndexerSync" } --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201, 202] {
-    error make {
-      msg: $"Failed to sync indexers: ($r.status) - ($r.body)"
-    }
+    error make {msg: $"Failed to sync indexers: ($r.status) - ($r.body)"}
   }
   print "  Indexer sync triggered"
 }

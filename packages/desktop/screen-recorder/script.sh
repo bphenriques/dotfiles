@@ -13,7 +13,7 @@ record() {
     _notify --icon "$ERROR_ICON" "Screen Recorder" "There is already a recording in progress"
     return 1
   else
-    printf '%s' "$destination" > "$STATE_FILE"
+    printf '%s' "$destination" >"$STATE_FILE"
     _notify --icon "$RECORD_ICON" "Screen Recorder" "Starting recording..."
 
     sleep 1
@@ -34,7 +34,7 @@ stop() {
   sleep 0.5
 
   local destination=""
-  if [[ -f "$STATE_FILE" ]]; then
+  if [[ -f $STATE_FILE ]]; then
     destination="$(cat "$STATE_FILE")"
     rm -f "$STATE_FILE"
   fi
