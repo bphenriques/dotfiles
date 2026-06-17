@@ -1,16 +1,17 @@
-# Run `nix run .#check-updates` to check for newer upstream releases.
+# Run `nix run .#check-updates` to check for newer upstream releases,
+# or `nix run .#check-updates -- --update` to bump the versions below.
 _final: prev: let
   inherit (prev) lib;
   images = {
     grist = {
       image = "gristlabs/grist";
-      version = "1.7.12";
+      version = "1.7.15";
       homepage = "https://github.com/gristlabs/grist-core";
       updateInfo = { repo = "gristlabs/grist-core"; stripPrefix = "v"; };
     };
     larapaper = {
       image = "ghcr.io/usetrmnl/larapaper";
-      version = "0.33.1";
+      version = "0.37.1";
       homepage = "https://github.com/usetrmnl/larapaper";
       updateInfo = { repo = "usetrmnl/larapaper"; };
     };
@@ -22,13 +23,13 @@ _final: prev: let
     };
     papra = {
       image = "ghcr.io/papra-hq/papra";
-      version = "26.4.0";
+      version = "26.5.0";
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
     romm = {
       image = "rommapp/romm";
-      version = "4.8.1";
+      version = "4.9.2";
       homepage = "https://github.com/rommapp/romm";
       updateInfo = { repo = "rommapp/romm"; };
     };

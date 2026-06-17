@@ -83,7 +83,7 @@
           oidc.enable = false; # ad-hoc user, no OIDC account
           jellyfin = {
             enable = true;
-            passwordFile = config.sops.secrets."jellyfin/home/password".path;
+            passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
           };
           seerr = {
             enable = true;
@@ -104,11 +104,11 @@
           oidc.enable = false;
           jellyfin = {
             enable = true;
-            passwordFile = config.sops.secrets."guest/password".path;
+            passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
           };
           kavita = {
             enable = true;
-            passwordFile = config.sops.secrets."guest/password".path;
+            passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
           };
           seerr = {
             enable = true;
@@ -154,6 +154,12 @@
   # FIXME: Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so own the secret by its
   # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
-  sops.secrets."jellyfin/home/password" = { };
-  sops.secrets."guest/password" = { };
+
+  # Bootstrap-only creds: set at account creation, then changed in-app. Never re-read, so unlike the admin
+  # secret these keep regenerateIfMissing's default (true) — a lost file regenerates instead of failing.
+  selfhost.runtimeSecrets = {
+    home-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
+    guest-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
+    guest-kavita-initial-credentials.restartUnits = [ "kavita-configure.service" ];
+  };
 }

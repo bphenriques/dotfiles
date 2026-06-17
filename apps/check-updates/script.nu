@@ -46,15 +46,41 @@ def check-group [entries: list<any>, label: string]: nothing -> list<any> {
   }
   $results
 }
-print "Checking for updates...\n"
-let pkg_results = check-group (open $env.PACKAGES_FILE) "Pinned packages (overlays/default.nix)"
-print ""
-let container_results = check-group (open $env.CONTAINERS_FILE) "Container images (overlays/default.nix)"
-let all_results = $pkg_results | append $container_results
-print ""
-if ($all_results | any { $in.outdated }) {
-  print "Some pinned versions are outdated."
-  exit 1
-} else {
-  print "All pinned versions are up to date."
+def update-containers [results: list<any>]: nothing -> nothing {
+  let outdated = $results | where {|r| $r.outdated and (not $r.error)}
+  if ($outdated | is-empty) {
+    print "No container images to update."
+    return
+  }
+  let file = $"($env.PWD)/overlays/containers.nix"
+  if not ($file | path exists) {
+    print $"Cannot update: ($file) not found. Run from the dotfiles repo root."
+    return
+  }
+  mut text = open --raw $file
+  for r in $outdated {
+    let pattern = '(?s)(' + $r.name + ' = \{.*?version = ")[^"]*(")'
+    $text = ($text | str replace --regex $pattern ('${1}' + $r.latest + '${2}'))
+    print $"  ($r.name): ($r.version) → ($r.latest)"
+  }
+  $text | save --force --raw $file
+  print $"Updated ($outdated | length) container image\(s\) in overlays/containers.nix."
+}
+def main [--update] {
+  print "Checking for updates...\n"
+  let pkg_results = check-group (open $env.PACKAGES_FILE) "Pinned packages (overlays/default.nix)"
+  print ""
+  let container_results = check-group (open $env.CONTAINERS_FILE) "Container images (overlays/default.nix)"
+  print ""
+  if $update {
+    update-containers $container_results
+    return
+  }
+  let all_results = $pkg_results | append $container_results
+  if ($all_results | any { $in.outdated }) {
+    print "Some pinned versions are outdated. Re-run with --update to bump container images."
+    exit 1
+  } else {
+    print "All pinned versions are up to date."
+  }
 }

@@ -185,17 +185,8 @@ def ensure_users [headers: list<any>, users: list<any>] {
       }
       print $"  '$cfg.username': created"
     } else {
+      # passwordFile is the bootstrap password only; never reconcile it, so UI password changes persist
       print $"  '$cfg.username': exists"
-      if $has_password_file {
-        let user = $existing_matches | first
-        let password = open $cfg.passwordFile | str trim
-        let r = http post $"($base_url)/Users/($user.Id)/Password" { NewPw: $password, ResetPassword: true } --content-type application/json --headers $headers --full --allow-errors
-        if $r.status == 204 {
-          print $"  '$cfg.username': password updated"
-        } else {
-          print $"  '$cfg.username': password update failed (($r.status))"
-        }
-      }
     }
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
