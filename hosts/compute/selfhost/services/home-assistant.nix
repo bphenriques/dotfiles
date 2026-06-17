@@ -1,10 +1,11 @@
-{ config, pkgs, ... }:
+{ config, pkgs, utils, ... }:
 let
   cfg = config.selfhost;
   serviceCfg = cfg.services.home-assistant;
   inherit (config.systemd.services.home-assistant.serviceConfig) User Group;
 
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
+  dongleUnit = "${utils.escapeSystemdPath donglePath}.device";
   otbrDataDir = "/var/lib/otbr";
   inherit (config.services.home-assistant) configDir;
 in
@@ -83,7 +84,8 @@ in
   virtualisation.oci-containers.containers.otbr = {
     # Upstream only publishes :latest and :main tags
     image = "openthread/border-router:latest";
-    autoStart = true;
+    # Started by the dongle's .device unit, not at boot (see below).
+    autoStart = false;
 
     environment = {
       OT_RCP_DEVICE = "spinel+hdlc+uart:///dev/ttyACM0?uart-baudrate=460800";
@@ -106,10 +108,13 @@ in
     ];
   };
 
-  # Ensure OTBR starts after bond0 is up
+  # Gate OTBR on the dongle being plugged: the .device unit starts it on hotplug
+  # (wantedBy), bindsTo stops it on unplug, so it never restart-loops when absent.
+  # (network-online ordering comes from the oci-containers module.)
   systemd.services.podman-otbr = {
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+    after = [ dongleUnit ];
+    bindsTo = [ dongleUnit ];
+    wantedBy = [ dongleUnit ];
   };
 
   systemd.services.home-assistant = {
