@@ -5,6 +5,7 @@ let
   json = pkgs.formats.json { };
 
   systemDashboard = json.generate "system.json" (import ./dashboard.nix);
+  shareVmDashboard = json.generate "share-vm.json" (import ./share-vm.nix);
 in
 {
   selfhost = {
@@ -62,10 +63,16 @@ in
         name = "selfhost";
         type = "file";
         disableDeletion = true;
-        options.path = pkgs.linkFarm "grafana-dashboards" [{
-          name = "system.json";
-          path = systemDashboard;
-        }];
+        options.path = pkgs.linkFarm "grafana-dashboards" [
+          {
+            name = "system.json";
+            path = systemDashboard;
+          }
+          {
+            name = "share-vm.json";
+            path = shareVmDashboard;
+          }
+        ];
       }];
     };
   };

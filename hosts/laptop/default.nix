@@ -12,6 +12,7 @@ in
     ../../profiles/nixos/development
     ../../profiles/nixos/gaming
     ../../profiles/nixos/selfhost-smb-client.nix
+    ./share-mount.nix
     # Users
     ./bphenriques
   ];

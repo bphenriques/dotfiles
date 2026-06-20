@@ -17,4 +17,17 @@
       jetkvm = "192.168.1.195";
     };
   };
+
+  # Microvm guests live on a compute-internal bridge; reachable from the fleet
+  # only via compute (ProxyJump / Traefik), internet via NAT through bond0.
+  microvm = {
+    bridge = {
+      name = "compute-microvm";   # 15-char IFNAMSIZ limit
+      gateway = "10.20.1.1";
+      prefixLength = 24;
+    };
+    hosts = {
+      share-vm = "10.20.1.11";
+    };
+  };
 }

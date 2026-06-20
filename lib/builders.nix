@@ -1,5 +1,5 @@
 { lib, pkgs }:
-{
+rec {
   writeFuzzelDmenuApplication = {
     name,
     runtimeInputs ? [ ],
@@ -57,4 +57,23 @@
       ${lib.getExe pkgs.nushell} --no-config-file --commands 'if not (nu-check "${src}") { exit 1 }'
       cp ${src} $out
     '';
+
+  # The JSON the `filebrowser-configure` package consumes (pkgs.filebrowser-configure,
+  # from overlays/). Each host supplies its own `users` list and `defaults`; the UI shell
+  # (branding, view, sorting) is shared here so the two FileBrowser instances stay
+  # consistent. `branding` is merged over the common base.
+  mkFilebrowserConfig =
+    { users, defaults, branding ? { } }:
+    pkgs.writeText "filebrowser.json" (builtins.toJSON {
+      inherit defaults users;
+      branding = {
+        name = "Shared Files";
+        disableExternal = true;
+        disableUsedPercentage = true;
+      } // branding;
+      viewMode = "mosaic";
+      singleClick = true;
+      hideDotfiles = true;
+      sorting = { by = "modified"; asc = false; };
+    });
 }

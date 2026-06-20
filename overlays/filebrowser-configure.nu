@@ -34,6 +34,9 @@ def configure_defaults [] {
     $"--hideDotfiles=($config.hideDotfiles)"
     $"--sorting.by=($config.sorting.by)"
     $"--sorting.asc=($config.sorting.asc)"
+    ...(
+      if (($config.branding.files? | default "") | is-not-empty) { [$"--branding.files=($config.branding.files)"] } else { [] }
+    )
   ]
   fb config set ...$args
   print "Defaults configured"
@@ -67,11 +70,14 @@ def ensure_user [user: record] {
     print $"  ($user.username): created"
   }
 }
+# Rebuild the DB from scratch so it is exactly the declared config: users removed from
+# the config are pruned for free, with no fragile `users ls` parsing. Safe because the DB
+# is fully config-derived (proxy auth, sharing disabled) and this runs before FileBrowser
+# starts (no sqlite lock, no live state to lose).
 def init_db [] {
-  if not ($env.FILEBROWSER_DB | path exists) {
-    fb config init
-    print "Database initialized"
-  }
+  if ($env.FILEBROWSER_DB | path exists) { rm --force $env.FILEBROWSER_DB }
+  fb config init
+  print "Database initialized (fresh)"
 }
 def main [] {
   init_db

@@ -13,4 +13,12 @@
       masquerade = true;
     };
   };
+
+  # Keep the WireGuard endpoint's record pointed at the current (dynamic) public IP.
+  sops.secrets."desec/token" = { };
+  selfhost.ddns.desec = {
+    enable = true;
+    tokenFile = config.sops.secrets."desec/token".path;
+    domains = [ config.selfhost.vpn.wireguard.endpoint ];
+  };
 }

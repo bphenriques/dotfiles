@@ -47,5 +47,11 @@ in
       url = "http://${hosts.jetkvm}";
       integrations.homepage.group = "Admin";
     };
+    share = {
+      displayName = "Share";
+      description = "Public file sharing (share-vm)";
+      url = "https://share.${private.settings.domain}";
+      integrations.homepage.group = "Admin";
+    };
   };
 }

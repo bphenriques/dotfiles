@@ -34,7 +34,7 @@ in
       description = "File Browser";
       port = 8085;
       subdomain = "files";
-      access.allowedGroups = with cfg.groups; [ guests users admin ];
+      access.allowedGroups = with cfg.groups; [ users admin ];
       forwardAuth.enable = true;
 
       # Upload size limit (4GB). A protection on top of Synology quota
@@ -42,32 +42,8 @@ in
       storage.smb = [ "shared" "bphenriques" ];
     };
 
-    selfhost.external.shared-files = {
-      displayName = "Shared Files";
-      description = "Shared Files";
-      url = "https://shared.${cfg.domain}";
-      integrations.homepage.icon = "filebrowser.svg";
-    };
-
-    # Guest access: separate subdomain with BasicAuth (no Pocket-ID required).
-    # BasicAuth's headerField sets Remote-User=guest, which FileBrowser uses for proxy auth.
-    # Guest user is pre-created by filebrowser-configure with read-only permissions and /shared scope.
-    sops.secrets."filebrowser/guest-htpasswd" = { owner = "traefik"; };
-    services.traefik.dynamicConfigOptions.http = {
-      routers.filebrowser-guest = {
-        rule = "Host(`shared.${cfg.domain}`)";
-        entryPoints = [ "websecure" ];
-        service = "filebrowser-svc";
-        middlewares = [ "filebrowser-guest-auth" "filebrowser-buffering" ];
-      };
-      middlewares.filebrowser-guest-auth.basicAuth = {
-        usersFile = config.sops.secrets."filebrowser/guest-htpasswd".path;
-        headerField = "Remote-User";
-        removeHeader = true;
-      };
-    };
-
     # Proxy auth via Traefik forwardAuth (Remote-User). Local bypass on 127.0.0.1 acceptable.
+    # Public/anonymous sharing is handled by share-vm, not a guest path here.
     services.filebrowser = {
       enable = true;
       settings = {

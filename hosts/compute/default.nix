@@ -7,6 +7,7 @@
     ../../profiles/nixos
     ../../profiles/nixos/headless
     ./selfhost
+    ./microvm
   ];
 
   # Basic setup

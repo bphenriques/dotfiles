@@ -57,6 +57,12 @@
       "pi-zero".User = "pi";
       "rg353m".User = "ark";
       "pixel".User = "bruno";
+      # share-vm microvm — only on compute's internal bridge, so jump through compute.
+      "share-vm" = {
+        HostName = "10.20.1.11";
+        User = "bphenriques";
+        ProxyJump = "compute";
+      };
     };
   };
 

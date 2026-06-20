@@ -36,6 +36,9 @@
     treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    microvm.url = "github:microvm-nix/microvm.nix"; # Lightweight, isolated guests hosted on compute
+    microvm.inputs.nixpkgs.follows = "nixpkgs";
  };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
@@ -43,7 +46,7 @@
       generators = import ./lib/generators.nix { inherit (nixpkgs) lib; };
       inherit (generators) forAllSystems readModulesAttrs;
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
-      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost;
+      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost mkMicrovmGuest;
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -79,6 +82,10 @@
         compute = mkNixosHost {
           hostName = "compute";
           configPath = ./hosts/compute;
+        };
+        share-vm = mkMicrovmGuest {
+          hostName = "share-vm";
+          configPath = ./hosts/share-vm;
         };
        };
     };

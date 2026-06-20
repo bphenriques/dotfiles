@@ -5,4 +5,5 @@ _: {
   pinned-github-releases = import ./jellyfin;
   pinned-container-images = import ./containers.nix;
   cook-cli-latest = import ./cook-cli.nix;
+  filebrowser-configure = import ./filebrowser-configure.nix;
 }

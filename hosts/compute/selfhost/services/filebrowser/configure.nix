@@ -3,7 +3,7 @@ let
   filebrowserDb = config.services.filebrowser.settings.database;
   enabledUsers = lib.filterAttrs (_: u: u.services.filebrowser.enable) config.selfhost.users;
 
-  configFile = pkgs.writeText "filebrowser-configure.json" (builtins.toJSON {
+  configFile = self.lib.builders.mkFilebrowserConfig {
     defaults = {
       scope = "/shared";
       permissions = {
@@ -18,24 +18,11 @@ let
     };
     users = lib.mapAttrsToList (_: u: {
       inherit (u) username;
-      inherit (u.services.filebrowser) scope;
-      inherit (u.services.filebrowser) admin;
+      inherit (u.services.filebrowser) scope admin;
     } // lib.optionalAttrs (u.services.filebrowser.permissions != null) {
       inherit (u.services.filebrowser) permissions;
     }) enabledUsers;
-    branding = {
-      name = "Shared Files";
-      disableExternal = true;
-      disableUsedPercentage = true;
-    };
-    viewMode = "mosaic";
-    singleClick = true;
-    hideDotfiles = true;
-    sorting = {
-      by = "modified";
-      asc = false;
-    };
-  });
+  };
 in
 {
   # One-shot setup: configures proxy auth and per-user scopes.
@@ -48,7 +35,7 @@ in
     description = "FileBrowser setup";
     requiredBy = [ "filebrowser.service" ];
     before = [ "filebrowser.service" ];
-    restartTriggers = [ configFile ./filebrowser-configure.nu ];
+    restartTriggers = [ configFile pkgs.filebrowser-configure ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -66,7 +53,6 @@ in
       FILEBROWSER_DB = filebrowserDb;
       FILEBROWSER_ROOT = config.services.filebrowser.settings.root;
     };
-    path = [ pkgs.filebrowser pkgs.nushell ];
-    script = ''nu ${self.lib.builders.writeNushellScript "filebrowser-configure" ./filebrowser-configure.nu}'';
+    script = lib.getExe pkgs.filebrowser-configure;
   };
 }
