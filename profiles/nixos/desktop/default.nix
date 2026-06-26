@@ -1,10 +1,10 @@
 { pkgs, config, ... }:
 {
   imports = [
-    ./greetd.nix        # Login manager
+    ./greetd.nix          # Login manager
     ./audio.nix
-    ./wayland.nix       # Base wayland settings
-    ./nautilus.nix      # Ideally I wish it was terminal based but xdg-desktop-portal-termfilechooser seems too old to consider
+    ./wayland.nix         # Base wayland settings
+    ./nautilus.nix        # Ideally I wish it was terminal based but xdg-desktop-portal-termfilechooser seems too old to consider
   ];
 
   networking.networkmanager.enable = true;    # More complete package to manage connectivity. Suitable for desktop.

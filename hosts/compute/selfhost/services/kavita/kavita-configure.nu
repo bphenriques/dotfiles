@@ -191,10 +191,10 @@ def provision_local_users [library_map: record, headers: record] {
   }
   for user in $config.localUsers {
     let password = open ($env.CREDENTIALS_DIRECTORY | path join $user.passwordCredential) | str trim
-    # Register user if not yet created (idempotent - 400 means already exists)
-    let existing_users = get_users $headers
-    let found = $existing_users | where username == $user.username | get 0?
+    mut users = get_users $headers
+    let found = $users | where username == $user.username | get 0?
     if $found == null {
+      # Register user (idempotent - 400 means already exists), then refresh to get the new record.
       let body = {
         username: $user.username
         password: $password
@@ -206,12 +206,12 @@ def provision_local_users [library_map: record, headers: record] {
       } else if $r.status != 400 {
         error make {msg: $"Failed to register local user ($user.username): ($r.status) - ($r.body)"}
       }
+      $users = get_users $headers
     } else {
       print $"  Local user '($user.username)' already exists"
     }
-    # Ensure roles and library access (re-fetch to get the user record after possible creation)
-    let kavita_users = get_users $headers
-    let kavita_user = $kavita_users | where username == $user.username | get 0?
+    # Ensure roles and library access
+    let kavita_user = $users | where username == $user.username | get 0?
     if $kavita_user != null {
       let library_ids = $user.libraries | each {|name| $library_map | get $name }
       let age_restriction = {ageRating: -1, includeUnknowns: true}

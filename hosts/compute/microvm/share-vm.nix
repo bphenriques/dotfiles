@@ -1,7 +1,3 @@
-# Monitoring for the share-vm guest. The VM owns its files and store on its own block
-# devices (see hosts/share-vm), so compute provisions no storage and shares nothing
-# in — it only scrapes the guest's node-exporter over the bridge and alerts on the
-# basics: offline, storage near the cap, sustained high CPU.
 { config, ... }:
 {
   selfhost.monitoring.scopes.share-vm = {
@@ -9,14 +5,14 @@
       {
         job_name = "share-vm";
         static_configs = [{
-          targets = [ "${config.custom.fleet.microvm.hosts.share-vm}:9100" ];
+          targets = [ "${config.custom.fleet.computeMicrovm.hosts.share-vm}:9100" ];
           labels.instance = "share-vm";
         }];
       }
       {
         job_name = "share-vm-traefik";
         static_configs = [{
-          targets = [ "${config.custom.fleet.microvm.hosts.share-vm}:9117" ];
+          targets = [ "${config.custom.fleet.computeMicrovm.hosts.share-vm}:9117" ];
           labels.instance = "share-vm";
         }];
       }

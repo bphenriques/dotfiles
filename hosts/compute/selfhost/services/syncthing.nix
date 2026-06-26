@@ -3,7 +3,7 @@ let
   serviceCfg = config.selfhost.services.syncthing;
   pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
-  syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.selfhost.users;
+  syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.custom.users;
 
   # Intentional as select the exact systems to sync
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
@@ -42,7 +42,7 @@ let
   };
 in
 {
-  options.selfhost.users = lib.mkOption {
+  options.custom.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options.services.syncthing = {
         enable = lib.mkEnableOption "Syncthing configuration for this user";

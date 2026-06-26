@@ -171,7 +171,7 @@ def ensure_users [headers: list<any>, users: list<any>] {
     if not $has_password_file {
       let oidc_matches = $oidc_users | where username == $cfg.username
       if ($oidc_matches | is-empty) {
-        error make {msg: $"User '$cfg.username' not found in OIDC users"}
+        error make {msg: $"User '($cfg.username)' not found in OIDC users"}
       }
     }
     let existing_matches = $existing.body | where Name == $cfg.username
@@ -181,27 +181,27 @@ def ensure_users [headers: list<any>, users: list<any>] {
       } else { random chars --length 32 }
       let r = http post $"($base_url)/Users/New" { Name: $cfg.username, Password: $initial_password } --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 200 {
-        error make {msg: $"Failed to create user '$cfg.username': ($r.status)"}
+        error make {msg: $"Failed to create user '($cfg.username)': ($r.status)"}
       }
-      print $"  '$cfg.username': created"
+      print $"  '($cfg.username)': created"
     } else {
       # passwordFile is the bootstrap password only; never reconcile it, so UI password changes persist
-      print $"  '$cfg.username': exists"
+      print $"  '($cfg.username)': exists"
     }
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
       let matches = $users.body | where Name == $cfg.username
       if ($matches | is-empty) {
-        error make {msg: $"User '$cfg.username' not found after creation"}
+        error make {msg: $"User '($cfg.username)' not found after creation"}
       }
       let user = $matches | first
       let updated_policy = $user.Policy | merge $cfg.policy
       let r = http post $"($base_url)/Users/($user.Id)/Policy" $updated_policy --content-type application/json --headers $headers --full --allow-errors
       if $r.status != 204 {
-        error make {msg: $"Failed to update policy for '$cfg.username': ($r.status)"}
+        error make {msg: $"Failed to update policy for '($cfg.username)': ($r.status)"}
       }
-      print $"  '$cfg.username': policy updated"
+      print $"  '($cfg.username)': policy updated"
     }
   }
 }

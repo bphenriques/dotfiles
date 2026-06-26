@@ -19,7 +19,7 @@
 
   # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts (lan + microvm guests)
   networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or [ ]) ++ [ name ]; }) { } (
-    config.custom.fleet.lan.hosts // config.custom.fleet.microvm.hosts
+    config.custom.fleet.lan.hosts // config.custom.fleet.computeMicrovm.hosts
   );
 
   boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.

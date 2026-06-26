@@ -4,7 +4,7 @@
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   # Allow remote deployment via `nixos-rebuild --target-host root@...`
-  users.users.root.openssh.authorizedKeys.keys = config.custom.fleet.authorizedSSHKeys;
+  users.users.root.openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
 
   # Prevent accidental suspend/hibernate on headless server
   systemd.sleep.settings.Sleep = {

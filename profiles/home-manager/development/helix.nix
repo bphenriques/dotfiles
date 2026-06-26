@@ -53,7 +53,6 @@
         bufferline = "multiple";
         color-modes = true;
         cursorline = true;
-        cursorcolumn = true;
         insert-final-newline = true;
         line-number = "absolute";
         rulers = [ 120 ];

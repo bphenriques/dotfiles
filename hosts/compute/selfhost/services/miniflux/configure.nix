@@ -2,45 +2,33 @@
 let
   serviceCfg = config.selfhost.services.miniflux;
   oidcCfg = config.selfhost.auth.oidc;
-  enabledUsers = lib.filterAttrs (_: u: u.services.miniflux.enable) config.selfhost.users;
+
+  # Per-user Miniflux personalization is a consumer concern, declared in custom.users (not selfhost-nix).
+  settingsUsers = lib.filterAttrs (_: u: (u.selfhost.apps.miniflux or { }) != { }) config.custom.users;
 
   adminUsernameFile = pkgs.writeText "miniflux-admin-username" "admin";
-
-  userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (builtins.toJSON (lib.mapAttrsToList (_: u:
-    { inherit (u) username; } // u.services.miniflux.settings // { is_admin = u.isAdmin; }
-  ) enabledUsers));
+  userSettingsFile = pkgs.writeText "miniflux-user-settings.json" (
+    builtins.toJSON (
+      lib.mapAttrsToList (
+        _: u: { inherit (u) username; } // u.selfhost.apps.miniflux // { is_admin = u.isAdmin; }
+      ) settingsUsers
+    )
+  );
 in
 {
-  selfhost = {
-    runtimeSecrets.miniflux-admin-password = {
-      regenerateIfMissing = false;
-      restartUnits = [ "miniflux-configure.service" ];
-    };
-
-    runtimeTemplates."miniflux-admin-credentials.env" = {
-      content = ''
-        ADMIN_USERNAME=admin
-        ADMIN_PASSWORD=${config.selfhost.runtimePlaceholder.miniflux-admin-password}
-      '';
-      restartUnits = [ "miniflux.service" ];
-    };
-  };
-
-  services.miniflux = {
-    adminCredentialsFile = config.selfhost.runtimeTemplates."miniflux-admin-credentials.env".path;
-    config = {
-      DISABLE_LOCAL_AUTH = 0;
-      CREATE_ADMIN = true;
-    };
-  };
+  # Re-run when the app's admin password changes (the selfhost-nix app owns the secret itself).
+  selfhost.runtimeSecrets.miniflux-admin-password.restartUnits = [ "miniflux-configure.service" ];
 
   systemd.services.miniflux-configure = {
-    description = "Miniflux setup";
+    description = "Apply per-user Miniflux settings";
     wantedBy = [ "miniflux.service" ];
     after = [ "miniflux.service" ];
     requires = [ "miniflux.service" ];
     partOf = [ "miniflux.service" ];
-    restartTriggers = [ userSettingsFile ./miniflux-configure.nu ];
+    restartTriggers = [
+      userSettingsFile
+      ./miniflux-configure.nu
+    ];
     startLimitIntervalSec = 300;
     startLimitBurst = 3;
     serviceConfig = {

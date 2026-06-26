@@ -169,11 +169,13 @@ const PERM_AUTO_APPROVE_4K_TV = 131072
 const PERM_RECENT_VIEW = 67108864
 # Composite permission sets
 const REQUEST_ALL = $PERM_REQUEST bit-or $PERM_REQUEST_4K
+
 const AUTO_APPROVE_ALL = (
   (
     $PERM_AUTO_APPROVE bit-or $PERM_AUTO_APPROVE_MOVIE bit-or $PERM_AUTO_APPROVE_TV bit-or $PERM_AUTO_APPROVE_4K bit-or $PERM_AUTO_APPROVE_4K_MOVIE bit-or $PERM_AUTO_APPROVE_4K_TV
   )
 )
+
 # Mask of all bits managed by this script (used to clear before applying desired state)
 const MANAGED_MASK = ($REQUEST_ALL bit-or $PERM_REQUEST_ADVANCED bit-or $AUTO_APPROVE_ALL bit-or $PERM_RECENT_VIEW)
 def configure_user_permissions [users: record] {

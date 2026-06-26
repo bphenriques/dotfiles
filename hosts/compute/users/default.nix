@@ -12,7 +12,7 @@ in
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
       ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
 
-    openssh.authorizedKeys.keys = config.custom.fleet.authorizedSSHKeys;
+    openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };
 
   home-manager.users.bphenriques = {

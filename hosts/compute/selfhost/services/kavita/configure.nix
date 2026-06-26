@@ -11,7 +11,7 @@ let
   # Libraries available to all users
   publicLibraries = [ "Books" "Comics" "Manga" ];
 
-  enabledUsers = lib.filterAttrs (_: u: u.services.kavita.enable) config.selfhost.users;
+  enabledUsers = lib.filterAttrs (_: u: u.services.kavita.enable) config.custom.users;
   localUsers = lib.filterAttrs (_: u: u.services.kavita.passwordFile != null) enabledUsers;
 
   # Admin user is for API bootstrapping only (initial setup + config reconciliation)
@@ -58,8 +58,10 @@ let
       libraries = publicLibraries;
     }) localUsers;
 
-    # OIDC users who should receive the Admin role (based on selfhost group membership)
-    oidcAdminUsernames = lib.mapAttrsToList (_: u: u.username) (lib.filterAttrs (_: u: u.isAdmin) enabledUsers);
+    # OIDC users who get the Admin role (services.kavita.admin, which defaults to the user's fleet isAdmin).
+    oidcAdminUsernames = lib.mapAttrsToList (_: u: u.username) (
+      lib.filterAttrs (_: u: u.services.kavita.admin) enabledUsers
+    );
   });
 in
 {

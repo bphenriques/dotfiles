@@ -1,33 +1,42 @@
-# FileBrowser: a single multi-user instance, localhost only — Traefik is the sole reverse
-# proxy and the only thing that sets the trusted Remote-User header. Files live on the
-# VM-owned /srv/share. Curation is done over sshfs as this user (see ../../default.nix),
-# so the upstream module keeps its own 0700/0077 hardening untouched.
-{ lib, ... }:
+{ config, inputs, private, shareVm, ... }:
 let
-  inherit (import ../../lib.nix { inherit lib; }) filesRoot fbPort fbDb folders;
+  inherit (shareVm) filesRoot;
 in
 {
-  imports = [ ./configure.nix ];
-
-  # noexec/nosuid/nodev: the data volume holds others' uploads — data, never an
-  # execution path, even inside the sealed VM (device/fsType come from microvm.nix).
-  fileSystems."/srv/share".options = [ "noexec" "nosuid" "nodev" ];
+  imports = [ inputs.selfhost-nix.nixosModules.filebrowser-multiuser ];
 
   services.filebrowser = {
     enable = true;
     settings = {
       address = "127.0.0.1";
-      port = fbPort;
+      port = 8085;
       root = filesRoot;
-      database = fbDb;
+      database = "/var/lib/filebrowser/filebrowser.db";
+      branding = {
+        files = ./branding;
+        disableExternal = true;
+        disableUsedPercentage = true;
+      };
+      viewMode = "mosaic";
+      singleClick = true;
+      hideDotfiles = true;
+      sorting = { by = "modified"; asc = false; };
     };
   };
-  # localhost-only egress: a compromised FileBrowser can't exfiltrate or reach tailnet/LAN.
-  systemd.services.filebrowser.serviceConfig = {
-    IPAddressDeny = "any";
-    IPAddressAllow = "localhost";
+
+  services.filebrowser-multiuser = {
+    enable = true;
+    inherit (private.settings.filebrowser) users;
+    unlistedScope = "/.unlisted"; # moot — BasicAuth admits only listed users; safe sentinel if not
   };
 
-  # Pre-create the shared folders, owner-only like the module's root.
-  systemd.tmpfiles.rules = map (f: "d ${filesRoot}/${f} 0700 filebrowser filebrowser -") folders;
+  # Host-created storage (folders declared privately); content is curated via laptop sshfs.
+  systemd.tmpfiles.rules = builtins.map
+    (f: "d ${filesRoot}/${f} 0700 ${config.services.filebrowser.user} ${config.services.filebrowser.group} -")
+    private.settings.filebrowser.folders;
+
+  # the data volume holds others' uploads — data, never an execution path
+  fileSystems.${filesRoot}.options = [ "noexec" "nosuid" "nodev" ];
+  # localhost-only egress: a compromised FileBrowser can't exfiltrate or reach tailnet/LAN
+  systemd.services.filebrowser.serviceConfig = { IPAddressDeny = "any"; IPAddressAllow = "localhost"; };
 }

@@ -5,7 +5,7 @@ let
   sonarrCfg = config.selfhost.services.sonarr;
   jellyfinCfg = config.selfhost.services.jellyfin;
   mediaCfg = config.custom.media;
-  seerrUsers = lib.filterAttrs (_: u: u.services.seerr.enable) config.selfhost.users;
+  seerrUsers = lib.filterAttrs (_: u: u.services.seerr.enable) config.custom.users;
 
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;

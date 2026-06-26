@@ -13,8 +13,13 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - Ensure consistency with existing patterns—read neighboring files before writing new code
 - Inline host-specific logic rather than creating non-reusable modules
 - Single-responsibility modules; split into schema + consumers when needed
-- Avoid redundant comments if the code is self-explanatory
-- If there is a need for comment, try to keep them one-line. Should be clear yet brief.
+
+## Comments
+
+- Default to none. If the code is clear it gets no comment; every comment must earn its place.
+- Add one only for what the code can't say: the *why*, a non-obvious constraint, or a cross-file pointer. Never restate clear code, echo an option's name as a label, or repeat architecture/design that belongs in a README.
+- When you do comment, one line and succinct—cut every word the sentence survives without.
+- Architecture and design choices (the why/how of a host or subsystem, the threat model, the network posture) live in that host's `README.md`, not in module headers. A module header is at most a one-line orientation plus a pointer to the README.
 
 ## Shell Scripts
 

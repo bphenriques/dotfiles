@@ -4,7 +4,7 @@ let
   selfhostMounts = config.selfhost.storage.smb.mounts;
   serviceCfg = config.selfhost.services.immich;
 
-  enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.selfhost.users;
+  enabledUsers = lib.filterAttrs (_: u: u.services.immich.enable) config.custom.users;
   usersWithMounts = lib.filterAttrs (username: _: selfhostMounts ? ${username}) enabledUsers;
 
   # Admin user for API bootstrapping; OIDC users get admin via isAdmin flag

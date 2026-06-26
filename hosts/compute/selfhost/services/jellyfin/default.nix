@@ -10,18 +10,20 @@ in
     ./configure.nix
   ];
 
-  options.selfhost.users = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options.services.jellyfin = {
-        enable = lib.mkEnableOption "Jellyfin account for this user";
-        # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
-        passwordFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
+  options.custom.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.services.jellyfin = {
+          enable = lib.mkEnableOption "Jellyfin account for this user";
+          # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
+          passwordFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
+          };
         };
-      };
-    });
+      }
+    );
   };
 
   config = {

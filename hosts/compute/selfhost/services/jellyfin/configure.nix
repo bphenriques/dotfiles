@@ -3,7 +3,7 @@ let
   serviceCfg = config.selfhost.services.jellyfin;
   pathsCfg = config.custom.paths;
   oidcCfg = config.selfhost.auth.oidc;
-  enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.selfhost.users;
+  enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.users;
 
   jellyfinConfig = {
     serverName = "Jellyfin";

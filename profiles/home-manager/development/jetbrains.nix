@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
-  home.packages = [ (pkgs.jetbrains.idea-oss.override { forceWayland = true; }) ];
+  home.packages = [ pkgs.jetbrains.idea-oss ];
 
   custom.programs.niri.windowRules.byApp = [
     ''

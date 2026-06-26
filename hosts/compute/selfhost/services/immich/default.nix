@@ -6,10 +6,12 @@ in
 {
   imports = [ ./configure.nix ];
 
-  options.selfhost.users = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
-    });
+  options.custom.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
+      }
+    );
   };
 
   config = {

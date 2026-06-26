@@ -37,7 +37,7 @@ in
         monthly = "1 year";
         yearly = "2 years";
       };
-      services = [ "gitea" "home-assistant" "miniflux" "radarr" "radicale" "sonarr" ];
+      services = [ "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
       bindings = {
         "/system/homelab-secrets"               = config.selfhost.runtimeSecretsDir;
         "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;

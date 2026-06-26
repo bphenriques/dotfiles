@@ -10,17 +10,27 @@ in
 {
   imports = [ ./configure.nix ];
 
-  options.selfhost.users = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options.services.kavita = {
-        enable = lib.mkEnableOption "Kavita permissions for this user";
-        passwordFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          description = "Path to file containing Kavita password for local authentication";
-        };
-      };
-    });
+  options.custom.users = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule (
+        { config, ... }:
+        {
+          options.services.kavita = {
+            enable = lib.mkEnableOption "Kavita permissions for this user";
+            passwordFile = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Path to file containing Kavita password for local authentication";
+            };
+            admin = lib.mkOption {
+              type = lib.types.bool;
+              default = config.isAdmin;
+              description = "Grant the Kavita Admin role; defaults to the user's fleet isAdmin.";
+            };
+          };
+        }
+      )
+    );
   };
 
   config = {

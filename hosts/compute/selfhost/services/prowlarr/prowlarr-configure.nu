@@ -13,10 +13,8 @@ let headers = [X-Api-Key, $api_key]
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Prowlarr... ($attempt)"
-    let r = try {
-      http get $"($base_url)/api/v1/system/status" --headers $headers
-      return
-    } catch { null }
+    let r = try { http get $"($base_url)/api/v1/system/status" --headers $headers --max-time 2sec --full --allow-errors } catch { null }
+    if $r != null and $r.status == 200 { return }
     sleep 2sec
   }
   error make {msg: "Prowlarr failed to start after 30 attempts"}

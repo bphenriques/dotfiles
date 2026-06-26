@@ -45,7 +45,9 @@ in
     (mkPanel {
       id = 6;
       title = "HTTP responses by status (watch 401)";
-      expr = ''sum by (code) (rate(traefik_service_requests_total{${inst}}[5m]))'';
+      # entrypoint, not service: auth 401s are rejected by middleware before any backend,
+      # so they only appear at the entrypoint level (service_* counts backend hits only).
+      expr = ''sum by (code) (rate(traefik_entrypoint_requests_total{${inst}}[5m]))'';
       legend = "{{code}}";
       unit = "reqps";
       gridPos = { x = w; y = 10; inherit w h; };

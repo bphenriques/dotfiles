@@ -1,9 +1,20 @@
-{ lib, ... }:
+{ config, lib, ... }:
+let
+  fleet = config.custom.fleet;
+in
 {
   options.custom.fleet = {
-    authorizedSSHKeys = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      description = "SSH public keys authorized across all hosts";
+    ssh = {
+      authorizedKeys = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        description = "SSH public keys authorized across all hosts";
+      };
+
+      hostKeys = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        description = "SSH host public keys, by hostname, for known-hosts pinning";
+      };
     };
 
     dns = lib.mkOption {
@@ -23,7 +34,7 @@
       };
     };
 
-    microvm = {
+    computeMicrovm = {
       bridge = {
         name = lib.mkOption {
           type = lib.types.str;
@@ -45,4 +56,13 @@
       };
     };
   };
+
+  # Pin fleet host keys (name + its LAN/bridge IPs) so SSH verifies against the registry
+  # rather than TOFU — stable across rebuilds, and a rotation is a loud registry edit.
+  config.programs.ssh.knownHosts = lib.mapAttrs (name: publicKey: {
+    hostNames = [ name ]
+      ++ lib.optional (fleet.lan.hosts ? ${name}) fleet.lan.hosts.${name}
+      ++ lib.optional (fleet.computeMicrovm.hosts ? ${name}) fleet.computeMicrovm.hosts.${name};
+    inherit publicKey;
+  }) fleet.ssh.hostKeys;
 }

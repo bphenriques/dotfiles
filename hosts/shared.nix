@@ -1,8 +1,19 @@
 {
-  authorizedSSHKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfNK2CGbIOfCrFsuWsX8bxqod4vtRJYYXpO54NWUdIY android-phone"
-  ];
+  ssh = {
+    authorizedKeys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfNK2CGbIOfCrFsuWsX8bxqod4vtRJYYXpO54NWUdIY android-phone"
+    ];
+
+    # Host public keys for known-hosts pinning (public; replaces TOFU). Capture once at a
+    # host's bootstrap: ssh-keyscan -t ed25519 <host>. share-vm's doubles as its sops age
+    # identity (dotfiles-private). A key rotation is a deliberate edit here, never a silent
+    # mount/SSH failure.
+    hostKeys = {
+      compute  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFOGTI4xCPsaWL5OASOh+cRDTKVVg9aioxo0eQfnGmry";
+      share-vm = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIArF1q4AmXnUZIDirGyY8JLxD8lFhIvrrPMjZ0avZR/G";
+    };
+  };
 
   dns = "1.1.1.1";
 
@@ -18,9 +29,10 @@
     };
   };
 
-  # Microvm guests live on a compute-internal bridge; reachable from the fleet
-  # only via compute (ProxyJump / Traefik), internet via NAT through bond0.
-  microvm = {
+  # Microvm guests sit on a compute-internal bridge: reached from the fleet only by
+  # initiating from compute (ssh -J), egress to the internet via NAT through bond0, never
+  # the LAN (see hosts/compute/microvm/firewall.nix).
+  computeMicrovm = {
     bridge = {
       name = "compute-microvm";   # 15-char IFNAMSIZ limit
       gateway = "10.20.1.1";

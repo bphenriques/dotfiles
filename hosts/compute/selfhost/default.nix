@@ -1,4 +1,51 @@
 { config, pkgs, lib, self, private, ... }:
+let
+  # Full per-user data; framework keys go to selfhost.users, the `custom` key to custom.users.
+  rawUsers = private.settings.users // {
+    home = {
+      email = "home@localhost";
+      firstName = "Home";
+      lastName = "User";
+      groups = [ config.selfhost.groups.users ];
+      auth.oidc.enable = false; # ad-hoc user, no OIDC account
+      custom.services.jellyfin = {
+        enable = true;
+        passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
+      };
+      custom.services.seerr = {
+        enable = true;
+        permissions = {
+          autoApprove = true;
+          advancedRequests = true;
+          viewRecentlyAdded = true;
+        };
+      };
+    };
+    guest = {
+      email = "guest@localhost";
+      firstName = "Guest";
+      lastName = "User";
+      groups = [ config.selfhost.groups.guests ];
+      auth.oidc.enable = false;
+      custom.services.jellyfin = {
+        enable = true;
+        passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
+      };
+      custom.services.kavita = {
+        enable = true;
+        passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
+      };
+      custom.services.seerr = {
+        enable = true;
+        permissions = {
+          autoApprove = false;
+          advancedRequests = false;
+          viewRecentlyAdded = true;
+        };
+      };
+    };
+  };
+in
 {
   imports = [
     ./datastores
@@ -7,6 +54,21 @@
     ./monitoring
     ../../../profiles/nixos/selfhost-smb-client.nix
   ];
+
+  # Consumer-owned per-user (not selfhost-nix); joined with selfhost.users by name in our configures.
+  custom.users = lib.mapAttrs (
+    n: u:
+    # Reuse the framework's derived identity (username/name/isAdmin) rather than recomputing it.
+    {
+      inherit (config.selfhost.users.${n})
+        username
+        email
+        name
+        isAdmin
+        ;
+    }
+    // (u.custom or { })
+  ) rawUsers;
 
   custom.fleet = import ../../shared.nix;
   custom.locale = {
@@ -73,58 +135,8 @@
       };
     };
 
-    users = private.settings.users // {
-      home = {
-        email = "home@localhost";
-        firstName = "Home";
-        lastName = "User";
-        groups = [ config.selfhost.groups.users ];
-        services = {
-          oidc.enable = false; # ad-hoc user, no OIDC account
-          jellyfin = {
-            enable = true;
-            passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
-          };
-          seerr = {
-            enable = true;
-            permissions = {
-              autoApprove = true;
-              advancedRequests = true;
-              viewRecentlyAdded = true;
-            };
-          };
-        };
-      };
-      guest = {
-        email = "guest@localhost";
-        firstName = "Guest";
-        lastName = "User";
-        groups = [ config.selfhost.groups.guests ];
-        services = {
-          oidc.enable = false;
-          jellyfin = {
-            enable = true;
-            passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
-          };
-          kavita = {
-            enable = true;
-            passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
-          };
-          seerr = {
-            enable = true;
-            permissions = {
-              autoApprove = false;
-              advancedRequests = false;
-              viewRecentlyAdded = true;
-            };
-          };
-          filebrowser = {
-            enable = true;
-            permissions = { create = true; delete = false; rename = false; modify = false; execute = false; share = false; download = true; };
-          };
-        };
-      };
-    };
+    # Framework view: drop the consumer `custom` key (it goes to custom.users above).
+    users = lib.mapAttrs (_: u: builtins.removeAttrs u [ "custom" ]) rawUsers;
   };
 
   virtualisation = {
@@ -155,8 +167,8 @@
   # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
 
-  # Bootstrap-only creds: set at account creation, then changed in-app. Never re-read, so unlike the admin
-  # secret these keep regenerateIfMissing's default (true) — a lost file regenerates instead of failing.
+  # Bootstrap-only creds: set at account creation, then changed in-app. Never re-read, so a lost file may
+  # regenerate (regenerateIfMissing's default, true) instead of failing the activation.
   selfhost.runtimeSecrets = {
     home-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
     guest-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];

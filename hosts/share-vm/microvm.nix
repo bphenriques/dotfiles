@@ -1,23 +1,15 @@
-_:
+{ lib, pkgs, shareVm, ... }:
 let
-  inherit (import ../shared.nix) microvm dns;
-  vmBridge = microvm.bridge;
-  vmIp = microvm.hosts.share-vm;
+  inherit (import ../shared.nix) computeMicrovm dns;
+  vmBridge = computeMicrovm.bridge;
+  vmIp = computeMicrovm.hosts.share-vm;
   vmMac = "02:00:00:00:01:11";  # also referenced by microvm.interfaces below
+  tapId = "vm-share";           # host tap; enslaved to the bridge in binScripts.tap-up
 in
 {
   networking = {
     useDHCP = false;
     useNetworkd = true;
-    nftables.enable = true;
-    # SSH only from compute over the bridge (the laptop reaches it via
-    # `ssh -J compute`). The public path is localhost-only (Funnel → Traefik :8080);
-    # the tailnet (100.x) and internet match no rule.
-    firewall = {
-      enable = true;
-      # SSH + metrics (node-exporter :9100, Traefik :9117), compute-over-the-bridge only.
-      extraInputRules = "ip saddr ${vmBridge.gateway} tcp dport { 22, 9100, 9117 } accept";
-    };
   };
   systemd.network = {
     enable = true;
@@ -32,36 +24,38 @@ in
   };
 
   microvm = {
-    # cloud-hypervisor: minimal rust-vmm VMM (memory-safe, own seccomp) like
-    # Firecracker, but supports live memory ballooning — Firecracker can't, which was
-    # the dealbreaker. Still sealed: no shares, store on a read-only disk, data
-    # VM-owned; runs unprivileged (microvm:kvm) under the host sandbox.
+    # cloud-hypervisor over Firecracker for live memory ballooning (see README); runs
+    # unprivileged (microvm:kvm) under the host sandbox.
     hypervisor = "cloud-hypervisor";
     vcpu = 2;
     mem = 1536;            # base footprint: Traefik + FileBrowser + tailscale
-    balloon = true;        # live memory resize without a reboot (ch-remote resize --balloon)
-    deflateOnOOM = true;   # hand memory back automatically if the guest is under pressure
+    balloon = true;        # live resize, no reboot: ch-remote resize --balloon
+    deflateOnOOM = true;   # return memory under guest pressure
 
-    # Plain tap; compute enslaves it to the bridge (see hosts/compute/microvm.nix).
+    # Guest CID for the AF_VSOCK control channel: lets cloud-hypervisor systemd-notify
+    # readiness, so microvm@share-vm goes active only once the guest is actually up.
+    vsock.cid = 3;
+
+    # Plain tap (cloud-hypervisor can't use type = "bridge"); enslave it to compute's bridge
+    # via microvm.nix's documented tap-up hook — appends to the generated tap-creation script,
+    # so it runs on the host right after the tap comes up.
     interfaces = [{
       type = "tap";
-      id = "vm-share";
+      id = tapId;
       mac = vmMac;
     }];
+    binScripts.tap-up = lib.mkAfter ''
+      ${lib.getExe' pkgs.iproute2 "ip"} link set dev ${tapId} master ${vmBridge.name}
+    '';
 
-    # No host shares: storeOnDisk is implied, so /nix/store rides a read-only image
-    # instead of a virtiofs mount from compute. The box shares nothing in.
+    # No host shares: /nix/store rides a read-only image (storeOnDisk), nothing mounted in.
     shares = [ ];
 
-    # All data the VM owns, on its own block devices (labelled for stable mapping):
-    #   share        — the shared files; size is the hard storage cap (uploads fail
-    #                  at the cap, physical use grows with data). Curated out to the
-    #                  NAS over sshfs, so it needs no compute-side backup.
-    #   share-state  — SSH host key (sops age identity) + per-scope credentials.
-    #   ts-state     — Tailscale node identity, so the Funnel URL stays stable.
+    # VM-owned block devices, labelled for stable mapping: shared files (size = hard cap),
+    # state (host key + creds), and the Tailscale identity (keeps the Funnel URL stable).
     volumes = [
-      { image = "share-data.img"; label = "share"; mountPoint = "/srv/share"; size = 25 * 1024; }
-      { image = "share-state.img"; label = "share-state"; mountPoint = "/var/lib/share"; size = 1024; }
+      { image = "share-data.img"; label = "share"; mountPoint = shareVm.filesRoot; size = 25 * 1024; }
+      { image = "share-state.img"; label = "share-state"; mountPoint = shareVm.dataRoot; size = 1024; }
       { image = "tailscale-state.img"; label = "ts-state"; mountPoint = "/var/lib/tailscale"; size = 256; }
     ];
   };
