@@ -8,39 +8,44 @@ let
       lastName = "User";
       groups = [ config.selfhost.groups.users ];
       auth.oidc.enable = false; # ad-hoc user, no OIDC account
-      custom.services.jellyfin = {
-        enable = true;
-        passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
-      };
-      custom.services.seerr = {
-        enable = true;
-        permissions = {
-          autoApprove = true;
-          advancedRequests = true;
-          viewRecentlyAdded = true;
+      custom = {
+        services.jellyfin = {
+          enable = true;
+          passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
+        };
+        services.seerr = {
+          enable = true;
+          permissions = {
+            autoApprove = true;
+            advancedRequests = true;
+            viewRecentlyAdded = true;
+          };
         };
       };
     };
+
     guest = {
       email = "guest@localhost";
       firstName = "Guest";
       lastName = "User";
       groups = [ config.selfhost.groups.guests ];
       auth.oidc.enable = false;
-      custom.services.jellyfin = {
-        enable = true;
-        passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
-      };
-      custom.services.kavita = {
-        enable = true;
-        passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
-      };
-      custom.services.seerr = {
-        enable = true;
-        permissions = {
-          autoApprove = false;
-          advancedRequests = false;
-          viewRecentlyAdded = true;
+      custom = {
+        services.jellyfin = {
+          enable = true;
+          passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
+        };
+        services.kavita = {
+          enable = true;
+          passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
+        };
+        services.seerr = {
+          enable = true;
+          permissions = {
+            autoApprove = false;
+            advancedRequests = false;
+            viewRecentlyAdded = true;
+          };
         };
       };
     };
@@ -55,42 +60,50 @@ in
     ../../../profiles/nixos/selfhost-smb-client.nix
   ];
 
-  # Consumer-owned per-user (not selfhost-nix); joined with selfhost.users by name in our configures.
-  custom.users = lib.mapAttrs (
-    n: u:
-    # Reuse the framework's derived identity (username/name/isAdmin) rather than recomputing it.
-    {
-      inherit (config.selfhost.users.${n})
-        username
-        email
-        name
-        isAdmin
-        ;
-    }
-    // (u.custom or { })
-  ) rawUsers;
+  custom = {
+    fleet = import ../../shared.nix;
+    locale = {
+      timezone = config.time.timeZone;
+      language = "pt-PT";
+      currency = "EUR";
+      latitude = 38.736946;
+      longitude = -9.142685;
+    };
 
-  custom.fleet = import ../../shared.nix;
-  custom.locale = {
-    timezone = config.time.timeZone;
-    language = "pt-PT";
-    currency = "EUR";
-    latitude = 38.736946;
-    longitude = -9.142685;
+    # Consumer-owned per-user (not selfhost-nix); joined with selfhost.users by name in our configures.
+    users = lib.mapAttrs (n: u:
+      { inherit (config.selfhost.users.${n}) username email name isAdmin; } // (u.custom or { })
+    ) rawUsers;
   };
 
   selfhost = {
     enable = true;
     inherit (private.settings) domain;
 
-    auth.oidc.pocket-id.enable = true;
-    auth.forwardAuth.tinyauth.enable = true;
+    # Curated apps that need no host-specific config beyond enabling them (per-user opt-ins live on
+    # selfhost.users.<name>.apps.<name>); apps with deployment overrides keep their own ./services file.
+    apps.radicale.enable = true;
+    apps.miniflux.enable = true;
+    apps.bentopdf.enable = true;
 
-    notify.ntfy.enable = true;
-    notify.topics = {
-      media.public = true;
-      download.public = false;
-      admin.public = false;
+    auth = {
+      forwardAuth.tinyauth.enable = true;
+      oidc = {
+        pocket-id.enable = true;
+        rotation = {
+          enable = true; # weekly @ 03:00; alert to the admin topic on failure
+          notifyTopic = "admin";
+        };
+      };
+    };
+
+    notify = {
+      ntfy.enable = true;
+      topics = {
+        media.public = true;
+        download.public = false;
+        admin.public = false;
+      };
     };
 
     mail = private.settings.smtp // {

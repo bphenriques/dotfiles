@@ -1,14 +1,14 @@
 { config, ... }:
 let
   pathsCfg = config.custom.paths;
-  selfhostMounts = config.selfhost.storage.smb.mounts;
 in
 {
-  selfhost.apps.transmission.enable = true;
-
-  selfhost.services.transmission = {
-    storage.smb = [ "media" ];
-    integrations.notify.topic = "download"; # our taxonomy; the app defaults to "downloads" when present
+  selfhost = {
+    apps.transmission.enable = true;
+    services.transmission = {
+      storage.smb = [ "media" ];
+      integrations.notify.topic = "download"; # our taxonomy; the app defaults to "downloads" when present
+    };
   };
 
   # Deployment specifics the app doesn't proxy: where downloads land, seeding policy, the storage backing.
@@ -23,5 +23,5 @@ in
     umask = 2; # group-writable downloads for the media group (arr/jellyfin share)
   };
 
-  users.users.${config.services.transmission.user}.extraGroups = [ selfhostMounts.media.group ];
+  users.users.${config.services.transmission.user}.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
 }

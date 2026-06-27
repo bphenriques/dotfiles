@@ -10,7 +10,6 @@ in
     ./jellyfin
     ./kapowarr.nix
     ./kavita
-    ./miniflux
     ./seerr
     ./prowlarr
     ./romm
@@ -19,12 +18,10 @@ in
     ./transmission.nix
     ./wireguard.nix
     ./home-assistant.nix
-    ./radicale
     ./cook-recipes.nix
-    ./filebrowser
-    ./gitea
+    ./filebrowser.nix
+    ./gitea.nix
     ./papra.nix
-    ./bentopdf.nix
     ./mympd.nix
   ];
 

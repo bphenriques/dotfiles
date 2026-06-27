@@ -18,10 +18,6 @@ in
   users.users.cook-recipes = { isSystemUser = true; group = "cook-recipes"; };
   users.groups.cook-recipes = { };
 
-  # `cook build web` renders the library to a self-contained static site, excluding the
-  # dynamic shopping-list/pantry/editing features. Rebuilt from the SMB library rather than
-  # built at eval time (recipes are runtime data, not in the store); the timer below refreshes
-  # it since inotify does not work on SMB mounts.
   systemd.services.cook-recipes-build = {
     description = "Build static Cook recipe site";
     wantedBy = [ "multi-user.target" ];
@@ -32,9 +28,7 @@ in
       User = "cook-recipes";
       SupplementaryGroups = [ config.selfhost.storage.smb.mounts.media.group ];
       StateDirectory = "cook-recipes";
-      # Rebuild from scratch so recipes deleted upstream stop being served (cook build web
-      # overwrites but does not prune).
-      ExecStartPre = "${pkgs.coreutils}/bin/rm -rf ${siteDir}";
+      ExecStartPre = "${pkgs.coreutils}/bin/rm -rf ${siteDir}"; # Rebuild from scratch to cleanup deleted files
       ExecStart = "${pkgs.cook-cli}/bin/cook build web --base-path ${recipesDir}/library ${siteDir}";
       ProtectSystem = "strict";
       ProtectHome = true;

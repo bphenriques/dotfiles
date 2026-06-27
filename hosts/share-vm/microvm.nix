@@ -24,11 +24,9 @@ in
   };
 
   microvm = {
-    # cloud-hypervisor over Firecracker for live memory ballooning (see README); runs
-    # unprivileged (microvm:kvm) under the host sandbox.
     hypervisor = "cloud-hypervisor";
     vcpu = 2;
-    mem = 1536;            # base footprint: Traefik + FileBrowser + tailscale
+    mem = 1536;
     balloon = true;        # live resize, no reboot: ch-remote resize --balloon
     deflateOnOOM = true;   # return memory under guest pressure
 
@@ -48,15 +46,13 @@ in
       ${lib.getExe' pkgs.iproute2 "ip"} link set dev ${tapId} master ${vmBridge.name}
     '';
 
-    # No host shares: /nix/store rides a read-only image (storeOnDisk), nothing mounted in.
-    shares = [ ];
+    shares = [ ]; # No host shares. The image contains everything (storeOnDisk).
 
-    # VM-owned block devices, labelled for stable mapping: shared files (size = hard cap),
-    # state (host key + creds), and the Tailscale identity (keeps the Funnel URL stable).
+    # Stable volumes
     volumes = [
-      { image = "share-data.img"; label = "share"; mountPoint = shareVm.filesRoot; size = 25 * 1024; }
-      { image = "share-state.img"; label = "share-state"; mountPoint = shareVm.dataRoot; size = 1024; }
-      { image = "tailscale-state.img"; label = "ts-state"; mountPoint = "/var/lib/tailscale"; size = 256; }
+      { image = "share-data.img"; label = "share"; mountPoint = shareVm.filesRoot; size = 25 * 1024; }      # Shared Data
+      { image = "share-state.img"; label = "share-state"; mountPoint = shareVm.dataRoot; size = 1024; }     # State (host key and creds)
+      { image = "tailscale-state.img"; label = "ts-state"; mountPoint = "/var/lib/tailscale"; size = 256; } # Tailscale Identity
     ];
   };
 }

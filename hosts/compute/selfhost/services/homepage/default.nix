@@ -2,8 +2,6 @@
 let
   cfg = config.selfhost;
   serviceCfg = cfg.services.homepage;
-  sonarrCfg = cfg.services.sonarr;
-  radarrCfg = cfg.services.radarr;
 
   # Custom package with wallpaper/favicon
   wallpaper = self.packages.wallpapers.files.sky-sunset;
@@ -52,8 +50,8 @@ in
               previousDays = 3;
               inherit (config.custom.locale) timezone;
               integrations = [
-                { type = "sonarr"; service_group = "Services"; service_name = sonarrCfg.displayName; }
-                { type = "radarr"; service_group = "Services"; service_name = radarrCfg.displayName; }
+                { type = "sonarr"; service_group = "Services"; service_name = cfg.services.sonarr.displayName; }
+                { type = "radarr"; service_group = "Services"; service_name = cfg.services.radarr.displayName; }
               ];
             };
           };

@@ -1,4 +1,4 @@
-_:
+{ shareVm, ... }:
 let
   fleet = import ../../shared.nix;
 in
