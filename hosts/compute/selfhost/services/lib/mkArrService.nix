@@ -70,12 +70,6 @@ in
       forwardAuth.enable = true;
       healthcheck.path = "/ping";
       integrations.homepage.group = "Services";
-      integrations.homepage.extraConfig.widget = {
-        type = name;
-        inherit (serviceCfg) url;
-        key = "{{HOMEPAGE_VAR_${lib.toUpper name}_API_KEY}}";
-        fields = []; # Omit all fields because we already have the calendar view
-      };
       integrations.notify.enable = true;
       integrations.notify.topic = "media";
       storage.smb = [ "media" ];

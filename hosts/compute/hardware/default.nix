@@ -1,7 +1,7 @@
 { lib, pkgs, config, ... }:
 {
   imports = [
-    ./hardware-configuration.nix  # Output of `nixos-generate-config --root /mnt`
+    ./hardware-configuration.nix
   ];
 
   # Disk
@@ -78,11 +78,11 @@
   services.thermald.enable = true;      # Intel thermal daemon
   systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
 
-  # Resource control: aggregate caps for thermally intensive and control-plane workloads
+  # Resource control: dedicated slice for programs that may have thermally intensive and ensure critical services take priority
   selfhost.resourceControl.slices = {
     throttled.sliceConfig = {
       AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
-      CPUQuota = "150%";    # hard cap prevents turbo heat-soak on passively-cooled N150
+      CPUQuota = "150%";    # Hard cap to prevent heating the CPU
       CPUWeight = 20;
       MemoryHigh = "16G";
       MemoryMax = "20G";
@@ -93,8 +93,8 @@
     };
   };
 
-  hardware.enableRedistributableFirmware = true;  # Misc drivers
-
+ # Misc
+  hardware.enableRedistributableFirmware = true;
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)
     "btusb"      # Bluetooth USB

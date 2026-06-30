@@ -40,8 +40,7 @@ in
 
     services.immich = {
       enable = true;
-      inherit (serviceCfg) host;
-      inherit (serviceCfg) port;
+      inherit (serviceCfg) host port;
       mediaLocation = "/var/lib/immich";
 
       settings = {
