@@ -4,8 +4,6 @@
     ./hardware-configuration.nix  # Output of `nixos-generate-config --root /mnt`
   ];
 
-  hardware.enableRedistributableFirmware = true;  # Misc drivers
-
   # Disk
   services.fstrim.enable = true;  # Weekly TRIM for NVMe longevity
   services.smartd.enable = true;  # Disk health
@@ -28,12 +26,11 @@
   };
   environment.systemPackages = [ pkgs.intel-gpu-tools ];
   boot.kernelParams = [
-    "i915.enable_guc=3"                # Enable GuC/HuC firmware for better media scheduling
+    "i915.enable_guc=3"                 # Enable GuC/HuC firmware for better media scheduling
     "block.events_dfl_poll_msecs=0"     # Disable removable media polling (no optical drives)
   ];
 
-  # Bonding: only bond0 gets DHCP, physical interfaces stay silent
-  # Router DHCP reservation should use bond0's MAC (inherited from enp1s0)
+  # Bonding: DHCP reservation uses bond0's MAC (inherited from enp1s0)
   networking.useDHCP = false;
   networking.bonds.bond0 = {
     interfaces = [ "enp1s0" "enp2s0" ];
@@ -46,9 +43,8 @@
   networking.interfaces.enp1s0.wakeOnLan.enable = true;
   networking.interfaces.enp2s0.wakeOnLan.enable = true;
 
-  # Wait for bond0 carrier before starting dhcpcd (bond takes a moment to come up at boot). This ensures the right IP.
-  # Otherwise, it will fall back to to 169.254.x.x link-local address as DHCP is slow.
-  networking.dhcpcd.extraConfig = "noipv4ll";
+  # bond0 is slow to start and to get the right IP we need it ready before starting dhcpcd. Otherwise: Otherwise, fall back to 169.254.x.x.
+  networking.dhcpcd.extraConfig = "noipv4ll"; # FIXME: Does this even make sense if we have useHDCP set to false?
   systemd.services.dhcpcd = {
     after = [ "sys-subsystem-net-devices-bond0.device" ];
     wants = [ "sys-subsystem-net-devices-bond0.device" ];
@@ -60,8 +56,7 @@
     cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
   };
 
-  # UPS monitoring (NUT netclient).
-  # Credentials: update `cat /etc/ups/upsd.users` on the Synology NAS and restart `synosystemctl restart ups-usb`
+  # UPS NUT client: For credentials update `cat /etc/ups/upsd.users` on the Synology NAS and restart `synosystemctl restart ups-usb`
   power.ups = {
     enable = true;
     mode = "netclient";
@@ -79,9 +74,9 @@
   };
 
   # Thermal & stability
-  boot.kernelModules = [ "iTCO_wdt" ]; # Hardware watchdog: Intel TCO timer. Confirm with journalctl -b -g 'watchdog\|iTCO'
-  services.thermald.enable = true;   # Intel thermal daemon
-  systemd.oomd.enable = true;        # Kill services under memory pressure before kernel OOM
+  boot.kernelModules = [ "iTCO_wdt" ];  # Hardware watchdog: Intel TCO timer. Confirm with journalctl -b -g 'watchdog\|iTCO'
+  services.thermald.enable = true;      # Intel thermal daemon
+  systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
 
   # Resource control: aggregate caps for thermally intensive and control-plane workloads
   selfhost.resourceControl.slices = {
@@ -97,6 +92,8 @@
       sliceConfig.CPUWeight = 1000;
     };
   };
+
+  hardware.enableRedistributableFirmware = true;  # Misc drivers
 
   boot.blacklistedKernelModules = [
     "iwlwifi"    # WiFi (always on Ethernet)

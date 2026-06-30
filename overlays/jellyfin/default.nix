@@ -3,7 +3,7 @@ _final: prev: let
   packages = {
     elegantfin-jellyfin-theme = prev.stdenvNoCC.mkDerivation rec {
       pname = "elegantfin-jellyfin-theme";
-      version = "25.12.31";
+      version = "26.06.06";
 
       src = prev.fetchurl {
         url = "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@v${version}/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css";
@@ -47,7 +47,7 @@ _final: prev: let
 
     jellyfin-plugin-open-subtitles = prev.stdenvNoCC.mkDerivation rec {
       pname = "jellyfin-plugin-open-subtitles";
-      version = "23";
+      version = "24";
 
       src = prev.fetchzip {
         url = "https://repo.jellyfin.org/releases/plugin/open-subtitles/open-subtitles_${version}.0.0.0.zip";

@@ -19,8 +19,10 @@ in
     capSysAdmin = true; # Required for KMS capture on Wayland
 
     settings = {
+      # Nvidia
       capture = "kms";      # Force KMS capture: avoids portal/other fallbacks on hybrid GPU setups
       encoder = "nvenc";    # Force NVIDIA encoder: prevents wandering into VAAPI/software on hybrid systems
+
       min_threads = 4;
     };
 

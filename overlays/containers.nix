@@ -11,7 +11,7 @@ _final: prev: let
     };
     larapaper = {
       image = "ghcr.io/usetrmnl/larapaper";
-      version = "0.37.1";
+      version = "0.38.0";
       homepage = "https://github.com/usetrmnl/larapaper";
       updateInfo = { repo = "usetrmnl/larapaper"; };
     };

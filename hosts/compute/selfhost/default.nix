@@ -82,9 +82,15 @@ in
 
     # Curated apps that need no host-specific config beyond enabling them (per-user opt-ins live on
     # selfhost.users.<name>.apps.<name>); apps with deployment overrides keep their own ./services file.
-    apps.radicale.enable = true;
-    apps.miniflux.enable = true;
-    apps.bentopdf.enable = true;
+    apps = {
+      radicale.enable = true;
+      miniflux.enable = true;
+      bentopdf.enable = true;
+      gitea = {
+        enable = true;
+        ssh.enable = true;
+      };
+    };
 
     auth = {
       forwardAuth.tinyauth.enable = true;
@@ -161,6 +167,9 @@ in
       no_new_privileges = true;
     };
   };
+
+  # Firewall
+  networking.firewall.interfaces.bond0.allowedTCPPorts = [ config.selfhost.apps.gitea.ssh.port ];
 
   # Secrets
   sops = {

@@ -250,14 +250,16 @@ in
       "Mod+BracketRight"  = "consume-or-expel-window-right";
 
       # Audio
-      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-increase"'';
-      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-decrease"'';
-      "XF86AudioMute        allow-when-locked=true" = ''spawn-sh "${volume} sink-toggle-mute"'';
-      "XF86AudioMicMute     allow-when-locked=true" = ''spawn-sh "${volume} source-toggle-mute"'';
-      "XF86AudioPrev        allow-when-locked=true" = ''spawn-sh "${playerctl} previous"'';
-      "XF86AudioNext        allow-when-locked=true" = ''spawn-sh "${playerctl} next"'';
-      "XF86AudioPlay        allow-when-locked=true" = ''spawn-sh "${playerctl} play-pause"'';
-      "XF86AudioPause       allow-when-locked=true" = ''spawn-sh "${playerctl} play-pause"'';
+      "XF86AudioRaiseVolume allow-when-locked=true"     = ''spawn-sh "${volume} sink-increase"'';
+      "XF86AudioLowerVolume allow-when-locked=true"     = ''spawn-sh "${volume} sink-decrease"'';
+      "XF86AudioMute        allow-when-locked=true"     = ''spawn-sh "${volume} sink-toggle-mute"'';
+      "XF86AudioMicMute     allow-when-locked=true"     = ''spawn-sh "${volume} source-toggle-mute"'';
+      "XF86AudioPrev        allow-when-locked=true"     = ''spawn-sh "${playerctl} previous"'';
+      "XF86AudioNext        allow-when-locked=true"     = ''spawn-sh "${playerctl} next"'';
+      "XF86AudioPlay        allow-when-locked=true"     = ''spawn-sh "${playerctl} play-pause"'';
+      "XF86AudioPause       allow-when-locked=true"     = ''spawn-sh "${playerctl} play-pause"'';
+      "Shift+XF86AudioRaiseVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-move-next"'';
+      "Shift+XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-move-prev"'';
 
       # Brightness
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn-sh "${brightness} increase"'';

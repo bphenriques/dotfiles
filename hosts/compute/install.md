@@ -60,10 +60,6 @@ Trigger initial library scan
 
 Enable extension protection per indexer (UI): Settings → Indexers → edit each indexer → Advanced → Fail Downloads → enable Dangerous Extensions and Executable Extensions
 
-### Tandoor
-
-Create guest/family users: Admin → Users and assign the space to the desired group
-
 ### Syncthing
 
 Accept device connections: approve pending devices on first sync
@@ -76,6 +72,3 @@ Share CalDAV/CardDAV URL with clients: `dav.<domain>` with generated `htpasswd` 
 
 Import client configs on devices
 
-### Obsidian LiveSync
-
-Configure plugin in Obsidian clients: install the plugin and configure connections

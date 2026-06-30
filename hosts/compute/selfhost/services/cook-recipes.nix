@@ -10,11 +10,8 @@ in
     description = "Recipe Collection";
     subdomain = "recipes";
     port = 9080;
-    access.allowedGroups = [ config.selfhost.groups.users ];
-    forwardAuth.enable = true;
     storage.smb = [ "media" ];
   };
-
   users.users.cook-recipes = { isSystemUser = true; group = "cook-recipes"; };
   users.groups.cook-recipes = { };
 
@@ -41,8 +38,6 @@ in
     };
   };
 
-  # Same lightweight static-file pattern as bentopdf; darkhttpd serves files fresh from disk,
-  # so a rebuild is picked up without restarting it.
   systemd.services.cook-recipes = {
     description = "Cook recipe static site";
     wantedBy = [ "multi-user.target" ];

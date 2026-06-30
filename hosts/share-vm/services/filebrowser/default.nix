@@ -1,6 +1,7 @@
 { config, inputs, private, shareVm, ... }:
 let
   inherit (shareVm) filesRoot;
+  fleet = import ../../../shared.nix;
 in
 {
   imports = [ inputs.selfhost-nix.nixosModules.filebrowser-multiuser ];
@@ -11,7 +12,6 @@ in
       address = "127.0.0.1";
       port = 8085;
       root = filesRoot;
-      database = "/var/lib/filebrowser/filebrowser.db";
       branding = {
         files = ./branding;
         disableExternal = true;

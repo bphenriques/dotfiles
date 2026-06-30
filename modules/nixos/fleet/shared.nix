@@ -1,6 +1,25 @@
 { config, lib, ... }:
 let
   fleet = config.custom.fleet;
+
+  microvmHostOpt = lib.types.submodule {
+    options = {
+      ip = lib.mkOption {
+        type = lib.types.str;
+        description = "Mapped IP to the bridge";
+      };
+
+      mac = lib.mkOption {
+        type = lib.types.str;
+        description = "MAC Address";
+      };
+
+      vsockCid = lib.mkOption {
+        type = lib.types.int;           # FIXED: Changed from attrsOf int to just int
+        description = "ID of vsocket id for systemd notification (readiness)";
+      };
+    };
+  };
 in
 {
   options.custom.fleet = {
@@ -51,8 +70,8 @@ in
       };
 
       hosts = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        description = "Microvm guest hostname to bridge IP mappings";
+        type = lib.types.attrsOf microvmHostOpt;
+        description = "Microvm guest hostname to its settings";
       };
     };
   };
@@ -62,7 +81,7 @@ in
   config.programs.ssh.knownHosts = lib.mapAttrs (name: publicKey: {
     hostNames = [ name ]
       ++ lib.optional (fleet.lan.hosts ? ${name}) fleet.lan.hosts.${name}
-      ++ lib.optional (fleet.computeMicrovm.hosts ? ${name}) fleet.computeMicrovm.hosts.${name};
+      ++ lib.optional (fleet.computeMicrovm.hosts ? ${name}) fleet.computeMicrovm.hosts.${name}.ip;
     inherit publicKey;
   }) fleet.ssh.hostKeys;
 }

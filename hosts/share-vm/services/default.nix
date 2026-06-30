@@ -5,5 +5,6 @@ _:
     ./filebrowser
     ./prometheus.nix
     ./tailscale.nix
+    ./ssh.nix
   ];
 }

@@ -11,9 +11,7 @@ in
     extraUpFlags = [ "--hostname=share-vm" "--ssh=false" "--accept-dns=false" "--accept-routes=false" ];
   };
 
-  # Establish the Funnel serve config at boot (idempotent; nixpkgs has no declarative serve
-  # option). It persists in tailscale state, so the kill-switch is just `tailscale down`/`up`
-  # — no wrapper needed (see README).
+  # Open funnel at boot
   systemd.services.share-funnel = {
     description = "Open the public Funnel endpoint";
     after = [ "tailscaled-autoconnect.service" ]; # needs the node logged in (nixpkgs ordering anchor)

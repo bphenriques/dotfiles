@@ -17,10 +17,13 @@
     options = "--delete-older-than 30d";
   };
 
-  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts (lan + microvm guests)
-  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or [ ]) ++ [ name ]; }) { } (
-    config.custom.fleet.lan.hosts // config.custom.fleet.computeMicrovm.hosts
-  );
+  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
+  networking.hosts = let
+    lan = config.custom.fleet.lan.hosts;
+    vms = builtins.listToAttrs (
+      lib.mapAttrsToList (name: vm: lib.nameValuePair name vm.ip) config.custom.fleet.computeMicrovm.hosts
+    );
+  in lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or [ ]) ++ [ name ]; }) { } (lan // vms);
 
   boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
 

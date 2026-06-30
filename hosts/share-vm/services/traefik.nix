@@ -5,7 +5,7 @@ let
   inherit (config.services.filebrowser-multiuser) authHeader;  # the header filebrowser trusts
   credsDir = "${dataRoot}/.credentials";
   htpasswd = "${credsDir}/htpasswd";
-  vmIp = computeMicrovm.hosts.share-vm;
+  vmIp = computeMicrovm.hosts.share-vm.ip;
   metricsPort = 9117;
 
   # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
@@ -44,16 +44,13 @@ in
         addServicesLabels = true;
       };
       log.level = "INFO";
-      # No API/dashboard.
     };
     dynamicConfigOptions.http = {
       routers.share = {
         rule = "PathPrefix(`/`)";
         entryPoints = [ "web" ];
         service = "filebrowser";
-        # Order matters: rate-limit first (so it also covers pre-auth attempts), strip any
-        # client Remote-User, then BasicAuth sets the trusted one.
-        middlewares = [ "ratelimit" "harden" "auth" ];
+        middlewares = [ "ratelimit" "harden" "auth" ]; # Order matters: rate-limit first before clearing headers auth
       };
       services.filebrowser.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString config.services.filebrowser.settings.port}"; }];
       middlewares = {

@@ -8,10 +8,7 @@ let
 in
 {
   config = {
-    # Internal, forwardAuth'd instance; public/anonymous sharing is share-vm's job.
-    # displayName/description/port come from the app defaults; storage.smb is derived from per-user grants.
     selfhost.services.filebrowser = {
-      subdomain = "files";
       access.allowedGroups = with cfg.groups; [ users admin ];
       traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296; # 4GB upload cap
     };
@@ -19,10 +16,9 @@ in
     services.filebrowser = {
       enable = true;
       settings = {
-        address = "127.0.0.1"; # forwardAuth gates ingress; localhost is the only pre-auth surface
+        address = "127.0.0.1";
         inherit (serviceCfg) port;
         root = filebrowserRoot;
-        database = "/var/lib/filebrowser/filebrowser.db";
         branding = { disableExternal = true; disableUsedPercentage = true; };
         viewMode = "mosaic";
         singleClick = true;
@@ -30,13 +26,14 @@ in
         sorting = { by = "modified"; asc = false; };
       };
     };
-
-    selfhost.apps.filebrowser.enable = true; # enableSelfhostIntegration defaults on (derive users + binds from selfhost.users)
-    services.filebrowser-multiuser.unlistedScope = "/empty"; # a group member not listed lands here — no ambient access
-
-    # The empty default scope; read access follows the grant-derived mount inventory.
-    systemd.tmpfiles.rules = [ "d ${filebrowserRoot}/empty 0700 ${config.services.filebrowser.user} ${config.services.filebrowser.group} -" ];
+    selfhost.apps.filebrowser.enable = true;
     users.users.filebrowser.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.smb;
+
+    # Default empty folders
+    services.filebrowser-multiuser.unlistedScope = "/empty"; # a group member not listed lands here
+    systemd.tmpfiles.rules = [
+      "d ${filebrowserRoot}/empty 0700 ${config.services.filebrowser.user} ${config.services.filebrowser.group} -"
+    ];
 
     systemd.services.filebrowser = {
       after = [ "filebrowser-configure.service" ];

@@ -39,7 +39,11 @@
       prefixLength = 24;
     };
     hosts = {
-      share-vm = "10.20.1.11";
+      share-vm = {
+        ip = "10.20.1.11";
+        mac = "02:00:00:00:01:11";
+        vsockCid = 3;
+      };
     };
   };
 }
