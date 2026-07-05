@@ -56,10 +56,10 @@ in
     };
     environment = {
       PROWLARR_URL = serviceCfg.url;
-      PROWLARR_API_KEY_FILE = config.selfhost.runtimeSecrets.prowlarr-api-key.path;
+      PROWLARR_API_KEY_FILE = config.selfhost.apps.prowlarr.apiKeyFile;
       PROWLARR_CONFIG_FILE = settingsFile;
-      RADARR_API_KEY_FILE = config.selfhost.runtimeSecrets.radarr-api-key.path;
-      SONARR_API_KEY_FILE = config.selfhost.runtimeSecrets.sonarr-api-key.path;
+      RADARR_API_KEY_FILE = config.selfhost.apps.radarr.apiKeyFile;
+      SONARR_API_KEY_FILE = config.selfhost.apps.sonarr.apiKeyFile;
       NTFY_TOKEN_FILE = serviceCfg.integrations.notify.tokenFile;
     };
     path = [ pkgs.nushell ];

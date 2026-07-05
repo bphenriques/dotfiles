@@ -1,11 +1,10 @@
-{ lib, pkgs, shareVm, ... }:
+{ config, lib, pkgs, shareVm, ... }:
 let
   inherit (import ../shared.nix) computeMicrovm dns;
 
   vmBridge = computeMicrovm.bridge;
-  microVm = computeMicrovm.hosts.share-vm;
+  microVm = computeMicrovm.hosts.${config.networking.hostName};  # this guest's ip/mac/vsockCid
   tapId = "vm-share";           # host tap; enslaved to the bridge in binScripts.tap-up
-  quad9DNS = "9.9.9.9";         # TODO: Potentially make it primary?
 in
 {
   networking = {
@@ -19,7 +18,9 @@ in
       networkConfig = {
         Address = "${microVm.ip}/${toString vmBridge.prefixLength}";
         Gateway = vmBridge.gateway;
-        DNS = "${dns} ${quad9DNS}";
+        DNS = dns;
+        LinkLocalAddressing = "ipv4";  # v4-only guest: no fe80:: and no RA-assigned v6, so the
+        IPv6AcceptRA = false;          # host's v4-only LAN-drop seal can't be sidestepped over v6
       };
     };
   };
@@ -28,8 +29,8 @@ in
     hypervisor = "cloud-hypervisor";
     vcpu = 2;
     mem = 1536;
-    balloon = true;        # Dynamically give back memory in case the VM does not need
-    deflateOnOOM = true;   # Or, host can return memory to the VM if it is under memory pressure
+    balloon = true;        # virtio-balloon: host can reclaim guest memory the VM isn't using
+    deflateOnOOM = true;   # on guest OOM, auto-deflate the balloon back before the OOM killer fires
 
     # Plugin Virtual Ethernet Cable (TAP) onto the network bridge as soon as the tap is available
     interfaces = [{ type = "tap"; id = tapId; mac = microVm.mac; }];

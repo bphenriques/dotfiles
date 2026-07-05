@@ -28,8 +28,20 @@ in
     }];
   };
 
-  # Guest Isolation: gets no input to compute's services nor is allowed to access internal network
-  networking.firewall.extraForwardRules = ''
-    iifname "${bridge.name}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop comment "Internet only. Drop private IP packets (RFC 1918)"
-  '';
+  # Guest seal. NOT via networking.firewall.extraForwardRules — those only apply when
+  # filterForward=true, else they silently no-op and the LAN leaks. This pre-firewall table
+  # (priority filter-1, policy accept) drops guest→LAN/host terminally and falls through for the rest.
+  networking.nftables.tables.microvm-containment = {
+    family = "ip";
+    content = ''
+      chain forward {
+        type filter hook forward priority filter - 1; policy accept;
+        iifname "${bridge.name}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop comment "Guests: internet-only, never the LAN"
+      }
+      chain input {
+        type filter hook input priority filter - 1; policy accept;
+        iifname "${bridge.name}" ct state new drop comment "Guests never initiate to the host (return traffic is ct established)"
+      }
+    '';
+  };
 }

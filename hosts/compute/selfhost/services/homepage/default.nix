@@ -4,7 +4,7 @@ let
   favicon = ./compass.svg;
 in
 {
-  selfhost.dashboards.homepage.enable = true;
+  selfhost.apps.homepage.enable = true;
   services.homepage-dashboard = {
     package = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
       postInstall = (oldAttrs.postInstall or "") + ''

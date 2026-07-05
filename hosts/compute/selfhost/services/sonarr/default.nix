@@ -1,18 +1,42 @@
-_: {
-  imports = [
-    (import ../lib/mkArrService.nix {
-      name = "sonarr";
-      port = 9097;
-      description = "TV Tracker";
-      rootPath = config: config.custom.paths.media.tv;
-      categoryField = "tvCategory";
-      forwardAuthGroup = config: config.selfhost.groups.admin;
-    })
-    ./backup.nix
-  ];
+{ config, ... }:
+{
+  selfhost.apps.sonarr = {
+    enable = true;
+    # Sonarr connection-tests a download client on save, so reconcile after Transmission is up.
+    configureAfter = [ "transmission.service" ];
+    rootFolders = [
+      {
+        path = config.custom.paths.media.tv;
+        defaultQualityProfile = config.custom.media.sonarr.profiles.default.name;
+      }
+    ];
+    downloadClients = [
+      {
+        name = "Transmission";
+        implementation = "Transmission";
+        protocol = "torrent";
+        fields = {
+          host = "127.0.0.1";
+          inherit (config.selfhost.services.transmission) port;
+          urlBase = "/transmission/";
+          tvCategory = "sonarr";
+        };
+      }
+    ];
+    delayProfile = {
+      preferredProtocol = "torrent";
+      torrentDelay = 120;
+    };
+  };
 
-  # Recyclarr v8 configuration using guide-backed quality profiles
-  # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
+  # Deployment: media storage + which notify topic (the framework wires the rest).
+  selfhost.services.sonarr = {
+    storage.smb = [ "media" ];
+    integrations.notify.topic = "media";
+  };
+  users.users.sonarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
+
+  # Quality taste (recyclarr / TRaSH guides) — consumer-owned; never in the framework.
   custom.media.sonarr = {
     qualityDefinitionType = "series";
     profiles = {

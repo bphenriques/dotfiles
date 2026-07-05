@@ -10,16 +10,20 @@ in
     ./configure.nix
   ];
 
-  options.custom.users = lib.mkOption {
+  options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        options.services.jellyfin = {
-          enable = lib.mkEnableOption "Jellyfin account for this user";
-          # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
-          passwordFile = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
+        options.extraConfig = lib.mkOption {
+          type = lib.types.submodule {
+            options.services.jellyfin = {
+              enable = lib.mkEnableOption "Jellyfin account for this user";
+              # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
+              passwordFile = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
+              };
+            };
           };
         };
       }
@@ -40,10 +44,6 @@ in
         };
         healthcheck.path = "/health";
         storage.smb = [ "media" ];
-        resourceControl = {
-          slice = "throttled";
-          systemdServices = [ "jellyfin" ];
-        };
       };
 
       runtimeSecrets.jellyfin-admin-password = {

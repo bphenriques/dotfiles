@@ -43,11 +43,13 @@
   networking.interfaces.enp1s0.wakeOnLan.enable = true;
   networking.interfaces.enp2s0.wakeOnLan.enable = true;
 
-  # bond0 is slow to start and to get the right IP we need it ready before starting dhcpcd. Otherwise: Otherwise, fall back to 169.254.x.x.
-  networking.dhcpcd.extraConfig = "noipv4ll"; # FIXME: Does this even make sense if we have useHDCP set to false?
+  # bond0 opts back into DHCP despite the global useDHCP=false, so dhcpcd runs; noipv4ll
+  # stops it assigning a useless 169.254.x.x link-local while the slow bond comes up.
+  networking.dhcpcd.extraConfig = "noipv4ll";
   systemd.services.dhcpcd = {
     after = [ "sys-subsystem-net-devices-bond0.device" ];
     wants = [ "sys-subsystem-net-devices-bond0.device" ];
+    serviceConfig.Slice = "critical.slice";
   };
 
   # Power management
@@ -74,24 +76,28 @@
   };
 
   # Thermal & stability
-  boot.kernelModules = [ "iTCO_wdt" ];  # Hardware watchdog: Intel TCO timer. Confirm with journalctl -b -g 'watchdog\|iTCO'
+  # Hardware watchdog needs no config here: intel_oc_wdt auto-probes as /dev/watchdog and is
+  # armed by RuntimeWatchdogSec in the headless profile (iTCO_wdt would just sit inactive).
   services.thermald.enable = true;      # Intel thermal daemon
   systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
 
-  # Resource control: dedicated slice for programs that may have thermally intensive and ensure critical services take priority
-  selfhost.resourceControl.slices = {
+  # Resource policy: throttle thermally-intensive media services into a capped slice; give critical
+  # services their own high-priority slice. (dhcpcd joins critical.slice in its unit block above.)
+  systemd.slices = {
     throttled.sliceConfig = {
       AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
-      CPUQuota = "150%";    # Hard cap to prevent heating the CPU
+      CPUQuota = "150%";    # hard cap prevents turbo heat-soak on the passively-cooled N150
       CPUWeight = 20;
       MemoryHigh = "16G";
       MemoryMax = "20G";
     };
-    critical = {
-      extraSystemdServices = [ "sshd" "dhcpcd" ];
-      sliceConfig.CPUWeight = 1000;
-    };
+    critical.sliceConfig.CPUWeight = 1000;
   };
+  systemd.services.jellyfin.serviceConfig.Slice = "throttled.slice";
+  # nixpkgs' immich module pins its own system-immich.slice, so force ours over it.
+  systemd.services.immich-server.serviceConfig.Slice = lib.mkForce "throttled.slice";
+  systemd.services.immich-machine-learning.serviceConfig.Slice = lib.mkForce "throttled.slice";
+  systemd.services.sshd.serviceConfig.Slice = "critical.slice";
 
  # Misc
   hardware.enableRedistributableFirmware = true;

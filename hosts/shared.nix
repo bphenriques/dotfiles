@@ -31,7 +31,7 @@
 
   # Microvm guests sit on a compute-internal bridge: reached from the fleet only by
   # initiating from compute (ssh -J), egress to the internet via NAT through bond0, never
-  # the LAN (see hosts/compute/microvm/firewall.nix).
+  # the LAN (see hosts/compute/microvm/default.nix).
   computeMicrovm = {
     bridge = {
       name = "compute-microvm";   # 15-char IFNAMSIZ limit

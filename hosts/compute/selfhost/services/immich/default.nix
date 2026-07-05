@@ -6,10 +6,14 @@ in
 {
   imports = [ ./configure.nix ];
 
-  options.custom.users = lib.mkOption {
+  options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
+        options.extraConfig = lib.mkOption {
+          type = lib.types.submodule {
+            options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
+          };
+        };
       }
     );
   };
@@ -32,10 +36,6 @@ in
       };
 
       healthcheck.path = "/api/server/ping";
-      resourceControl = {
-        slice = "throttled";
-        systemdServices = [ "immich-server" "immich-machine-learning" ];
-      };
     };
 
     services.immich = {

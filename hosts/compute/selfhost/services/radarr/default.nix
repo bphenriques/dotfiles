@@ -1,19 +1,42 @@
-_: {
-  imports = [
-    (import ../lib/mkArrService.nix {
-      name = "radarr";
-      port = 9098;
-      description = "Movie Tracker";
-      rootPath = config: config.custom.paths.media.movies;
-      categoryField = "movieCategory";
-      forwardAuthGroup = config: config.selfhost.groups.admin;
-    })
-    ./backup.nix
-  ];
+{ config, ... }:
+{
+  selfhost.apps.radarr = {
+    enable = true;
+    # Radarr connection-tests a download client on save, so reconcile after Transmission is up.
+    configureAfter = [ "transmission.service" ];
+    rootFolders = [
+      {
+        path = config.custom.paths.media.movies;
+        defaultQualityProfile = config.custom.media.radarr.profiles.default.name;
+      }
+    ];
+    downloadClients = [
+      {
+        name = "Transmission";
+        implementation = "Transmission";
+        protocol = "torrent";
+        fields = {
+          host = "127.0.0.1";
+          inherit (config.selfhost.services.transmission) port;
+          urlBase = "/transmission/";
+          movieCategory = "radarr";
+        };
+      }
+    ];
+    delayProfile = {
+      preferredProtocol = "torrent";
+      torrentDelay = 120;
+    };
+  };
 
-  # Recyclarr v8 configuration using guide-backed quality profiles
-  # See: https://recyclarr.dev/guide/upgrade-guide/v8.0/
-  # See: https://trash-guides.info/
+  # Deployment: media storage + which notify topic (the framework wires the rest).
+  selfhost.services.radarr = {
+    storage.smb = [ "media" ];
+    integrations.notify.topic = "media";
+  };
+  users.users.radarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
+
+  # Quality taste (recyclarr / TRaSH guides) — consumer-owned; never in the framework.
   custom.media.radarr = {
     qualityDefinitionType = "movie";
     profiles = {

@@ -25,28 +25,26 @@
     ReadWritePaths = [ "${config.microvm.stateDir}/share-vm" ];
     PrivateTmp = true;
     ProtectHome = true;
-    # Umask?
 
     # Privilege & Capabilities
     NoNewPrivileges = true;
     CapabilityBoundingSet = "";
     LockPersonality = true;
-    # RestrictSUIDSGID
+    RestrictSUIDSGID = true;              # the VMM needs no setuid/setgid bits
 
     # Kernel & System Protection
     ProtectClock = true;
     ProtectKernelTunables = true;
     ProtectKernelModules = true;
     ProtectControlGroups = true;
-    # ProtectProc = "invisible"; ?
-    # ProcSubset = "pid";
+    ProtectProc = "invisible";            # the VMM has no reason to see other PIDs
+    ProcSubset = "pid";
 
-    # FIXME? Device Isolation (Cloud-Hypervisor Specific)
-    #PrivateDevices = true;
-    #DeviceAllow = [
-    #  "/dev/kvm rwm"
-    #  "/dev/net/tun rwm"
-    #];
+    # Device isolation WITHOUT PrivateDevices: a private /dev is a fresh tmpfs that wouldn't
+    # contain /dev/kvm, so the VMM can't open the hypervisor. DevicePolicy=closed keeps the
+    # host /dev but cgroup-restricts to only what the tap-native VMM needs (+ std pseudo-devs).
+    DevicePolicy = "closed";
+    DeviceAllow = [ "/dev/kvm rw" "/dev/net/tun rw" ];
 
     # Advanced
     RestrictNamespaces = true;            # the VMM runs no jailer, so creates none

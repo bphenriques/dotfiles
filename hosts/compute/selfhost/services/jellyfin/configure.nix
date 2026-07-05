@@ -3,7 +3,7 @@ let
   serviceCfg = config.selfhost.services.jellyfin;
   pathsCfg = config.custom.paths;
   oidcCfg = config.selfhost.auth.oidc;
-  enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.custom.users;
+  enabledUsers = lib.filterAttrs (_: u: u.extraConfig.services.jellyfin.enable) config.selfhost.users;
 
   jellyfinConfig = {
     serverName = "Jellyfin";
@@ -40,8 +40,8 @@ let
         IsHidden = false;
         EnableSubtitleManagement = true;
       };
-    } // lib.optionalAttrs (u.services.jellyfin ? passwordFile) {
-      inherit (u.services.jellyfin) passwordFile;
+    } // lib.optionalAttrs (u.extraConfig.services.jellyfin ? passwordFile) {
+      inherit (u.extraConfig.services.jellyfin) passwordFile;
     }) enabledUsers;
   };
 

@@ -7,7 +7,7 @@ _final: prev: let
 
       src = prev.fetchurl {
         url = "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@v${version}/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css";
-        hash = "sha256-utg6R5Qbmm/7tckWqMCh33wLAORG+4QROqXxmzmjL1U=";
+        hash = "sha256-XCzoCb1Ylj785EF1XYixCb8Tn09ZT8YBsdarj/t/cK4=";
       };
 
       dontUnpack = true;
@@ -51,7 +51,7 @@ _final: prev: let
 
       src = prev.fetchzip {
         url = "https://repo.jellyfin.org/releases/plugin/open-subtitles/open-subtitles_${version}.0.0.0.zip";
-        hash = "sha256-+5gwpkZliE5Kb3JKqcUDAAZDZ0UXNue4NkUgdn0fYMA=";
+        hash = "sha256-b6sgmgBlvhUAhFuq0p/EjB3604NGBkpS4NP33n1hfKc=";
         stripRoot = false;
       };
 

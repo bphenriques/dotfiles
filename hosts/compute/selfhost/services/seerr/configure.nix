@@ -5,7 +5,7 @@ let
   sonarrCfg = config.selfhost.services.sonarr;
   jellyfinCfg = config.selfhost.services.jellyfin;
   mediaCfg = config.custom.media;
-  seerrUsers = lib.filterAttrs (_: u: u.services.seerr.enable) config.custom.users;
+  seerrUsers = lib.filterAttrs (_: u: u.extraConfig.services.seerr.enable) config.selfhost.users;
 
   initConfig = {
     applicationUrl = serviceCfg.publicUrl;
@@ -42,7 +42,7 @@ let
     };
     users = lib.mapAttrs (_: user: {
       inherit (user) username;
-      inherit (user.services.seerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
+      inherit (user.extraConfig.services.seerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
     }) seerrUsers;
   };
 
@@ -88,7 +88,7 @@ in
   assertions = [
     {
       # FIXME: Remove once Seerr supports OIDC
-      assertion = lib.all (u: u.services.jellyfin.passwordFile != null) (lib.attrValues seerrUsers);
+      assertion = lib.all (u: u.extraConfig.services.jellyfin.passwordFile != null) (lib.attrValues seerrUsers);
       message = "All Seerr users must have a Jellyfin passwordFile until Seerr supports OIDC.";
     }
   ];

@@ -1,6 +1,6 @@
 { config, private, ... }:
 {
-  selfhost.vpn.wireguard = {
+  selfhost.apps.wireguard = {
     enable = true;
     address = "10.100.0.1/24";
     clientSubnet = "10.100.0.0/24";
@@ -16,9 +16,9 @@
 
   # Keep the WireGuard endpoint's record pointed at the current (dynamic) public IP.
   sops.secrets."desec/token" = { };
-  selfhost.ddns.desec = {
+  selfhost.apps.desec = {
     enable = true;
     tokenFile = config.sops.secrets."desec/token".path;
-    domains = [ config.selfhost.vpn.wireguard.endpoint ];
+    domains = [ config.selfhost.apps.wireguard.endpoint ];
   };
 }

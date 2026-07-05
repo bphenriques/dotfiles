@@ -1,12 +1,11 @@
 { config, lib, pkgs, shareVm, ... }:
 let
   inherit (import ../../shared.nix) computeMicrovm;
-  inherit (shareVm) dataRoot proxyPort;
+  inherit (shareVm) dataRoot proxyPort traefikMetricsPort;
   inherit (config.services.filebrowser-multiuser) authHeader;  # the header filebrowser trusts
   credsDir = "${dataRoot}/.credentials";
   htpasswd = "${credsDir}/htpasswd";
   vmIp = computeMicrovm.hosts.share-vm.ip;
-  metricsPort = 9117;
 
   # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
   # uncrackable for online auth), bcrypt-hashed into the BasicAuth htpasswd and printed once.
@@ -22,7 +21,7 @@ let
         exit 1
       fi
       pw=$(xkcdpass -n 5 -d -)
-      htpasswd -bB "${htpasswd}" "$user" "$pw" 2>/dev/null
+      htpasswd -bB "${htpasswd}" "$user" "$pw"
       printf '%s\n' "$pw"
     '';
   };
@@ -37,7 +36,7 @@ in
           address = "127.0.0.1:${toString proxyPort}";
           proxyProtocol.trustedIPs = [ "127.0.0.1/32" ];
         };
-        metrics.address = "${vmIp}:${toString metricsPort}";
+        metrics.address = "${vmIp}:${toString traefikMetricsPort}";
       };
       metrics.prometheus = {
         entryPoint = "metrics";

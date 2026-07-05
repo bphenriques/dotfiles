@@ -1,14 +1,14 @@
 { config, pkgs, lib, self, private, ... }:
 let
-  # Full per-user data; framework keys go to selfhost.users, the `custom` key to custom.users.
-  rawUsers = private.settings.users // {
+  # Ad-hoc (non-private) users; consumer-internal per-user config rides in `extraConfig` on selfhost.users.
+  extraUsers = {
     home = {
       email = "home@localhost";
       firstName = "Home";
       lastName = "User";
       groups = [ config.selfhost.groups.users ];
       auth.oidc.enable = false; # ad-hoc user, no OIDC account
-      custom = {
+      extraConfig = {
         services.jellyfin = {
           enable = true;
           passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
@@ -30,7 +30,7 @@ let
       lastName = "User";
       groups = [ config.selfhost.groups.guests ];
       auth.oidc.enable = false;
-      custom = {
+      extraConfig = {
         services.jellyfin = {
           enable = true;
           passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
@@ -69,11 +69,6 @@ in
       latitude = 38.736946;
       longitude = -9.142685;
     };
-
-    # Consumer-owned per-user (not selfhost-nix); joined with selfhost.users by name in our configures.
-    users = lib.mapAttrs (n: u:
-      { inherit (config.selfhost.users.${n}) username email name isAdmin; } // (u.custom or { })
-    ) rawUsers;
   };
 
   selfhost = {
@@ -140,22 +135,7 @@ in
       scrapeInterval = "60s";
     };
 
-    resourceControl.slices = {
-      throttled.sliceConfig = {
-        AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
-        CPUQuota = "150%";    # hard cap prevents turbo heat-soak on passively-cooled N150
-        CPUWeight = 20;
-        MemoryHigh = "16G";
-        MemoryMax = "20G";
-      };
-      critical = {
-        extraSystemdServices = [ "sshd" "dhcpcd" ];
-        sliceConfig.CPUWeight = 1000;
-      };
-    };
-
-    # Framework view: drop the consumer `custom` key (it goes to custom.users above).
-    users = lib.mapAttrs (_: u: builtins.removeAttrs u [ "custom" ]) rawUsers;
+    users = private.settings.users // extraUsers;
   };
 
   virtualisation = {

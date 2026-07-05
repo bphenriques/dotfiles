@@ -3,16 +3,16 @@ let
   serviceCfg = config.selfhost.services.syncthing;
   pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
-  syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.custom.users;
+  syncthingUsers = lib.filterAttrs (_: u: u.extraConfig.services.syncthing.enable) config.selfhost.users;
 
   # Intentional as select the exact systems to sync
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
   allSyncthingDevices = lib.pipe syncthingUsers [
-    (lib.mapAttrsToList (_: u: u.services.syncthing.devices))
+    (lib.mapAttrsToList (_: u: u.extraConfig.services.syncthing.devices))
     lib.flatten
   ];
-  userSyncthingDevices = user: syncthingUsers.${user}.services.syncthing.devices;
+  userSyncthingDevices = user: syncthingUsers.${user}.extraConfig.services.syncthing.devices;
   toDeviceNames = devices: map (d: d.name) devices;
 
   mkSendOnlyFolder = id: path: devices: {
@@ -42,18 +42,22 @@ let
   };
 in
 {
-  options.custom.users = lib.mkOption {
+  options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
-      options.services.syncthing = {
-        enable = lib.mkEnableOption "Syncthing configuration for this user";
-        devices = lib.mkOption {
-          type = lib.types.listOf (lib.types.submodule {
-            options = {
-              name = lib.mkOption { type = lib.types.str; };
-              id = lib.mkOption { type = lib.types.str; };
+      options.extraConfig = lib.mkOption {
+        type = lib.types.submodule {
+          options.services.syncthing = {
+            enable = lib.mkEnableOption "Syncthing configuration for this user";
+            devices = lib.mkOption {
+              type = lib.types.listOf (lib.types.submodule {
+                options = {
+                  name = lib.mkOption { type = lib.types.str; };
+                  id = lib.mkOption { type = lib.types.str; };
+                };
+              });
+              default = [ ];
             };
-          });
-          default = [ ];
+          };
         };
       };
     });

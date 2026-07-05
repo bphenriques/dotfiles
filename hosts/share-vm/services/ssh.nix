@@ -3,12 +3,13 @@ let
   inherit (shareVm) dataRoot;
   sshHostKey = "${dataRoot}/.ssh-host-keys/ssh_host_ed25519_key";
   fleet = import ../../shared.nix;
+  me = fleet.computeMicrovm.hosts.${config.networking.hostName};
 in
 {
   services.openssh = {
     enable = true;
     listenAddresses = [{
-      addr = fleet.computeMicrovm.hosts.share-vm.ip; # Accessible within the bridge but not localhost nor tailnet.
+      addr = me.ip; # Accessible within the bridge but not localhost nor tailnet.
       port = 22;
     }];
     settings = {

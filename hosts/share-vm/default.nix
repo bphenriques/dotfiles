@@ -1,8 +1,6 @@
-{ config, pkgs, inputs, private, shareVm, ... }:
+{ config, pkgs, inputs, private, ... }:
 let
   fleet = import ../shared.nix;
-  inherit (shareVm) dataRoot;
-  sshHostKey = "${dataRoot}/.ssh-host-keys/ssh_host_ed25519_key";
   adminUser = "bphenriques";
 in
 {
