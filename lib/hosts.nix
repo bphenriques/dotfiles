@@ -1,13 +1,14 @@
 { nixpkgs, self, inputs }:
 let
   inherit (nixpkgs.lib.attrsets) attrValues;
+  fleet = import ../hosts/shared.nix;   # imported once; threaded to guests via specialArgs
 in
 {
-  mkMicrovmGuest = { hostName, system ? "x86_64-linux", configPath }:
+  mkMicrovmGuest = { hostName, system ? "x86_64-linux", configPath, placement }:
     nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs;
+        inherit inputs placement fleet;   # placement allocated by the host; fleet = shared.nix, no path-imports in guests
         self = self // { lib = self.lib // { builders = self.lib.builders.${system}; }; };
         private = inputs.dotfiles-private.hosts.${hostName};
       };

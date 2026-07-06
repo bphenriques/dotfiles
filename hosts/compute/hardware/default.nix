@@ -30,26 +30,24 @@
     "block.events_dfl_poll_msecs=0"     # Disable removable media polling (no optical drives)
   ];
 
-  # Bonding: DHCP reservation uses bond0's MAC (inherited from enp1s0)
+  # bond0 over enp1s0/enp2s0 (active-backup) via systemd-networkd. The bond MAC is pinned to
+  # enp1s0's — the DHCP reservation (192.168.1.196) is keyed on it.
   networking.useDHCP = false;
-  networking.bonds.bond0 = {
-    interfaces = [ "enp1s0" "enp2s0" ];
-    driverOptions = {
-      mode = "active-backup";
-      primary = "enp1s0";
+  networking.useNetworkd = true;
+  systemd.network = {
+    netdevs."10-bond0" = {
+      netdevConfig = { Kind = "bond"; Name = "bond0"; MACAddress = "78:55:36:05:37:c8"; };
+      bondConfig = { Mode = "active-backup"; MIIMonitorSec = "100ms"; };  # link monitoring ⇒ failover on cable pull
     };
-  };
-  networking.interfaces.bond0.useDHCP = true;
-  networking.interfaces.enp1s0.wakeOnLan.enable = true;
-  networking.interfaces.enp2s0.wakeOnLan.enable = true;
-
-  # bond0 opts back into DHCP despite the global useDHCP=false, so dhcpcd runs; noipv4ll
-  # stops it assigning a useless 169.254.x.x link-local while the slow bond comes up.
-  networking.dhcpcd.extraConfig = "noipv4ll";
-  systemd.services.dhcpcd = {
-    after = [ "sys-subsystem-net-devices-bond0.device" ];
-    wants = [ "sys-subsystem-net-devices-bond0.device" ];
-    serviceConfig.Slice = "critical.slice";
+    networks."10-enp1s0" = { matchConfig.Name = "enp1s0"; networkConfig.Bond = "bond0"; };
+    networks."10-enp2s0" = { matchConfig.Name = "enp2s0"; networkConfig.Bond = "bond0"; };
+    networks."10-bond0" = {
+      matchConfig.Name = "bond0";
+      networkConfig = { DHCP = "ipv4"; IPv6AcceptRA = true; };  # keep the routable global IPv6 (RA)
+    };
+    # WoL by original name: enslaved slaves read the bond MAC, so can't match on address.
+    links."10-enp1s0" = { matchConfig.OriginalName = "enp1s0"; linkConfig.WakeOnLan = "magic"; };
+    links."10-enp2s0" = { matchConfig.OriginalName = "enp2s0"; linkConfig.WakeOnLan = "magic"; };
   };
 
   # Power management
@@ -82,7 +80,7 @@
   systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
 
   # Resource policy: throttle thermally-intensive media services into a capped slice; give critical
-  # services their own high-priority slice. (dhcpcd joins critical.slice in its unit block above.)
+  # services (e.g. sshd, below) their own high-priority slice.
   systemd.slices = {
     throttled.sliceConfig = {
       AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)

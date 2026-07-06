@@ -1,3 +1,8 @@
+let
+  # MicroVM guest placement is host-local (hosts/compute/guests.nix), not fleet data. The fleet
+  # needs only name→bridge-IP for `ssh -J` resolution + known-hosts pinning; derive it from there.
+  computeGuests = import ./compute/guests.nix;
+in
 {
   ssh = {
     authorizedKeys = [
@@ -29,21 +34,7 @@
     };
   };
 
-  # Microvm guests sit on a compute-internal bridge: reached from the fleet only by
-  # initiating from compute (ssh -J), egress to the internet via NAT through bond0, never
-  # the LAN (see hosts/compute/microvm/default.nix).
-  computeMicrovm = {
-    bridge = {
-      name = "compute-microvm";   # 15-char IFNAMSIZ limit
-      gateway = "10.20.1.1";
-      prefixLength = 24;
-    };
-    hosts = {
-      share-vm = {
-        ip = "10.20.1.11";
-        mac = "02:00:00:00:01:11";
-        vsockCid = 3;
-      };
-    };
-  };
+  # Guests reached from the fleet only by `ssh -J compute` (internal bridge; internet egress via
+  # NAT, never the LAN — see profiles/nixos/microvm-host.nix). Name→IP only; rich placement is host-local.
+  microvmHosts = builtins.mapAttrs (_: g: g.ip) computeGuests.guests;
 }

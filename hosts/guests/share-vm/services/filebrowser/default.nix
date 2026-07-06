@@ -1,7 +1,6 @@
 { config, inputs, private, shareVm, ... }:
 let
   inherit (shareVm) filesRoot;
-  fleet = import ../../../shared.nix;
 in
 {
   imports = [ inputs.selfhost-nix.nixosModules.filebrowser-multiuser ];

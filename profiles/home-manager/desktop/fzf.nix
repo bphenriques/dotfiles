@@ -7,6 +7,10 @@
 
     defaultOptions = [
       "--height='80%'"
+      "--layout=reverse"
+      "--cycle"
+      "--info=inline-right"
+      "--wrap"
       "--marker='* '"
       "--pointer='▶'"
       "--preview-window='right:60%'"

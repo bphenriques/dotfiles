@@ -57,7 +57,8 @@ in
                   };
                   "@swap" = {
                     mountpoint = "/.swapvol";
-                    swap.swapfile.size = "13G"; # Dont forget to set the right offset: https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Acquire_swap_file_offset
+                    # Recreating/resizing this changes the physical offset — recompute resume_offset in ./default.nix.
+                    swap.swapfile.size = "13G";
                   };
                   "@home" = {
                     mountpoint = "/home";

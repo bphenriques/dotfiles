@@ -19,7 +19,7 @@ EOF
 
 # Adapted from https://gist.github.com/seanh/d3d1a6dfa4b7d5d9f135984ae913cf0f
 create_session() {
-  test -z "$1" && echo "EMAIL not provided" && exit 1
+  test -z "$1" && echo "EMAIL not provided" >&2 && exit 1
 
   # Fast path: caller already has a session token. Trust it, skip
   # login/unlock checks (which themselves can hang on bw's implicit
@@ -37,6 +37,8 @@ create_session() {
     BW_SESSION="$(bw unlock --raw)"
   fi
 
+  # Never emit an empty token — it would silently break the caller's `export BW_SESSION=`.
+  test -n "${BW_SESSION:-}" || { echo "No session token available; set BW_SESSION manually (see --help)" >&2; exit 1; }
   bw sync >/dev/null
   echo "$BW_SESSION"
 }

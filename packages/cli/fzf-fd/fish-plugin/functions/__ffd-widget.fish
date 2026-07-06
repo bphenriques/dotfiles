@@ -13,10 +13,11 @@ function __ffd-widget
             cd $target
         end
     else
-        # if buffer is not empty, replace the current token with the search result
+        # buffer is not empty: replace the current token with the search result
         set --local current_token (builtin commandline --current-token)
         set --local target (fzf-fd $current_token)
-        builtin commandline -rt $target
+        not test -z $target
+        and builtin commandline -rt $target
         and builtin commandline --function repaint
     end
 end

@@ -1,8 +1,8 @@
 #shellcheck shell=bash
 
 default_device() { brightnessctl --machine-readable | awk -F, '{ print $1; }'; }
-get_percentage() { brightnessctl --device="${2:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
-set_brightness() { brightnessctl --device="${2:-"$(default_device)"}" set "$1"; }
+get_percentage() { brightnessctl --device="${1:-"$(default_device)"}" --machine-readable | awk -F, '{print $4}' | tr -d %; }
+set_brightness() { brightnessctl --device="${1:-"$(default_device)"}" set "$2"; }
 
 notify() {
   percentage="$1"
@@ -34,13 +34,13 @@ case "${1:-}" in
   increase)
     shift 1
     device="${2:-"$(default_device)"}"
-    set_brightness "+${1:-5}%" "$device"
+    set_brightness "$device" "+${1:-5}%"
     notify "$(get_percentage "$device")"
     ;;
   decrease)
     shift 1
     device="${2:-"$(default_device)"}"
-    set_brightness "${1:-5}-%" "$device"
+    set_brightness "$device" "${1:-5}-%"
     notify "$(get_percentage "$device")"
     ;;
   list) brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }' ;;

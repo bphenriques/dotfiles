@@ -59,10 +59,11 @@
       formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper); # `nix fmt`
       checks    = forAllSystems (system: {                                            # `nix flake check`
         formatting = treefmtEval.${system}.config.build.check self;
-      } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-        eval-compute = self.nixosConfigurations.compute.config.system.build.toplevel;
-        eval-laptop = self.nixosConfigurations.laptop.config.system.build.toplevel;
-      });
+      # eval-<name> for every nixosConfiguration on this system (hosts + generated microVM guests);
+      # derived, so a new host/guest is covered with no hardcoded list to drift.
+      } // nixpkgs.lib.mapAttrs'
+        (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
+        (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations));
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
@@ -83,10 +84,15 @@
           hostName = "compute";
           configPath = ./hosts/compute;
         };
-        share-vm = mkMicrovmGuest {
-          hostName = "share-vm";
-          configPath = ./hosts/share-vm;
+      } // (let
+        computeMicrovm = import ./hosts/compute/guests.nix;
+      in nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
+        hostName = name;
+        configPath = ./hosts/guests/${name};
+        placement = {
+          inherit (entry) ip mac vsockCid;
+          inherit (computeMicrovm.bridge) gateway prefixLength;
         };
-       };
+      }) computeMicrovm.guests);
     };
 }

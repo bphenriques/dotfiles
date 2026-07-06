@@ -1,17 +1,20 @@
-{ config, pkgs, inputs, private, ... }:
+{ fleet, shareVm, ... }:
 let
-  fleet = import ../shared.nix;
   adminUser = "bphenriques";
 in
 {
   imports = [
     ./settings.nix
-    inputs.microvm.nixosModules.microvm
+    ../../../profiles/nixos/microvm-guest.nix
     ./microvm.nix
-    ./firewall.nix
     ./services
-    ./secrets.nix
   ];
+
+  homelab.microvm.guest = {
+    enable = true;
+    stateRoot = shareVm.dataRoot;                 # SSH host key / sops age identity live here
+    ingressPorts = [ shareVm.traefikMetricsPort ]; # Traefik metrics, scraped by compute over the bridge
+  };
 
   time.timeZone = "Europe/Lisbon";
   i18n.defaultLocale = "en_US.UTF-8";

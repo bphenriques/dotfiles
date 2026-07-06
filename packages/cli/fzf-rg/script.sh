@@ -1,14 +1,13 @@
 #shellcheck shell=bash
 
 initial_query="${1:-}"
-search='rg --column --line-number --no-heading --color=always --smart-case '
+rg_prefix='rg --column --line-number --no-heading --color=always --smart-case'
 
-# shellcheck disable=SC2034
-FZF_DEFAULT_COMMAND="$search '$initial_query' ."
-
-fzf --bind "change:reload:sleep 0.05;$search {q} . || true" \
+fzf --ansi --disabled --query "$initial_query" \
+  --bind "start:reload:$rg_prefix -- {q} ." \
+  --bind "change:reload:sleep 0.05; $rg_prefix -- {q} . || true" \
   --prompt "Find text: " \
-  --ansi --query "$initial_query" --disabled \
   --delimiter : \
-  --preview "rg --ignore-case --pretty --context 10 '{q}' {1}" \
-  | cut -d ':' -f1
+  --preview 'bat --color=always --style=numbers --highlight-line {2} -- {1}' \
+  --preview-window '+{2}/3' \
+  --accept-nth '{1}:{2}'

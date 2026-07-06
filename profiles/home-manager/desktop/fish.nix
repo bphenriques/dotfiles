@@ -20,22 +20,15 @@ in
         ''bind alt-p __project-widget''                               # Switch project
         ''bind alt-space ${config.programs.yazi.shellWrapperName}''   # Browse files
       ];
-
-      source_sh = ''
-        for line in (cat $argv | grep -v '^#' |  grep -v '^\s*$' | sed -e 's/=/ /' -e "s/'//g" -e 's/"//g' )
-          set export (string split ' ' $line)
-          set -gx $export[1] $export[2]
-        end
-      '';
     };
 
     interactiveShellInit = let
       purePrompt = ''
-        set -U pure_enable_single_line_prompt true
-        set -U pure_enable_virtualenv false
-        set -U pure_color_success green
-        set -U pure_shorten_window_title_current_directory_length 1
-        set -U pure_enable_nixdevshell true
+        set -g pure_enable_single_line_prompt true
+        set -g pure_enable_virtualenv false
+        set -g pure_color_success green
+        set -g pure_shorten_window_title_current_directory_length 1
+        set -g pure_enable_nixdevshell true
         set -g async_prompt_functions _pure_prompt_git
       '';
       extra = ''

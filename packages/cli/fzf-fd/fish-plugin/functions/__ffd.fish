@@ -1,7 +1,6 @@
 function __ffd
     set --local target (fzf-fd $argv[1])
-
-    not -z $target
+    not test -z $target
     and if test -f $target
         $EDITOR $target
     else if test -d $target

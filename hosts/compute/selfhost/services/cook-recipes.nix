@@ -18,7 +18,9 @@ in
   systemd.services.cook-recipes-build = {
     description = "Build static Cook recipe site";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" "remote-fs.target" ];
+    # Gate on the real media mount (itself After network-online), else the build can race ahead of
+    # the SMB share at boot and fail to read the recipes — network.target/remote-fs.target don't wait.
+    unitConfig.RequiresMountsFor = [ recipesDir ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

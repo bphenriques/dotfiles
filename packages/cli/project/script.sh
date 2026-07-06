@@ -5,7 +5,7 @@ PROJ_ROOT="${PROJ_ROOT:-${XDG_DOCUMENTS_DIR}}"
 __proj_clone_repo() {
   target="$(basename "$1" .git)"
   if [ ! -d "$PROJ_ROOT/$target" ]; then
-    git clone "$target" "$PROJ_ROOT/$target"
+    git clone "$1" "$PROJ_ROOT/$target"
   fi
   printf %s "$PROJ_ROOT/$target"
 }
@@ -17,9 +17,9 @@ __proj_root() {
 __proj_select() {
   target="${1-}"
   # shellcheck disable=SC2016
-  fd --base-directory "$PROJ_ROOT" --type directory --max-depth 1 --exec basename \
+  fd --base-directory "$PROJ_ROOT" --type directory --max-depth 1 --format '{/}' \
     | fzf --prompt "Switch to project: " --exit-0 --select-1 --no-multi --query="$target" --layout=reverse --preview='preview "$PROJ_ROOT"/{}' \
-    | xargs -I{} printf %s/%s "$PROJ_ROOT" {}
+    | xargs -r -I{} printf %s/%s "$PROJ_ROOT" {}
 }
 
 if [ ! -d "${PROJ_ROOT}" ]; then
