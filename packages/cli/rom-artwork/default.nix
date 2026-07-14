@@ -4,7 +4,7 @@
   ...
 }:
 pkgs.writeShellApplication {
-  name = "scrape-roms";
+  name = "rom-artwork";
   runtimeInputs = [ pkgs.skyscraper ];
   text = lib.fileContents ./script.sh;
   meta.platforms = lib.platforms.linux;

@@ -44,12 +44,9 @@ Key dependencies:
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 - [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) that abstracts common concerns around self-hosting (Reverse Proxy, OIDC, and Secrets)
-- `dotfiles-private` to store private information (SOPS secrets, personal information, and wallpapers)
+- `dotfiles-private` private dependency to store private information (SOPS secrets, personal information, and wallpapers)
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
-
-> [!NOTE]
-> This won't build as-is as it depends on `dotfiles-private`. Let me know if you need help!
 
 ## `dot` cli
 
@@ -66,7 +63,7 @@ dot compute c        # show changelog for the compute host
 
 ## AI Disclaimer
 
-AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster. I drive the architecture, review and own every line.
+AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster. I drive the architecture, review and verify every line.
 
 ## Acknowledgements
 

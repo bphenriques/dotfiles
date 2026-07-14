@@ -42,5 +42,10 @@ Metrics → compute's Grafana (**Share VM** dashboard).
 1. **Tailscale** (admin console): policy `{ "tagOwners": {"tag:share":["autogroup:admin"]}, "acls": [], "nodeAttrs": [{"target":["tag:share"],"attr":["funnel"]}] }`; enable **DNS → HTTPS Certificates**; generate a **reusable, non-ephemeral, `tag:share`** auth key.
 2. **dotfiles-private** `hosts/share-vm/`: `settings.nix` (folders/users) + `secrets.yaml` with the auth key as `tailscale/authkey`, authored against `&base-microvm` (your permanent microvm bootstrap key). `nix run .#host-secrets share-vm` prints the skeleton.
 3. **Deploy.** The VM boots but Tailscale stays logged out — its key isn't a sops recipient yet.
-4. `nix run .#host-keys share-vm` and follow it: paste the printed host-key pin + sops recipient, `sops updatekeys`, commit, redeploy. Confirm `ssh share-vm tailscale status`.
+4. **Register the VM's host key** (it doubles as the VM's sops age identity). Capture it over the compute bridge, register in both places, `sops updatekeys`, commit, redeploy, then confirm `ssh share-vm tailscale status`:
+   ```bash
+   key=$(ssh compute ssh-keyscan -t ed25519 share-vm | awk '/ssh-ed25519/{print $2, $3}')
+   echo "$key"                                # → hosts/shared.nix   ssh.hostKeys.share-vm
+   echo "$key" | nix run nixpkgs#ssh-to-age   # → dotfiles-private/.sops.yaml as `- &share-vm <age>` (keep &base-microvm), add to the share-vm key_group
+   ```
 5. **Cloudflare**: a *proxied* (orange-cloud) A record `share` → `192.0.2.1`, plus a Static **302** redirect rule `share.<domain>` → `https://<vm>.<tailnet>.ts.net/files/`.

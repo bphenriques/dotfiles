@@ -7,8 +7,8 @@ let
   # Build v8 guide-backed quality profiles from media settings
   mkQualityProfiles = mediaCfg:
     map (profile: {
-      trash_id = profile.trashId;
       inherit (profile) name;
+      trash_id = profile.trashId;
       reset_unmatched_scores.enabled = true;
     }) (lib.attrValues mediaCfg.profiles);
 

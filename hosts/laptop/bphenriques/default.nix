@@ -12,8 +12,7 @@ in
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
       ++ lib.optionals config.services.sunshine.enable          [ "input" ]
-      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
-      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
+      ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.mounts);
 
     openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };

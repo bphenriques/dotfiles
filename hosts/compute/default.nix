@@ -13,7 +13,7 @@
   # Basic setup
   networking.hostName = "compute";
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_0;
+    kernelPackages = pkgs.linuxPackages_7_1;
     loader.systemd-boot = {
       enable = true;
       editor = false;

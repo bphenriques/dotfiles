@@ -8,9 +8,7 @@ in
     isNormalUser = true;
     uid = 1000;
     hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path;
-    extraGroups = [ "wheel" ]
-      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? media) [ smbCfg.mounts.media.group ]
-      ++ lib.optionals (smbCfg.enable && smbCfg.mounts ? bphenriques) [ smbCfg.mounts.bphenriques.group ];
+    extraGroups = [ "wheel" ] ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.mounts);
 
     openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };

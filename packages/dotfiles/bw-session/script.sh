@@ -38,7 +38,10 @@ create_session() {
   fi
 
   # Never emit an empty token — it would silently break the caller's `export BW_SESSION=`.
-  test -n "${BW_SESSION:-}" || { echo "No session token available; set BW_SESSION manually (see --help)" >&2; exit 1; }
+  test -n "${BW_SESSION:-}" || {
+    echo "No session token available; set BW_SESSION manually (see --help)" >&2
+    exit 1
+  }
   bw sync >/dev/null
   echo "$BW_SESSION"
 }

@@ -95,11 +95,14 @@ in
     };
 
     systemd.services.immich-server.serviceConfig = {
+      Slice = lib.mkForce "throttled.slice";
       SupplementaryGroups = serviceCfg.oidc.systemd.supplementaryGroups;
       MemoryMax = "4G";
       MemoryHigh = "3G";
     };
+
     systemd.services.immich-machine-learning.serviceConfig = {
+      Slice = lib.mkForce "throttled.slice";
       MemoryMax = "5G";
       MemoryHigh = "4G";
     };

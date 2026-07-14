@@ -1,4 +1,4 @@
-{ config, self, lib, pkgs, utils, ... }:
+{ config, self, lib, utils, ... }:
 let
   romsDir = config.custom.paths.media.gaming.emulation.roms;
   stateDir = "/var/lib/skyscraper";
@@ -21,28 +21,7 @@ let
     { dir = "dreamcast"; }
   ];
 
-  scrapeAndGenerate = pkgs.writeShellApplication {
-    name = "scrape-and-generate-pegasus-artwork";
-    runtimeInputs = [ pkgs.skyscraper ];
-    text = ''
-      ROMS_DIR="${romsDir}"
-      ${lib.concatMapStringsSep "\n" (p: let platform = p.scraper or p.dir; in ''
-        if [[ -d "$ROMS_DIR/${p.dir}" ]]; then
-          printf '=== Scraping ${p.dir} (platform: ${platform}) ===\n'
-          Skyscraper -p "${platform}" -i "$ROMS_DIR/${p.dir}" \
-            --flags "unattend,onlymissing,nohints" \
-            -s screenscraper || printf 'Warning: scraping failed for ${p.dir}\n' >&2
-
-          printf '=== Generating artwork for ${p.dir} ===\n'
-          mkdir -p "$HOME/.skyscraper/gamelists/${p.dir}"
-          Skyscraper -p "${platform}" -i "$ROMS_DIR/${p.dir}" \
-            --flags "unattend" \
-            -g "$HOME/.skyscraper/gamelists/${p.dir}" \
-            -o "$ROMS_DIR/${p.dir}/media" || printf 'Warning: generate failed for ${p.dir}\n' >&2
-        fi
-      '') platforms}
-    '';
-  };
+  romArtworkArgs = map (p: "${p.scraper or p.dir}:${romsDir}/${p.dir}") platforms;
 in
 {
   sops.secrets."romm/screenscraper/user" = { };
@@ -72,7 +51,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       StateDirectory = "skyscraper";
-      ExecStart = utils.escapeSystemdExecArgs [ (lib.getExe scrapeAndGenerate) ];
+      ExecStart = utils.escapeSystemdExecArgs ([ (lib.getExe self.packages.rom-artwork) ] ++ romArtworkArgs);
       Environment = [
         "HOME=${stateDir}"
       ];

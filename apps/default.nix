@@ -12,11 +12,10 @@ let
     in pkgsToApps {
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
       host-secrets = pkgs.callPackage ./host-secrets { };
-      host-keys = pkgs.callPackage ./host-keys { };
       check-updates = pkgsWithOverlays.callPackage ./check-updates {
         inherit (self.lib.builders.${system}) writeNushellScript;
       };
-      });
+    });
 
   linux = forLinuxSystems (system:
     let

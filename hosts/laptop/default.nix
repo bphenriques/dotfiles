@@ -22,12 +22,11 @@ in
   networking.hostName = "bphenriques-laptop";
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_0; # Intentionally not LTS as I want to keep up at my own pace
+    kernelPackages = pkgs.linuxPackages_7_1;
 
     initrd.systemd.enable = true;
 
-    # Hibernation: resume from btrfs swapfile on the root partition.
-    # To get the offset: sudo btrfs inspect-internal map-swapfile -r /.swapvol/swapfile
+    # Hibernation: resume from btrfs swapfile on the root partition. To get the offset: sudo btrfs inspect-internal map-swapfile -r /.swapvol/swapfile
     resumeDevice = "${rootDisk}-part2";
     kernelParams = [ "boot.shell_on_fail" "resume_offset=533760" ];
     loader = {

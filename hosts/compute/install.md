@@ -71,4 +71,3 @@ Share CalDAV/CardDAV URL with clients: `dav.<domain>` with generated `htpasswd` 
 ### WireGuard
 
 Import client configs on devices
-

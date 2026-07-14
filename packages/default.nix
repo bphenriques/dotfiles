@@ -34,7 +34,7 @@ let
       status-glance = pkgs.callPackage ./desktop/status-glance { inherit upower-notify volume-osd niri-keyboard-layout; };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
-      scrape-roms = pkgs.callPackage ./cli/scrape-roms { };
+      rom-artwork = pkgs.callPackage ./cli/rom-artwork { };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

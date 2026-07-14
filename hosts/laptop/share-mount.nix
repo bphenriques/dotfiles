@@ -1,13 +1,10 @@
-# share-vm's files mounted like the NAS shares (/mnt/homelab-*): an sshfs automount over
-# the existing admin SSH (key-based, laptop-only). The laptop is a stationary desktop, so
-# this is effectively always available — it mounts on first access and reconnects. Curate
-# from here onto the NAS. The (passphraseless) laptop key is already authorized for both hops.
-#
-# Deliberately a root mount: the content is inert (noexec,nosuid,nodev) and curation is by
-# hand, so the only residual (a compromised VM's SFTP server exploiting the sftp *client*)
-# is a speculative parser 0-day in a brief manual window — not worth a dedicated non-root
-# user's cross-host key/jump cost, especially on a single-user desktop where sudo exists.
+# share-vm's files as an sshfs automount, like the NAS /mnt/homelab-* shares. Root mount by
+# design: content is inert and curation is manual, so a dedicated non-root jump user isn't
+# worth its cross-host key cost on a single-user desktop.
 { config, pkgs, ... }:
+let
+  user = config.users.users.bphenriques;
+in
 {
   fileSystems."/mnt/homelab-shared-vm" = {
     device = "filebrowser@share-vm:/srv/share";
@@ -18,33 +15,30 @@
       "noauto"
       "x-systemd.idle-timeout=600"
       "x-systemd.mount-timeout=20s"
-      # appear as bphenriques so the desktop session has full access to FileBrowser's files
+      # present FileBrowser's files as bphenriques so the desktop session owns them
       "allow_other"
       "default_permissions"
-      "uid=${toString config.users.users.bphenriques.uid}"
+      "uid=${toString user.uid}"
       "gid=100"
       "reconnect"
       "ServerAliveInterval=15"
       "ServerAliveCountMax=3"
-      # carries others' uploads — data, never an execution path here
       "noexec"
       "nosuid"
       "nodev"
     ];
   };
-  # Provide the fuse mount helper; allow a non-root session to enter the root-owned mount.
+
   system.fsPackages = [ pkgs.sshfs ];
   programs.fuse.userAllowOther = true;
 
-  # The whole connection lives here, read by root's mount and interactive ssh alike: the key
-  # for each hop, host-key pinning, and the jump. ProxyJump spawns a *separate* ssh to compute
-  # that wouldn't inherit a mount-level IdentityFile, and root has no default key — so the key
-  # belongs in ssh_config, where every hop's ssh finds it.
+  # Key lives here, not as a mount option: root has no default key, and ProxyJump spawns a
+  # separate ssh to compute that wouldn't inherit a mount-level IdentityFile.
   programs.ssh.extraConfig = ''
     Host compute share-vm
-      IdentityFile ${config.users.users.bphenriques.home}/.ssh/id_ed25519
+      IdentityFile ${user.home}/.ssh/id_ed25519
       StrictHostKeyChecking yes
     Host share-vm
-      ProxyJump bphenriques@compute
+      ProxyJump ${user.name}@compute
   '';
 }

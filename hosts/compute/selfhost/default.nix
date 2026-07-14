@@ -176,4 +176,6 @@ in
     guest-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
     guest-kavita-initial-credentials.restartUnits = [ "kavita-configure.service" ];
   };
+
+  systemd.services.sshd.serviceConfig.Slice = "critical.slice";
 }

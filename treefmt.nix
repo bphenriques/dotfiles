@@ -20,33 +20,29 @@
     statix.priority = 2;
   };
 
-  # Follow Google's Shell Style Guide: https://google.github.io/styleguide/shellguide.html
-  settings.formatter.shfmt.options = [
-    "-i"
-    "2"   # 2-space indentation
-    "-ci" # indent switch/case labels
-    "-bn" # binary ops (&&, ||, |) may start a line
-    "-s"  # simplify shell expressions
-  ];
+  settings.formatter = {
+    # Follow Google's Shell Style Guide: https://google.github.io/styleguide/shellguide.html
+    shfmt.options = [
+      "-i"
+      "2"   # 2-space indentation
+      "-ci" # indent switch/case labels
+      "-bn" # binary ops (&&, ||, |) may start a line
+      "-s"  # simplify shell expressions
+    ];
+    shellcheck.excludes = [
+      ".envrc" # is a direnv file, not a regular shell script.
+      # Avoids false positive related with lack of shebang.
+      "hosts/**/backup.sh"
+      "packages/**/script.sh"
+      "apps/**/script.sh"
+    ];
 
-  # Shell scripts wrapped by writeShellApplication intentionally omit shebangs.
-  # shellcheck runs at build time for those; exclude them here to avoid SC2148 false positives.
-  # .envrc is a direnv file, not a regular shell script.
-  settings.formatter.shellcheck.excludes = [
-    ".envrc"
-    "hosts/compute/services/*/backup.sh"
-    "packages/*/script.sh"
-    "packages/*/*/script.sh"
-  ];
-
-  # Nushell formatter (not yet in treefmt-nix)
-  settings.formatter.nufmt =
-    let
-      config = pkgs.writeText "nufmt.nuon" "{ indent: 2, line_length: 120 }";
-    in
-    {
+    # Nushell formatter (not yet in treefmt-nix)
+    nufmt = let config = pkgs.writeText "nufmt.nuon" "{ indent: 2, line_length: 120 }";
+    in {
       command = lib.getExe pkgs.nufmt;
       options = [ "--config" (toString config) ];
       includes = [ "*.nu" ];
     };
+  };
 }

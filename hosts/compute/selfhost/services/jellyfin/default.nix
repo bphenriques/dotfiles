@@ -56,6 +56,7 @@ in
     users.users.jellyfin.extraGroups = [ selfhostMounts.media.group "video" "render" ];
     systemd.services.jellyfin.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
     systemd.services.jellyfin.serviceConfig.ReadOnlyPaths = [ pathsCfg.media.music.library ];
+    systemd.services.jellyfin.serviceConfig.Slice = "throttled.slice";
 
     assertions = [
       {

@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, private, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -31,23 +31,31 @@
   ];
 
   # bond0 over enp1s0/enp2s0 (active-backup) via systemd-networkd. The bond MAC is pinned to
-  # enp1s0's — the DHCP reservation (192.168.1.196) is keyed on it.
+  # enp1s0's — the DHCP reservation is keyed on it (private.settings.network.bond0MAC).
   networking.useDHCP = false;
   networking.useNetworkd = true;
   systemd.network = {
     netdevs."10-bond0" = {
-      netdevConfig = { Kind = "bond"; Name = "bond0"; MACAddress = "78:55:36:05:37:c8"; };
-      bondConfig = { Mode = "active-backup"; MIIMonitorSec = "100ms"; };  # link monitoring ⇒ failover on cable pull
+      netdevConfig = { Kind = "bond"; Name = "bond0"; MACAddress = private.settings.network.bond0MAC; };
+      bondConfig = { Mode = "active-backup"; MIIMonitorSec = "100ms"; };  # link monitoring, then failover on cable pull
     };
-    networks."10-enp1s0" = { matchConfig.Name = "enp1s0"; networkConfig.Bond = "bond0"; };
-    networks."10-enp2s0" = { matchConfig.Name = "enp2s0"; networkConfig.Bond = "bond0"; };
-    networks."10-bond0" = {
-      matchConfig.Name = "bond0";
-      networkConfig = { DHCP = "ipv4"; IPv6AcceptRA = true; };  # keep the routable global IPv6 (RA)
+    networks = {
+      "10-enp1s0" = { matchConfig.Name = "enp1s0"; networkConfig.Bond = "bond0"; };
+      "10-enp2s0" = { matchConfig.Name = "enp2s0"; networkConfig.Bond = "bond0"; };
+      "10-bond0" = {
+        matchConfig.Name = "bond0";
+        networkConfig = {
+          DHCP = "ipv4";
+          IPv6AcceptRA = true; # keep the routable global IPv6 (RA)
+        };
+      };
     };
+
     # WoL by original name: enslaved slaves read the bond MAC, so can't match on address.
-    links."10-enp1s0" = { matchConfig.OriginalName = "enp1s0"; linkConfig.WakeOnLan = "magic"; };
-    links."10-enp2s0" = { matchConfig.OriginalName = "enp2s0"; linkConfig.WakeOnLan = "magic"; };
+    links = {
+      "10-enp1s0" = { matchConfig.OriginalName = "enp1s0"; linkConfig.WakeOnLan = "magic"; };
+      "10-enp2s0" = { matchConfig.OriginalName = "enp2s0"; linkConfig.WakeOnLan = "magic"; };
+    };
   };
 
   # Power management
@@ -74,28 +82,18 @@
   };
 
   # Thermal & stability
-  # Hardware watchdog needs no config here: intel_oc_wdt auto-probes as /dev/watchdog and is
-  # armed by RuntimeWatchdogSec in the headless profile (iTCO_wdt would just sit inactive).
   services.thermald.enable = true;      # Intel thermal daemon
   systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
-
-  # Resource policy: throttle thermally-intensive media services into a capped slice; give critical
-  # services (e.g. sshd, below) their own high-priority slice.
   systemd.slices = {
     throttled.sliceConfig = {
-      AllowedCPUs = "1-2";  # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
-      CPUQuota = "150%";    # hard cap prevents turbo heat-soak on the passively-cooled N150
+      AllowedCPUs = "1-2";              # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)
+      CPUQuota = "150%";                # hard cap prevents turbo heat-soak on the passively-cooled N150
       CPUWeight = 20;
       MemoryHigh = "16G";
       MemoryMax = "20G";
     };
-    critical.sliceConfig.CPUWeight = 1000;
+    critical.sliceConfig.CPUWeight = 1000; # Reserved for critical services
   };
-  systemd.services.jellyfin.serviceConfig.Slice = "throttled.slice";
-  # nixpkgs' immich module pins its own system-immich.slice, so force ours over it.
-  systemd.services.immich-server.serviceConfig.Slice = lib.mkForce "throttled.slice";
-  systemd.services.immich-machine-learning.serviceConfig.Slice = lib.mkForce "throttled.slice";
-  systemd.services.sshd.serviceConfig.Slice = "critical.slice";
 
  # Misc
   hardware.enableRedistributableFirmware = true;
