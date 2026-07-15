@@ -14,7 +14,7 @@
     };
   };
 
-  # Keep the WireGuard endpoint's record pointed at the current (dynamic) public IP.
+  # Ensure WireGuard endpoint is up to date as my home IP may change
   sops.secrets."desec/token" = { };
   selfhost.apps.desec = {
     enable = true;

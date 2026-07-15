@@ -7,8 +7,7 @@ let
 in
 {
   selfhost.monitoring.scopes.ups = lib.mkIf (config.power.ups.enable && config.power.ups.upsmon.monitor ? synology) (
-    assert lib.assertMsg (parsed != null)
-      "power.ups.upsmon.monitor.synology.system must be \"ups@host\" (got: ${upsmon.system})";
+    assert lib.assertMsg (parsed != null) "power.ups.upsmon.monitor.synology.system must be \"ups@host\" (got: ${upsmon.system})";
   {
     exporters.nut = {
       enable = true;
@@ -18,6 +17,7 @@ in
       nutUser = upsmon.user;
       passwordPath = upsmon.passwordFile;
     };
+
     scrapeConfigs = [{
       job_name = "nut";
       metrics_path = "/ups_metrics";
@@ -27,6 +27,7 @@ in
         labels.instance = config.networking.hostName;
       }];
     }];
+
     rules = [{
       name = "ups";
       rules = [

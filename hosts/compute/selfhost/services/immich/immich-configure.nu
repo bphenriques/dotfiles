@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 let base_url = $env.IMMICH_URL
 let config = open $env.IMMICH_CONFIG_FILE
+
 def wait_ready [] {
   for attempt in 1..60 {
     print $"Waiting for Immich... ($attempt)"
@@ -11,9 +12,11 @@ def wait_ready [] {
   }
   error make {msg: "Immich failed to start after 60 attempts"}
 }
+
 def admin_signup [admin: record, password: string] {
   let body = {email: $admin.email, name: $admin.name, password: $password}
   let r = http post $"($base_url)/api/auth/admin-sign-up" $body --content-type application/json --full --allow-errors
+
   if $r.status == 201 {
     print $"Admin user ($admin.email) registered successfully"
   } else if $r.status == 400 and ($r.body | to text | str contains "admin") {
@@ -22,9 +25,11 @@ def admin_signup [admin: record, password: string] {
     error make {msg: $"Failed to register admin: ($r.status) - ($r.body)"}
   }
 }
+
 def complete_admin_onboarding [headers: record] {
   # System-level admin onboarding
   let r = http post $"($base_url)/api/system-metadata/admin-onboarding" {} --headers $headers --content-type application/json --full --allow-errors
+
   if $r.status == 204 or $r.status == 200 {
     print "System admin onboarding completed"
   } else if $r.status == 400 {
@@ -33,6 +38,7 @@ def complete_admin_onboarding [headers: record] {
     print $"Warning: Failed to complete system admin onboarding: ($r.status)"
   }
 }
+
 def login [email: string, password: string] {
   let body = {email: $email, password: $password}
   let r = http post $"($base_url)/api/auth/login" $body --content-type application/json --full --allow-errors
@@ -41,6 +47,7 @@ def login [email: string, password: string] {
   }
   $r.body.accessToken
 }
+
 def get_all [endpoint: string, headers: record] {
   let r = http get $"($base_url)/api($endpoint)" --headers $headers --full --allow-errors
   if $r.status != 200 {
@@ -48,9 +55,11 @@ def get_all [endpoint: string, headers: record] {
   }
   $r.body
 }
+
 def ensure_user [user: record, existing: list<any>, headers: record] {
   let is_admin = $user.isAdmin? | default false
   let found = $existing | where email == $user.email | get 0?
+
   if $found != null {
     if $found.isAdmin != $is_admin {
       let body = {isAdmin: $is_admin}
@@ -64,6 +73,7 @@ def ensure_user [user: record, existing: list<any>, headers: record] {
     }
     return $found.id
   }
+
   let body = {
     email: $user.email
     name: $user.name
@@ -77,6 +87,7 @@ def ensure_user [user: record, existing: list<any>, headers: record] {
   print $"Created user ($user.email)"
   $r.body.id
 }
+
 def ensure_library [
   lib: record
   owner_id: string
@@ -97,6 +108,7 @@ def ensure_library [
     }
     return $found.id
   }
+
   let body = {
     name: $lib.name
     ownerId: $owner_id
@@ -108,6 +120,7 @@ def ensure_library [
     error make {msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)"}
   }
   print $"Created library ($lib.name)"
+
   let scan = http post $"($base_url)/api/libraries/($r.body.id)/scan" "{}" --headers $headers --content-type application/json --full --allow-errors
   if $scan.status == 204 {
     print $"Triggered scan for library ($lib.name)"
@@ -116,24 +129,30 @@ def ensure_library [
   }
   $r.body.id
 }
+
 def main [] {
   wait_ready
   print "Immich is ready"
   let admin = $config.admin
   let password = open $admin.passwordFile | str trim
+
   # Register admin on first run
   admin_signup $admin $password
+
   # Login and use access token for API operations
   let token = login $admin.email $password
   let headers = {"Authorization": $"Bearer ($token)"}
+
   # Complete admin onboarding to skip the getting started wizard
   complete_admin_onboarding $headers
+
   # Create users and complete their onboarding
   let existing_users = get_all "/admin/users" $headers
   let user_map = $config.users | each { |u|
         let user_id = ensure_user $u $existing_users $headers
         [$u.email $user_id]
       } | into record
+
   # Create libraries
   let existing_libraries = get_all "/libraries" $headers
   $config.libraries | each { |lib|

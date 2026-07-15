@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 let base_url = $env.KAVITA_URL
 let config = open $env.KAVITA_CONFIG_FILE
+
 def wait_ready [] {
   for attempt in 1..60 {
     print $"Waiting for Kavita... ($attempt)"
@@ -11,6 +12,7 @@ def wait_ready [] {
   }
   error make {msg: "Kavita failed to start after 60 attempts"}
 }
+
 def register_admin [password: string] {
   let body = {username: "admin", password: $password, email: ""}
   let r = http post $"($base_url)/api/Account/register" $body --content-type application/json --full --allow-errors
@@ -24,6 +26,7 @@ def register_admin [password: string] {
     error make {msg: $"Failed to register admin: ($r.status) - ($r.body)"}
   }
 }
+
 def login [username: string, password: string] {
   let body = {userName: $username, password: $password}
   let r = http post $"($base_url)/api/Account/login" $body --content-type application/json --full --allow-errors
@@ -32,6 +35,7 @@ def login [username: string, password: string] {
   }
   $r.body.token
 }
+
 def get_settings [headers: record] {
   let r = http get $"($base_url)/api/Settings" --headers $headers --full --allow-errors
   if $r.status != 200 {
@@ -39,12 +43,14 @@ def get_settings [headers: record] {
   }
   $r.body
 }
+
 def update_settings [settings: record, headers: record] {
   let r = http post $"($base_url)/api/Settings" $settings --headers $headers --content-type application/json --full --allow-errors
   if $r.status != 200 {
     error make {msg: $"Failed to update settings: ($r.status) - ($r.body)"}
   }
 }
+
 def get_libraries [headers: record] {
   let r = http get $"($base_url)/api/Library/libraries" --headers $headers --full --allow-errors
   if $r.status != 200 {
@@ -52,6 +58,7 @@ def get_libraries [headers: record] {
   }
   $r.body
 }
+
 def create_library [lib: record, headers: record] {
   let body = {
     name: $lib.name
@@ -76,6 +83,7 @@ def create_library [lib: record, headers: record] {
     error make {msg: $"Failed to create library ($lib.name): ($r.status) - ($r.body)"}
   }
 }
+
 def update_library [existing: record, lib: record, headers: record] {
   let body = {
     id: $existing.id
@@ -101,6 +109,7 @@ def update_library [existing: record, lib: record, headers: record] {
   }
   print $"Updated library: ($lib.name)"
 }
+
 def ensure_libraries [libraries: list<any>, headers: record] {
   let existing = get_libraries $headers
   $libraries | each { |lib|
@@ -112,6 +121,7 @@ def ensure_libraries [libraries: list<any>, headers: record] {
     }
   } | ignore
 }
+
 def update_server_settings [headers: record] {
   let current_settings = get_settings $headers
   let server = $config.server
@@ -119,11 +129,14 @@ def update_server_settings [headers: record] {
   update_settings $updated_settings $headers
   print "Server settings updated"
 }
+
 def update_oidc_settings [library_map: record, headers: record] {
   let current_settings = get_settings $headers
   let oidc = $config.oidc
+
   # Resolve library names to IDs
   let default_library_ids = $oidc.defaultLibraries | each {|name| $library_map | get $name }
+
   # OIDC for authentication only - roles managed via API
   let base_oidc_config = $current_settings.oidcConfig? | default {}
   let updated_oidc_config = $base_oidc_config | upsert providerName $oidc.buttonText | upsert provisionAccounts $oidc.provisionAccounts | upsert syncUserSettings $oidc.syncUserSettings | upsert defaultRoles $oidc.defaultRoles | upsert defaultLibraries $default_library_ids | upsert defaultAgeRestriction $oidc.defaultAgeRestriction | upsert defaultIncludeUnknowns $oidc.defaultIncludeUnknowns | upsert autoLogin $oidc.autoLogin | upsert disablePasswordAuthentication $oidc.disablePasswordAuth
@@ -131,6 +144,7 @@ def update_oidc_settings [library_map: record, headers: record] {
   update_settings $updated_settings $headers
   print "OIDC settings updated"
 }
+
 def get_users [headers: record] {
   let r = http get $"($base_url)/api/Users" --headers $headers --full --allow-errors
   if $r.status != 200 {
@@ -138,6 +152,7 @@ def get_users [headers: record] {
   }
   $r.body
 }
+
 def update_user [
   kavita_user: record
   roles: list<any>
@@ -159,6 +174,7 @@ def update_user [
     error make {msg: $"Failed to update user ($kavita_user.username): ($r.status) - ($r.body)"}
   }
 }
+
 def reconcile_oidc_users [library_map: record, headers: record] {
   let oidc = $config.oidc
   let admin_usernames = $config.oidcAdminUsernames? | default []
@@ -166,6 +182,7 @@ def reconcile_oidc_users [library_map: record, headers: record] {
   let default_roles = $oidc.defaultRoles
   let expected_age = {ageRating: $oidc.defaultAgeRestriction, includeUnknowns: $oidc.defaultIncludeUnknowns}
   let users = get_users $headers
+
   # identityProvider: 0=Kavita, 1=OIDC
   let oidc_users = $users | where identityProvider == 1
   for user in $oidc_users {
@@ -184,6 +201,7 @@ def reconcile_oidc_users [library_map: record, headers: record] {
     }
   }
 }
+
 def provision_local_users [library_map: record, headers: record] {
   if ($config.localUsers? | default [] | is-empty) {
     print "  No local users configured"
@@ -210,6 +228,7 @@ def provision_local_users [library_map: record, headers: record] {
     } else {
       print $"  Local user '($user.username)' already exists"
     }
+
     # Ensure roles and library access
     let kavita_user = $users | where username == $user.username | get 0?
     if $kavita_user != null {
@@ -220,27 +239,35 @@ def provision_local_users [library_map: record, headers: record] {
     }
   }
 }
+
 def main [] {
   wait_ready
   print "Kavita is ready"
+
   # Generate admin password and register if needed (idempotent - 400 means already exists)
   let password = open $config.adminPasswordFile | str trim
   register_admin $password
+
   # Login and configure via API
   let token = login $config.adminUsername $password
   let headers = {"Authorization": $"Bearer ($token)"}
+
   # Create libraries
   ensure_libraries $config.libraries $headers
+
   # Build library name -> ID map for settings and user sync
   let libraries = get_libraries $headers
   let library_map = $libraries | each {|lib| [$lib.name $lib.id] } | into record
+
   # Update settings via API
   update_server_settings $headers
   update_oidc_settings $library_map $headers
+
   # Reconcile OIDC users: ensure they have public libraries
   # (defaultLibraries only applies at first provisioning, not retroactively)
   print "Reconciling OIDC users..."
   reconcile_oidc_users $library_map $headers
+
   # Provision local users (e.g., guest accounts)
   print "Provisioning local users..."
   provision_local_users $library_map $headers

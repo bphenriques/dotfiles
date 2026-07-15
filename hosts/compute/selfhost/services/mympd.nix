@@ -3,7 +3,13 @@ let
   serviceCfg = config.selfhost.services.mympd;
 in
 {
-  sops.secrets."mympd/pin" = { };
+  selfhost.services.mympd = {
+    displayName = "My MPD";
+    description = "Remote MPD Client";
+    port = 8093;
+    access.allowedGroups = [ config.selfhost.groups.users ];
+    forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
+  };
 
   services.mympd = {
     enable = true;
@@ -14,6 +20,7 @@ in
     };
   };
 
+  sops.secrets."mympd/pin" = { };
   systemd.services.mympd = {
     environment = {
       MPD_HOST = config.custom.fleet.lan.hosts.inky;
@@ -25,13 +32,5 @@ in
       printf '%s' "$pin_hash" > "$STATE_DIRECTORY/config/pin_hash"
       chmod 0600 "$STATE_DIRECTORY/config/pin_hash"
     '';
-  };
-
-  selfhost.services.mympd = {
-    displayName = "My MPD";
-    description = "Remote MPD Client";
-    port = 8093;
-    access.allowedGroups = [ config.selfhost.groups.users ];
-    forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
   };
 }

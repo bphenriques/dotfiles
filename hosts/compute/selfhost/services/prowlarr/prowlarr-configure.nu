@@ -10,6 +10,7 @@ let sonarr_api_key = open $env.SONARR_API_KEY_FILE | str trim
 let ntfy_token = open $env.NTFY_TOKEN_FILE | str trim
 let config = open $env.PROWLARR_CONFIG_FILE
 let headers = [X-Api-Key, $api_key]
+
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Prowlarr... ($attempt)"
@@ -19,6 +20,7 @@ def wait_ready [] {
   }
   error make {msg: "Prowlarr failed to start after 30 attempts"}
 }
+
 def ensure_tag [tag_name: string]: nothing -> int {
   let existing = http get $"($base_url)/api/v1/tag" --headers $headers --full --allow-errors
   if $existing.status != 200 {
@@ -37,6 +39,7 @@ def ensure_tag [tag_name: string]: nothing -> int {
   print $"  Created tag: ($tag_name)"
   $r.body.id
 }
+
 def get_default_app_profile_id [] {
   let profiles = http get $"($base_url)/api/v1/appprofile" --headers $headers --full --allow-errors
   if $profiles.status != 200 {
@@ -48,6 +51,7 @@ def get_default_app_profile_id [] {
   }
   $profile.id
 }
+
 def ensure_indexers [] {
   print "Configuring indexers..."
   let indexers = ($config | get -o indexers) | default []
@@ -61,6 +65,7 @@ def ensure_indexers [] {
   let existing_names = (
     $existing.body | default [] | get -o name | default []
   )
+
   # Get available indexer schemas
   let schemas = http get $"($base_url)/api/v1/indexer/schema" --headers $headers --full --allow-errors
   if $schemas.status != 200 {
@@ -73,18 +78,21 @@ def ensure_indexers [] {
       print $"  Indexer exists: ($idx.name)"
       continue
     }
+
     # Find the schema for this indexer
     let schema = $schemas.body | where definitionName == $idx.definitionName | get 0?
     if $schema == null {
       print $"  Indexer schema not found: ($idx.definitionName), skipping"
       continue
     }
+
     # Merge custom fields
     let fields_cfg = ($idx | get -o fields) | default {}
     let fields = $schema.fields | each { |f|
       let custom_value = $fields_cfg | get -o $f.name
       if $custom_value != null { $f | upsert value $custom_value } else { $f }
     }
+
     # Resolve tag names to IDs
     let tag_names = ($idx | get -o tags) | default []
     let tag_ids = $tag_names | each {|t| ensure_tag $t }
@@ -107,6 +115,7 @@ def ensure_indexers [] {
     print $"  Warning: Failed to create indexers: ($failed | str join ', ')"
   }
 }
+
 def ensure_applications [] {
   print "Configuring applications..."
   let applications = ($config | get -o applications) | default []
@@ -126,6 +135,7 @@ def ensure_applications [] {
     let existing_app = (
       $existing.body | default [] | where name == $app.name | get 0?
     )
+
     # Get the appropriate API key
     let app_api_key = match $app.implementation {
       Radarr => $radarr_api_key
@@ -135,12 +145,14 @@ def ensure_applications [] {
         continue
       }
     }
+
     # Find schema for this implementation
     let schema = $schemas.body | where implementation == $app.implementation | get 0?
     if $schema == null {
       print $"  Application schema not found: ($app.implementation), skipping"
       continue
     }
+
     # Build fields from existing record (preserving server-set values) or schema defaults
     let base_fields = if $existing_app != null { $existing_app.fields } else { $schema.fields }
     let fields = $base_fields | each { |f|
@@ -177,6 +189,7 @@ def ensure_applications [] {
     }
   }
 }
+
 def ensure_notification [] {
   print "Configuring ntfy notification..."
   let existing = http get $"($base_url)/api/v1/notification" --headers $headers --full --allow-errors
@@ -227,6 +240,7 @@ def ensure_notification [] {
   }
   print $"  Created notification: ($notification_name)"
 }
+
 def sync_indexers [] {
   print "Syncing indexers to applications..."
   let r = http post $"($base_url)/api/v1/command" { name: "ApplicationIndexerSync" } --headers $headers --content-type application/json --full --allow-errors
@@ -235,6 +249,7 @@ def sync_indexers [] {
   }
   print "  Indexer sync triggered"
 }
+
 def main [] {
   wait_ready
   print "Prowlarr is ready"

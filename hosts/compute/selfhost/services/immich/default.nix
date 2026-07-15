@@ -62,7 +62,7 @@ in
         library.watch.enabled = true;
 
         ffmpeg = {
-          accel = "disabled";      # CPU-only; iGPU reserved for Jellyfin and I can't throttle GPU. Both will lead to thermal issues in such as small device.
+          accel = "disabled";      # CPU-only; iGPU reserved for Jellyfin and I can't throttle GPU. Both will lead to thermal issues in a small device.
           accelDecode = false;
           acceptedVideoCodecs = [ "h264" "hevc" ];
           threads = 2;

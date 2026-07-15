@@ -2,34 +2,28 @@
 {
   selfhost.apps.sonarr = {
     enable = true;
-    # Sonarr connection-tests a download client on save, so reconcile after Transmission is up.
-    configureAfter = [ "transmission.service" ];
-    rootFolders = [
-      {
-        path = config.custom.paths.media.tv;
-        defaultQualityProfile = config.custom.media.sonarr.profiles.default.name;
-      }
-    ];
-    downloadClients = [
-      {
-        name = "Transmission";
-        implementation = "Transmission";
-        protocol = "torrent";
-        fields = {
-          host = "127.0.0.1";
-          inherit (config.selfhost.services.transmission) port;
-          urlBase = "/transmission/";
-          tvCategory = "sonarr";
-        };
-      }
-    ];
+    configureAfter = [ "transmission.service" ]; # sonarr does connection tests when configuring
+    rootFolders = [{
+      path = config.custom.paths.media.tv;
+      defaultQualityProfile = config.custom.media.sonarr.profiles.default.name;
+    }];
+    downloadClients = [{
+      name = "Transmission";
+      implementation = "Transmission";
+      protocol = "torrent";
+      fields = {
+        host = "127.0.0.1";
+        inherit (config.selfhost.services.transmission) port;
+        urlBase = "/transmission/";
+        tvCategory = "sonarr";
+      };
+    }];
     delayProfile = {
       preferredProtocol = "torrent";
       torrentDelay = 120;
     };
   };
 
-  # Deployment: media storage + which notify topic (the framework wires the rest).
   selfhost.services.sonarr = {
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";

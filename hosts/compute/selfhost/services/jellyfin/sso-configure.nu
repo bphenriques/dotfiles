@@ -7,6 +7,7 @@ let admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let config = open $env.SSO_CONFIG_FILE
 let oidc_client_id = open $env.OIDC_CLIENT_ID_FILE | str trim
 let oidc_client_secret = open $env.OIDC_CLIENT_SECRET_FILE | str trim
+
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Jellyfin... ($attempt)"
@@ -16,6 +17,7 @@ def wait_ready [] {
   }
   error make {msg: "Jellyfin failed to respond after 30 attempts"}
 }
+
 def authenticate []: nothing -> record<headers: list<any>, api_key: string> {
   print $"Authenticating as: ($admin_username)"
   let r = http post $"($base_url)/Users/AuthenticateByName" { Username: $admin_username, Pw: $admin_password } --content-type application/json --headers [Authorization, "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""] --full --allow-errors
@@ -48,6 +50,7 @@ def authenticate []: nothing -> record<headers: list<any>, api_key: string> {
     api_key: ($matches | first).AccessToken
   }
 }
+
 def ensure_branding [headers: list<any>] {
   print "Configuring branding..."
   let r = http post $"($base_url)/System/Configuration/Branding" $config.brandingConfig --content-type application/json --headers $headers --full --allow-errors
@@ -56,6 +59,7 @@ def ensure_branding [headers: list<any>] {
   }
   print "  Branding configured"
 }
+
 def ensure_sso [api_key: string] {
   print "Configuring SSO..."
   let provider_name = $config.ssoConfig.providerName
@@ -64,6 +68,7 @@ def ensure_sso [api_key: string] {
   if $r.status != 200 {
     error make {msg: $"Failed to query SSO providers: ($r.status)"}
   }
+
   # OID/Add creates or overwrites the provider config
   let sso_config = $config.ssoConfig | update oidClientId $oidc_client_id | update oidSecret $oidc_client_secret
   let r2 = http post $"($base_url)/sso/OID/Add/($provider_name | url encode)?api_key=($api_key)" $sso_config --content-type application/json --full --allow-errors
@@ -72,6 +77,7 @@ def ensure_sso [api_key: string] {
   }
   print $"  SSO provider ($provider_name) configured"
 }
+
 def main [] {
   wait_ready
   let auth = authenticate

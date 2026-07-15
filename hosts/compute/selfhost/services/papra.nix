@@ -1,5 +1,3 @@
-# TODO: Add user schema (schemas/user-papra.nix) for per-user access
-# once Papra exposes an API for organization membership/invites.
 { config, lib, pkgs, ... }:
 let
   cfg = config.selfhost;
@@ -40,7 +38,6 @@ in
       bytes = 48;
       restartUnits = [ "podman-papra.service" ];
     };
-
     runtimeTemplates."papra.env" = {
       content = ''
         AUTH_SECRET=${cfg.runtimePlaceholder.papra-auth-secret}
@@ -50,13 +47,9 @@ in
     };
   };
 
-  # Allow container bridge to reach Traefik for OIDC discovery/token exchange
-  networking.firewall.interfaces.podman0.allowedTCPPorts = [ 443 ];
-
   users.groups.${papraUser.group} = { inherit (papraUser) gid; };
   users.users.${papraUser.name} = {
-    inherit (papraUser) uid;
-    inherit (papraUser) group;
+    inherit (papraUser) uid group;
     isSystemUser = true;
     extraGroups = [ selfhostMounts.bphenriques.group ];
   };

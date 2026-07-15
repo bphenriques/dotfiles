@@ -39,11 +39,8 @@ in
       dashboards.default_home_dashboard_path = "${systemDashboard}";
       security.secret_key = "$__file{${config.selfhost.runtimeSecrets.grafana-secret-key.path}}";
       users.allow_sign_up = false;
-
-      # Anonymous auth is safe here: Grafana is behind forwardAuth, so all users are already
-      # authenticated via the proxy. This sets the default Grafana role for those users.
       "auth.anonymous" = {
-        enabled = true;
+        enabled = true; # Fine as Grafana is behind forwardAuth and it is view only
         org_role = "Viewer";
       };
     };
@@ -64,14 +61,8 @@ in
         type = "file";
         disableDeletion = true;
         options.path = pkgs.linkFarm "grafana-dashboards" [
-          {
-            name = "system.json";
-            path = systemDashboard;
-          }
-          {
-            name = "share-vm.json";
-            path = shareVmDashboard;
-          }
+          { name = "system.json";   path = systemDashboard; }
+          { name = "share-vm.json"; path = shareVmDashboard; }
         ];
       }];
     };

@@ -2,14 +2,11 @@
 {
   selfhost.apps.radarr = {
     enable = true;
-    # Radarr connection-tests a download client on save, so reconcile after Transmission is up.
-    configureAfter = [ "transmission.service" ];
-    rootFolders = [
-      {
-        path = config.custom.paths.media.movies;
-        defaultQualityProfile = config.custom.media.radarr.profiles.default.name;
-      }
-    ];
+    configureAfter = [ "transmission.service" ];  # radarr does connection tests when configuring
+    rootFolders = [{
+      path = config.custom.paths.media.movies;
+      defaultQualityProfile = config.custom.media.radarr.profiles.default.name;
+    }];
     downloadClients = [
       {
         name = "Transmission";
@@ -29,7 +26,6 @@
     };
   };
 
-  # Deployment: media storage + which notify topic (the framework wires the rest).
   selfhost.services.radarr = {
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";

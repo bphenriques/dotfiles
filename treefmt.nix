@@ -36,13 +36,5 @@
       "packages/**/script.sh"
       "apps/**/script.sh"
     ];
-
-    # Nushell formatter (not yet in treefmt-nix)
-    nufmt = let config = pkgs.writeText "nufmt.nuon" "{ indent: 2, line_length: 120 }";
-    in {
-      command = lib.getExe pkgs.nufmt;
-      options = [ "--config" (toString config) ];
-      includes = [ "*.nu" ];
-    };
   };
 }

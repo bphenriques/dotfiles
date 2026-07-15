@@ -11,8 +11,16 @@
       mac = "02:00:00:00:01:11";
       vsockCid = 3;
       autostart = true;
-      serviceConfig = { Slice = "throttled.slice"; CPUWeight = 10; CPUQuota = "100%"; MemoryMax = "2G"; };
-      monitoring = { traefikMetrics = true; storageMount = "/srv/share"; };
+      serviceConfig = {
+        Slice = "throttled.slice";
+        CPUWeight = 10;
+        CPUQuota = "100%";
+        MemoryMax = "2G";
+      };
+      monitoring = {
+        traefikMetrics = true;
+        storageMount = "/srv/share";
+      };
     };
   };
 }

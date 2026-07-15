@@ -1,7 +1,7 @@
 let
-  # MicroVM guest placement is host-local (hosts/compute/guests.nix), not fleet data. The fleet
+  # MicroVM guest placement is host-local (hosts/compute/microvm/guests.nix), not fleet data. The fleet
   # needs only name→bridge-IP for `ssh -J` resolution + known-hosts pinning; derive it from there.
-  computeGuests = import ./compute/guests.nix;
+  computeGuests = import ./compute/microvm/guests.nix;
 in
 {
   ssh = {

@@ -1,7 +1,7 @@
 # compute as microVM host: import the host-agnostic profile and feed it compute's allocation table.
 { ... }:
 {
-  imports = [ ../../profiles/nixos/capabilities/microvm-host.nix ];
+  imports = [ ../../../profiles/nixos/capabilities/microvm-host.nix ];
 
   homelab.microvm.host = {
     enable = true;

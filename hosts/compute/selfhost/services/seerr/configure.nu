@@ -9,6 +9,7 @@ let radarr_api_key = open $env.RADARR_API_KEY_FILE | str trim
 let sonarr_api_key = open $env.SONARR_API_KEY_FILE | str trim
 let config = open $env.SEERR_CONFIG_FILE
 let headers = [X-Api-Key, $api_key]
+
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Seerr... ($attempt)"
@@ -19,6 +20,7 @@ def wait_ready [] {
   }
   error make {msg: "Seerr failed to start after 30 attempts"}
 }
+
 def complete_setup_wizard [] {
   let r = http get $"($base_url)/api/v1/settings/public" --full --allow-errors
   let public_settings = if $r.status == 200 { $r.body } else { {initialized: false, mediaServerType: 0} }
@@ -29,6 +31,7 @@ def complete_setup_wizard [] {
   let jellyfinServerType = 2 # mediaServerType: 0 = NOT_CONFIGURED, 2 = Jellyfin
   if ($public_settings.mediaServerType? | default 0) == $jellyfinServerType {
     print "Jellyfin already configured, completing initialization..."
+
     # Just need to login (without hostname) and mark as initialized
     let payload = {username: $jellyfin_admin_username, password: $jellyfin_admin_password}
     let r = http post $"($base_url)/api/v1/auth/jellyfin" $payload --content-type application/json --full --allow-errors
@@ -55,6 +58,7 @@ def complete_setup_wizard [] {
     }
     print "  Jellyfin configured and admin user created"
   }
+
   # Mark as initialized
   let init_r = http post $"($base_url)/api/v1/settings/initialize" {} --headers $headers --content-type application/json --full --allow-errors
   if $init_r.status not-in [200, 204] {
@@ -62,6 +66,7 @@ def complete_setup_wizard [] {
   }
   print "  Setup wizard completed"
 }
+
 def get_quality_profile_id [service_url: string, service_api_key: string, profile_name: string] {
   let profiles = http get $"($service_url)/api/v3/qualityprofile" --headers [X-Api-Key, $service_api_key] --full --allow-errors
   if $profiles.status != 200 {
@@ -73,6 +78,7 @@ def get_quality_profile_id [service_url: string, service_api_key: string, profil
   }
   $profile.id
 }
+
 def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   let endpoint = $kind | str downcase
   print $"Configuring ($kind) server..."
@@ -102,6 +108,7 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
     isDefault: $cfg.isDefault
     externalUrl: $cfg.externalUrl
   }
+
   # Service-specific fields
   if $kind == "Radarr" {
     $payload = $payload | merge { minimumAvailability: $cfg.minimumAvailability }
@@ -114,6 +121,7 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   }
   print $"  Created ($kind) server: ($cfg.name)"
 }
+
 def set_application_url [app_url: string] {
   print "Setting Application URL..."
   let payload = {applicationUrl: $app_url}
@@ -123,19 +131,23 @@ def set_application_url [app_url: string] {
   }
   print $"  Application URL set to: ($app_url)"
 }
+
 def sync_jellyfin_users [users: record] {
   print "Syncing Jellyfin users..."
+
   # Get configured usernames from Nix config
   let wanted_usernames = $users | transpose key value | get value | get username
   if ($wanted_usernames | is-empty) {
     print "  No users configured"
     return
   }
+
   # Get list of Jellyfin users from settings endpoint
   let jf_users = http get $"($base_url)/api/v1/settings/jellyfin/users" --headers $headers --full --allow-errors
   if $jf_users.status != 200 {
     error make {msg: $"Failed to get Jellyfin users: ($jf_users.status) - ($jf_users.body)"}
   }
+
   # Only import users that are in our Nix config
   let jf_to_import = $jf_users.body | where {|u| ($u.username? | default "") in $wanted_usernames }
   let jf_user_ids = $jf_to_import | get id
@@ -155,6 +167,7 @@ def sync_jellyfin_users [users: record] {
     print "  All configured users already synced"
   }
 }
+
 # Permission bitmask values from Seerr (formerly seerr v2.2.3)
 # Source: https://github.com/Fallenbagel/seerr/blob/v2.2.3/server/lib/permissions.ts
 const PERM_REQUEST = 32
@@ -167,6 +180,7 @@ const PERM_AUTO_APPROVE_4K = 32768
 const PERM_AUTO_APPROVE_4K_MOVIE = 65536
 const PERM_AUTO_APPROVE_4K_TV = 131072
 const PERM_RECENT_VIEW = 67108864
+
 # Composite permission sets
 const REQUEST_ALL = $PERM_REQUEST bit-or $PERM_REQUEST_4K
 
@@ -178,8 +192,10 @@ const AUTO_APPROVE_ALL = (
 
 # Mask of all bits managed by this script (used to clear before applying desired state)
 const MANAGED_MASK = ($REQUEST_ALL bit-or $PERM_REQUEST_ADVANCED bit-or $AUTO_APPROVE_ALL bit-or $PERM_RECENT_VIEW)
+
 def configure_user_permissions [users: record] {
   print "Configuring user permissions..."
+
   # Get all Seerr users
   let all_users = http get $"($base_url)/api/v1/user" --headers $headers --full --allow-errors
   if $all_users.status != 200 {
@@ -192,6 +208,7 @@ def configure_user_permissions [users: record] {
     if $user == null {
       error make {msg: $"Failed to find user: ($username)"}
     }
+
     # Build desired permissions from config
     mut managed_perms = $REQUEST_ALL
     if $entry.value.autoApprove {
@@ -203,6 +220,7 @@ def configure_user_permissions [users: record] {
     if $entry.value.viewRecentlyAdded {
       $managed_perms = $managed_perms bit-or $PERM_RECENT_VIEW
     }
+
     # Clear managed bits, preserve any other Seerr-granted permissions
     let current_perms = $user.permissions? | default 0
     let base_perms = $current_perms bit-and (0xFFFFFFFF bit-xor $MANAGED_MASK)
@@ -219,6 +237,7 @@ def configure_user_permissions [users: record] {
     print $"  Updated permissions for '($username)'"
   }
 }
+
 def main [] {
   wait_ready
   complete_setup_wizard

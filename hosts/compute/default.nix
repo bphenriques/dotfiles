@@ -4,11 +4,11 @@
     inputs.sops-nix.nixosModules.sops
     ./hardware
     ./disko.nix
-    ./users
+    ./users.nix
     ../../profiles/nixos/base.nix
     ../../profiles/nixos/headless.nix
     ./selfhost
-    ./microvm.nix
+    ./microvm/host.nix
   ];
 
   # Basic setup

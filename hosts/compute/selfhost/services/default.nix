@@ -4,8 +4,8 @@ let
 in
 {
   imports = [
-    ./radarr
-    ./sonarr
+    ./radarr.nix
+    ./sonarr.nix
     ./immich
     ./jellyfin
     ./kapowarr.nix

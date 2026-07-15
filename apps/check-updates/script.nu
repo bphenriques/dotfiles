@@ -3,6 +3,7 @@ let headers = if "GITHUB_TOKEN" in $env {
 } else {
   {}
 }
+
 def query-latest [pkg: record]: nothing -> record {
   let latest_tag = try {
     http get --headers $headers $"https://api.github.com/repos/($pkg.repo)/releases/latest" | get tag_name
@@ -28,6 +29,7 @@ def query-latest [pkg: record]: nothing -> record {
     error: false
   }
 }
+
 def check-group [entries: list<any>, label: string]: nothing -> list<any> {
   let results = $entries | each {|e| query-latest $e }
   let max_name = $results | get name | str length | math max
@@ -46,6 +48,7 @@ def check-group [entries: list<any>, label: string]: nothing -> list<any> {
   }
   $results
 }
+
 def update-containers [results: list<any>]: nothing -> nothing {
   let outdated = $results | where {|r| $r.outdated and (not $r.error)}
   if ($outdated | is-empty) {
@@ -66,6 +69,7 @@ def update-containers [results: list<any>]: nothing -> nothing {
   $text | save --force --raw $file
   print $"Updated ($outdated | length) container image\(s\) in overlays/containers.nix."
 }
+
 def main [--update] {
   print "Checking for updates...\n"
   let pkg_results = check-group (open $env.PACKAGES_FILE) "Pinned packages (overlays/default.nix)"

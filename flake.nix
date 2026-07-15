@@ -72,7 +72,7 @@
 
       # Hosts
       nixosConfigurations = let
-        computeMicrovm = import ./hosts/compute/guests.nix;
+        computeMicrovm = import ./hosts/compute/microvm/guests.nix;
         microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
           configPath = ./hosts/guests/${name};

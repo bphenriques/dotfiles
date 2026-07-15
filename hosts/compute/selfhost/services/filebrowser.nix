@@ -8,9 +8,12 @@ let
 in
 {
   config = {
-    selfhost.services.filebrowser = {
-      access.allowedGroups = with cfg.groups; [ users admin ];
-      traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296; # 4GB upload cap
+    selfhost = {
+      apps.filebrowser.enable = true;
+      services.filebrowser = {
+        access.allowedGroups = with cfg.groups; [ users admin ];
+        traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296; # 4GB upload cap
+      };
     };
 
     services.filebrowser = {
@@ -19,14 +22,16 @@ in
         address = "127.0.0.1";
         inherit (serviceCfg) port;
         root = filebrowserRoot;
-        branding = { disableExternal = true; disableUsedPercentage = true; };
+        branding = {
+          disableExternal = true;
+          disableUsedPercentage = true;
+        };
         viewMode = "mosaic";
         singleClick = true;
         hideDotfiles = true;
         sorting = { by = "modified"; asc = false; };
       };
     };
-    selfhost.apps.filebrowser.enable = true;
     users.users.filebrowser.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.smb;
 
     # Default empty folders

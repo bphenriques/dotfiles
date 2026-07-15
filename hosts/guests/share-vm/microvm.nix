@@ -7,7 +7,7 @@
     mem = 1536;
     balloon = true;        # virtio-balloon: host can reclaim guest memory the VM isn't using
     deflateOnOOM = true;   # on guest OOM, auto-deflate the balloon back before the OOM killer fires
-    shares = [ ]; # No host shares. The image contains everything (storeOnDisk).
+    shares = [ ];          # None as the image contains everything (storeOnDisk).
     volumes = [
       { image = "share-data.img"; label = "share"; mountPoint = shareVm.filesRoot; size = 25 * 1024; }      # Shared Data
       { image = "share-state.img"; label = "share-state"; mountPoint = shareVm.dataRoot; size = 1024; }     # State (host key and creds)

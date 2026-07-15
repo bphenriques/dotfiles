@@ -12,6 +12,7 @@ def print_metadata [roms_path: path, artwork_mapping: list<any>]: list<string> -
     [$"game: ($basename)" $"file: ($rom)"] | append $assets | append ""
   } | flatten
 }
+
 def process_system [
   system: record
   roms_dir: path
@@ -38,6 +39,7 @@ def process_system [
   ] | path join
   $header | append $game_lines | str join "\n" | save --force $out
 }
+
 def main [config_file: path, output_dir: path] {
   mkdir $output_dir
   let config = open $config_file

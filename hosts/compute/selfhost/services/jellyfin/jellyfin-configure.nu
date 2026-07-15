@@ -7,6 +7,7 @@ let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
 let admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let config = open $env.JELLYFIN_CONFIG_FILE
 let oidc_users = open $env.OIDC_USERS_FILE
+
 def wait_ready [] {
   for attempt in 1..30 {
     print $"Waiting for Jellyfin... ($attempt)"
@@ -16,7 +17,9 @@ def wait_ready [] {
   }
   error make {msg: "Jellyfin failed to start after 30 attempts"}
 }
+
 def is_startup_wizard_complete [] { (http get $"($base_url)/Startup/Configuration" --full --allow-errors).status in [401, 403] }
+
 # Jellyfin Startup Wizard API flow (undocumented, discovered via source/build logs):
 #   1. POST /Startup/Configuration - Set locale/metadata preferences
 #   2. GET  /Startup/User          - Triggers internal user creation (returns default username)
@@ -49,6 +52,7 @@ def complete_startup_wizard [] {
   }
   print "  Startup wizard completed"
 }
+
 def authenticate []: nothing -> record<headers: list<any>> {
   print $"Authenticating as: ($admin_username)"
   let auth_headers = [Authorization, "MediaBrowser Client=\"nix\", Device=\"nix\", DeviceId=\"nix\", Version=\"1\""]
@@ -80,6 +84,7 @@ def authenticate []: nothing -> record<headers: list<any>> {
     ]
   }
 }
+
 def ensure_server_name [headers: list<any>] {
   print "Configuring server name..."
   let current = http get $"($base_url)/System/Configuration" --headers $headers --full --allow-errors
@@ -93,6 +98,7 @@ def ensure_server_name [headers: list<any>] {
   }
   print $"  Server name set to: ($config.serverName)"
 }
+
 def ensure_encoding [headers: list<any>] {
   print "Configuring encoding/transcoding..."
   let current = http get $"($base_url)/System/Configuration/encoding" --headers $headers --full --allow-errors
@@ -105,6 +111,7 @@ def ensure_encoding [headers: list<any>] {
   }
   print "  Encoding configured"
 }
+
 def ensure_trickplay [headers: list<any>] {
   print "Configuring trickplay..."
   let current = http get $"($base_url)/System/Configuration" --headers $headers --full --allow-errors
@@ -118,9 +125,11 @@ def ensure_trickplay [headers: list<any>] {
   }
   print "  Trickplay configured"
 }
+
 def library_options [lib: record] {
   {EnableRealtimeMonitor: $lib.EnableRealtimeMonitor, ExtractTrickplayImagesDuringLibraryScan: $lib.ExtractTrickplayImagesDuringLibraryScan, EnableChapterImageExtraction: $lib.EnableChapterImageExtraction}
 }
+
 def ensure_libraries [headers: list<any>] {
   print "Configuring libraries..."
   let existing = http get $"($base_url)/Library/VirtualFolders" --headers $headers --full --allow-errors
@@ -158,6 +167,7 @@ def ensure_libraries [headers: list<any>] {
     }
   }
 }
+
 # FIXME: Remove passwordFile check once Seerr supports OIDC
 # Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
 def ensure_users [headers: list<any>, users: list<any>] {
@@ -188,6 +198,7 @@ def ensure_users [headers: list<any>, users: list<any>] {
       # passwordFile is the bootstrap password only; never reconcile it, so UI password changes persist
       print $"  '($cfg.username)': exists"
     }
+
     # Update user policy if configured
     if ($cfg.policy? | is-not-empty) {
       let users = http get $"($base_url)/Users" --headers $headers --full --allow-errors
@@ -205,6 +216,7 @@ def ensure_users [headers: list<any>, users: list<any>] {
     }
   }
 }
+
 def main [] {
   wait_ready
   print "Jellyfin is ready"

@@ -149,7 +149,10 @@ in
   };
 
   # Firewall
-  networking.firewall.interfaces.bond0.allowedTCPPorts = [ config.selfhost.apps.gitea.ssh.port ];
+  networking.firewall.interfaces = {
+    bond0.allowedTCPPorts = [ config.selfhost.apps.gitea.ssh.port ];
+    podman0.allowedTCPPorts = [ 443 ]; # Allow containers to reach Traefik for OIDC discovery/token exchange
+  };
 
   # Secrets
   sops = {
