@@ -10,11 +10,11 @@ let
 in
 {
   imports = [
-    ../../../profiles/home-manager
-    ../../../profiles/home-manager/desktop-environment
-    ../../../profiles/home-manager/desktop
-    ../../../profiles/home-manager/development
-    ../../../profiles/home-manager/gaming
+    ../../../profiles/home-manager/base.nix
+    ../../../profiles/home-manager/capabilities/graphical
+    ../../../profiles/home-manager/capabilities/desktop
+    ../../../profiles/home-manager/capabilities/development
+    ../../../profiles/home-manager/capabilities/gaming
     ./kanshi.nix
   ];
 
@@ -22,6 +22,7 @@ in
   systemd.user.tmpfiles.rules = [
     "L ${config.xdg.userDirs.pictures}/nas  - - - - ${mounts.nasPrivate}/photos"
     "L ${config.xdg.userDirs.music}/nas     - - - - ${mounts.nasMedia}/music"
+    "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"  # was in the shared HM base
   ];
 
   gtk.gtk3.bookmarks = [

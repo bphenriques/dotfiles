@@ -1,10 +1,12 @@
-{ config, ... }:
+{ config, inputs, ... }:
 let
   inherit (config.users) groups;
   inherit (config.users) users;
   rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
 in
 {
+  imports = [ inputs.disko.nixosModules.disko ];
+
   disko.devices = {
     disk = {
       vda = {

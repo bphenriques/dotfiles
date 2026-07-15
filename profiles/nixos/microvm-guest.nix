@@ -1,6 +1,6 @@
 # Host-agnostic sealed-guest contract: v4-only net, tap/vsock, node metrics, ingress firewall, SSH
-# over the bridge, and the sops-age-identity-is-the-host-key bootstrap. `placement` injected by the host.
-{ config, lib, pkgs, inputs, placement, private, fleet, ... }:
+# over the bridge, and the sops-age-identity-is-the-host-key bootstrap. `guestPlacement` injected by the host.
+{ config, lib, pkgs, inputs, guestPlacement, private, fleet, ... }:
 let
   cfg = config.homelab.microvm.guest;
   tapId = "vm-${config.networking.hostName}";     # matches the host's vm-* enslave glob
@@ -8,7 +8,10 @@ let
   sshHostKey = "${hostKeyDir}/ssh_host_ed25519_key";
 in
 {
-  imports = [ inputs.microvm.nixosModules.microvm ];
+  imports = [
+    inputs.microvm.nixosModules.microvm
+    inputs.sops-nix.nixosModules.sops
+  ];
 
   options.homelab.microvm.guest = {
     enable = lib.mkEnableOption "sealed microVM guest wiring (net, metrics, ssh, host-key bootstrap)";
@@ -29,10 +32,10 @@ in
     systemd.network = {
       enable = true;
       networks."10-lan" = {
-        matchConfig.MACAddress = placement.mac;   # virtio gives unpredictable enp0sN names; match by MAC
+        matchConfig.MACAddress = guestPlacement.mac;   # virtio gives unpredictable enp0sN names; match by MAC
         networkConfig = {
-          Address = "${placement.ip}/${toString placement.prefixLength}";
-          Gateway = placement.gateway;
+          Address = "${guestPlacement.ip}/${toString guestPlacement.prefixLength}";
+          Gateway = guestPlacement.gateway;
           DNS = cfg.dns;
           LinkLocalAddressing = "ipv4";   # v4-only guest: no fe80:: and no RA-assigned v6, so the
           IPv6AcceptRA = false;           # host's v4-only LAN-drop seal can't be sidestepped over v6
@@ -43,12 +46,12 @@ in
     # Sealed appliance resolves via static DNS; drop the link-local LLMNR responder.
     services.resolved.settings.Resolve.LLMNR = false;
 
-    microvm.interfaces = [{ type = "tap"; id = tapId; inherit (placement) mac; }];
-    microvm.vsock.cid = placement.vsockCid;   # for readiness systemd integration
+    microvm.interfaces = [{ type = "tap"; id = tapId; inherit (guestPlacement) mac; }];
+    microvm.vsock.cid = guestPlacement.vsockCid;   # for readiness systemd integration
 
     services.prometheus.exporters.node = {
       enable = true;
-      listenAddress = placement.ip;   # bridge IP (host-only behind the firewall)
+      listenAddress = guestPlacement.ip;   # bridge IP (host-only behind the firewall)
       port = 9100;
       openFirewall = false;
     };
@@ -56,12 +59,12 @@ in
     networking.nftables.enable = true;
     networking.firewall = {
       enable = true;
-      extraInputRules = "ip saddr ${placement.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
+      extraInputRules = "ip saddr ${guestPlacement.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
     };
 
     services.openssh = {
       enable = true;
-      listenAddresses = [{ addr = placement.ip; port = 22; }];   # bridge only, not localhost/tailnet
+      listenAddresses = [{ addr = guestPlacement.ip; port = 22; }];   # bridge only, not localhost/tailnet
       settings = {
         PasswordAuthentication = false;
         PermitRootLogin = "no";

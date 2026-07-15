@@ -1,6 +1,3 @@
-# compute's microVM allocation table — host-local, NOT fleet data (an IP/CID is compute's to hand
-# out). Read by the flake (builds each guest with its slot) and hosts/compute/microvm.nix (host side).
-# The fleet sees only the derived name→ip (shared.nix microvmHosts) for `ssh -J` resolution.
 {
   bridge = {
     name = "compute-microvm";   # 15-char IFNAMSIZ limit

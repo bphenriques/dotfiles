@@ -27,7 +27,7 @@
   };
 
   systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
-    "d ${config.xdg.cacheHome}/yazi 600 ${config.home.username} users 10d -"
+    "d ${config.xdg.cacheHome}/yazi 700 ${config.home.username} users 10d -"
   ];
 
   custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.isLinux {

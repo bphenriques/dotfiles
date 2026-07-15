@@ -1,17 +1,17 @@
-{ config, pkgs, lib, self, private, ... }:
+{ config, pkgs, lib, self, inputs, private, ... }:
 {
   imports = [
+    inputs.sops-nix.nixosModules.sops
     ./hardware
     ./disko.nix
     ./users
-    ../../profiles/nixos
-    ../../profiles/nixos/headless
+    ../../profiles/nixos/base.nix
+    ../../profiles/nixos/headless.nix
     ./selfhost
     ./microvm.nix
   ];
 
   # Basic setup
-  networking.hostName = "compute";
   boot = {
     kernelPackages = pkgs.linuxPackages_7_1;
     loader.systemd-boot = {
@@ -28,7 +28,6 @@
   };
 
   # Users
-  users.mutableUsers = false;
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
   system.stateVersion = "25.11"; # The release version of the first install of this system!

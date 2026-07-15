@@ -1,10 +1,10 @@
-{ config, lib, pkgs, shareVm, placement, ... }:
+{ config, lib, pkgs, shareVm, guestPlacement, ... }:
 let
   inherit (shareVm) dataRoot proxyPort traefikMetricsPort;
   inherit (config.services.filebrowser-multiuser) authHeader;  # the header filebrowser trusts
   credsDir = "${dataRoot}/.credentials";
   htpasswd = "${credsDir}/htpasswd";
-  vmIp = placement.ip;
+  vmIp = guestPlacement.ip;
 
   # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
   # uncrackable for online auth), bcrypt-hashed into the BasicAuth htpasswd and printed once.
@@ -84,7 +84,7 @@ in
     unitConfig.RequiresMountsFor = [ dataRoot ];
     serviceConfig = {
       IPAddressDeny = "any";
-      IPAddressAllow = [ "localhost" placement.gateway vmIp ];
+      IPAddressAllow = [ "localhost" guestPlacement.gateway vmIp ];
     };
   };
   systemd.tmpfiles.rules = [

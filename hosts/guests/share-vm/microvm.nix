@@ -1,6 +1,6 @@
 { shareVm, ... }:
 {
-  # Networking, tap and vsock come from the microvm-guest profile (from injected placement).
+  # Networking, tap and vsock come from the microvm-guest.nix profile (from injected guestPlacement).
   microvm = {
     hypervisor = "cloud-hypervisor";
     vcpu = 2;

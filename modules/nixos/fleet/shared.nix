@@ -1,7 +1,4 @@
-{ config, lib, ... }:
-let
-  fleet = config.custom.fleet;
-in
+{ lib, fleet, ... }:
 {
   options.custom.fleet = {
     ssh = {
@@ -42,6 +39,8 @@ in
       description = "MicroVM guest hostname to its bridge IP";
     };
   };
+
+  config.custom.fleet = fleet;
 
   # Pin fleet host keys (name + its LAN/bridge IPs) so SSH verifies against the registry
   # rather than TOFU — stable across rebuilds, and a rotation is a loud registry edit.

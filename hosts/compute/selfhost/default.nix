@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, private, ... }:
+{ config, pkgs, lib, self, inputs, private, ... }:
 let
   # Ad-hoc (non-private) users; consumer-internal per-user config rides in `extraConfig` on selfhost.users.
   extraUsers = {
@@ -53,15 +53,15 @@ let
 in
 {
   imports = [
+    inputs.selfhost-nix.nixosModules.default
     ./datastores
     ./services
     ./tasks
     ./monitoring
-    ../../../profiles/nixos/selfhost-smb-client.nix
+    ../../../profiles/nixos/capabilities/selfhost-smb-client.nix
   ];
 
   custom = {
-    fleet = import ../../shared.nix;
     locale = {
       timezone = config.time.timeZone;
       language = "pt-PT";
@@ -153,8 +153,6 @@ in
 
   # Secrets
   sops = {
-    defaultSopsFile = private.sopsSecretsFile;
-    age.keyFile = "/var/lib/sops-nix/system-keys.txt";
     secrets.cloudflare_dns_api_token = { };
     templates."traefik-cloudflare" = {
       owner = "traefik";

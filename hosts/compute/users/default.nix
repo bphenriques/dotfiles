@@ -13,8 +13,6 @@ in
     openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };
 
-  home-manager.users.bphenriques = {
-    imports = [ ../../../profiles/home-manager ];
-    home.stateVersion = "25.11";
-  };
+  # Defensive: keep ~/.ssh owner-only (was a home-manager tmpfiles rule; compute runs no home-manager).
+  systemd.tmpfiles.rules = [ "z /home/bphenriques/.ssh 0700 bphenriques users" ];
 }

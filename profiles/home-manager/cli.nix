@@ -1,35 +1,5 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, osConfig, ... }:
 {
-  imports = [
-    ./stylix.nix          # Color scheme, fonts, icons, cursor
-    ./xdg-userdirs.nix    # XDG user directories, screenshots, recordings
-    ./btop.nix            # System Monitor
-    ./fish.nix            # Shell
-    ./fzf.nix             # Fuzzy search
-    ./qt.nix              # Setup theming for some set of apps
-    ./gtk.nix             # Setup theming for some set of apps
-    ./firefox             # Browser
-    ./zathura.nix         # Documents
-    ./mpv.nix             # Videos
-    ./imv.nix             # Images
-    ./beets.nix           # Music library manager
-    ./ghostty.nix         # Terminal
-    ./discord.nix         # Social
-    ./rofi.nix            # Alternative customizable menu
-    ./kdenlive.nix        # Video editor
-    ./qbittorrent.nix     # Torrent client
-    ./mpd.nix             # Music player
-    ./awww.nix            # Wallpaper daemon
-    ./obsidian.nix        # note taking
-    ./yazi.nix            # File browser
-  ];
-
-  xdg.mimeApps.enable = pkgs.stdenv.isLinux;    # Default apps and directories
-
-  # Enable easier font management
-  fonts.fontconfig.enable = true;
-  stylix.targets.fontconfig.enable = true;
-
   programs.tealdeer = {
     enable = true;
     settings = {
@@ -47,8 +17,8 @@
     includes = [ "$HOME/.ssh/config.local" ];
     settings = {
       "*" = {
-        SetEnv.TERM = "xterm-256color";  # Sane default across different terminals. Don't need more.
-        AddKeysToAgent = "4h";  # Cache the keys temporarily but expire after 4 hours.
+        SetEnv.TERM = "xterm-256color";   # Sane default across different terminals. Don't need more.
+        AddKeysToAgent = "4h";            # Cache the keys temporarily but expire after 4 hours.
       };
       "bruno-home-nas" = {
         User = "Bruno-Admin";
@@ -57,9 +27,8 @@
       "pi-zero".User = "pi";
       "rg353m".User = "ark";
       "pixel".User = "bruno";
-      # share-vm microvm — only on compute's internal bridge, so jump through compute.
       "share-vm" = {
-        HostName = "10.20.1.11";
+        HostName = osConfig.custom.fleet.microvmHosts."share-vm";
         User = "bphenriques";
         ProxyJump = "compute";
       };
@@ -91,14 +60,9 @@
   programs.nushell.enable = true;         # Adhoc shell for data processing
 
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    pkgs.xdg-user-dirs  # Relevant for desktop
-
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
-
-    # GUI centric
-    pkgs.gparted
   ];
 
   home = {
@@ -112,5 +76,4 @@
       l = "${lib.getExe pkgs.eza} -alh";
     };
   };
-
 }

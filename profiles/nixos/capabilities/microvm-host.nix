@@ -51,6 +51,10 @@ let
   egressEntries = lib.concatLists (lib.mapAttrsToList (name: g:
     map (e: { inherit name; inherit (g) ip; inherit (e) host ports; target = resolveHost e.host; }) g.egress.allowLan
   ) cfg.guests);
+  # Admin's `ssh -J` reaches each guest's sshd and nothing else: scope the forwarding override to
+  # exactly these direct-tcpip targets (empty guest table ⇒ `none`, i.e. no forwarding at all).
+  guestSshTargets = lib.concatMapStringsSep " " (g: "${g.ip}:22") (lib.attrValues cfg.guests);
+
   # Per-guest accepts first (first match wins); the RFC1918 drop is the floor beneath them.
   forwardRules =
     map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} → ${e.host}"'') egressEntries
@@ -68,7 +72,7 @@ in
     adminUser = lib.mkOption {
       type = lib.types.str;
       default = "bphenriques";
-      description = "User allowed to `ssh -J` through to guests (TCP-forwarding override).";
+      description = "User allowed to `ssh -J` through to guests (scoped local-forward override to guest :22 only).";
     };
     bridge = {
       name = lib.mkOption { type = lib.types.str; };
@@ -123,10 +127,12 @@ in
       message = "microvm guest ${e.name}: egress.allowLan may not target the host's own LAN IP (${e.host}) — it would bypass the host seal";
     }) egressEntries;
 
-    # Narrow override of the no-forwarding baseline: reach guests via `ssh -J` (admin only).
+    # Narrow override of the no-forwarding baseline: admin may `ssh -J` to guests, but only local
+    # forwards and only to a guest's :22 — not "forward anywhere compute can reach".
     services.openssh.extraConfig = ''
       Match User ${cfg.adminUser}
-        AllowTcpForwarding yes
+        AllowTcpForwarding local
+        PermitOpen ${if cfg.guests == { } then "none" else guestSshTargets}
     '';
 
     networking.nat = {

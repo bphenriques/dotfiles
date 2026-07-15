@@ -1,6 +1,5 @@
 {
   description = "bphenriques's fleet";
-
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
@@ -15,38 +14,40 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Private dotfiles for confidential information required in build-time
-    dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private";
+    # Personal flakes
+    dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private"; # Private dotfiles
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Personal modules version controlled separately
-    selfhost-nix.url = "git+ssh://git@github.com/bphenriques/selfhost-nix";
+    selfhost-nix.url = "git+ssh://git@github.com/bphenriques/selfhost-nix";         # Selfhost abstractions
     selfhost-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Community flakes
-    stylix.url = "github:danth/stylix";           # Consistent coloring across my system. I can still tweak manually.
-    nur.url = "github:nix-community/nur";         # Collection of packages. Use it for Firefox extensions
-    sops-nix.url = "github:Mic92/sops-nix";       # Manage secrets using sops
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    stylix.url = "github:danth/stylix";                                 # Consistent coloring across my system. I can still tweak manually.
+    nur.url = "github:nix-community/nur";                               # Collection of packages. Use it for Firefox extensions
+    sops-nix.url = "github:Mic92/sops-nix";                             # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    disko.url = "github:nix-community/disko";     # Declaratively describe my disks layout
+    disko.url = "github:nix-community/disko";                           # Declaratively describe my disks layout
     disko.inputs.nixpkgs.follows = "nixpkgs";
-    treefmt-nix.url = "github:numtide/treefmt-nix"; # Unified formatter for multiple languages
+    treefmt-nix.url = "github:numtide/treefmt-nix";                     # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-
-    microvm.url = "github:microvm-nix/microvm.nix"; # Lightweight, isolated guests hosted on compute
+    microvm.url = "github:microvm-nix/microvm.nix";                     # Lightweight, isolated guests
     microvm.inputs.nixpkgs.follows = "nixpkgs";
- };
+  };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
     let
       generators = import ./lib/generators.nix { inherit (nixpkgs) lib; };
+      hostBuilders = import ./lib/hosts.nix { inherit nixpkgs self inputs; };
       inherit (generators) forAllSystems readModulesAttrs;
+      inherit (hostBuilders) mkNixosHost mkMicrovmGuest;
+
+      # One eval-<name> check per host/guest on `system`, derived — no hardcoded list to drift.
+      evalChecks = system: nixpkgs.lib.mapAttrs'
+        (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
+        (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations);
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
-      inherit (import ./lib/hosts.nix { inherit nixpkgs self inputs; }) mkNixosHost mkMicrovmGuest;
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -56,43 +57,40 @@
       );
       apps      = import ./apps { inherit nixpkgs self generators; };
       packages  = import ./packages { inherit nixpkgs generators; builders = self.lib.builders; };
-      formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper); # `nix fmt`
-      checks    = forAllSystems (system: {                                            # `nix flake check`
+      overlays  = import ./overlays inputs;
+      checks    = forAllSystems (system: {
         formatting = treefmtEval.${system}.config.build.check self;
-      # eval-<name> for every nixosConfiguration on this system (hosts + generated microVM guests);
-      # derived, so a new host/guest is covered with no hardcoded list to drift.
-      } // nixpkgs.lib.mapAttrs'
-        (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
-        (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations));
+      } // evalChecks system);
+      formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
-      overlays  = import ./overlays inputs;
 
       # Modules
       nixosModules        = readModulesAttrs ./modules/nixos;
       homeManagerModules  = readModulesAttrs ./modules/home-manager;
 
-      nixosConfigurations = {
+      # Hosts
+      nixosConfigurations = let
+        computeMicrovm = import ./hosts/compute/guests.nix;
+        microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
+          hostName = name;
+          configPath = ./hosts/guests/${name};
+          guestPlacement = {
+            inherit (entry) ip mac vsockCid;
+            inherit (computeMicrovm.bridge) gateway prefixLength;
+          };
+        }) computeMicrovm.guests;
+      in {
         laptop = mkNixosHost {
           hostName = "laptop";
           configPath = ./hosts/laptop;
           extraOverlays = [ inputs.nur.overlays.default ];
-          extraHmModules = [ inputs.stylix.homeModules.stylix ];
         };
         compute = mkNixosHost {
           hostName = "compute";
           configPath = ./hosts/compute;
         };
-      } // (let
-        computeMicrovm = import ./hosts/compute/guests.nix;
-      in nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
-        hostName = name;
-        configPath = ./hosts/guests/${name};
-        placement = {
-          inherit (entry) ip mac vsockCid;
-          inherit (computeMicrovm.bridge) gateway prefixLength;
-        };
-      }) computeMicrovm.guests);
+      } // microvmGuests;
     };
 }

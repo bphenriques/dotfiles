@@ -35,6 +35,6 @@ in
   };
 
   # Guests reached from the fleet only by `ssh -J compute` (internal bridge; internet egress via
-  # NAT, never the LAN — see profiles/nixos/microvm-host.nix). Name→IP only; rich placement is host-local.
+  # NAT, never the LAN — see profiles/nixos/capabilities/microvm-host.nix). Name→IP only; rich placement is host-local.
   microvmHosts = builtins.mapAttrs (_: g: g.ip) computeGuests.guests;
 }

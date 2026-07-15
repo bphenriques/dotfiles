@@ -1,11 +1,13 @@
 # Homelab SMB client: mounts the NAS shares and wires the sops credentials.
 # Hosts only declare `selfhost.storage.smb.mounts` (gids, optional uid).
-{ config, lib, ... }:
+{ config, lib, inputs, ... }:
 let
   cfg = config.selfhost.storage.smb;
   hasMount = name: cfg.mounts ? ${name};
 in
 {
+  imports = [ inputs.selfhost-nix.nixosModules.default ];
+
   selfhost.storage.smb = {
     enable = true;
     hostname = config.custom.fleet.lan.hosts.bruno-home-nas;

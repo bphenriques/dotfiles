@@ -14,15 +14,10 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  networking.useDHCP = false;
-
-  # Auto-GC under disk pressure (no one watches free space on a server): when free
-  # space drops below min-free, collect garbage until max-free is available. Keeps
-  # old generations and storeOnDisk/microvm store images from filling the disk
-  # between the scheduled monthly GC.
+  # Auto-GC under disk pressure
   nix.settings = {
     min-free = 10 * 1024 * 1024 * 1024;  # start collecting under 10 GiB free
-    max-free = 50 * 1024 * 1024 * 1024;  # …until 50 GiB is free
+    max-free = 50 * 1024 * 1024 * 1024;  # ...until 50 GiB is free
   };
 
   environment.systemPackages = [ pkgs.nvd ]; # Remote changelog diffing
