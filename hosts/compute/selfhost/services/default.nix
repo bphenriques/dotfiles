@@ -20,7 +20,6 @@ in
     ./home-assistant.nix
     ./cook-recipes.nix
     ./filebrowser.nix
-    ./gitea.nix
     ./papra.nix
     ./mympd.nix
   ];
