@@ -49,7 +49,7 @@ in
     custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "file-explorer.desktop" ];
 
     # Set some sane defaults
-    custom.programs.file-explorer.bookmarks = [
+    custom.programs.file-explorer.bookmarks = lib.mkDefault [
       {
         name = "Documents";
         icon = mkIcon "documents" "󱧶";

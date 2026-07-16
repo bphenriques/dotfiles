@@ -47,7 +47,6 @@ in
       shutdown          = mkAppOpt' "${systemctl} poweroff";
       reboot            = mkAppOpt' "${systemctl} reboot";
       reboot-efi        = mkAppOpt' "${systemctl} reboot --firmware-setup";
-      reboot-windows    = mkAppOpt' (rebootToWindowsCmd (builtins.head (lib.attrValues osConfig.boot.loader.systemd-boot.windows)));
     };
   };
 

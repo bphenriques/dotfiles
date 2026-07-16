@@ -42,7 +42,7 @@ in
     directory = lib.mkOption {
       description = "Location of recordings";
       type = lib.types.str;
-      default = config.xdg.userDirs.extraConfig.XDG_RECORDINGS_DIR;
+      default = config.xdg.userDirs.extraConfig.RECORDINGS;
     };
 
     exec = {

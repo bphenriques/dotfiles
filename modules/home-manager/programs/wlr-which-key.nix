@@ -16,7 +16,7 @@ in
     };
     menus = lib.mkOption {
       type = lib.types.attrsOf yamlFormat.type;
-      default = [ ];
+      default = { };
     };
   };
 
