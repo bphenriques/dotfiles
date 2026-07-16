@@ -130,7 +130,7 @@ in
       set -euo pipefail
       PASSWORD=$(cat ${config.selfhost.runtimeSecrets.romm-db-password.path})
       # Idempotent: create user if missing, set password, grant privileges
-      # Password is hex-only (openssl rand -hex), so SQL interpolation is safe
+      # Password is hex — selfhost-nix runtimeSecrets uses openssl rand -hex — so SQL interpolation is safe; revisit if that generator changes
       ${config.services.mysql.package}/bin/mysql -u root <<SQL
         CREATE USER IF NOT EXISTS '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';
         ALTER USER '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';
