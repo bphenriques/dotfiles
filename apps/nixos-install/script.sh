@@ -48,7 +48,7 @@ remote_install() {
   local ssh_host="$3"
   local -a extraArgs=()
 
-  # Fetched secrets (sops age key, luks key) land in these tmp dirs; wipe on any exit path.
+  # Ensure critical secrets are deleted (sops age key, luks key) even if the script fails
   trap 'rm -rf "${post_format_files:-}" "${luks_files:-}"' EXIT
 
   # Pre-flight check: requires local clone (remote runs use FLAKE_URL for actual install)
