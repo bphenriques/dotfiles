@@ -60,14 +60,13 @@ init_host() {
   age-keygen -o "$tmpdir/age.key" 2>/dev/null
   local fields
   # Bitwarden field types: 0=text, 1=hidden, 2=secure note (secureNote.type: 0=generic)
-  # Secrets reach jq through the environment ($ENV), not --arg: --arg would put the value in jq's
-  # argv, world-readable via ps / /proc/<pid>/cmdline for the life of the call.
-  fields=$(sops_key="$(cat "$tmpdir/age.key")" jq -n '[{name: "sops-private", value: $ENV.sops_key, type: 0}]')
+  # --arg briefly exposes these values in jq's argv (ps); acceptable for this single-user, rarely-run tool.
+  fields=$(jq -n --arg sops "$(cat "$tmpdir/age.key")" '[{name: "sops-private", value: $sops, type: 0}]')
 
   local luks_password=""
   if [ "$with_luks" = "--luks" ]; then
     luks_password="$(openssl rand -base64 32)"
-    fields=$(echo "$fields" | luks_pw="$luks_password" jq '. += [{name: "luks-interactive-password", value: $ENV.luks_pw, type: 1}]')
+    fields=$(echo "$fields" | jq --arg luks "$luks_password" '. += [{name: "luks-interactive-password", value: $luks, type: 1}]')
   fi
 
   local item_json
