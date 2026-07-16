@@ -48,6 +48,9 @@ remote_install() {
   local ssh_host="$3"
   local -a extraArgs=()
 
+  # Fetched secrets (sops age key, luks key) land in these tmp dirs; wipe on any exit path.
+  trap 'rm -rf "${post_format_files:-}" "${luks_files:-}"' EXIT
+
   # Pre-flight check: requires local clone (remote runs use FLAKE_URL for actual install)
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
   ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
@@ -76,9 +79,6 @@ remote_install() {
   fi
 
   nixos-anywhere --flake "${FLAKE_URL}#${host}" --target-host "${ssh_host}" --ssh-option "IdentitiesOnly=yes" --extra-files "$post_format_files" "${extraArgs[@]}"
-
-  rm -r "${luks_files}"
-  rm -r "${post_format_files}"
 }
 
 local_install() {
