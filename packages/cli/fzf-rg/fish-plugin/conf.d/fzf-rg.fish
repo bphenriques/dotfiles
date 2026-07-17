@@ -1,9 +1,7 @@
-if test -z "$FZF_RG_CMD"
-    set -U FZF_RG_CMD frg
+if not set -q FZF_RG_CMD
+    set -g FZF_RG_CMD frg
 end
 
-if test ! -z $FZF_RG_CMD
-    function $FZF_RG_CMD -d "find file"
-        __frg $argv
-    end
+function $FZF_RG_CMD -d "find file"
+    __frg $argv
 end

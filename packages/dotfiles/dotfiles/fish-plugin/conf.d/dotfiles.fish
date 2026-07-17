@@ -1,13 +1,11 @@
-if test -z "$DOTFILES_CMD"
-    set -U DOTFILES_CMD dot
+if not set -q DOTFILES_CMD
+    set -g DOTFILES_CMD dot
 end
 
-if test -z "$DOTFILES_LOCATION"
-    set -U DOTFILES_LOCATION "$HOME/.dotfiles"
+if not set -q DOTFILES_LOCATION
+    set -g DOTFILES_LOCATION "$HOME/.dotfiles"
 end
 
-if test ! -z $DOTFILES_CMD
-    function $DOTFILES_CMD -d dotfiles
-        __dotfiles $argv
-    end
+function $DOTFILES_CMD -d dotfiles
+    __dotfiles $argv
 end

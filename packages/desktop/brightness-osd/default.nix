@@ -14,7 +14,7 @@ pkgs.writeShellApplication {
     pkgs.brightnessctl
     pkgs.gnugrep
     pkgs.gawk
-    pkgs.findutils
+    pkgs.coreutils
   ];
   text = ''
     OSD_BRIGHTNESS_OFF_ICON="${iconOff}"

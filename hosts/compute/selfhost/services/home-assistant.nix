@@ -22,7 +22,13 @@ in
     backup = {
       package = pkgs.writeShellApplication {
         name = "backup-home-assistant";
-        text = ''cp -a "${configDir}/backups/." "$OUTPUT_DIR/"'';
+        runtimeInputs = [ pkgs.coreutils ];
+        text = ''
+          # backups/ exists only after HA's backup scheduler is configured (manual post-install); skip if absent.
+          if [ -d "${configDir}/backups" ]; then
+            cp -a "${configDir}/backups/." "$OUTPUT_DIR/"
+          fi
+        '';
       };
       after = [ "home-assistant.service" ];
     };
