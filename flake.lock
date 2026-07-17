@@ -391,11 +391,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1784042323,
-        "narHash": "sha256-1GIuoA9/qrHtQYNK5nR2FIMqaelqkreeBED3UBpN5hg=",
+        "lastModified": 1784301693,
+        "narHash": "sha256-raUYVdEp+g6KCo39vaOl0a0j6tUtkfsS1nGCw818ja0=",
         "ref": "refs/heads/main",
-        "rev": "5f599b4de9f38783b20d7a632cf152913f30acef",
-        "revCount": 32,
+        "rev": "004a1afb8d928c6a63b2bd8b80e025d82dfd3f32",
+        "revCount": 46,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/selfhost-nix"
       },
