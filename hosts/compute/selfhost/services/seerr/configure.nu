@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
-# Initializes Seerr (partially) declaratively via the API.
-# - TODO: reconcile on config drift.
+# Initializes Seerr (partially) declaratively via the API. Create-only: existing entities aren't
+# reconciled on config drift — change them in the UI, or delete-to-recreate.
 let base_url = $env.SEERR_URL
 let api_key = open $env.SEERR_API_KEY_FILE | str trim
 let jellyfin_admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim

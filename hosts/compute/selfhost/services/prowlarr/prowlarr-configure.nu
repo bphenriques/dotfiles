@@ -74,6 +74,7 @@ def ensure_indexers [] {
   let app_profile_id = get_default_app_profile_id
   mut failed = []
   for idx in $indexers {
+    # Create-only: an existing indexer is left as-is (change in the UI or delete-to-recreate).
     if $idx.name in $existing_names {
       print $"  Indexer exists: ($idx.name)"
       continue
