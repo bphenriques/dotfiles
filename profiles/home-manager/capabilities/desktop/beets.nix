@@ -32,26 +32,29 @@ let
   };
 
   # Sanity check + backup database file to NAS. Can't store the DB file in the NAS as it leads to lock issues.
-  finalPackage = pkgs.writeScriptBin "beet" ''
-    #!${pkgs.stdenv.shell}
-    if [ ! -d "${musicLibrary}" ]; then
-      echo "${musicLibrary} does not exist!"
-      exit 1
-    fi
+  finalPackage = pkgs.writeShellApplication {
+    name = "beet";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      if [ ! -d "${musicLibrary}" ]; then
+        echo "${musicLibrary} does not exist!"
+        exit 1
+      fi
 
-    if [ ! -f "${database}" ]; then
-      mkdir -p "$(dirname "${database}")"
-      cp -f "${databaseBackup}" "${database}"
-    fi
+      if [ ! -f "${database}" ]; then
+        mkdir -p "$(dirname "${database}")"
+        cp -f "${databaseBackup}" "${database}"
+      fi
 
-    ${lib.getExe basePackage} "$@"
-    status=$?
-    if [ $status -eq 0 ] && [ -f "${database}" ] && { [ ! -f "${databaseBackup}" ] || ! cmp -s "${database}" "${databaseBackup}"; }; then
-      echo "Backing up beets library: ${database}"
-      cp -f "${database}" "${databaseBackup}"
-    fi
-    exit $status
-  '';
+      status=0
+      ${lib.getExe basePackage} "$@" || status=$?
+      if [ "$status" -eq 0 ] && [ -f "${database}" ] && { [ ! -f "${databaseBackup}" ] || ! cmp -s "${database}" "${databaseBackup}"; }; then
+        echo "Backing up beets library: ${database}"
+        cp -f "${database}" "${databaseBackup}"
+      fi
+      exit "$status"
+    '';
+  };
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.beets = {

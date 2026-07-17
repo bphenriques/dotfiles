@@ -7,13 +7,13 @@ let
   setDefault = types: target: foldl' (acc: type: acc // { "${type}" = target; }) { } types;
   mkDefaultAppOption = type: lib.mkOption {
     type = lib.types.listOf lib.types.str;
-    description = lib.mdDoc ''Default app to open ${type} files'';
+    description = ''Default app to open ${type} files'';
     default = [];
   };
 
   mkMimeOption = description: default: lib.mkOption {
     type = lib.types.listOf lib.types.str;
-    description = lib.mdDoc ''List of mimes describing ${description} files'';
+    description = ''List of mimes describing ${description} files'';
     inherit default;
   };
 in
