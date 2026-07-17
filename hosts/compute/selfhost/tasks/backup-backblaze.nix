@@ -37,6 +37,8 @@ in
         monthly = "1 year";
         yearly = "2 years";
       };
+      # App DBs (Immich/Miniflux/RomM) are deliberately not dumped — in a real disaster they are trivially
+      # rebuilt (re-scan) or non-critical; the irreplaceable data (files, gitea repos, config) is covered here.
       services = [ "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
       bindings = {
         "/system/homelab-secrets"               = config.selfhost.runtimeSecretsDir;

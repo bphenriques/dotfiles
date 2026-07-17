@@ -55,8 +55,7 @@ let
           port = toString config.services.coturn.listening-port;
           lanIP = config.custom.fleet.lan.hosts.compute;
           wgIP = "10.100.0.1";
-          # Plaintext is acceptable. TURN relay is LAN/WG-only, no internet exposure, credentials are non-sensitive
-          turnCreds = { username = "romm"; credential = "romm-netplay"; };
+          turnCreds = import ./turn-creds.nix; # shared with coturn.nix — single source (rationale in that file)
         in [
           { urls = "stun:${lanIP}:${port}"; }
           ({ urls = "turn:${lanIP}:${port}?transport=udp"; } // turnCreds)
@@ -130,7 +129,7 @@ in
       set -euo pipefail
       PASSWORD=$(cat ${config.selfhost.runtimeSecrets.romm-db-password.path})
       # Idempotent: create user if missing, set password, grant privileges
-      # Password is hex-only (openssl rand -hex), so SQL interpolation is safe
+      # Password is hex — selfhost-nix runtimeSecrets uses openssl rand -hex — so SQL interpolation is safe; revisit if that generator changes
       ${config.services.mysql.package}/bin/mysql -u root <<SQL
         CREATE USER IF NOT EXISTS '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';
         ALTER USER '${db.user}'@'localhost' IDENTIFIED BY '$PASSWORD';

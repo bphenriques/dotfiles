@@ -13,6 +13,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - Ensure consistency with existing patterns—read neighboring files before writing new code
 - Inline host-specific logic rather than creating non-reusable modules
 - Single-responsibility modules; split into schema + consumers when needed
+- Accepted duplication (do not DRY): the per-service `*-configure` oneshot scaffolding and the nushell `wait_ready`/status-check helpers are intentionally repeated per service, not abstracted into a shared builder/lib. Keep them inline.
 
 ## Comments
 
