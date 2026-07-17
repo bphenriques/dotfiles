@@ -5,8 +5,7 @@ let
   minPort = 49152;
   maxPort = 49999;
 
-  turnUser = "romm";
-  turnPassword = "romm-netplay";
+  turnCreds = import ./turn-creds.nix;
 in
 {
   selfhost.services.coturn = {
@@ -27,7 +26,7 @@ in
     extraConfig = ''
       no-multicast-peers
       no-loopback-peers
-      user=${turnUser}:${turnPassword}
+      user=${turnCreds.username}:${turnCreds.credential}
 
       # Only allow relaying to LAN/VPN peers
       allowed-peer-ip=10.100.0.0-10.100.0.255

@@ -55,8 +55,7 @@ let
           port = toString config.services.coturn.listening-port;
           lanIP = config.custom.fleet.lan.hosts.compute;
           wgIP = "10.100.0.1";
-          # Plaintext is acceptable. TURN relay is LAN/WG-only, no internet exposure, credentials are non-sensitive
-          turnCreds = { username = "romm"; credential = "romm-netplay"; };
+          turnCreds = import ./turn-creds.nix; # shared with coturn.nix — single source (rationale in that file)
         in [
           { urls = "stun:${lanIP}:${port}"; }
           ({ urls = "turn:${lanIP}:${port}?transport=udp"; } // turnCreds)
