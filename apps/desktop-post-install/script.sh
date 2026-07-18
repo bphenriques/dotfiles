@@ -69,7 +69,7 @@ import_age_private_key() {
 
   info "Sops Private Key - Fetching for ${host}..."
   local key
-  key="$(dotfiles-secrets "$bw_email" fetch sops-private-key "${host}")" || fatal "Failed to fetch sops-private-key for ${host}"
+  key="$(dotfiles-secrets "$bw_email" fetch sops-secret "${host}")" || fatal "Failed to fetch sops-secret for ${host}"
 
   # Append key if not already present (idempotent)
   mkdir -p "$(dirname "$SOPS_AGE_KEY_FILE")"

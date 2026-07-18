@@ -43,5 +43,4 @@ case "${1:-}" in
     set_brightness "$device" "${1:-5}-%"
     notify "$(get_percentage "$device")"
     ;;
-  list) brightnessctl --machine-readable -l | grep ',backlight,' | awk -F, '{ print $1; }' ;;
 esac

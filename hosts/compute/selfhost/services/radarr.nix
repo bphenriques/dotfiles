@@ -29,6 +29,7 @@
   selfhost.services.radarr = {
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";
+    integrations.homepage.group = "Admin";
   };
   users.users.radarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
 

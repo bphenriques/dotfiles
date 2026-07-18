@@ -79,7 +79,7 @@ in
           };
 
           options = lib.mkOption {
-            description = "xkb layout settings";
+            description = "xkb options settings";
             type = lib.types.str;
           };
         };

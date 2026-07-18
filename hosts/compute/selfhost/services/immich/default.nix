@@ -60,7 +60,6 @@ in
         };
         passwordLogin.enabled = true; # TODO: review whether this is still needed after OIDC is fully rolled out
         library.watch.enabled = false; # inotify doesn't fire on the CIFS-mounted library; the nightly library.scan covers it
-        library.watch.enabled = true;
 
         ffmpeg = {
           accel = "disabled";      # CPU-only; iGPU reserved for Jellyfin and I can't throttle GPU. Both will lead to thermal issues in a small device.

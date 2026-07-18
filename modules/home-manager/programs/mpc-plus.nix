@@ -21,14 +21,11 @@ let
     play-shuffled     = ''${mpc-plus} play-shuffled'';
     previous          = ''${mpc-plus} previous'';
     next              = ''${mpc-plus} next'';
-    clear             = ''${mpc-plus} clear'';
     toggle-random     = ''${mpc-plus} toggle-random'';
     toggle-repeat     = ''${mpc-plus} toggle-repeat'';
     volume-increase   = ''${mpc-plus} volume-increase'';
     volume-decrease   = ''${mpc-plus} volume-decrease'';
     search-play       = ''${mpc-plus} dmenu-file-exec play'';
-    search-enqueue    = ''${mpc-plus} dmenu-file-exec add'';
-    search-next       = ''${mpc-plus} dmenu-file-exec next'';
     select-stream     = ''${mpc-plus} dmenu-radio-stream'';
     select-server     = ''${mpc-plus} dmenu-select-server'';
   };
@@ -43,7 +40,6 @@ in
         artistIcon = mkIcon "mpc-plus-artist" "󰠃";
         albumIcon = mkIcon "mpc-plus-album" "󰀥";
         stoppedIcon = mkIcon "mpc-plus-stopped" "";
-        clearIcon = mkIcon "mpc-plus-clear" "";
         shuffleIcon = mkIcon "mpc-plus-shuffle" "";
         noShuffleIcon = mkIcon "mpc-plus-no-shuffle" "󰒞";
         repeatSongIcon = mkIcon "mpc-plus-repeat-song" "󰑖";

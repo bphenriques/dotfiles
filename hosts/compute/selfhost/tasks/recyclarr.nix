@@ -37,7 +37,7 @@ in
     restartUnits = [ "recyclarr.service" ];
   };
 
-  # Runs once at boot (to apply config on deploy) and daily at 3 AM via timer
+  # Runs once at boot (to apply config on deploy) and daily at 2 AM via timer
   systemd.services.recyclarr = {
     description = "Recyclarr sync";
     wantedBy = [ "multi-user.target" ];

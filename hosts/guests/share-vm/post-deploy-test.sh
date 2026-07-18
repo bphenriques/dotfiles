@@ -2,7 +2,7 @@
 # Behavioural check of the share-vm network seal — the running kernel actually drops
 # guest->LAN/host while keeping internet egress. The `microvm-containment` flake check
 # guards the *rules* at eval time; this exercises them live. Run after each deploy:
-#   ./hosts/share-vm/post-deploy-test.sh
+#   ./hosts/guests/share-vm/post-deploy-test.sh
 #
 # Probed LAN/host ports must be OPEN when reachable (NAS SMB 445, compute sshd 22) so that a
 # "blocked" result unambiguously means the firewall dropped, not a closed port. Needs admin SSH.

@@ -27,6 +27,7 @@
   selfhost.services.sonarr = {
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";
+    integrations.homepage.group = "Admin";
   };
   users.users.sonarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
 

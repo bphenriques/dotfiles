@@ -33,7 +33,6 @@ fetch() {
     sops-secret) bw_get_item_field "system-nixos-${host}" "sops-private" ;;
     luks-key) bw_get_item_field "system-nixos-${host}" "luks-interactive-password" ;;
     ssh-private-key) bw get item "ssh-key-nixos-${host}" | jq -re '.sshKey.privateKey' ;;
-    sops-private-key) bw_get_item_field "system-nixos-${host}" "sops-private" ;;
     *) fatal "Unknown secret type: $secret_type" ;;
   esac
 }

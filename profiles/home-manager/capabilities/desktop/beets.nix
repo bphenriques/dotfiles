@@ -5,25 +5,15 @@ let
   musicDir = osConfig.custom.paths.media.music.root;
   musicLibrary = osConfig.custom.paths.media.music.library;
 
-  # Beets require absolute paths: https://github.com/beetbox/beets/issues/133
-  # If needed:
-  # 1. Find the base path in the db: beet list -f '$path' artist:beatles | head -n 1
-  # 2. Manually update the database:
-  #   sqlite3 $XDG_DATA_HOME/beets/library.db "UPDATE items SET path = replace(path, '/home/bphenriques/Music/Library', '/home/bphenriques/music/library');"
-  #   sqlite3 $XDG_DATA_HOME/beets/library.db "UPDATE albums SET artpath = replace(artpath, '/home/bphenriques/Music/Library', '/home/bphenriques/music/library');"
-  #
-  # 3. Confirm if everything is alright. The following command should **not hint** that files should be deleted.
-  #   beets update -p
   database = "${config.xdg.dataHome}/beets/library.db";
   databaseBackup = "${musicDir}/beets.db.backup";
 
-  # Healthcheck: beet bad && beet duplicates
-  # Update files: beet fetchart && beet fingerprint && beet embedart && beet scrub
+  # Routine maintenance: beet-manage. Ad-hoc: beet mbsync (-p to preview), beet fingerprint, beet scrub.
   # Docs: https://beets.readthedocs.io/en/stable/plugins/index.html
   plugins = let
-    providers = [ "chroma" "spotify" "deezer" ];
+    providers = [ "musicbrainz" "chroma" "spotify" "deezer" ];
     metadata  = [ "fetchart" "embedart" "lyrics" "mbsync" ]; # lastgenre
-    health    = [ "duplicates" "badfiles" ];
+    health    = [ "duplicates" "badfiles" "unimported" ];
     utility   = [ "edit" "playlist" "scrub" "fish" ]; # https://beets.readthedocs.io/en/stable/plugins/smartplaylist.html
   in providers ++ health ++ metadata ++ utility;
   basePackage = pkgs.python3.pkgs.beets.override {
@@ -55,8 +45,24 @@ let
       exit "$status"
     '';
   };
+
+  # Curated maintenance pass (custom, unlike the plain `beet` wrapper). mbsync stays manual: it rewrites tags library-wide (preview with -p).
+  beet-manage = pkgs.writeShellApplication {
+    name = "beet-manage";
+    runtimeInputs = [ finalPackage pkgs.flac pkgs.mp3val ]; # flac/mp3val: external checkers `beet bad` shells out to
+    text = ''
+      beet update       # reconcile DB with on-disk moves/edits
+      beet fetchart     # fetch missing covers (cautious)
+      beet embedart     # embed covers into files
+      beet lyrics       # fetch missing (synced) lyrics
+      beet bad          # report unplayable files
+      beet duplicates   # report duplicate items
+      beet unimported   # report files on disk beets isn't tracking
+    '';
+  };
 in
 lib.mkIf pkgs.stdenv.isLinux {
+  home.packages = [ beet-manage ];
   programs.beets = {
     enable = true;
     package = finalPackage;
@@ -78,8 +84,9 @@ lib.mkIf pkgs.stdenv.isLinux {
         auto = true;
         cautious = true;
       };
+      lyrics.synced = true;
       musicbrainz = {
-        extra_tags = ["date" "year" "originalyear" "originalartist" "originalalbum" "artists"];
+        extra_tags = ["catalognum" "country" "label" "media" "year"];
       };
     };
   };

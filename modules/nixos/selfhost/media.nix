@@ -39,11 +39,6 @@ let
 in
 {
   options.custom.media = {
-    jellyfin.serverId = lib.mkOption {
-      type = lib.types.str;
-      description = "Jellyfin server ID for integrations (e.g., Seerr)";
-    };
-
     radarr = lib.mkOption {
       type = mediaServiceOpt;
       description = "Radarr quality profile settings";

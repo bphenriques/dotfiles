@@ -48,8 +48,6 @@ let
   jellyfinConfigFile = pkgs.writeText "jellyfin-config.json" (builtins.toJSON jellyfinConfig);
 in
 {
-  custom.media.jellyfin.serverId = jellyfinConfig.serverName;
-
   systemd.services.jellyfin-configure = {
     description = "Jellyfin setup";
     wantedBy = [ "jellyfin.service" ];

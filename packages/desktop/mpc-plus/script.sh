@@ -183,7 +183,6 @@ case "${1:-}" in
   volume-increase) mpc volume "+${2:-5}" ;;
   volume-decrease) mpc volume "-${2:-5}" ;;
   play-shuffled) mpc random on && mpc clear && mpc add / && mpc play ;;
-  clear) mpc clear && _notify -i "${MPC_PLUS_CLEAR_ICON}" "Music Queue" "No songs" ;;
   toggle-random)
     new_state="$(toggle_random)"
     case "$new_state" in
@@ -214,7 +213,6 @@ case "${1:-}" in
       mpc clear && mpc load "${selection}" && mpc play
     fi
     ;;
-  list-servers) config_list_servers ;;
   dmenu-select-server)
     selection="$(config_list_servers | fuzzel --dmenu --mesg "Current: ${MPD_HOST_DISPLAY_NAME}")"
     if [[ -n $selection ]]; then

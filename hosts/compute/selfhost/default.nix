@@ -64,8 +64,6 @@ in
   custom = {
     locale = {
       timezone = config.time.timeZone;
-      language = "pt-PT";
-      currency = "EUR";
       latitude = 38.736946;
       longitude = -9.142685;
     };

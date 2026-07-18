@@ -10,10 +10,6 @@ __proj_clone_repo() {
   printf %s "$PROJ_ROOT/$target"
 }
 
-__proj_root() {
-  printf %s "${PROJ_ROOT}"
-}
-
 __proj_select() {
   target="${1-}"
   # shellcheck disable=SC2016
@@ -28,7 +24,6 @@ if [ ! -d "${PROJ_ROOT}" ]; then
 fi
 
 case "${1:-}" in
-  --root) __proj_root ;;
   --select)
     shift 1
 

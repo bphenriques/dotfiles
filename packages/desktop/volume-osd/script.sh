@@ -223,7 +223,6 @@ case "${1:-}" in
   sink-toggle-mute) set_mute @DEFAULT_SINK@ toggle && notify_current_sink ;;
   sink-increase) set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink ;;
   sink-decrease) set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink ;;
-  sink-move) set_sink_and_move "$2" && notify_current_sink ;;
   sink-move-next) set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink ;;
   sink-move-prev) set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink ;;
   sink-move-fuzzel)
@@ -250,7 +249,6 @@ case "${1:-}" in
   source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle && notify_current_source ;;
   source-increase) set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source ;;
   source-decrease) set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source ;;
-  source-move) set_source_and_move "$2" && notify_current_source ;;
   source-move-next) set_source_and_move "$(get_next_source "+1")" && notify_current_source ;;
   source-move-prev) set_source_and_move "$(get_next_source "-1")" && notify_current_source ;;
   source-move-fuzzel)

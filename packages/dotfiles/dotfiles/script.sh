@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Standalone-run affordance (unused today): the writeShellApplication build re-injects shebang + strict mode.
 set -e
 
 have_cmd() { command -v "$1" >/dev/null 2>&1; }

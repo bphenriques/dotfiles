@@ -32,7 +32,6 @@
     shellcheck.excludes = [
       ".envrc" # is a direnv file, not a regular shell script.
       # Avoids false positive related with lack of shebang.
-      "hosts/**/backup.sh"
       "packages/**/script.sh"
       "apps/**/script.sh"
     ];

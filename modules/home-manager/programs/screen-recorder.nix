@@ -63,7 +63,7 @@ in
       cfg.package
       dmenu
       (pkgs.makeDesktopItem {
-        name = "screen-recoder-menu";
+        name = "screen-recorder-menu";
         desktopName = "Screen Recording";
         icon = mkIcon "screen-recorder" "󰑋";
         exec = lib.getExe dmenu;
