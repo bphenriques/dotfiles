@@ -1,5 +1,4 @@
-# Run `nix run .#check-updates` to check for newer upstream releases,
-# or `nix run .#check-updates -- --update` to bump the versions below.
+# Run `nix run .#check-updates` to check for newer upstream releases.
 _final: prev: let
   inherit (prev) lib;
   images = {
