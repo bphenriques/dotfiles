@@ -3,15 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Technical lead and software engineer, enthusiastic about self-hosting and NixOS."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bphenriques.dev/" />
+    <meta property="og:title" content="Bruno Henriques" />
+    <meta
+      property="og:description"
+      content="Technical lead and software engineer, enthusiastic about self-hosting and NixOS."
+    />
     <title>Bruno Henriques</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👋</text></svg>"
+    />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main>
-      <h1>hello.</h1>
-      <p>placeholder — the real page is coming.</p>
-      <p class="fleet">fleet: @hostCount@ hosts · @serviceCount@ services</p>
-      <p class="hint">psst: <code>curl -sI</code> this page.</p>
+      <h1>Bruno Henriques</h1>
+      <p class="tagline">
+        Technical lead and software engineer, enthusiastic about self-hosting
+        and NixOS.
+      </p>
+      <nav class="links" aria-label="profile links">
+        <a href="https://github.com/bphenriques">GitHub</a>
+        <a href="https://www.linkedin.com/in/bphenriques">LinkedIn</a>
+        <a
+          href="https://github.com/bphenriques/curriculum-vitae/releases/latest/download/bruno-henriques-cv.pdf"
+          >cv.pdf</a
+        >
+      </nav>
+      <p class="homelab">
+        Homelab:
+        <a href="https://github.com/bphenriques/dotfiles"
+          >@hostCount@ hosts running @serviceCount@ services</a
+        >
+      </p>
+      <p class="hint">
+        psst: <code>curl -sI</code> this page (served through a Tailscale
+        Funnel).
+      </p>
     </main>
   </body>
 </html>

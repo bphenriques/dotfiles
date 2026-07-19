@@ -1,22 +1,85 @@
 :root {
   color-scheme: light dark;
+  /* Darker/burnt in light mode for contrast against a light page; the original pale gold in dark mode. */
+  --accent: light-dark(#c2660c, #ffe57f);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box; /* so the border below sits inside the 100dvh, not 6px past it */
   display: grid;
   place-items: center;
-  font: 16px/1.6 ui-monospace, "SFMono-Regular", monospace;
+  border-top: 3px solid var(--accent);
+  border-bottom: 3px solid var(--accent);
+  font: 16px/1.6 ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
 }
 
 main {
-  max-width: 42ch;
+  max-width: 46ch;
   padding: 2rem;
+}
+
+@media (max-width: 400px) {
+  main {
+    padding: 1.5rem;
+  }
 }
 
 h1 {
   margin: 0 0 0.5rem;
+  font-size: 1.4rem;
+}
+
+.tagline {
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin: 0 0 1.5rem;
+}
+
+.links a {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 999px;
+}
+
+.links a:hover,
+.links a:focus-visible {
+  border-color: var(--accent);
+}
+
+.homelab {
+  opacity: 0.75;
+}
+
+.homelab a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.15em;
+}
+
+.homelab a:hover,
+.homelab a:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .links a {
+    transition: border-color 120ms ease;
+  }
+  .homelab a {
+    transition: text-decoration-color 120ms ease;
+  }
 }
 
 .hint {
