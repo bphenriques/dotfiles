@@ -32,6 +32,11 @@
         User = "bphenriques";
         ProxyJump = "compute";
       };
+      "cv-vm" = {
+        HostName = osConfig.custom.fleet.microvmHosts."cv-vm";
+        User = "bphenriques";
+        ProxyJump = "compute";
+      };
     };
   };
 

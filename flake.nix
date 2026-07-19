@@ -73,9 +73,11 @@
       # Hosts
       nixosConfigurations = let
         computeMicrovm = import ./hosts/compute/microvm/guests.nix;
+        fleetFacts = import ./lib/fleet.nix { inherit (self) nixosConfigurations; };
         microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
           configPath = ./hosts/guests/${name};
+          inherit fleetFacts;
           guestPlacement = {
             inherit (entry) ip mac vsockCid;
             inherit (computeMicrovm.bridge) gateway prefixLength;

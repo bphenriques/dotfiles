@@ -22,5 +22,21 @@
         storageMount = "/srv/share";
       };
     };
+
+    cv-vm = {
+      ip = "10.20.1.12";
+      mac = "02:00:00:00:01:12";
+      vsockCid = 4;
+      autostart = true;
+      serviceConfig = {
+        Slice = "throttled.slice";
+        CPUWeight = 10;
+        CPUQuota = "100%";
+        MemoryMax = "768M";
+      };
+      monitoring = {
+        traefikMetrics = true;
+      };
+    };
   };
 }

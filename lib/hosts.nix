@@ -4,11 +4,11 @@ let
   fleet = import ../hosts/shared.nix;
 in
 {
-  mkMicrovmGuest = { hostName, system ? "x86_64-linux", configPath, guestPlacement }:
+  mkMicrovmGuest = { hostName, system ? "x86_64-linux", configPath, guestPlacement, fleetFacts ? { } }:
     nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs guestPlacement fleet;   # guestPlacement allocated by the host; fleet = shared.nix, no path-imports in guests
+        inherit inputs guestPlacement fleet fleetFacts;   # guestPlacement allocated by the host; fleet = shared.nix, no path-imports in guests
         self = self // { lib = self.lib // { builders = self.lib.builders.${system}; }; };
         private = inputs.dotfiles-private.hosts.${hostName};
       };

@@ -24,6 +24,7 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 | [compute](./hosts/compute)          | NixOS         | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake |
 | [laptop](./hosts/laptop)            | NixOS         | Personal workstation                                                                 |
 | [share-vm](./hosts/guests/share-vm) | NixOS microVM | Public file sharing on `compute`, exposed only via Tailscale Funnel                  |
+| [cv-vm](./hosts/guests/cv-vm)       | NixOS microVM | Public static CV landing page on `compute`, exposed only via Tailscale Funnel        |
 | [inky](./hosts/inky)                | Raspberry Pi  | Raspberry Pi Zero 2W connected to Inky Impression and speakers                       |
 
 ## Nix Stack

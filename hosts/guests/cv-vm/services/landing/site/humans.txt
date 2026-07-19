@@ -1,0 +1,9 @@
+/* team */
+  everything  : bruno henriques
+  stack       : nixos + traefik, declared in github.com/bphenriques/dotfiles
+
+/* site */
+  javascript  : none
+  last update : whenever the flake rebuilds
+
+that's the whole rabbit hole. go build something.
