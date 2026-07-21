@@ -1,4 +1,10 @@
 { pkgs, lib, osConfig, ... }:
+let
+  # One jump block per guest; HostName omitted since the name resolves via /etc/hosts (base.nix).
+  guestBlocks = lib.concatMapAttrs (vmHost: guests:
+    lib.mapAttrs (_: _: { ProxyJump = vmHost; StrictHostKeyChecking = "accept-new"; }) guests
+  ) osConfig.custom.fleet.microvms;
+in
 {
   programs.tealdeer = {
     enable = true;
@@ -27,17 +33,9 @@
       "pi-zero".User = "pi";
       "rg353m".User = "ark";
       "pixel".User = "bruno";
-      "share-vm" = {
-        HostName = osConfig.custom.fleet.microvmHosts."share-vm";
-        User = "bphenriques";
-        ProxyJump = "compute";
-      };
-      "cv-vm" = {
-        HostName = osConfig.custom.fleet.microvmHosts."cv-vm";
-        User = "bphenriques";
-        ProxyJump = "compute";
-      };
-    };
+      # accept-new: persistent key, so a one-time bootstrap TOFU; a *changed* key is still refused.
+      "compute".StrictHostKeyChecking = "accept-new";
+    } // guestBlocks;
   };
 
   services.gpg-agent = {

@@ -13,7 +13,7 @@ body {
   place-items: center;
   border-top: 3px solid var(--accent);
   border-bottom: 3px solid var(--accent);
-  font: 16px/1.6 ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+  font: 16px/1.6 ui-monospace, "Consolas", "Liberation Mono", monospace;
 }
 
 main {

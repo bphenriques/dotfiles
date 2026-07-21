@@ -2,18 +2,6 @@
 _final: prev: let
   inherit (prev) lib;
   images = {
-    grist = {
-      image = "gristlabs/grist";
-      version = "1.7.15";
-      homepage = "https://github.com/gristlabs/grist-core";
-      updateInfo = { repo = "gristlabs/grist-core"; stripPrefix = "v"; };
-    };
-    larapaper = {
-      image = "ghcr.io/usetrmnl/larapaper";
-      version = "0.38.0";
-      homepage = "https://github.com/usetrmnl/larapaper";
-      updateInfo = { repo = "usetrmnl/larapaper"; };
-    };
     kapowarr = {
       image = "mrcas/kapowarr";
       version = "1.3.1";
@@ -22,13 +10,13 @@ _final: prev: let
     };
     papra = {
       image = "ghcr.io/papra-hq/papra";
-      version = "26.5.0";
+      version = "26.6.1";
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
     romm = {
       image = "rommapp/romm";
-      version = "4.9.2";
+      version = "5.0.0";
       homepage = "https://github.com/rommapp/romm";
       updateInfo = { repo = "rommapp/romm"; };
     };

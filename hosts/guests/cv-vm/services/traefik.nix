@@ -26,27 +26,26 @@ in
         rule = "PathPrefix(`/`)";
         entryPoints = [ "web" ];
         service = "landing";
-        middlewares = [ "ratelimit" "signature" "notfound" ];
+        middlewares = [ "ratelimit" "security" "signature" "notfound" ];
       };
       services.landing.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString staticPort}"; }];
       middlewares = {
         # Coarse per-IP DoS guard (real IP via PROXY protocol): 5 req/s, small burst.
         ratelimit.rateLimit = { average = 5; burst = 10; };
-        # Easter-egg headers only a curl user notices, plus baseline hardening for the public surface.
-        signature.headers = {
-          customResponseHeaders = {
-            "X-Served-By" = "homelab · nixos + traefik";
-            "X-Declared-In" = "github.com/bphenriques/dotfiles";
-            "X-Fleet" = "${toString fleetFacts.hosts} hosts · ${toString fleetFacts.services} services";
-            "X-Sla" = "best effort — it's a homelab";
-            "X-See-Also" = "/humans.txt";
-          };
+        # Baseline hardening for the public surface.
+        security.headers = {
           contentTypeNosniff = true;
           frameDeny = true;
           referrerPolicy = "no-referrer";
           stsSeconds = 31536000;
         };
-        # darkhttpd has no custom-404, so serve the static root's /404.html for not-found responses.
+        # Easter-egg headers only a curl user notices.
+        signature.headers.customResponseHeaders = {
+          "X-Declared-In" = "github.com/bphenriques/dotfiles";
+          "X-Fleet" = "${toString fleetFacts.hosts} hosts · ${toString fleetFacts.services} services";
+          "X-Sla" = "best effort";
+          "X-See-Also" = "/humans.txt";
+        };
         notfound.errors = {
           status = [ "404" ];
           service = "landing";

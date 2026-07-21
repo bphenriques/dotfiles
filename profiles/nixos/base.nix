@@ -1,6 +1,7 @@
 { pkgs, lib, config, self, ... }:
 let
-  fleetHosts = config.custom.fleet.lan.hosts // config.custom.fleet.microvmHosts;
+  fleetHosts = config.custom.fleet.lan.hosts
+    // lib.concatMapAttrs (_: guests: guests) config.custom.fleet.microvms;
 in
 {
   imports = [ ../settings.nix ./shell.nix ];

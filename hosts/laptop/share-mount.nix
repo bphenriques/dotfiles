@@ -34,10 +34,13 @@ in
 
   # Key lives here, not as a mount option: root has no default key, and ProxyJump spawns a
   # separate ssh to compute that wouldn't inherit a mount-level IdentityFile.
+  # accept-new, not yes: the automount runs as root with no TTY to accept a first-use prompt, so
+  # first-connect TOFU is the seal (own wired LAN; a *changed* key is still refused). If share-vm's
+  # host key regenerates (state wipe — it's the sops age identity), recover: `sudo ssh-keygen -R share-vm`.
   programs.ssh.extraConfig = ''
     Host compute share-vm
       IdentityFile ${user.home}/.ssh/id_ed25519
-      StrictHostKeyChecking yes
+      StrictHostKeyChecking accept-new
     Host share-vm
       ProxyJump ${user.name}@compute
   '';

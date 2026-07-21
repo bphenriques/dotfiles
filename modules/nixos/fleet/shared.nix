@@ -6,12 +6,6 @@
         type = lib.types.listOf lib.types.str;
         description = "SSH public keys authorized across all hosts";
       };
-
-      hostKeys = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = { };
-        description = "SSH host public keys, by hostname, for known-hosts pinning";
-      };
     };
 
     dns = lib.mkOption {
@@ -31,23 +25,12 @@
       };
     };
 
-    # Guest hostname → bridge IP, for `ssh -J <host>` resolution + known-hosts pinning. Derived
-    # from the microVM host's local allocation table; the rich placement stays host-local.
-    microvmHosts = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
+    microvms = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
       default = { };
-      description = "MicroVM guest hostname to its bridge IP";
+      description = "MicroVM host to its { guest hostname -> bridge IP } table";
     };
   };
 
   config.custom.fleet = fleet;
-
-  # Pin fleet host keys (name + its LAN/bridge IPs) so SSH verifies against the registry
-  # rather than TOFU — stable across rebuilds, and a rotation is a loud registry edit.
-  config.programs.ssh.knownHosts = lib.mapAttrs (name: publicKey: {
-    hostNames = [ name ]
-      ++ lib.optional (fleet.lan.hosts ? ${name}) fleet.lan.hosts.${name}
-      ++ lib.optional (fleet.microvmHosts ? ${name}) fleet.microvmHosts.${name};
-    inherit publicKey;
-  }) fleet.ssh.hostKeys;
 }
