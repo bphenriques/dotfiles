@@ -1,11 +1,11 @@
 let
   inherit (import ./lib.nix) mkPanel mkRow h w fullW;
-  inst = ''instance="share-vm"'';
+  inst = ''instance="cv-vm"'';
 in
 {
-  uid = "share-vm";
-  title = "Share VM";
-  tags = [ "share-vm" "node" ];
+  uid = "cv-vm";
+  title = "CV VM";
+  tags = [ "cv-vm" "node" ];
   timezone = "browser";
   schemaVersion = 39;
   refresh = "1m";
@@ -31,22 +31,20 @@ in
       gridPos = { x = w; y = 1; inherit w h; };
     })
 
-    (mkRow { id = 4; title = "Storage & HTTP"; gridPos = { x = 0; y = 9; w = fullW; h = 1; }; })
+    (mkRow { id = 4; title = "HTTP"; gridPos = { x = 0; y = 9; w = fullW; h = 1; }; })
     (mkPanel {
       id = 5;
-      title = "Share Storage (/srv/share, capped)";
-      expr = [
-        { expr = ''node_filesystem_size_bytes{mountpoint="/srv/share",fstype="ext4"}''; legend = "Total"; }
-        { expr = ''node_filesystem_size_bytes{mountpoint="/srv/share",fstype="ext4"} - node_filesystem_avail_bytes{mountpoint="/srv/share",fstype="ext4"}''; legend = "Used"; }
-      ];
-      unit = "bytes";
+      title = "Request rate (public, rate-limited to 5/s)";
+      expr = ''sum(rate(traefik_entrypoint_requests_total{${inst},entrypoint="web"}[5m]))'';
+      legend = "req/s";
+      unit = "reqps";
       gridPos = { x = 0; y = 10; inherit w h; };
     })
     (mkPanel {
       id = 6;
-      title = "HTTP responses by status (watch 401)";
-      # entrypoint, not service: auth 401s are rejected by middleware before any backend,
-      # so they only appear at the entrypoint level (service_* counts backend hits only).
+      title = "HTTP responses by status (watch 429 rate-limit, 404 scanners)";
+      # entrypoint, not service: rate-limit 429s are rejected by middleware before any backend,
+      # so they only surface at the entrypoint level (service_* counts backend hits only).
       expr = ''sum by (code) (rate(traefik_entrypoint_requests_total{${inst},entrypoint="web"}[5m]))'';
       legend = "{{code}}";
       unit = "reqps";

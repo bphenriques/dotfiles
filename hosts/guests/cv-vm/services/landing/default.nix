@@ -2,22 +2,28 @@
 let
   inherit (fleetFacts) hosts services;
 
-  # Group order; any category not listed falls to the end, alphabetically.
-  categoryOrder = [ "identity" "media" "downloads" "productivity" "files" "home" "monitoring" ];
-  usedCategories = lib.unique (map (s: s.category) services);
+  listedServices = lib.filter (s: s.listed) services;
+  moreCount = builtins.length services - builtins.length listedServices;
+
+  # Group order; any category not listed falls to the end, alphabetically. Categories are
+  # derived from listed services only, so a fully-hidden category never renders an empty header.
+  categoryOrder = [ "identity" "media" "media automation" "productivity" "files" "home" "monitoring" ];
+  usedCategories = lib.unique (map (s: s.category) listedServices);
   categories =
     (lib.filter (c: lib.elem c usedCategories) categoryOrder)
     ++ lib.sort (a: b: a < b) (lib.filter (c: !lib.elem c categoryOrder) usedCategories);
   inCategory =
     c:
     lib.sort (a: b: if a.order != b.order then a.order < b.order else a.displayName < b.displayName) (
-      lib.filter (s: s.category == c) services
+      lib.filter (s: s.category == c) listedServices
     );
 
   # Page data, kept separate from the markup (index.html.mustache) and rendered at build time.
   data = {
     hostCount = hosts;
     serviceCount = builtins.length services;
+    hasMore = moreCount > 0;
+    inherit moreCount;
     categories = map (c: {
       name = c;
       services = map (s: { inherit (s) displayName homepage; }) (inCategory c);

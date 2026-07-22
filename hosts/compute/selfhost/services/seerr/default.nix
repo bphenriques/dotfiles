@@ -27,10 +27,10 @@ in
         displayName = "Seerr";
         meta.homepage = "https://github.com/fallenbagel/jellyseerr";
         meta.description = "TV / Movie Finder";
-        meta.category = "downloads";
+        meta.category = "media";
         port = 9099;
         healthcheck.path = "/api/v1/status";
-        extraConfig.landingPage.enable = true;
+        extraConfig.landingPage = { enable = true; listed = false; };
       };
 
       # Upstream uses DynamicUser; EnvironmentFile loads as root before user drop.

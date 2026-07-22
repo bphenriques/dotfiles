@@ -124,6 +124,13 @@ h1 {
   padding-left: 1rem;
 }
 
+.more {
+  margin: 0.9rem 0 0;
+  padding-left: 1rem;
+  opacity: 0.45;
+  font-size: 0.9em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .links a {
     transition: border-color 120ms ease;

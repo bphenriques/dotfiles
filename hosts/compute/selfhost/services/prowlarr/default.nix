@@ -5,6 +5,6 @@
   selfhost.apps.prowlarr.enable = true;
   selfhost.services.prowlarr = {
     integrations.notify.topic = "admin";
-    extraConfig.landingPage.enable = true;
+    extraConfig.landingPage = { enable = true; listed = false; };
   };
 }

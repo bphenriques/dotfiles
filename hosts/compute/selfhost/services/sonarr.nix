@@ -25,6 +25,7 @@
   };
 
   selfhost.services.sonarr = {
+    meta.category = "media automation";
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";
     integrations.homepage.group = "Admin";

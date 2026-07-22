@@ -8,7 +8,7 @@ in
     services.transmission = {
       storage.smb = [ "media" ];
       integrations.notify.topic = "download";
-      extraConfig.landingPage.enable = true;
+      extraConfig.landingPage = { enable = true; listed = false; };
     };
   };
 

@@ -89,7 +89,7 @@ in
       };
       healthcheck.path = "/api/heartbeat";
       storage.smb = [ "media" ];
-      extraConfig.landingPage.enable = true;
+      extraConfig.landingPage = { enable = true; listed = false; };
     };
 
     runtimeSecrets = {

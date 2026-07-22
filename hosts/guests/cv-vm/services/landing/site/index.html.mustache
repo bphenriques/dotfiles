@@ -48,6 +48,7 @@
           {{/services}}
           {{/categories}}
         </dl>
+        {{#hasMore}}<p class="more">…and {{moreCount}} more</p>{{/hasMore}}
       </details>
       <p class="hint">
         psst: <code>curl -sI</code> this page (served through a Tailscale

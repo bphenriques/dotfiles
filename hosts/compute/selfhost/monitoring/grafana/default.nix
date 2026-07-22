@@ -6,6 +6,7 @@ let
 
   systemDashboard = json.generate "system.json" (import ./dashboard.nix);
   shareVmDashboard = json.generate "share-vm.json" (import ./share-vm.nix);
+  cvVmDashboard = json.generate "cv-vm.json" (import ./cv-vm.nix);
 in
 {
   selfhost = {
@@ -65,6 +66,7 @@ in
         options.path = pkgs.linkFarm "grafana-dashboards" [
           { name = "system.json";   path = systemDashboard; }
           { name = "share-vm.json"; path = shareVmDashboard; }
+          { name = "cv-vm.json";    path = cvVmDashboard; }
         ];
       }];
     };
