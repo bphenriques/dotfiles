@@ -10,7 +10,9 @@ body {
   min-height: 100dvh;
   box-sizing: border-box; /* so the border below sits inside the 100dvh, not 6px past it */
   display: grid;
-  place-items: center;
+  /* Top-aligned (not centered) so expanding the services list grows downward
+     instead of re-centering and shifting the header. */
+  place-items: start center;
   border-top: 3px solid var(--accent);
   border-bottom: 3px solid var(--accent);
   font: 16px/1.6 ui-monospace, "Consolas", "Liberation Mono", monospace;
@@ -19,6 +21,14 @@ body {
 main {
   max-width: 46ch;
   padding: 2rem;
+  margin-block-start: clamp(2rem, 12vh, 5rem);
+}
+
+/* Fluid, wider column on desktop so the tagline and the curl hint stop wrapping. */
+@media (min-width: 50rem) {
+  main {
+    max-width: min(84ch, 100% - 6rem);
+  }
 }
 
 @media (max-width: 400px) {
@@ -79,14 +89,9 @@ h1 {
   content: "▾";
 }
 
-.note {
-  opacity: 0.55;
-  font-size: 0.85em;
-  margin: 0.4rem 0 0.9rem;
-}
-
 .homelab a,
-.hint a {
+.hint a,
+.tagline a {
   color: inherit;
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
@@ -96,17 +101,17 @@ h1 {
 .homelab a:hover,
 .homelab a:focus-visible,
 .hint a:hover,
-.hint a:focus-visible {
+.hint a:focus-visible,
+.tagline a:hover,
+.tagline a:focus-visible {
   text-decoration-color: currentColor;
 }
 
 .svc {
-  list-style: none;
   margin: 0;
-  padding: 0;
 }
 
-.svc .cat {
+.svc dt {
   opacity: 0.45;
   font-size: 0.75em;
   letter-spacing: 0.08em;
@@ -114,7 +119,8 @@ h1 {
   margin: 0.9rem 0 0.15rem;
 }
 
-.svc li:not(.cat) {
+.svc dd {
+  margin: 0;
   padding-left: 1rem;
 }
 
@@ -123,7 +129,8 @@ h1 {
     transition: border-color 120ms ease;
   }
   .homelab a,
-  .hint a {
+  .hint a,
+  .tagline a {
     transition: text-decoration-color 120ms ease;
   }
 }

@@ -26,8 +26,9 @@
     <main>
       <h1>Bruno Henriques</h1>
       <p class="tagline">
-        Technical lead and software engineer, enthusiastic about self-hosting
-        and NixOS.
+        Technical lead and software engineer, enthusiastic about
+        <a href="https://github.com/bphenriques/dotfiles">self-hosting</a> and
+        NixOS.
       </p>
       <nav class="links" aria-label="profile links">
         <a href="https://github.com/bphenriques">GitHub</a>
@@ -38,12 +39,19 @@
         >
       </nav>
       <details class="homelab">
-        <summary>Homelab · @serviceCount@ services</summary>
-        @services@
+        <summary>Homelab · {{hostCount}} hosts · {{serviceCount}} services</summary>
+        <dl class="svc">
+          {{#categories}}
+          <dt>{{name}}</dt>
+          {{#services}}
+          <dd>{{#homepage}}<a href="{{homepage}}" target="_blank" rel="noopener">{{displayName}}</a>{{/homepage}}{{^homepage}}{{displayName}}{{/homepage}}</dd>
+          {{/services}}
+          {{/categories}}
+        </dl>
       </details>
       <p class="hint">
-        <a href="https://github.com/bphenriques/dotfiles">source</a> · psst:
-        <code>curl -sI</code> this page (served through a Tailscale Funnel).
+        psst: <code>curl -sI</code> this page (served through a Tailscale
+        Funnel).
       </p>
     </main>
   </body>

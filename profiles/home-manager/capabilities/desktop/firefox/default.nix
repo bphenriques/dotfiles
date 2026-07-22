@@ -98,13 +98,6 @@ lib.mkIf pkgs.stdenv.isLinux {
     windowRules.byApp = [
       ''
         window-rule {
-          match app-id="firefox" at-startup=true
-          open-on-workspace "${niriWorkspaces.browser.name}"
-          open-focused true
-        }
-      ''
-      ''
-        window-rule {
           match app-id="firefox"
           open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
         }

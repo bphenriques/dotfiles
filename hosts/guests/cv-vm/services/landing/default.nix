@@ -1,6 +1,6 @@
 { pkgs, lib, cvVm, fleetFacts, ... }:
 let
-  inherit (fleetFacts) services;
+  inherit (fleetFacts) hosts services;
 
   # Group order; any category not listed falls to the end, alphabetically.
   categoryOrder = [ "identity" "media" "downloads" "productivity" "files" "home" "monitoring" ];
@@ -14,26 +14,22 @@ let
       lib.filter (s: s.category == c) services
     );
 
-  # Each name links to its upstream homepage (meta.homepage) so a visitor can see what the service is.
-  renderItem =
-    s:
-    let
-      label =
-        if s.homepage != null then
-          ''<a href="${s.homepage}" target="_blank" rel="noopener">${s.displayName}</a>''
-        else
-          s.displayName;
-    in
-    "<li>${label}</li>";
-  renderCategory = c: ''<li class="cat">${c}</li>'' + lib.concatMapStrings renderItem (inCategory c);
-  servicesHtml = ''<ul class="svc">'' + lib.concatMapStrings renderCategory categories + "</ul>";
+  # Page data, kept separate from the markup (index.html.mustache) and rendered at build time.
+  data = {
+    hostCount = hosts;
+    serviceCount = builtins.length services;
+    categories = map (c: {
+      name = c;
+      services = map (s: { inherit (s) displayName homepage; }) (inCategory c);
+    }) categories;
+  };
+  dataJson = pkgs.writeText "cv-data.json" (builtins.toJSON data);
 
-  site = pkgs.runCommandLocal "cv-site" { } ''
+  site = pkgs.runCommandLocal "cv-site" { nativeBuildInputs = [ pkgs.mustache-go ]; } ''
     cp -r ${./site} "$out"
     chmod -R u+w "$out"
-    substituteInPlace "$out/index.html" \
-      --replace-warn '@serviceCount@' '${toString (builtins.length services)}' \
-      --replace-warn '@services@' ${lib.escapeShellArg servicesHtml}
+    mustache ${dataJson} "$out/index.html.mustache" > "$out/index.html"
+    rm "$out/index.html.mustache"
   '';
 in
 {
