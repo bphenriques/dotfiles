@@ -7,11 +7,15 @@ in
 {
   selfhost.services.cook-recipes = {
     displayName = "Recipes";
-    description = "Recipe Collection";
+    meta.homepage = "https://cooklang.org";
+    meta.description = "Recipe Collection";
+    meta.category = "productivity";
     subdomain = "recipes";
     port = 9080;
     storage.smb = [ "media" ];
+    extraConfig.landingPage.enable = true;
   };
+
   users.users.cook-recipes = { isSystemUser = true; group = "cook-recipes"; };
   users.groups.cook-recipes = { };
 

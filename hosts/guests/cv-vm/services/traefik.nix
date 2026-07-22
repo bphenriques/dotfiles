@@ -42,7 +42,7 @@ in
         # Easter-egg headers only a curl user notices.
         signature.headers.customResponseHeaders = {
           "X-Declared-In" = "github.com/bphenriques/dotfiles";
-          "X-Fleet" = "${toString fleetFacts.hosts} hosts · ${toString fleetFacts.services} services";
+          "X-Fleet" = "${toString (builtins.length fleetFacts.services)} services · all behind SSO unless noted";
           "X-Sla" = "best effort";
           "X-See-Also" = "/humans.txt";
         };

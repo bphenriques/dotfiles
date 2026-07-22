@@ -9,11 +9,7 @@ in
   options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        options.extraConfig = lib.mkOption {
-          type = lib.types.submodule {
-            options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
-          };
-        };
+        options.services.immich.enable = lib.mkEnableOption "Immich account for this user";
       }
     );
   };
@@ -21,7 +17,9 @@ in
   config = {
     selfhost.services.immich = {
       displayName = "Immich";
-      description = "Photo & Video Gallery";
+      meta.homepage = "https://immich.app";
+      meta.description = "Photo & Video Gallery";
+      meta.category = "media";
       port = 2283;
       subdomain = "photos";
       access.allowedGroups = with config.selfhost.groups; [ admin ];
@@ -36,6 +34,7 @@ in
       };
 
       healthcheck.path = "/api/server/ping";
+      extraConfig.landingPage.enable = true;
     };
 
     services.immich = {

@@ -13,17 +13,13 @@ in
   options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        options.extraConfig = lib.mkOption {
-          type = lib.types.submodule {
-            options.services.jellyfin = {
-              enable = lib.mkEnableOption "Jellyfin account for this user";
-              # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
-              passwordFile = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
-                default = null;
-                description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
-              };
-            };
+        options.services.jellyfin = {
+          enable = lib.mkEnableOption "Jellyfin account for this user";
+          # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
+          passwordFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
           };
         };
       }
@@ -34,7 +30,9 @@ in
     selfhost = {
       services.jellyfin = {
         displayName = "Jellyfin";
-        description = "Media Player";
+        meta.homepage = "https://jellyfin.org";
+        meta.description = "Media Player";
+        meta.category = "media";
         port = 8096;
         access.allowedGroups = with config.selfhost.groups; [ guests users admin ];
         oidc = {
@@ -44,6 +42,7 @@ in
         };
         healthcheck.path = "/health";
         storage.smb = [ "media" ];
+        extraConfig.landingPage.enable = true;
       };
 
       runtimeSecrets.jellyfin-admin-password = {

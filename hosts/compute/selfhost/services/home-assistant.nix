@@ -12,7 +12,9 @@ in
 {
   selfhost.services.home-assistant = {
     displayName = "Home Assistant";
-    description = "Home Automation";
+    meta.homepage = "https://www.home-assistant.io";
+    meta.description = "Home Automation";
+    meta.category = "home";
     port = 8123;
     subdomain = "home";
     access.allowedGroups = [ config.selfhost.groups.admin ];
@@ -32,6 +34,7 @@ in
       };
       after = [ "home-assistant.service" ];
     };
+    extraConfig.landingPage.enable = true;
   };
 
   services.home-assistant = {

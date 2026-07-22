@@ -11,7 +11,9 @@ in
   selfhost = {
     services.grafana = {
       displayName = "Grafana";
-      description = "Dashboards";
+      meta.homepage = "https://grafana.com";
+      meta.description = "Dashboards";
+      meta.category = "monitoring";
       port = 3010;
       healthcheck.path = "/api/health";
       forwardAuth.enable = true;

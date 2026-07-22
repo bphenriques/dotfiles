@@ -75,7 +75,9 @@ in
   selfhost = {
     services.romm = {
       displayName = "RomM";
-      description = "ROM Manager";
+      meta.homepage = "https://romm.app";
+      meta.description = "ROM Manager";
+      meta.category = "media";
       port = 8095;
 
       access.allowedGroups = with cfg.groups; [ guests users admin ];
@@ -87,6 +89,7 @@ in
       };
       healthcheck.path = "/api/heartbeat";
       storage.smb = [ "media" ];
+      extraConfig.landingPage.enable = true;
     };
 
     runtimeSecrets = {

@@ -37,15 +37,13 @@
           >cv.pdf</a
         >
       </nav>
-      <p class="homelab">
-        Homelab:
-        <a href="https://github.com/bphenriques/dotfiles"
-          >@hostCount@ hosts and @serviceCount@ services</a
-        >
-      </p>
+      <details class="homelab">
+        <summary>Homelab · @serviceCount@ services</summary>
+        @services@
+      </details>
       <p class="hint">
-        psst: <code>curl -sI</code> this page (served through a Tailscale
-        Funnel).
+        <a href="https://github.com/bphenriques/dotfiles">source</a> · psst:
+        <code>curl -sI</code> this page (served through a Tailscale Funnel).
       </p>
     </main>
   </body>

@@ -58,10 +58,35 @@ h1 {
 }
 
 .homelab {
-  opacity: 0.75;
+  margin: 0 0 1.5rem;
 }
 
-.homelab a {
+.homelab > summary {
+  cursor: pointer;
+  opacity: 0.75;
+  list-style: none;
+}
+.homelab > summary::-webkit-details-marker {
+  display: none;
+}
+.homelab > summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.2em;
+  opacity: 0.7;
+}
+.homelab[open] > summary::before {
+  content: "▾";
+}
+
+.note {
+  opacity: 0.55;
+  font-size: 0.85em;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.homelab a,
+.hint a {
   color: inherit;
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
@@ -69,15 +94,36 @@ h1 {
 }
 
 .homelab a:hover,
-.homelab a:focus-visible {
+.homelab a:focus-visible,
+.hint a:hover,
+.hint a:focus-visible {
   text-decoration-color: currentColor;
+}
+
+.svc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.svc .cat {
+  opacity: 0.45;
+  font-size: 0.75em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0.9rem 0 0.15rem;
+}
+
+.svc li:not(.cat) {
+  padding-left: 1rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .links a {
     transition: border-color 120ms ease;
   }
-  .homelab a {
+  .homelab a,
+  .hint a {
     transition: text-decoration-color 120ms ease;
   }
 }

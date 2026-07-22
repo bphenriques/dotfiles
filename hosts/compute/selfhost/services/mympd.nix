@@ -5,10 +5,13 @@ in
 {
   selfhost.services.mympd = {
     displayName = "My MPD";
-    description = "Remote MPD Client";
+    meta.homepage = "https://jcorporation.github.io/myMPD/";
+    meta.description = "Remote MPD Client";
+    meta.category = "media";
     port = 8093;
     access.allowedGroups = [ config.selfhost.groups.users ];
     forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
+    extraConfig.landingPage.enable = true;
   };
 
   services.mympd = {

@@ -11,8 +11,8 @@ let
   # Libraries available to all users
   publicLibraries = [ "Books" "Comics" "Manga" ];
 
-  enabledUsers = lib.filterAttrs (_: u: u.extraConfig.services.kavita.enable) config.selfhost.users;
-  localUsers = lib.filterAttrs (_: u: u.extraConfig.services.kavita.passwordFile != null) enabledUsers;
+  enabledUsers = lib.filterAttrs (_: u: u.services.kavita.enable) config.selfhost.users;
+  localUsers = lib.filterAttrs (_: u: u.services.kavita.passwordFile != null) enabledUsers;
 
   # Admin user is for API bootstrapping only (initial setup + config reconciliation)
   kavitaConfigFile = pkgs.writeText "kavita-config.json" (builtins.toJSON {
@@ -59,7 +59,7 @@ let
 
     # OIDC users who get the Admin role (services.kavita.admin, which defaults to the user's fleet isAdmin).
     oidcAdminUsernames = lib.mapAttrsToList (_: u: u.username) (
-      lib.filterAttrs (_: u: u.extraConfig.services.kavita.admin) enabledUsers
+      lib.filterAttrs (_: u: u.services.kavita.admin) enabledUsers
     );
   });
 in
@@ -82,7 +82,7 @@ in
       Restart = "on-failure";
       RestartSec = 10;
       LoadCredential = lib.mapAttrsToList (_: u:
-        "kavita-password-${u.username}:${u.extraConfig.services.kavita.passwordFile}"
+        "kavita-password-${u.username}:${u.services.kavita.passwordFile}"
       ) localUsers;
     };
     environment = {

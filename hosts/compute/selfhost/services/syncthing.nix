@@ -3,16 +3,16 @@ let
   serviceCfg = config.selfhost.services.syncthing;
   pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
-  syncthingUsers = lib.filterAttrs (_: u: u.extraConfig.services.syncthing.enable) config.selfhost.users;
+  syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.selfhost.users;
 
   # Intentional as select the exact systems to sync
   romSystems = [ "3ds" "dos" "dreamcast" "fbneo" "gb" "gba" "gbc" "megadrive" "snes" "n64" "nds" "nes" "pico8" "ps2" "psp" "psx" "switch" "wii" ];
 
   allSyncthingDevices = lib.pipe syncthingUsers [
-    (lib.mapAttrsToList (_: u: u.extraConfig.services.syncthing.devices))
+    (lib.mapAttrsToList (_: u: u.services.syncthing.devices))
     lib.flatten
   ];
-  userSyncthingDevices = user: syncthingUsers.${user}.extraConfig.services.syncthing.devices;
+  userSyncthingDevices = user: syncthingUsers.${user}.services.syncthing.devices;
   toDeviceNames = devices: map (d: d.name) devices;
 
   mkSendOnlyFolder = id: path: devices: {
@@ -44,20 +44,16 @@ in
 {
   options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
-      options.extraConfig = lib.mkOption {
-        type = lib.types.submodule {
-          options.services.syncthing = {
-            enable = lib.mkEnableOption "Syncthing configuration for this user";
-            devices = lib.mkOption {
-              type = lib.types.listOf (lib.types.submodule {
-                options = {
-                  name = lib.mkOption { type = lib.types.str; };
-                  id = lib.mkOption { type = lib.types.str; };
-                };
-              });
-              default = [ ];
+      options.services.syncthing = {
+        enable = lib.mkEnableOption "Syncthing configuration for this user";
+        devices = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption { type = lib.types.str; };
+              id = lib.mkOption { type = lib.types.str; };
             };
-          };
+          });
+          default = [ ];
         };
       };
     });
@@ -67,13 +63,16 @@ in
     selfhost = {
       services.syncthing = {
         displayName = "Syncthing";
-        description = "File Sync";
+        meta.homepage = "https://syncthing.net";
+        meta.description = "File Sync";
+        meta.category = "files";
         port = 8384;
         healthcheck.path = "/rest/noauth/health";
         access.allowedGroups = [ config.selfhost.groups.admin ];
         forwardAuth.enable = true;
         integrations.homepage.group = "Admin";
         storage.smb = [ "media" "bphenriques" ];
+        extraConfig.landingPage.enable = true;
       };
 
       runtimeSecrets.syncthing-gui-password = {

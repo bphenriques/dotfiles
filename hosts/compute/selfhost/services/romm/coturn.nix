@@ -9,7 +9,7 @@ let
 in
 {
   selfhost.services.coturn = {
-    description = "STUN/TURN Server";
+    meta.description = "STUN/TURN Server";
     port = listenPort;
     ingress.enable = false;
     integrations.monitoring.enable = false;

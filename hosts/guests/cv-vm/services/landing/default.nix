@@ -1,11 +1,39 @@
 { pkgs, lib, cvVm, fleetFacts, ... }:
 let
+  inherit (fleetFacts) services;
+
+  # Group order; any category not listed falls to the end, alphabetically.
+  categoryOrder = [ "identity" "media" "downloads" "productivity" "files" "home" "monitoring" ];
+  usedCategories = lib.unique (map (s: s.category) services);
+  categories =
+    (lib.filter (c: lib.elem c usedCategories) categoryOrder)
+    ++ lib.sort (a: b: a < b) (lib.filter (c: !lib.elem c categoryOrder) usedCategories);
+  inCategory =
+    c:
+    lib.sort (a: b: if a.order != b.order then a.order < b.order else a.displayName < b.displayName) (
+      lib.filter (s: s.category == c) services
+    );
+
+  # Each name links to its upstream homepage (meta.homepage) so a visitor can see what the service is.
+  renderItem =
+    s:
+    let
+      label =
+        if s.homepage != null then
+          ''<a href="${s.homepage}" target="_blank" rel="noopener">${s.displayName}</a>''
+        else
+          s.displayName;
+    in
+    "<li>${label}</li>";
+  renderCategory = c: ''<li class="cat">${c}</li>'' + lib.concatMapStrings renderItem (inCategory c);
+  servicesHtml = ''<ul class="svc">'' + lib.concatMapStrings renderCategory categories + "</ul>";
+
   site = pkgs.runCommandLocal "cv-site" { } ''
     cp -r ${./site} "$out"
     chmod -R u+w "$out"
     substituteInPlace "$out/index.html" \
-      --replace-warn '@hostCount@' '${toString fleetFacts.hosts}' \
-      --replace-warn '@serviceCount@' '${toString fleetFacts.services}'
+      --replace-warn '@serviceCount@' '${toString (builtins.length services)}' \
+      --replace-warn '@services@' ${lib.escapeShellArg servicesHtml}
   '';
 in
 {

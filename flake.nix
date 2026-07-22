@@ -73,7 +73,7 @@
       # Hosts
       nixosConfigurations = let
         computeMicrovm = import ./hosts/compute/microvm/guests.nix;
-        fleetFacts = import ./lib/fleet.nix { inherit (self) nixosConfigurations; };
+        fleetFacts = import ./lib/fleet.nix { inherit (self) nixosConfigurations; inherit (nixpkgs) lib; };
         microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
           configPath = ./hosts/guests/${name};

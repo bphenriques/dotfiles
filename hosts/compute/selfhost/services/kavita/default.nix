@@ -15,21 +15,17 @@ in
       lib.types.submodule (
         { config, ... }:
         {
-          options.extraConfig = lib.mkOption {
-            type = lib.types.submodule {
-              options.services.kavita = {
-                enable = lib.mkEnableOption "Kavita permissions for this user";
-                passwordFile = lib.mkOption {
-                  type = lib.types.nullOr lib.types.str;
-                  default = null;
-                  description = "Path to file containing Kavita password for local authentication";
-                };
-                admin = lib.mkOption {
-                  type = lib.types.bool;
-                  default = config.isAdmin; # config = the user submodule (identity), reached via closure
-                  description = "Grant the Kavita Admin role; defaults to the user's fleet isAdmin.";
-                };
-              };
+          options.services.kavita = {
+            enable = lib.mkEnableOption "Kavita permissions for this user";
+            passwordFile = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Path to file containing Kavita password for local authentication";
+            };
+            admin = lib.mkOption {
+              type = lib.types.bool;
+              default = config.isAdmin; # config = the user submodule (identity), reached via closure
+              description = "Grant the Kavita Admin role; defaults to the user's fleet isAdmin.";
             };
           };
         }
@@ -41,7 +37,9 @@ in
     selfhost = {
       services.kavita = {
         displayName = "Kavita";
-        description = "Book Server";
+        meta.homepage = "https://www.kavitareader.com";
+        meta.description = "Book Server";
+        meta.category = "media";
         port = 8097;
         access.allowedGroups = with config.selfhost.groups; [ guests users admin ];
         oidc = {
@@ -54,6 +52,7 @@ in
         };
         healthcheck.path = "/api/health";
         storage.smb = [ "media" ];
+        extraConfig.landingPage.enable = true;
       };
 
       runtimeSecrets = {

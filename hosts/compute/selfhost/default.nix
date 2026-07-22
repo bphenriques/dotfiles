@@ -1,6 +1,6 @@
 { config, pkgs, lib, self, inputs, private, ... }:
 let
-  # Ad-hoc (non-private) users; consumer-internal per-user config rides in `extraConfig` on selfhost.users.
+  # Ad-hoc (non-private) users; per-user service config rides under `services` on selfhost.users.
   extraUsers = {
     home = {
       email = "home@localhost";
@@ -8,12 +8,12 @@ let
       lastName = "User";
       groups = [ config.selfhost.groups.users ];
       auth.oidc.enable = false; # ad-hoc user, no OIDC account
-      extraConfig = {
-        services.jellyfin = {
+      services = {
+        jellyfin = {
           enable = true;
           passwordFile = config.selfhost.runtimeSecrets.home-jellyfin-initial-credentials.path;
         };
-        services.seerr = {
+        seerr = {
           enable = true;
           permissions = {
             autoApprove = true;
@@ -30,16 +30,16 @@ let
       lastName = "User";
       groups = [ config.selfhost.groups.guests ];
       auth.oidc.enable = false;
-      extraConfig = {
-        services.jellyfin = {
+      services = {
+        jellyfin = {
           enable = true;
           passwordFile = config.selfhost.runtimeSecrets.guest-jellyfin-initial-credentials.path;
         };
-        services.kavita = {
+        kavita = {
           enable = true;
           passwordFile = config.selfhost.runtimeSecrets.guest-kavita-initial-credentials.path;
         };
-        services.seerr = {
+        seerr = {
           enable = true;
           permissions = {
             autoApprove = false;
@@ -67,6 +67,21 @@ in
       latitude = 38.736946;
       longitude = -9.142685;
     };
+  };
+
+  # Landing-page opt-in for framework-provided services; their category comes from each service's
+  # meta.category default. Pocket ID is pinned to the top (order 0).
+  selfhost.services = {
+    pocket-id.extraConfig.landingPage = { enable = true; order = 0; };
+    tinyauth.extraConfig.landingPage.enable = true;
+    gitea.extraConfig.landingPage.enable = true;
+    bentopdf.extraConfig.landingPage.enable = true;
+    miniflux.extraConfig.landingPage.enable = true;
+    radicale.extraConfig.landingPage.enable = true;
+    ntfy.extraConfig.landingPage.enable = true;
+    prometheus.extraConfig.landingPage.enable = true;
+    grafana.extraConfig.landingPage.enable = true;
+    alertmanager.extraConfig.landingPage.enable = true;
   };
 
   selfhost = {

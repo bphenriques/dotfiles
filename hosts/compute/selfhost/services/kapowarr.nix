@@ -9,13 +9,16 @@ in
 {
   selfhost.services.kapowarr = {
     displayName = "Kapowarr";
-    description = "Comic Book Manager";
+    meta.homepage = "https://github.com/Casvt/Kapowarr";
+    meta.description = "Comic Book Manager";
+    meta.category = "downloads";
     port = 5656;
     access.allowedGroups = with config.selfhost.groups; [ users admin ];
     forwardAuth.enable = true;
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any";
     storage.smb = [ "media" ];
+    extraConfig.landingPage.enable = true;
   };
 
   systemd.tmpfiles.rules = [

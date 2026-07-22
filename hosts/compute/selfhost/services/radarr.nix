@@ -30,7 +30,9 @@
     storage.smb = [ "media" ];
     integrations.notify.topic = "media";
     integrations.homepage.group = "Admin";
+    extraConfig.landingPage.enable = true;
   };
+
   users.users.radarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
 
   # Quality taste (recyclarr / TRaSH guides) — consumer-owned; never in the framework.

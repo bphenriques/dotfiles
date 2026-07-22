@@ -21,7 +21,9 @@ in
   selfhost = {
     services.papra = {
       displayName = "Papra";
-      description = "Document Management";
+      meta.homepage = "https://papra.app";
+      meta.description = "Document Management";
+      meta.category = "productivity";
       port = 1221;
       access.allowedGroups = [ cfg.groups.admin ];
       oidc = {
@@ -32,6 +34,7 @@ in
       healthcheck.path = "/";
       healthcheck.probeModule = "http_any";
       storage.smb = [ "bphenriques" ];
+      extraConfig.landingPage.enable = true;
     };
 
     runtimeSecrets.papra-auth-secret = {

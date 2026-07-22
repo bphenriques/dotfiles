@@ -8,16 +8,12 @@ in
   options.selfhost.users = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
-        options.extraConfig = lib.mkOption {
-          type = lib.types.submodule {
-            options.services.seerr = {
-              enable = lib.mkEnableOption "Seerr account for this user (requires Jellyfin)";
-              permissions = {
-                autoApprove = lib.mkEnableOption "auto-approve requests";
-                advancedRequests = lib.mkEnableOption "advanced request options (e.g., quality profile)";
-                viewRecentlyAdded = lib.mkEnableOption "view recently added media";
-              };
-            };
+        options.services.seerr = {
+          enable = lib.mkEnableOption "Seerr account for this user (requires Jellyfin)";
+          permissions = {
+            autoApprove = lib.mkEnableOption "auto-approve requests";
+            advancedRequests = lib.mkEnableOption "advanced request options (e.g., quality profile)";
+            viewRecentlyAdded = lib.mkEnableOption "view recently added media";
           };
         };
       }
@@ -29,9 +25,12 @@ in
     selfhost = {
       services.seerr = {
         displayName = "Seerr";
-        description = "TV / Movie Finder";
+        meta.homepage = "https://github.com/fallenbagel/jellyseerr";
+        meta.description = "TV / Movie Finder";
+        meta.category = "downloads";
         port = 9099;
         healthcheck.path = "/api/v1/status";
+        extraConfig.landingPage.enable = true;
       };
 
       # Upstream uses DynamicUser; EnvironmentFile loads as root before user drop.

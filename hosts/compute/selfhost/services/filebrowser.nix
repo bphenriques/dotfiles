@@ -13,6 +13,7 @@ in
       services.filebrowser = {
         access.allowedGroups = with cfg.groups; [ users admin ];
         traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296; # 4GB upload cap
+        extraConfig.landingPage.enable = true;
       };
     };
 
