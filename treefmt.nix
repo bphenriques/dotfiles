@@ -34,6 +34,7 @@
       # Avoids false positive related with lack of shebang.
       "packages/**/script.sh"
       "apps/**/script.sh"
+      "infra/tofu.sh" # writeShellApplication fragment; shellchecked at build via that.
     ];
   };
 }

@@ -4,7 +4,7 @@ A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) for password
 
 Security concerns:
 
-- No filesystem shared with compute — the VM owns its data on its own block devices
+- No filesystem shared with compute; the VM owns its data on its own block devices
 - Only ways in: the Funnel (behind Traefik BasicAuth) and admin SSH over the compute bridge
 - Rate-limited to 30 req/s per client
 - Egress is internet-only, never the LAN
@@ -36,10 +36,21 @@ Each user is a BasicAuth account that only has the target folders in scope.
 
 ## Setup (one-time)
 
-1. **Tailscale** (admin console): policy `{ "tagOwners": {"tag:share":["autogroup:admin"]}, "nodeAttrs": [{"target":["tag:share"],"attr":["funnel"]}] }`; enable **DNS → HTTPS Certificates**; generate a **reusable, non-ephemeral, `tag:share`** auth key.
-2. **dotfiles-private** `hosts/share-vm/`: `settings.nix` (folders/users) + `secrets.yaml` with the auth key as `tailscale/authkey`, authored against `&base-microvm` (the bootstrap microvm key). `nix run .#host-secrets share-vm` prints the skeleton.
-3. **Deploy.** Boots but Tailscale stays logged out — its key isn't a sops recipient yet.
-4. Re-encrypt secrets to the VM's host key (it doubles as its sops age identity): `ssh compute ssh-keyscan -t ed25519 share-vm | awk '/ssh-ed25519/{print $2, $3}' | nix run nixpkgs#ssh-to-age`, add to `dotfiles-private/.sops.yaml` as `- &share-vm <age>` (keep `&base-microvm`, add to the share-vm key_group), `sops updatekeys`, commit.
-5. **Deploy** again — secrets now decrypt.
-6. **Approve** the new host in Tailscale, **restart** the VM, then confirm `ssh share-vm tailscale status`.
-7. **Cloudflare** (managed in [`infra`](../../../infra)): add `share` to `funnel_redirects` in dotfiles-private (target `https://share-vm.<tailnet>.ts.net/files/`) and `tofu apply` — a *proxied* placeholder A record plus a **302** redirect `share.<domain>` → the Funnel.
+1. **Tailscale** (admin console). Add to the policy, enable **DNS → HTTPS Certificates**, and mint a **reusable, non-ephemeral `tag:share`** auth key:
+
+   ```json
+   "tagOwners": { "tag:share": ["autogroup:admin"] },
+   "nodeAttrs": [{ "target": ["tag:share"], "attr": ["funnel"] }]
+   ```
+
+2. **dotfiles-private** `hosts/share-vm/`: `settings.nix` (folders/users) and `secrets.yaml` with the auth key as `tailscale/authkey`, authored against `&base-microvm`. `nix run .#host-secrets share-vm` prints the skeleton.
+
+3. **Register the VM's sops identity.** Its host key only exists after first boot, so it takes two deploys:
+
+   - **Deploy.** Boots logged-out; the key isn't a sops recipient yet.
+   - `ssh compute ssh-keyscan -t ed25519 share-vm | awk '/ssh-ed25519/{print $2, $3}' | nix run nixpkgs#ssh-to-age`, add to `.sops.yaml` as `- &share-vm <age>` (share-vm key_group; keep `&base-microvm`), then `sops updatekeys` and commit.
+   - **Deploy** again. Secrets now decrypt.
+
+4. **Approve** the host in Tailscale, **restart** the VM, then confirm `ssh share-vm tailscale status`.
+
+5. **Cloudflare** (in [`infra`](../../../infra)): add `share = "https://share-vm.<tailnet>.ts.net/files/"` to `redirects` in dotfiles-private, then `tofu apply` (proxied placeholder + 302 `share.<domain>` to the Funnel).

@@ -5,8 +5,6 @@ let
   listedServices = lib.filter (s: s.listed) services;
   moreCount = builtins.length services - builtins.length listedServices;
 
-  # Group order; any category not listed falls to the end, alphabetically. Categories are
-  # derived from listed services only, so a fully-hidden category never renders an empty header.
   categoryOrder = [ "identity" "media" "media automation" "productivity" "files" "home" "monitoring" ];
   usedCategories = lib.unique (map (s: s.category) listedServices);
   categories =
@@ -47,8 +45,7 @@ in
       DynamicUser = true;
       Restart = "on-failure";
       RestartSec = "10s";
-      # Full confinement for the one internet-facing process (via Funnel): it only binds a
-      # localhost socket and reads static files, so it needs no caps, no extra syscalls, no LAN.
+      # Localhost-only static server: no caps, no extra syscalls, no LAN.
       CapabilityBoundingSet = "";
       NoNewPrivileges = true;
       SystemCallFilter = [ "@system-service" ];

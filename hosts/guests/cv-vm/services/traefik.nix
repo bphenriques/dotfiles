@@ -1,6 +1,6 @@
 { cvVm, guestPlacement, fleetFacts, ... }:
 let
-  inherit (cvVm) proxyPort staticPort traefikMetricsPort;
+  inherit (cvVm) tunnelPort staticPort traefikMetricsPort;
   vmIp = guestPlacement.ip;
 in
 {
@@ -8,11 +8,7 @@ in
     enable = true;
     staticConfigOptions = {
       entryPoints = {
-        # The Funnel terminates TLS and forwards here with a PROXY v2 header (real IP).
-        web = {
-          address = "127.0.0.1:${toString proxyPort}";
-          proxyProtocol.trustedIPs = [ "127.0.0.1/32" ];
-        };
+        tunnel.address = "127.0.0.1:${toString tunnelPort}"; # cloudflared forwards here. The real client IP arrives in CF-Connecting-IP.
         metrics.address = "${vmIp}:${toString traefikMetricsPort}";
       };
       metrics.prometheus = {
@@ -24,22 +20,24 @@ in
     dynamicConfigOptions.http = {
       routers.landing = {
         rule = "PathPrefix(`/`)";
-        entryPoints = [ "web" ];
+        entryPoints = [ "tunnel" ];
         service = "landing";
         middlewares = [ "ratelimit" "security" "signature" "notfound" ];
       };
       services.landing.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString staticPort}"; }];
       middlewares = {
-        # Coarse per-IP DoS guard (real IP via PROXY protocol): 5 req/s, small burst.
-        ratelimit.rateLimit = { average = 5; burst = 10; };
-        # Baseline hardening for the public surface.
+        ratelimit.rateLimit = {
+          average = 5;
+          burst = 10;
+          sourceCriterion.requestHeaderName = "CF-Connecting-IP"; # The IP as sent by Cloudflare
+        };
         security.headers = {
           contentTypeNosniff = true;
           frameDeny = true;
           referrerPolicy = "no-referrer";
           stsSeconds = 31536000;
         };
-        # Easter-egg headers only a curl user notices.
+        # Small easter-egg for those who call with curl
         signature.headers.customResponseHeaders = {
           "X-Declared-In" = "github.com/bphenriques/dotfiles";
           "X-Fleet" = "${toString fleetFacts.hosts} hosts · ${toString (builtins.length fleetFacts.services)} services";
@@ -55,7 +53,7 @@ in
     };
   };
 
-  # localhost + bridge only: no exfiltration or LAN reach; the bridge is just for metrics.
+  # localhost + bridge (metrics) only, no LAN reach.
   systemd.services.traefik.serviceConfig = {
     IPAddressDeny = "any";
     IPAddressAllow = [ "localhost" guestPlacement.gateway vmIp ];

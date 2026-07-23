@@ -12,8 +12,8 @@ tofu init
 tofu plan
 ```
 
-`tofu` is wrapped so the API token and state passphrase are decrypted from sops per invocation —
-they never enter the shell env. State is encrypted (OpenTofu native) and committed, encrypted, to
+`tofu` is wrapped so the API token and state passphrase are decrypted from sops per invocation; they
+never enter the shell env. State is encrypted (OpenTofu native) and committed, encrypted, to
 `dotfiles-private/infra/terraform.tfstate`.
 
 ## Secrets
@@ -26,17 +26,15 @@ cloudflare:
   state_passphrase: <openssl rand -hex 32>
 ```
 
-- **api_token** — Cloudflare token scoped to the zone only: `DNS` Edit, `Single Redirect` Edit,
-  `Zone` Read. **It has an expiry** — when it lapses, mint a new one with the same scopes and
-  replace this value (nothing else changes).
-- **state_passphrase** — random secret encrypting the state (PBKDF2 → AES-GCM). Lose it and the
-  committed state can't be decrypted.
+- **api_token**: Cloudflare token with zone `DNS` Edit, `Single Redirect` Edit, `Zone` Read, plus account `Cloudflare Tunnel` Edit (the tunnel is account-scoped). It has an expiry; when it lapses, mint a new one with the same scopes and replace this value.
+- **state_passphrase**: random secret encrypting the state (PBKDF2, AES-GCM). Lose it and the committed state can't be decrypted.
 
 ## What it manages
 
 - `internal_records`: `<sub>.<domain>` -> internal IP (unproxied, split-horizon).
-- `funnel_redirects`: proxied placeholder + 302 redirect `<sub>.<domain>` -> the VM's Tailscale
-  Funnel URL.
+- `redirects`: proxied placeholder + 302 redirect `<sub>.<domain>` -> a target URL (`share` ->
+  tailscale funnel, `www` -> apex).
+- `tunnel`: a Cloudflare Tunnel + proxied apex CNAME to it. `bphenriques.com` is served by cv-vm's `cloudflared`. After apply, `tofu output -raw tunnel_token` -> cv-vm sops as `cloudflared/token` (see [`hosts/guests/cv-vm`](../hosts/guests/cv-vm)).
 
 TF owns the zone's entire dynamic-redirect ruleset (a per-zone singleton): a redirect added in the
 dashboard but absent here is removed on `apply`.
@@ -45,10 +43,8 @@ dashboard but absent here is removed on `apply`.
 
 Deliberately left in the Cloudflare dashboard:
 
-- **Email** — the apex `MX` and SPF/DMARC `TXT` records. Set-and-forget and high-stakes; kept out
-  to avoid apply-risk.
-- **ACME challenges** — `_acme-challenge.*` `TXT` records are created and removed dynamically by
-  Traefik (lego) during certificate issuance. Never import these.
+- **Email**: the apex `MX` and SPF/DMARC `TXT` records. Set-and-forget and high-stakes; kept out to avoid apply-risk.
+- **ACME challenges**: `_acme-challenge.*` `TXT` records are created and removed dynamically by Traefik (lego) during certificate issuance. Never import these.
 
 ## Bootstrap (one-time import)
 
@@ -62,4 +58,4 @@ tofu import cloudflare_ruleset.redirects              zones/<zone_id>/<ruleset_i
 ```
 
 Record IDs come from the Cloudflare dashboard or the API. HCL resource attributes target the
-`cloudflare/cloudflare` v5 provider — verify against the nix-pinned version on the first `plan`.
+`cloudflare/cloudflare` v5 provider; verify against the nix-pinned version on the first `plan`.

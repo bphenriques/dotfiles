@@ -15,6 +15,12 @@
       property="og:description"
       content="Technical lead and software engineer, enthusiastic about self-hosting and NixOS."
     />
+    <meta property="og:url" content="https://bphenriques.com/" />
+    <meta property="og:image" content="https://bphenriques.com/avatar.jpg" />
+    <meta property="og:image:width" content="460" />
+    <meta property="og:image:height" content="460" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://bphenriques.com/" />
     <title>Bruno Henriques</title>
     <link
       rel="icon"
@@ -39,7 +45,7 @@
         >
       </nav>
       <details class="homelab">
-        <summary>Homelab · {{hostCount}} hosts · {{serviceCount}} services</summary>
+        <summary>{{hostCount}} hosts · {{serviceCount}} services</summary>
         <dl class="svc">
           {{#categories}}
           <dt>{{name}}</dt>
