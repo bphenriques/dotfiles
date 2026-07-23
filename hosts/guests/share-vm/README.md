@@ -3,6 +3,7 @@
 A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) for password-protected file sharing with people outside the fleet, exposed to the internet **only** via Tailscale Funnel.
 
 Security concerns:
+
 - No filesystem shared with compute — the VM owns its data on its own block devices
 - Only ways in: the Funnel (behind Traefik BasicAuth) and admin SSH over the compute bridge
 - Rate-limited to 30 req/s per client
@@ -21,6 +22,7 @@ tailscale funnel status       # current Funnel state
 ## Access
 
 Under `.dotfiles-private`, the access folders and the users are set as follows:
+
 ```nix
 users = {
   alice = { folders = [ "bob" ]; };                              # read-only on bob
@@ -40,4 +42,4 @@ Each user is a BasicAuth account that only has the target folders in scope.
 4. Re-encrypt secrets to the VM's host key (it doubles as its sops age identity): `ssh compute ssh-keyscan -t ed25519 share-vm | awk '/ssh-ed25519/{print $2, $3}' | nix run nixpkgs#ssh-to-age`, add to `dotfiles-private/.sops.yaml` as `- &share-vm <age>` (keep `&base-microvm`, add to the share-vm key_group), `sops updatekeys`, commit.
 5. **Deploy** again — secrets now decrypt.
 6. **Approve** the new host in Tailscale, **restart** the VM, then confirm `ssh share-vm tailscale status`.
-7. **Cloudflare**: a *proxied* (orange-cloud) A record `share` → `192.0.2.1`, plus a Static **302** redirect `share.<domain>` → `https://<vm>.<tailnet>.ts.net/files/`.
+7. **Cloudflare** (managed in [`infra`](../../../infra)): add `share` to `funnel_redirects` in dotfiles-private (target `https://share-vm.<tailnet>.ts.net/files/`) and `tofu apply` — a *proxied* placeholder A record plus a **302** redirect `share.<domain>` → the Funnel.

@@ -64,6 +64,7 @@
       formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
+        infra = import ./infra/shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
       });
 
       # Modules

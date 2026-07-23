@@ -3,6 +3,7 @@
 A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) serving a static CV landing page publicly via Tailscale Funnel.
 
 Security concerns:
+
 - Rate-limited to 5 req/s per client
 - Egress is internet-only, never the LAN
 
@@ -23,3 +24,5 @@ tailscale funnel status       # current Funnel state
 4. Re-encrypt secrets to the VM's host key (it doubles as its sops age identity): `ssh compute ssh-keyscan -t ed25519 cv-vm | awk '/ssh-ed25519/{print $2, $3}' | nix run nixpkgs#ssh-to-age`, add to `dotfiles-private/.sops.yaml` as `- &cv-vm <age>` (keep `&base-microvm`, add to the cv-vm key_group), `sops updatekeys`, commit.
 5. **Deploy** again — secrets now decrypt.
 6. **Approve** the new host in Tailscale, **restart** the VM, then confirm `ssh cv-vm tailscale status`.
+
+Served at its Tailscale Funnel URL (`https://cv-vm.<tailnet>.ts.net`). Custom-domain fronting is deferred — see [`infra`](../../../infra).
