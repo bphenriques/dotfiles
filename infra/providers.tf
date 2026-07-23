@@ -4,7 +4,7 @@ terraform {
       source = "cloudflare/cloudflare"
     }
   }
-  backend "local" {} # path -> encrypted state in dotfiles-private, passed at `tofu init`
+  backend "local" {}
 }
 
-provider "cloudflare" {} # CLOUDFLARE_API_TOKEN is injected by the devShell
+provider "cloudflare" {} # CLOUDFLARE_API_TOKEN is injected

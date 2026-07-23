@@ -1,5 +1,4 @@
-# Injects the CF token, state passphrase, and tfvars from the private tree (nothing secret in the
-# shell env). $TOFU is the real binary; this script is named `tofu`, so calling it plain would recurse.
+# Injects the relevant secrets in runtime
 
 : "${DOTFILES_PRIVATE:=$HOME/.dotfiles-private}"
 secrets="$DOTFILES_PRIVATE/infra/secrets.yaml"

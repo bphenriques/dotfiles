@@ -2,8 +2,7 @@
 let
   tofu = pkgs.opentofu.withPlugins (p: [ p.cloudflare_cloudflare ]);
 
-  # `tofu` wrapped so secrets never enter the shell env (see tofu.sh). Named `tofu`; $TOFU is the
-  # real binary it execs.
+  # `tofu` wrapped so secrets never enter the shell env.
   tofuWrapper = pkgs.writeShellApplication {
     name = "tofu";
     runtimeInputs = [ pkgs.sops pkgs.git ];
