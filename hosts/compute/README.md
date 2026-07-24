@@ -35,6 +35,11 @@ Made some tweaks to ensure thermal stability with sustained workloads:
                        │       ▼      │                           │
                        │  Alertmanager──▶ ntfy ──▶ push notif     │
                        │                                          │
+                       │  sealed microVMs on an internal bridge:  │
+                       │    share-vm → Tailscale Funnel (public)  │
+                       │    cv-vm    → Cloudflare Tunnel (public) │
+                       │    agent-vm → laptop Ollama (private)    │
+                       │                                          │
                        │  rustic (cron) ──────────────────────────├──▶ Backblaze B2
                        └──────────────┬───────────────────────────┘    (off-site)
                                       │
