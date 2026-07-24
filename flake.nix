@@ -34,6 +34,8 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     microvm.url = "github:microvm-nix/microvm.nix";                     # Lightweight, isolated guests
     microvm.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.20";   # Local-LLM assistant runtime (agent-vm brain)
+    hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
@@ -43,7 +45,6 @@
       inherit (generators) forAllSystems readModulesAttrs;
       inherit (hostBuilders) mkNixosHost mkMicrovmGuest;
 
-      # One eval-<name> check per host/guest on `system`, derived — no hardcoded list to drift.
       evalChecks = system: nixpkgs.lib.mapAttrs'
         (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
         (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations);

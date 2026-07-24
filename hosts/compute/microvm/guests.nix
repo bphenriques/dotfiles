@@ -38,5 +38,24 @@
         traefikMetrics = true;
       };
     };
+
+    # hermes-agent fronting the laptop's Ollama; NextChat (UI) runs on compute.
+    agent-vm = {
+      ip = "10.20.1.13";
+      mac = "02:00:00:00:01:13";
+      vsockCid = 5;
+      autostart = true;
+      serviceConfig = {
+        Slice = "throttled.slice";
+        CPUWeight = 10;
+        CPUQuota = "100%";
+        MemoryMax = "2G";
+      };
+      monitoring = {
+        storageMount = "/var/lib/hermes";
+      };
+      # The one LAN hole in the seal: the laptop's Ollama.
+      egress.allowLan = [{ host = "laptop"; ports = [ 11434 ]; }];
+    };
   };
 }

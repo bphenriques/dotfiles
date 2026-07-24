@@ -22,6 +22,7 @@ in
     ./filebrowser.nix
     ./papra.nix
     ./mympd.nix
+    ./nextchat.nix
   ];
 
   selfhost.external = {

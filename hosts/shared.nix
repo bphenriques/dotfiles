@@ -24,4 +24,9 @@ in
   };
 
   microvms.compute = builtins.mapAttrs (_: g: g.ip) computeGuests.guests; # Used to seed /etc/hosts and ssh jump
+
+  ai = {
+    model = "qwen3.5:4b";            # Fully fits RTX 4060 at Hermes' 64K (65 t/s). Anything else is not practical.
+    extraModels = [ "gpt-oss:20b" ]; # MoE. Smarter but slower (~25 t/s) with better tool-use
+  };
 }

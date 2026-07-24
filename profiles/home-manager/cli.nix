@@ -1,8 +1,11 @@
 { pkgs, lib, osConfig, ... }:
 let
-  # One jump block per guest; HostName omitted since the name resolves via /etc/hosts (base.nix).
   guestBlocks = lib.concatMapAttrs (vmHost: guests:
-    lib.mapAttrs (_: _: { ProxyJump = vmHost; StrictHostKeyChecking = "accept-new"; }) guests
+    lib.mapAttrs (_: ip: {
+      HostName = ip;
+      ProxyJump = vmHost;
+      StrictHostKeyChecking = "accept-new";
+    }) guests
   ) osConfig.custom.fleet.microvms;
 in
 {

@@ -83,18 +83,20 @@ in
     # sops's age identity IS the VM's SSH host key, so the state volume joins the initrd and an
     # activation step generates the key (if absent) before sops runs.
     fileSystems.${cfg.stateRoot}.neededForBoot = true;
-    sops = {
+    # Wire sops only when the guest declares secrets; a secret-less guest needs no dotfiles-private entry.
+    sops = lib.mkIf (config.sops.secrets != { } || config.sops.templates != { }) {
       defaultSopsFile = private.sopsSecretsFile;
       age.sshKeyPaths = [ sshHostKey ];
     };
-    system.activationScripts = {
-      sshHostKeyInit.text = ''
-        if [ ! -e ${sshHostKey} ]; then
-          install -d -m 700 ${hostKeyDir}
-          ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${sshHostKey}
-        fi
-      '';
-      setupSecrets.deps = [ "sshHostKeyInit" ];
-    };
+    system.activationScripts.sshHostKeyInit.text = ''
+      if [ ! -e ${sshHostKey} ]; then
+        install -d -m 700 ${hostKeyDir}
+        ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${sshHostKey}
+      fi
+    '';
+    # Order sops's setupSecrets after the host key, but only when it exists: guard the whole entry so a
+    # secret-less guest doesn't instantiate a textless activation script.
+    system.activationScripts.setupSecrets =
+      lib.mkIf (config.sops.secrets != { } || config.sops.templates != { }) { deps = [ "sshHostKeyInit" ]; };
   };
 }

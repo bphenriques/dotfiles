@@ -10,6 +10,8 @@ _:
     dynamicBoost.enable = true;
     nvidiaSettings = true;
     powerManagement.enable = true;
+    # Keeps the dGPU initialised so Ollama's CUDA doesn't drop to CPU after idle suspend.
+    nvidiaPersistenced = true;
     open = false;
     prime = {
       # `sudo lshw -c` display to check businfo. Convert hexa to decimal, then remove leading zeroes, and replace . with ;

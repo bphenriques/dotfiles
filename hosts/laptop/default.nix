@@ -15,6 +15,7 @@ in
     ../../profiles/nixos/capabilities/gaming
     ../../profiles/nixos/capabilities/selfhost-smb-client.nix
     ./share-mount.nix
+    ./ollama.nix
     # Users
     ./bphenriques
   ];
