@@ -58,6 +58,21 @@ resource "cloudflare_zone_setting" "always_use_https" {
   value      = "on"
 }
 
+# HSTS. include_subdomains stays off so the unproxied internal HTTP records aren't forced to HTTPS.
+resource "cloudflare_zone_setting" "security_header" {
+  zone_id    = var.zone_id
+  setting_id = "security_header"
+  value = {
+    strict_transport_security = {
+      enabled            = true
+      max_age            = 31536000
+      include_subdomains = false
+      preload            = false
+      nosniff            = false
+    }
+  }
+}
+
 # Apex landing: a Cloudflare Tunnel (config_src = cloudflare -> ingress managed here) + apex CNAME.
 resource "cloudflare_zero_trust_tunnel_cloudflared" "cv" {
   account_id = var.account_id

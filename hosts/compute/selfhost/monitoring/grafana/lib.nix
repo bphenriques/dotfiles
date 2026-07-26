@@ -50,11 +50,48 @@ rec {
           [{ inherit datasource; refId = "A"; inherit expr; legendFormat = args.legend or ""; }];
     };
 
-  mkRow =
-    { id, title, gridPos }:
+  # Single-value tile; renders one cell per returned series (used for the fleet strip).
+  mkStat =
     {
-      inherit id title gridPos;
-      type = "row";
-      collapsed = false;
+      id,
+      title,
+      expr,
+      gridPos,
+      legend ? "{{instance}}",
+      unit ? "short",
+      thresholds ? null,
+      mappings ? null,
+      colorMode ? "value",
+    }:
+    {
+      inherit id title gridPos datasource;
+      type = "stat";
+      fieldConfig.defaults =
+        { inherit unit; color.mode = "thresholds"; }
+        // (if thresholds != null then { inherit thresholds; } else { })
+        // (if mappings != null then { inherit mappings; } else { });
+      options = {
+        reduceOptions = { calcs = [ "lastNotNull" ]; fields = ""; values = false; };
+        inherit colorMode;
+        graphMode = "none";
+        textMode = "value_and_name";
+        justifyMode = "auto";
+      };
+      targets = [{ inherit datasource; refId = "A"; inherit expr; legendFormat = legend; }];
     };
+
+  mkRow =
+    { id, title, gridPos, collapsed ? false, panels ? [ ] }:
+    {
+      inherit id title gridPos collapsed panels;
+      type = "row";
+    };
+
+  # Assign gridPos to a list of mkPanel arg sets, flowing two-per-row from y0.
+  layout2 = y0: specs:
+    builtins.genList
+      (i:
+        let s = builtins.elemAt specs i;
+        in s // { gridPos = { x = (i - 2 * (builtins.div i 2)) * w; y = y0 + (builtins.div i 2) * h; inherit w h; }; })
+      (builtins.length specs);
 }

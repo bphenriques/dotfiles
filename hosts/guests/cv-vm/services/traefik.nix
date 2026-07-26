@@ -35,7 +35,6 @@ in
           contentTypeNosniff = true;
           frameDeny = true;
           referrerPolicy = "no-referrer";
-          stsSeconds = 31536000;
         };
         # Small easter-egg for those who call with curl
         signature.headers.customResponseHeaders = {

@@ -4,9 +4,7 @@ let
   prometheusCfg = config.selfhost.services.prometheus;
   json = pkgs.formats.json { };
 
-  systemDashboard = json.generate "system.json" (import ./dashboard.nix);
-  shareVmDashboard = json.generate "share-vm.json" (import ./share-vm.nix);
-  cvVmDashboard = json.generate "cv-vm.json" (import ./cv-vm.nix);
+  computeDashboard = json.generate "compute.json" (import ./dashboard.nix config.networking.hostName config.homelab.microvm.host.guests);
 in
 {
   selfhost = {
@@ -39,7 +37,7 @@ in
       analytics.reporting_enabled = false;
       "unified_alerting".enabled = false;
       alerting.enabled = false; # Already using Alert Manager
-      dashboards.default_home_dashboard_path = "${systemDashboard}";
+      dashboards.default_home_dashboard_path = "${computeDashboard}";
       security.secret_key = "$__file{${config.selfhost.runtimeSecrets.grafana-secret-key.path}}";
       users.allow_sign_up = false;
       "auth.anonymous" = {
@@ -64,9 +62,7 @@ in
         type = "file";
         disableDeletion = true;
         options.path = pkgs.linkFarm "grafana-dashboards" [
-          { name = "system.json";   path = systemDashboard; }
-          { name = "share-vm.json"; path = shareVmDashboard; }
-          { name = "cv-vm.json";    path = cvVmDashboard; }
+          { name = "compute.json"; path = computeDashboard; }
         ];
       }];
     };

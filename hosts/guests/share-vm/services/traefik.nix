@@ -63,6 +63,7 @@ in
           frameDeny = true;
           referrerPolicy = "no-referrer";
           stsSeconds = 31536000;
+          forceSTSHeader = true;   # Funnel host isn't in the CF zone; emit here despite Traefik seeing plain HTTP
         };
         # BasicAuth is the gate; the authenticated user becomes the trusted username
         # FileBrowser reads (the Authorization header is stripped before forwarding).

@@ -169,6 +169,7 @@ in
       networks."30-vm-tap" = {
         matchConfig.Name = "vm-*";
         networkConfig.Bridge = bridge.name;
+        bridgeConfig.Isolated = true;   # block guest-to-guest at L2; the nft forward seal only sees routed traffic
         linkConfig.RequiredForOnline = "no";
       };
     };
