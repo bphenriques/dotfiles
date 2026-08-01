@@ -104,7 +104,7 @@ Configure Open Subtitles plugin credentials: Admin → Plugins → Open Subtitle
 
 Trigger initial library scan
 
-### Sonarr / Radarr
+### Sonarr / Radarr / Prowlarr
 
 Enable extension protection per indexer (UI): Settings → Indexers → edit each indexer → Advanced → Fail Downloads → enable Dangerous Extensions and Executable Extensions
 

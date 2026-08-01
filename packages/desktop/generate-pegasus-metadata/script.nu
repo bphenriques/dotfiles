@@ -24,8 +24,8 @@ def process_system [
     $system.dir
   ] | path join
   if not ($roms_path | path exists) { return }
-  let exts = $system.extensions | each { str downcase }
-  let roms = glob --no-dir $"($roms_path)/*" | where { ($in | path parse | get extension | str downcase) in $exts } | sort
+  let exts = $system.extensions | each { str lowercase }
+  let roms = glob --no-dir $"($roms_path)/*" | where { ($in | path parse | get extension | str lowercase) in $exts } | sort
   let header = [
     $"collection: ($system.name)"
     $"shortname: ($system.shortname)"

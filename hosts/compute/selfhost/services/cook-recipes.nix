@@ -12,7 +12,10 @@ in
     meta.category = "productivity";
     subdomain = "recipes";
     port = 9080;
-    storage.smb = [ "media" ];
+    storage = {
+      smb = [ "media" ];
+      systemdServices = [ "cook-recipes-build" ];
+    };
     extraConfig.landingPage.enable = true;
   };
 
@@ -22,17 +25,18 @@ in
   systemd.services.cook-recipes-build = {
     description = "Build static Cook recipe site";
     wantedBy = [ "multi-user.target" ];
-    # Gate on the real media mount (itself After network-online), else the build can race ahead of
-    # the SMB share at boot and fail to read the recipes — network.target/remote-fs.target don't wait.
-    unitConfig.RequiresMountsFor = [ recipesDir ];
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
       User = "cook-recipes";
       SupplementaryGroups = [ config.selfhost.storage.smb.mounts.media.group ];
       StateDirectory = "cook-recipes";
-      ExecStartPre = "${pkgs.coreutils}/bin/rm -rf ${siteDir}"; # Rebuild from scratch to cleanup deleted files
+      ExecStartPre = [
+        "${pkgs.coreutils}/bin/test -d ${recipesDir}/library"
+        "${pkgs.coreutils}/bin/rm -rf ${siteDir}"
+      ];
       ExecStart = "${pkgs.cook-cli}/bin/cook build web --base-path ${recipesDir}/library ${siteDir}";
+      Restart = "on-failure";
+      RestartSec = "1min";
       ProtectSystem = "strict";
       ProtectHome = true;
       PrivateTmp = true;
@@ -48,7 +52,6 @@ in
     description = "Cook recipe static site";
     wantedBy = [ "multi-user.target" ];
     after = [ "cook-recipes-build.service" ];
-    requires = [ "cook-recipes-build.service" ];
     serviceConfig = {
       ExecStart = "${pkgs.darkhttpd}/bin/darkhttpd ${siteDir} --addr 127.0.0.1 --port ${toString serviceCfg.port} --no-listing --no-server-id";
       User = "cook-recipes";

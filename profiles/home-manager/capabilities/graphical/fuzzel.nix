@@ -17,7 +17,22 @@ lib.mkIf pkgs.stdenv.isLinux {
   programs.fuzzel.settings.colors.background = lib.mkForce "${config.lib.stylix.colors.base00}EB"; # 92% opacity for blur (override stylix's FF alpha)
 
   custom.programs.niri.layerRules = {
-    launchers = [ ''namespace="^launcher$"'' ];
     screencasting.block = [ ''namespace="^launcher$"'' ];
+    base = [
+      ''
+        layer-rule {
+          match namespace="^launcher$"
+          shadow {
+            on
+          }
+
+          geometry-corner-radius 10
+
+          background-effect {
+            blur true
+          }
+        }
+      ''
+    ];
   };
 }

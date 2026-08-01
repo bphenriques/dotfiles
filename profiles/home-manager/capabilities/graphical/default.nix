@@ -1,4 +1,4 @@
-{ config, lib, pkgs, osConfig, ... }:
+{ config, lib, osConfig, ... }:
 {
   imports = [
     ./fuzzel.nix            # Application launcher
@@ -24,8 +24,4 @@
   custom.services = {
     upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
   };
-
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
-    pkgs.xwayland-satellite       # Needed in PATH for niri's built-in xwayland support
-  ];
 }

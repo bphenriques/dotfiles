@@ -85,7 +85,7 @@ in
     };
     layerRules = {
       screencasting.block = [ ''namespace="^notifications$"'' ];
-      extra = [
+      base = [
         ''
           layer-rule {
             match namespace="^notifications$"

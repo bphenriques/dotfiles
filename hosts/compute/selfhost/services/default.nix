@@ -6,6 +6,8 @@ in
   imports = [
     ./radarr.nix
     ./sonarr.nix
+    ./bazarr.nix
+    ./cleanuparr
     ./immich
     ./jellyfin
     ./kapowarr.nix

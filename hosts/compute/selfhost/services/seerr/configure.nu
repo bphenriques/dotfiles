@@ -80,7 +80,7 @@ def get_quality_profile_id [service_url: string, service_api_key: string, profil
 }
 
 def ensure_arr_server [kind: string, cfg: record, api_key: string] {
-  let endpoint = $kind | str downcase
+  let endpoint = $kind | str lowercase
   print $"Configuring ($kind) server..."
   let existing = http get $"($base_url)/api/v1/settings/($endpoint)" --headers $headers --full --allow-errors
   if $existing.status != 200 {
@@ -238,10 +238,41 @@ def configure_user_permissions [users: record] {
   }
 }
 
+# The agent endpoint replaces the whole object, so unlike the rest of this script it reconciles.
+def ensure_notification [] {
+  let n = $config | get -o notification
+  if $n == null { return }
+  print "Configuring ntfy notifications..."
+  # Mirrors Seerr's default object: the endpoint stores the body verbatim and answers 200 either way, so a
+  # missing key (locale is read at send time) would only surface as a silent failure.
+  let payload = {
+    enabled: true
+    embedPoster: true
+    types: $n.types
+    options: {
+      url: $n.serverUrl
+      topic: $n.topic
+      priority: 3
+      locale: "en"
+      authMethodUsernamePassword: false
+      authMethodToken: true
+      token: (open $env.NTFY_TOKEN_FILE | str trim)
+      username: ""
+      password: ""
+    }
+  }
+  let r = http post $"($base_url)/api/v1/settings/notifications/ntfy" $payload --headers $headers --content-type application/json --full --allow-errors
+  if $r.status not-in [200, 201, 204] {
+    error make {msg: $"Failed to configure ntfy notifications: ($r.status) - ($r.body)"}
+  }
+  print $"  ntfy → topic ($n.topic), types ($n.types)"
+}
+
 def main [] {
   wait_ready
   complete_setup_wizard
   set_application_url $config.applicationUrl
+  ensure_notification
   ensure_arr_server "Radarr" $config.radarr $radarr_api_key
   ensure_arr_server "Sonarr" $config.sonarr $sonarr_api_key
   let users = $config.users

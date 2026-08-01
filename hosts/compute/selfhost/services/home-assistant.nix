@@ -26,10 +26,13 @@ in
         name = "backup-home-assistant";
         runtimeInputs = [ pkgs.coreutils ];
         text = ''
-          # backups/ exists only after HA's backup scheduler is configured (manual post-install); skip if absent.
-          if [ -d "${configDir}/backups" ]; then
-            cp -a "${configDir}/backups/." "$OUTPUT_DIR/"
+          shopt -s nullglob
+          backups=("${configDir}/backups/"*.tar)
+          if (( ''${#backups[@]} == 0 )); then
+            echo "No Home Assistant backups found. Configure or repair the native backup scheduler." >&2
+            exit 1
           fi
+          cp -a "''${backups[@]}" "$OUTPUT_DIR/"
         '';
       };
       after = [ "home-assistant.service" ];

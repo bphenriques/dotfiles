@@ -22,6 +22,17 @@ let
     scale_type0 = viewport
   '';
 
+  # Gentle CRT for text-heavy DOS/Windows content: flat (no curvature), soft
+  # scanlines, shadow-mask disabled so text stays sharp (gdv-mini-ultra mangles it).
+  dosCrtShader = ''
+    #reference "${shaderPath}/crt/crt-easymode.slangp"
+    parameters = "MASK_STRENGTH;SCANLINE_STRENGTH;BRIGHT_BOOST;GAMMA_OUTPUT"
+    MASK_STRENGTH = "0.0"
+    SCANLINE_STRENGTH = "0.40"
+    BRIGHT_BOOST = "1.30"
+    GAMMA_OUTPUT = "2.0"
+  '';
+
   # Simple Preset: references upstream newpixie-crt.slangp and overrides parameters only.
   crt3dShader = ''
     #reference "${shaderPath}/crt/newpixie-crt.slangp"
@@ -124,7 +135,11 @@ let
     };
     dosbox_pure = {
       displayName = "DOSBox-pure";
-      shader = crtShader;
+      options = {
+        dosbox_pure_conf = "inside";           # auto-run the DOSBOX.conf bundled inside each game zip (no start menu)
+        dosbox_pure_mouse_input = "virtual";   # single emulated cursor; right analog stick drives the mouse (no host double-cursor)
+      };
+      shader = dosCrtShader;   # gentler CRT than crtShader; keeps DOS/Windows text readable
     };
     prboom = {
       displayName = "PrBoom";

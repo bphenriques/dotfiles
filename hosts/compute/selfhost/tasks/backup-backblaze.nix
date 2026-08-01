@@ -39,7 +39,7 @@ in
       };
       # App DBs (Immich/Miniflux/RomM) are deliberately not dumped — in a real disaster they are trivially
       # rebuilt (re-scan) or non-critical; the irreplaceable data (files, gitea repos, config) is covered here.
-      services = [ "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
+      services = [ "bazarr" "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
       bindings = {
         "/system/homelab-secrets"               = config.selfhost.runtimeSecretsDir;
         "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;

@@ -30,6 +30,7 @@ in
         meta.category = "media";
         port = 9099;
         healthcheck.path = "/api/v1/status";
+        integrations.notify.topic = "media";
         extraConfig.landingPage = { enable = true; listed = false; };
       };
 

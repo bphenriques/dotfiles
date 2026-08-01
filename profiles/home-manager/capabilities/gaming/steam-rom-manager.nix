@@ -1,4 +1,7 @@
 { lib, pkgs, osConfig, ... }:
+let
+  romsDir = osConfig.custom.paths.media.gaming.emulation.roms;
+in
 # SRM treats parser config as mutable runtime state. Do not manage it declaratively.
 # Manual setup (one-time): close Steam → open SRM → create one Glob parser per system → set ROM directory,
 #   executable, args, steam category, and local image paths (covers→tall, screenshots→hero, wheels→logo,
@@ -10,16 +13,22 @@ lib.mkIf pkgs.stdenv.isLinux {
   systemd.user = {
     # Re-run after ROM changes: systemctl --user start sync-steam-shortcuts.service (Steam must be closed)
     services.sync-steam-shortcuts = {
-      Unit = {
-        Description = "Sync ROM shortcuts to Steam via Steam ROM Manager";
-        RequiresMountsFor = [ osConfig.custom.paths.media.gaming.emulation.roms ];
-      };
+      Unit.Description = "Sync ROM shortcuts to Steam via Steam ROM Manager";
       Service = {
         Type = "oneshot";
         ExecCondition = "${lib.getExe (pkgs.writeShellApplication {
-          name = "steam-not-running";
+          name = "steam-shortcuts-ready";
           runtimeInputs = [ pkgs.procps ];
-          text = "! pgrep -x steam > /dev/null";
+          text = ''
+            if pgrep -x steam > /dev/null; then
+              echo "Steam is running; skipping shortcut sync" >&2
+              exit 1
+            fi
+            if ! test -d ${lib.escapeShellArg romsDir}; then
+              echo "ROM directory is unavailable; skipping shortcut sync" >&2
+              exit 1
+            fi
+          '';
         })}";
         # Nuke then re-add: ensures removed ROMs are cleaned up from Steam.
         ExecStart = [

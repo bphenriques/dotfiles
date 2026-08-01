@@ -44,6 +44,12 @@ let
       inherit (user) username;
       inherit (user.services.seerr.permissions) autoApprove advancedRequests viewRecentlyAdded;
     }) seerrUsers;
+    notification = {
+      serverUrl = config.selfhost.services.ntfy.url;
+      inherit (serviceCfg.integrations.notify) topic;
+      # Seerr's Notification enum: APPROVED 4 + AVAILABLE 8 + FAILED 16; pending/auto-approved are noise.
+      types = 4 + 8 + 16;
+    };
   };
 
   initConfigFile = pkgs.writeText "seerr-config.json" (builtins.toJSON initConfig);
@@ -58,9 +64,9 @@ in
   systemd.services.seerr-configure = {
     description = "Seerr setup";
     wantedBy = [ "seerr.service" ];
-    after = [ "seerr.service" "jellyfin-configure.service" "radarr.service" "sonarr.service" ];
+    after = [ "seerr.service" "jellyfin-configure.service" "radarr.service" "sonarr.service" "ntfy-configure.service" ];
     requires = [ "seerr.service" ];
-    wants = [ "jellyfin.service" "radarr.service" "sonarr.service" ];
+    wants = [ "jellyfin.service" "radarr.service" "sonarr.service" "ntfy-configure.service" ];
     partOf = [ "seerr.service" "jellyfin-configure.service" ];
     restartTriggers = [ initConfigFile ./configure.nu ];
     startLimitIntervalSec = 300;
@@ -80,6 +86,7 @@ in
       JELLYFIN_ADMIN_PASSWORD_FILE = config.selfhost.runtimeSecrets.jellyfin-admin-password.path;
       RADARR_API_KEY_FILE = config.selfhost.runtimeSecrets.radarr-api-key.path;
       SONARR_API_KEY_FILE = config.selfhost.runtimeSecrets.sonarr-api-key.path;
+      NTFY_TOKEN_FILE = serviceCfg.integrations.notify.tokenFile;
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "seerr-configure" ./configure.nu}'';

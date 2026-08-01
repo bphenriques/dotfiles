@@ -57,4 +57,6 @@
       font-packages.enable = true;
     };
   };
+
+  home.pointerCursor.enable = true;
 }

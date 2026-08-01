@@ -1,7 +1,6 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, ... }:
 let
   inherit (pkgs.nur.repos.rycee) firefox-addons;
-  niriWorkspaces = config.custom.programs.niri.workspaces;
 in
 lib.mkIf pkgs.stdenv.isLinux {
   programs.firefox = {
@@ -93,15 +92,12 @@ lib.mkIf pkgs.stdenv.isLinux {
   custom.xdgDefaultApps.internetBrowser = lib.mkBefore [ "firefox.desktop" ];
   home.sessionVariables.BROWSER = "firefox";
 
-  custom.programs.niri = {
-    spawnAtStartup = [ "${lib.getExe pkgs.firefox}" ];
-    windowRules.byApp = [
-      ''
-        window-rule {
-          match app-id="firefox"
-          open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
-        }
-      ''
-    ];
-  };
+  custom.programs.niri.windowRules.byApp = [
+    ''
+      window-rule {
+        match app-id="firefox"
+        open-maximized-to-edges true  // Reserve fullscreen for immersive tasks
+      }
+    ''
+  ];
 }

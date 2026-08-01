@@ -18,6 +18,7 @@
         tvCategory = "sonarr";
       };
     }];
+    notifyOnImport = false; # Seerr announces arrivals to the family; this connection stays operational
     delayProfile = {
       preferredProtocol = "torrent";
       torrentDelay = 120;
@@ -27,7 +28,7 @@
   selfhost.services.sonarr = {
     meta.category = "media automation";
     storage.smb = [ "media" ];
-    integrations.notify.topic = "media";
+    integrations.notify.topic = "admin"; # health/manual-interaction flags: ops signal, not family-facing
     integrations.homepage.group = "Admin";
     extraConfig.landingPage.enable = true;
   };

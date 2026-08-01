@@ -1,6 +1,7 @@
-{ config, lib, pkgs, self, ... }:
+{ config, lib, pkgs, ... }:
 let
   inherit (config.custom.programs) satty;
+  colors = config.lib.stylix.colors.withHashtag;
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
   brightness      = lib.getExe config.custom.programs.brightness-osd.package;
@@ -17,80 +18,13 @@ in
 {
   custom.programs.niri = {
     enable = true;
-    screenshotPath = "${satty.directory}/${satty.format}";
 
     # Pinned to the default output so niri moves them to the active monitor when kanshi disables it.
     workspaces = {
-      browser.openOnDefaultOutput = true;
-      main.openOnDefaultOutput    = true;
-      gaming.openOnDefaultOutput  = true;
+      browser = { order = 1; openOnDefaultOutput = true; };
+      main    = { order = 2; openOnDefaultOutput = true; };
+      gaming  = { order = 3; openOnDefaultOutput = true; };
     };
-
-    environment = {
-      # Electron
-      NIXOS_OZONE_WL = "1";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    };
-
-    input = {
-      keyboard = {
-        xkb = {
-          layout = "us,pt";
-          variant = "euro,";
-          options = "caps:ctrl_modifier";
-        };
-        extraOptions = [ ''track-layout "global"'' ]; # Keep layout consistent across all windows
-      };
-
-      extraOptions = [
-        ''focus-follows-mouse max-scroll-amount="10%"''
-      ];
-    };
-
-    layout = ''
-      gaps 6
-      center-focused-column "never"
-      always-center-single-column
-      background-color "transparent"
-
-      preset-column-widths {
-        proportion 0.33333
-        proportion 0.5
-        proportion 0.66667
-        proportion 1.0
-      }
-      default-column-width { proportion 0.66667; }
-
-      preset-window-heights {
-        proportion 0.33333
-        proportion 0.5
-        proportion 0.66667
-        proportion 1.0
-      }
-
-      focus-ring {
-        width 2
-        active-gradient from="${config.lib.stylix.colors.withHashtag.base0D}" to="${config.lib.stylix.colors.withHashtag.base0E}" angle=45
-        inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
-        urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
-      }
-
-      shadow {
-        on
-      }
-
-      tab-indicator {
-        width 4
-        hide-when-single-tab
-        length total-proportion=0.5
-        place-within-column
-        active-color "${config.lib.stylix.colors.withHashtag.base0A}"
-        inactive-color "${config.lib.stylix.colors.withHashtag.base04}"
-        urgent-color "${config.lib.stylix.colors.withHashtag.base08}"
-        position "right"
-        gaps-between-tabs 4
-      }
-    '';
 
     windowRules = {
       byType = {
@@ -103,11 +37,6 @@ in
           "^(download)"
           "^(error)"
           "^(notification)"
-        ];
-
-        pip = lib.map (title: ''title="${title}"'') [
-          "^Picture in picture$"
-          "^Discord Popout$"
         ];
 
         tui = lib.map (title: ''title="${title}"'') [
@@ -147,11 +76,26 @@ in
       overrides = [
         ''
           window-rule {
+            match title="^Picture in picture$"
+            match title="^Discord Popout$"
+
+            open-floating true
+            open-focused false
+            open-maximized false
+            open-maximized-to-edges false
+            open-fullscreen false
+            default-column-width { fixed 480; }
+            default-window-height { fixed 270; }
+            default-floating-position x=32 y=32 relative-to="bottom-right"
+          }
+        ''
+        ''
+          window-rule {
             match is-urgent=true
             border {
               on
-              active-color "${config.lib.stylix.colors.withHashtag.base08}"
-              inactive-color "${config.lib.stylix.colors.withHashtag.base08}"
+              active-color "${colors.base08}"
+              inactive-color "${colors.base08}"
             }
           }
         ''
@@ -160,21 +104,21 @@ in
             match is-window-cast-target=true
 
             focus-ring {
-              active-color "${config.lib.stylix.colors.withHashtag.base08}"
-              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+              active-color "${colors.base08}"
+              inactive-color "${colors.base01}"
             }
 
             border {
-              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+              inactive-color "${colors.base01}"
             }
 
             shadow {
-              color "${config.lib.stylix.colors.withHashtag.base08}70"
+              color "${colors.base08}70"
             }
 
             tab-indicator {
-              active-color "${config.lib.stylix.colors.withHashtag.base08}"
-              inactive-color "${config.lib.stylix.colors.withHashtag.base01}"
+              active-color "${colors.base08}"
+              inactive-color "${colors.base01}"
             }
           }
         ''
@@ -265,24 +209,95 @@ in
       "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn-sh "${brightness} increase"'';
       "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightness} decrease"'';
     };
+  };
 
-   extraConfig = ''
-      cursor {
-        xcursor-theme "${config.stylix.cursor.name}"
-        xcursor-size ${toString config.stylix.cursor.size}
+  wayland.windowManager.niri.settings = {
+    prefer-no-csd = { };
+    screenshot-path = "${satty.directory}/${satty.format}";
+    hotkey-overlay.skip-at-startup = { };
+
+    environment = {
+      # Electron
+      NIXOS_OZONE_WL = "1";
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+    };
+
+    input = {
+      keyboard = {
+        xkb = {
+          layout = "us,pt";
+          variant = "euro,";
+          options = "caps:ctrl_modifier";
+        };
+        track-layout = "global"; # Keep layout consistent across all windows
       };
 
-      overview {
-        workspace-shadow {
-          off
-        }
-      }
+      focus-follows-mouse._props.max-scroll-amount = "10%";
+    };
 
-      gestures {
-        hot-corners {
-          off
-        }
-      }
-    '';
+    layout = {
+      gaps = 6;
+      center-focused-column = "never";
+      always-center-single-column = { };
+      background-color = "transparent";
+
+      preset-column-widths._children = [
+        { proportion = 0.33333; }
+        { proportion = 0.5; }
+        { proportion = 0.66667; }
+        { proportion = 1.0; }
+      ];
+      default-column-width.proportion = 0.66667;
+
+      preset-window-heights._children = [
+        { proportion = 0.33333; }
+        { proportion = 0.5; }
+        { proportion = 0.66667; }
+        { proportion = 1.0; }
+      ];
+
+      focus-ring = {
+        width = 2;
+        active-gradient._props = { from = colors.base0D; to = colors.base0E; angle = 45; };
+        inactive-color = colors.base04;
+        urgent-color = colors.base08;
+      };
+
+      shadow.on = { };
+
+      tab-indicator = {
+        width = 4;
+        hide-when-single-tab = { };
+        length._props.total-proportion = 0.5;
+        place-within-column = { };
+        active-color = colors.base0A;
+        inactive-color = colors.base04;
+        urgent-color = colors.base08;
+        position = "right";
+        gaps-between-tabs = 4;
+      };
+    };
+
+    # Keyboard-triggered actions use short fixed durations (easing).
+    # Gesture-sensitive actions (touchpad swipes) use springs to respond to finger velocity.
+    # Springs: higher stiffness = snappier. damping-ratio=1.0 = no oscillation (critically damped).
+    animations = {
+      window-open.duration-ms = 150;
+      window-close.duration-ms = 150;
+      window-resize.duration-ms = 150;
+      window-movement.duration-ms = 150;
+      workspace-switch.spring._props = { damping-ratio = 1.0; stiffness = 1200; epsilon = 0.0001; };
+      horizontal-view-movement.spring._props = { damping-ratio = 1.0; stiffness = 1000; epsilon = 0.0001; };
+      overview-open-close.spring._props = { damping-ratio = 1.0; stiffness = 1000; epsilon = 0.0001; };
+    };
+
+    cursor = {
+      xcursor-theme = config.stylix.cursor.name;
+      xcursor-size = config.stylix.cursor.size;
+    };
+
+    overview.workspace-shadow.off = { };
+
+    gestures.hot-corners.off = { };
   };
 }

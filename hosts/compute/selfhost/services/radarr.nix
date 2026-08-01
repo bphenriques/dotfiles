@@ -20,6 +20,7 @@
         };
       }
     ];
+    notifyOnImport = false;
     delayProfile = {
       preferredProtocol = "torrent";
       torrentDelay = 120;
@@ -29,7 +30,7 @@
   selfhost.services.radarr = {
     meta.category = "media automation";
     storage.smb = [ "media" ];
-    integrations.notify.topic = "media";
+    integrations.notify.topic = "admin";
     integrations.homepage.group = "Admin";
     extraConfig.landingPage.enable = true;
   };

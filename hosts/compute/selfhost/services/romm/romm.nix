@@ -63,6 +63,10 @@ let
           ({ urls = "turn:${wgIP}:${port}?transport=udp"; } // turnCreds)
         ];
     };
+
+    emulatorjs.settings = {
+      dosbox_pure.dosbox_pure_conf = "inside"; # autorun the bundled DOSBOX.conf
+    };
   };
 in
 {
@@ -90,6 +94,12 @@ in
       healthcheck.path = "/api/heartbeat";
       storage.smb = [ "media" ];
       extraConfig.landingPage = { enable = true; listed = false; };
+
+      # Required to exposes SharedArrayBuffer required by some games
+      traefik.middlewares.romm-coop-coep.headers.customResponseHeaders = {
+        "Cross-Origin-Opener-Policy" = "same-origin";
+        "Cross-Origin-Embedder-Policy" = "credentialless";
+      };
     };
 
     runtimeSecrets = {
@@ -115,8 +125,7 @@ in
     };
   };
 
-  # Fully own MySQL user creation/password (no ensureUsers - script owns all user state)
-  # Assumes NixOS default MySQL root auth: unix socket authentication (no password needed for local root).
+  # Fully own MySQL user creation/password. Auth is using unix socket authentication (no password needed for local root).
   services.mysql.ensureDatabases = [ db.name ];
   systemd.services.romm-db-setup = {
     description = "Setup RomM MySQL user and password";
@@ -164,13 +173,12 @@ in
 
     environment = {
       ROMM_PORT = toString serviceCfg.port;  # Host network: bind to configured port
+      ROMM_SESSION_SECURE_COOKIE = "true";   # All access is HTTPS via Traefik
       DISABLE_SETUP_WIZARD = "true";
       HASHEOUS_API_ENABLED = "true";
       KIOSK_MODE = "true";  # Read-only access without login; OIDC users still get full access
 
-      # Auto-scan: picks up new/changed ROMs without manual intervention
-      # Filesystem watching uses polling (not inotify) on Podman bind mounts, wasting CPU.
-      # The daily scheduled rescan is sufficient.
+      # Auto-scan: picks up new/changed ROMs without manual intervention. Disabled inotify due to SMB.
       ENABLE_RESCAN_ON_FILESYSTEM_CHANGE = "false";
       ENABLE_SCHEDULED_RESCAN = "true";
       SCHEDULED_RESCAN_CRON = "0 3 * * *";
@@ -188,6 +196,7 @@ in
 
       # OIDC
       OIDC_ENABLED = "true";
+      OIDC_ALLOW_REGISTRATION = "false";  # No auto-provisioning of new OIDC users; kiosk covers read-only guests
       OIDC_PROVIDER = oidcCfg.provider.displayName;
       OIDC_REDIRECT_URI = builtins.head serviceCfg.oidc.callbackURLs;
       OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.issuerUrl;
