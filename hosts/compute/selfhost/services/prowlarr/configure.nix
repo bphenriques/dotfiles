@@ -69,5 +69,7 @@ in
   selfhost.runtimeSecrets = {
     radarr-api-key.restartUnits = [ "prowlarr-configure.service" ];
     sonarr-api-key.restartUnits = [ "prowlarr-configure.service" ];
+    # Prowlarr's own key is embedded in every indexer it pushed, so a rotation needs the forced re-sync.
+    prowlarr-api-key.restartUnits = [ "prowlarr-configure.service" ];
   };
 }

@@ -244,7 +244,9 @@ def ensure_notification [] {
 
 def sync_indexers [] {
   print "Syncing indexers to applications..."
-  let r = http post $"($base_url)/api/v1/command" { name: "ApplicationIndexerSync" } --headers $headers --content-type application/json --full --allow-errors
+  # forceSync: the *arr masks secret fields on read, so Prowlarr's change check cannot see that the API key
+  # it embeds has rotated. Without this a key rotation silently leaves every indexer unauthenticated.
+  let r = http post $"($base_url)/api/v1/command" { name: "ApplicationIndexerSync", forceSync: true } --headers $headers --content-type application/json --full --allow-errors
   if $r.status not-in [200, 201, 202] {
     error make {msg: $"Failed to sync indexers: ($r.status) - ($r.body)"}
   }

@@ -2,11 +2,14 @@
 let
   serviceCfg = config.selfhost.services.jellyfin;
   pathsCfg = config.custom.paths;
-  oidcCfg = config.selfhost.auth.oidc;
   enabledUsers = lib.filterAttrs (_: u: u.services.jellyfin.enable) config.selfhost.users;
 
   jellyfinConfig = {
     serverName = "Jellyfin";
+    brandingConfig = {
+      SplashscreenEnabled = false;
+      CustomCss = builtins.readFile pkgs.elegantfin-jellyfin-theme;
+    };
     libraries = [
       { Name = "Movies";    CollectionType = "movies";  Locations = [ pathsCfg.media.movies ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; EnableChapterImageExtraction = true; }
       { Name = "TV Shows";  CollectionType = "tvshows"; Locations = [ pathsCfg.media.tv ]; EnableRealtimeMonitor = true; ExtractTrickplayImagesDuringLibraryScan = true; EnableChapterImageExtraction = true; }
@@ -69,7 +72,6 @@ in
       JELLYFIN_ADMIN_USERNAME_FILE = pkgs.writeText "jellyfin-admin-username" "admin";  # Not a secret but keeps consistency.
       JELLYFIN_ADMIN_PASSWORD_FILE = config.selfhost.runtimeSecrets.jellyfin-admin-password.path;
       JELLYFIN_CONFIG_FILE = jellyfinConfigFile;
-      OIDC_USERS_FILE = oidcCfg.credentials.usersFile; # Validates non-local users exist in OIDC provider
     };
     path = [ pkgs.nushell ];
     script = ''nu ${self.lib.builders.writeNushellScript "jellyfin-configure" ./jellyfin-configure.nu}'';

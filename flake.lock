@@ -95,11 +95,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785596664,
-        "narHash": "sha256-JG7FpXBip0W+V6malZ8VemnyeLg90fXVPFxFvtF3Mxk=",
+        "lastModified": 1785672952,
+        "narHash": "sha256-s+y0bxhviCPv0LN8N7lFLpZbq9RlimqCPS3fbnWGAN0=",
         "ref": "refs/heads/main",
-        "rev": "c67d7676d3012943f0ac672e4e7a1e0994951d06",
-        "revCount": 108,
+        "rev": "4081afae31b9f9c1d0e4975b4a9a5c8e85cfb9e6",
+        "revCount": 110,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/dotfiles-private"
       },
@@ -512,11 +512,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1785620982,
-        "narHash": "sha256-KTIHJOm+jnYjXgSRbJNAYk3kJZfKElXD+XpwltBBhDw=",
+        "lastModified": 1785672017,
+        "narHash": "sha256-vfTMP+zg2T/362Fx7/DYXx4BEW4kampjK/536hTmvP0=",
         "ref": "refs/heads/main",
-        "rev": "43b38bca4959155a9b721867ff84388619d7929c",
-        "revCount": 63,
+        "rev": "83d9a4cf85811b75d4e435c2c35933a3785d9dd4",
+        "revCount": 64,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/selfhost-nix"
       },

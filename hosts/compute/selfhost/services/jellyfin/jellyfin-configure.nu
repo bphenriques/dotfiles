@@ -6,7 +6,6 @@ let base_url = $env.JELLYFIN_URL
 let admin_username = open $env.JELLYFIN_ADMIN_USERNAME_FILE | str trim
 let admin_password = open $env.JELLYFIN_ADMIN_PASSWORD_FILE | str trim
 let config = open $env.JELLYFIN_CONFIG_FILE
-let oidc_users = open $env.OIDC_USERS_FILE
 
 def wait_ready [] {
   for attempt in 1..30 {
@@ -99,6 +98,17 @@ def ensure_server_name [headers: list<any>] {
   print $"  Server name set to: ($config.serverName)"
 }
 
+def ensure_branding [headers: list<any>] {
+  let branding = $config | get -o brandingConfig
+  if $branding == null { return }
+  print "Configuring branding..."
+  let r = http post $"($base_url)/System/Configuration/Branding" $branding --content-type application/json --headers $headers --full --allow-errors
+  if $r.status != 204 {
+    error make {msg: $"Failed to configure branding: ($r.status)"}
+  }
+  print "  Branding configured"
+}
+
 def ensure_encoding [headers: list<any>] {
   print "Configuring encoding/transcoding..."
   let current = http get $"($base_url)/System/Configuration/encoding" --headers $headers --full --allow-errors
@@ -168,8 +178,6 @@ def ensure_libraries [headers: list<any>] {
   }
 }
 
-# FIXME: Remove passwordFile check once Seerr supports OIDC
-# Users with passwordFile are local accounts (not OIDC), skip OIDC validation for them
 def ensure_users [headers: list<any>, users: list<any>] {
   print "Configuring users..."
   let existing = http get $"($base_url)/Users" --headers $headers --full --allow-errors
@@ -178,12 +186,6 @@ def ensure_users [headers: list<any>, users: list<any>] {
   }
   for cfg in $users {
     let has_password_file = ($cfg.passwordFile? | default null) != null
-    if not $has_password_file {
-      let oidc_matches = $oidc_users | where username == $cfg.username
-      if ($oidc_matches | is-empty) {
-        error make {msg: $"User '($cfg.username)' not found in OIDC users"}
-      }
-    }
     let existing_matches = $existing.body | where Name == $cfg.username
     if ($existing_matches | is-empty) {
       let initial_password = if $has_password_file {
@@ -226,6 +228,7 @@ def main [] {
   }
   let auth = authenticate
   ensure_server_name $auth.headers
+  ensure_branding $auth.headers
   ensure_encoding $auth.headers
   ensure_trickplay $auth.headers
   ensure_libraries $auth.headers

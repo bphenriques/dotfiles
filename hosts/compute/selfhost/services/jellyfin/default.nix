@@ -1,12 +1,10 @@
 { config, lib, ... }:
 let
-  serviceCfg = config.selfhost.services.jellyfin;
   pathsCfg = config.custom.paths;
   selfhostMounts = config.selfhost.storage.smb.mounts;
 in
 {
   imports = [
-    ./plugins.nix
     ./configure.nix
   ];
 
@@ -15,11 +13,10 @@ in
       lib.types.submodule {
         options.services.jellyfin = {
           enable = lib.mkEnableOption "Jellyfin account for this user";
-          # FIXME: Remove once Seerr supports OIDC - used for local Jellyfin auth
           passwordFile = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "Path to file containing local Jellyfin password (for Seerr auth until OIDC is supported)";
+            description = "Path to file containing the initial Jellyfin password";
           };
         };
       }
@@ -34,12 +31,6 @@ in
         meta.description = "Media Player";
         meta.category = "media";
         port = 8096;
-        access.allowedGroups = with config.selfhost.groups; [ guests users admin ];
-        oidc = {
-          enable = true;
-          callbackURLs = [ "${serviceCfg.publicUrl}/sso/OID/redirect/PocketID" ];
-          systemd.dependentServices = [ "jellyfin-configure" "jellyfin-sso-configure" ];
-        };
         healthcheck.path = "/health";
         storage.smb = [ "media" ];
         extraConfig.landingPage.enable = true;
@@ -47,7 +38,7 @@ in
 
       runtimeSecrets.jellyfin-admin-password = {
         regenerateIfMissing = false;
-        restartUnits = [ "jellyfin-configure.service" "jellyfin-sso-configure.service" ];
+        restartUnits = [ "jellyfin-configure.service" ];
       };
     };
 

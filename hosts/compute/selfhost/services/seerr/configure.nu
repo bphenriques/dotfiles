@@ -86,13 +86,9 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   if $existing.status != 200 {
     error make {msg: $"Failed to get ($kind) servers: ($existing.status) - ($existing.body)"}
   }
-  let existing_names = (
-    $existing.body | default [] | get -o name | default []
-  )
-  if $cfg.name in $existing_names {
-    print $"  ($kind) server exists: ($cfg.name)"
-    return
-  }
+  # Upsert: create-only left this pointing at the port the *arr used before the framework migration, so
+  # every request failed with ECONNREFUSED while Seerr itself looked healthy.
+  let existing_server = ($existing.body | default [] | where name == $cfg.name | get 0?)
   let profile_id = get_quality_profile_id $"http://($cfg.hostname):($cfg.port)" $api_key $cfg.activeProfileName
   mut payload = {
     name: $cfg.name
@@ -115,11 +111,20 @@ def ensure_arr_server [kind: string, cfg: record, api_key: string] {
   } else if $kind == "Sonarr" {
     $payload = $payload | merge { enableSeasonFolders: true }
   }
-  let r = http post $"($base_url)/api/v1/settings/($endpoint)" $payload --headers $headers --content-type application/json --full --allow-errors
-  if $r.status not-in [200, 201] {
-    error make {msg: $"Failed to create ($kind) server ($cfg.name): ($r.status) - ($r.body)"}
+  if $existing_server == null {
+    let r = http post $"($base_url)/api/v1/settings/($endpoint)" $payload --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201] {
+      error make {msg: $"Failed to create ($kind) server ($cfg.name): ($r.status) - ($r.body)"}
+    }
+    print $"  Created ($kind) server: ($cfg.name)"
+  } else {
+    # id is read-only on the body: it belongs in the path only.
+    let r = http put $"($base_url)/api/v1/settings/($endpoint)/($existing_server.id)" $payload --headers $headers --content-type application/json --full --allow-errors
+    if $r.status not-in [200, 201, 202] {
+      error make {msg: $"Failed to update ($kind) server ($cfg.name): ($r.status) - ($r.body)"}
+    }
+    print $"  Updated ($kind) server: ($cfg.name) -> ($cfg.hostname):($cfg.port)"
   }
-  print $"  Created ($kind) server: ($cfg.name)"
 }
 
 def set_application_url [app_url: string] {
