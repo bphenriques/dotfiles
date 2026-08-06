@@ -8,7 +8,7 @@ in
     ./sonarr.nix
     ./bazarr.nix
     ./cleanuparr
-    ./immich
+    ./immich.nix
     ./jellyfin
     ./kapowarr.nix
     ./kavita
