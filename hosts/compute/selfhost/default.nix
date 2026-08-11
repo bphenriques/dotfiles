@@ -86,7 +86,6 @@ in
 
   selfhost = {
     enable = true;
-    inherit (private.settings) domain;
 
     # Curated apps that need no host-specific config beyond enabling them (per-user opt-ins live on
     # selfhost.users.<name>.apps.<name>); apps with deployment overrides keep their own ./services file.
@@ -124,13 +123,14 @@ in
       passwordFile = config.sops.secrets."smtp-password".path;
     };
 
-    storage.smb.mounts = {
+    storage.mounts.smb.shares = {
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
       shared = { gid = 5002; };
     };
 
     ingress = {
+      inherit (private.settings) domain;
       allowedInterfaces = [ "bond0" "wg0" ];
       traefik.enable = true;
       acme = {

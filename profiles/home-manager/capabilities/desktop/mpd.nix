@@ -3,8 +3,8 @@ lib.mkIf pkgs.stdenv.isLinux {
   services.mpd = {
     enable = true;
 
-    musicDirectory = osConfig.custom.paths.media.music.library;
-    playlistDirectory = osConfig.custom.paths.media.music.playlists;
+    musicDirectory = "${osConfig.custom.shares.media.root}/music/library";
+    playlistDirectory = "${osConfig.custom.shares.media.root}/music/playlists";
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {

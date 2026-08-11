@@ -2,7 +2,7 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  pathsCfg = config.custom.paths;
+  sharesCfg = config.custom.shares;
   kavitaCfg = config.services.kavita;
 
   # Default roles for new users (OIDC provisioned)
@@ -44,9 +44,9 @@ let
     libraries = let
       fileType = { archive = 1; epub = 2; pdf = 3; image = 4; };
     in [
-      { name = "Books";   type = 2; folders = [ pathsCfg.media.books.library ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
-      { name = "Comics";  type = 1; folders = [ pathsCfg.media.comics.library ]; fileGroupTypes = [ fileType.archive ];           }
-      { name = "Manga";   type = 0; folders = [ pathsCfg.media.manga.library ];  fileGroupTypes = [ fileType.archive ];           }
+      { name = "Books";   type = 2; folders = [ "${sharesCfg.media.root}/books/library" ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
+      { name = "Comics";  type = 1; folders = [ "${sharesCfg.media.root}/comics/library" ]; fileGroupTypes = [ fileType.archive ];           }
+      { name = "Manga";   type = 0; folders = [ "${sharesCfg.media.root}/manga/library" ];  fileGroupTypes = [ fileType.archive ];           }
     ];
 
     # Local users provisioned with password authentication (all get public libraries)

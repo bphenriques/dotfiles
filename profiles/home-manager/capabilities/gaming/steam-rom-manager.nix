@@ -1,6 +1,6 @@
 { lib, pkgs, osConfig, ... }:
 let
-  romsDir = osConfig.custom.paths.media.gaming.emulation.roms;
+  romsDir = "${osConfig.custom.shares.media.root}/gaming/emulation/roms";
 in
 # SRM treats parser config as mutable runtime state. Do not manage it declaratively.
 # Manual setup (one-time): close Steam → open SRM → create one Glob parser per system → set ROM directory,

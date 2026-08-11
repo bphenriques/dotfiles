@@ -4,7 +4,7 @@
     enable = true;
     configureAfter = [ "transmission.service" ]; # sonarr does connection tests when configuring
     rootFolders = [{
-      path = config.custom.paths.media.tv;
+      path = "${config.custom.shares.media.root}/tv";
       defaultQualityProfile = config.custom.media.sonarr.profiles.default.name;
     }];
     downloadClients = [{
@@ -27,13 +27,13 @@
 
   selfhost.services.sonarr = {
     meta.category = "media automation";
-    storage.smb = [ "media" ];
+    storage.mounts = [ "media" ];
     integrations.notify.topic = "admin"; # health/manual-interaction flags: ops signal, not family-facing
     integrations.homepage.group = "Admin";
     extraConfig.landingPage.enable = true;
   };
 
-  users.users.sonarr.extraGroups = [ config.selfhost.storage.smb.mounts.media.group ];
+  users.users.sonarr.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
 
   # Quality taste (recyclarr / TRaSH guides) — consumer-owned; never in the framework.
   custom.media.sonarr = {

@@ -1,25 +1,25 @@
 { config, lib, ... }:
 let
-  selfhostMounts = config.selfhost.storage.smb.mounts;
+  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
 
   # Everyone with a personal share. Declaring libraries is inert until the user enables Immich, so this
   # needs no opt-in check, and it cannot read config.selfhost.users without recursing on it.
-  photoUsers = lib.attrNames config.custom.paths.users;
+  photoUsers = lib.attrNames (lib.filterAttrs (_: s: s.personal) config.custom.shares);
 
   # Names are the reconcile identity: renaming one creates a second library.
   mkLibraries =
     user:
     let
-      photos = config.custom.paths.users.${user}.photos;
+      root = config.custom.shares.${user}.root;
     in
     [
       {
         name = "${user}-library";
-        importPaths = [ photos.library ];
+        importPaths = [ "${root}/photos/library" ];
       }
       {
         name = "${user}-inbox";
-        importPaths = [ photos.inbox ];
+        importPaths = [ "${root}/photos/inbox" ];
       }
     ];
 in
@@ -32,7 +32,7 @@ in
       access.allowedGroups = [ config.selfhost.groups.admin ];
       extraConfig.landingPage.enable = true;
       storage = {
-        smb = photoUsers;
+        mounts = photoUsers;
         systemdServices = [ "immich-server" ];
       };
     };

@@ -1,8 +1,7 @@
-# Uses host networking to reach MySQL on localhost.
 { config, pkgs, lib, ... }:
 let
   cfg = config.selfhost;
-  selfhostMounts = config.selfhost.storage.smb.mounts;
+  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
   groupsCfg = config.selfhost.groups;
 
   serviceCfg = cfg.services.romm;
@@ -92,7 +91,7 @@ in
         systemd.dependentServices = [ "podman-romm" ];
       };
       healthcheck.path = "/api/heartbeat";
-      storage.smb = [ "media" ];
+      storage.mounts = [ "media" ];
       extraConfig.landingPage = { enable = true; listed = false; };
 
       # Required to exposes SharedArrayBuffer required by some games
@@ -166,7 +165,6 @@ in
     "d ${dataDir}/assets    0750 ${rommUser.name} ${rommUser.group} -"
   ];
 
-  # TODO: Add health check when podman supports healthcheck restart policy
   virtualisation.oci-containers.containers.romm = {
     image = "${img.image}:${img.version}";
     autoStart = true;
@@ -226,8 +224,8 @@ in
 
       # Data
       "${configFile}:/romm/config/config.yml:ro"
-      "${config.custom.paths.media.gaming.emulation.roms}:/romm/library/roms:ro"
-      "${config.custom.paths.media.gaming.emulation.bios}:/romm/library/bios:ro"
+      "${config.custom.shares.media.root}/gaming/emulation/roms:/romm/library/roms:ro"
+      "${config.custom.shares.media.root}/gaming/emulation/bios:/romm/library/bios:ro"
     ];
 
     user = "${toString rommUser.uid}:${toString rommUser.gid}";

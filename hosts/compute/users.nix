@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  smbCfg = config.selfhost.storage.smb;
+  smbCfg = config.selfhost.storage.mounts.smb;
 in
 {
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
@@ -8,7 +8,7 @@ in
     isNormalUser = true;
     uid = 1000;
     hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path;
-    extraGroups = [ "wheel" ] ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.mounts);
+    extraGroups = [ "wheel" ] ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.shares);
 
     openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };

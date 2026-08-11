@@ -2,8 +2,8 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  pathsCfg = config.custom.paths;
-  selfhostMounts = config.selfhost.storage.smb.mounts;
+  sharesCfg = config.custom.shares;
+  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
 
   kavitaCfg = config.services.kavita;
 in
@@ -51,7 +51,7 @@ in
           systemd.dependentServices = [ "kavita" ];
         };
         healthcheck.path = "/api/health";
-        storage.smb = [ "media" ];
+        storage.mounts = [ "media" ];
         extraConfig.landingPage.enable = true;
       };
 
@@ -85,9 +85,9 @@ in
       serviceConfig = {
         LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
         ReadOnlyPaths = [
-          pathsCfg.media.books.library
-          pathsCfg.media.comics.library
-          pathsCfg.media.manga.library
+          "${sharesCfg.media.root}/books/library"
+          "${sharesCfg.media.root}/comics/library"
+          "${sharesCfg.media.root}/manga/library"
         ];
       };
       # Kavita has no native _FILE support for OIDC credentials; replace placeholders at runtime.

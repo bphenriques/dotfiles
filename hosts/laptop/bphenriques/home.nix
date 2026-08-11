@@ -2,10 +2,10 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
-  nasPaths = osConfig.custom.paths;
+  nasShares = osConfig.custom.shares;
   mounts = {
-    nasPrivate = nasPaths.users.bphenriques.root;
-    nasMedia = nasPaths.media.root;
+    nasPrivate = nasShares.bphenriques.root;
+    nasMedia = nasShares.media.root;
   };
 in
 {
@@ -28,11 +28,11 @@ in
   gtk.gtk3.bookmarks = [
     "file://${mounts.nasPrivate} NAS Private"
     "file://${mounts.nasMedia} NAS Media"
-    "file://${nasPaths.users.bphenriques.notes} NAS Notes"
-    "file://${nasPaths.users.bphenriques.documents.root} NAS Documents"
-    "file://${nasPaths.media.movies} NAS Movies"
-    "file://${nasPaths.media.tv} NAS TV"
-    "file://${nasPaths.media.downloads.root} NAS Downloads"
+    "file://${nasShares.bphenriques.root}/notes NAS Notes"
+    "file://${nasShares.bphenriques.root}/documents NAS Documents"
+    "file://${nasShares.media.root}/movies NAS Movies"
+    "file://${nasShares.media.root}/tv NAS TV"
+    "file://${nasShares.media.root}/downloads NAS Downloads"
   ];
 
   custom.dotfiles.enable = true;
@@ -52,27 +52,27 @@ in
       {
         name = "NAS Notes";
         icon = mkIcon "nas-notes" "󱞁";
-        path = nasPaths.users.bphenriques.notes;
+        path = "${nasShares.bphenriques.root}/notes";
       }
       {
         name = "NAS Documents";
         icon = mkIcon "nas-documents" "󰈙";
-        path = nasPaths.users.bphenriques.documents.root;
+        path = "${nasShares.bphenriques.root}/documents";
       }
       {
         name = "NAS Movies";
         icon = mkIcon "nas-movies" "󰎁";
-        path = nasPaths.media.movies;
+        path = "${nasShares.media.root}/movies";
       }
       {
         name = "NAS TV";
         icon = mkIcon "nas-tv" "󰟴";
-        path = nasPaths.media.tv;
+        path = "${nasShares.media.root}/tv";
       }
       {
         name = "NAS Downloads";
         icon = mkIcon "nas-downloads" "󰇚";
-        path = nasPaths.media.downloads.root;
+        path = "${nasShares.media.root}/downloads";
       }
     ];
   };

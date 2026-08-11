@@ -1,4 +1,11 @@
 { lib, pkgs, fleet, agentVm, inputs, ... }:
+let
+  ollama = {
+    provider = "ollama";
+    api_key = "ollama";                    # dummy; Ollama needs no auth
+    base_url = "http://${fleet.lan.hosts.laptop}:11434/v1";
+  };
+in
 {
   imports = [ inputs.hermes-agent.nixosModules.default ];
 
@@ -19,11 +26,8 @@
     };
 
     settings = {
-      model = {
+      model = ollama // {
         default = fleet.ai.model;
-        provider = "ollama";
-        api_key = "ollama";                  # dummy; Ollama needs no auth
-        base_url = "http://${fleet.lan.hosts.laptop}:11434/v1";
         context_length = 65536;              # Hermes requires >=64K; match OLLAMA_CONTEXT_LENGTH
       };
       compression.enabled = true;            # auto-summarise old turns
@@ -35,12 +39,7 @@
           port = agentVm.apiPort;
 
           # Extra dropdown models need an explicit route or they fall back to model.default.
-          model_routes = lib.genAttrs fleet.ai.extraModels (m: {
-            model = m;
-            provider = "ollama";
-            api_key = "ollama";
-            base_url = "http://${fleet.lan.hosts.laptop}:11434/v1";
-          });
+          model_routes = lib.genAttrs fleet.ai.extraModels (m: ollama // { model = m; });
         };
       };
     };

@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.cook-recipes;
-  recipesDir = config.custom.paths.media.recipes;
+  recipesDir = "${config.custom.shares.media.root}/recipes";
   siteDir = "/var/lib/cook-recipes/site";
 in
 {
@@ -13,7 +13,7 @@ in
     subdomain = "recipes";
     port = 9080;
     storage = {
-      smb = [ "media" ];
+      mounts = [ "media" ];
       systemdServices = [ "cook-recipes-build" ];
     };
     extraConfig.landingPage.enable = true;
@@ -28,7 +28,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       User = "cook-recipes";
-      SupplementaryGroups = [ config.selfhost.storage.smb.mounts.media.group ];
+      SupplementaryGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
       StateDirectory = "cook-recipes";
       ExecStartPre = [
         "${pkgs.coreutils}/bin/test -d ${recipesDir}/library"

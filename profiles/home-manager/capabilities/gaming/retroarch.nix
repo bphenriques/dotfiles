@@ -1,6 +1,6 @@
 { lib, pkgs, config, osConfig, ... }:
 let
-  emulationPaths = osConfig.custom.paths.media.gaming.emulation;
+  mediaRoot = osConfig.custom.shares.media.root;
   stateDir = "${config.xdg.stateHome}/retroarch";
 
 
@@ -175,8 +175,8 @@ lib.mkIf pkgs.stdenv.isLinux {
     # Config: https://github.com/libretro/RetroArch/blob/master/retroarch.cfg
     settings = {
       # Paths
-      system_directory = emulationPaths.bios;
-      rgui_browser_directory = emulationPaths.roms;
+      system_directory = "${mediaRoot}/gaming/emulation/bios";
+      rgui_browser_directory = "${mediaRoot}/gaming/emulation/roms";
       savefile_directory = "${stateDir}/savefiles";
       savestate_directory = "${stateDir}/savestates";
       playlist_directory = "${stateDir}/playlists";

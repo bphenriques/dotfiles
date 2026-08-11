@@ -2,7 +2,7 @@
 let
   cfg = config.selfhost;
   serviceCfg = cfg.services.filebrowser;
-  selfhostMounts = cfg.storage.smb.mounts;
+  selfhostMounts = cfg.storage.mounts.smb.shares;
 
   filebrowserRoot = "/var/lib/filebrowser/root";
 in
@@ -33,7 +33,7 @@ in
         sorting = { by = "modified"; asc = false; };
       };
     };
-    users.users.filebrowser.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.smb;
+    users.users.filebrowser.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.mounts;
 
     # Default empty folders
     services.filebrowser-multiuser.unlistedScope = "/empty"; # a group member not listed lands here

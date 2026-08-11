@@ -3,8 +3,8 @@ let
   cfg = config.selfhost;
   serviceCfg = cfg.services.papra;
   oidcCfg = cfg.auth.oidc;
-  selfhostMounts = cfg.storage.smb.mounts;
-  pathsCfg = config.custom.paths;
+  selfhostMounts = cfg.storage.mounts.smb.shares;
+  sharesCfg = config.custom.shares;
   dataDir = "/var/lib/papra";
   img = pkgs.containerImages.papra;
 
@@ -33,7 +33,7 @@ in
       };
       healthcheck.path = "/";
       healthcheck.probeModule = "http_any";
-      storage.smb = [ "bphenriques" ];
+      storage.mounts = [ "bphenriques" ];
       extraConfig.landingPage.enable = true;
     };
 
@@ -115,8 +115,8 @@ in
     ports = [ "127.0.0.1:${toString serviceCfg.port}:${toString serviceCfg.port}" ];
     volumes = [
       "${dataDir}/db:/data/db"
-      "${pathsCfg.users.bphenriques.documents.root}/library:/data/documents"
-      "${pathsCfg.users.bphenriques.documents.inbox}:/data/ingestion"
+      "${sharesCfg.bphenriques.root}/documents/library:/data/documents"
+      "${sharesCfg.bphenriques.root}/documents/inbox:/data/ingestion"
     ];
     user = "${toString papraUser.uid}:${toString papraUser.gid}";
     extraOptions = [

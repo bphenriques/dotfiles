@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.kapowarr;
-  pathsCfg = config.custom.paths;
+  sharesCfg = config.custom.shares;
 
   dataDir = "/var/lib/kapowarr";
   img = pkgs.containerImages.kapowarr;
@@ -17,7 +17,7 @@ in
     forwardAuth.enable = true;
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any";
-    storage.smb = [ "media" ];
+    storage.mounts = [ "media" ];
     extraConfig.landingPage = { enable = true; listed = false; };
   };
 
@@ -43,7 +43,7 @@ in
     volumes = [
       "${dataDir}/db:/app/db"
       "${dataDir}/downloads:/app/temp_downloads"
-      "${pathsCfg.media.comics.library}:/comics"
+      "${sharesCfg.media.root}/comics/library:/comics"
     ];
 
     ports = [ "127.0.0.1:${toString serviceCfg.port}:5656" ];

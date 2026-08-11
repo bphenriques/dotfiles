@@ -1,8 +1,8 @@
 { config, lib, ... }:
 let
   serviceCfg = config.selfhost.services.syncthing;
-  pathsCfg = config.custom.paths;
-  selfhostMounts = config.selfhost.storage.smb.mounts;
+  sharesCfg = config.custom.shares;
+  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
   syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.selfhost.users;
 
   # Intentional as select the exact systems to sync
@@ -30,15 +30,15 @@ let
   };
 
   publicFolders = {
-    music = mkSendOnlyFolder "music" pathsCfg.media.music.library allSyncthingDevices;
+    music = mkSendOnlyFolder "music" "${sharesCfg.media.root}/music/library" allSyncthingDevices;
   } // lib.listToAttrs (map (system: lib.nameValuePair "roms-${system}" (
-    mkSendOnlyFolder "roms-${system}" "${pathsCfg.media.gaming.emulation.roms}/${system}" allSyncthingDevices
+    mkSendOnlyFolder "roms-${system}" "${sharesCfg.media.root}/gaming/emulation/roms/${system}" allSyncthingDevices
   )) romSystems);
 
   # Per-user folders
   bphenriquesFolders = lib.optionalAttrs (syncthingUsers ? bphenriques) {
-    "bphenriques-phone-backup" = mkSyncFolder "bphenriques-phone-backup" pathsCfg.users.bphenriques.backups.phone (userSyncthingDevices "bphenriques");
-    "bphenriques-photos-inbox" = mkSyncFolder "bphenriques-photos-inbox" pathsCfg.users.bphenriques.photos.inbox (userSyncthingDevices "bphenriques");
+    "bphenriques-phone-backup" = mkSyncFolder "bphenriques-phone-backup" "${sharesCfg.bphenriques.root}/backups/phone" (userSyncthingDevices "bphenriques");
+    "bphenriques-photos-inbox" = mkSyncFolder "bphenriques-photos-inbox" "${sharesCfg.bphenriques.root}/photos/inbox" (userSyncthingDevices "bphenriques");
   };
 in
 {
@@ -71,7 +71,7 @@ in
         access.allowedGroups = [ config.selfhost.groups.admin ];
         forwardAuth.enable = true;
         integrations.homepage.group = "Admin";
-        storage.smb = [ "media" "bphenriques" ];
+        storage.mounts = [ "media" "bphenriques" ];
         extraConfig.landingPage.enable = true;
       };
 

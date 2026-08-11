@@ -1,6 +1,6 @@
 { config, self, lib, utils, ... }:
 let
-  romsDir = config.custom.paths.media.gaming.emulation.roms;
+  romsDir = "${config.custom.shares.media.root}/gaming/emulation/roms";
   stateDir = "/var/lib/skyscraper";
   skyscraperConfig = config.sops.templates."skyscraper-config.ini".path;
 
@@ -41,7 +41,7 @@ in
 
   selfhost.tasks.scrape-roms = {
     systemdServices = [ "scrape-roms" ];
-    storage.smb = [ "media" ];
+    storage.mounts = [ "media" ];
   };
 
   systemd.services.scrape-roms = {

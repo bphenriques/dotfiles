@@ -21,7 +21,7 @@ let
       inherit (radarrCfg) port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.custom.paths.media.movies;
+      activeDirectory = "${config.custom.shares.media.root}/movies";
       activeProfileName = mediaCfg.radarr.profiles.default.name;
       is4k = false;
       minimumAvailability = "released";
@@ -34,7 +34,7 @@ let
       inherit (sonarrCfg) port;
       useSsl = false;
       baseUrl = "";
-      activeDirectory = config.custom.paths.media.tv;
+      activeDirectory = "${config.custom.shares.media.root}/tv";
       activeProfileName = mediaCfg.sonarr.profiles.default.name;
       is4k = false;
       isDefault = true;

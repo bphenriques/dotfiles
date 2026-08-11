@@ -9,7 +9,7 @@ in
     ./bazarr.nix
     ./cleanuparr
     ./immich.nix
-    ./jellyfin
+    ./jellyfin.nix
     ./kapowarr.nix
     ./kavita
     ./seerr

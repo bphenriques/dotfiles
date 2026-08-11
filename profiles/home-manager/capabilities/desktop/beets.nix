@@ -2,8 +2,8 @@
 let
   inherit (lib) foldl';
 
-  musicDir = osConfig.custom.paths.media.music.root;
-  musicLibrary = osConfig.custom.paths.media.music.library;
+  musicDir = "${osConfig.custom.shares.media.root}/music";
+  musicLibrary = "${osConfig.custom.shares.media.root}/music/library";
 
   database = "${config.xdg.dataHome}/beets/library.db";
   databaseBackup = "${musicDir}/beets.db.backup";
@@ -78,7 +78,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       playlist = {
         auto = true;                        # Automatically remove/move items inside the playlists in case they move.
         relative_to = musicLibrary;
-        playlist_dir = osConfig.custom.paths.media.music.playlists;
+        playlist_dir = "${osConfig.custom.shares.media.root}/music/playlists";
       };
       fetchart = {
         auto = true;

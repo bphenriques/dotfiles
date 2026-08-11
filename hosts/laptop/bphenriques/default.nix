@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  smbCfg = config.selfhost.storage.smb;
+  smbCfg = config.selfhost.storage.mounts.smb;
 in
 {
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
@@ -12,7 +12,7 @@ in
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]
       ++ lib.optionals config.virtualisation.docker.enable      [ "docker" ]
       ++ lib.optionals config.services.sunshine.enable          [ "input" ]
-      ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.mounts);
+      ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.shares);
 
     openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
   };

@@ -1,9 +1,23 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
-  inherit (config.custom) paths;
+  inherit (config.custom) shares;
+  mounted = lib.filterAttrs (_: s: s.root != null) shares;
+  backed = lib.filterAttrs (_: s: s.backup) mounted;
+  skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
 in
 {
   selfhost.tasks.backup.integrations.notify.enable = true;
+
+  custom.shares = {
+    bphenriques.backup = true;
+    media.backup = true;
+  };
+
+  # Opt-in is the safe default for a per-byte cost, but a share nobody decided about should not stay
+  # quiet: `shared` was mounted and unbacked for a long time without anything saying so.
+  warnings = lib.optional (
+    skipped != [ ]
+  ) "Shares mounted here but excluded from the off-site backup: ${toString skipped}. Set custom.shares.<name>.backup if unintended.";
 
   sops = {
     secrets."backup/b2/bucket" = { };
@@ -40,19 +54,11 @@ in
       # App DBs (Immich/Miniflux/RomM) are deliberately not dumped — in a real disaster they are trivially
       # rebuilt (re-scan) or non-critical; the irreplaceable data (files, gitea repos, config) is covered here.
       services = [ "bazarr" "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
-      bindings = {
-        "/system/homelab-secrets"               = config.selfhost.runtimeSecretsDir;
-        "/nas/bphenriques/backups"              = paths.users.bphenriques.backups.root;
-        "/nas/bphenriques/notes"                = paths.users.bphenriques.notes;
-        "/nas/bphenriques/private"              = paths.users.bphenriques.private;
-        "/nas/bphenriques/documents"            = paths.users.bphenriques.documents.root;
-        "/nas/bphenriques/photos/library"       = paths.users.bphenriques.photos.library;
-        "/nas/bphenriques/photos/inbox"         = paths.users.bphenriques.photos.inbox;
-        "/nas/media/music/library"              = paths.media.music.library;
-        "/nas/media/music/playlists"            = paths.media.music.playlists;
-        "/nas/media/gaming/emulation/roms"      = paths.media.gaming.emulation.roms;
-        "/nas/media/gaming/emulation/bios"      = paths.media.gaming.emulation.bios;
-      };
+      # Whole shares, so a new folder is protected by default; exclusions live in each share's
+      # .gitignore, which rustic honours via git-ignore.
+      bindings =
+        { "/system/homelab-secrets" = config.selfhost.runtimeSecretsDir; }
+        // lib.mapAttrs' (name: s: lib.nameValuePair "/nas/${name}" s.root) backed;
     };
   };
 }

@@ -5,7 +5,7 @@
 # the guests run on the host's own cores.
 hostName: guests:
 let
-  inherit (import ./lib.nix) mkPanel mkStat mkRow layout2 h w fullW;
+  inherit (import ./lib.nix) mkPanel mkStat mkRow layout2 fullW;
 
   hostInst = ''instance="${hostName}"'';
   names = builtins.attrNames guests;

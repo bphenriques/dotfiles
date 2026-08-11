@@ -43,7 +43,7 @@ in
   };
 
   # Homelab integration
-  selfhost.storage.smb.mounts = {
+  selfhost.storage.mounts.smb.shares = {
     bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
     media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
   };
