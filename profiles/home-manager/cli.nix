@@ -56,8 +56,12 @@ in
     options = [ "--cmd j" ];
   };
 
-  stylix.targets.bat.enable = true;
+  programs.vivid.enable = true;           # `LS_COLORS` generator
+  stylix.targets.vivid.enable = true;
+
   programs.bat.enable = true;             # Better file previewer
+  stylix.targets.bat.enable = true;
+
   programs.fd.enable = true;              # Better `find`.
   programs.jq.enable = true;              # JSON query.
   custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
@@ -72,9 +76,7 @@ in
   ];
 
   home = {
-    sessionVariables = {
-      LS_COLORS = "$(${lib.getExe pkgs.vivid} generate snazzy)";
-    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    sessionVariables = lib.optionalAttrs pkgs.stdenv.isDarwin {
       CLICOLOR = 1;
     };
 

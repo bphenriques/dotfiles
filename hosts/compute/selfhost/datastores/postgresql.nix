@@ -11,6 +11,14 @@
     package = pkgs.postgresql_16; # Immich + pgvecto.rs requires <= 16
   };
 
+  # After an unclean shutdown the stale postmaster.pid can name a PID a boot-time transient
+  # now holds, and postgres refuses to start until that PID exits. Upstream sizes the start
+  # limit for 5 slow attempts but never sets RestartSec, so instant failures burn all 5 in
+  # under a second. Spreading them over a minute lets the colliding PID clear.
+  # Not an ExecStartPre that deletes the pid file: it cannot distinguish a stale lock from a
+  # live postmaster, so it would trade a self-healing outage for silent data corruption.
+  systemd.services.postgresql.serviceConfig.RestartSec = 15;
+
   selfhost.monitoring.scopes.postgres = {
     exporters.postgres = {
       enable = true;

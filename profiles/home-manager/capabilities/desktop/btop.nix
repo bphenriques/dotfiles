@@ -7,7 +7,7 @@ in
   programs.btop = {
     enable = true;
     settings = {
-      theme_background = true;
+      theme_background = false;
       proc_gradient = false;
       graph_symbol = "block";
       shown_boxes = "cpu mem proc";

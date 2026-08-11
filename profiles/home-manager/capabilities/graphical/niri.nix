@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (config.custom.programs) satty;
+  inherit (config.custom.programs) screenshot;
   colors = config.lib.stylix.colors.withHashtag;
 
   volume          = lib.getExe config.custom.programs.volume-osd.package;
@@ -213,7 +213,7 @@ in
 
   wayland.windowManager.niri.settings = {
     prefer-no-csd = { };
-    screenshot-path = "${satty.directory}/${satty.format}";
+    screenshot-path = "${screenshot.directory}/${screenshot.format}";
     hotkey-overlay.skip-at-startup = { };
 
     environment = {

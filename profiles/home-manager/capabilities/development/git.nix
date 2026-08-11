@@ -16,10 +16,10 @@ in
 {
   home.packages = [
     pkgs.git-absorb
-    pkgs.gitui
   ];
 
   stylix.targets.gitui.enable = true;
+  programs.gitui.enable = true;
   programs.lazygit.enable = true;
   programs.diff-so-fancy = {
     enable = true;

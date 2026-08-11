@@ -1,23 +1,10 @@
 { config, pkgs, self, lib, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
-  stylix.targets.rofi.enable = true;
-  programs.rofi = {
+  stylix.targets.rofi = {
     enable = true;
-    theme = let
-      inherit (config.lib.formats.rasi) mkLiteral;
-    in {
-      # Overwrite stylix elements to remove alternate coloring.
-      "element alternate.normal" = {
-        background-color = lib.mkForce (mkLiteral "@normal-background");
-        text-color = lib.mkForce (mkLiteral "@normal-text");
-      };
-
-      "element alternate.active" = {
-        background-color = lib.mkForce (mkLiteral "@active-background");
-        text-color = lib.mkForce (mkLiteral "@active-text");
-      };
-    };
+    alternatePattern = false;
   };
+  programs.rofi.enable = true;
 
   xdg.configFile = {
     "rofi/wallpaper.rasi".text = ''

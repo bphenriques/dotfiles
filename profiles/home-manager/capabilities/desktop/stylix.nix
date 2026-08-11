@@ -7,7 +7,6 @@
     autoEnable = false;
 
     base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark.yaml";
-    override.base00 = "#282c34"; # Background
 
     polarity = "dark";
 
@@ -52,6 +51,8 @@
       name = "Bibata-Modern-Classic";
       size = 16;
     };
+
+    opacity.terminal = 0.92; # Needed for niri blur to show through
 
     targets = {
       font-packages.enable = true;

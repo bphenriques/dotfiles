@@ -10,8 +10,13 @@
     ./zellij.nix          # Terminal multiplexer
   ];
 
+  programs.parallel = {
+    enable = pkgs.stdenv.isLinux;
+    package = pkgs.parallel;  # `parallel-full` default drags in 28MiB of SQL/niceload extras I don't use
+    will-cite = true;
+  };
+
   home.packages = lib.optionals pkgs.stdenv.isLinux [
-    pkgs.parallel
     pkgs.yq-go            # Query YAML
     pkgs.dateutils
     pkgs.openssl

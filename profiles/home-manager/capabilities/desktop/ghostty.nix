@@ -12,8 +12,6 @@ in
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {
     enable = true;
-    enableFishIntegration = config.programs.fish.enable;
-    systemd.enable = pkgs.stdenv.isLinux;
 
     settings = let
       common = {
@@ -25,7 +23,6 @@ in
         gtk-single-instance = true;
         window-decoration = true;
         quit-after-last-window-closed = false; # Reduces latency when opening new windows
-        background-opacity = 0.92; # Needed for niri blur to show through
       };
 
       darwin = lib.optionalAttrs pkgs.stdenv.isDarwin {

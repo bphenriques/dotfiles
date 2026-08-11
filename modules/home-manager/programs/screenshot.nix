@@ -21,6 +21,12 @@ in
       type = lib.types.str;
     };
 
+    format = lib.mkOption {
+      description = "Filename format of screenshots. Templates must be compatible with strftime";
+      type = lib.types.str;
+      default = "screenshot-%Y%m%d-%H%M%S.png";
+    };
+
     exec = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       readOnly = true;

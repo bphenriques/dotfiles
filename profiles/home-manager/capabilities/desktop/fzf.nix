@@ -1,9 +1,8 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, ... }:
 {
   programs.fzf = {
     enable = true;
     defaultCommand = "${lib.getExe pkgs.fd} --type file --hidden --exclude=.git";
-    enableFishIntegration = config.programs.fish.enable;
 
     defaultOptions = [
       "--height='80%'"

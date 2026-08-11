@@ -2,8 +2,6 @@
 {
   gtk = {
     enable = true;
-    gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc"; # Leave my $HOME
-
     gtk3 = {
       bookmarks = [
         "file://${config.xdg.userDirs.documents}"

@@ -1,6 +1,9 @@
 { lib, pkgs, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
-  home.packages = [ pkgs.discord ];
+  programs.discord = {
+    enable = true;
+    settings.openH264Enabled = true;
+  };
   xdg.mimeApps.defaultApplications."x-scheme-handler/discord" = [ "discord.desktop" ];
 
   custom.programs.niri.windowRules.byApp = [
