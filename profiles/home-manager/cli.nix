@@ -57,7 +57,7 @@ in
   };
 
   programs.vivid.enable = true;           # `LS_COLORS` generator
-  stylix.targets.vivid.enable = true;
+  programs.vivid.activeTheme = "one-dark";
 
   programs.bat.enable = true;             # Better file previewer
   stylix.targets.bat.enable = true;

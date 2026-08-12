@@ -8,6 +8,8 @@ let
   shares = config.custom.shares;
   selfhostMounts = config.selfhost.storage.mounts.smb.shares;
 
+  transcodeDir = "${config.services.jellyfin.cacheDir}/transcodes";
+
   trickplayScan = {
     EnableRealtimeMonitor = true;
     ExtractTrickplayImagesDuringLibraryScan = true;
@@ -92,5 +94,18 @@ in
     environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
     serviceConfig.ReadOnlyPaths = [ "${shares.media.root}/music/library" ];
     serviceConfig.Slice = "throttled.slice";
+  };
+
+  # Use spare RAM to transcode segments to tmpfs rater than over using the SSD. Limited to size to avoid zram compression.
+  fileSystems."${transcodeDir}" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+    options = [ "size=8G" "mode=0700" "nosuid" "nodev" "noexec" ];
+  };
+
+  # The mount lands root-owned and jellyfin's uid is allocated at activation, so fix it up by name.
+  systemd.tmpfiles.settings.jellyfinTranscodes."${transcodeDir}".d = {
+    mode = "700";
+    inherit (config.services.jellyfin) user group;
   };
 }

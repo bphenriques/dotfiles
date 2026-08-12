@@ -23,7 +23,7 @@ in
     ./cook-recipes.nix
     ./filebrowser.nix
     ./papra.nix
-    ./mympd.nix
+    # ./mympd.nix  # inky (its MPD backend) is retired; re-enable when it is back
     ./nextchat.nix
   ];
 

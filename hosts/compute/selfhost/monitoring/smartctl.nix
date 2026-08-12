@@ -8,7 +8,7 @@
     };
     scrapeConfigs = [{
       job_name = "smartctl";
-      scrape_interval = "15m";
+      scrape_interval = "2m";
       static_configs = [{
         targets = [ "127.0.0.1:9633" ];
         labels.instance = config.networking.hostName;
