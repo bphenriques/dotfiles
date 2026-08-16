@@ -14,7 +14,7 @@ in
     meta.category = "media automation";
     port = 5656;
     access.allowedGroups = with config.selfhost.groups; [ users admin ];
-    forwardAuth.enable = true;
+    access.model = "forwardAuth";
     healthcheck.path = "/";
     healthcheck.probeModule = "http_any";
     storage.mounts = [ "media" ];

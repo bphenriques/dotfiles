@@ -15,7 +15,7 @@ in
       meta.category = "monitoring";
       port = 3010;
       healthcheck.path = "/api/health";
-      forwardAuth.enable = true;
+      access.model = "forwardAuth";
       integrations.homepage.group = "Admin";
     };
 

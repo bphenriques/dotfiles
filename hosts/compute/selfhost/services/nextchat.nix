@@ -16,7 +16,7 @@ in
     port = 3210;
     subdomain = "chat";
     access.allowedGroups = [ cfg.groups.admin ];
-    forwardAuth.enable = true;
+    access.model = "forwardAuth";
     extraConfig.landingPage.enable = true;
   };
 

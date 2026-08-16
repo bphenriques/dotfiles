@@ -9,8 +9,9 @@ in
     meta.description = "Remote MPD Client";
     meta.category = "media";
     port = 8093;
-    access.allowedGroups = [ config.selfhost.groups.users ];
-    forwardAuth.enable = false; # Not required as settings are protected and the service only has read-only permissions
+    # Read-only remote control with its settings locked down, so it is served unauthenticated rather
+    # than gated. Nothing enforces groups here, so none are named.
+    access.model = "open";
     extraConfig.landingPage.enable = true;
   };
 

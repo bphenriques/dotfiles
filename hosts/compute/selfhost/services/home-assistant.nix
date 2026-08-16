@@ -17,8 +17,9 @@ in
     meta.category = "home";
     port = 8123;
     subdomain = "home";
-    access.allowedGroups = [ config.selfhost.groups.admin ];
-    forwardAuth.enable = false; # Home-Assistant mobile apps breaks. Relying on built-in authentication.
+    # Mobile apps break behind the gateway, so Home Assistant authenticates its own users. Its login
+    # knows nothing of selfhost groups, so allowedGroups would not be enforced and is left unset.
+    access.model = "native";
     healthcheck.path = "/manifest.json";
     integrations.homepage.group = "Services";
     backup = {

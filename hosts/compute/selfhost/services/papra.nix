@@ -26,8 +26,8 @@ in
       meta.category = "productivity";
       port = 1221;
       access.allowedGroups = [ cfg.groups.admin ];
-      oidc = {
-        enable = true;
+      access.model = "oidc";
+      access.oidc = {
         callbackURLs = [ "${serviceCfg.publicUrl}/api/auth/oauth2/callback/${providerId}" ];
         systemd.dependentServices = [ "podman-papra" ];
       };

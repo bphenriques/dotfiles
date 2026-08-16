@@ -69,7 +69,7 @@ in
         port = 8384;
         healthcheck.path = "/rest/noauth/health";
         access.allowedGroups = [ config.selfhost.groups.admin ];
-        forwardAuth.enable = true;
+        access.model = "forwardAuth";
         integrations.homepage.group = "Admin";
         storage.mounts = [ "media" "bphenriques" ];
         extraConfig.landingPage.enable = true;

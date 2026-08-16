@@ -11,11 +11,10 @@ in
     meta.description = "Recipe Collection";
     meta.category = "productivity";
     subdomain = "recipes";
+    access.model = "open"; # a generated static site with no login
     port = 9080;
-    storage = {
-      mounts = [ "media" ];
-      systemdServices = [ "cook-recipes-build" ];
-    };
+    systemdServices = [ "cook-recipes-build" ]; # the generator, not a long-running service
+    storage.mounts = [ "media" ];
     extraConfig.landingPage.enable = true;
   };
 

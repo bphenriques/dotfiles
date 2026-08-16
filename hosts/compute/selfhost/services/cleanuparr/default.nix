@@ -67,7 +67,7 @@ in
       port = 11011;
       healthcheck.path = "/health";
       access.allowedGroups = [ cfg.groups.admin ];
-      forwardAuth.enable = true;
+      access.model = "forwardAuth";
       integrations.notify.topic = "download";
       integrations.homepage.group = "Admin";
       integrations.homepage.icon = "cleanuparr.png";

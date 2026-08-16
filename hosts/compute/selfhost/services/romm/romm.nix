@@ -84,8 +84,8 @@ in
       port = 8095;
 
       access.allowedGroups = with cfg.groups; [ guests users admin ];
-      oidc = {
-        enable = true;
+      access.model = "oidc";
+      access.oidc = {
         gid = 971;  # Fixed GID for container access
         callbackURLs = [ "${serviceCfg.publicUrl}/api/oauth/openid" ];
         systemd.dependentServices = [ "podman-romm" ];
@@ -196,7 +196,7 @@ in
       OIDC_ENABLED = "true";
       OIDC_ALLOW_REGISTRATION = "false";  # No auto-provisioning of new OIDC users; kiosk covers read-only guests
       OIDC_PROVIDER = oidcCfg.provider.displayName;
-      OIDC_REDIRECT_URI = builtins.head serviceCfg.oidc.callbackURLs;
+      OIDC_REDIRECT_URI = builtins.head serviceCfg.access.oidc.callbackURLs;
       OIDC_SERVER_APPLICATION_URL = oidcCfg.provider.issuerUrl;
       OIDC_CLIENT_ID_FILE = "/run/secrets/oidc_client_id";
       OIDC_CLIENT_SECRET_FILE = "/run/secrets/oidc_client_secret";
@@ -216,8 +216,8 @@ in
 
       # Secrets
       "${config.selfhost.runtimeSecrets.romm-db-password.path}:/run/secrets/db_password:ro"
-      "${serviceCfg.oidc.id.file}:/run/secrets/oidc_client_id:ro"
-      "${serviceCfg.oidc.secret.file}:/run/secrets/oidc_client_secret:ro"
+      "${serviceCfg.access.oidc.id.file}:/run/secrets/oidc_client_id:ro"
+      "${serviceCfg.access.oidc.secret.file}:/run/secrets/oidc_client_secret:ro"
       "${config.sops.secrets."romm/mobygames/api-key".path}:/run/secrets/mobygames_api_key:ro"
       "${config.sops.secrets."romm/screenscraper/user".path}:/run/secrets/screenscraper_user:ro"
       "${config.sops.secrets."romm/screenscraper/password".path}:/run/secrets/screenscraper_password:ro"
@@ -232,7 +232,7 @@ in
     extraOptions = [
       "--network=host"  # Use host network for MySQL access
       "--group-add=${toString selfhostMounts.media.gid}"
-      "--group-add=${toString serviceCfg.oidc.gid}"
+      "--group-add=${toString serviceCfg.access.oidc.gid}"
       "--memory=512m"
     ];
   };

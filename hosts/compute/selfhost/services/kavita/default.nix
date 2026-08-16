@@ -42,8 +42,8 @@ in
         meta.category = "media";
         port = 8097;
         access.allowedGroups = with config.selfhost.groups; [ guests users admin ];
-        oidc = {
-          enable = true;
+        access.model = "oidc";
+        access.oidc = {
           callbackURLs = [
             "${serviceCfg.publicUrl}/signin-oidc"
             "${serviceCfg.publicUrl}/signout-callback-oidc"
@@ -76,14 +76,14 @@ in
       settings.IpAddresses = "127.0.0.1";
       settings.OpenIdConnectSettings = {
         Authority = oidcCfg.provider.issuerUrl;
-        ClientId = serviceCfg.oidc.id.placeholder;
-        Secret = serviceCfg.oidc.secret.placeholder;
+        ClientId = serviceCfg.access.oidc.id.placeholder;
+        Secret = serviceCfg.access.oidc.secret.placeholder;
       };
     };
 
     systemd.services.kavita = {
       serviceConfig = {
-        LoadCredential = serviceCfg.oidc.systemd.loadCredentials;
+        LoadCredential = serviceCfg.access.oidc.systemd.loadCredentials;
         ReadOnlyPaths = [
           "${sharesCfg.media.root}/books/library"
           "${sharesCfg.media.root}/comics/library"
@@ -93,10 +93,10 @@ in
       # Kavita has no native _FILE support for OIDC credentials; replace placeholders at runtime.
       # If upstream adds file-based config, switch to it and remove this workaround.
       preStart = lib.mkAfter ''
-        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.oidc.id.placeholder}' \
+        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.access.oidc.id.placeholder}' \
           "''${CREDENTIALS_DIRECTORY}/oidc-id" \
           '${kavitaCfg.dataDir}/config/appsettings.json'
-        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.oidc.secret.placeholder}' \
+        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.access.oidc.secret.placeholder}' \
           "''${CREDENTIALS_DIRECTORY}/oidc-secret" \
           '${kavitaCfg.dataDir}/config/appsettings.json'
       '';

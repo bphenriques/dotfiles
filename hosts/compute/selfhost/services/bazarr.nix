@@ -3,14 +3,9 @@
   selfhost.apps.bazarr = {
     enable = true;
     configureAfter = [ "sonarr.service" "radarr.service" ];
-    sonarr = {
-      inherit (config.selfhost.services.sonarr) port;
-      inherit (config.selfhost.apps.sonarr) apiKeyFile;
-    };
-    radarr = {
-      inherit (config.selfhost.services.radarr) port;
-      inherit (config.selfhost.apps.radarr) apiKeyFile;
-    };
+    # host, port and the generated key come from the local apps' registry entries.
+    sonarr = { };
+    radarr = { };
 
     languageProfiles = [{
       name = "English";

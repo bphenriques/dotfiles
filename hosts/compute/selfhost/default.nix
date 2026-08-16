@@ -103,12 +103,12 @@ in
       forwardAuth.tinyauth.enable = true;
       oidc = {
         pocket-id.enable = true;
-        rotation = {
-          enable = true; # weekly @ 03:00; alert to the admin topic on failure
-          notifyTopic = "admin";
-        };
+        rotation.enable = true; # weekly @ 03:00
       };
     };
+
+    # Rotation self-registers a homelab-rotation topic; keep its failures on the admin one instead.
+    tasks.oidc-rotate.integrations.notify.topic = "admin";
 
     notify = {
       ntfy.enable = true;

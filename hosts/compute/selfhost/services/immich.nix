@@ -31,10 +31,8 @@ in
       subdomain = "photos";
       access.allowedGroups = [ config.selfhost.groups.admin ];
       extraConfig.landingPage.enable = true;
-      storage = {
-        mounts = photoUsers;
-        systemdServices = [ "immich-server" ];
-      };
+      systemdServices = [ "immich-server" ];
+      storage.mounts = photoUsers;
     };
 
     users = lib.genAttrs photoUsers (user: { services.immich.libraries = mkLibraries user; });
