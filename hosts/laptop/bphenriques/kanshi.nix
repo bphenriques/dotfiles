@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, ... }:
 let
   kanshictl = lib.getExe' pkgs.kanshi "kanshictl";
 
@@ -72,17 +72,14 @@ in
     ];
   };
 
-  custom.programs.wlr-which-key.menus = {
-    display = [
+  programs.wlr-which-key.settings.menu = lib.mkAfter [
+    { key = "d"; desc = "Display"; submenu = [
       { key = "l"; desc = "Laptop";         cmd = "${kanshictl} switch internal"; }
       { key = "o"; desc = "Office monitor"; cmd = "${kanshictl} switch external-office"; }
       { key = "t"; desc = "Living room TV"; cmd = "${kanshictl} switch external-living-room"; }
       { key = "c"; desc = "Configure";      cmd = lib.getExe pkgs.wdisplays; }
-    ];
-    global = lib.mkAfter [
-      { key = "d"; desc = "Display"; submenu = config.custom.programs.wlr-which-key.menus.display; }
-    ];
-  };
+    ]; }
+  ];
 
   custom.programs.niri.output.default = {
     identifier = laptopScreen.criteria;

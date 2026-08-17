@@ -13,7 +13,6 @@ let
     };
   };
 
-  whichKeyCfg = config.custom.programs.wlr-which-key;
   mpc-plus = lib.getExe cfg.package;
   exec = {
     play-pause        = ''${mpc-plus} play-pause'';
@@ -68,35 +67,23 @@ in
     home.packages = [
       pkgs.mpc
       cfg.package
-      (pkgs.makeDesktopItem {
-        name = "Music";
-        desktopName = "Music";
-        icon = mkIcon "music-player" "󰥠";
-        exec = if whichKeyCfg.enable
-          then ''${lib.getExe whichKeyCfg.package} mpc-plus''
-          else exec.search-play;
-        actions = {
-          "shuffle"       = { name = "Shuffle library"; icon = mkIcon "mpc-plus-shuffle-library" ""; exec = exec.play-shuffled; };
-          "find-play"     = { name = "Play...";         icon = mkIcon "mpc-plus-find-play" "";       exec = exec.search-play; };
-          "stop"          = { name = "Stop";            icon = mkIcon "mpc-plus-stop" "";            exec = exec.stop; };
-          "select-server" = { name = "Select server";   icon = mkIcon "mpc-select-server" "󰓃";        exec = exec.select-server; };
-        };
-      })
     ];
 
-    custom.programs.wlr-which-key.menus.mpc-plus = [
-      { key = "p";            desc = "Play/Pause";        cmd = exec.play-pause;      keep_open = true; }
-      { key = "s";            desc = "Stop";              cmd = exec.stop; }
-      { key = ["Left" "h"];   desc = "Previous";          cmd = exec.previous;        keep_open = true; }
-      { key = ["Right" "l"];  desc = "Next";              cmd = exec.next;            keep_open = true; }
-      { key = ["Up" "k"];     desc = "Increase volume";   cmd = exec.volume-increase; keep_open = true; }
-      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = exec.volume-decrease; keep_open = true; }
-      { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
-      { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
-      { key = "space";        desc = "Play...";           cmd = exec.search-play; }
-      { key = "r";            desc = "Stream...";         cmd = exec.select-stream; }
-      { key = "a";            desc = "Shuffle library";   cmd = exec.play-shuffled; }
-      { key = "d";            desc = "Select Server";     cmd = exec.select-server; }
+    programs.wlr-which-key.settings.menu = lib.mkOrder 100 [
+      { key = "m"; desc = "Music"; submenu = [
+        { key = "p";            desc = "Play/Pause";        cmd = exec.play-pause;      keep_open = true; }
+        { key = "s";            desc = "Stop";              cmd = exec.stop; }
+        { key = ["Left" "h"];   desc = "Previous";          cmd = exec.previous;        keep_open = true; }
+        { key = ["Right" "l"];  desc = "Next";              cmd = exec.next;            keep_open = true; }
+        { key = ["Up" "k"];     desc = "Increase volume";   cmd = exec.volume-increase; keep_open = true; }
+        { key = ["Down" "j"];   desc = "Reduce volume";     cmd = exec.volume-decrease; keep_open = true; }
+        { key = "z";            desc = "Toggle repeat";     cmd = exec.toggle-repeat;   keep_open = true; }
+        { key = "x";            desc = "Toggle random";     cmd = exec.toggle-random;   keep_open = true; }
+        { key = "space";        desc = "Play...";           cmd = exec.search-play; }
+        { key = "r";            desc = "Stream...";         cmd = exec.select-stream; }
+        { key = "a";            desc = "Shuffle library";   cmd = exec.play-shuffled; }
+        { key = "d";            desc = "Select Server";     cmd = exec.select-server; }
+      ]; }
     ];
   };
 }

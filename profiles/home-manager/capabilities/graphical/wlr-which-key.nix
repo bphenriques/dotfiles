@@ -6,7 +6,7 @@ let
   terminal = config.custom.programs.terminal;
 in
 lib.mkIf pkgs.stdenv.isLinux {
-  custom.programs.wlr-which-key = {
+  programs.wlr-which-key = {
     enable = true;
     settings = {
       font = "${fonts.monospace.name} ${toString fonts.sizes.popups}";
@@ -25,17 +25,12 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       rows_per_column = 5;
       column_padding = 50;
-    };
 
-    menus.global = lib.optionals config.custom.programs.mpc-plus.enable [
-      { key = "m"; desc = "Music"; submenu = config.custom.programs.wlr-which-key.menus.mpc-plus; }
-    ] ++ lib.optionals config.custom.programs.volume-osd.enable [
-      { key = "a"; desc = "Audio Output"; submenu = config.custom.programs.wlr-which-key.menus.sound-output; }
-      { key = "A"; desc = "Audio Input"; submenu = config.custom.programs.wlr-which-key.menus.sound-input; }
-    ] ++ [
-      { key = "n"; desc = "Network Manager"; cmd = terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
-    ] ++ lib.optionals config.custom.programs.session.enable [
-      { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }
-    ];
+      menu = [
+        { key = "n"; desc = "Network Manager"; cmd = terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
+      ] ++ lib.optionals config.custom.programs.session.enable [
+        { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }
+      ];
+    };
   };
 }
