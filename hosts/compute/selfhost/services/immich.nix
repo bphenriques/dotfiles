@@ -50,6 +50,7 @@ in
           "h264"
           "hevc"
         ];
+        preset = "veryfast"; # measured on this box: Immich's ultrafast default emits ~30Mbit/s 720p, veryfast is 4x smaller for 7% more CPU
         threads = 2;
       };
 

@@ -42,7 +42,7 @@ in
   };
 
   services.gpg-agent = {
-    enable = pkgs.stdenv.isLinux;
+    enable = pkgs.stdenv.hostPlatform.isLinux;
     pinentry.package = pkgs.pinentry-gnome3;
   };
 
@@ -69,14 +69,14 @@ in
   custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
   programs.nushell.enable = true;         # Adhoc shell for data processing
 
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
+  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it
   ];
 
   home = {
-    sessionVariables = lib.optionalAttrs pkgs.stdenv.isDarwin {
+    sessionVariables = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
       CLICOLOR = 1;
     };
 

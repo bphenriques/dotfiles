@@ -25,7 +25,7 @@ let
   ];
 
   setDefault = types: target: lib.foldl' (acc: type: acc // { "${type}" = target; }) { } types;
-in lib.mkIf pkgs.stdenv.isLinux {
+in lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [
     pkgs.umu-launcher
     umu-run0

@@ -1,5 +1,5 @@
 { pkgs, lib, config, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.mpv = {
     enable = true;
     config = {

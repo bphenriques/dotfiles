@@ -1,5 +1,5 @@
 { lib, pkgs, config, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.obsidian ];
 
   custom.programs.niri.windowRules.byApp = [

@@ -4,6 +4,6 @@
 #   ${osConfig.custom.shares.media.root}/gaming/emulation/bios
 # Manual setup (one-time): Settings → Graphics → set 3x internal resolution.
 # Manual setup (one-time): Settings → Controllers → configure gamepad for Port 1.
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.pcsx2 ];
 }

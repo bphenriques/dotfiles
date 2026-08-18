@@ -61,7 +61,7 @@ let
     '';
   };
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ beet-manage ];
   programs.beets = {
     enable = true;

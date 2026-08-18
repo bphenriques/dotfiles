@@ -62,7 +62,7 @@ let
 
   metafilesDir = "${config.xdg.configHome}/pegasus-frontend/metafiles";
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.pegasus-frontend ];
 
   systemd.user = {

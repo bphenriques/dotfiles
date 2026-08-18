@@ -153,6 +153,11 @@ in
 
   virtualisation = {
     podman.enable = true;
+    podman.autoPrune = {
+      enable = true;
+      dates = "weekly";
+      flags = [ "--all" ]; # image tags pile up on every bump; only running containers keep theirs
+    };
     oci-containers.backend = "podman";
     containers.containersConf.settings.containers = {
       default_capabilities = [];

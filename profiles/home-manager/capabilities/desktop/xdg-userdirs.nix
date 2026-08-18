@@ -16,7 +16,7 @@
   };
 
   # https://www.mankier.com/5/tmpfiles.d
-  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.isLinux [
+  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     "d ${config.xdg.userDirs.desktop}     - - - -"
     "d ${config.xdg.userDirs.pictures}    - - - -"
     "d ${config.xdg.userDirs.music}       - - - -"

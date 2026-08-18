@@ -14,7 +14,7 @@ in
     ./kavita
     ./seerr
     ./prowlarr
-    ./romm
+    ./romm.nix
     ./homepage
     ./syncthing.nix
     ./transmission.nix

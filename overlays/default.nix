@@ -2,4 +2,5 @@ _: {
   # Run `nix run .#check-updates` to check for newer upstream releases.
   pinned-github-releases = import ./jellyfin;
   pinned-container-images = import ./containers.nix;
+  romm-fastapi = import ./romm-fastapi.nix;
 }

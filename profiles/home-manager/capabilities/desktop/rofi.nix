@@ -1,5 +1,5 @@
 { config, pkgs, self, lib, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   stylix.targets.rofi = {
     enable = true;
     alternatePattern = false;

@@ -24,13 +24,13 @@
     ./yazi.nix            # File browser
   ];
 
-  xdg.mimeApps.enable = pkgs.stdenv.isLinux;    # Default apps and directories
+  xdg.mimeApps.enable = pkgs.stdenv.hostPlatform.isLinux;    # Default apps and directories
 
   # Enable easier font management
   fonts.fontconfig.enable = true;
   stylix.targets.fontconfig.enable = true;
 
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
+  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     pkgs.xdg-user-dirs  # Relevant for desktop
     pkgs.gparted        # GUI partition editor
   ];

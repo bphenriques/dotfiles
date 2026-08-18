@@ -57,7 +57,9 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 | -------- | ------------------- | ------------------ |
 | `admin`  | Homelab owner       | Everything         |
 | `users`  | Family              | Media, recipes     |
-| `guests` | Friends, colleagues | Romm only (viewer) |
+| `guests` | Friends, colleagues | RomM only          |
+
+RomM runs in kiosk mode: it is readable without logging in, and only `admin` can modify the library.
 
 ## Setup
 

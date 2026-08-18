@@ -15,7 +15,7 @@ in
   };
   stylix.targets.btop.enable = true;
 
-  home.packages = lib.optionals pkgs.stdenv.isLinux [
+  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     (pkgs.makeDesktopItem {
       name = "system-monitor";
       desktopName = "System Monitor";
@@ -24,7 +24,7 @@ in
     })
   ];
 
-  custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.isLinux {
+  custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     "Ctrl+Alt+Delete" = ''spawn-sh "${system-monitor}"'';
   };
 }

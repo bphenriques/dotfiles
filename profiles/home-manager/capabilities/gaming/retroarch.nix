@@ -154,7 +154,7 @@ let
     // lib.optionalAttrs (overrides != {}) { "${prefix}.cfg".text = toRetroArchConfig overrides; }
   ) coreConfigs;
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.retroarch = {
     enable = true;
     # Cores: https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/emulators/libretro/cores

@@ -2,7 +2,7 @@
 let
   inherit (pkgs.nur.repos.rycee) firefox-addons;
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.firefox = {
     enable = true;
     configPath = ".mozilla/firefox";  # TODO: drop once home.stateVersion >= 26.05 makes the XDG path the default.

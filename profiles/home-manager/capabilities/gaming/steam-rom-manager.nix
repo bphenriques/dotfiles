@@ -7,7 +7,7 @@ in
 #   executable, args, steam category, and local image paths (covers→tall, screenshots→hero, wheels→logo,
 #   marquees→icon) → disable online image providers → save → close SRM →
 #   systemctl --user start sync-steam-shortcuts.service
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.steam-rom-manager ];
 
   systemd.user = {

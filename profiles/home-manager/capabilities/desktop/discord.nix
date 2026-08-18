@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.discord = {
     enable = true;
     settings.openH264Enabled = true;

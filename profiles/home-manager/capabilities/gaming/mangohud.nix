@@ -1,5 +1,5 @@
 { lib, pkgs, ...}:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   stylix.targets.mangohud.enable = true;
   programs.mangohud = {
     enable = true;

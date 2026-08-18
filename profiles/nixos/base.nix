@@ -12,8 +12,8 @@ in
   nix.registry.nixpkgs.flake = self.inputs.nixpkgs; # Pin nixpkgs registry to flake input: nix shell nixpkgs#hello
   nix.gc = {
     automatic = true;
-    dates = "monthly";
-    options = "--delete-older-than 30d";
+    dates = "weekly";
+    options = "--delete-older-than 7d";
   };
 
   # Boot

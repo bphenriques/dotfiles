@@ -20,12 +20,6 @@ _final: prev: let
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
-    romm = {
-      image = "docker.io/rommapp/romm";
-      version = "5.1.0";
-      homepage = "https://github.com/rommapp/romm";
-      updateInfo = { repo = "rommapp/romm"; };
-    };
     nextchat = {
       image = "docker.io/yidadaa/chatgpt-next-web";
       version = "2.16.1";

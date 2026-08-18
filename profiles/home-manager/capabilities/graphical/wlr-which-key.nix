@@ -5,7 +5,7 @@ let
 
   terminal = config.custom.programs.terminal;
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.wlr-which-key = {
     enable = true;
     settings = {

@@ -19,13 +19,13 @@ in
         command = lib.getExe config.programs.fish.package;
       };
 
-      linux = lib.optionalAttrs pkgs.stdenv.isLinux {
+      linux = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         gtk-single-instance = true;
         window-decoration = true;
         quit-after-last-window-closed = false; # Reduces latency when opening new windows
       };
 
-      darwin = lib.optionalAttrs pkgs.stdenv.isDarwin {
+      darwin = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         window-colorspace = "display-p3";
         macos-non-native-fullscreen = "visible-menu";
         macos-option-as-alt = "left";
@@ -34,12 +34,12 @@ in
     in lib.mergeAttrsList [ common linux darwin ];
   };
 
-  xdg.mimeApps.defaultApplications = lib.mkIf pkgs.stdenv.isLinux {
+  xdg.mimeApps.defaultApplications = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     "x-scheme-handler/terminal" = [ "Ghostty.desktop" ];
     "x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
   };
 
-  custom.programs.niri = lib.mkIf pkgs.stdenv.isLinux {
+  custom.programs.niri = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     spawnShAtStartup = [ config.custom.programs.terminal.exec ];
     windowRules = {
       byApp = [

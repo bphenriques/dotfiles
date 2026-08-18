@@ -116,7 +116,7 @@ in
 
       # Personal tools
       "bphenriques-tools/"
-    ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
       ".DS_Store"
       ".DS_Store?"
       ".Spotlight-V100"

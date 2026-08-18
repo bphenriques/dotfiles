@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.jetbrains.idea ];
 
   custom.programs.niri.windowRules.byApp = [
