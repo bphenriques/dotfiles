@@ -22,29 +22,20 @@ let
         importPaths = [ "${root}/photos/inbox" ];
       }
     ];
-in
-{
-  selfhost = {
-    apps.immich.enable = true;
 
-    services.immich = {
-      subdomain = "photos";
-      access.allowedGroups = [ config.selfhost.groups.admin ];
-      extraConfig.landingPage.enable = true;
-      systemdServices = [ "immich-server" ];
-      storage.mounts = photoUsers;
+  throttled =
+    { max, high }:
+    {
+      Slice = lib.mkForce "throttled.slice";
+      MemoryMax = max;
+      MemoryHigh = high;
     };
 
-    users = lib.genAttrs photoUsers (user: { services.immich.libraries = mkLibraries user; });
-  };
-
-  services.immich = {
-    settings = {
-      passwordLogin.enabled = true; # TODO: review whether this is still needed after OIDC is fully rolled out
-      library.watch.enabled = false; # inotify doesn't fire on the CIFS-mounted library; the nightly library.scan covers it
-
+  # No iGPU: it is reserved for Jellyfin and cannot be throttled, so sharing it cooks a small passive box.
+  serverBudget = {
+    services.immich.settings = {
       ffmpeg = {
-        accel = "disabled"; # CPU-only; iGPU reserved for Jellyfin and I can't throttle GPU. Both will lead to thermal issues in a small device.
+        accel = "disabled";
         accelDecode = false;
         acceptedVideoCodecs = [
           "h264"
@@ -54,43 +45,75 @@ in
         threads = 2;
       };
 
+      job = {
+        videoConversion.concurrency = 1;
+        thumbnailGeneration.concurrency = 1;
+      };
+    };
+
+    systemd.services.immich-server.serviceConfig = throttled {
+      max = "4G";
+      high = "3G";
+    };
+  };
+
+  # The memory-hungry half. Single-threaded to stay inside its cap rather than be OOM-killed mid-job.
+  mlBudget = {
+    services.immich.settings.job = {
+      faceDetection.concurrency = 1;
+      smartSearch.concurrency = 1;
+    };
+
+    services.immich.machine-learning.environment = {
+      MACHINE_LEARNING_REQUEST_THREADS = "1";
+      MACHINE_LEARNING_MODEL_INTRA_OP_THREADS = "1";
+    };
+
+    systemd.services.immich-machine-learning.serviceConfig = throttled {
+      max = "5G";
+      high = "4G";
+    };
+  };
+
+  # Keep the heavy scans off the hours anyone is using the box.
+  offPeakSchedule = {
+    services.immich.settings = {
+      library.scan.cronExpression = "0 3 * * *";
+      nightlyTasks.startTime = "02:00";
+    };
+  };
+in
+lib.mkMerge [
+  serverBudget
+  mlBudget
+  offPeakSchedule
+
+  {
+    selfhost = {
+      apps.immich.enable = true;
+
+      services.immich = {
+        subdomain = "photos";
+        access.allowedGroups = [ config.selfhost.groups.admin ];
+        extraConfig.landingPage.enable = true;
+        systemdServices = [ "immich-server" ];
+        storage.mounts = photoUsers;
+      };
+
+      users = lib.genAttrs photoUsers (user: { services.immich.libraries = mkLibraries user; });
+    };
+
+    services.immich.settings = {
+      passwordLogin.enabled = true; # TODO: review whether this is still needed after OIDC is fully rolled out
+      library.watch.enabled = false; # inotify doesn't fire on the CIFS-mounted library; the nightly library.scan covers it
+
       storageTemplate = {
         enabled = true;
         hashVerificationEnabled = true;
         template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
       };
-
-      # Reduce job concurrency: ML for memory pressure, thumbnails for CPU/thermal
-      job = {
-        videoConversion.concurrency = 1;
-        thumbnailGeneration.concurrency = 1;
-        faceDetection.concurrency = 1;
-        smartSearch.concurrency = 1;
-      };
-
-      # Spread nightly work
-      library.scan.cronExpression = "0 3 * * *";
-      nightlyTasks.startTime = "02:00";
     };
 
-    # Reduce ML thread usage
-    machine-learning.environment = {
-      MACHINE_LEARNING_REQUEST_THREADS = "1";
-      MACHINE_LEARNING_MODEL_INTRA_OP_THREADS = "1";
-    };
-  };
-
-  users.users.immich.extraGroups = map (user: selfhostMounts.${user}.group) photoUsers;
-
-  systemd.services.immich-server.serviceConfig = {
-    Slice = lib.mkForce "throttled.slice";
-    MemoryMax = "4G";
-    MemoryHigh = "3G";
-  };
-
-  systemd.services.immich-machine-learning.serviceConfig = {
-    Slice = lib.mkForce "throttled.slice";
-    MemoryMax = "5G";
-    MemoryHigh = "4G";
-  };
-}
+    users.users.immich.extraGroups = map (user: selfhostMounts.${user}.group) photoUsers;
+  }
+]

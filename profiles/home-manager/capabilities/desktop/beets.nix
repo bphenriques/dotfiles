@@ -12,9 +12,11 @@ let
   # Docs: https://beets.readthedocs.io/en/stable/plugins/index.html
   plugins = let
     providers = [ "musicbrainz" "chroma" "spotify" "deezer" ];
-    metadata  = [ "fetchart" "embedart" "lyrics" "mbsync" ]; # lastgenre
+    # mbsubmit adds "Print tracks"/Picard choices when an import finds no MusicBrainz match.
+    # After the fact: `beet mbsubmit <query>` prints a listing for MusicBrainz's track parser.
+    metadata  = [ "fetchart" "embedart" "lyrics" "mbsync" "mbsubmit" "replaygain" ]; # lastgenre
     health    = [ "duplicates" "badfiles" "unimported" ];
-    utility   = [ "edit" "playlist" "scrub" "fish" ]; # https://beets.readthedocs.io/en/stable/plugins/smartplaylist.html
+    utility   = [ "edit" "playlist" "smartplaylist" "scrub" "fish" ];
   in providers ++ health ++ metadata ++ utility;
   basePackage = pkgs.python3.pkgs.beets.override {
     # Reference: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/audio/beets/builtin-plugins.nix
@@ -55,6 +57,8 @@ let
       beet fetchart     # fetch missing covers (cautious)
       beet embedart     # embed covers into files
       beet lyrics       # fetch missing (synced) lyrics
+      beet replaygain -a # album-gain analysis; skips files already tagged
+      beet splupdate    # regenerate smart playlists
       beet bad          # report unplayable files
       beet duplicates   # report duplicate items
       beet unimported   # report files on disk beets isn't tracking
@@ -85,6 +89,16 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         cautious = true;
       };
       lyrics.synced = true;
+      replaygain.backend = "ffmpeg"; # default `command` backend (mp3gain) covers fewer formats than this library uses
+      smartplaylist = {
+        relative_to = musicLibrary;
+        playlist_dir = "${osConfig.custom.shares.media.root}/music/playlists";
+        # Generated files land beside the hand-written radio-*.m3u, so keep names distinct.
+        playlists = [
+          { name = "1990s.m3u"; query = "year:1990..1999"; }
+          { name = "2000s.m3u"; query = "year:2000..2009"; }
+        ];
+      };
       musicbrainz = {
         extra_tags = ["catalognum" "country" "label" "media" "year"];
       };
