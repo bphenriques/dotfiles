@@ -6,6 +6,7 @@
     ./lang-scala.nix      # Programming language
     ./jetbrains.nix       # IDE
     ./claude-code.nix     # AI Assistant
+    ./omp.nix             # AI Assistant
     ./helix.nix           # Editor
     ./zellij.nix          # Terminal multiplexer
   ];
