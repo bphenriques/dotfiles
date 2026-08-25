@@ -6,7 +6,7 @@
     enable = true;
     autoEnable = false;
 
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/onedark.yaml";
+    base16Scheme = "${inputs.tinted-schemes}/base16/onedark.yaml";
 
     polarity = "dark";
 

@@ -20,6 +20,7 @@ in
       root = mountedRoot "bphenriques";
     };
     media.root = mountedRoot "media";
+    shared.root = mountedRoot "shared";
   };
 
   sops = {

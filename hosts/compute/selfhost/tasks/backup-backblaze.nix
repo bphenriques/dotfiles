@@ -11,10 +11,10 @@ in
   custom.shares = {
     bphenriques.backup = true;
     media.backup = true;
+    shared.backup = true;
   };
 
-  # Opt-in is the safe default for a per-byte cost, but a share nobody decided about should not stay
-  # quiet: `shared` was mounted and unbacked for a long time without anything saying so.
+  # Opt-in is the safe default for a per-byte cost, but exclusions must remain visible.
   warnings = lib.optional (
     skipped != [ ]
   ) "Shares mounted here but excluded from the off-site backup: ${toString skipped}. Set custom.shares.<name>.backup if unintended.";
