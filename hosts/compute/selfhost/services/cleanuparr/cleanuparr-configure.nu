@@ -54,7 +54,7 @@ def put_config [token: string, section: string, payload: record] {
 }
 
 # Nested records merge one level deep, which covers every section here.
-def overlay [current: record, changes: record] {
+def merge_nested [current: record, changes: record] {
   $changes | transpose key value | reduce --fold $current { |it, acc|
     let existing = $acc | get -o $it.key
     let merged = if ($existing | describe | str starts-with "record") and ($it.value | describe | str starts-with "record") {
@@ -68,7 +68,7 @@ def overlay [current: record, changes: record] {
 
 def apply_section [token: string, section: string, changes: record] {
   let current = get_config $token $section
-  let desired = overlay $current $changes
+  let desired = merge_nested $current $changes
   if $desired == $current {
     print $"  ($section) already matches"
     return

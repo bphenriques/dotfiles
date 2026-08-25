@@ -12,7 +12,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";        # Stable(ish) enough. Plus home-manager is _always_ on unstable.
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";          # Stable(ish) enough. Plus home-manager is _always_ on unstable.
 
     # Personal flakes
     dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private"; # Private dotfiles

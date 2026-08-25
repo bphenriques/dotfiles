@@ -3,6 +3,7 @@ let
   fleet = config.custom.fleet;
 in
 {
+  # TODO: Move to a docker
   services.ollama = {
     enable = true;
     package = pkgs.ollama-cuda;
@@ -18,9 +19,4 @@ in
       OLLAMA_KEEP_ALIVE = "1h";
     };
   };
-
-  # Only compute's NAT egress reaches Ollama; scoped by IP so it survives interface renames.
-  networking.firewall.extraCommands = ''
-    iptables -I nixos-fw -p tcp -s ${fleet.lan.hosts.compute} --dport 11434 -j nixos-fw-accept
-  '';
 }

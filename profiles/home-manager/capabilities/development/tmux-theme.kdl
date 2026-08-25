@@ -1,0 +1,126 @@
+themes {
+    tmux {
+        text_unselected {
+            base "#abb2bf"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#e5c07b"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        // message-style bg=yellow,fg=black
+        text_selected {
+            base "#282c34"
+            background "#e5c07b"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#282c34"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        // window-status-format
+        ribbon_unselected {
+            base "#e5c07b"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#abb2bf"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        // window-status-current-format bg=yellow fg=black
+        ribbon_selected {
+            base "#282c34"
+            background "#e5c07b"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#282c34"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        table_title {
+            base "#e5c07b"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#abb2bf"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        table_cell_unselected {
+            base "#abb2bf"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#e5c07b"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        // mode-style bg=white,fg=black
+        table_cell_selected {
+            base "#282c34"
+            background "#c8ccd4"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#e5c07b"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        list_unselected {
+            base "#abb2bf"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#e5c07b"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        list_selected {
+            base "#282c34"
+            background "#c8ccd4"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#e5c07b"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#545862"
+        }
+        // pane-active-border-style fg=yellow
+        frame_selected {
+            base "#e5c07b"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#abb2bf"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#282c34"
+        }
+        // zoom and broadcast markers
+        frame_highlight {
+            base "#7ba9ec"
+            background "#282c34"
+            emphasis_0 "#e5c07b"
+            emphasis_1 "#7ba9ec"
+            emphasis_2 "#7ba9ec"
+            emphasis_3 "#7ba9ec"
+        }
+        exit_code_success {
+            base "#98c379"
+            background "#282c34"
+            emphasis_0 "#7ba9ec"
+            emphasis_1 "#545862"
+            emphasis_2 "#e5c07b"
+            emphasis_3 "#abb2bf"
+        }
+        exit_code_error {
+            base "#e06c75"
+            background "#282c34"
+            emphasis_0 "#e5c07b"
+            emphasis_1 "#282c34"
+            emphasis_2 "#282c34"
+            emphasis_3 "#282c34"
+        }
+        multiplayer_user_colors {
+            player_1 "#7ba9ec"
+            player_2 "#e5c07b"
+            player_3 "#98c379"
+            player_4 "#c678dd"
+            player_5 "#56b6c2"
+            player_6 "#d19a66"
+            player_7 "#e06c75"
+            player_8 "#abb2bf"
+            player_9 "#545862"
+            player_10 "#c8ccd4"
+        }
+    }
+}

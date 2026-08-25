@@ -15,7 +15,10 @@ in
     ../../profiles/nixos/capabilities/gaming
     ../../profiles/nixos/capabilities/selfhost-smb-client.nix
     ./share-mount.nix
-    ./ollama.nix
+
+    # Removed since I am going to move to an AI machine
+    #./ollama.nix
+    #./firewall.nix
     # Users
     ./bphenriques
   ];

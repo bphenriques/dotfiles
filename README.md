@@ -19,16 +19,17 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 
 ## Hosts
 
-| Host                                | Platform      | Description                                                                          |
-|-------------------------------------|---------------|--------------------------------------------------------------------------------------|
-| [storage](./hosts/storage)          | NixOS         | Placeholder for a machine dedicated to data storage                                  |
-| [ai](./hosts/ai)                    | NixOS         | Placeholder for a machine dedicated to AI inference                                  |
-| [compute](./hosts/compute)          | NixOS         | Homelab using my [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) flake |
-| [laptop](./hosts/laptop)            | NixOS         | Personal workstation                                                                 |
-| [share-vm](./hosts/guests/share-vm) | NixOS microVM | Public file sharing on `compute`, exposed only via Tailscale Funnel                  |
-| [cv-vm](./hosts/guests/cv-vm)       | NixOS microVM | Public static CV landing page on `compute`, exposed only via Cloudflare Tunnel       |
-| [agent-vm](./hosts/guests/agent-vm) | NixOS microVM | Private AI assistant (hermes-agent) on `compute`                                     |
-| [inky](./hosts/inky)                | Raspberry Pi  | Raspberry Pi Zero 2W connected to Inky Impression and speakers                       |
+| Host                                   | Platform      | Description                                                    |
+| -------------------------------------- | ------------- | -------------------------------------------------------------- |
+| [laptop](./hosts/laptop)               | NixOS         | Personal laptop                                                |
+| [compute](./hosts/compute)             | NixOS         | Compute headless server                                        |
+| [storage](./hosts/storage)             | NixOS         | Placeholder. Headless NAS                                      |
+| [ai](./hosts/ai)                       | NixOS         | Placeholder. Headless AI inference                             |
+| [share-vm](./hosts/guests/share-vm)    | NixOS microVM | Private file sharing service exposed only via Tailscale Funnel |
+| [cv-vm](./hosts/guests/cv-vm)          | NixOS microVM | Public landing page exposed only via Cloudflare Tunnel         |
+| [agent-vm](./hosts/guests/agent-vm)    | NixOS microVM | Private AI assistant                                           |
+| [phone-android](./hosts/phone-android) | Android       | Termux client                                                  |
+| [inky](./hosts/inky)                   | Raspberry Pi  | Raspberry Pi Zero 2W connected to Inky Screen and speakers     |
 
 ## Nix Stack
 
@@ -47,9 +48,9 @@ Key dependencies:
 - [`stylix`](https://github.com/danth/stylix) for consistent theming
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
-- [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) that abstracts common concerns around self-hosting (Reverse Proxy, OIDC, and Secrets)
-- [`infra`](./infra) that setups my Cloudflare account through IaC.
+- [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) personal flake that does the heavy-lifting when it comes to self-hosting (reverse Proxy, OIDC, and secrets)
 - `dotfiles-private` private dependency to store private information (SOPS secrets, personal information, and wallpapers)
+- [`infra`](./infra) that setups my Cloudflare account through IaC.
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 
