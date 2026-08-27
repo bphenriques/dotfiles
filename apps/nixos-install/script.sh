@@ -49,7 +49,7 @@ remote_install() {
   local -a extraArgs=()
 
   # Ensure critical secrets are deleted (sops age key, luks key) even if the script fails
-  trap 'rm -rf "${post_format_files:-}" "${luks_files:-}"' EXIT
+  trap 'rm -rf "${post_format_files:-}" "${luks_files:-}" "${zfs_keys:-}"' EXIT
 
   # Pre-flight check: requires local clone (remote runs use FLAKE_URL for actual install)
   ! test -d "${DOTFILES_LOCATION}" && fatal "dotfiles folder not found: ${DOTFILES_LOCATION}"
@@ -66,6 +66,24 @@ remote_install() {
   else
     fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
   fi
+
+  # Native-encrypted pools need their key in the installer before disko runs, and on the installed root
+  # for every boot after. Pool names and key locations come from the host config; the value comes from
+  # its sops file, decrypted with the operator age key.
+  info "Checking for native-encrypted ZFS pools..."
+  zfs_keys="$(mktemp -d)"
+  sops_file="$(nix eval --raw "${FLAKE_URL}#nixosConfigurations.${host}.config.sops.defaultSopsFile" 2>/dev/null || true)"
+  while read -r pool; do
+    keylocation="$(nix eval --raw "${FLAKE_URL}#nixosConfigurations.${host}.config.disko.devices.zpool.${pool}.rootFsOptions.keylocation" 2>/dev/null || true)"
+    [[ $keylocation == file://* ]] || continue
+    test -n "$sops_file" || fatal "Pool ${pool} wants a key file but ${host} has no sops file"
+    key_path="${keylocation#file://}"
+    info "Decrypting ${pool} pool key..."
+    sops decrypt --extract "[\"zfs\"][\"${pool}-key\"]" --output-type binary "$sops_file" >"${zfs_keys}/${pool}.key"
+    chmod 0400 "${zfs_keys}/${pool}.key"
+    install -D -m 0400 "${zfs_keys}/${pool}.key" "${post_format_files}${key_path}"
+    extraArgs+=("--disk-encryption-keys" "$key_path" "${zfs_keys}/${pool}.key")
+  done < <(nix eval --json "${FLAKE_URL}#nixosConfigurations.${host}.config.disko.devices.zpool" --apply builtins.attrNames | jq -r ".[]")
 
   info "Checking for luks encryption keys..."
   luks_files="$(mktemp -d)"
@@ -106,6 +124,12 @@ local_install() {
 
   info "Formatting disks..."
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
+
+  for zfs_key in /var/lib/zfs/*.key; do
+    [ -e "$zfs_key" ] || continue
+    info "Copying ZFS key ${zfs_key} to the installed root..."
+    sudo install -D -m 0400 -o root -g root "$zfs_key" "/mnt${zfs_key}"
+  done
 
   info "Fetching sops key for ${host}..."
   if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then

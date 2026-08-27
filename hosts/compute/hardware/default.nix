@@ -6,7 +6,10 @@
 
   # Disk
   services.fstrim.enable = true;  # Weekly TRIM for NVMe longevity
-  services.smartd.enable = true;  # Disk health
+  services.smartd = {
+    enable = true;
+    defaults.autodetected = "-a -s (S/../../7/02|L/../01/./03)";  # Short test Sun 02:00, long test 1st of month 03:00
+  };
 
   # RAM: ~8GB on 32GB RAM. OOM safety net without NVMe wear
   zramSwap = {
@@ -27,7 +30,6 @@
   environment.systemPackages = [ pkgs.intel-gpu-tools ];
   boot.kernelParams = [
     "i915.enable_guc=3"                 # Enable GuC/HuC firmware for better media scheduling
-    "block.events_dfl_poll_msecs=0"     # Disable removable media polling (no optical drives)
   ];
 
   # bond0 over enp1s0/enp2s0 (active-backup) via systemd-networkd. The bond MAC is pinned to
@@ -64,12 +66,12 @@
     cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
   };
 
-  # UPS NUT client: For credentials update `cat /etc/ups/upsd.users` on the Synology NAS and restart `synosystemctl restart ups-usb`
+  # UPS NUT client. Credentials are storage's `ups/compute-password`.
   power.ups = {
     enable = true;
     mode = "netclient";
-    upsmon.monitor.synology = {
-      system = "ups@${config.custom.fleet.lan.hosts.bruno-home-nas}";
+    upsmon.monitor.storage = {
+      system = "storage@${config.custom.fleet.lan.hosts.storage}";
       powerValue = 1;
       user = "compute";
       passwordFile = config.sops.secrets."upsmon/password".path;

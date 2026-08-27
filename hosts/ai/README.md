@@ -283,7 +283,7 @@ The parts NixOS owns, all of which need confirming on the actual hardware.
 **Kernel**: a hard floor, not a preference. Kernels older than 6.18.4 carry a `gfx1151` stability
 bug, and the known-good stack asks for in-tree `amdgpu` at 6.19.2 or newer. The fleet's 7.1 clears
 both comfortably, so this is only a constraint on ever pinning backwards. Worth noting the contrast
-with the [Beelink](../storage/beelink.md), which pins 6.18 LTS for ZFS: **do not copy that pin here.**
+with the [Beelink](../storage/README.md), which pins 6.18 LTS for ZFS: **do not copy that pin here.**
 Nothing on this host pins the kernel, and it must stay that way.
 
 **BIOS**: UMA framebuffer to its minimum (512MB), and **IOMMU enabled** (required for the NPU).
@@ -342,8 +342,7 @@ idle most of the day and the assistant tolerates latency better than the househo
 heater.
 
 If it shares the UPS it joins the NUT client set, but the NUT server itself is moving to the
-[Beelink](../storage/beelink.md), so sequence this after that migration rather than pointing at the
-Synology.
+[Beelink](../storage/README.md), which now serves it.
 
 ## Fleet impact
 

@@ -4,7 +4,11 @@ let
   prometheusCfg = config.selfhost.services.prometheus;
   json = pkgs.formats.json { };
 
-  computeDashboard = json.generate "compute.json" (import ./dashboard.nix config.networking.hostName config.homelab.microvm.host.guests);
+  computeDashboard = json.generate "compute.json" (import ./dashboard.nix {
+    hostName = config.networking.hostName;
+    guests = config.homelab.microvm.host.guests;
+    storageName = "storage"; # the instance label ../storage.nix attaches to the NAS scrape jobs
+  });
 in
 {
   selfhost = {

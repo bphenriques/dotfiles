@@ -3,7 +3,7 @@ let
   shared = import ../shared.nix;
 
   # SMB mounts: share name → gid (mirrors selfhost-nix storage/smb.nix conventions)
-  nasIP = shared.lan.hosts.bruno-home-nas;
+  nasIP = shared.lan.hosts.storage;
 
   mounts = {
     media = { gid = 5001; };

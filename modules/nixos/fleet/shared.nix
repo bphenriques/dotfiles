@@ -31,6 +31,11 @@
       description = "MicroVM host to its { guest hostname -> bridge IP } table";
     };
 
+    media.downloadCategories = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      description = "Download-client category per arr. The client writes completed downloads to <download-dir>/<category>, and the NAS precreates those directories.";
+    };
+
     ai = {
       model = lib.mkOption {
         type = lib.types.str;

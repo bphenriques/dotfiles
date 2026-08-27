@@ -24,6 +24,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     stylix.url = "github:danth/stylix";                                 # Consistent coloring across my system. I can still tweak manually.
+    tinted-schemes.follows = "stylix/tinted-schemes";
     nur.url = "github:nix-community/nur";                               # Collection of packages. Use it for Firefox extensions
     sops-nix.url = "github:Mic92/sops-nix";                             # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
@@ -99,6 +100,10 @@
         compute = mkNixosHost {
           hostName = "compute";
           configPath = ./hosts/compute;
+        };
+        storage = mkNixosHost {
+          hostName = "storage";
+          configPath = ./hosts/storage;
         };
       } // microvmGuests;
     };

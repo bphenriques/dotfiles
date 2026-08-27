@@ -1,13 +1,13 @@
 { lib, pkgs, config, ... }:
 let
-  upsmon = config.power.ups.upsmon.monitor.synology;
+  upsmon = config.power.ups.upsmon.monitor.storage;
   parsed = builtins.match "([^@]+)@(.+)" upsmon.system;
   upsName = builtins.elemAt parsed 0;
   nutServer = builtins.elemAt parsed 1;
 in
 {
-  selfhost.monitoring.scopes.ups = lib.mkIf (config.power.ups.enable && config.power.ups.upsmon.monitor ? synology) (
-    assert lib.assertMsg (parsed != null) "power.ups.upsmon.monitor.synology.system must be \"ups@host\" (got: ${upsmon.system})";
+  selfhost.monitoring.scopes.ups = lib.mkIf (config.power.ups.enable && config.power.ups.upsmon.monitor ? storage) (
+    assert lib.assertMsg (parsed != null) "power.ups.upsmon.monitor.storage.system must be \"ups@host\" (got: ${upsmon.system})";
   {
     exporters.nut = {
       enable = true;

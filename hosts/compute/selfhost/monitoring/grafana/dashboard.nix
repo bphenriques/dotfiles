@@ -1,17 +1,18 @@
-# Single dashboard for the whole box: an always-visible fleet strip (host + guests), then one
-# collapsed detail row per entity — host first (richest), then each microVM guest. Guest rows are
+# Single dashboard for the fleet: an always-visible strip (host, NAS and guests), then one collapsed
+# detail row per entity, host first (richest), then the NAS, then each microVM guest. Guest rows are
 # generated from config.homelab.microvm.host.guests (the table that also drives scrape/alerts), so
 # a new guest needs no edit here. Host and guest CPU/IO share one time axis for easy correlation:
 # the guests run on the host's own cores.
-hostName: guests:
+{ hostName, guests, storageName }:
 let
   inherit (import ./lib.nix) mkPanel mkStat mkRow layout2 fullW;
 
   hostInst = ''instance="${hostName}"'';
+  storageInst = ''instance="${storageName}"'';
   names = builtins.attrNames guests;
   guestInst = builtins.concatStringsSep "|" names;  # RE2 is fully anchored: matches node jobs, not *-traefik
-  allInst = "${hostName}|${guestInst}";
-  nodeJobs = "node|${guestInst}";  # host node-exporter job is "node"; each guest's job is its name
+  allInst = "${hostName}|${storageName}|${guestInst}";
+  nodeJobs = "node|storage-node|${guestInst}";  # host node-exporter job is "node"; each guest's job is its name
   pct = { mode = "absolute"; steps = [ { color = "green"; value = null; } { color = "yellow"; value = 60; } { color = "red"; value = 85; } ]; };
 
   hostSpecs = [
@@ -94,16 +95,94 @@ let
   hostRow = mkRow {
     id = 100;
     title = "${hostName} (host)";
-    gridPos = { x = 0; y = 6; w = fullW; h = 1; };
+    gridPos = { x = 0; y = 10; w = fullW; h = 1; };
     collapsed = true;
-    panels = map mkPanel (layout2 7 hostSpecs);
+    panels = map mkPanel (layout2 11 hostSpecs);
+  };
+
+  # The NAS is scraped by three exporters under one instance label: storage-node, storage-smartctl and
+  # storage-zfs. Pool figures come from the zfs exporter, disk temperatures from smartctl.
+  storageSpecs = [
+    {
+      id = 201;
+      title = "CPU Usage";
+      unit = "percent";
+      legend = "CPU %";
+      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${storageInst},mode="idle"}[5m]))) * 100'';
+    }
+    {
+      id = 202;
+      title = "Memory Usage";
+      unit = "bytes";
+      # ARC is kernel slab, so it lands in Used rather than cache; panel 204 breaks it out.
+      expr = [
+        { expr = ''node_memory_MemTotal_bytes{${storageInst}} - node_memory_MemAvailable_bytes{${storageInst}}''; legend = "Used"; }
+        { expr = ''node_memory_MemAvailable_bytes{${storageInst}}''; legend = "Available"; }
+      ];
+    }
+    {
+      id = 203;
+      title = "ZFS Pool";
+      unit = "bytes";
+      expr = [
+        { expr = ''zfs_pool_size_bytes{${storageInst}}''; legend = "{{pool}} total"; }
+        { expr = ''zfs_pool_allocated_bytes{${storageInst}}''; legend = "{{pool}} used"; }
+      ];
+    }
+    {
+      id = 204;
+      title = "ZFS ARC";
+      unit = "bytes";
+      expr = [
+        { expr = ''node_zfs_arc_size{${storageInst}}''; legend = "ARC size"; }
+        { expr = ''node_zfs_arc_c_max{${storageInst}}''; legend = "ARC max"; }
+      ];
+    }
+    {
+      id = 205;
+      title = "Disk Temperatures";
+      unit = "celsius";
+      legend = "{{device}}";
+      expr = ''smartctl_device_temperature{${storageInst},temperature_type="current"}'';
+      # Matches the HDD alert in smartctl.nix, which fires above 50.
+      thresholds = {
+        mode = "absolute";
+        steps = [ { color = "green"; value = null; } { color = "yellow"; value = 45; } { color = "red"; value = 50; } ];
+      };
+    }
+    {
+      id = 206;
+      title = "Network Bandwidth";
+      unit = "Bps";
+      expr = [
+        { expr = ''sum(rate(node_network_receive_bytes_total{${storageInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "RX"; }
+        { expr = ''sum(rate(node_network_transmit_bytes_total{${storageInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "TX"; }
+      ];
+    }
+    {
+      id = 207;
+      title = "Disk Usage (Root)";
+      unit = "bytes";
+      expr = [
+        { expr = ''node_filesystem_size_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
+        { expr = ''node_filesystem_size_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
+      ];
+    }
+  ];
+
+  storageRow = mkRow {
+    id = 200;
+    title = "${storageName} (NAS)";
+    gridPos = { x = 0; y = 11; w = fullW; h = 1; };
+    collapsed = true;
+    panels = map mkPanel (layout2 12 storageSpecs);
   };
 
   mkVmRow = i: name:
     let
       mon = guests.${name}.monitoring;
       inst = ''instance="${name}"'';
-      rowY = 7 + i;  # after the fleet strip (y0..6) and the host row (y6)
+      rowY = 12 + i;  # after the fleet strip (y0..9), the host row (y10) and the NAS row (y11)
       base = 10 * (i + 1);
       specs =
         [
@@ -187,6 +266,30 @@ in
       thresholds = pct;
       gridPos = { x = 16; y = 1; w = 8; h = 5; };
     })
+    (mkStat {
+      id = 5;
+      title = "Pool Free";
+      unit = "percent";
+      # Percent rather than bytes so the thresholds keep tracking the 85%/90%-full policy at any pool size.
+      expr = ''(zfs_pool_free_bytes{${storageInst}} / zfs_pool_size_bytes{${storageInst}}) * 100'';
+      legend = "{{pool}}";
+      thresholds = {
+        mode = "absolute";
+        steps = [ { color = "red"; value = null; } { color = "yellow"; value = 10; } { color = "green"; value = 15; } ];
+      };
+      gridPos = { x = 0; y = 6; w = 12; h = 4; };
+    })
+    (mkStat {
+      id = 6;
+      title = "SMART";
+      # min: one failing device drops its whole host to FAIL.
+      expr = ''min by(instance) (smartctl_device_smart_status)'';
+      colorMode = "background";
+      thresholds = { mode = "absolute"; steps = [ { color = "red"; value = null; } { color = "green"; value = 1; } ]; };
+      mappings = [{ type = "value"; options = { "0" = { text = "FAIL"; }; "1" = { text = "OK"; }; }; }];
+      gridPos = { x = 12; y = 6; w = 12; h = 4; };
+    })
     hostRow
+    storageRow
   ] ++ builtins.genList (i: mkVmRow i (builtins.elemAt names i)) (builtins.length names);
 }

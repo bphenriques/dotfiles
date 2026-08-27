@@ -4,6 +4,7 @@
     ./grafana
     ./ups.nix
     ./smartctl.nix
+    ./storage.nix
   ];
 
   selfhost.monitoring.scopes.node = {

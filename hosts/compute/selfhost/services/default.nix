@@ -28,12 +28,6 @@ in
   ];
 
   selfhost.external = {
-    synology-dsm = {
-      displayName = "Synology";
-      meta.description = "NAS";
-      url = "http://${hosts.bruno-home-nas}:5000";
-      integrations.homepage.group = "Admin";
-    };
     inky = {
       displayName = "Inky";
       meta.description = "E-Ink Display";

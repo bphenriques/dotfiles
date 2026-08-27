@@ -61,6 +61,8 @@ in
     ../../../profiles/nixos/capabilities/selfhost-smb-client.nix
   ];
 
+  custom.shares.bphenriques.personal = true;
+
   custom = {
     locale = {
       timezone = config.time.timeZone;
@@ -112,6 +114,8 @@ in
 
     notify = {
       ntfy.enable = true;
+      # Storage runs no notify provider; its token is provisioned here and copied across by hand.
+      ntfy.remotePublishers.storage-backup.topic = "homelab-backup";
       topics = {
         media.public = true;
         download.public = false;

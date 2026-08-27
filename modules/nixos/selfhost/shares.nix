@@ -15,7 +15,7 @@
           root = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "Absolute local root. Null means this host does not have the share.";
+            description = "Absolute local root. A share this host does not have is simply absent from the attrset.";
           };
 
           backup = lib.mkOption {

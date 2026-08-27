@@ -33,6 +33,10 @@
    nix run --no-write-lock-file --extra-experimental-features 'nix-command flakes' github:bphenriques/dotfiles#nixos-install -- local "$HOST" "$BITWARDEN_EMAIL"   
    ```
 
+   For native-encrypted ZFS pools, the local path expects each key at `/var/lib/zfs/<pool>.key`
+   beforehand. The remote path needs nothing: it reads the pool list and key location from the host
+   config and decrypts the key from the host sops file with your own age key.
+
 3. (if workstation) Once installed and booted onto the NixOS installation run:
 
    ```shell

@@ -83,7 +83,7 @@ init_host() {
   fi
 
   # Only the two non-obvious placements for the generated key; the rest (secrets.yaml, rebuild) is the standard flow.
-  echo "Next: add the public key to .sops.yaml, and append the private key to ~/.config/sops/age/keys.txt"
+  echo "Next: add the public key to .sops.yaml, and append the private key to ~/.config/sops/age/keys.txt (chmod 600 it; age does not refuse a world-readable identity file)"
 }
 
 usage() {

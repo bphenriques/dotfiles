@@ -1,24 +1,5 @@
-{ config, lib, pkgs, ... }:
-let
-  inherit (config.custom) shares;
-  mounted = lib.filterAttrs (_: s: s.root != null) shares;
-  backed = lib.filterAttrs (_: s: s.backup) mounted;
-  skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
-in
+{ config, pkgs, ... }:
 {
-  selfhost.tasks.backup.integrations.notify.enable = true;
-
-  custom.shares = {
-    bphenriques.backup = true;
-    media.backup = true;
-    shared.backup = true;
-  };
-
-  # Opt-in is the safe default for a per-byte cost, but exclusions must remain visible.
-  warnings = lib.optional (
-    skipped != [ ]
-  ) "Shares mounted here but excluded from the off-site backup: ${toString skipped}. Set custom.shares.<name>.backup if unintended.";
-
   sops = {
     secrets."backup/b2/bucket" = { };
     secrets."backup/b2/bucket_id" = { };
@@ -51,14 +32,15 @@ in
         monthly = "1 year";
         yearly = "2 years";
       };
+      # Storage prunes this shared repository; rustic takes no lock, and two concurrent prunes read packs
+      # the other is deleting. Forget still runs here, and storage reclaims this host's space too.
+      prune = false;
       # App DBs (Immich/Miniflux/RomM) are deliberately not dumped — in a real disaster they are trivially
       # rebuilt (re-scan) or non-critical; the irreplaceable data (files, gitea repos, config) is covered here.
       services = [ "bazarr" "gitea" "home-assistant" "radarr" "radicale" "sonarr" ];
-      # Whole shares, so a new folder is protected by default; exclusions live in each share's
-      # .gitignore, which rustic honours via git-ignore.
-      bindings =
-        { "/system/homelab-secrets" = config.selfhost.runtimeSecretsDir; }
-        // lib.mapAttrs' (name: s: lib.nameValuePair "/nas/${name}" s.root) backed;
+      # The NAS shares are storage's job now: it reads the datasets locally and records their real
+      # ownership, where this host's CIFS mounts could only record a fabricated uid/gid.
+      bindings."/system/homelab-secrets" = config.selfhost.runtimeSecretsDir;
     };
   };
 }

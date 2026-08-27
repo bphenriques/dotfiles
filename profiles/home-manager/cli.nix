@@ -29,10 +29,6 @@ in
         SetEnv.TERM = "xterm-256color";   # Sane default across different terminals. Don't need more.
         AddKeysToAgent = "4h";            # Cache the keys temporarily but expire after 4 hours.
       };
-      "bruno-home-nas" = {
-        User = "Bruno-Admin";
-        Port = 6188;
-      };
       "pi-zero".User = "pi";
       "rg353m".User = "ark";
       "pixel".User = "bruno";
