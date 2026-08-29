@@ -4,12 +4,12 @@
   ...
 }:
 let
-  personal = lib.attrNames private.settings.storage.personalShares;
-  tankDevices = {
-    tank0 = "/dev/disk/by-id/ata-TOSHIBA_HDWG21C_X3H0A04AFP8G";
-    tank1 = "/dev/disk/by-id/ata-TOSHIBA_HDWG21C_X3H0A04JFP8G";
-  };
-  mkPoolDisks = pool: builtins.mapAttrs (_: device: {
+  runtimeMountOptions = [
+    "defaults"
+    "nofail"
+  ];
+
+  mkTankDisk = device: {
     type = "disk";
     inherit device;
     content = {
@@ -19,40 +19,28 @@ let
         end = "-8G";
         content = {
           type = "zfs";
-          inherit pool;
+          pool = "tank";
         };
       };
     };
-  });
-  runtimeMountOptions = [
-    "defaults"
-    "nofail"
-  ];
-  mkUserDataset = name: lib.nameValuePair "users/${name}" {
+  };
+
+  mkDataset = mountpoint: {
     type = "zfs_fs";
-    mountpoint = "/srv/storage/${name}";
+    inherit mountpoint;
     mountOptions = runtimeMountOptions;
   };
-  encryptedRootOptions = key: {
-    acltype = "posixacl";
-    atime = "off";
-    canmount = "off";
-    casesensitivity = "sensitive";
-    compression = "lz4";
-    dnodesize = "auto";
-    encryption = "aes-256-gcm";
-    keyformat = "hex";
-    keylocation = "file:///var/lib/zfs/${key}.key";
-    mountpoint = "none";
-    normalization = "formD";
-    snapdir = "hidden";
-    utf8only = "on";
-    xattr = "sa";
-  };
+
+  personalDatasets = lib.mapAttrs' (
+    name: _: lib.nameValuePair "users/${name}" (mkDataset "/srv/storage/${name}")
+  ) private.settings.storage.personalShares;
 in
 {
   disko.devices = {
-    disk = mkPoolDisks "tank" tankDevices;
+    disk = builtins.mapAttrs (_: mkTankDisk) {
+      tank0 = "/dev/disk/by-id/ata-TOSHIBA_HDWG21C_X3H0A04AFP8G";
+      tank1 = "/dev/disk/by-id/ata-TOSHIBA_HDWG21C_X3H0A04JFP8G";
+    };
 
     zpool.tank = {
       type = "zpool";
@@ -62,7 +50,22 @@ in
         autotrim = "off";
         compatibility = "openzfs-2.2";
       };
-      rootFsOptions = encryptedRootOptions "tank";
+      rootFsOptions = {
+        acltype = "posixacl";
+        atime = "off";
+        canmount = "off";
+        casesensitivity = "sensitive";
+        compression = "lz4";
+        dnodesize = "auto";
+        encryption = "aes-256-gcm";
+        keyformat = "hex";
+        keylocation = "file:///var/lib/zfs/tank.key";
+        mountpoint = "none";
+        normalization = "formD";
+        snapdir = "hidden";
+        utf8only = "on";
+        xattr = "sa";
+      };
       datasets = {
         users = {
           type = "zfs_fs";
@@ -71,34 +74,13 @@ in
             mountpoint = "none";
           };
         };
-        shared = {
-          type = "zfs_fs";
-          mountpoint = "/srv/storage/shared";
-          mountOptions = runtimeMountOptions;
-        };
-        media = {
-          type = "zfs_fs";
-          mountpoint = "/srv/storage/media";
-          mountOptions = runtimeMountOptions;
-          options.recordsize = "1M";
-        };
-        "media/music" = {
-          type = "zfs_fs";
-          mountpoint = "/srv/storage/media/music";
-          mountOptions = runtimeMountOptions;
-        };
-        "media/books" = {
-          type = "zfs_fs";
-          mountpoint = "/srv/storage/media/books";
-          mountOptions = runtimeMountOptions;
-        };
-        "media/gaming" = {
-          type = "zfs_fs";
-          mountpoint = "/srv/storage/media/gaming";
-          mountOptions = runtimeMountOptions;
-        };
+        shared = mkDataset "/srv/storage/shared";
+        media = mkDataset "/srv/storage/media" // { options.recordsize = "1M"; };
+        "media/music" = mkDataset "/srv/storage/media/music";
+        "media/books" = mkDataset "/srv/storage/media/books";
+        "media/gaming" = mkDataset "/srv/storage/media/gaming";
       }
-      // lib.listToAttrs (map mkUserDataset personal);
+      // personalDatasets;
     };
   };
 }

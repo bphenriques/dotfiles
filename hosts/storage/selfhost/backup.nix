@@ -12,7 +12,7 @@ let
   skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
 in
 {
-  # Opt-in is the safe default for a per-byte cost, but exclusions must remain visible.
+  # The opt-in silently omits, so the exclusions have to stay visible.
   warnings = lib.optional (
     skipped != [ ]
   ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set custom.storage.shares.<name>.backup if unintended.";

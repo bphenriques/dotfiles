@@ -2,7 +2,7 @@
 {
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
 
-  # smbd drops to the connecting user, so the login here is also the SMB principal declared under ./selfhost.
+  # Doubles as the SMB principal declared in ./selfhost: smbd resolves a session to this POSIX account.
   users.users.bphenriques = {
     isNormalUser = true;
     uid = 1000;

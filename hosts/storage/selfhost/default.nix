@@ -6,14 +6,10 @@
   ...
 }:
 let
-  # Passwords are this host's own secrets: the account lives here, not on the host the principal comes from.
-  smbAccount = name: {
-    enable = true;
-    passwordFile = config.sops.secrets."samba/${name}-password".path;
-  };
-
-  # Everyone else reaches their files through compute's applications; only these hold a direct SMB account.
-  smbPeople = [ "bphenriques" ];
+  # The registry decides who holds an account; the password is this host's own secret, since the account
+  # lives here rather than on the host the principal comes from.
+  smbPeople = lib.filterAttrs (_: p: p.storage.smb.enable or false) private.users;
+  smbPassword = name: config.sops.secrets."samba/${name}-password".path;
 
   serviceAccounts = {
     machine-compute = {
@@ -40,27 +36,37 @@ in
     ./backup.nix
   ];
 
-  # No services or ingress here: the backup pipeline, principal registries and SMB server all gate on this.
-  selfhost.enable = true;
+  selfhost = {
+    # No services or ingress here: the backup pipeline, principal registries and SMB server all gate on this.
+    enable = true;
 
-  # One spelling of each group name: the framework canonical names come from the household vocabulary
-  # rather than defaulting alongside it.
-  selfhost.groups = { inherit (private.groups) admin users; };
+    # One spelling of each group name: the canonical ones come from the household vocabulary.
+    groups = { inherit (private.groups) admin users; };
 
-  # Ids pinned: these own files on a pool that outlives the root recording the allocation.
-  selfhost.serviceAccounts = lib.mapAttrs (
-    name: account: account // { storage.smb = smbAccount name; }
-  ) serviceAccounts;
+    # Ids pinned: these own files on a pool that outlives the root recording the allocation.
+    serviceAccounts = lib.mapAttrs (
+      name: account:
+      account
+      // {
+        storage.smb = {
+          enable = true;
+          passwordFile = smbPassword name;
+        };
+      }
+    ) serviceAccounts;
 
-  # The same registry compute reads, so group membership is decided in one place. Per-service config is
-  # dropped: it belongs to the host running the service. A person with no SMB account is inert here.
-  selfhost.users = lib.mapAttrs (
-    name: person:
-    removeAttrs person [ "services" ]
-    // lib.optionalAttrs (lib.elem name smbPeople) { storage.smb = smbAccount name; }
-  ) private.users;
+    # The same registry compute reads, so membership is decided once. Per-service config belongs to the
+    # host running the service; a person with no SMB account is inert here.
+    users = lib.mapAttrs (
+      name: person:
+      removeAttrs person [ "services" ]
+      // lib.optionalAttrs (smbPeople ? ${name}) {
+        storage.smb = person.storage.smb // { passwordFile = smbPassword name; };
+      }
+    ) private.users;
+  };
 
   sops.secrets = lib.genAttrs (
-    map (name: "samba/${name}-password") (lib.attrNames serviceAccounts ++ smbPeople)
+    map (name: "samba/${name}-password") (lib.attrNames serviceAccounts ++ lib.attrNames smbPeople)
   ) (_: { restartUnits = [ "selfhost-smb-passwords.service" ]; });
 }

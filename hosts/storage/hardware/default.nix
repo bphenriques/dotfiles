@@ -1,8 +1,22 @@
-{ pkgs, ... }:
+{ pkgs, private, ... }:
 {
   imports = [ ./hardware-configuration.nix ];
 
   hardware.enableRedistributableFirmware = true;
+
+  networking = {
+    useDHCP = false;
+    useNetworkd = true;
+  };
+
+  # Only the RTL8126A 5GbE port is configured; the i226-V stays down as a fallback to wire by hand.
+  systemd.network.networks."10-lan" = {
+    matchConfig.MACAddress = private.settings.network.lanMAC;
+    networkConfig = {
+      DHCP = "ipv4";
+      IPv6AcceptRA = true;
+    };
+  };
 
   services = {
     fstrim.enable = true;
@@ -12,8 +26,7 @@
       # the nightly backup, all on the same two spindles.
       defaults.autodetected = "-a -s (S/../../7/02|L/../15/./07)";
     };
-    # No thermald: this chassis is not a mobile platform, so it exits at startup. The thermal risk
-    # here is drive temperature, not the CPU, and that is covered by the smartctl exporter.
+    # No thermald: it exits at startup here, and drive temperature is covered by the smartctl exporter.
   };
 
   zramSwap = {
@@ -28,7 +41,7 @@
   # No cpuFreqGovernor either: intel_pstate already defaults to powersave here.
 
   boot.blacklistedKernelModules = [
-    "mt7921e"    # WiFi (always wired); MediaTek here, unlike compute's iwlwifi
+    "mt7921e"    # WiFi (always wired)
     "btusb"      # Takes btrtl/btintel/btmtk/btbcm with it
     "bluetooth"
   ];

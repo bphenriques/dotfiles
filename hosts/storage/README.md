@@ -41,9 +41,9 @@ Alerting lives on compute by decision: a NAS should not be the thing that notice
 ## Shares
 
 - **Household**: `media` and `shared`. **Personal**: one dataset each under `tank/users`.
-- **Private settings** own personal share names, owners, Samba access and the 5GbE MAC. The host
-  derives datasets and snapshot policy from that one attrset and refuses to evaluate while it holds
-  placeholders; the SMB server itself is `selfhost.storage.shares.smb`, fed the same attrset.
+- **Private settings** own personal share names, owners, Samba access and the 5GbE MAC. Datasets and
+  their children are read back from `disko/pool.nix`, so the pool layout is declared once. The share
+  inventory in `shares/` is transport-neutral; the SMB view over it is `services/samba.nix`.
 - **Principals** are `selfhost.users` and `selfhost.serviceAccounts` entries with `storage.smb.enable`.
   Holding an account is separate from being let into a share: grants live on the share, and a share can
   be owned by a principal holding none. Clients must speak SMB 3.1.1.
@@ -139,6 +139,35 @@ Standing constraints:
 - Do not run `zpool upgrade` automatically; review the compatibility profile first.
 - Native encryption protects removed drives, RMA and disposal, **not** a stolen complete box. A
   removable key can be adopted later with `zfs change-key`, at the cost of unattended recovery.
+
+### Adding or removing a dataset
+
+`nixos-rebuild` never creates or destroys datasets; it only emits the mount. Do the ZFS half by hand,
+and mind the order.
+
+**Adding, dataset first.** A share whose mount is missing fails `selfhost-smb-permissions`, which Samba
+requires, so it takes down every share rather than just the new one.
+
+```bash
+sudo zfs create -o mountpoint=/srv/storage/archive tank/archive
+```
+
+Then declare it in `disko/pool.nix`, add a share in `shares/default.nix` if it should be exported, and
+rebuild. `dataset` and `childDatasets` derive themselves, and a dataset nested under an existing share
+is adopted by it without a share of its own.
+
+**Removing, config first.** Drop the share, then the dataset from `disko/pool.nix`, rebuild, and only
+then:
+
+```bash
+sudo zfs destroy -r tank/archive
+```
+
+Nothing prunes what you leave behind: sanoid's `autoprune` only manages datasets still in its config, so
+orphaned snapshots persist, and B2 keeps the last copy until retention expires.
+
+Half-finished in either direction is caught at eval: a share with no dataset is an assertion, a mounted
+dataset reached by no share is a warning naming it.
 
 ### Degraded pool
 

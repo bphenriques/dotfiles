@@ -25,14 +25,14 @@ in
 
   microvms.compute = builtins.mapAttrs (_: g: g.ip) computeGuests.guests; # Used to seed /etc/hosts and ssh jump
 
-  # Transmission writes to <download-dir>/<category>: compute sets these on the arrs, storage precreates the dirs.
+  # Required to define how transmission maps downloads to folders and enable declaretively adding them.
   media.downloadCategories = {
     radarr = "radarr";
     sonarr = "sonarr";
   };
 
   ai = {
-    model = "qwen3.5:4b";            # Fully fits RTX 4060 at Hermes' 64K (65 t/s). Anything else is not practical.
-    extraModels = [ "gpt-oss:20b" ]; # MoE. Smarter but slower (~25 t/s) with better tool-use
+    model = "qwen3.5:4b";
+    extraModels = [ "gpt-oss:20b" ];
   };
 }

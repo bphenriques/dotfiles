@@ -9,9 +9,13 @@ let
 
   personal = private.settings.storage.personalShares;
 
+  # disko declares the pool layout; a share adopts the dataset mounted at its root, plus its children.
+  poolDatasets = config.disko.devices.zpool.tank.datasets;
+  keyAt = root: lib.attrNames (lib.filterAttrs (_: d: d.mountpoint == root) poolDatasets);
+  childKeys = key: lib.filter (n: lib.hasPrefix "${key}/" n) (lib.attrNames poolDatasets);
+
   household = {
     shared = {
-      dataset = "shared";
       backup = true;
       smb = {
         owner = "bphenriques";
@@ -23,14 +27,8 @@ let
       };
     };
     media = {
-      dataset = "media";
       backup = true;
       snapshots = false;
-      childDatasets = [
-        "music"
-        "books"
-        "gaming"
-      ];
       smb = {
         owner = "bphenriques";
         gid = 990;
@@ -53,22 +51,38 @@ let
     };
   };
 
+  coveredKeys =
+    let
+      matched = lib.concatMap (s: keyAt s.root) (lib.attrValues cfg.shares);
+    in
+    matched ++ lib.concatMap childKeys matched;
+
+  strayDatasets = lib.subtractLists coveredKeys (
+    lib.attrNames (lib.filterAttrs (_: d: d.mountpoint != null) poolDatasets)
+  );
+
+  orphanShares = lib.attrNames (lib.filterAttrs (_: s: s.dataset == "") cfg.shares);
+
   shareNameCollisions = lib.intersectLists (lib.attrNames personal) (lib.attrNames household);
 in
 {
-  imports = [ ./snapshots.nix ];
-
   options.custom.storage = {
     shares = lib.mkOption {
       description = "Shares served by this host, pairing the ZFS backing with the SMB export.";
       type = lib.types.attrsOf (
         lib.types.submodule (
-          { name, ... }:
+          { name, config, ... }:
+          let
+            key = lib.head (keyAt config.root ++ [ "" ]);
+          in
           {
             options = {
               dataset = lib.mkOption {
                 type = lib.types.str;
-                description = "Dataset under the pool, without the pool name.";
+                readOnly = true;
+                default = if key == "" then "" else poolDatasets.${key}._name;
+                defaultText = lib.literalMD "the disko dataset mounted at `root`";
+                description = "Fully qualified dataset backing this share, read back from disko.";
               };
               root = lib.mkOption {
                 type = lib.types.str;
@@ -85,8 +99,10 @@ in
               };
               childDatasets = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
-                default = [ ];
-                description = "Child datasets under this share, snapshotted independently.";
+                readOnly = true;
+                default = map (lib.removePrefix "${key}/") (childKeys key);
+                defaultText = lib.literalMD "disko datasets nested under `dataset`";
+                description = "Child datasets under this share, snapshotted independently and ownership-fixed with it.";
               };
               smb = lib.mkOption {
                 type = lib.types.attrsOf lib.types.anything;
@@ -101,46 +117,22 @@ in
   };
 
   config = {
-    custom.storage.shares =
-      lib.mapAttrs (name: share: share // { dataset = "users/${name}"; }) personal
-      // household;
+    custom.storage.shares = personal // household;
 
-    # Same rule as the SMB clients: a share named after someone in the registry is theirs.
+    # Same rule as the SMB clients.
     custom.shares = lib.mapAttrs (name: share: {
       inherit (share) root backup;
       personal = private.users ? ${name};
     }) cfg.shares;
 
-    # Child datasets are already mounted, so they ride in with the plain directories: ownership only.
-    selfhost.storage.shares.smb = {
-      enable = true;
-      openFirewall = true;
-      shares = lib.mapAttrs (_: share:
-        share.smb
-        // {
-          path = share.root;
-          directories = share.childDatasets ++ (share.smb.directories or [ ]);
-        }
-      ) cfg.shares;
-    };
-
-    # Previous Versions in samba's own keys. Whole-name match: catching _daily too matches nothing at all
-    # (tested 2026-08-28). sanoid runs under TZ=UTC. media holds no snapshots itself, but its children do.
-    services.samba.settings = lib.mapAttrs (_: _: {
-      "vfs objects" = "shadow_copy2";
-      "shadow:snapdir" = ".zfs/snapshot";
-      "shadow:snapdirseverywhere" = "yes";
-      "shadow:format" = "autosnap_%Y-%m-%d_%H:%M:%S_hourly";
-      "shadow:sort" = "desc";
-    }) cfg.shares;
-
-    # Compute runs Prometheus and carries this alert against the scraped units.
-    selfhost.monitoring.scopes.smb-shares.enable = false;
+    warnings = lib.optional (strayDatasets != [ ])
+      "Datasets mounted here but reached by no share: ${toString strayDatasets}. They are not snapshotted, exported or backed up. Declare a share, or `zfs destroy` them if a removal is unfinished.";
 
     assertions = [
       {
-        assertion = !(lib.any (lib.hasInfix "REPLACE_WITH") (lib.attrNames cfg.shares));
-        message = "Storage share names still contain a placeholder; fill in the private host settings.";
+        # Without a dataset the share would export whatever sits on the root filesystem at that path.
+        assertion = orphanShares == [ ];
+        message = "Shares whose `root` is not a disko dataset mountpoint: ${toString orphanShares}. Declare the dataset in hosts/storage/disko/pool.nix.";
       }
       {
         # The household set wins the merge above, so a collision would silently drop someone's dataset.
