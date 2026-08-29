@@ -12,35 +12,43 @@ let
   household = {
     shared = {
       dataset = "shared";
-      owner = "bphenriques";
-      gid = 989;
-      access = {
-        bphenriques = "rw";
-        machine-compute = "rw";
+      backup = true;
+      smb = {
+        owner = "bphenriques";
+        gid = 989;
+        access = {
+          groups.${private.groups.users} = "rw";
+          users.machine-compute = "rw";
+        };
       };
     };
     media = {
       dataset = "media";
-      owner = "bphenriques";
-      gid = 990;
+      backup = true;
       snapshots = false;
       childDatasets = [
         "music"
         "books"
         "gaming"
       ];
-      directories = [
-        "movies"
-        "tv"
-        "downloads"
-        "downloads/incomplete"
-      ]
-      # The arrs health-check their category dir before any download would create it.
-      ++ map (c: "downloads/${c}") (lib.attrValues config.custom.fleet.media.downloadCategories);
-      access = {
-        bphenriques = "rw";
-        machine-compute = "rw";
-        machine-inky = "ro";
+      smb = {
+        owner = "bphenriques";
+        gid = 990;
+        directories = [
+          "movies"
+          "tv"
+          "downloads"
+          "downloads/incomplete"
+        ]
+        # The arrs health-check their category dir before any download would create it.
+        ++ map (c: "downloads/${c}") (lib.attrValues config.custom.fleet.media.downloadCategories);
+        access = {
+          groups.${private.groups.users} = "rw";
+          users = {
+            machine-compute = "rw";
+            machine-inky = "ro";
+          };
+        };
       };
     };
   };
@@ -52,7 +60,7 @@ in
 
   options.custom.storage = {
     shares = lib.mkOption {
-      description = "Shares served by this host. Personal ones come from the private host settings.";
+      description = "Shares served by this host, pairing the ZFS backing with the SMB export.";
       type = lib.types.attrsOf (
         lib.types.submodule (
           { name, ... }:
@@ -65,29 +73,6 @@ in
               root = lib.mkOption {
                 type = lib.types.str;
                 default = "/srv/storage/${name}";
-              };
-              gid = lib.mkOption {
-                type = lib.types.nullOr lib.types.int;
-                default = null;
-                description = "Group GID, as in `users.groups.<name>.gid`.";
-              };
-              owner = lib.mkOption {
-                type = lib.types.str;
-                default = "root";
-              };
-              access = lib.mkOption {
-                type = lib.types.attrsOf (
-                  lib.types.enum [
-                    "rw"
-                    "ro"
-                  ]
-                );
-                default = { };
-                description = "SMB principal to access level.";
-              };
-              personal = lib.mkOption {
-                type = lib.types.bool;
-                default = false;
               };
               backup = lib.mkOption {
                 type = lib.types.bool;
@@ -103,10 +88,10 @@ in
                 default = [ ];
                 description = "Child datasets under this share, snapshotted independently.";
               };
-              directories = lib.mkOption {
-                type = lib.types.listOf lib.types.str;
-                default = [ ];
-                description = "Plain directories inside the share, sharing its dataset so hardlinks work between them.";
+              smb = lib.mkOption {
+                type = lib.types.attrsOf lib.types.anything;
+                default = { };
+                description = "Passed verbatim to `selfhost.storage.shares.smb.shares.<name>`, which is what types it. `path` and the child datasets come from the fields above.";
               };
             };
           }
@@ -117,23 +102,26 @@ in
 
   config = {
     custom.storage.shares =
-      lib.mapAttrs (name: share: share // {
-        dataset = "users/${name}";
-        personal = true;
-      }) personal
+      lib.mapAttrs (name: share: share // { dataset = "users/${name}"; }) personal
       // household;
 
-    custom.shares = lib.mapAttrs (_: share: { inherit (share) root personal backup; }) cfg.shares;
+    # Same rule as the SMB clients: a share named after someone in the registry is theirs.
+    custom.shares = lib.mapAttrs (name: share: {
+      inherit (share) root backup;
+      personal = private.users ? ${name};
+    }) cfg.shares;
 
     # Child datasets are already mounted, so they ride in with the plain directories: ownership only.
     selfhost.storage.shares.smb = {
       enable = true;
       openFirewall = true;
-      shares = lib.mapAttrs (_: share: {
-        inherit (share) owner gid access;
-        path = share.root;
-        directories = share.childDatasets ++ share.directories;
-      }) cfg.shares;
+      shares = lib.mapAttrs (_: share:
+        share.smb
+        // {
+          path = share.root;
+          directories = share.childDatasets ++ (share.smb.directories or [ ]);
+        }
+      ) cfg.shares;
     };
 
     # Previous Versions in samba's own keys. Whole-name match: catching _daily too matches nothing at all

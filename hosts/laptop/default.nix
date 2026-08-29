@@ -50,8 +50,6 @@ in
     bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
     media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
   };
-  custom.shares.bphenriques.personal = true;
-
   # Secrets
   sops = {
     defaultSopsFile = private.sopsSecretsFile;

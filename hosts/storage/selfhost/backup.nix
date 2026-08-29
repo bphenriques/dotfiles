@@ -12,12 +12,6 @@ let
   skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
 in
 {
-  # Household shares only; personal ones opt in from the private settings, so their names stay there.
-  custom.storage.shares = {
-    media.backup = true;
-    shared.backup = true;
-  };
-
   # Opt-in is the safe default for a per-byte cost, but exclusions must remain visible.
   warnings = lib.optional (
     skipped != [ ]

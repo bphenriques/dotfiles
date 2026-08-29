@@ -61,8 +61,6 @@ in
     ../../../profiles/nixos/capabilities/selfhost-smb-client.nix
   ];
 
-  custom.shares.bphenriques.personal = true;
-
   custom = {
     locale = {
       timezone = config.time.timeZone;
@@ -88,6 +86,10 @@ in
 
   selfhost = {
     enable = true;
+
+    # One spelling of each group name: the canonical names come from the household vocabulary rather
+    # than defaulting alongside it.
+    groups = { inherit (private.groups) admin users; };
 
     # Curated apps that need no host-specific config beyond enabling them (per-user opt-ins live on
     # selfhost.users.<name>.apps.<name>); apps with deployment overrides keep their own ./services file.
@@ -152,7 +154,7 @@ in
       scrapeInterval = "60s";
     };
 
-    users = private.settings.users // extraUsers;
+    users = private.users // extraUsers;
   };
 
   virtualisation = {

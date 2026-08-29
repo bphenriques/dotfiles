@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  private,
   ...
 }:
 let
@@ -10,6 +11,9 @@ let
     enable = true;
     passwordFile = config.sops.secrets."samba/${name}-password".path;
   };
+
+  # Everyone else reaches their files through compute's applications; only these hold a direct SMB account.
+  smbPeople = [ "bphenriques" ];
 
   serviceAccounts = {
     machine-compute = {
@@ -29,15 +33,6 @@ let
       };
     };
   };
-
-  # Others reach their files through compute's applications; only this one holds a direct SMB account.
-  users.bphenriques = {
-    email = "bphenriques@localhost"; # no OIDC and no mail here, so nothing reads it
-    firstName = "Bruno";
-    lastName = "Henriques";
-    groups = [ config.selfhost.groups.users ];
-    auth.oidc.enable = false;
-  };
 in
 {
   imports = [
@@ -48,14 +43,24 @@ in
   # No services or ingress here: the backup pipeline, principal registries and SMB server all gate on this.
   selfhost.enable = true;
 
+  # One spelling of each group name: the framework canonical names come from the household vocabulary
+  # rather than defaulting alongside it.
+  selfhost.groups = { inherit (private.groups) admin users; };
+
   # Ids pinned: these own files on a pool that outlives the root recording the allocation.
   selfhost.serviceAccounts = lib.mapAttrs (
     name: account: account // { storage.smb = smbAccount name; }
   ) serviceAccounts;
 
-  selfhost.users = lib.mapAttrs (name: user: user // { storage.smb = smbAccount name; }) users;
+  # The same registry compute reads, so group membership is decided in one place. Per-service config is
+  # dropped: it belongs to the host running the service. A person with no SMB account is inert here.
+  selfhost.users = lib.mapAttrs (
+    name: person:
+    removeAttrs person [ "services" ]
+    // lib.optionalAttrs (lib.elem name smbPeople) { storage.smb = smbAccount name; }
+  ) private.users;
 
   sops.secrets = lib.genAttrs (
-    map (name: "samba/${name}-password") (lib.attrNames serviceAccounts ++ lib.attrNames users)
+    map (name: "samba/${name}-password") (lib.attrNames serviceAccounts ++ smbPeople)
   ) (_: { restartUnits = [ "selfhost-smb-passwords.service" ]; });
 }
