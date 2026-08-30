@@ -139,6 +139,21 @@ Standing constraints:
 - Do not run `zpool upgrade` automatically; review the compatibility profile first.
 - Native encryption protects removed drives, RMA and disposal, **not** a stolen complete box. A
   removable key can be adopted later with `zfs change-key`, at the cost of unattended recovery.
+- **SMB signing and encryption stay unenforced, deliberately.** Clients negotiate signing on their own
+  (compute's session runs `SMB3_11` with `AES-128-CMAC`), the LAN is trusted, and remote access arrives
+  over WireGuard, which terminates on compute and reaches this host over that same trusted LAN. This is
+  the posture the Synology shipped: server signing "Client defined", transfer encryption opt-in. Forcing
+  either only pays off against an active on-LAN attacker, and `mandatory` risks locking out a client
+  that does not sign.
+- **The B2 application keys carry bucket-admin, accepted.** They are per-host already, but the console
+  only offers presets and gives no way to narrow them to `listBuckets`, `listFiles`, `readFiles`,
+  `writeFiles`, `deleteFiles`. Anything that reads a host's secrets can therefore delete that host's
+  backups, which is the argument for keeping the sops key tight rather than for more B2 work.
+- **The NVMe is the sensitive disk, not the HDDs.** It is unencrypted and holds the pool key, the sops
+  age key, Samba's `passdb.tdb` and the journal. Disposal or RMA of the *root* NVMe needs
+  `nvme format -s` or physical destruction; pulling the HDDs and wiping them is not enough. Dataset and
+  snapshot names are also cleartext on the HDDs, since ZFS encrypts file contents and names but not
+  pool metadata.
 
 ### Adding or removing a dataset
 
@@ -190,15 +205,14 @@ replacement; the shared age and batch is a reason to watch the survivor closely,
 
 ## Deferred work
 
-- Narrow the B2 application keys to `listBuckets`, `listFiles`, `readFiles`, `writeFiles`,
-  `deleteFiles`. They are per-host already, but the web console only offers presets, so both carry
-  bucket-admin capabilities backup never uses. Needs `b2 key create --capabilities` with the master key.
-- Scope the exporter and NUT firewall rules to compute instead of the whole LAN. Samba stays LAN-wide;
-  laptop, inky and the phone all mount it.
 - Keep one SN700 as a cold spare and give the other a `fast` pool for ephemeral scratch. `zpool trim`
   becomes meaningful there, where today it is inert against the HDD mirror.
 - Decide whether compute gains a second backup target on `fast` once it exists, a local copy alongside
   B2, or whether off-site alone stays sufficient.
-- Consider moving the unattended ZFS key from root to removable USB.
+- Encrypt the root NVMe rather than moving the ZFS key to removable USB. A USB key left plugged in has
+  the same threat model as today, and unplugged it costs unattended recovery. The box has TPM2 and
+  Secure Boot in setup mode, so LUKS with `systemd-cryptenroll --tpm2-device=auto` keeps unattended
+  boot. Without measured boot, PCR7 is forgeable, so this protects a pulled disk and not a stolen box,
+  which is exactly the RMA and disposal case above.
 - Consider NFS for selected machine consumers now that SMB is stable.
 - Revisit per-user `refquota` only under real capacity pressure.

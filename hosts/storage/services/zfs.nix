@@ -1,4 +1,8 @@
 # Everything ZFS except the pool layout, which is disko's in ../disko.
+{ config, lib, ... }:
+let
+  poolKey = lib.removePrefix "file://" config.disko.devices.zpool.tank.rootFsOptions.keylocation;
+in
 {
   boot = {
     supportedFilesystems.zfs = true;
@@ -21,4 +25,7 @@
   # Disko declares every dataset mountpoint, so systemd owns the mounts. `zfs mount -a` then races
   # them and loses with "mountpoint or dataset is busy".
   systemd.services.zfs-mount.enable = false;
+
+  # The installer writes the pool key once and nothing reasserts it; a hand-restored key must not widen.
+  systemd.tmpfiles.rules = [ "z ${poolKey} 0400 root root -" ];
 }

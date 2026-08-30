@@ -60,8 +60,9 @@ remote_install() {
   info "Fetching sops key for ${host}..."
   post_format_files="$(mktemp -d)"
   if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
-    mkdir -p "$(dirname "${post_format_files}/${SOPS_AGE_SYSTEM_FILE}")"
-    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >"${post_format_files}/${SOPS_AGE_SYSTEM_FILE}"
+    # nixos-anywhere preserves the staged mode, so it has to be right here. sops-nix creates this key 0600.
+    install -D -m 0600 /dev/null "${post_format_files}${SOPS_AGE_SYSTEM_FILE}"
+    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >"${post_format_files}${SOPS_AGE_SYSTEM_FILE}"
     success "Host sops key fetched"
   else
     fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"
@@ -133,11 +134,9 @@ local_install() {
 
   info "Fetching sops key for ${host}..."
   if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
-    info "Copying sops system private key to /mnt/${SOPS_AGE_SYSTEM_FILE}"
-    sudo mkdir -p "$(dirname "/mnt/${SOPS_AGE_SYSTEM_FILE}")"
-    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "/mnt/${SOPS_AGE_SYSTEM_FILE}" >/dev/null
-    sudo chown root:root "/mnt/${SOPS_AGE_SYSTEM_FILE}"
-    sudo chmod 600 "/mnt/${SOPS_AGE_SYSTEM_FILE}"
+    info "Copying sops system private key to /mnt${SOPS_AGE_SYSTEM_FILE}"
+    sudo install -D -m 0600 -o root -g root /dev/null "/mnt${SOPS_AGE_SYSTEM_FILE}"
+    dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "/mnt${SOPS_AGE_SYSTEM_FILE}" >/dev/null
     success "Host sops key installed"
   else
     fatal "Host sops key not found in Bitwarden (item: sops-secret/${host})"

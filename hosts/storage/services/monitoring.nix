@@ -1,5 +1,5 @@
-{ config, ... }:
 {
+  # Bound to every interface but reachable only from compute; the scoping lives in ../firewall.nix.
   services.prometheus.exporters = {
     node = {
       enable = true;
@@ -22,10 +22,4 @@
       port = 9134;
     };
   };
-
-  networking.firewall.allowedTCPPorts = [
-    config.services.prometheus.exporters.node.port
-    config.services.prometheus.exporters.smartctl.port
-    config.services.prometheus.exporters.zfs.port
-  ];
 }

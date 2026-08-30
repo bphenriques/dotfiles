@@ -8,7 +8,7 @@
   power.ups = {
     enable = true;
     mode = "netserver";
-    openFirewall = true;
+    openFirewall = false; # ../firewall.nix opens 3493 to compute only.
     ups.storage = {
       driver = "usbhid-ups";
       port = "auto";

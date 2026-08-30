@@ -10,6 +10,7 @@
     inputs.sops-nix.nixosModules.sops
     ./hardware
     ./disko
+    ./firewall.nix
     ./shares.nix
     ./users.nix
     ./selfhost
