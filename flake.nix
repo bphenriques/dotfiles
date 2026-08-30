@@ -105,6 +105,10 @@
           hostName = "storage";
           configPath = ./hosts/storage;
         };
+        ai = mkNixosHost {
+          hostName = "ai";
+          configPath = ./hosts/ai;
+        };
       } // microvmGuests;
     };
 }

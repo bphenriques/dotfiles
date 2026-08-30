@@ -17,7 +17,9 @@ in
 {
   imports = [ inputs.omp.homeManagerModules.default ];
 
-  home.sessionVariables.OLLAMA_BASE_URL = "http://${osConfig.custom.fleet.lan.hosts.laptop}:11434";
+  home.sessionVariables.OLLAMA_BASE_URL =
+    let endpoint = osConfig.custom.fleet.ai.endpoint;
+    in "http://${endpoint.host}:${toString endpoint.port}";
   home.file.".omp/agent/themes/onedark-transparent.json".source = jsonFormat.generate "onedark-transparent.json" onedarkTransparent;
 
   programs.omp = {

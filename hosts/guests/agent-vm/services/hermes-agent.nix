@@ -3,7 +3,7 @@ let
   ollama = {
     provider = "ollama";
     api_key = "ollama";                    # dummy; Ollama needs no auth
-    base_url = "http://${fleet.lan.hosts.laptop}:11434/v1";
+    base_url = "http://${fleet.ai.endpoint.host}:${toString fleet.ai.endpoint.port}/v1";
   };
 in
 {

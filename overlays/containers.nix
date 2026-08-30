@@ -26,6 +26,13 @@ _final: prev: let
       homepage = "https://github.com/ChatGPTNextWeb/NextChat";
       updateInfo = { repo = "ChatGPTNextWeb/NextChat"; stripPrefix = "v"; };
     };
+    # The `ai` host appends `-rocm` to this tag; that variant is what carries the AMD GPU runtime.
+    ollama = {
+      image = "docker.io/ollama/ollama";
+      version = "0.33.2";
+      homepage = "https://github.com/ollama/ollama";
+      updateInfo = { repo = "ollama/ollama"; stripPrefix = "v"; };
+    };
   };
 in {
   containerImages = images;

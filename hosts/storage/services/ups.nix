@@ -3,6 +3,7 @@
   sops.secrets = {
     "ups/storage-password" = { };
     "ups/compute-password" = { };
+    "ups/ai-password" = { };
   };
 
   power.ups = {
@@ -23,6 +24,10 @@
       };
       compute = {
         passwordFile = config.sops.secrets."ups/compute-password".path;
+        upsmon = "secondary";
+      };
+      ai = {
+        passwordFile = config.sops.secrets."ups/ai-password".path;
         upsmon = "secondary";
       };
     };

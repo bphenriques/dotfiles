@@ -5,6 +5,7 @@
     ./ups.nix
     ./smartctl.nix
     ./storage.nix
+    ./ai.nix
   ];
 
   selfhost.monitoring.scopes.node = {

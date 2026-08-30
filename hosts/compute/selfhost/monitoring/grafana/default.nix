@@ -8,6 +8,7 @@ let
     hostName = config.networking.hostName;
     guests = config.homelab.microvm.host.guests;
     storageName = "storage"; # the instance label ../storage.nix attaches to the NAS scrape jobs
+    aiName = "ai";           # likewise ../ai.nix
   });
 in
 {

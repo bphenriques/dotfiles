@@ -3,16 +3,17 @@
 # generated from config.homelab.microvm.host.guests (the table that also drives scrape/alerts), so
 # a new guest needs no edit here. Host and guest CPU/IO share one time axis for easy correlation:
 # the guests run on the host's own cores.
-{ hostName, guests, storageName }:
+{ hostName, guests, storageName, aiName }:
 let
   inherit (import ./lib.nix) mkPanel mkStat mkRow layout2 fullW;
 
   hostInst = ''instance="${hostName}"'';
   storageInst = ''instance="${storageName}"'';
+  aiInst = ''instance="${aiName}"'';
   names = builtins.attrNames guests;
   guestInst = builtins.concatStringsSep "|" names;  # RE2 is fully anchored: matches node jobs, not *-traefik
-  allInst = "${hostName}|${storageName}|${guestInst}";
-  nodeJobs = "node|storage-node|${guestInst}";  # host node-exporter job is "node"; each guest's job is its name
+  allInst = "${hostName}|${storageName}|${aiName}|${guestInst}";
+  nodeJobs = "node|storage-node|ai-node|${guestInst}";  # host node-exporter job is "node"; each guest's job is its name
   pct = { mode = "absolute"; steps = [ { color = "green"; value = null; } { color = "yellow"; value = 60; } { color = "red"; value = 85; } ]; };
 
   hostSpecs = [
@@ -178,11 +179,87 @@ let
     panels = map mkPanel (layout2 12 storageSpecs);
   };
 
+  # The inference box. hwmon names its chips by PCI path, so every sensor panel joins
+  # node_hwmon_sensor_label to get a readable series name; that join also drops unlabelled sensors.
+  withLabel = metric: ''
+    ${metric}{${aiInst}} * on(chip, sensor) group_left(label) node_hwmon_sensor_label{${aiInst}}
+  '';
+
+  aiSpecs = [
+    {
+      id = 301;
+      title = "SoC Package Power (PPT)";
+      unit = "watt";
+      legend = "{{label}}";
+      expr = withLabel "node_hwmon_power_watt";
+    }
+    {
+      id = 302;
+      title = "GPU Clock";
+      unit = "hertz";
+      legend = "{{sensor}}";
+      expr = ''node_hwmon_freq_freq_mhz{${aiInst}, sensor="sclk"} * 1000000'';
+    }
+    {
+      id = 303;
+      title = "Temperatures";
+      unit = "celsius";
+      legend = "{{label}}";
+      expr = withLabel "node_hwmon_temp_celsius";
+      thresholds = {
+        mode = "absolute";
+        steps = [ { color = "green"; value = null; } { color = "yellow"; value = 75; } { color = "red"; value = 90; } ];
+      };
+    }
+    {
+      id = 304;
+      title = "CPU Usage";
+      unit = "percent";
+      legend = "CPU %";
+      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${aiInst},mode="idle"}[5m]))) * 100'';
+    }
+    {
+      id = 305;
+      title = "Memory Usage";
+      unit = "bytes";
+      expr = [
+        { expr = ''node_memory_MemTotal_bytes{${aiInst}} - node_memory_MemAvailable_bytes{${aiInst}}''; legend = "Used"; }
+        { expr = ''node_memory_MemAvailable_bytes{${aiInst}}''; legend = "Available"; }
+      ];
+    }
+    {
+      id = 306;
+      title = "Network Bandwidth";
+      unit = "Bps";
+      expr = [
+        { expr = ''rate(node_network_receive_bytes_total{${aiInst},device!="lo"}[5m])''; legend = "{{device}} rx"; }
+        { expr = ''rate(node_network_transmit_bytes_total{${aiInst},device!="lo"}[5m])''; legend = "{{device}} tx"; }
+      ];
+    }
+    {
+      id = 307;
+      title = "Disk Usage (Root)";
+      unit = "bytes";
+      expr = [
+        { expr = ''node_filesystem_size_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
+        { expr = ''node_filesystem_size_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
+      ];
+    }
+  ];
+
+  aiRow = mkRow {
+    id = 300;
+    title = "${aiName} (inference)";
+    gridPos = { x = 0; y = 12; w = fullW; h = 1; };
+    collapsed = true;
+    panels = map mkPanel (layout2 13 aiSpecs);
+  };
+
   mkVmRow = i: name:
     let
       mon = guests.${name}.monitoring;
       inst = ''instance="${name}"'';
-      rowY = 12 + i;  # after the fleet strip (y0..9), the host row (y10) and the NAS row (y11)
+      rowY = 13 + i;  # after the fleet strip (y0..9), host (y10), NAS (y11) and ai (y12)
       base = 10 * (i + 1);
       specs =
         [
@@ -291,5 +368,6 @@ in
     })
     hostRow
     storageRow
+    aiRow
   ] ++ builtins.genList (i: mkVmRow i (builtins.elemAt names i)) (builtins.length names);
 }

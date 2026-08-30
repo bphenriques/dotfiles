@@ -18,6 +18,6 @@ in
   # else answers to compute alone, and none of it authenticates beyond NUT's shared password.
   networking.firewall.extraInputRules = ''
     ip saddr ${hosts.compute} tcp dport { ${dports exporterPorts} } accept comment "exporters, scraped by compute"
-    ip saddr ${hosts.compute} tcp dport { ${dports upsdPorts} } accept comment "upsd, monitored by compute's secondary upsmon"
+    ip saddr { ${hosts.compute}, ${hosts.ai} } tcp dport { ${dports upsdPorts} } accept comment "upsd, monitored by the secondary upsmons"
   '';
 }

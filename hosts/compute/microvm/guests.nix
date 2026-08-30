@@ -39,7 +39,7 @@
       };
     };
 
-    # hermes-agent fronting the laptop's Ollama; NextChat (UI) runs on compute.
+    # hermes-agent fronting the ai host's Ollama; NextChat (UI) runs on compute.
     agent-vm = {
       ip = "10.20.1.13";
       mac = "02:00:00:00:01:13";
@@ -54,8 +54,8 @@
       monitoring = {
         storageMount = "/var/lib/hermes";
       };
-      # The one LAN hole in the seal: the laptop's Ollama.
-      egress.allowLan = [{ host = "laptop"; ports = [ 11434 ]; }];
+      # The one LAN hole in the seal: the ai host's Ollama.
+      egress.allowLan = [{ host = "ai"; ports = [ 11434 ]; }];
     };
   };
 }

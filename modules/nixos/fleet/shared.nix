@@ -37,14 +37,24 @@
     };
 
     ai = {
+      endpoint = {
+        host = lib.mkOption {
+          type = lib.types.str;
+          description = "Address serving the fleet's OpenAI-compatible inference API. Consumers need only this and a model id, never the runtime behind it.";
+        };
+        port = lib.mkOption {
+          type = lib.types.port;
+          description = "Port the inference API listens on. Runtime-specific, so it moves with the endpoint.";
+        };
+      };
       model = lib.mkOption {
         type = lib.types.str;
-        description = "Fleet-wide default LLM tag (Ollama format). Pulled by the Ollama host, served as the Hermes default, the chat UI default.";
+        description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
       };
       extraModels = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Additional Ollama tags pulled and offered in the chat dropdown alongside the default (routed to the same Ollama backend).";
+        description = "Additional model ids offered in the chat dropdown alongside the default (routed to the same endpoint).";
       };
     };
   };

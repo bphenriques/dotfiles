@@ -51,7 +51,8 @@ init_host() {
   fi
 
   # Generate SOPS age key
-  local tmpdir
+  # Not `local`: the EXIT trap fires after this function returns, when a local would be out of scope,
+  # and `set -u` would then abort the trap and leave the generated age key in /tmp.
   tmpdir="$(mktemp -d)"
   trap 'rm -rf "$tmpdir"' EXIT
 
