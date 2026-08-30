@@ -10,11 +10,17 @@
   };
 
   # Only the RTL8126A 5GbE port is configured; the i226-V stays down as a fallback to wire by hand.
-  systemd.network.networks."10-lan" = {
-    matchConfig.MACAddress = private.settings.network.lanMAC;
-    networkConfig = {
-      DHCP = "ipv4";
-      IPv6AcceptRA = true;
+  systemd.network = {
+    networks."10-lan" = {
+      matchConfig.MACAddress = private.settings.network.lanMAC;
+      networkConfig = {
+        DHCP = "ipv4";
+        IPv6AcceptRA = true;
+      };
+    };
+    links."10-lan" = {
+      matchConfig.MACAddress = private.settings.network.lanMAC;
+      linkConfig.WakeOnLan = "magic";
     };
   };
 
