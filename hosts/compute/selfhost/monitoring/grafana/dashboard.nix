@@ -11,43 +11,42 @@ let
   storageInst = ''instance="${storageName}"'';
   aiInst = ''instance="${aiName}"'';
   names = builtins.attrNames guests;
-  guestInst = builtins.concatStringsSep "|" names;  # RE2 is fully anchored: matches node jobs, not *-traefik
-  allInst = "${hostName}|${storageName}|${aiName}|${guestInst}";
-  nodeJobs = "node|storage-node|ai-node|${guestInst}";  # host node-exporter job is "node"; each guest's job is its name
-  pct = { mode = "absolute"; steps = [ { color = "green"; value = null; } { color = "yellow"; value = 60; } { color = "red"; value = 85; } ]; };
 
-  hostSpecs = [
+  # Every entity gets these two; only the instance selector changes.
+  common = base: inst: [
     {
-      id = 101;
-      title = "Top Services by Request Rate";
-      unit = "reqps";
-      legend = "{{service}}";
-      expr = ''topk(10, sum by (service) (rate(traefik_service_requests_total{${hostInst}}[5m])))'';
-    }
-    {
-      id = 102;
-      title = "WireGuard Peers";
-      legend = "{{allowed_ips}}";
-      expr = ''(time() - wireguard_latest_handshake_seconds{${hostInst}}) < bool 180'';
-    }
-    {
-      id = 103;
+      id = base + 1;
       title = "CPU Usage";
       unit = "percent";
       legend = "CPU %";
-      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${hostInst},mode="idle"}[5m]))) * 100'';
+      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${inst},mode="idle"}[5m]))) * 100'';
     }
     {
-      id = 104;
+      id = base + 2;
       title = "Memory Usage";
       unit = "bytes";
       expr = [
-        { expr = ''node_memory_MemTotal_bytes{${hostInst}} - node_memory_MemAvailable_bytes{${hostInst}}''; legend = "Used"; }
-        { expr = ''node_memory_MemAvailable_bytes{${hostInst}}''; legend = "Available"; }
+        { expr = ''node_memory_MemTotal_bytes{${inst}} - node_memory_MemAvailable_bytes{${inst}}''; legend = "Used"; }
+        { expr = ''node_memory_MemAvailable_bytes{${inst}}''; legend = "Available"; }
       ];
     }
+  ];
+
+  # Hosts only: a guest's root is tmpfs, which this filter excludes by design.
+  rootDisk = id: inst: {
+    inherit id;
+    title = "Disk Usage (Root)";
+    unit = "bytes";
+    expr = [
+      { expr = ''node_filesystem_size_bytes{${inst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
+      { expr = ''node_filesystem_size_bytes{${inst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${inst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
+    ];
+  };
+
+  hostSpecs = common 100 hostInst ++ [
+    (rootDisk 103 hostInst)
     {
-      id = 105;
+      id = 104;
       title = "Hardware Temperatures";
       unit = "celsius";
       legend = "{{chip}} / {{sensor}}";
@@ -58,32 +57,14 @@ let
       };
     }
     {
-      id = 106;
+      id = 105;
       title = "Power Consumption (RAPL)";
       unit = "watt";
       legend = "{{path}}";
       expr = ''rate(node_rapl_package_joules_total{${hostInst}}[5m])'';
     }
     {
-      id = 107;
-      title = "Network Bandwidth";
-      unit = "Bps";
-      expr = [
-        { expr = ''sum(rate(node_network_receive_bytes_total{${hostInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "RX"; }
-        { expr = ''sum(rate(node_network_transmit_bytes_total{${hostInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "TX"; }
-      ];
-    }
-    {
-      id = 108;
-      title = "Disk Usage (Root)";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_filesystem_size_bytes{${hostInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
-        { expr = ''node_filesystem_size_bytes{${hostInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${hostInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
-      ];
-    }
-    {
-      id = 109;
+      id = 106;
       title = "NAS Storage Usage";
       unit = "bytes";
       expr = [
@@ -96,47 +77,23 @@ let
   hostRow = mkRow {
     id = 100;
     title = "${hostName} (host)";
-    gridPos = { x = 0; y = 10; w = fullW; h = 1; };
+    gridPos = { x = 0; y = 6; w = fullW; h = 1; };
     collapsed = true;
-    panels = map mkPanel (layout2 11 hostSpecs);
+    panels = map mkPanel (layout2 7 hostSpecs);
   };
 
-  # The NAS is scraped by three exporters under one instance label: storage-node, storage-smartctl and
-  # storage-zfs. Pool figures come from the zfs exporter, disk temperatures from smartctl.
-  storageSpecs = [
+  # The NAS answers on one instance label across the node, smartctl and zfs jobs. Pool figures come
+  # from the zfs exporter, disk temperatures from smartctl. Its memory panel counts the ZFS ARC under
+  # Used rather than cache, because ARC is kernel slab.
+  storageSpecs = common 200 storageInst ++ [
+    (rootDisk 203 storageInst)
     {
-      id = 201;
-      title = "CPU Usage";
-      unit = "percent";
-      legend = "CPU %";
-      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${storageInst},mode="idle"}[5m]))) * 100'';
-    }
-    {
-      id = 202;
-      title = "Memory Usage";
-      unit = "bytes";
-      # ARC is kernel slab, so it lands in Used rather than cache; panel 204 breaks it out.
-      expr = [
-        { expr = ''node_memory_MemTotal_bytes{${storageInst}} - node_memory_MemAvailable_bytes{${storageInst}}''; legend = "Used"; }
-        { expr = ''node_memory_MemAvailable_bytes{${storageInst}}''; legend = "Available"; }
-      ];
-    }
-    {
-      id = 203;
+      id = 204;
       title = "ZFS Pool";
       unit = "bytes";
       expr = [
         { expr = ''zfs_pool_size_bytes{${storageInst}}''; legend = "{{pool}} total"; }
         { expr = ''zfs_pool_allocated_bytes{${storageInst}}''; legend = "{{pool}} used"; }
-      ];
-    }
-    {
-      id = 204;
-      title = "ZFS ARC";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_zfs_arc_size{${storageInst}}''; legend = "ARC size"; }
-        { expr = ''node_zfs_arc_c_max{${storageInst}}''; legend = "ARC max"; }
       ];
     }
     {
@@ -151,57 +108,42 @@ let
         steps = [ { color = "green"; value = null; } { color = "yellow"; value = 45; } { color = "red"; value = 50; } ];
       };
     }
-    {
-      id = 206;
-      title = "Network Bandwidth";
-      unit = "Bps";
-      expr = [
-        { expr = ''sum(rate(node_network_receive_bytes_total{${storageInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "RX"; }
-        { expr = ''sum(rate(node_network_transmit_bytes_total{${storageInst},device!~"lo|veth.*|br-.*|docker.*|wg.*"}[5m]))''; legend = "TX"; }
-      ];
-    }
-    {
-      id = 207;
-      title = "Disk Usage (Root)";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_filesystem_size_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
-        { expr = ''node_filesystem_size_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${storageInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
-      ];
-    }
   ];
 
   storageRow = mkRow {
     id = 200;
     title = "${storageName} (NAS)";
-    gridPos = { x = 0; y = 11; w = fullW; h = 1; };
+    gridPos = { x = 0; y = 7; w = fullW; h = 1; };
     collapsed = true;
-    panels = map mkPanel (layout2 12 storageSpecs);
+    panels = map mkPanel (layout2 8 storageSpecs);
   };
 
   # The inference box. hwmon names its chips by PCI path, so every sensor panel joins
   # node_hwmon_sensor_label to get a readable series name; that join also drops unlabelled sensors.
+  # Job-pinned: a renamed job leaves its old series in the index, and two matches per (chip, sensor)
+  # make this a many-to-one error rather than a graph.
   withLabel = metric: ''
-    ${metric}{${aiInst}} * on(chip, sensor) group_left(label) node_hwmon_sensor_label{${aiInst}}
+    ${metric}{${aiInst},job="node"} * on(chip, sensor) group_left(label) node_hwmon_sensor_label{${aiInst},job="node"}
   '';
 
-  aiSpecs = [
+  aiSpecs = common 300 aiInst ++ [
+    (rootDisk 303 aiInst)
     {
-      id = 301;
+      id = 304;
       title = "SoC Package Power (PPT)";
       unit = "watt";
       legend = "{{label}}";
       expr = withLabel "node_hwmon_power_watt";
     }
     {
-      id = 302;
+      id = 305;
       title = "GPU Clock";
       unit = "hertz";
       legend = "{{sensor}}";
       expr = ''node_hwmon_freq_freq_mhz{${aiInst}, sensor="sclk"} * 1000000'';
     }
     {
-      id = 303;
+      id = 306;
       title = "Temperatures";
       unit = "celsius";
       legend = "{{label}}";
@@ -211,75 +153,24 @@ let
         steps = [ { color = "green"; value = null; } { color = "yellow"; value = 75; } { color = "red"; value = 90; } ];
       };
     }
-    {
-      id = 304;
-      title = "CPU Usage";
-      unit = "percent";
-      legend = "CPU %";
-      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${aiInst},mode="idle"}[5m]))) * 100'';
-    }
-    {
-      id = 305;
-      title = "Memory Usage";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_memory_MemTotal_bytes{${aiInst}} - node_memory_MemAvailable_bytes{${aiInst}}''; legend = "Used"; }
-        { expr = ''node_memory_MemAvailable_bytes{${aiInst}}''; legend = "Available"; }
-      ];
-    }
-    {
-      id = 306;
-      title = "Network Bandwidth";
-      unit = "Bps";
-      expr = [
-        { expr = ''rate(node_network_receive_bytes_total{${aiInst},device!="lo"}[5m])''; legend = "{{device}} rx"; }
-        { expr = ''rate(node_network_transmit_bytes_total{${aiInst},device!="lo"}[5m])''; legend = "{{device}} tx"; }
-      ];
-    }
-    {
-      id = 307;
-      title = "Disk Usage (Root)";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_filesystem_size_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Total"; }
-        { expr = ''node_filesystem_size_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} - node_filesystem_avail_bytes{${aiInst},mountpoint="/",fstype!~"tmpfs|overlay|squashfs"}''; legend = "Used"; }
-      ];
-    }
   ];
 
   aiRow = mkRow {
     id = 300;
     title = "${aiName} (inference)";
-    gridPos = { x = 0; y = 12; w = fullW; h = 1; };
+    gridPos = { x = 0; y = 8; w = fullW; h = 1; };
     collapsed = true;
-    panels = map mkPanel (layout2 13 aiSpecs);
+    panels = map mkPanel (layout2 9 aiSpecs);
   };
 
   mkVmRow = i: name:
     let
       mon = guests.${name}.monitoring;
       inst = ''instance="${name}"'';
-      rowY = 13 + i;  # after the fleet strip (y0..9), host (y10), NAS (y11) and ai (y12)
-      base = 10 * (i + 1);
+      rowY = 9 + i;  # after the fleet strip (y0 row, y1..5 tiles), host (y6), NAS (y7) and ai (y8)
+      base = 1000 + 100 * i;   # clear of the fixed rows, with room for any number of guests
       specs =
-        [
-          {
-            id = base + 1;
-            title = "CPU Usage";
-            legend = "CPU %";
-            unit = "percent";
-            expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{${inst},mode="idle"}[5m]))) * 100'';
-          }
-          {
-            id = base + 2;
-            title = "Memory Usage";
-            unit = "bytes";
-            expr = [
-              { expr = ''node_memory_MemTotal_bytes{${inst}} - node_memory_MemAvailable_bytes{${inst}}''; legend = "Used"; }
-              { expr = ''node_memory_MemAvailable_bytes{${inst}}''; legend = "Available"; }
-            ];
-          }
-        ]
+        common base inst
         ++ (if mon.storageMount != null then [{
           id = base + 3;
           title = "Storage (${mon.storageMount})";
@@ -321,50 +212,40 @@ in
     (mkStat {
       id = 2;
       title = "Up";
-      expr = ''up{job=~"${nodeJobs}"}'';
+      expr = ''up{job="node"}'';
       colorMode = "background";
       thresholds = { mode = "absolute"; steps = [ { color = "red"; value = null; } { color = "green"; value = 1; } ]; };
       mappings = [{ type = "value"; options = { "0" = { text = "DOWN"; }; "1" = { text = "UP"; }; }; }];
-      gridPos = { x = 0; y = 1; w = 8; h = 5; };
+      gridPos = { x = 0; y = 1; w = 7; h = 5; };
     })
     (mkStat {
       id = 3;
-      title = "CPU %";
+      title = "Disk %";
       unit = "percent";
-      expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{instance=~"${allInst}",mode="idle"}[5m]))) * 100'';
-      thresholds = pct;
-      gridPos = { x = 8; y = 1; w = 8; h = 5; };
+      # The fullest filesystem per box, so a new guest or volume needs no edit here. The allowlist drops
+      # the ones reporting someone else's disk: cifs is the NAS from compute, virtiofs the host from a guest.
+      expr = ''
+        max by(instance) (
+          (1 - node_filesystem_avail_bytes{job="node",fstype=~"ext4|zfs|xfs|btrfs"}
+             / node_filesystem_size_bytes{job="node",fstype=~"ext4|zfs|xfs|btrfs"}) * 100
+        )
+      '';
+      # Tracks DiskAlmostFull, which fires at 80.
+      thresholds = {
+        mode = "absolute";
+        steps = [ { color = "green"; value = null; } { color = "yellow"; value = 70; } { color = "red"; value = 80; } ];
+      };
+      gridPos = { x = 7; y = 1; w = 10; h = 5; };
     })
     (mkStat {
       id = 4;
-      title = "Memory %";
-      unit = "percent";
-      expr = ''(1 - node_memory_MemAvailable_bytes{instance=~"${allInst}"} / node_memory_MemTotal_bytes{instance=~"${allInst}"}) * 100'';
-      thresholds = pct;
-      gridPos = { x = 16; y = 1; w = 8; h = 5; };
-    })
-    (mkStat {
-      id = 5;
-      title = "Pool Free";
-      unit = "percent";
-      # Percent rather than bytes so the thresholds keep tracking the 85%/90%-full policy at any pool size.
-      expr = ''(zfs_pool_free_bytes{${storageInst}} / zfs_pool_size_bytes{${storageInst}}) * 100'';
-      legend = "{{pool}}";
-      thresholds = {
-        mode = "absolute";
-        steps = [ { color = "red"; value = null; } { color = "yellow"; value = 10; } { color = "green"; value = 15; } ];
-      };
-      gridPos = { x = 0; y = 6; w = 12; h = 4; };
-    })
-    (mkStat {
-      id = 6;
       title = "SMART";
       # min: one failing device drops its whole host to FAIL.
       expr = ''min by(instance) (smartctl_device_smart_status)'';
       colorMode = "background";
       thresholds = { mode = "absolute"; steps = [ { color = "red"; value = null; } { color = "green"; value = 1; } ]; };
       mappings = [{ type = "value"; options = { "0" = { text = "FAIL"; }; "1" = { text = "OK"; }; }; }];
-      gridPos = { x = 12; y = 6; w = 12; h = 4; };
+      gridPos = { x = 17; y = 1; w = 7; h = 5; };
     })
     hostRow
     storageRow

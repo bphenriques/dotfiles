@@ -1,4 +1,4 @@
-{ config, ... }:
+_:
 {
   selfhost.monitoring.scopes.smartctl = {
     exporters.smartctl = {
@@ -6,14 +6,6 @@
       listenAddress = "127.0.0.1";
       port = 9633;
     };
-    scrapeConfigs = [{
-      job_name = "smartctl";
-      scrape_interval = "2m";
-      static_configs = [{
-        targets = [ "127.0.0.1:9633" ];
-        labels.instance = config.networking.hostName;
-      }];
-    }];
     # Rules match every scraped host, so these cover storage's drives as well as compute's.
     rules = [{
       name = "disk-health";

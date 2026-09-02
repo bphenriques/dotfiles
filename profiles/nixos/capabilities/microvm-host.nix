@@ -30,15 +30,21 @@ let
     SystemCallFilter = [ "@system-service" ];
   };
 
+  # Selects on instance, not job: the host running Prometheus assembles the scrape jobs and picks
+  # their names, so this table only has to know what its guests are called.
+  guestScope = {
+    rules = [{
+      name = "guests";
+      rules = [
+        { alert = "GuestDown"; expr = ''up{instance=~"${lib.concatStringsSep "|" (lib.attrNames cfg.guests)}"} == 0''; for = "5m"; labels.severity = "warning"; annotations.summary = "{{ $labels.instance }} is unreachable"; }
+      ];
+    }];
+  };
+
   mkScope = name: g: {
-    scrapeConfigs = [
-      { job_name = name; static_configs = [{ targets = [ "${g.ip}:9100" ]; labels.instance = name; }]; }
-    ] ++ lib.optional g.monitoring.traefikMetrics
-      { job_name = "${name}-traefik"; static_configs = [{ targets = [ "${g.ip}:9117" ]; labels.instance = name; }]; };
     rules = [{
       inherit name;
       rules = [
-        { alert = "GuestDown"; expr = ''up{job="${name}"} == 0''; for = "5m"; labels.severity = "warning"; annotations.summary = "${name} is unreachable"; }
         { alert = "GuestHighCpu"; expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{instance="${name}",mode="idle"}[5m]))) * 100 > 90''; for = "15m"; labels.severity = "warning"; annotations.summary = "${name} CPU over 90% for 15m"; }
       ] ++ lib.optional (g.monitoring.storageMount != null)
         { alert = "GuestStorageNearCap"; expr = ''node_filesystem_avail_bytes{mountpoint="${g.monitoring.storageMount}",fstype="ext4"} / node_filesystem_size_bytes{mountpoint="${g.monitoring.storageMount}",fstype="ext4"} < 0.1''; for = "15m"; labels.severity = "warning"; annotations.summary = "${g.monitoring.storageMount} on ${name} is over 90% full"; };
@@ -188,6 +194,9 @@ in
     # Per-VM autostart; the microvm module derives the top-level microvm.autostart list from these.
     microvm.vms = lib.mapAttrs (_: g: { flake = self; restartIfChanged = true; inherit (g) autostart; }) cfg.guests;
 
-    selfhost.monitoring.scopes = lib.mapAttrs mkScope cfg.guests;
+    selfhost.monitoring.scopes = lib.mkMerge [
+      (lib.mapAttrs mkScope cfg.guests)
+      (lib.optionalAttrs (cfg.guests != { }) { guests = guestScope; })
+    ];
   };
 }

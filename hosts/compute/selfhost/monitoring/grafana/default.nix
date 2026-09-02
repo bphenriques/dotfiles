@@ -1,17 +1,35 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   serviceCfg = config.selfhost.services.grafana;
   prometheusCfg = config.selfhost.services.prometheus;
   json = pkgs.formats.json { };
 
+  # Instance labels. Their only definition is the fleet table in ../fleet.nix; naming one that is not
+  # scraped renders empty panels rather than failing, so the assertion below checks them.
+  storageName = "storage";
+  aiName = "ai";
+
+  scrapedInstances = lib.concatMap (
+    c: if c.job_name == "node" then map (s: s.labels.instance) c.static_configs else [ ]
+  ) config.services.prometheus.scrapeConfigs;
+
   computeDashboard = json.generate "compute.json" (import ./dashboard.nix {
     hostName = config.networking.hostName;
     guests = config.homelab.microvm.host.guests;
-    storageName = "storage"; # the instance label ../storage.nix attaches to the NAS scrape jobs
-    aiName = "ai";           # likewise ../ai.nix
+    inherit storageName aiName;
   });
 in
 {
+  assertions = map (name: {
+    assertion = lib.elem name scrapedInstances;
+    message = "Grafana dashboard names instance '${name}', which no `node` scrape target carries (has: ${lib.concatStringsSep ", " scrapedInstances}). Instance labels come from the fleet table in monitoring/fleet.nix.";
+  }) [ storageName aiName ];
+
   selfhost = {
     services.grafana = {
       displayName = "Grafana";
@@ -65,7 +83,8 @@ in
       dashboards.settings.providers = [{
         name = "selfhost";
         type = "file";
-        disableDeletion = true;
+        # Grafana's own default. `true` is what stranded five pre-consolidation dashboards in its database.
+        disableDeletion = false;
         options.path = pkgs.linkFarm "grafana-dashboards" [
           { name = "compute.json"; path = computeDashboard; }
         ];

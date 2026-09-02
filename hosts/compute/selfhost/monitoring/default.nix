@@ -1,4 +1,4 @@
-{ config, ... }:
+_:
 {
   imports = [
     ./grafana
@@ -6,7 +6,12 @@
     ./smartctl.nix
     ./storage.nix
     ./ai.nix
+    ./fleet.nix
+    ./prometheus.nix
   ];
+
+  # One router per service here, so router labels only duplicate the service ones the dashboard reads.
+  services.traefik.staticConfigOptions.metrics.prometheus.addRoutersLabels = false;
 
   selfhost.monitoring.scopes.node = {
     exporters.node = {
@@ -15,14 +20,6 @@
       port = 9101;
       enabledCollectors = [ "hwmon" "rapl" "systemd" "thermal_zone" ];
     };
-
-    scrapeConfigs = [{
-      job_name = "node";
-      static_configs = [{
-        targets = [ "127.0.0.1:9101" ];
-        labels.instance = config.networking.hostName;
-      }];
-    }];
 
     rules = [{
       name = "system";
