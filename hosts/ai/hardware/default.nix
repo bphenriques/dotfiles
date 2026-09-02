@@ -5,12 +5,7 @@
   hardware.enableRedistributableFirmware = true;
 
   boot = {
-    # TTM caps how much system RAM the iGPU may pin, and defaults to half. 112 GiB in 4KiB pages,
-    # leaving ~11 GiB for the OS. IOMMU needs no kernel param: the BIOS already enables it.
-    kernelParams = [ "ttm.pages_limit=29360128" ];
-
-    # Headless and wired: the radios and the HDA controller are dead weight, and the WiFi chip
-    # otherwise shows up as a hwmon sensor the temperature alerts would have to filter out.
+    kernelParams = [ "ttm.pages_limit=29360128" ];  # Set 112GiB for the iGPU
     blacklistedKernelModules = [
       "mt7925e"        # WiFi
       "btusb"          # Takes btrtl/btintel/btmtk/btbcm with it
@@ -24,7 +19,6 @@
     useNetworkd = true;
   };
 
-  # Only the cabled RTL8127 is configured; the second one stays down to wire by hand.
   systemd.network = {
     networks."10-lan" = {
       matchConfig.MACAddress = private.settings.network.lanMAC;
@@ -39,7 +33,14 @@
     };
   };
 
-  services.fstrim.enable = true;
+  services = {
+    fstrim.enable = true;
+    # Single consumer NVMe holding the OS and every model: short test weekly, long monthly.
+    smartd = {
+      enable = true;
+      defaults.autodetected = "-a -s (S/../../7/03|L/../15/./04)";
+    };
+  };
 
   environment.systemPackages = [
     pkgs.ethtool

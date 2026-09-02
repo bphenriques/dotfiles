@@ -61,7 +61,7 @@ init_host() {
   local fields
   # Bitwarden field types: 0=text, 1=hidden, 2=secure note (secureNote.type: 0=generic)
   # --arg briefly exposes these values in jq's argv (ps); acceptable for this single-user, rarely-run tool.
-  fields=$(jq -n --arg sops "$(cat "$tmpdir/age.key")" '[{name: "sops-private", value: $sops, type: 0}]')
+  fields=$(jq -n --arg sops "$(cat "$tmpdir/age.key")" '[{name: "sops-private", value: $sops, type: 1}]')
 
   local luks_password=""
   if [ "$with_luks" = "--luks" ]; then

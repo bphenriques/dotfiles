@@ -1,13 +1,22 @@
 {
-  # Only hwmon and systemd: it already carries every sensor plus SoC package power (PPT) and GPU
-  # clock. rapl needs root to read energy_uj, and thermal_zone returns nothing on this board.
-  services.prometheus.exporters.node = {
-    enable = true;
-    listenAddress = "0.0.0.0";
-    port = 9100;
-    enabledCollectors = [
-      "hwmon"
-      "systemd"
-    ];
+  # Bound to every interface but reachable only from compute; the scoping lives in ../firewall.nix.
+  services.prometheus.exporters = {
+    # Only hwmon and systemd: it already carries every sensor plus SoC package power (PPT) and GPU
+    # clock. rapl needs root to read energy_uj, and thermal_zone returns nothing on this board.
+    node = {
+      enable = true;
+      listenAddress = "0.0.0.0";
+      port = 9100;
+      enabledCollectors = [
+        "hwmon"
+        "systemd"
+      ];
+    };
+    smartctl = {
+      enable = true;
+      listenAddress = "0.0.0.0";
+      port = 9633;
+      maxInterval = "2m";
+    };
   };
 }

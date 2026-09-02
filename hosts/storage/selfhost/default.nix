@@ -37,10 +37,7 @@ in
   ];
 
   selfhost = {
-    # No services or ingress here: the backup pipeline, principal registries and SMB server all gate on this.
     enable = true;
-
-    # One spelling of each group name: the canonical ones come from the household vocabulary.
     groups = { inherit (private.groups) admin users; };
 
     # Ids pinned: these own files on a pool that outlives the root recording the allocation.

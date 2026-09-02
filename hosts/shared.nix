@@ -6,7 +6,7 @@ let
     subnet = "192.168.1.0/24";
     hosts = {
       laptop = "192.168.1.121";
-      compute = "192.168.1.196";        # First one from link aggregation
+      compute = "192.168.1.196";        # bond0; active-backup, so a single address
       storage = "192.168.1.199";
       ai = "192.168.1.200";
       inky = "192.168.1.92";            # Raspberry Pi Zero 2W

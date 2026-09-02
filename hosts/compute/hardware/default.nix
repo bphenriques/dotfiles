@@ -85,7 +85,6 @@
 
   # Thermal & stability
   services.thermald.enable = true;      # Intel thermal daemon
-  systemd.oomd.enable = true;           # Kill services under memory pressure before kernel OOM
   systemd.slices = {
     throttled.sliceConfig = {
       AllowedCPUs = "1-2";              # cores 0,3 reserved for system/critical (core 0 handles timer/boot interrupts)

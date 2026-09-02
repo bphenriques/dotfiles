@@ -168,7 +168,6 @@ in
     containers.containersConf.settings.containers = {
       default_capabilities = [];
       pids_limit = 100;
-      no_new_privileges = true;
     };
   };
 

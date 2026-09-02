@@ -1,6 +1,5 @@
 { config, ... }:
 {
-  # NUT client. The server is storage; credentials are its `ups/ai-password`.
   power.ups = {
     enable = true;
     mode = "netclient";

@@ -35,7 +35,10 @@
 
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
-  environment.systemPackages = [ inputs.disko.packages.${pkgs.stdenv.hostPlatform.system}.disko ];
+  environment.systemPackages = [
+    inputs.disko.packages.${pkgs.stdenv.hostPlatform.system}.disko
+    pkgs.gptfdisk # sgdisk: the degraded-pool runbook partitions a replacement by hand
+  ];
 
   system.stateVersion = "26.05";
 }

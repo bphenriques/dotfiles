@@ -17,9 +17,6 @@ in
     skipped != [ ]
   ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set custom.storage.shares.<name>.backup if unintended.";
 
-  # Manual restores and `rustic tag` run against the same generated profile as the timer.
-  environment.systemPackages = [ pkgs.rustic ];
-
   sops = {
     secrets."backup/b2/bucket" = { };
     secrets."backup/b2/bucket_id" = { };
@@ -56,8 +53,7 @@ in
       monthly = "1 year";
       yearly = "2 years";
     };
-    # Reading the datasets locally records their real ownership, unlike the CIFS mount on compute which
-    # fabricated uid/gid and forced restores through --no-ownership.
+    # Local folders which will enable storing the ownership information making restores safer.
     bindings = lib.mapAttrs' (name: s: lib.nameValuePair "/nas/${name}" s.root) backed;
   };
 }

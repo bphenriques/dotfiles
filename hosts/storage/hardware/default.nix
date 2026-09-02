@@ -41,8 +41,6 @@
     algorithm = "lz4";
   };
 
-  systemd.oomd.enable = true;
-
   # No powertop: its auto-tune enables USB autosuspend, and the UPS arrives on USB HID.
   # No cpuFreqGovernor either: intel_pstate already defaults to powersave here.
 

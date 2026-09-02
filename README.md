@@ -20,11 +20,11 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 ## Hosts
 
 | Host                                   | Platform      | Description                                                    |
-| -------------------------------------- | ------------- | -------------------------------------------------------------- |
+|----------------------------------------|---------------|----------------------------------------------------------------|
 | [laptop](./hosts/laptop)               | NixOS         | Personal laptop                                                |
 | [compute](./hosts/compute)             | NixOS         | Compute headless server                                        |
-| [storage](./hosts/storage)             | NixOS         | Headless NAS                                    |
-| [ai](./hosts/ai)                       | NixOS         | Headless AI inference                             |
+| [storage](./hosts/storage)             | NixOS         | Headless NAS                                                   |
+| [ai](./hosts/ai)                       | NixOS         | Headless AI inference                                          |
 | [share-vm](./hosts/guests/share-vm)    | NixOS microVM | Private file sharing service exposed only via Tailscale Funnel |
 | [cv-vm](./hosts/guests/cv-vm)          | NixOS microVM | Public landing page exposed only via Cloudflare Tunnel         |
 | [agent-vm](./hosts/guests/agent-vm)    | NixOS microVM | Private AI assistant                                           |

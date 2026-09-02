@@ -123,6 +123,16 @@ local_install() {
     dotfiles-secrets "$bw_email" fetch luks-key "$host" >"/tmp/luks-interactive-password.key"
   fi
 
+  # The remote path decrypts pool keys from sops; a local install expects them already in place, so
+  # fail on the documented precondition rather than at zpool create with an unrelated error.
+  local keylocation
+  while read -r pool; do
+    keylocation="$(nix eval --raw "${FLAKE_URL}#nixosConfigurations.${host}.config.disko.devices.zpool.${pool}.rootFsOptions.keylocation" 2>/dev/null || true)"
+    [[ $keylocation == file://* ]] || continue
+    [ -e "${keylocation#file://}" ] \
+      || fatal "Pool ${pool} needs its key at ${keylocation#file://} before a local install (see apps/nixos-install/README.md)"
+  done < <(nix eval --json "${FLAKE_URL}#nixosConfigurations.${host}.config.disko.devices.zpool" --apply builtins.attrNames | jq -r ".[]")
+
   info "Formatting disks..."
   sudo disko --mode destroy,format,mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 

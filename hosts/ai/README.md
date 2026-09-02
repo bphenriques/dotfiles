@@ -63,22 +63,24 @@ Settled, recorded so they are not relitigated:
 ## Network and exposure
 
 The endpoint has no authentication, so reachability is the access control. `firewall.nix` opens
-11434 to `compute` and `laptop` only, and 9100 to `compute` alone. `agent-vm` reaches it through
-compute's NAT egress, which is why compute is on the list. Nothing else on the LAN reaches it and it
-is never published.
+11434 to `compute` and `laptop`, and the exporters to `compute` alone. `agent-vm` reaches it through
+compute's NAT egress, which is why compute is on the list.
 
-**Know what that grants.** Anything that can reach 11434 can also `POST /api/pull`, which fetches
-arbitrary models from the internet onto the 2TB disk, and can run inference at will. Since compute is
-on the allowlist, that includes every container and guest on compute, not just hermes. Acceptable for
-a household LAN and the reason the port is not open wider; it is the residual risk to weigh before
-ever widening it.
+**Ollama runs with `--network=host`, not a published port.** Netavark DNATs published ports in
+`nat prerouting`, before the input hook, and `nixos-fw` has no forward chain, so an `input-allow`
+rule for a published port is dead code. Measured: storage reached 11434 while blocked on 9100.
 
-The container runs unprivileged with **all capabilities dropped** and `no_new_privileges`, verified
-by running the image with `--cap-drop=ALL` and confirming it still binds and drives the GPU.
+**Anything that reaches 11434 can `POST /api/pull`**, so every container and guest on compute can
+pull arbitrary models onto the disk. Narrowing below host granularity is authentication, not
+firewalling: compute SNATs guest egress to bond0. `hosts/compute/microvm/guests.nix` is the lever.
+
+**Hardening flags belong in `extraOptions`, not `containers.conf`**: a deploy rewrites the file but
+does not recreate a running container. `no_new_privileges` is not a `containers.conf` key at all and
+podman drops it silently; `--security-opt=no-new-privileges` is the working form.
 
 ## Monitoring
 
-`prometheus-node-exporter` on :9100, scraped by compute from
+`prometheus-node-exporter` on :9100 and `smartctl` on :9633, scraped by compute from
 [`monitoring/ai.nix`](../compute/selfhost/monitoring/ai.nix), with an `ai (inference)` row in the
 merged Grafana dashboard.
 
@@ -92,7 +94,12 @@ returns zero series on this board, so both were dropped after measuring rather t
 plausible-looking dead weight. compute grants `CAP_DAC_READ_SEARCH` for rapl; not worth a capability
 here when hwmon's PPT reports the same number.
 
-Alert thresholds are per sensor, not the fleet-wide `max(node_hwmon_temp_celsius) > 80`. That rule
+The OS and every model share one consumer NVMe, so `smartd` and the smartctl exporter run here too.
+The seven `disk-health` rules in `monitoring/smartctl.nix` are host-agnostic and cover it as soon as
+the exporter exists; hwmon `Composite` temperature alone was not wear or reallocation coverage.
+
+Alert thresholds are per sensor, not the fleet-wide `max(node_hwmon_temp_celsius) > 80`, which is now
+scoped to `instance="compute"` rather than merely claimed to be superseded here. That rule
 takes `max()` across every sensor, conflating parts with very different limits: NVMe crit is 89.85C,
 CPU Tjmax is 100C. CPU warns at 95C, GPU at 90C, NVMe at 75C, all `for: 10m`.
 
@@ -112,6 +119,10 @@ wall draw. The governor is already `amd-pstate-epp` / `powersave` / `balance_per
 the target state and not a default to fix. ASPM is left at the BIOS default: forcing `powersave`
 might save a watt against a real history of marginal PCIe devices dropping out. WiFi, Bluetooth and
 the HDA controller are blacklisted, being useless on a headless wired box.
+
+**No zram or swap**, unlike storage. `systemd-oomd` is on by default, the box sits near 2% memory
+use, and the plausible failure here is a GPU allocation rather than OS memory pressure. Compressing
+anonymous pages to buy RAM is beside the point when 112 GiB is reserved for GTT.
 
 NUT client of the [Beelink](../storage/README.md)'s Ellipse ECO 650. Under sustained inference this
 box roughly doubles the UPS load, which is fine for NUT's job of shutting down cleanly rather than

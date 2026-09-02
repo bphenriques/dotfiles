@@ -46,7 +46,7 @@ Made some tweaks to ensure thermal stability with sustained workloads:
                                       ▼
                                 ┌───────────┐
                                 │    NAS    │
-                                │ (Synology)│
+                                │ (Storage)│
                                 └───────────┘
                                   SMB mounts
 ```
