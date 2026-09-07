@@ -4,16 +4,18 @@ A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running herm
 
 Security concerns:
 
-- No inference here; the model runs on the laptop, tools and memory stay local
-- Egress is internet-only plus a single hole to `laptop:11434` (Ollama), never the rest of the LAN
+- No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
+- Egress is internet-only plus a single hole to `ai:11434` (Ollama), never the rest of the LAN
 - The vault is read-only, shared in over virtiofs from compute's gitea clone; the VM never reaches gitea
 - The API (`:8642`) is bridge-only, gated by a key compute generates and shares in read-only over virtiofs; the VM holds no secrets of its own
 
 ## Ops
 
-`ssh -J compute bphenriques@agent-vm`, then:
+The fleet-wide SSH profile disables TCP forwarding, so `-J` cannot reach the bridge; relay through compute instead:
 
 ```bash
+ssh -o ProxyCommand='ssh root@compute nc %h %p' bphenriques@agent-vm
+
 systemctl status hermes-agent      # the assistant runtime
 journalctl -u hermes-agent -f      # tool calls and model errors
 sudo -u hermes hermes chat         # CLI against the same state

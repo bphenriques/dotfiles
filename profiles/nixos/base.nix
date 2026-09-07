@@ -40,10 +40,10 @@ in
       LoginGraceTime = "30s";
     };
   };
-  services.journald.extraConfig = ''
-    MaxRetentionSec=1month
-    SystemMaxUse=1G
-  '';
+  services.journald.settings.Journal = {
+    MaxRetentionSec = "1month";
+    SystemMaxUse = "1G";
+  };
   security.sudo.extraConfig = "Defaults lecture=never";
   # sops-nix creates this key 0600; installers have not always. Converge regardless of what bootstrapped the host.
   systemd.tmpfiles.rules = lib.optional (

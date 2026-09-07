@@ -28,7 +28,7 @@ in
       volumes = [ "ollama:/root/.ollama" ];
       environment = {
         OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-        OLLAMA_MAX_LOADED_MODELS = "1";
+        OLLAMA_MAX_LOADED_MODELS = "2";      # assistant and coding models stay resident together (~44 GB of 112 GiB GTT)
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)

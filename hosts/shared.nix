@@ -40,7 +40,7 @@ in
       host = lan.hosts.ai;
       port = 11434;                     # Ollama's default, served from a container rather than nixpkgs
     };
-    model = "qwen3.5:4b";
-    extraModels = [ "gpt-oss:20b" ];
+    model = "qwen3.6:35b-a3b";
+    extraModels = [ "qwen3.6:35b-a3b-coding" ];
   };
 }

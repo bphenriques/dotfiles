@@ -35,8 +35,9 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     microvm.url = "github:microvm-nix/microvm.nix";                     # Lightweight, isolated guests
     microvm.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.20";   # Local-LLM assistant runtime (agent-vm brain)
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";   # Local-LLM assistant runtime (agent-vm brain)
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent.inputs.home-manager.follows = "home-manager";
     omp.url = "github:can1357/oh-my-pi/v17.4.0";                        # Terminal coding agent. No binary cache, so keep upstream's tested nixpkgs.
   };
 

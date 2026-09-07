@@ -11,6 +11,7 @@
       enable = true;
       subnet = config.custom.fleet.lan.subnet;
       masquerade = true;
+      broadcastForwarding = true;   # Wake-on-LAN the fleet from the VPN
     };
   };
 
