@@ -12,5 +12,6 @@ in
   networking.firewall.extraInputRules = ''
     ip saddr ${hosts.compute} tcp dport { ${toString exporters.node.port}, ${toString exporters.smartctl.port} } accept comment "exporters, scraped by compute"
     ip saddr { ${hosts.compute}, ${hosts.laptop} } tcp dport ${toString endpoint.port} accept comment "inference endpoint; compute covers agent-vm's NAT egress"
+    ip saddr ${hosts.laptop} tcp dport 8080 accept comment "ad-hoc experiments; rootless publishing binds a host socket, so this chain does see it"
   '';
 }

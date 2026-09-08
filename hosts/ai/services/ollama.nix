@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
   inherit (config.custom.fleet) ai;
-  models = [ ai.model ] ++ ai.extraModels;
+  models = [ ai.model ai.embeddingModel ] ++ ai.extraModels;
   img = pkgs.containerImages.ollama;
   localApi = "http://127.0.0.1:${toString ai.endpoint.port}";
 
   configure = pkgs.writeShellApplication {
     name = "ollama-configure";
-    runtimeInputs = [ pkgs.curl ];
+    runtimeInputs = [ pkgs.curl pkgs.jq ];
     text = builtins.readFile ./ollama-configure.sh;
   };
 in
@@ -20,7 +20,6 @@ in
       flags = [ "--all" ]; # image tags pile up on every bump; only running containers keep theirs
     };
     oci-containers.backend = "podman";
-    containers.containersConf.settings.containers.default_capabilities = [ ];
 
     oci-containers.containers.ollama = {
       image = "${img.image}:${img.version}-rocm";
@@ -28,12 +27,15 @@ in
       volumes = [ "ollama:/root/.ollama" ];
       environment = {
         OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-        OLLAMA_MAX_LOADED_MODELS = "2";      # assistant and coding models stay resident together (~44 GB of 112 GiB GTT)
+        # `model` and `codingModel` share a parent_model, so they are one runner, not two.
+        OLLAMA_MAX_LOADED_MODELS = "3";
+        # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)
-        OLLAMA_CONTEXT_LENGTH = "65536";     # Hermes requires >=64K
-        OLLAMA_KEEP_ALIVE = "1h";
+        OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
+        # ~25 GB of 112 GiB GTT, so an expiry only buys a 5-8s cold load after every idle spell.
+        OLLAMA_KEEP_ALIVE = "-1";
       };
       # Host networking, not a published port: netavark DNATs published ports in nat-prerouting,
       # which runs before the input hook, so ../firewall.nix would never see the traffic.

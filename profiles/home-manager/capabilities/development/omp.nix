@@ -13,13 +13,18 @@ let
     };
 
   jsonFormat = pkgs.formats.json { };
+
+  inherit (osConfig.custom.fleet) ai;
 in
 {
   imports = [ inputs.omp.homeManagerModules.default ];
 
-  home.sessionVariables.OLLAMA_BASE_URL =
-    let endpoint = osConfig.custom.fleet.ai.endpoint;
-    in "http://${endpoint.host}:${toString endpoint.port}";
+  home.sessionVariables = {
+    OLLAMA_BASE_URL = "http://${ai.endpoint.host}:${toString ai.endpoint.port}";
+
+    # Tells omp the real window; it does not change Ollama's runtime num_ctx.
+    OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
+  };
   home.file.".omp/agent/themes/onedark-transparent.json".source = jsonFormat.generate "onedark-transparent.json" onedarkTransparent;
 
   programs.omp = {
@@ -28,6 +33,11 @@ in
     settings = {
       tools.approvalMode = "write";
       secrets.enabled = true;       # Redact credentials before they reach the provider.
+
+      # `/model` still switches freely until the next home-manager switch restores these.
+      # `tiny` is pinned too: left unset, background tasks fall back to a cloud model.
+      modelRoles.default = "ollama/${ai.codingModel}";
+      modelRoles.tiny = "ollama/${ai.codingModel}";
 
       # Nix owns the version.
       startup.checkUpdate = false;

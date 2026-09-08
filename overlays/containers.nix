@@ -20,12 +20,6 @@ _final: prev: let
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
-    nextchat = {
-      image = "docker.io/yidadaa/chatgpt-next-web";
-      version = "2.16.1";
-      homepage = "https://github.com/ChatGPTNextWeb/NextChat";
-      updateInfo = { repo = "ChatGPTNextWeb/NextChat"; stripPrefix = "v"; };
-    };
     # The `ai` host appends `-rocm` to this tag; that variant is what carries the AMD GPU runtime.
     ollama = {
       image = "docker.io/ollama/ollama";

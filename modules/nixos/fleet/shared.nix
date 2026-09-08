@@ -51,10 +51,22 @@
         type = lib.types.str;
         description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
       };
+      codingModel = lib.mkOption {
+        type = lib.types.str;
+        description = "Model id the terminal coding agents default to. Distinct from `model` because coding and assistant turns want different weights.";
+      };
       extraModels = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
         description = "Additional model ids offered in the chat dropdown alongside the default (routed to the same endpoint).";
+      };
+      embeddingModel = lib.mkOption {
+        type = lib.types.str;
+        description = "Model id used to embed documents for retrieval. Never offered in the chat dropdown.";
+      };
+      contextLength = lib.mkOption {
+        type = lib.types.ints.positive;
+        description = "Context window the endpoint actually serves. Clients otherwise assume the window declared in model metadata and overrun it.";
       };
     };
   };

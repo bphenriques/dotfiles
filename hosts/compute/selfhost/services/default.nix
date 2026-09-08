@@ -24,7 +24,7 @@ in
     ./filebrowser.nix
     ./papra.nix
     # ./mympd.nix  # inky (its MPD backend) is retired; re-enable when it is back
-    ./nextchat.nix
+    ./open-webui.nix
   ];
 
   selfhost.external = {

@@ -28,6 +28,12 @@ in
       web-search = {
         command = "${pkgs.uv}/bin/uvx";
         args = [ "duckduckgo-mcp-server@0.7.0" ];
+
+        # uv otherwise fetches a generic-linux CPython that NixOS cannot exec.
+        env = {
+          UV_PYTHON_DOWNLOADS = "never";
+          UV_PYTHON = "${pkgs.python3}/bin/python3";
+        };
       };
 
       # npx fetches mcpvault on first boot (guest has internet).
@@ -51,7 +57,7 @@ in
       model = ollama // {
         provider = "custom:ai";
         default = fleet.ai.model;
-        context_length = 65536;              # Hermes requires >=64K; match OLLAMA_CONTEXT_LENGTH
+        context_length = fleet.ai.contextLength;
       };
 
       compression.enabled = true;            # auto-summarise old turns
@@ -62,6 +68,13 @@ in
         inherit (ollama) api_key base_url;
         model = fleet.ai.model;
       };
+
+      # Fired concurrently with the answer and doubled every turn's latency.
+      auxiliary.title_generation.enabled = false;
+
+      # Left on "auto" this hides the MCP tools behind a search-then-`tool_call` indirection once the
+      # listing passes 5% of context, and the model then calls them without their required arguments.
+      tools.tool_search.enabled = "off";
 
       platform_toolsets.api_server = [ "memory" "session_search" "todo" ];
       platforms.api_server = {

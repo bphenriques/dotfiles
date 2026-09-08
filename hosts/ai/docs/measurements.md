@@ -106,3 +106,23 @@ they would improve somewhat on this memory bandwidth, not by 4x.
 Two hours of continuous inference: GPU 67C at 87W and 2470MHz, CPU 75C (k10temp), load
 ~2.0. Zero throttling events. Thermal limits are ~95-100C in a ~120W envelope, so
 inference benchmarks on this box are not thermally biased.
+
+## Those numbers only hold for directly declared tools
+
+Every figure above was measured with the tools declared in the request. Hermes does not
+always do that: `tools.tool_search` defaults to `auto` and, once the listing passes 5% of
+context, hides the MCP tools behind a search-then-`tool_call` indirection. qwen3.6:35b-a3b
+drives that badly, calling tools with their required arguments missing:
+
+```
+tool_call to 'mcp__vault__search_notes' is missing required argument(s): query.
+The tool was NOT invoked.
+```
+
+Observed 2026-09-08 as the agent insisting the vault was unavailable, then failing the same
+call repeatedly. `tools.tool_search.enabled = "off"` puts the model back on the path
+benchmarked here. The cost is the full listing inlined: the hermes system prompt went from
+5390 to 7824 tokens, against a 64K window.
+
+A benchmark of tool selection says nothing about a runtime that rewrites how tools are
+offered. Check which of the two a client uses before trusting the table above.

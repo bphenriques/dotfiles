@@ -21,7 +21,6 @@
     pkgs.yq-go            # Query YAML
     pkgs.dateutils
     pkgs.openssl
-    pkgs.amp-cli          # AI Assistant
   ];
 
   programs.gpg = {

@@ -13,6 +13,8 @@ let
       jetkvm = "192.168.1.195";
     };
   };
+
+  codingModel = "qwen3.6:35b-a3b-coding";
 in
 {
   ssh = {
@@ -41,6 +43,9 @@ in
       port = 11434;                     # Ollama's default, served from a container rather than nixpkgs
     };
     model = "qwen3.6:35b-a3b";
-    extraModels = [ "qwen3.6:35b-a3b-coding" ];
+    inherit codingModel;
+    extraModels = [ codingModel ];
+    embeddingModel = "embeddinggemma";  # 0.5 GB, so it sits alongside the chat weights
+    contextLength = 65536;              # Hermes requires >=64K
   };
 }

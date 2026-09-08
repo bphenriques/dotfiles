@@ -33,5 +33,10 @@
 
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
+  # Ad-hoc compose experiments: `podman compose` drives docker-compose against the podman
+  # socket, and dockerCompat makes the literal `docker compose ...` reach it too.
+  virtualisation.podman.dockerCompat = true;
+  environment.systemPackages = [ pkgs.docker-compose ];
+
   system.stateVersion = "26.05";
 }
