@@ -15,9 +15,9 @@ normal flake update should become:
 
 The initial package list is deliberately static:
 
-| Input | Output | Reason |
-| --- | --- | --- |
-| `omp` | `packages.x86_64-linux.default` | Upstream does not publish this output to a maintainer cache. |
+| Input          | Output                          | Reason                                                        |
+| -------------- | ------------------------------- | ------------------------------------------------------------- |
+| `omp`          | `packages.x86_64-linux.default` | Upstream does not publish this output to a maintainer cache.  |
 | `hermes-agent` | `packages.x86_64-linux.default` | The upstream Cachix cache does not contain the pinned output. |
 
 Add another package only after it repeatedly causes a meaningful local build.

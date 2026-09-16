@@ -1,4 +1,4 @@
-{ lib, pkgs, config, self, osConfig, ... }:
+{ lib, pkgs, config, self, ... }:
 let
   cfg = config.custom.programs.screenshot;
 

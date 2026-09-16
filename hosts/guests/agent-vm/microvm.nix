@@ -8,10 +8,13 @@
     balloon = true;        # virtio-balloon: host can reclaim guest memory the VM isn't using
     deflateOnOOM = true;   # on guest OOM, auto-deflate the balloon before the OOM killer fires
 
-    # Both RO virtiofs of compute-owned data (RO enforced host-side by the VMM sandbox).
     shares = [
-      { source = "/var/lib/agent-vm-vault"; mountPoint = agentVm.vaultRoot; tag = "vault"; proto = "virtiofs"; } # gitea vault clone
-      { source = "/var/lib/agent-vm-secrets"; mountPoint = agentVm.secretsRoot; tag = "secrets"; proto = "virtiofs"; } # API_SERVER_KEY env
+      # The live vault on the NAS, reached through compute's CIFS mount. RW: the agent writes notes.
+      # The mount forces gid 5000 with 0660, so the guest's own gid-5000 group is what grants access.
+      # posixAcl drops `--posix-acl --xattr`, which CIFS cannot answer: with them on, even opendir
+      # returns EOPNOTSUPP and the guest sees an unusable mount rather than a permission error.
+      { source = "/mnt/homelab-bphenriques/notes"; mountPoint = agentVm.vaultRoot; tag = "vault"; proto = "virtiofs"; posixAcl = false; }
+      { source = "/var/lib/agent-vm-secrets"; mountPoint = agentVm.secretsRoot; tag = "secrets"; proto = "virtiofs"; readOnly = true; } # API_SERVER_KEY env
     ];
     volumes = [
       { image = "hermes-state.img"; label = "hermes-state"; mountPoint = agentVm.stateRoot; size = 4096; } # host key + hermes state

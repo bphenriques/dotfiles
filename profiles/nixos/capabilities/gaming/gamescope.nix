@@ -1,4 +1,4 @@
-{ pkgs, config, lib, ... }:
+_:
 {
   # Steam's micro-compositor for gaming.
   programs.gamescope = {

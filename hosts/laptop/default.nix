@@ -8,7 +8,6 @@ in
     inputs.sops-nix.nixosModules.sops
     ./hardware
     ./disko.nix
-    ../../profiles/nixos/base.nix
     ../../profiles/nixos/home-manager.nix
     ../../profiles/nixos/graphical
     ../../profiles/nixos/capabilities/development.nix

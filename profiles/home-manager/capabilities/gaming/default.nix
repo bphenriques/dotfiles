@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ config, ... }:
 let
   niriWorkspaces = config.custom.programs.niri.workspaces;
 in

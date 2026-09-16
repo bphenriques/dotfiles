@@ -6,11 +6,22 @@ let
   tapId = "vm-${config.networking.hostName}";     # matches the host's vm-* enslave glob
   hostKeyDir = "${cfg.stateRoot}/.ssh-host-keys";
   sshHostKey = "${hostKeyDir}/ssh_host_ed25519_key";
+  # Binding guestPlacement.ip fails outright if networkd has not configured it yet:
+  # https://github.com/NixOS/nixpkgs/issues/105570. The budget outlasts wait-online's timeout so a
+  # slow boot retries, while still reaching `failed` (and the alert) if the bind is genuinely broken.
+  ipBoundService = {
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    startLimitIntervalSec = 120;
+    startLimitBurst = 20;
+    serviceConfig.RestartSec = "2s";
+  };
 in
 {
   imports = [
     inputs.microvm.nixosModules.microvm
     inputs.sops-nix.nixosModules.sops
+    ./base.nix
   ];
 
   options.homelab.microvm.guest = {
@@ -31,8 +42,12 @@ in
     networking = { useDHCP = false; useNetworkd = true; };
     systemd.network = {
       enable = true;
+      # microvm.nix's optimize profile masks wait-online, which leaves network-online.target a no-op
+      # and lets services ordered on it start before the address exists.
+      wait-online = { enable = true; timeout = 30; };
       networks."10-lan" = {
         matchConfig.MACAddress = guestPlacement.mac;   # virtio gives unpredictable enp0sN names; match by MAC
+        linkConfig.RequiredForOnline = "routable";   # the default `degraded` is already met by the IPv4LL address
         networkConfig = {
           Address = "${guestPlacement.ip}/${toString guestPlacement.prefixLength}";
           Gateway = guestPlacement.gateway;
@@ -43,8 +58,8 @@ in
       };
     };
 
-    # Sealed appliance resolves via static DNS; drop the link-local LLMNR responder.
-    services.resolved.settings.Resolve.LLMNR = false;
+    # Rootfs is tmpfs, so Storage=auto picks "persistent" off a tmpfiles-made dir and logs into RAM.
+    services.journald.storage = "volatile";
 
     microvm.interfaces = [{ type = "tap"; id = tapId; inherit (guestPlacement) mac; }];
     microvm.vsock.cid = guestPlacement.vsockCid;   # for readiness systemd integration
@@ -54,6 +69,7 @@ in
       listenAddress = guestPlacement.ip;   # bridge IP (host-only behind the firewall)
       port = 9100;
       openFirewall = false;
+      enabledCollectors = [ "systemd" ];   # without it a failed unit is invisible from outside the guest
     };
 
     networking.nftables.enable = true;
@@ -63,22 +79,13 @@ in
     };
 
     services.openssh = {
-      enable = true;
+      openFirewall = false;   # its unqualified `tcp dport 22 accept` would shadow the rule above
       listenAddresses = [{ addr = guestPlacement.ip; port = 22; }];   # bridge only, not localhost/tailnet
-      settings = {
-        PasswordAuthentication = false;
-        PermitRootLogin = "no";
-        AllowTcpForwarding = false;
-        AllowAgentForwarding = false;
-        X11Forwarding = false;
-      };
+      settings.PermitRootLogin = "no";
       hostKeys = [{ path = sshHostKey; type = "ed25519"; }];
     };
-    # SSHD must wait for the IP or it fails: https://github.com/NixOS/nixpkgs/issues/105570
-    systemd.services.sshd = {
-      wants = [ "network-online.target" ];
-      after = [ "network-online.target" ];
-    };
+    systemd.services.sshd = ipBoundService;
+    systemd.services.prometheus-node-exporter = ipBoundService;
 
     # sops's age identity IS the VM's SSH host key, so the state volume joins the initrd and an
     # activation step generates the key (if absent) before sops runs.

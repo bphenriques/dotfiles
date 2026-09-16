@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, inputs, private, ... }:
+{ config, inputs, private, ... }:
 let
   # Ad-hoc (non-private) users; per-user service config rides under `services` on selfhost.users.
   extraUsers = {

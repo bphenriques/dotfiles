@@ -1,6 +1,8 @@
 { pkgs, config, ... }:
 {
   imports = [
+    ../base.nix
+    ../full-host.nix
     ./greetd.nix          # Login manager
     ./audio.nix
     ./wayland.nix         # Base wayland settings

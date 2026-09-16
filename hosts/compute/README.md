@@ -38,7 +38,7 @@ Made some tweaks to ensure thermal stability with sustained workloads:
                        │  sealed microVMs on an internal bridge:  │
                        │    share-vm → Tailscale Funnel (public)  │
                        │    cv-vm    → Cloudflare Tunnel (public) │
-                       │    agent-vm → laptop Ollama (private)    │
+                       │    agent-vm → ai host Ollama (private)    │
                        │                                          │
                        │  rustic (cron) ──────────────────────────├──▶ Backblaze B2
                        └──────────────┬───────────────────────────┘    (off-site)
@@ -53,11 +53,11 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 
 ## Access Control
 
-| Group    | Target              | Example access     |
-| -------- | ------------------- | ------------------ |
-| `admin`  | Homelab owner       | Everything         |
-| `users`  | Family              | Media, recipes     |
-| `guests` | Friends, colleagues | RomM only          |
+| Group    | Target              | Example access |
+| -------- | ------------------- | -------------- |
+| `admin`  | Homelab owner       | Everything     |
+| `users`  | Family              | Media, recipes |
+| `guests` | Friends, colleagues | RomM only      |
 
 RomM runs in kiosk mode: it is readable without logging in, and only `admin` can modify the library.
 
@@ -109,6 +109,14 @@ Trigger initial library scan
 ### Sonarr / Radarr / Prowlarr
 
 Enable extension protection per indexer (UI): Settings → Indexers → edit each indexer → Advanced → Fail Downloads → enable Dangerous Extensions and Executable Extensions
+
+### Obsidian LiveSync
+
+Per device. The URI carries the CouchDB credentials and the vault passphrase, so it prints once and is never stored.
+
+1. `ssh root@compute livesync-setup-uri`
+2. In Obsidian create an **empty** vault, install Self-hosted LiveSync, then answer the welcome notice: `I am adding a device to an existing synchronisation setup` → `Use a Setup URI` → `Restart and Fetch Data` → `Overwrite all with remote files` → `Keep local files even if not on remote`
+3. Set Sync Mode to **LiveSync**. On Events does not reliably pick up remote changes
 
 ### Syncthing
 

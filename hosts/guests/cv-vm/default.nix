@@ -16,9 +16,6 @@ in
     ingressPorts = [ cvVm.traefikMetricsPort ];   # Traefik metrics, scraped by compute over the bridge
   };
 
-  time.timeZone = "Europe/Lisbon";
-  i18n.defaultLocale = "en_US.UTF-8";
-
   users.users.${adminUser} = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];

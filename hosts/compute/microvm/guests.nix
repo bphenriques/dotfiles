@@ -39,7 +39,7 @@
       };
     };
 
-    # hermes-agent fronting the ai host's Ollama; NextChat (UI) runs on compute.
+    # hermes-agent fronting the ai host's Ollama; the chat UI runs on compute.
     agent-vm = {
       ip = "10.20.1.13";
       mac = "02:00:00:00:01:13";

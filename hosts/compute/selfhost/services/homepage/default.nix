@@ -5,6 +5,10 @@ let
 in
 {
   selfhost.apps.homepage.enable = true;
+
+  # Next.js binds 0.0.0.0 otherwise; the module only sets PORT.
+  systemd.services.homepage-dashboard.environment.HOSTNAME = "127.0.0.1";
+
   services.homepage-dashboard = {
     package = pkgs.homepage-dashboard.overrideAttrs (oldAttrs: {
       postInstall = (oldAttrs.postInstall or "") + ''

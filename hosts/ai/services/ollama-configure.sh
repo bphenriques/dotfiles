@@ -1,5 +1,7 @@
 # shellcheck shell=bash
 
+json=(-H "Content-Type: application/json")
+
 deadline=$((SECONDS + 300))
 until curl -sf "$OLLAMA_API/api/version" >/dev/null; do
   [ "$SECONDS" -lt "$deadline" ] || {
@@ -9,15 +11,18 @@ until curl -sf "$OLLAMA_API/api/version" >/dev/null; do
   sleep 2
 done
 
-# /api/tags always reports a tag, so untagged declarations compare as ":latest".
-qualify() { case "$1" in *:*) echo "$1" ;; *) echo "$1:latest" ;; esac; }
+read -ra models <<<"$DECLARED_MODELS"
+# An empty declared set would prune every model this unit pulled: a mistake rather than an intent.
+[ "${#models[@]}" -gt 0 ] || {
+  echo "no models declared" >&2
+  exit 1
+}
 
-read -ra models <<<"$OLLAMA_MODELS"
 for model in "${models[@]}"; do
   echo "pulling $model"
   # /api/pull answers 200 even for a bad tag and reports failure inside the stream, so the last
   # line is the only verdict. A failed request yields none, which is why success is matched.
-  if ! verdict=$(curl -sf "$OLLAMA_API/api/pull" -d "{\"model\":\"$model\"}" | tail -1); then
+  if ! verdict=$(curl -sf "${json[@]}" "$OLLAMA_API/api/pull" -d "{\"model\":\"$model\"}" | tail -1); then
     echo "pull of $model failed: request error" >&2
     exit 1
   fi
@@ -30,17 +35,31 @@ for model in "${models[@]}"; do
   esac
 done
 
-# The declared set is the whole set; pulls happen first so this never races a download.
-declared=""
-for model in "${models[@]}"; do declared="$declared $(qualify "$model")"; done
+# /api/tags reports a tag on every model, so untagged declarations are recorded as ":latest".
+qualify() { case "$1" in *:*) echo "$1" ;; *) echo "$1:latest" ;; esac }
 
-for present in $(curl -sf "$OLLAMA_API/api/tags" | jq -r '.models[].name'); do
-  case " $declared " in
-    *" $present "*) ;;
-    *)
-      echo "removing undeclared $present"
-      curl -sf -X DELETE "$OLLAMA_API/api/delete" -d "{\"model\":\"$present\"}" >/dev/null ||
-        echo "failed to remove $present" >&2
-      ;;
-  esac
-done
+declared=()
+for model in "${models[@]}"; do declared+=("$(qualify "$model")"); done
+
+# Pruning reads what this unit pulled last time rather than /api/tags: a model pulled by hand is not
+# ours to delete.
+managed="$STATE_DIRECTORY/managed"
+if [ -f "$managed" ]; then
+  while read -r model; do
+    case " ${declared[*]} " in
+      *" $model "*) continue ;;
+    esac
+    echo "removing $model, no longer declared"
+    curl -sf "${json[@]}" -X DELETE "$OLLAMA_API/api/delete" -d "{\"model\":\"$model\"}" >/dev/null \
+      || echo "failed to remove $model" >&2
+  done <"$managed"
+fi
+
+printf '%s\n' "${declared[@]}" >"$managed"
+
+# Ollama has no per-model keep_alive setting: the value sticks to the loaded instance and later
+# requests preserve it, so pinning once here outlives the finite default the other models get.
+echo "pinning $PINNED_MODEL"
+curl -sf "${json[@]}" "$OLLAMA_API/api/generate" \
+  -d "{\"model\":\"$PINNED_MODEL\",\"prompt\":\"\",\"stream\":false,\"keep_alive\":-1}" >/dev/null \
+  || echo "failed to pin $PINNED_MODEL" >&2

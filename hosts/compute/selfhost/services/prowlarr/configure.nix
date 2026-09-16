@@ -1,4 +1,4 @@
-{ config, pkgs, lib, self, private, ... }:
+{ config, pkgs, self, private, ... }:
 let
   serviceCfg = config.selfhost.services.prowlarr;
   radarrCfg = config.selfhost.services.radarr;

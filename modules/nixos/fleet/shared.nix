@@ -47,6 +47,16 @@
           description = "Port the inference API listens on. Runtime-specific, so it moves with the endpoint.";
         };
       };
+      imageEndpoint = {
+        host = lib.mkOption {
+          type = lib.types.str;
+          description = "Address serving image generation and editing. Separate from `endpoint`: diffusion is a different runtime with a different API and can move host on its own.";
+        };
+        port = lib.mkOption {
+          type = lib.types.port;
+          description = "Port the image API listens on.";
+        };
+      };
       model = lib.mkOption {
         type = lib.types.str;
         description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
@@ -54,11 +64,6 @@
       codingModel = lib.mkOption {
         type = lib.types.str;
         description = "Model id the terminal coding agents default to. Distinct from `model` because coding and assistant turns want different weights.";
-      };
-      extraModels = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Additional model ids offered in the chat dropdown alongside the default (routed to the same endpoint).";
       };
       embeddingModel = lib.mkOption {
         type = lib.types.str;

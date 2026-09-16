@@ -35,6 +35,9 @@ in
           contentTypeNosniff = true;
           frameDeny = true;
           referrerPolicy = "no-referrer";
+          stsSeconds = 31536000;
+          forceSTSHeader = true;   # cloudflared speaks plain HTTP here, and Traefik skips STS on non-TLS
+          # No includeSubdomains: the apex is public, but *.bphenriques.com is LAN-only.
         };
         # Small easter-egg for those who call with curl
         signature.headers.customResponseHeaders = {

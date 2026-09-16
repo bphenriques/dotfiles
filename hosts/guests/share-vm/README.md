@@ -32,6 +32,8 @@ users = {
 
 Each user is a BasicAuth account that only has the target folders in scope.
 
+Passwords exist only as bcrypt hashes in the htpasswd, so there is nothing to look up: `share-rotate` mints a fresh one. Dropping a user from the settings revokes their login on the next deploy.
+
 `laptop` automounts the share at `/mnt/homelab-shared-vm`.
 
 ## Setup (one-time)

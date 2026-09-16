@@ -13,8 +13,6 @@ let
       jetkvm = "192.168.1.195";
     };
   };
-
-  codingModel = "qwen3.6:35b-a3b-coding";
 in
 {
   ssh = {
@@ -42,9 +40,12 @@ in
       host = lan.hosts.ai;
       port = 11434;                     # Ollama's default, served from a container rather than nixpkgs
     };
+    imageEndpoint = {
+      host = lan.hosts.ai;
+      port = 8000;                      # the toolbox image's own launcher port, kept so its docs still apply
+    };
     model = "qwen3.6:35b-a3b";
-    inherit codingModel;
-    extraModels = [ codingModel ];
+    codingModel = "qwen3.8:27b";        # dense, so slower than the MoE above; picked for code quality
     embeddingModel = "embeddinggemma";  # 0.5 GB, so it sits alongside the chat weights
     contextLength = 65536;              # Hermes requires >=64K
   };

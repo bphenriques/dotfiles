@@ -28,7 +28,6 @@ in
   gtk.gtk3.bookmarks = [
     "file://${mounts.nasPrivate} NAS Private"
     "file://${mounts.nasMedia} NAS Media"
-    "file://${nasShares.bphenriques.root}/notes NAS Notes"
     "file://${nasShares.bphenriques.root}/documents NAS Documents"
     "file://${nasShares.media.root}/movies NAS Movies"
     "file://${nasShares.media.root}/tv NAS TV"
@@ -48,11 +47,6 @@ in
         name = "NAS Media";
         icon = mkIcon "nas-media" "󰥠";
         path = mounts.nasMedia;
-      }
-      {
-        name = "NAS Notes";
-        icon = mkIcon "nas-notes" "󱞁";
-        path = "${nasShares.bphenriques.root}/notes";
       }
       {
         name = "NAS Documents";

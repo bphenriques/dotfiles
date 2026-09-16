@@ -15,7 +15,6 @@
     ./users.nix
     ./selfhost
     ./services
-    ../../profiles/nixos/base.nix
     ../../profiles/nixos/headless.nix
   ];
 

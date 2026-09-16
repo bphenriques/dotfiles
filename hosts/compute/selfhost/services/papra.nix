@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   cfg = config.selfhost;
   serviceCfg = cfg.services.papra;

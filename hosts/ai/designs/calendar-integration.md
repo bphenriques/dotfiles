@@ -16,8 +16,7 @@ Use a community MCP server inside the guest. Do not build a custom syncer.
   npx-pinned, same shape as the `vault` entry in `hosts/guests/agent-vm/services/hermes-agent.nix`.
 - **Identity boundary:** a dedicated bot Gmail account, invited to the shared calendar with one ACL
   entry ("Make changes to events"). That entry is the bot's entire privilege.
-- **Capability boundary:** `ENABLED_TOOLS` allowlist. Grant `list-calendars, list-events,
-  search-events, get-event, get-freebusy, get-current-time, create-event, update-event`. Withhold
+- **Capability boundary:** `ENABLED_TOOLS` allowlist. Grant `list-calendars, list-events, search-events, get-event, get-freebusy, get-current-time, create-event, update-event`. Withhold
   `delete-event`, `respond-to-event`, `manage-accounts`. Deletion stays a human action.
 - Credentials are the guest's own secret, so its own sops file.
 
@@ -58,13 +57,13 @@ worse than the MCP server: more code, fewer features, identical security posture
 
 ## Rejected
 
-| Option | Why not |
-|---|---|
-| `taylorwilsdon/google_workspace_mcp` (3120 stars, MIT) | `--read-only` is binary, cannot express "update yes, delete no". Whole-Workspace scope is wider than needed. Reconsider if the ask grows past calendar. |
-| Keeper.sh (1277 stars, AGPL) | Needs Docker + Postgres + Redis + a public hostname. Its `@keeper.sh` UID ownership marker guards only the cleanup sweep, not the MCP write tools, so it would not have given the constraint anyway. Container-only, so dotfiles + overlays, not selfhost-nix. |
-| vdirsyncer (nixpkgs 0.20.0) | Faithful mirror with no ownership concept, so a bot bug propagates deletions to her events. Needs full `auth/calendar`. Worse than the status quo. |
-| Radicale as a bot-side calendar | Falls off the critical path once Google is the source of truth, and it reintroduces the subscription step the whole thing exists to avoid. |
-| Reuse the personal Google account | Scopes are account-wide. Collapses identity and ACL into one boundary, and bot events become indistinguishable from hand-made ones. |
+| Option                                                 | Why not                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `taylorwilsdon/google_workspace_mcp` (3120 stars, MIT) | `--read-only` is binary, cannot express "update yes, delete no". Whole-Workspace scope is wider than needed. Reconsider if the ask grows past calendar.                                                                                                        |
+| Keeper.sh (1277 stars, AGPL)                           | Needs Docker + Postgres + Redis + a public hostname. Its `@keeper.sh` UID ownership marker guards only the cleanup sweep, not the MCP write tools, so it would not have given the constraint anyway. Container-only, so dotfiles + overlays, not selfhost-nix. |
+| vdirsyncer (nixpkgs 0.20.0)                            | Faithful mirror with no ownership concept, so a bot bug propagates deletions to her events. Needs full `auth/calendar`. Worse than the status quo.                                                                                                             |
+| Radicale as a bot-side calendar                        | Falls off the critical path once Google is the source of truth, and it reintroduces the subscription step the whole thing exists to avoid.                                                                                                                     |
+| Reuse the personal Google account                      | Scopes are account-wide. Collapses identity and ACL into one boundary, and bot events become indistinguishable from hand-made ones.                                                                                                                            |
 
 ## Open before building
 

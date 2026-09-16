@@ -1,57 +1,27 @@
-{ config, pkgs, lib, ... }:
+{ config, ... }:
 let
   cfg = config.selfhost;
-  serviceCfg = cfg.services.filebrowser;
+  serviceCfg = cfg.services.filebrowser-quantum;
   selfhostMounts = cfg.storage.mounts.smb.shares;
-
-  filebrowserRoot = "/var/lib/filebrowser/root";
 in
 {
   config = {
     selfhost = {
-      apps.filebrowser.enable = true;
-      services.filebrowser = {
+      apps.filebrowser-quantum.enable = true;
+      services.filebrowser-quantum = {
+        subdomain = "filebrowser"; # the app was renamed, the URL people use was not
         access.allowedGroups = with cfg.groups; [ users admin ];
         traefik.middlewares.filebrowser-buffering.buffering.maxRequestBodyBytes = 4294967296; # 4GB upload cap
         extraConfig.landingPage.enable = true;
       };
     };
 
-    services.filebrowser = {
-      enable = true;
-      settings = {
-        address = "127.0.0.1";
-        inherit (serviceCfg) port;
-        root = filebrowserRoot;
-        branding = {
-          disableExternal = true;
-          disableUsedPercentage = true;
-        };
-        viewMode = "mosaic";
-        singleClick = true;
-        hideDotfiles = true;
-        sorting = { by = "modified"; asc = false; };
-      };
+    services.filebrowser-quantum.settings.userDefaults.listing = {
+      viewMode = "gallery";
+      singleClick = true;
+      showHidden = false;
     };
-    users.users.filebrowser.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.mounts;
 
-    # Default empty folders
-    services.filebrowser-multiuser.unlistedScope = "/empty"; # a group member not listed lands here
-    systemd.tmpfiles.rules = [
-      "d ${filebrowserRoot}/empty 0700 ${config.services.filebrowser.user} ${config.services.filebrowser.group} -"
-    ];
-
-    systemd.services.filebrowser = {
-      after = [ "filebrowser-configure.service" ];
-      requires = [ "filebrowser-configure.service" ];
-      serviceConfig = {
-        Restart = lib.mkForce "on-failure";
-        RestartSec = "5s";
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        ProtectClock = true;
-        ProtectKernelLogs = true;
-      };
-    };
+    users.users.filebrowser-quantum.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.mounts;
   };
 }

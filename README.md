@@ -20,7 +20,7 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 ## Hosts
 
 | Host                                   | Platform      | Description                                                    |
-|----------------------------------------|---------------|----------------------------------------------------------------|
+| -------------------------------------- | ------------- | -------------------------------------------------------------- |
 | [laptop](./hosts/laptop)               | NixOS         | Personal laptop                                                |
 | [compute](./hosts/compute)             | NixOS         | Compute headless server                                        |
 | [storage](./hosts/storage)             | NixOS         | Headless NAS                                                   |

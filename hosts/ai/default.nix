@@ -13,7 +13,6 @@
     ./users.nix
     ./firewall.nix
     ./services
-    ../../profiles/nixos/base.nix
     ../../profiles/nixos/headless.nix
   ];
 
@@ -33,8 +32,7 @@
 
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
-  # Ad-hoc compose experiments: `podman compose` drives docker-compose against the podman
-  # socket, and dockerCompat makes the literal `docker compose ...` reach it too.
+  # `podman compose` shells out to docker-compose; dockerCompat also answers `docker compose`.
   virtualisation.podman.dockerCompat = true;
   environment.systemPackages = [ pkgs.docker-compose ];
 

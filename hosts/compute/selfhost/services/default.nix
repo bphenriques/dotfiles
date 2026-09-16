@@ -21,10 +21,12 @@ in
     ./wireguard.nix
     ./home-assistant.nix
     ./cook-recipes.nix
+    ./couchdb.nix
+    ./livesync-cli
     ./filebrowser.nix
     ./papra.nix
     # ./mympd.nix  # inky (its MPD backend) is retired; re-enable when it is back
-    ./open-webui.nix
+    ./open-webui
   ];
 
   selfhost.external = {

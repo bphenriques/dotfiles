@@ -1,4 +1,4 @@
-{ lib, pkgs, osConfig, ... }:
+{ lib, pkgs, ... }:
 # PCSX2 treats config files as mutable runtime state. Do not manage them declaratively.
 # Manual setup (one-time): run PCSX2 → complete the setup wizard → set BIOS path to
 #   ${osConfig.custom.shares.media.root}/gaming/emulation/bios

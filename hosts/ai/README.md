@@ -1,7 +1,7 @@
 # AI Host
 
 Minisforum MS-S1 MAX running local inference for the fleet. Ollama serves an OpenAI-compatible
-endpoint on the iGPU; `agent-vm`'s hermes, NextChat and the laptop's coding agent all point at it
+endpoint on the iGPU; `agent-vm`'s hermes, the chat UI and the laptop's coding agent all point at it
 through `fleet.ai.endpoint`.
 
 **The success metric is tool-call reliability, not tokens/second.** An assistant that generates fast
@@ -52,11 +52,16 @@ Settled, recorded so they are not relitigated:
   userspace; NixOS owns the kernel, firmware, GPU enablement, firewall and the pinned image tag.
   Chasing a weekly-moving stack through nixpkgs is the wrong fight.
 - **Ollama rather than bare `llama-server`**, chosen for continuity: hermes' `provider = "ollama"`,
-  NextChat and the `fleet.ai.model` tags already speak it, so containerising the same server changed
+  the chat UI and the `fleet.ai.model` tags already speak it, so containerising the same server changed
   only the address. Watch, do not re-argue: Ollama's structured output is the machinery tool calling
   runs on and is its documented weak spot, and `gfx1151` is long-tail on its ROCm path.
   `llama-server` is the A/B if tool calls disappoint. Lemonade is the later option, and the only
   Linux path to the NPU.
+- **ComfyUI comes from a container too, and for a stronger reason than Ollama's.** nixpkgs has
+  `comfyui` and a `services.comfyui` module, but the package pins torch to `cudaPackages_13`; built
+  with `config.rocmSupport` it wants `torch`, `torchvision`, `torchaudio` and `rocm-merged` compiled
+  from source, on top of 6.0 GiB of fetches, and again on every nixpkgs bump. The image used instead
+  installs torch from AMD's ROCm nightlies as `torch[device-gfx1151]`, built for this chip alone.
 - **The switch is cheap in both directions.** Every candidate eats the same GGUF weights and speaks
   OpenAI `/v1`, so moving is a `fleet.ai.endpoint` change plus a container tag.
 
@@ -74,9 +79,70 @@ rule for a published port is dead code. Measured: storage reached 11434 while bl
 pull arbitrary models onto the disk. Narrowing below host granularity is authentication, not
 firewalling: compute SNATs guest egress to bond0. `hosts/compute/microvm/guests.nix` is the lever.
 
+**ComfyUI on 8000 has no authentication either, and the same guests reach it.** Its API is the wider
+surface of the two: it takes file uploads into the input directory and executes whatever graph it is
+handed. Open to compute for the chat UI and to laptop for ComfyUI's own UI, on the same reasoning
+that reachability is the access control.
+
 **Hardening flags belong in `extraOptions`, not `containers.conf`**: a deploy rewrites the file but
 does not recreate a running container. `no_new_privileges` is not a `containers.conf` key at all and
 podman drops it silently; `--security-opt=no-new-privileges` is the working form.
+
+## Models
+
+`fleet.ai` declares the models the fleet depends on and `ollama-configure` pulls them. The unit
+prunes only what it pulled itself, tracked in `/var/lib/ollama-configure/managed`, and never lists
+`/api/tags`, so a model pulled by hand survives deploys and reboots until you remove it.
+
+`ollama-models` on compute wraps the API for that: `list`, `pull <model>`, `rm <model>`.
+
+Coding agents need no configuration to see the result: omp discovers every tag and offers it as
+`ollama/<tag>`, after an `omp models refresh` since it caches the list. `OLLAMA_MAX_LOADED_MODELS` is
+the count of declared models, so an extra resident model evicts one of them and costs it a cold load.
+
+## Image generation
+
+ComfyUI from [`kyuz0/amd-strix-halo-comfyui`](https://github.com/kyuz0/amd-strix-halo-comfyui-toolboxes),
+serving its own UI on 8000 and, once configured, the chat UI's generate and edit buttons.
+
+**The pin is untracked.** Upstream cuts no GitHub releases, only datestamped tags, so
+`overlays/containers.nix` gives it no `updateInfo` and `check-updates` cannot see it. Bumping is a
+manual read of the tag list.
+
+**It is a toolbox image**: `Cmd` is a bare `/bin/bash` and the ROCm environment comes from
+`/etc/profile.d`, which only a login shell reads, so `services/comfyui.nix` supplies the launch line
+and those variables itself. `--disable-mmap` is not optional: mmap above 64GB is pathologically slow
+on gfx1151.
+
+**Weights are a manual bootstrap**, tens of GB behind interactive menus. These four pull exactly what
+the two workflows in `open-webui/` name, and nothing works until they are present:
+
+```
+podman exec -it comfyui /opt/get_qwen_image.sh 2   # Qwen-Image-Edit 2511 fp8, + text encoder and VAE
+podman exec -it comfyui /opt/get_qwen_image.sh 4   # its Lightning 4-step LoRA
+podman exec -it comfyui /opt/get_qwen_image.sh 1   # Qwen-Image 2512 fp8, for text-to-image
+podman exec -it comfyui /opt/get_qwen_image.sh 3   # its Lightning 4-step LoRA
+```
+
+Entries 1 and 2 share the text encoder and VAE, so the second pair adds only two files. The volume is
+`comfyui` at `/opt/comfy-home`, holding `comfy-models`, `comfy-outputs` and the HuggingFace cache;
+`/opt/model_manager.py` lists what is there. It is not at `/root` because Fedora ships that mode 0550,
+writable only via `CAP_DAC_OVERRIDE`, which the container's `--cap-drop=ALL` removes.
+
+**Take the API-format workflows, not the UI ones.** Only `workflows/API/*.json` are the format
+Open-WebUI posts, and upstream ships those for the safetensors path only, which is why the pick is
+fp8 rather than the GGUF the other menu entries offer. Both copies here swap the unet to fp8, and the
+text-to-image one also swaps in the LoRA matching its own model: upstream's JSON names the Edit LoRA
+in a text-to-image graph, which reads as a copy-paste slip.
+
+**Video is not reachable from the chat UI.** Open-WebUI has no video generation of any kind, so there
+is nothing to wire. The container already carries the workflows and `/opt/get_wan22.sh`,
+`get_ltx2.sh`, `get_hunyuan15.sh` and `get_minimax_h3.sh`, so it is a download away in ComfyUI's own
+UI on 8000 and needs no change here.
+
+**ComfyUI and Ollama share one GTT pool and one iGPU with no arbitration.** `OLLAMA_KEEP_ALIVE=-1`
+pins about 40 GB against a 112 GiB limit, and a diffusion run stalls chat and coding for its duration.
+If that grates, the lever is Ollama's keep-alive, not a bigger carve-out.
 
 ## Monitoring
 
@@ -103,7 +169,7 @@ scoped to `instance="compute"` rather than merely claimed to be superseded here.
 takes `max()` across every sensor, conflating parts with very different limits: NVMe crit is 89.85C,
 CPU Tjmax is 100C. CPU warns at 95C, GPU at 90C, NVMe at 75C, all `for: 10m`.
 
-Measured under load for calibration: generating on gpt-oss:20b peaks at **CPU 60C, GPU 48C, 104W
+Measured for calibration on gpt-oss:20b, since dropped: peaks at **CPU 60C, GPU 48C, 104W
 PPT, sclk pinned at 2900 MHz** with no throttling, against 5W and 600 MHz at idle. So the cooling has
 a lot of headroom and these thresholds are far from normal operation, which is the point. hwmon names chips by PCI path, so the rules join `node_hwmon_sensor_label` on
 `(chip, sensor)` to match `Tctl` / `edge` / `Composite` by name. No alert on the endpoint being down:
@@ -133,10 +199,8 @@ riding through.
 Not designed, listed so they are not forgotten. Do not start any until phase 1 has run unattended
 for a while.
 
-- **Model choice.** `qwen3.5:4b` was sized for the laptop's 8GB and is kept only so the move here
-  changed one variable. Pick against tool-call reliability, preferring a larger MoE.
-- **Lemonade, then NPU prefill.** The NPU does prefill while the iGPU decodes, roughly halving TTFT,
-  which is the metric that matters. Lemonade is the only Linux path to it.
+- **Lemonade.** The only Linux path to the NPU, but not a speed play: `docs/measurements.md` measures
+  NPU prefill at roughly a quarter of this iGPU's. Worth it only if something needs the NPU itself.
 - **Immich remote ML.** Not covered by Lemonade: Immich needs its own container and protocol, and
   nixpkgs cannot do ROCm there (`onnxruntime` exposes `cudaSupport` only).
 - **Speech for Home Assistant.** HA speaks Wyoming, Lemonade speaks OpenAI `/v1/audio/*`. Bridging

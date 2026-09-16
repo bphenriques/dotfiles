@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, config, ... }:
 let
   upsmon = config.power.ups.upsmon.monitor.storage;
   parsed = builtins.match "([^@]+)@(.+)" upsmon.system;

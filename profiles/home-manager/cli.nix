@@ -64,6 +64,7 @@ in
   custom.programs.fzf-fd.enable = true;   # Fuzzy fd
   custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
   programs.nushell.enable = true;         # Adhoc shell for data processing
+  programs.bash.enable = true;            # Login/ssh shell; without it home.sessionVariables reach fish only
 
   home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive

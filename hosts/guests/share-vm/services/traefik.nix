@@ -1,10 +1,11 @@
 { config, lib, pkgs, shareVm, guestPlacement, ... }:
 let
   inherit (shareVm) dataRoot proxyPort traefikMetricsPort;
-  inherit (config.services.filebrowser-multiuser) authHeader;  # the header filebrowser trusts
+  inherit (config.services.filebrowser-quantum) authHeader;  # the header filebrowser trusts
   credsDir = "${dataRoot}/.credentials";
   htpasswd = "${credsDir}/htpasswd";
   vmIp = guestPlacement.ip;
+  declaredUsers = lib.attrNames config.services.filebrowser-quantum.users;
 
   # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
   # uncrackable for online auth), bcrypt-hashed into the BasicAuth htpasswd and printed once.
@@ -13,7 +14,7 @@ let
     name = "share-rotate";
     runtimeInputs = [ pkgs.apacheHttpd pkgs.xkcdpass ];
     text = ''
-      users=(${lib.escapeShellArgs (lib.attrNames config.services.filebrowser-multiuser.users)})
+      users=(${lib.escapeShellArgs declaredUsers})
       user="''${1:-}"
       if [[ -z "$user" ]] || ! printf '%s\n' "''${users[@]}" | grep -qxF -- "$user"; then
         echo "usage: share-rotate <user>; known: ''${users[*]}" >&2
@@ -22,6 +23,28 @@ let
       pw=$(xkcdpass -n 5 -d -)
       htpasswd -bB "${htpasswd}" "$user" "$pw"
       printf '%s\n' "$pw"
+    '';
+  };
+
+  # `share-rotate` only ever adds, so dropping a user from the private settings left them a
+  # working BasicAuth login (FileBrowser then parks them on `unlistedScope`). Reconcile the
+  # file against the declared list instead; the buffer-then-truncate keeps its owner/perms.
+  sharePrune = pkgs.writeShellApplication {
+    name = "share-htpasswd-prune";
+    runtimeInputs = [ pkgs.gnugrep ];
+    text = ''
+      users=(${lib.escapeShellArgs declaredUsers})
+      kept=""
+      while IFS= read -r line || [[ -n "$line" ]]; do
+        user="''${line%%:*}"
+        [[ -n "$user" ]] || continue
+        if printf '%s\n' "''${users[@]}" | grep -qxF -- "$user"; then
+          kept+="$line"$'\n'
+        else
+          echo "pruning credential for undeclared user: $user" >&2
+        fi
+      done < "${htpasswd}"
+      printf '%s' "$kept" > "${htpasswd}"
     '';
   };
 in
@@ -50,7 +73,7 @@ in
         service = "filebrowser";
         middlewares = [ "ratelimit" "harden" "auth" ]; # Order matters: rate-limit first before clearing headers auth
       };
-      services.filebrowser.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString config.services.filebrowser.settings.port}"; }];
+      services.filebrowser.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString config.services.filebrowser-quantum.settings.server.port}"; }];
       middlewares = {
         # Coarse per-IP DoS guard (real IP via PROXY protocol) — the random per-user
         # passphrases are the real defence, so it stays generous for photo-gallery bursts.
@@ -92,6 +115,23 @@ in
     "d ${credsDir} 0750 traefik traefik -"
     "f ${htpasswd} 0640 traefik traefik -"
   ];
+
+  # Runs before Traefik reads the file, and again on any deploy that changes the user list
+  # (the declared names are baked into ExecStart, so the unit itself changes with them).
+  systemd.services.share-htpasswd-prune = {
+    description = "Drop share credentials for undeclared users";
+    requiredBy = [ "traefik.service" ];
+    before = [ "traefik.service" ];
+    after = [ "systemd-tmpfiles-setup.service" ];
+    unitConfig.RequiresMountsFor = [ dataRoot ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      User = "traefik";
+      Group = "traefik";
+      ExecStart = lib.getExe sharePrune;
+    };
+  };
 
   # `share-rotate` just rewrites the htpasswd (proxy-agnostic); Traefik reads it only at
   # startup, so restart it when the file changes. This watch is the only Traefik-specific

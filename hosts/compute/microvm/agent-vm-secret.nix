@@ -1,4 +1,4 @@
-# Generate the shared hermes API key here (NextChat + hermes both need it) and expose only its rendered
+# Generate the shared hermes API key here (the chat UI and hermes both need it) and expose only its rendered
 # env file to agent-vm over RO virtiofs. Compute is the guest's hypervisor, so no sops/ssh needed.
 { config, ... }:
 {

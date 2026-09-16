@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
   inherit (config.custom.fleet) ai;
-  models = [ ai.model ai.embeddingModel ] ++ ai.extraModels;
+  models = lib.unique [ ai.model ai.codingModel ai.embeddingModel ];
   img = pkgs.containerImages.ollama;
   localApi = "http://127.0.0.1:${toString ai.endpoint.port}";
 
   configure = pkgs.writeShellApplication {
     name = "ollama-configure";
-    runtimeInputs = [ pkgs.curl pkgs.jq ];
+    runtimeInputs = [ pkgs.curl ];
     text = builtins.readFile ./ollama-configure.sh;
   };
 in
@@ -27,15 +27,15 @@ in
       volumes = [ "ollama:/root/.ollama" ];
       environment = {
         OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-        # `model` and `codingModel` share a parent_model, so they are one runner, not two.
-        OLLAMA_MAX_LOADED_MODELS = "3";
+        OLLAMA_MAX_LOADED_MODELS = toString (builtins.length models);
         # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)
         OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
-        # ~25 GB of 112 GiB GTT, so an expiry only buys a 5-8s cold load after every idle spell.
-        OLLAMA_KEEP_ALIVE = "-1";
+        # Keeping all three resident OOM-killed ComfyUI, which needs ~30 GB on demand. ollama-configure
+        # pins `ai.model` alone at -1, which later requests preserve; the rest reload in 5-8s.
+        OLLAMA_KEEP_ALIVE = "10m";
       };
       # Host networking, not a published port: netavark DNATs published ports in nat-prerouting,
       # which runs before the input hook, so ../firewall.nix would never see the traffic.
@@ -64,11 +64,13 @@ in
     requires = [ "podman-ollama.service" ];
     environment = {
       OLLAMA_API = localApi;
-      OLLAMA_MODELS = toString models;
+      DECLARED_MODELS = toString models;
+      PINNED_MODEL = ai.model;
     };
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      StateDirectory = "ollama-configure";
       TimeoutStartSec = "4h";   # First pull of a large model is bounded by the internet, not the box
       ExecStart = lib.getExe configure;
     };

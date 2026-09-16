@@ -1,38 +1,18 @@
-{ pkgs, lib, config, self, ... }:
-let
-  fleetHosts = config.custom.fleet.lan.hosts
-    // lib.concatMapAttrs (_: guests: guests) config.custom.fleet.microvms;
-in
+# Universal floor: policy every machine in the fleet gets, sealed microVM guests included.
+# Anything needing a writable store, its own boot, persistent logs or an operator belongs in full-host.nix.
+{ ... }:
 {
-  imports = [ ../settings.nix ./shell.nix ];
+  imports = [ ../settings.nix ];
 
   users.mutableUsers = false;
 
-  # Nix
-  nix.registry.nixpkgs.flake = self.inputs.nixpkgs; # Pin nixpkgs registry to flake input: nix shell nixpkgs#hello
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
-  };
-
-  # Boot
-  boot.tmp.cleanOnBoot = true; # Not enabling useTmpfs despite having enough RAM. Might consider it.
-  system.nixos.label = let date = self.lastModifiedDate or "00000000000000";
-  in "${builtins.substring 2 6 date}-${builtins.substring 8 6 date}"; # Label visible in the boot menu. Format: YYMMdd-HHmmss (e.g. 250415-194532)
-
-  # Networking
-  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
-  networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or [ ]) ++ [ name ]; }) { } fleetHosts;
-  networking.firewall.enable = true;
-
-  # Security
+  # Security. PermitRootLogin is left to the consumer: hosts allow key-only root for remote
+  # deployment, guests forbid it outright.
   services.openssh = {
     enable = true;
     settings = {
-      PermitRootLogin = "prohibit-password";
       PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
+      KbdInteractiveAuthentication = false;   # PAM reaches the password stack through it despite the line above
       X11Forwarding = false;
       AllowAgentForwarding = false;
       AllowTcpForwarding = false;
@@ -40,25 +20,12 @@ in
       LoginGraceTime = "30s";
     };
   };
-  services.journald.settings.Journal = {
-    MaxRetentionSec = "1month";
-    SystemMaxUse = "1G";
-  };
+  services.resolved.settings.Resolve.LLMNR = false;   # nothing resolves through it; /etc/hosts + DNS cover the fleet
   security.sudo.extraConfig = "Defaults lecture=never";
-  # sops-nix creates this key 0600; installers have not always. Converge regardless of what bootstrapped the host.
-  systemd.tmpfiles.rules = lib.optional (
-    config.sops.age.keyFile != null
-  ) "z ${config.sops.age.keyFile} 0600 root root -";
 
-  # Localization
+  # Localization. The pt_PT LC_* set is an operator concern and lives in full-host.nix.
   time.timeZone = "Europe/Lisbon";
-  i18n = {
-    defaultLocale = "en_GB.UTF-8";
-    extraLocaleSettings = lib.genAttrs [
-      "LC_ADDRESS" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MONETARY"
-      "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME"
-    ] (_: "pt_PT.UTF-8");
-  };
+  i18n.defaultLocale = "en_GB.UTF-8";
 
   # Disabled defaults
   programs.nano.enable = false;

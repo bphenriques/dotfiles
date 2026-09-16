@@ -19,11 +19,10 @@ in
 {
   imports = [ inputs.omp.homeManagerModules.default ];
 
+  # Only reaches shells started after the next login; omp defaults to localhost until then.
   home.sessionVariables = {
     OLLAMA_BASE_URL = "http://${ai.endpoint.host}:${toString ai.endpoint.port}";
-
-    # Tells omp the real window; it does not change Ollama's runtime num_ctx.
-    OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
+    OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;   # `/api/show` reports the training window
   };
   home.file.".omp/agent/themes/onedark-transparent.json".source = jsonFormat.generate "onedark-transparent.json" onedarkTransparent;
 
@@ -35,9 +34,10 @@ in
       secrets.enabled = true;       # Redact credentials before they reach the provider.
 
       # `/model` still switches freely until the next home-manager switch restores these.
-      # `tiny` is pinned too: left unset, background tasks fall back to a cloud model.
-      modelRoles.default = "ollama/${ai.codingModel}";
-      modelRoles.tiny = "ollama/${ai.codingModel}";
+      # `:high` is the thinking selector; Ollama's /v1 drops reasoning_effort, so it only bites elsewhere.
+      modelRoles.default = "ollama/${ai.codingModel}:high";
+      # Pinned so background tasks stay local, on the MoE because it decodes 3x the dense coder.
+      modelRoles.tiny = "ollama/${ai.model}";
 
       # Nix owns the version.
       startup.checkUpdate = false;

@@ -94,4 +94,3 @@ sudo rustic -P backblaze restore \
 The destination directory is rustic's own container and takes no metadata from the snapshot, so it
 lands `root:root`; everything inside carries the recorded owner, group and mode. Pin a known-good
 snapshot with `sudo rustic -P backblaze tag --add keep-forever <snapshot-id>`.
-

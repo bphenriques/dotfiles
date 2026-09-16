@@ -52,6 +52,9 @@ in
       inherit (serviceCfg) port;
     };
 
-    systemd.services.seerr.serviceConfig.EnvironmentFile = config.selfhost.runtimeTemplates."seerr.env".path;
+    systemd.services.seerr = {
+      environment.HOST = "127.0.0.1";   # binds 0.0.0.0 otherwise; the module only sets PORT
+      serviceConfig.EnvironmentFile = config.selfhost.runtimeTemplates."seerr.env".path;
+    };
   };
 }

@@ -1,23 +1,22 @@
-{ fleet, agentVm, ... }:
+{ fleet, ... }:
 let
+  agentVm = import ./settings.nix;
   adminUser = "bphenriques";
 in
 {
   imports = [
-    ./settings.nix
     ../../../profiles/nixos/microvm-guest.nix
     ./microvm.nix
     ./services
   ];
 
+  _module.args.agentVm = agentVm;
+
   homelab.microvm.guest = {
     enable = true;
     inherit (agentVm) stateRoot;        # SSH host key + hermes state
-    ingressPorts = [ agentVm.apiPort ]; # hermes API, reached by NextChat over the bridge
+    ingressPorts = [ agentVm.apiPort ]; # hermes API, reached by the chat UI over the bridge
   };
-
-  time.timeZone = "Europe/Lisbon";
-  i18n.defaultLocale = "en_US.UTF-8";
 
   users.users.${adminUser} = {
     isNormalUser = true;

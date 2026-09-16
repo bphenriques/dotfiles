@@ -3,4 +3,5 @@ _: {
   pinned-github-releases = import ./jellyfin;
   pinned-container-images = import ./containers.nix;
   romm-fastapi = import ./romm-fastapi.nix;
+  open-webui-image-edit = import ./open-webui-image-edit.nix;
 }

@@ -1,4 +1,6 @@
-{ pkgs, lib, config, ... }: {
+{ pkgs, config, ... }: {
+  imports = [ ./base.nix ./full-host.nix ];
+
   # Auto-reboot on failure
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" ];
   systemd.settings.Manager.RuntimeWatchdogSec = "30s";

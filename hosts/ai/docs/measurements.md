@@ -19,12 +19,12 @@ result carries repo text. Filler is real repo content, not synthetic.
 
 ## Model selection
 
-| model | ctx~1.7k | ctx~12.8k | watch turn | decode |
-|---|---|---|---|---|
-| qwen3.6:35b-a3b | 44/45 | 45/45 | 1.46s | 68 tok/s |
-| qwen3.6:35b-a3b-coding | 45/45 | 45/45 | 0.95s | 78 tok/s |
-| qwen3.8:27b | 45/45 | 44/45 | 3.75s | 23 tok/s |
-| gpt-oss:20b | 38/45 | **22/45** | 1.33s | 49 tok/s |
+| model                  | ctx~1.7k | ctx~12.8k | watch turn | decode   |
+| ---------------------- | -------- | --------- | ---------- | -------- |
+| qwen3.6:35b-a3b        | 44/45    | 45/45     | 1.46s      | 68 tok/s |
+| qwen3.6:35b-a3b-coding | 45/45    | 45/45     | 0.95s      | 78 tok/s |
+| qwen3.8:27b            | 45/45    | 44/45     | 3.75s      | 23 tok/s |
+| gpt-oss:20b            | 38/45    | **22/45** | 1.33s      | 49 tok/s |
 
 gpt-oss:20b was dropped on 2026-09-06. Its knee sits between ~4k and ~11k prompt tokens.
 Past it, the characteristic failure is not a missing call: it selects the right tool and
@@ -34,6 +34,10 @@ produces confident wrong actions, which is worse than refusing.
 qwen3.8:27b is dense, so decode costs 2.9x qwen3.6's MoE (3B active of 35B). Equally
 reliable, 2.6x slower. A higher version number is not an upgrade across architectures.
 
+It is still the coding pick as of 2026-09-08. This harness scores tool-call reliability, not
+code quality, so it says nothing about the axis that choice rests on, and the latency lands on
+`omp` rather than on the assistant.
+
 Prefill figures are prefix-cache warm, which is the realistic case for a fixed system
 prompt. Cold first requests cost more.
 
@@ -41,12 +45,12 @@ prompt. Cold first requests cost more.
 
 Each was tested, not assumed.
 
-| hypothesis | result |
-|---|---|
-| `reasoning_effort = "low"` | default effort scores identically |
-| synthetic filler artifact | real repo content reproduces it |
-| context truncation | `/api/ps` confirms `ctx=65536` as configured |
-| server or ROCm build | reproduces on stock Ollama; not a Lemonade defect |
+| hypothesis                        | result                                               |
+| --------------------------------- | ---------------------------------------------------- |
+| `reasoning_effort = "low"`        | default effort scores identically                    |
+| synthetic filler artifact         | real repo content reproduces it                      |
+| context truncation                | `/api/ps` confirms `ctx=65536` as configured         |
+| server or ROCm build              | reproduces on stock Ollama; not a Lemonade defect    |
 | `q8_0` KV cache + flash attention | f16 control ties at baseline and flips sign at depth |
 
 The f16 control is the reason `OLLAMA_KV_CACHE_TYPE = "q8_0"` stays. Three models share
@@ -60,11 +64,11 @@ targets (`read_local_file` against `read_note`, `world_clock` and
 count is what plausibly breaks selection.
 
 | tools | prompt | shallow | ~15k ctx | ~29k ctx |
-|---|---|---|---|---|
-| 18 | 1732 | 45/45 | 45/45 | |
-| 20 | 1847 | 44/45 | | |
-| 25 | 2148 | 45/45 | | |
-| 40 | 3081 | 45/45 | 44/45 | 45/45 |
+| ----- | ------ | ------- | -------- | -------- |
+| 18    | 1732   | 45/45   | 45/45    |          |
+| 20    | 1847   | 44/45   |          |          |
+| 25    | 2148   | 45/45   |          |          |
+| 40    | 3081   | 45/45   | 44/45    | 45/45    |
 
 Doubling the tool surface costs ~61 prompt tokens per tool and no measurable accuracy,
 and it does not compound with context depth. Add MCP servers freely. The one crowding
@@ -90,11 +94,11 @@ the dominant path, and disabling it might cost reliability rather than buy laten
 Relevant to any future Lemonade or FastFlowLM evaluation. AMD's own published FLM numbers
 for `gpt-oss-20b` on XDNA2, against this box measured:
 
-| | NPU via FLM | this iGPU |
-|---|---|---|
-| decode @1k | 18.2 tok/s | 49.5 tok/s |
-| decode @64k | 8.7 tok/s | operating context |
-| prefill | 221-477 tok/s | ~1455-1810 tok/s |
+|             | NPU via FLM   | this iGPU         |
+| ----------- | ------------- | ----------------- |
+| decode @1k  | 18.2 tok/s    | 49.5 tok/s        |
+| decode @64k | 8.7 tok/s     | operating context |
+| prefill     | 221-477 tok/s | ~1455-1810 tok/s  |
 
 The NPU is ~50 TOPS on every XDNA2 part. What differs is the iGPU beside it: 8 CUs on the
 laptops Lemonade targets, 40 here. NPU offload wins when the NPU is the largest compute
@@ -106,6 +110,9 @@ they would improve somewhat on this memory bandwidth, not by 4x.
 Two hours of continuous inference: GPU 67C at 87W and 2470MHz, CPU 75C (k10temp), load
 ~2.0. Zero throttling events. Thermal limits are ~95-100C in a ~120W envelope, so
 inference benchmarks on this box are not thermally biased.
+
+A 16h agent session ran hotter and still did not throttle: 77C at 96W, 79C peak. See
+`agent-load.md`, which also accounts for where wall clock goes on that path.
 
 ## Those numbers only hold for directly declared tools
 
