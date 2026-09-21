@@ -6,10 +6,10 @@
     clientSubnet = "10.100.0.0/24";
     endpoint = private.settings.services.wireguard.endpoint;
     dns = config.custom.fleet.dns;
-    name = "bphenr";
     lanAccess = {
       enable = true;
       subnet = config.custom.fleet.lan.subnet;
+      serverAddress = config.custom.fleet.lan.hosts.compute;
       masquerade = true;
       wakeOnLan = true;   # Wake a powered-off fleet host from the VPN
     };

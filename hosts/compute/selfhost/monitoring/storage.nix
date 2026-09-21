@@ -21,6 +21,15 @@ _:
           annotations.summary = "{{ $labels.pool }}: {{ $value | printf \"%.0f\" }}% full";
         }
         {
+          # Quota'd datasets are invisible to the pool alert above: the pool has terabytes free while
+          # the dataset is full. Inert until a dataset is given a quota.
+          alert = "ZFSDatasetQuotaAlmostFull";
+          expr = "zfs_dataset_quota_bytes > 0 and (zfs_dataset_used_bytes / zfs_dataset_quota_bytes) * 100 > 85";
+          "for" = "15m";
+          labels.severity = "warning";
+          annotations.summary = "{{ $labels.name }}: {{ $value | printf \"%.0f\" }}% of its quota";
+        }
+        {
           # The framework declares this alert on the host serving the shares; that host runs no Prometheus.
           alert = "SmbSharesUnserved";
           expr = ''node_systemd_unit_state{instance="storage",name=~"samba-smbd.service|selfhost-smb-permissions.service",state="failed"} == 1'';

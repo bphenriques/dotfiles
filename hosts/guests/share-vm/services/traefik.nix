@@ -1,10 +1,11 @@
-{ config, lib, pkgs, shareVm, guestPlacement, ... }:
+{ config, lib, pkgs, shareVm, ... }:
 let
   inherit (shareVm) dataRoot proxyPort traefikMetricsPort;
   inherit (config.services.filebrowser-quantum) authHeader;  # the header filebrowser trusts
   credsDir = "${dataRoot}/.credentials";
   htpasswd = "${credsDir}/htpasswd";
-  vmIp = guestPlacement.ip;
+  guest = config.custom.microvm.guest;
+  vmIp = guest.ip;
   declaredUsers = lib.attrNames config.services.filebrowser-quantum.users;
 
   # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
@@ -108,7 +109,7 @@ in
     unitConfig.RequiresMountsFor = [ dataRoot ];
     serviceConfig = {
       IPAddressDeny = "any";
-      IPAddressAllow = [ "localhost" guestPlacement.gateway vmIp ];
+      IPAddressAllow = [ "localhost" guest.gateway vmIp ];
     };
   };
   systemd.tmpfiles.rules = [

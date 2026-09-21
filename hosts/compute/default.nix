@@ -13,7 +13,7 @@
 
   # Basic setup
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_1;
+    kernelPackages = pkgs.linuxPackages_7_2;
     loader.systemd-boot = {
       enable = true;
       editor = false;

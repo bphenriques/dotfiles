@@ -1,12 +1,14 @@
 # Host-agnostic sealed-guest contract: v4-only net, tap/vsock, node metrics, ingress firewall, SSH
-# over the bridge, and the sops-age-identity-is-the-host-key bootstrap. `guestPlacement` injected by the host.
-{ config, lib, pkgs, inputs, guestPlacement, private, fleet, ... }:
+# over the bridge, and the sops-age-identity-is-the-host-key bootstrap. Placement is set by mkMicrovmGuest.
+{ config, lib, pkgs, inputs, private, fleet, ... }:
 let
-  cfg = config.homelab.microvm.guest;
+  cfg = config.custom.microvm.guest;
+
   tapId = "vm-${config.networking.hostName}";     # matches the host's vm-* enslave glob
   hostKeyDir = "${cfg.stateRoot}/.ssh-host-keys";
   sshHostKey = "${hostKeyDir}/ssh_host_ed25519_key";
-  # Binding guestPlacement.ip fails outright if networkd has not configured it yet:
+
+  # Binding the guest IP fails outright if networkd has not configured it yet:
   # https://github.com/NixOS/nixpkgs/issues/105570. The budget outlasts wait-online's timeout so a
   # slow boot retries, while still reaching `failed` (and the alert) if the bind is genuinely broken.
   ipBoundService = {
@@ -21,11 +23,14 @@ in
   imports = [
     inputs.microvm.nixosModules.microvm
     inputs.sops-nix.nixosModules.sops
-    ./base.nix
   ];
 
-  options.homelab.microvm.guest = {
-    enable = lib.mkEnableOption "sealed microVM guest wiring (net, metrics, ssh, host-key bootstrap)";
+  options.custom.microvm.guest = {
+    ip = lib.mkOption { type = lib.types.str; };
+    mac = lib.mkOption { type = lib.types.str; };
+    vsockCid = lib.mkOption { type = lib.types.int; };
+    gateway = lib.mkOption { type = lib.types.str; };
+    prefixLength = lib.mkOption { type = lib.types.int; };
     stateRoot = lib.mkOption {
       type = lib.types.str;
       description = "Persistent state dir holding the SSH host key (doubles as the sops age identity).";
@@ -38,7 +43,7 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     networking = { useDHCP = false; useNetworkd = true; };
     systemd.network = {
       enable = true;
@@ -46,11 +51,11 @@ in
       # and lets services ordered on it start before the address exists.
       wait-online = { enable = true; timeout = 30; };
       networks."10-lan" = {
-        matchConfig.MACAddress = guestPlacement.mac;   # virtio gives unpredictable enp0sN names; match by MAC
+        matchConfig.MACAddress = cfg.mac;   # virtio gives unpredictable enp0sN names; match by MAC
         linkConfig.RequiredForOnline = "routable";   # the default `degraded` is already met by the IPv4LL address
         networkConfig = {
-          Address = "${guestPlacement.ip}/${toString guestPlacement.prefixLength}";
-          Gateway = guestPlacement.gateway;
+          Address = "${cfg.ip}/${toString cfg.prefixLength}";
+          Gateway = cfg.gateway;
           DNS = cfg.dns;
           LinkLocalAddressing = "ipv4";   # v4-only guest: no fe80:: and no RA-assigned v6, so the
           IPv6AcceptRA = false;           # host's v4-only LAN-drop seal can't be sidestepped over v6
@@ -59,14 +64,14 @@ in
     };
 
     # Rootfs is tmpfs, so Storage=auto picks "persistent" off a tmpfiles-made dir and logs into RAM.
-    services.journald.storage = "volatile";
+    services.journald.settings.Journal.Storage = "volatile";
 
-    microvm.interfaces = [{ type = "tap"; id = tapId; inherit (guestPlacement) mac; }];
-    microvm.vsock.cid = guestPlacement.vsockCid;   # for readiness systemd integration
+    microvm.interfaces = [{ type = "tap"; id = tapId; inherit (cfg) mac; }];
+    microvm.vsock.cid = cfg.vsockCid;   # for readiness systemd integration
 
     services.prometheus.exporters.node = {
       enable = true;
-      listenAddress = guestPlacement.ip;   # bridge IP (host-only behind the firewall)
+      listenAddress = cfg.ip;   # bridge IP (host-only behind the firewall)
       port = 9100;
       openFirewall = false;
       enabledCollectors = [ "systemd" ];   # without it a failed unit is invisible from outside the guest
@@ -75,12 +80,13 @@ in
     networking.nftables.enable = true;
     networking.firewall = {
       enable = true;
-      extraInputRules = "ip saddr ${guestPlacement.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
+      extraInputRules = "ip saddr ${cfg.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
     };
 
     services.openssh = {
+      enable = true;
       openFirewall = false;   # its unqualified `tcp dport 22 accept` would shadow the rule above
-      listenAddresses = [{ addr = guestPlacement.ip; port = 22; }];   # bridge only, not localhost/tailnet
+      listenAddresses = [{ addr = cfg.ip; port = 22; }];   # bridge only, not localhost/tailnet
       settings.PermitRootLogin = "no";
       hostKeys = [{ path = sshHostKey; type = "ed25519"; }];
     };

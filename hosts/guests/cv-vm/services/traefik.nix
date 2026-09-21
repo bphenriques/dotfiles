@@ -1,7 +1,8 @@
-{ cvVm, guestPlacement, fleetFacts, ... }:
+{ config, cvVm, fleetFacts, ... }:
 let
   inherit (cvVm) tunnelPort staticPort traefikMetricsPort;
-  vmIp = guestPlacement.ip;
+  guest = config.custom.microvm.guest;
+  vmIp = guest.ip;
 in
 {
   services.traefik = {
@@ -58,6 +59,6 @@ in
   # localhost + bridge (metrics) only, no LAN reach.
   systemd.services.traefik.serviceConfig = {
     IPAddressDeny = "any";
-    IPAddressAllow = [ "localhost" guestPlacement.gateway vmIp ];
+    IPAddressAllow = [ "localhost" guest.gateway vmIp ];
   };
 }

@@ -5,15 +5,14 @@ let
 in
 {
   imports = [
-    ../../../profiles/nixos/microvm-guest.nix
+    ../../../profiles/nixos/base.nix
     ./microvm.nix
     ./services
   ];
 
   _module.args.agentVm = agentVm;
 
-  homelab.microvm.guest = {
-    enable = true;
+  custom.microvm.guest = {
     inherit (agentVm) stateRoot;        # SSH host key + hermes state
     ingressPorts = [ agentVm.apiPort ]; # hermes API, reached by the chat UI over the bridge
   };

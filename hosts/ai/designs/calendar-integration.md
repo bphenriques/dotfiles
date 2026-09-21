@@ -33,8 +33,8 @@ worse than the MCP server: more code, fewer features, identical security posture
 
 ## Measured, do not re-derive
 
-- **The seal blocks LAN, not internet.** `profiles/nixos/capabilities/microvm-host.nix:67` drops
-  guest to RFC1918, `:161` drops guest to host. The guest reaches `googleapis.com` fine, so an MCP
+- **The seal blocks LAN, not internet.** `modules/nixos/microvm/host.nix:77` drops
+  guest to RFC1918, `:173` drops guest to host. The guest reaches `googleapis.com` fine, so an MCP
   server holding Google credentials runs *inside* the guest. Got this wrong once; it is what makes
   the community tooling usable at all.
 - **No Calendar OAuth scope narrows to a single calendar.** `calendar.app.created` is narrowest and

@@ -11,10 +11,10 @@ in
 {
   imports = [
     ../../../profiles/home-manager/base.nix
-    ../../../profiles/home-manager/capabilities/graphical
-    ../../../profiles/home-manager/capabilities/desktop
-    ../../../profiles/home-manager/capabilities/development
-    ../../../profiles/home-manager/capabilities/gaming
+    ../../../profiles/home-manager/graphical
+    ../../../profiles/home-manager/desktop
+    ../../../profiles/home-manager/development
+    ../../../profiles/home-manager/gaming
     ./kanshi.nix
   ];
 

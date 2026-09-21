@@ -32,7 +32,6 @@
       # the nightly backup, all on the same two spindles.
       defaults.autodetected = "-a -s (S/../../7/02|L/../15/./07)";
     };
-    # No thermald: it exits at startup here, and drive temperature is covered by the smartctl exporter.
   };
 
   zramSwap = {
@@ -40,9 +39,6 @@
     memoryPercent = 25;
     algorithm = "lz4";
   };
-
-  # No powertop: its auto-tune enables USB autosuspend, and the UPS arrives on USB HID.
-  # No cpuFreqGovernor either: intel_pstate already defaults to powersave here.
 
   boot.blacklistedKernelModules = [
     "mt7921e"    # WiFi (always wired)

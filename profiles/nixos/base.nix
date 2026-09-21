@@ -1,16 +1,15 @@
-# Universal floor: policy every machine in the fleet gets, sealed microVM guests included.
-# Anything needing a writable store, its own boot, persistent logs or an operator belongs in full-host.nix.
-{ ... }:
+{ lib, config, self, ... }:
 {
   imports = [ ../settings.nix ];
 
   users.mutableUsers = false;
 
-  # Security. PermitRootLogin is left to the consumer: hosts allow key-only root for remote
-  # deployment, guests forbid it outright.
+  # Security
+  networking.firewall.enable = true;
   services.openssh = {
     enable = true;
     settings = {
+      PermitRootLogin = "no";
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;   # PAM reaches the password stack through it despite the line above
       X11Forwarding = false;
@@ -23,11 +22,21 @@
   services.resolved.settings.Resolve.LLMNR = false;   # nothing resolves through it; /etc/hosts + DNS cover the fleet
   security.sudo.extraConfig = "Defaults lecture=never";
 
-  # Localization. The pt_PT LC_* set is an operator concern and lives in full-host.nix.
+  # Boot
+  boot.tmp.cleanOnBoot = true;
+  system.nixos.label =
+    let date = self.lastModifiedDate or "00000000000000";
+    in "${builtins.substring 2 6 date}-${builtins.substring 8 6 date}"; # Format: YYMMdd-HHmmss (e.g. 250415-194532)
+
+  # Localization
   time.timeZone = "Europe/Lisbon";
   i18n.defaultLocale = "en_GB.UTF-8";
 
-  # Disabled defaults
+  # Secrets: Ensure the secret sops file's permission do not diverge
+  systemd.tmpfiles.rules = lib.optional (config.sops.age.keyFile != null)
+    "z ${config.sops.age.keyFile} 0600 root root -";
+
+  # Disable defaults that are not required
   programs.nano.enable = false;
-  documentation.nixos.enable = false;  # Disable generating NixOS configuration options
+  documentation.nixos.enable = false;
 }

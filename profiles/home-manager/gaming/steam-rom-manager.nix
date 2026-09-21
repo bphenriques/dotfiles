@@ -2,11 +2,9 @@
 let
   romsDir = "${osConfig.custom.shares.media.root}/gaming/emulation/roms";
 in
-# SRM treats parser config as mutable runtime state. Do not manage it declaratively.
-# Manual setup (one-time): close Steam → open SRM → create one Glob parser per system → set ROM directory,
-#   executable, args, steam category, and local image paths (covers→tall, screenshots→hero, wheels→logo,
-#   marquees→icon) → disable online image providers → save → close SRM →
-#   systemctl --user start sync-steam-shortcuts.service
+# Manual setup (one-time) with Steam closed:
+# 1. open SRM → create parser per system using a community preset and set missing options. Retroarch likely needs to set to /etc/profiles/per-user/bphenriques/bin/retroarch
+# 2. systemctl --user start sync-steam-shortcuts.service
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.steam-rom-manager ];
 

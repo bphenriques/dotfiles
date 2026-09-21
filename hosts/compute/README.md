@@ -53,13 +53,33 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 
 ## Access Control
 
-| Group    | Target              | Example access |
-| -------- | ------------------- | -------------- |
-| `admin`  | Homelab owner       | Everything     |
-| `users`  | Family              | Media, recipes |
-| `guests` | Friends, colleagues | RomM only      |
+| Group       | Target                       | Example access |
+| ----------- | ---------------------------- | -------------- |
+| `admin`     | Homelab owner                | Everything     |
+| `users`     | Household                    | Media, recipes |
+| `relatives` | Family outside the household | Immich only    |
+| `guests`    | Friends, colleagues          | RomM only      |
 
 RomM runs in kiosk mode: it is readable without logging in, and only `admin` can modify the library.
+
+## Onboarding a relative
+
+Immich only, over WireGuard. Their public key is an input to the declaration, so the config comes first.
+
+1. **Config**: `sudo wg-manage invite --device phone > <name>-phone.conf`. Send it; they import, edit,
+   regenerate the private key, and send back the public key. Use `issue` instead to mint the key here
+   and render a QR, for someone who cannot.
+2. **Declare** in `dotfiles-private`: the user in `users.nix` (`relatives`), the device in
+   `users/<name>.nix`. Push, `nix flake update dotfiles-private`, deploy compute. The peer is dead
+   until this lands.
+3. **Confirm the tunnel**: they connect, `wg-manage status` shows a handshake.
+4. **Passkey**, only once step 3 holds: the link is single use and expires in an hour, so sending it
+   earlier burns it while they are still fixing WireGuard. Emails are `@local.invalid` and no invite is
+   sent, so generate a one-time link in the Pocket-ID admin UI. It signs them in once; they register a
+   passkey from there.
+
+To revoke, delete the device from the registry and deploy: `wg-manage` holds no state, and
+`wireguard-reconcile-peers` drops the peer.
 
 ## Setup
 
@@ -128,4 +148,4 @@ Share CalDAV/CardDAV URL with clients: `dav.<domain>` with generated `htpasswd` 
 
 ### WireGuard
 
-Import client configs on devices
+Own devices follow the same flow as [Onboarding a relative](#onboarding-a-relative), with `--full-access`.

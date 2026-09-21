@@ -6,6 +6,7 @@ _:
     ./smartctl.nix
     ./storage.nix
     ./ai.nix
+    ./guests.nix
     ./fleet.nix
     ./prometheus.nix
   ];

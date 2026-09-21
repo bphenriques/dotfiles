@@ -1,15 +1,15 @@
 let
   computeGuests = import ./compute/microvm/guests.nix;
 
-  # Set using static DHCP IPs. Alternatively, I should have disabled DHCP for a specific range but here we are.
+  # Set using static DHCP IPs.  I should have disabled DHCP for a specific range but here we are.
   lan = {
     subnet = "192.168.1.0/24";
     hosts = {
       laptop = "192.168.1.121";
-      compute = "192.168.1.196";        # bond0; active-backup, so a single address
+      compute = "192.168.1.196";
       storage = "192.168.1.199";
       ai = "192.168.1.200";
-      inky = "192.168.1.92";            # Raspberry Pi Zero 2W
+      inky = "192.168.1.92";
       jetkvm = "192.168.1.195";
     };
   };
@@ -19,7 +19,7 @@ in
     authorizedKeys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfNK2CGbIOfCrFsuWsX8bxqod4vtRJYYXpO54NWUdIY android-phone"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJmjV8lNkTmLcTm2ERfFEVrdUvmxgGttVMdWuljTsVKe mac"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7T3w1ex/9s2FBy8EM0HTSjF0kQIQi61ZwBh/mXQyNv ios-terminus"
     ];
   };
 

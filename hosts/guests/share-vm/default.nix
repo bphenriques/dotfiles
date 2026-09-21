@@ -5,13 +5,12 @@ in
 {
   imports = [
     ./settings.nix
-    ../../../profiles/nixos/microvm-guest.nix
+    ../../../profiles/nixos/base.nix
     ./microvm.nix
     ./services
   ];
 
-  homelab.microvm.guest = {
-    enable = true;
+  custom.microvm.guest = {
     stateRoot = shareVm.dataRoot;                   # SSH host key / sops age identity live here
     ingressPorts = [ shareVm.traefikMetricsPort ];  # Traefik metrics, scraped by compute over the bridge
   };

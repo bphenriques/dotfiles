@@ -58,7 +58,7 @@ in
     ./services
     ./tasks
     ./monitoring
-    ../../../profiles/nixos/capabilities/selfhost-smb-client.nix
+    ../../../profiles/nixos/selfhost-smb-client.nix
   ];
 
   custom = {
@@ -85,8 +85,6 @@ in
   };
 
   selfhost = {
-    enable = true;
-
     # One spelling of each group name: the canonical names come from the household vocabulary rather
     # than defaulting alongside it.
     groups = { inherit (private.groups) admin users; };
@@ -133,6 +131,21 @@ in
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
       shared = { gid = 5002; };
+      # Immich's media location is a StateDirectory, so systemd owns /var/lib/immich and the NAS lands
+      # on the two subfolders that grow instead. thumbs stays local (read on every timeline scroll).
+      #
+      # uid, not just gid: upload -> library now crosses devices, and Immich's EXDEV fallback ends in
+      # utimes(), which is owner-only whatever the mode says. Owner also makes the group grant moot.
+      immich-uploads = {
+        localMount = "/var/lib/immich/library";
+        uid = config.users.users.immich.uid;
+        gid = 5004;
+      };
+      immich-encoded-video = {
+        localMount = "/var/lib/immich/encoded-video";
+        uid = config.users.users.immich.uid;
+        gid = 5005;
+      };
     };
 
     ingress = {

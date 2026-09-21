@@ -1,6 +1,17 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  private,
+  ...
+}:
 let
   selfhostMounts = config.selfhost.storage.mounts.smb.shares;
+
+  # library and encoded-video come from the NAS; see hosts/compute/selfhost/default.nix.
+  mediaMounts = [
+    "immich-uploads"
+    "immich-encoded-video"
+  ];
 
   # Everyone with a personal share. Declaring libraries is inert until the user enables Immich, so this
   # needs no opt-in check, and it cannot read config.selfhost.users without recursing on it.
@@ -94,10 +105,14 @@ lib.mkMerge [
 
       services.immich = {
         subdomain = "photos";
-        access.allowedGroups = [ config.selfhost.groups.admin ];
+        # relatives reach Immich and nothing else: no other service lists this group.
+        access.allowedGroups = [
+          config.selfhost.groups.admin
+          private.groups.relatives
+        ];
         extraConfig.landingPage.enable = true;
         systemdServices = [ "immich-server" ];
-        storage.mounts = photoUsers;
+        storage.mounts = photoUsers ++ mediaMounts;
       };
 
       users = lib.genAttrs photoUsers (user: { services.immich.libraries = mkLibraries user; });
@@ -114,6 +129,10 @@ lib.mkMerge [
       };
     };
 
-    users.users.immich.extraGroups = map (user: selfhostMounts.${user}.group) photoUsers;
+    users.users.immich = {
+      # Pinned: the NAS mounts name a numeric owner, and Immich has to own its files to stamp mtime.
+      uid = 996;
+      extraGroups = map (user: selfhostMounts.${user}.group) photoUsers;
+    };
   }
 ]

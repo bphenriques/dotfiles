@@ -10,9 +10,9 @@ in
     ./disko.nix
     ../../profiles/nixos/home-manager.nix
     ../../profiles/nixos/graphical
-    ../../profiles/nixos/capabilities/development.nix
-    ../../profiles/nixos/capabilities/gaming
-    ../../profiles/nixos/capabilities/selfhost-smb-client.nix
+    ../../profiles/nixos/development.nix
+    ../../profiles/nixos/gaming
+    ../../profiles/nixos/selfhost-smb-client.nix
     ./share-mount.nix
 
     # Users
@@ -20,7 +20,7 @@ in
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_1;
+    kernelPackages = pkgs.linuxPackages_7_2;
     loader = {
       timeout = 0;  # The menu can be shown by pressing and holding a key before systemd-boot is launched.
       systemd-boot = {

@@ -19,7 +19,7 @@
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_18;
+    kernelPackages = pkgs.linuxPackages_6_18; # Strictly LTS to avoid rebooting and spinning down disks.
     loader.systemd-boot = {
       enable = true;
       editor = false;
@@ -35,7 +35,6 @@
   nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
 
   environment.systemPackages = [
-    inputs.disko.packages.${pkgs.stdenv.hostPlatform.system}.disko
     pkgs.gptfdisk # sgdisk: the degraded-pool runbook partitions a replacement by hand
   ];
 

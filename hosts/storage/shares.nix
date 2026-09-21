@@ -26,6 +26,32 @@ let
         };
       };
     };
+    # Immich's media location lives on compute; the two folders that actually grow are mounted from
+    # here. `immich-uploads` is Immich's `library/`, which holds only what people upload through the
+    # app: household members reach their own photos as external libraries from their personal share.
+    immich-uploads = {
+      root = "/srv/storage/immich/uploads";
+      backup = true;
+      smb = {
+        owner = "bphenriques";
+        gid = 985;
+        # Machine-only: compute is the sole reader, and no human principal holds a grant here.
+        access.users.machine-compute = "rw";
+      };
+    };
+    immich-encoded-video = {
+      root = "/srv/storage/immich/encoded-video";
+      # Transcodes, plus the motion-photo halves Immich extracts here. All of it regenerates from
+      # originals that are themselves backed up, so neither snapshotted nor sent off-site; the build
+      # warning naming this share is the intended opt-out record.
+      backup = false;
+      snapshots = false;
+      smb = {
+        owner = "bphenriques";
+        gid = 984;
+        access.users.machine-compute = "rw";
+      };
+    };
     media = {
       backup = true;
       snapshots = false;

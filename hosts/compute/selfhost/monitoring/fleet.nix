@@ -26,7 +26,7 @@ let
 
   # Guests run the same node_exporter, so they join the same job. Their traefik cannot: the framework
   # already owns a `traefik` job for this host's own instance.
-  microvm = config.homelab.microvm.host;
+  microvm = config.custom.microvm.host;
   guestEntries = lib.optionalAttrs microvm.enable (
     lib.mapAttrs (_: g: {
       address = g.ip;

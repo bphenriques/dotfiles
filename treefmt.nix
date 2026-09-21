@@ -21,7 +21,7 @@ _:
   };
 
   settings.formatter = {
-    # Follow Google's Shell Style Guide: https://google.github.io/styleguide/shellguide.html
+    # Google's Shell Style Guide: https://google.github.io/styleguide/shellguide.html
     shfmt.options = [
       "-i"
       "2"   # 2-space indentation
@@ -30,11 +30,12 @@ _:
       "-s"  # simplify shell expressions
     ];
     shellcheck.excludes = [
-      ".envrc" # is a direnv file, not a regular shell script.
-      # Avoids false positive related with lack of shebang.
+      ".envrc" # direnv file
+
+      # Avoids false positive related with nix packages scripts that do not have a shebang.
       "packages/**/script.sh"
       "apps/**/script.sh"
-      "infra/tofu.sh" # writeShellApplication fragment; shellchecked at build via that.
+      "infra/tofu.sh"
     ];
   };
 }

@@ -8,14 +8,12 @@ let
     (lib.findFirst (s: s.tag == "vault") null self.nixosConfigurations.agent-vm.config.microvm.shares).source;
 in
 {
-  imports = [
-    ../../../profiles/nixos/capabilities/microvm-host.nix
-    ./agent-vm-secret.nix
-  ];
+  imports = [ ./agent-vm-secret.nix ];
 
-  homelab.microvm.host = {
+  custom.microvm.host = {
     enable = true;
     uplink = "bond0";
+    adminUser = config.users.users.bphenriques.name;
     inherit (guests) bridge guests;
   };
 

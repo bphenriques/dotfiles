@@ -76,6 +76,17 @@ in
           };
         };
         shared = mkDataset "/srv/storage/shared";
+        # Container, like `users` above: unmounted, and the one place recordsize is declared.
+        immich = {
+          type = "zfs_fs";
+          options = {
+            canmount = "off";
+            mountpoint = "none";
+            recordsize = "1M";
+          };
+        };
+        "immich/uploads" = mkDataset "/srv/storage/immich/uploads";
+        "immich/encoded-video" = mkDataset "/srv/storage/immich/encoded-video";
         media = mkDataset "/srv/storage/media" // { options.recordsize = "1M"; };
         "media/music" = mkDataset "/srv/storage/media/music";
         "media/books" = mkDataset "/srv/storage/media/books";

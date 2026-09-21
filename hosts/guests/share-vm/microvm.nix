@@ -4,7 +4,7 @@ let
   dataVolume = { image = "share-data.img"; label = "share"; mountPoint = shareVm.filesRoot; size = 40 * 1024; };
 in
 {
-  # Networking, tap and vsock come from the microvm-guest.nix profile (from injected guestPlacement).
+  # Networking, tap and vsock come from the microvm-guest module (placement set by mkMicrovmGuest).
   microvm = {
     hypervisor = "cloud-hypervisor";
     vcpu = 2;

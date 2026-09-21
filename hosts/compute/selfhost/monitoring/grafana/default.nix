@@ -20,7 +20,7 @@ let
 
   computeDashboard = json.generate "compute.json" (import ./dashboard.nix {
     hostName = config.networking.hostName;
-    guests = config.homelab.microvm.host.guests;
+    guests = config.custom.microvm.host.guests;
     inherit storageName aiName;
   });
 in

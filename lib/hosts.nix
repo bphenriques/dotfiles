@@ -8,11 +8,13 @@ in
     nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs guestPlacement fleet fleetFacts;   # guestPlacement allocated by the host; fleet = shared.nix, no path-imports in guests
+        inherit inputs fleet fleetFacts;   # fleet = shared.nix, no path-imports in guests
         self = self // { lib = self.lib // { builders = self.lib.builders.${system}; }; };
         private = inputs.dotfiles-private.hosts.${hostName};
       };
       modules = [
+        self.nixosModules.microvm-guest
+        { custom.microvm.guest = guestPlacement; }   # allocated by the host
         { nixpkgs.overlays = attrValues self.overlays; }
         { networking.hostName = hostName; }
         configPath
@@ -30,7 +32,8 @@ in
           lib = self.lib // { builders = self.lib.builders.${system}; };
         };
       };
-      modules = attrValues self.nixosModules ++ [
+      # microvm-guest turns whatever imports it into a guest, so only mkMicrovmGuest takes it.
+      modules = attrValues (removeAttrs self.nixosModules [ "microvm-guest" ]) ++ [
         { nixpkgs.overlays = attrValues self.overlays ++ extraOverlays; }
         { networking.hostName = hostName; }
         configPath

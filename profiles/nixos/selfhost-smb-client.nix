@@ -1,5 +1,3 @@
-# Homelab SMB client: mounts the NAS shares and wires the sops credentials.
-# Hosts only declare `selfhost.storage.mounts.smb.shares` (gids, optional uid).
 { config, lib, inputs, private, ... }:
 let
   cfg = config.selfhost.storage.mounts.smb;
@@ -14,9 +12,10 @@ in
   };
 
   # A share named after someone in the household registry is theirs; everything else is a household share.
+  # The laptop carries no registry, so it marks nothing personal; nothing there reads the flag.
   custom.shares = lib.mapAttrs (name: mount: {
     root = mount.localMount;
-    personal = private.users ? ${name};
+    personal = (private.users or { }) ? ${name};
   }) cfg.shares;
 
   sops = {

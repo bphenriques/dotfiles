@@ -38,6 +38,7 @@ in
     };
   };
 
+  # TODO: Is this still required?
   # Sunshine needs access to /dev/uinput (virtual mouse/keyboard) and /dev/uhid (DS5 gamepad emulation).
   # The NixOS module runs Sunshine as a user service, so these devices must be group-accessible.
   services.udev.extraRules = lib.optionalString config.services.sunshine.enable ''

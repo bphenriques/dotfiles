@@ -9,16 +9,8 @@ let
   ) osConfig.custom.fleet.microvms;
 in
 {
-  programs.tealdeer = {
-    enable = true;
-    settings = {
-      display = {
-        compact = false;
-        use_pager = true;
-      };
-      updates.auto_update = false;
-    };
-  };
+  programs.nushell.enable = true;         # Adhoc shell for data processing
+  programs.bash.enable = true;            # Login/ssh shell; without it home.sessionVariables reach fish only
 
   programs.ssh = {
     enable = true;
@@ -35,6 +27,17 @@ in
       # accept-new: persistent key, so a one-time bootstrap TOFU; a *changed* key is still refused.
       "compute".StrictHostKeyChecking = "accept-new";
     } // guestBlocks;
+  };
+
+  programs.tealdeer = {
+    enable = true;
+    settings = {
+      display = {
+        compact = false;
+        use_pager = true;
+      };
+      updates.auto_update = false;
+    };
   };
 
   services.gpg-agent = {
@@ -59,12 +62,10 @@ in
   stylix.targets.bat.enable = true;
 
   programs.fd.enable = true;              # Better `find`.
+  custom.programs.fzf-fd.enable = true;   # Fuzzy fd
   programs.jq.enable = true;              # JSON query.
   custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
-  custom.programs.fzf-fd.enable = true;   # Fuzzy fd
   custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
-  programs.nushell.enable = true;         # Adhoc shell for data processing
-  programs.bash.enable = true;            # Login/ssh shell; without it home.sessionVariables reach fish only
 
   home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive

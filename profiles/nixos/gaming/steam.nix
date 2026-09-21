@@ -11,26 +11,12 @@ let
   };
 in
 {
-  # Tweaks
-  boot.kernel.sysctl = {
-    "vm.max_map_count" = 2147483642;        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
-  };
-
-  security.pam.loginLimits = [
-    {
-      domain = "*";
-      type = "hard";
-      item = "nofile";
-      value = "1048576";
-    }
-  ];
-
   programs.steam = {
     enable = true;
     extest.enable = true;
     extraCompatPackages = [ pkgs.proton-ge-bin ];
     protontricks.enable = true;
-    gamescopeSession.enable = config.programs.gamescope.enable;
+    gamescopeSession.enable = true;
 
     # Network options
     remotePlay.openFirewall = true;
@@ -41,6 +27,17 @@ in
   environment.systemPackages = [
     steam-desktop-item
   ];
+
+   boot.kernel.sysctl = {
+     "vm.max_map_count" = 2147483642;        # https://wiki.archlinux.org/title/gaming#Increase_vm.max_map_count
+   };
+
+   security.pam.loginLimits = [{
+      domain = "*";
+      type = "hard";
+      item = "nofile";
+      value = "1048576";
+    }];
 }
 
 

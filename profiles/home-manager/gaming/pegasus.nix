@@ -26,8 +26,7 @@ let
     { dir = "wii";       name = "Wii";              launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\"";                      extensions = [ "iso" "wbfs" "rvz" ]; }
   ];
 
-  # Resolve cores dir from retroarch on PATH so metadata doesn't go stale when the package changes.
-  # Assumes bin/retroarch and lib/retroarch/cores live under the same package root.
+  # Paths are solved in runtime. Assumes bin/retroarch and lib/retroarch/cores live under the package root.
   retroarchWithCore = pkgs.writeShellApplication {
     name = "retroarch-with-core";
     runtimeInputs = [ pkgs.coreutils ];
@@ -38,10 +37,12 @@ let
       exec "$retroarch_bin" -L "$core_path" "$@"
     '';
   };
+
   mkLaunchCmd = sys:
     if sys ? core
     then "${lib.getExe retroarchWithCore} ${sys.core} \"{file.path}\""
     else sys.launch;
+
   configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
     romsDir = "${osConfig.custom.shares.media.root}/gaming/emulation/roms";
 
@@ -52,15 +53,14 @@ let
       { folder = "wheels";      asset = "logo"; }
       { folder = "marquees";    asset = "marquee"; }
       { folder = "textures";    asset = "background"; }
-   ];
+    ];
+
     systems = map (sys: {
       inherit (sys) dir name extensions;
       shortname = sys.shortname or sys.dir;
       launch = mkLaunchCmd sys;
     }) systems;
   });
-
-  metafilesDir = "${config.xdg.configHome}/pegasus-frontend/metafiles";
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.pegasus-frontend ];
@@ -71,7 +71,11 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       Unit.Description = "Generate Pegasus frontend metadata files";
       Service = {
         Type = "oneshot";
-        ExecStart = lib.escapeShellArgs [ (lib.getExe self.packages.generate-pegasus-metadata) configFile metafilesDir ];
+        ExecStart = lib.escapeShellArgs [
+          (lib.getExe self.packages.generate-pegasus-metadata)
+          configFile
+          "${config.xdg.configHome}/pegasus-frontend/metafiles"
+        ];
       };
     };
 

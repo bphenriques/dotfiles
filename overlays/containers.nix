@@ -4,26 +4,26 @@ _final: prev: let
   images = {
     cleanuparr = {
       image = "ghcr.io/cleanuparr/cleanuparr";
-      version = "2.10.2";
+      version = "2.10.6";
       homepage = "https://github.com/Cleanuparr/Cleanuparr";
       updateInfo = { repo = "Cleanuparr/Cleanuparr"; stripPrefix = "v"; };
     };
     kapowarr = {
       image = "docker.io/mrcas/kapowarr";
-      version = "1.3.1";
+      version = "1.3.2";
       homepage = "https://github.com/Casvt/Kapowarr";
       updateInfo = { repo = "Casvt/Kapowarr"; stripPrefix = "V"; };
     };
     # Image tags carry a `-cli` suffix the GitHub release tags do not, so consumers append it.
     livesync-cli = {
       image = "ghcr.io/vrtmrz/livesync-cli";
-      version = "1.0.29";
+      version = "1.0.30";
       homepage = "https://github.com/vrtmrz/obsidian-livesync";
       updateInfo = { repo = "vrtmrz/obsidian-livesync"; };
     };
     papra = {
       image = "ghcr.io/papra-hq/papra";
-      version = "26.6.1";
+      version = "26.6.2";
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
     };
@@ -37,7 +37,7 @@ _final: prev: let
     # The `ai` host appends `-rocm` to this tag; that variant is what carries the AMD GPU runtime.
     ollama = {
       image = "docker.io/ollama/ollama";
-      version = "0.33.2";
+      version = "0.34.2";
       homepage = "https://github.com/ollama/ollama";
       updateInfo = { repo = "ollama/ollama"; stripPrefix = "v"; };
     };

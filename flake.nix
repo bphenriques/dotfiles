@@ -21,11 +21,11 @@
     selfhost-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Community flakes
+    ## Basic
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     stylix.url = "github:danth/stylix";                                 # Consistent coloring across my system. I can still tweak manually.
     tinted-schemes.follows = "stylix/tinted-schemes";
-    nur.url = "github:nix-community/nur";                               # Collection of packages. Use it for Firefox extensions
     sops-nix.url = "github:Mic92/sops-nix";                             # Manage secrets using sops
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";                           # Declaratively describe my disks layout
@@ -33,6 +33,9 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";                     # Unified formatter for multiple languages
     nix-index-database.url = "github:nix-community/nix-index-database"; # Pre-built nix-index database for comma
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    ## Extra packages
+    nur.url = "github:nix-community/nur";                               # Collection of packages. Use it for Firefox extensions
     microvm.url = "github:microvm-nix/microvm.nix";                     # Lightweight, isolated guests
     microvm.inputs.nixpkgs.follows = "nixpkgs";
     hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";   # Local-LLM assistant runtime (agent-vm brain)

@@ -2,24 +2,17 @@
 let
   producerCfgs = lib.getAttrs producers nixosConfigurations;
   fromHost = _: cfg:
-    let
-      byName = builtins.listToAttrs (map (i: { inherit (i) name; value = i; }) cfg.config.selfhost.inventory);
-    in
     lib.concatLists (
       lib.mapAttrsToList (
         name: s:
-        lib.optional (s.extraConfig.landingPage.enable or false) (
-          let
-            fact = byName.${name};
-          in
-          {
-            inherit name;
-            inherit (fact) displayName homepage;
-            category = if fact.category == null then "other" else fact.category;
-            order = s.extraConfig.landingPage.order or 1;
-            listed = s.extraConfig.landingPage.listed or true;
-          }
-        )
+        lib.optional (s.extraConfig.landingPage.enable or false) {
+          inherit name;
+          inherit (s) displayName;
+          inherit (s.meta) homepage;
+          category = if s.meta.category == null then "other" else s.meta.category;
+          order = s.extraConfig.landingPage.order or 1;
+          listed = s.extraConfig.landingPage.listed or true;
+        }
       ) cfg.config.selfhost.services
     );
 in

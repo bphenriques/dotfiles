@@ -37,7 +37,6 @@ in
   ];
 
   selfhost = {
-    enable = true;
     groups = { inherit (private.groups) admin users; };
 
     # Ids pinned: these own files on a pool that outlives the root recording the allocation.
