@@ -153,9 +153,11 @@ in
       allowedInterfaces = [ "bond0" "wg0" ];
       traefik.enable = true;
       acme = {
-        dnsProvider = "cloudflare";
         email = private.settings.cloudflare.email;
-        credentialsEnvFile = config.sops.templates."traefik-cloudflare".path;
+        dns01 = {
+          provider = "cloudflare";
+          credentialsEnvFile = config.sops.templates."traefik-cloudflare".path;
+        };
       };
     };
 

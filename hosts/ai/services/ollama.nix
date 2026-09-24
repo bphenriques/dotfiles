@@ -12,49 +12,30 @@ let
   };
 in
 {
-  virtualisation = {
-    podman.enable = true;
-    podman.autoPrune = {
-      enable = true;
-      dates = "weekly";
-      flags = [ "--all" ]; # image tags pile up on every bump; only running containers keep theirs
+  virtualisation.oci-containers.containers.ollama = {
+    image = "${img.image}:${img.version}-rocm";
+    autoStart = true;
+    volumes = [ "ollama:/root/.ollama" ];
+    environment = {
+      OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
+      OLLAMA_MAX_LOADED_MODELS = toString (builtins.length models);
+      # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.
+      OLLAMA_NUM_PARALLEL = "1";
+      OLLAMA_FLASH_ATTENTION = "1";
+      OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)
+      OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
+      # Keeping all three resident OOM-killed ComfyUI, which needs ~30 GB on demand. ollama-configure
+      # pins `ai.model` alone at -1, which later requests preserve; the rest reload in 5-8s.
+      OLLAMA_KEEP_ALIVE = "10m";
     };
-    oci-containers.backend = "podman";
-
-    oci-containers.containers.ollama = {
-      image = "${img.image}:${img.version}-rocm";
-      autoStart = true;
-      volumes = [ "ollama:/root/.ollama" ];
-      environment = {
-        OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-        OLLAMA_MAX_LOADED_MODELS = toString (builtins.length models);
-        # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.
-        OLLAMA_NUM_PARALLEL = "1";
-        OLLAMA_FLASH_ATTENTION = "1";
-        OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)
-        OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
-        # Keeping all three resident OOM-killed ComfyUI, which needs ~30 GB on demand. ollama-configure
-        # pins `ai.model` alone at -1, which later requests preserve; the rest reload in 5-8s.
-        OLLAMA_KEEP_ALIVE = "10m";
-      };
-      # Host networking, not a published port: netavark DNATs published ports in nat-prerouting,
-      # which runs before the input hook, so ../firewall.nix would never see the traffic.
-      # These are flags rather than containers.conf keys so a deploy reasserts them via ExecStart.
-      extraOptions = [
-        "--network=host"
-        "--cap-drop=ALL"
-        "--security-opt=no-new-privileges"
-        "--device=/dev/kfd"
-        "--device=/dev/dri"
-      ];
-    };
-  };
-
-  systemd.services.podman-ollama.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "10s";
-    RestartMaxDelaySec = "5min";
-    RestartSteps = 5;
+    # Host networking: netavark DNATs published ports before the input hook, out of ../firewall.nix's reach.
+    extraOptions = [
+      "--network=host"
+      "--cap-drop=ALL"
+      "--security-opt=no-new-privileges"
+      "--device=/dev/kfd"
+      "--device=/dev/dri"
+    ];
   };
 
   systemd.services.ollama-configure = {

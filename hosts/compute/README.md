@@ -156,11 +156,29 @@ Enable extension protection per indexer (UI): Settings → Indexers → edit eac
 
 ### Obsidian LiveSync
 
-Per device. The URI carries the CouchDB credentials and the vault passphrase, so it prints once and is never stored.
+Same steps on desktop, Android and iOS. The URI carries the CouchDB credentials and the vault
+passphrase: it prints once, is never stored, and should be treated as a secret.
 
-1. `ssh root@compute livesync-setup-uri`
-2. In Obsidian create an **empty** vault, install Self-hosted LiveSync, then answer the welcome notice: `I am adding a device to an existing synchronisation setup` → `Use a Setup URI` → `Restart and Fetch Data` → `Overwrite all with remote files` → `Keep local files even if not on remote`
-3. Set Sync Mode to **LiveSync**. On Events does not reliably pick up remote changes
+Mint one, either way:
+
+- From a device already syncing: LiveSync settings → Quick Setup → copy the URI, or show its QR
+  code. Easiest onto a phone.
+- From the server: `ssh root@compute livesync-setup-uri`. Takes a passphrase as the first argument,
+  otherwise it generates one and prints it alongside.
+
+On the new device:
+
+1. Create an **empty** vault. On phones keep it on the device, not iCloud or Drive, or it fights
+   with LiveSync over the same files.
+2. Install Self-hosted LiveSync from Community plugins. Plugins are not synced, so this is per device.
+3. Open the URI or scan the QR, then enter the passphrase.
+4. Welcome notice: `I am adding a device to an existing synchronisation setup` → `Use a Setup URI`
+   → `Restart and Fetch Data` → `Overwrite all with remote files` → `Keep local files even if not
+   on remote`.
+5. Set Sync Mode to **LiveSync**. On Events misses remote changes.
+
+`couchdb.<domain>` points at a LAN address, so the device needs the LAN or WireGuard. Phones sync
+only while Obsidian is open: background replication is desktop-only.
 
 ### Syncthing
 

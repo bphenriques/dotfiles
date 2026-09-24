@@ -21,8 +21,7 @@ in
     image = "${img.image}:${img.version}";
     autoStart = true;
 
-    # Not /root: Fedora ships it mode 0550, which only CAP_DAC_OVERRIDE makes writable, and the
-    # cap-drop below removes that. /opt is the tree this image chmods a+rwX for exactly this reason.
+    # Not /root: Fedora ships it mode 0550, unwritable once --cap-drop=ALL removes CAP_DAC_OVERRIDE.
     volumes = [ "comfyui:/opt/comfy-home" ];
 
     environment = {
@@ -49,12 +48,5 @@ in
       "--device=/dev/kfd"
       "--device=/dev/dri"
     ];
-  };
-
-  systemd.services.podman-comfyui.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "10s";
-    RestartMaxDelaySec = "5min";
-    RestartSteps = 5;
   };
 }
