@@ -1,3 +1,4 @@
+# Allocation table: read by flake.nix to build each guest, and by ./host.nix to drive the bridge and seal.
 {
   bridge = {
     name = "compute-microvm";   # 15-char IFNAMSIZ limit
@@ -10,7 +11,6 @@
       ip = "10.20.1.11";
       mac = "02:00:00:00:01:11";
       vsockCid = 3;
-      autostart = true;
       serviceConfig = {
         Slice = "throttled.slice";
         CPUWeight = 10;
@@ -27,7 +27,6 @@
       ip = "10.20.1.12";
       mac = "02:00:00:00:01:12";
       vsockCid = 4;
-      autostart = true;
       serviceConfig = {
         Slice = "throttled.slice";
         CPUWeight = 10;
@@ -44,7 +43,6 @@
       ip = "10.20.1.13";
       mac = "02:00:00:00:01:13";
       vsockCid = 5;
-      autostart = true;
       serviceConfig = {
         Slice = "throttled.slice";
         CPUWeight = 10;

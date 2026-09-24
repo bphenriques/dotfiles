@@ -1,65 +1,10 @@
-# Host-agnostic microVM host: bridge + NAT + egress seal + per-guest taps/sandboxes,
-# all driven by the allocation table (custom.microvm.host.guests). No host name baked in.
+# Host-agnostic microVM host: bridge, NAT, egress seal and per-guest taps, all driven by custom.microvm.host.guests.
 { config, lib, self, inputs, ... }:
 let
   cfg = config.custom.microvm.host;
   inherit (cfg) bridge;
 
-  # Confines the unprivileged VMM to this VM's state; cloud-hypervisor is tap-native so empty caps don't break networking.
-  vmSandbox = {
-    ProtectSystem = "strict";
-    PrivateTmp = true;
-    ProtectHome = true;
-    NoNewPrivileges = true;
-    CapabilityBoundingSet = "";
-    LockPersonality = true;
-    RestrictSUIDSGID = true;
-    ProtectClock = true;
-    ProtectKernelTunables = true;
-    ProtectKernelModules = true;
-    ProtectControlGroups = true;
-    ProtectProc = "invisible";
-    ProcSubset = "pid";
-    DevicePolicy = "closed";                # keep host /dev but restrict to what the VMM opens
-    DeviceAllow = [ "/dev/kvm rw" "/dev/net/tun rw" ];
-    RestrictNamespaces = true;
-    SystemCallArchitectures = "native";
-    RestrictRealtime = true;
-    MemoryDenyWriteExecute = true;
-    RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" "AF_NETLINK" ];
-    SystemCallFilter = [ "@system-service" ];
-  };
-
-  # virtiofsd speaks vhost-user straight to the guest, so a compromised guest attacks it directly, and
-  # upstream's unit sets only PrivateTmp: it runs as root with the whole bounding set. It self-sandboxes
-  # (--sandbox=namespace by default) but the unit should not be handing it the rest.
-  #
-  # Kept to what a passthrough filesystem genuinely needs. Deliberately not narrowed further:
-  # ProtectSystem=strict would need per-guest ReadWritePaths for every share source, and
-  # RestrictSUIDSGID would block setuid bits on guest-created files.
-  virtiofsdSandbox = {
-    CapabilityBoundingSet = [
-      "CAP_SETPCAP"         # virtiofsd drops its own caps at startup; capset cannot raise what the
-                            # bounding set excludes, so omitting this fails it closed on every guest
-      "CAP_SYS_ADMIN"       # unshare/pivot_root for its own sandbox
-      "CAP_SYS_CHROOT"
-      "CAP_CHOWN"
-      "CAP_DAC_OVERRIDE"
-      "CAP_DAC_READ_SEARCH"
-      "CAP_FOWNER"
-      "CAP_FSETID"
-      "CAP_MKNOD"
-      "CAP_SETGID"
-      "CAP_SETUID"
-      "CAP_SETFCAP"
-    ];
-    NoNewPrivileges = true;
-    ProtectHome = true;     # no share source lives under /home
-    ProtectClock = true;
-    ProtectKernelModules = true;
-    ProtectKernelTunables = true;
-    RestrictRealtime = true;
-  };
+  inherit (import ./lib/sandboxes.nix) vmSandbox virtiofsdSandbox;
 
   # LAN egress allowlist (default none), flattened once for both the nft accepts and the assertions.
   ownIp = config.custom.fleet.lan.hosts.${config.networking.hostName} or null;
@@ -67,13 +12,12 @@ let
   egressEntries = lib.concatLists (lib.mapAttrsToList (name: g:
     map (e: { inherit name; inherit (g) ip; inherit (e) host ports; target = resolveHost e.host; }) g.egress.allowLan
   ) cfg.guests);
-  # Admin's `ssh -J` reaches each guest's sshd and nothing else: scope the forwarding override to
-  # exactly these direct-tcpip targets (empty guest table ⇒ `none`, i.e. no forwarding at all).
+  # Exact direct-tcpip targets for the sshd PermitOpen override.
   guestSshTargets = lib.concatMapStringsSep " " (g: "${g.ip}:22") (lib.attrValues cfg.guests);
 
   # Per-guest accepts first (first match wins); the RFC1918 drop is the floor beneath them.
   forwardRules =
-    map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} → ${e.host}"'') egressEntries
+    map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.host}"'') egressEntries
     ++ [ ''iifname "${bridge.name}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop comment "Guests: internet-only, never the LAN"'' ];
 in
 {
@@ -102,25 +46,14 @@ in
           ip = lib.mkOption { type = lib.types.str; };
           mac = lib.mkOption { type = lib.types.str; };
           vsockCid = lib.mkOption { type = lib.types.int; };
-          autostart = lib.mkOption { type = lib.types.bool; default = true; };
           serviceConfig = lib.mkOption {
             type = lib.types.attrsOf lib.types.anything;
             default = { };
-            description = ''
-              Raw systemd serviceConfig (CPUQuota/MemoryMax/…), merged over the sandbox. Keys override
-              per-key; list keys like DeviceAllow REPLACE — re-list /dev/kvm + /dev/net/tun to add a device.
-            '';
-          };
-          monitoring = {
-            traefikMetrics = lib.mkOption { type = lib.types.bool; default = false; };
-            storageMount = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+            description = "Raw serviceConfig merged over the sandbox (a list key replaces, it does not append).";
           };
           egress.allowLan = lib.mkOption {
             default = [ ];
-            description = ''
-              Per-guest LAN allowlist (default: none). Each entry opens specific TCP ports on one LAN
-              host; there is no all-ports form, so ssh stays closed unless a port is listed explicitly.
-            '';
+            description = "LAN hosts this guest may reach, per TCP port (default: none; there is no all-ports form).";
             type = lib.types.listOf (lib.types.submodule {
               options = {
                 host = lib.mkOption { type = lib.types.str; description = "Fleet hostname (resolved via fleet.lan.hosts) or a raw IP."; };
@@ -133,23 +66,22 @@ in
     };
   };
 
-  # Top-level keys stay static (per-guest fan-out is inside the mapAttrs values); otherwise the
-  # module's attr-paths would depend on cfg.guests and recurse via freeformType.
   config = lib.mkMerge [
     { microvm.host.enable = cfg.enable; }   # upstream defaults to true, and every host imports this module
     (lib.mkIf cfg.enable {
-      # A guest may not allowlist the host's own LAN IP — that would route around the input-chain seal.
-      assertions = map (e: {
+      assertions = [{
+        assertion = cfg.guests != { };
+        message = "custom.microvm.host: enabled with an empty guest table; disable it instead";
+      }] ++ map (e: {
         assertion = e.target != ownIp;
-        message = "microvm guest ${e.name}: egress.allowLan may not target the host's own LAN IP (${e.host}) — it would bypass the host seal";
+        message = "microvm guest ${e.name}: egress.allowLan may not target the host's own LAN IP (${e.host}), which would bypass the host seal";
       }) egressEntries;
 
-      # Narrow override of the no-forwarding baseline: admin may `ssh -J` to guests, but only local
-      # forwards and only to a guest's :22 — not "forward anywhere compute can reach".
+      # Narrow override of the no-forwarding baseline: local forwards to a guest's :22, nothing else.
       services.openssh.extraConfig = ''
         Match User ${cfg.adminUser}
           AllowTcpForwarding local
-          PermitOpen ${if cfg.guests == { } then "none" else guestSshTargets}
+          PermitOpen ${guestSshTargets}
       '';
 
       networking.nat = {
@@ -158,8 +90,7 @@ in
         externalInterface = cfg.uplink;
       };
 
-      # Egress seal. Not firewall.extraForwardRules — those no-op unless filterForward=true and then
-      # silently leak the LAN. Pre-firewall table (priority filter-1) drops guest→LAN/host terminally.
+      # Not firewall.extraForwardRules: those no-op unless filterForward=true, then leak the LAN.
       networking.nftables.tables.microvm-containment = {
         family = "ip";
         content = ''
@@ -174,14 +105,12 @@ in
         '';
       };
 
-      # Internal bridge + tap enslave. ConfigureWithoutCarrier assigns the gateway IP with no VM up;
-      # RequiredForOnline=no stops a VM-less boot hanging network-online.
       systemd.network = {
         netdevs."20-${bridge.name}".netdevConfig = { Kind = "bridge"; Name = bridge.name; };
         networks."20-${bridge.name}" = {
           matchConfig.Name = bridge.name;
-          networkConfig = { Address = "${bridge.gateway}/${toString bridge.prefixLength}"; ConfigureWithoutCarrier = true; };
-          linkConfig.RequiredForOnline = "no";
+          networkConfig = { Address = "${bridge.gateway}/${toString bridge.prefixLength}"; ConfigureWithoutCarrier = true; };   # assign the gateway IP with no VM up
+          linkConfig.RequiredForOnline = "no";   # a VM-less boot must not hang network-online
         };
         networks."30-vm-tap" = {
           matchConfig.Name = "vm-*";
@@ -191,8 +120,7 @@ in
         };
       };
 
-      # Sandbox as overridable per-key defaults, host-derived state path, then the guest's raw caps.
-      # virtiofsd is a template unit: one entry, not one per guest.
+      # Keys stay static: per-guest fan-out lives in the values, or attr-paths recurse via freeformType.
       systemd.services = lib.mapAttrs' (name: g:
         lib.nameValuePair "microvm@${name}" {
           serviceConfig = lib.mkMerge [
@@ -206,8 +134,7 @@ in
         "microvm-virtiofsd@".serviceConfig = lib.mapAttrs (_: lib.mkDefault) virtiofsdSandbox;
       };
 
-      # Per-VM autostart; the microvm module derives the top-level microvm.autostart list from these.
-      microvm.vms = lib.mapAttrs (_: g: { flake = self; restartIfChanged = true; inherit (g) autostart; }) cfg.guests;
+      microvm.vms = lib.mapAttrs (_: _: { flake = self; restartIfChanged = true; }) cfg.guests;   # upstream defaults it false for flake-defined VMs
     })
   ];
 }

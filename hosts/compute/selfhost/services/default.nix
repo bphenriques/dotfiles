@@ -15,6 +15,7 @@ in
     ./seerr
     ./prowlarr
     ./romm.nix
+    ./romm-5.3.1.nix
     ./homepage
     ./syncthing.nix
     ./transmission.nix

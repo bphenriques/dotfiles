@@ -49,7 +49,7 @@ Key dependencies:
 - [`sops-nix`](https://github.com/Mic92/sops-nix) for secrets
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 - [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) personal flake that does the heavy-lifting when it comes to self-hosting (reverse Proxy, OIDC, and secrets)
-- `dotfiles-private` private dependency to store private information (SOPS secrets, personal information, and wallpapers)
+- `dotfiles-private` private dependency to store SOPS secrets, personal information, and wallpapers. Typically under `~/.dotfiles-private`.
 - [`infra`](./infra) that setups my Cloudflare account through IaC.
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.

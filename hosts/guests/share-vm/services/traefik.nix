@@ -8,7 +8,7 @@ let
   vmIp = guest.ip;
   declaredUsers = lib.attrNames config.services.filebrowser-quantum.users;
 
-  # Issue a one-time passphrase for a share user: 5 words (~64 bits — easy to relay,
+  # Issue a one-time passphrase for a share user: 5 words (~64 bits, easy to relay,
   # uncrackable for online auth), bcrypt-hashed into the BasicAuth htpasswd and printed once.
   # In-place edit preserves the file's owner/perms; the path-watch below reloads Traefik.
   shareRotate = pkgs.writeShellApplication {
@@ -76,7 +76,7 @@ in
       };
       services.filebrowser.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString config.services.filebrowser-quantum.settings.server.port}"; }];
       middlewares = {
-        # Coarse per-IP DoS guard (real IP via PROXY protocol) — the random per-user
+        # Coarse per-IP DoS guard (real IP via PROXY protocol): the random per-user
         # passphrases are the real defence, so it stays generous for photo-gallery bursts.
         ratelimit.rateLimit = { average = 30; burst = 60; };
         # Clear any client-supplied auth header before auth sets the trusted one (no header
@@ -136,7 +136,7 @@ in
 
   # `share-rotate` just rewrites the htpasswd (proxy-agnostic); Traefik reads it only at
   # startup, so restart it when the file changes. This watch is the only Traefik-specific
-  # coupling to the credential file — swap it out to use a different reverse proxy.
+  # coupling to the credential file; swap it out to use a different reverse proxy.
   systemd.paths.share-htpasswd = {
     wantedBy = [ "multi-user.target" ];
     pathConfig.PathChanged = htpasswd;

@@ -93,10 +93,10 @@ Manage Bitwarden secrets for NixOS provisioning.
 
 Usage: dotfiles-secrets <bw-email> <command> [args]
 
-The first argument is always your Bitwarden email — it's used to unlock
+The first argument is always your Bitwarden email, used to unlock
 the vault before any command runs.
 
-Escape hatch — when bw's interactive password prompt misbehaves or its
+Escape hatch: when bw's interactive password prompt misbehaves or its
 implicit sync hangs:
 
   export BW_SESSION="$(bw unlock --raw)"   # one-time manual unlock

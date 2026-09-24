@@ -13,7 +13,7 @@ let
   };
 
   # Folders from private settings, plus the unlisted sentinel derived from the option so the two
-  # cannot drift apart — the module checks every scope resolves, including that one.
+  # cannot drift apart: the module checks every scope resolves, including that one.
   arrangedDirs = private.settings.filebrowser.folders ++ [ (lib.removePrefix "/" fbq.unlistedScope) ];
 
   # That scope check is global: one user pointing at a missing directory fails ExecStartPre and takes
@@ -27,7 +27,7 @@ in
 
   assertions = [{
     assertion = badScopes == { };
-    message = "share-vm filebrowser: scope with no matching folder — "
+    message = "share-vm filebrowser: scope with no matching folder: "
       + lib.concatStringsSep ", " (lib.mapAttrsToList (n: u: "${n} -> ${u.scope}") badScopes)
       + ". Add it to filebrowser.folders in private settings, or fix the name.";
   }];
@@ -45,7 +45,7 @@ in
       # the data volume is a filesystem root; the indexer cannot read lost+found
       rules = [ { folderPath = "/lost+found"; } ];
     };
-    unlistedScope = "/.unlisted"; # moot — BasicAuth admits only listed users; safe sentinel if not
+    unlistedScope = "/.unlisted"; # moot: BasicAuth admits only listed users, safe sentinel if not
     settings = {
       server = {
         numImageProcessors = 2; # one per vCPU: previews must not starve the request path
@@ -96,7 +96,7 @@ in
     (f: "d ${filesRoot}/${f} 0700 ${fbq.user} ${fbq.group} -")
     arrangedDirs;
 
-  # the data volume holds others' uploads — data, never an execution path
+  # the data volume holds others' uploads: data, never an execution path
   fileSystems.${filesRoot}.options = [ "noexec" "nosuid" "nodev" ];
   # localhost-only egress: a compromised FileBrowser cannot exfiltrate or reach tailnet/LAN. The
   # reconciler only ever talks to the server on loopback, so it is held to the same rule.

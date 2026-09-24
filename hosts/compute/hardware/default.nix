@@ -33,7 +33,7 @@
   ];
 
   # bond0 over enp1s0/enp2s0 (active-backup) via systemd-networkd. The bond MAC is pinned to
-  # enp1s0's — the DHCP reservation is keyed on it (private.settings.network.bond0MAC).
+  # enp1s0's: the DHCP reservation is keyed on it (private.settings.network.bond0MAC).
   networking.useDHCP = false;
   networking.useNetworkd = true;
   systemd.network = {

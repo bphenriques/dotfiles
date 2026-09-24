@@ -59,7 +59,7 @@ in
                   };
                   "@swap" = {
                     mountpoint = "/.swapvol";
-                    # Recreating/resizing this changes the physical offset — recompute resume_offset in ./default.nix.
+                    # Recreating/resizing this changes the physical offset, so recompute resume_offset in ./default.nix.
                     swap.swapfile.size = "13G";
                   };
                   "@home" = {

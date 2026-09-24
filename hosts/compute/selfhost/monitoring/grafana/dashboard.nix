@@ -63,15 +63,6 @@ let
       legend = "{{path}}";
       expr = ''rate(node_rapl_package_joules_total{${hostInst}}[5m])'';
     }
-    {
-      id = 106;
-      title = "NAS Storage Usage";
-      unit = "bytes";
-      expr = [
-        { expr = ''node_filesystem_size_bytes{${hostInst},fstype="cifs"}''; legend = "{{mountpoint}} total"; }
-        { expr = ''node_filesystem_size_bytes{${hostInst},fstype="cifs"} - node_filesystem_avail_bytes{${hostInst},fstype="cifs"}''; legend = "{{mountpoint}} used"; }
-      ];
-    }
   ];
 
   hostRow = mkRow {

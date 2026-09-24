@@ -12,7 +12,7 @@ fish: set -x BW_SESSION (bw-session session <EMAIL>)
 
 Escape hatch: if BW_SESSION is already set in the environment (e.g.
 you ran `bw unlock --raw` manually), this command echoes it back
-unchanged and skips the login/unlock/sync dance — useful when bw's
+unchanged and skips the login/unlock/sync dance, useful when bw's
 interactive password prompt misbehaves or its implicit sync hangs.
 EOF
 }
@@ -37,7 +37,7 @@ create_session() {
     BW_SESSION="$(bw unlock --raw)"
   fi
 
-  # Never emit an empty token — it would silently break the caller's `export BW_SESSION=`.
+  # Never emit an empty token: it would silently break the caller's `export BW_SESSION=`.
   test -n "${BW_SESSION:-}" || {
     echo "No session token available; set BW_SESSION manually (see --help)" >&2
     exit 1

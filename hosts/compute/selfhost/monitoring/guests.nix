@@ -1,5 +1,6 @@
-# Guest alert rules; the scrape targets live in fleet.nix. Selects on instance, not job: fleet.nix
-# picks the job names, so these only have to know what the guests are called.
+# The per-guest fields compute watches on, plus the alerts. Declared here, not in the microvm module:
+# that module owns the guests' networking, not what this host charts. Scrape targets live in fleet.nix,
+# and alerts select on instance, not job, because fleet.nix picks the job names.
 { config, lib, ... }:
 let
   cfg = config.custom.microvm.host;
@@ -25,8 +26,14 @@ let
   };
 in
 {
-  selfhost.monitoring.scopes = lib.mkIf cfg.enable (lib.mkMerge [
-    (lib.mapAttrs mkScope cfg.guests)
-    (lib.optionalAttrs (cfg.guests != { }) { guests = guestScope; })
-  ]);
+  options.custom.microvm.host.guests = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.monitoring = {
+        traefikMetrics = lib.mkOption { type = lib.types.bool; default = false; };
+        storageMount = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+      };
+    });
+  };
+
+  config.selfhost.monitoring.scopes = lib.mkIf cfg.enable (lib.mapAttrs mkScope cfg.guests // { guests = guestScope; });
 }

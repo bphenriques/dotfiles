@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  private,
   ...
 }:
 let
@@ -13,8 +12,7 @@ let
     "immich-encoded-video"
   ];
 
-  # Everyone with a personal share. Declaring libraries is inert until the user enables Immich, so this
-  # needs no opt-in check, and it cannot read config.selfhost.users without recursing on it.
+  # Not config.selfhost.users: reading it here recurses, and a library for a non-Immich user is inert.
   photoUsers = lib.attrNames (lib.filterAttrs (_: s: s.personal) config.custom.shares);
 
   # Names are the reconcile identity: renaming one creates a second library.
@@ -68,7 +66,7 @@ let
     };
   };
 
-  # The memory-hungry half. Single-threaded to stay inside its cap rather than be OOM-killed mid-job.
+  # Single-threaded to stay inside the cap rather than be OOM-killed mid-job.
   mlBudget = {
     services.immich.settings.job = {
       faceDetection.concurrency = 1;
@@ -86,7 +84,6 @@ let
     };
   };
 
-  # Keep the heavy scans off the hours anyone is using the box.
   offPeakSchedule = {
     services.immich.settings = {
       library.scan.cronExpression = "0 3 * * *";
@@ -105,10 +102,10 @@ lib.mkMerge [
 
       services.immich = {
         subdomain = "photos";
-        # relatives reach Immich and nothing else: no other service lists this group.
-        access.allowedGroups = [
-          config.selfhost.groups.admin
-          private.groups.relatives
+        # Guest membership lives in Pocket-ID (`pocket-id-manage guest invite`), not in selfhost.users.
+        access.allowedGroups = with config.selfhost.groups; [
+          admin
+          guests
         ];
         extraConfig.landingPage.enable = true;
         systemdServices = [ "immich-server" ];
@@ -119,8 +116,14 @@ lib.mkMerge [
     };
 
     services.immich.settings = {
-      passwordLogin.enabled = true; # TODO: review whether this is still needed after OIDC is fully rolled out
+      passwordLogin.enabled = true; # Break-glass: Pocket-ID is otherwise the only way in, and it is not backed up.
       library.watch.enabled = false; # inotify doesn't fire on the CIFS-mounted library; the nightly library.scan covers it
+
+      # Applied when the account is created on first login and never reconciled, so an admin-UI bump sticks.
+      oauth = {
+        autoRegister = true;
+        defaultStorageQuota = 30; # GiB
+      };
 
       storageTemplate = {
         enabled = true;

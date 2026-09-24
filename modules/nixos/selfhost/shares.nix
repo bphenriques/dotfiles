@@ -1,5 +1,3 @@
-# NAS shares available to this host. `root` is bound by whoever owns the share here: the SMB mount
-# today, a dataset mountpoint on the NAS. Callers interpolate against it, as with `xdg.configHome`.
 { lib, ... }:
 {
   options.custom.shares = lib.mkOption {

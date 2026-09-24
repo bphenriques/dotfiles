@@ -37,7 +37,7 @@
 
   users.users.radarr.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
 
-  # Quality taste (recyclarr / TRaSH guides) — consumer-owned; never in the framework.
+  # Quality taste (recyclarr / TRaSH guides): consumer-owned, never in the framework.
   custom.media.radarr = {
     qualityDefinitionType = "movie";
     profiles = {

@@ -53,33 +53,58 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 
 ## Access Control
 
-| Group       | Target                       | Example access |
-| ----------- | ---------------------------- | -------------- |
-| `admin`     | Homelab owner                | Everything     |
-| `users`     | Household                    | Media, recipes |
-| `relatives` | Family outside the household | Immich only    |
-| `guests`    | Friends, colleagues          | RomM only      |
+| Group    | Target                        | Example access        |
+| -------- | ----------------------------- | --------------------- |
+| `admin`  | Homelab owner                 | Everything            |
+| `users`  | Household                     | Media, recipes        |
+| `guests` | Family and friends, invited   | Immich, Kavita, RomM  |
+
+`admin` and `users` are declared in `dotfiles-private/users`. `guests` are not declared anywhere:
+membership lives in Pocket-ID, so inviting someone is the whole grant and needs no deploy. The tier is
+indivisible, since a service either lists `guests` or it does not.
+
+Groups only bind services that authenticate through Pocket-ID. Homepage, cook-recipes and BentoPDF ask
+for nothing, so anyone on the tunnel reaches them whatever their group.
 
 RomM runs in kiosk mode: it is readable without logging in, and only `admin` can modify the library.
 
-## Onboarding a relative
+## Onboarding a guest
 
-Immich only, over WireGuard. Their public key is an input to the declaration, so the config comes first.
+Two grants, both runtime. Neither needs a commit or a deploy.
 
-1. **Config**: `sudo wg-manage invite --device phone > <name>-phone.conf`. Send it; they import, edit,
-   regenerate the private key, and send back the public key. Use `issue` instead to mint the key here
-   and render a QR, for someone who cannot.
-2. **Declare** in `dotfiles-private`: the user in `users.nix` (`relatives`), the device in
-   `users/<name>.nix`. Push, `nix flake update dotfiles-private`, deploy compute. The peer is dead
-   until this lands.
-3. **Confirm the tunnel**: they connect, `wg-manage status` shows a handshake.
-4. **Passkey**, only once step 3 holds: the link is single use and expires in an hour, so sending it
-   earlier burns it while they are still fixing WireGuard. Emails are `@local.invalid` and no invite is
-   sent, so generate a one-time link in the Pocket-ID admin UI. It signs them in once; they register a
-   passkey from there.
+1. **Network**, on compute: `sudo wg-manage add <name>` mints the keypair, brings the peer up, and
+   renders the config as a QR to scan. `--conf` prints the config instead, for someone you cannot hand
+   a screen to, which means sending a live credential: fine for the restricted tier, never for
+   `--full-access`.
+2. **Identity**, once they are connected: `sudo pocket-id-manage guest invite <email> --firstName <name>`
+   creates the account in the `guests` group and emails a one-time link. Without SMTP, create the user
+   in the Pocket-ID admin UI and mint the link with `pocket-id one-time-access-token <username>`. It
+   signs them in once; they register a passkey from there.
 
-To revoke, delete the device from the registry and deploy: `wg-manage` holds no state, and
-`wireguard-reconcile-peers` drops the peer.
+Their Immich account appears on first login, at the quota in `selfhost/services/immich.nix`. Raise it
+per person in the Immich admin UI; it is set at creation and never reconciled, so the change sticks.
+Uploads land under their Pocket-ID username rather than a UUID.
+
+Offboarding is `pocket-id-manage guest remove <username>` plus `wg-manage remove <name>`. The first
+refuses anyone outside the `guests` group, so it cannot touch a household account. Deleting the
+Pocket-ID account ends access; the Immich data outlives it and is removed in the Immich admin UI.
+
+A device's tier is its address: `10.100.0.0/28` reaches the LAN, every other address in the tunnel
+reaches Traefik on 80 and 443 and nothing else. The firewall matches the prefix, so an address is
+bounded by where it sits rather than by any list being correct.
+
+Peers are runtime state in `/var/lib/wireguard/peers.json`, applied live.
+
+A config cannot be shown again: the private key is minted in memory and never stored, so replacing a
+lost one is `wg-manage remove <name>` then `add`, which issues a new key.
+
+`wg-manage status` is the inventory and `remove <name>` cuts a peer. `wireguard-apply-peers` restores
+the file whenever the interface appears; `wg-manage apply` re-syncs it after a hand edit, which is the
+escape hatch for anything the three commands do not cover.
+
+Backups carry the peer file, not the server private key. Losing the host therefore costs every device
+one edited field (the peer's `PublicKey`), which the restored file is what makes possible: it still
+holds who had which address and which key.
 
 ## Setup
 
@@ -148,4 +173,5 @@ Share CalDAV/CardDAV URL with clients: `dav.<domain>` with generated `htpasswd` 
 
 ### WireGuard
 
-Own devices follow the same flow as [Onboarding a relative](#onboarding-a-relative), with `--full-access`.
+Own devices take `--full-access`, which allocates from `10.100.0.0/28`. Thirteen addresses, and
+`wg-manage` errors rather than spilling out of the block.

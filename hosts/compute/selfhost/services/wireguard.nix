@@ -4,6 +4,7 @@
     enable = true;
     address = "10.100.0.1/24";
     clientSubnet = "10.100.0.0/24";
+    fullAccessSubnet = "10.100.0.0/28";   # Only my own devices; everything above reaches Traefik alone
     endpoint = private.settings.services.wireguard.endpoint;
     dns = config.custom.fleet.dns;
     lanAccess = {
