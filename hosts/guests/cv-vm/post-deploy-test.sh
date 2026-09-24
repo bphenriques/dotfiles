@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Behavioural check of the share-vm network seal: the running kernel actually drops
-# guest->LAN/host while keeping internet egress. The `microvm-containment` flake check
-# guards the *rules* at eval time; this exercises them live. Run after each deploy:
-#   ./hosts/guests/share-vm/post-deploy-test.sh
+# Behavioural check of the cv-vm network seal: the running kernel actually drops guest->LAN/host
+# while keeping internet egress. Eval only proves the nftables table in modules/nixos/microvm/host.nix
+# builds, not that it works, so this is the seal's only real verification. Run after each deploy:
+#   ./hosts/guests/cv-vm/post-deploy-test.sh
 #
 # Probed LAN/host ports must be OPEN when reachable (NAS SMB 445, compute sshd 22) so that a
 # "blocked" result unambiguously means the firewall dropped, not a closed port. Needs admin SSH.
 set -euo pipefail
 
-jump=compute vm=share-vm user=bphenriques
+jump=compute vm=cv-vm user=bphenriques
 fail=0
 
 # want=blocked|open. A DROP makes the connect hang to timeout; a closed port RSTs, and both fail
@@ -25,10 +25,10 @@ check() {
   fi
 }
 
-echo "== share-vm containment =="
-check 192.168.1.192 445 blocked "LAN (NAS SMB)"
+echo "== cv-vm containment =="
+check 192.168.1.199 445 blocked "LAN (NAS SMB)"
 check 10.20.1.1 22 blocked "host (compute pivot)"
 check 1.1.1.1 443 open "internet egress"
 
-[[ $fail -eq 0 ]] && echo "OK: seal holds." || echo "SEAL BROKEN: investigate before exposing."
+[[ $fail -eq 0 ]] && echo "OK: seal holds." || echo "SEAL BROKEN: cv-vm is continuously exposed, investigate now."
 exit $fail

@@ -1,4 +1,4 @@
-{ config, private, ... }:
+{ config, ... }:
 let
   inherit (config.custom.fleet.lan) hosts;
 in
@@ -41,12 +41,6 @@ in
       displayName = "JetKVM";
       meta.description = "Remote KVM";
       url = "http://${hosts.jetkvm}";
-      integrations.homepage.group = "Admin";
-    };
-    share = {
-      displayName = "Share";
-      meta.description = "Public file sharing (share-vm)";
-      url = "https://share.${private.settings.domain}";
       integrations.homepage.group = "Admin";
     };
   };
