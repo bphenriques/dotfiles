@@ -50,6 +50,10 @@ Alerting lives on compute by decision: a NAS should not be the thing that notice
 - **Previous Versions** reaches back about five days. `shadow:format` must match a whole snapshot
   name, so only sanoid's `_hourly` snapshots surface; dropping the suffix to catch `_daily` matches
   nothing.
+- **Apple clients** need `streams_xattr`: iOS Files mounts a share read-only unless the server
+  advertises `FILE_NAMED_STREAMS`, whatever the permissions say. Metadata then lands in
+  `user.DosStream.*` xattrs, carried by `xattr=sa`. `vfs_fruit` is deliberately absent: unnecessary
+  here, and the module with the RCE history (CVE-2021-44142).
 
 ## Setup
 

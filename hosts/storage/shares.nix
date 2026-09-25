@@ -70,7 +70,10 @@ let
         # The arrs health-check their category dir before any download would create it.
         ++ map (c: "downloads/${c}") (lib.attrValues config.fleet.media.downloadCategories);
         access = {
-          groups.${private.groups.users} = "rw";
+          groups = {
+            ${private.groups.admin} = "rw";
+            ${private.groups.users} = "ro";
+          };
           users = {
             machine-compute = "rw";
             machine-inky = "ro";

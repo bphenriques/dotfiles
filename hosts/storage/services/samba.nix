@@ -20,8 +20,9 @@ in
 
   # Previous Versions in samba's own keys. Whole-name match: catching _daily too matches nothing at all
   # (tested 2026-08-28). sanoid runs under TZ=UTC. media holds no snapshots itself, but its children do.
+  # streams_xattr: iOS Files mounts a share read-only unless FILE_NAMED_STREAMS is advertised.
   services.samba.settings = lib.mapAttrs (_: _: {
-    "vfs objects" = "shadow_copy2";
+    "vfs objects" = "shadow_copy2 streams_xattr";
     "shadow:snapdir" = ".zfs/snapshot";
     "shadow:snapdirseverywhere" = "yes";
     "shadow:format" = "autosnap_%Y-%m-%d_%H:%M:%S_hourly";

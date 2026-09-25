@@ -54,6 +54,12 @@ in
 
     # The same registry compute reads, so membership is decided once. Per-service config belongs to the
     # host running the service; a person with no SMB account is inert here.
-    users = lib.mapAttrs (_: person: removeAttrs person [ "services" ]) private.users;
+    users = lib.mapAttrs (
+      _: person:
+      lib.recursiveUpdate (removeAttrs person [ "services" ]) {
+        # Opted in here, not in the shared registry: compute reads the same records and needs no accounts.
+        unixAccount.enable = person.storage.smb.enable or false;
+      }
+    ) private.users;
   };
 }
