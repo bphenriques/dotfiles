@@ -10,7 +10,7 @@ let
   serviceAccounts = {
     machine-compute = {
       description = "Compute's SMB principal";
-      systemUser = {
+      unixAccount = {
         enable = true;
         uid = 999;
         gid = 999;
@@ -18,7 +18,7 @@ let
     };
     machine-inky = {
       description = "Inky's read-only SMB principal";
-      systemUser = {
+      unixAccount = {
         enable = true;
         uid = 998;
         gid = 998;
@@ -26,7 +26,7 @@ let
     };
     machine-laptop = {
       description = "Laptop's SMB principal";
-      systemUser = {
+      unixAccount = {
         enable = true;
         uid = 978;
         gid = 978;
