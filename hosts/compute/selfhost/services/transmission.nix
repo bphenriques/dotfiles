@@ -1,12 +1,13 @@
 { config, ... }:
 let
-  sharesCfg = config.custom.shares;
+  sharesCfg = config.fleet.shares;
 in
 {
   selfhost = {
     apps.transmission.enable = true;
     services.transmission = {
       storage.mounts = [ "media" ];
+      storage.users = [ config.services.transmission.user ];
       integrations.notify.topic = "download";
       extraConfig.landingPage = { enable = true; listed = false; };
     };
@@ -23,5 +24,4 @@ in
     umask = 2; # group-writable downloads for the media group (arr/jellyfin share)
   };
 
-  users.users.${config.services.transmission.user}.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
 }

@@ -3,14 +3,14 @@ let
   guests = import ./guests.nix;
 
   vaultShare = "bphenriques";
-  vaultShareRoot = config.custom.shares.${vaultShare}.root;
+  vaultShareRoot = config.fleet.shares.${vaultShare}.root;
   agentVaultSource =
     (lib.findFirst (s: s.tag == "vault") null self.nixosConfigurations.agent-vm.config.microvm.shares).source;
 in
 {
   imports = [ ./agent-vm-secret.nix ];
 
-  custom.microvm.host = {
+  my.microvm.host = {
     enable = true;
     uplink = "bond0";
     adminUser = config.users.users.bphenriques.name;

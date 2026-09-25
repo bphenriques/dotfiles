@@ -1,6 +1,6 @@
 { lib, pkgs, osConfig, ... }:
 let
-  romsDir = "${osConfig.custom.shares.media.root}/gaming/emulation/roms";
+  romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
 in
 # Manual setup (one-time) with Steam closed:
 # 1. open SRM → create parser per system using a community preset and set missing options. Retroarch likely needs to set to /etc/profiles/per-user/bphenriques/bin/retroarch

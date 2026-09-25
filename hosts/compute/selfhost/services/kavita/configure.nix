@@ -2,7 +2,7 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  sharesCfg = config.custom.shares;
+  sharesCfg = config.fleet.shares;
   kavitaCfg = config.services.kavita;
 
   # Default roles for new users (OIDC provisioned)

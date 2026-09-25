@@ -6,7 +6,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   };
   xdg.mimeApps.defaultApplications."x-scheme-handler/discord" = [ "discord.desktop" ];
 
-  custom.programs.niri.windowRules.byApp = [
+  my.programs.niri.windowRules.byApp = [
     ''
       window-rule {
         match app-id="discord"

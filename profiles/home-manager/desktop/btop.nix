@@ -1,6 +1,6 @@
 { pkgs, lib, config, self, ... }:
 let
-  terminal = config.custom.programs.terminal;
+  terminal = config.my.programs.terminal;
   system-monitor = terminal.execApp { title = "btop-tui"; cmd = lib.getExe config.programs.btop.package; };
 in
 {
@@ -24,7 +24,7 @@ in
     })
   ];
 
-  custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+  my.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     "Ctrl+Alt+Delete" = ''spawn-sh "${system-monitor}"'';
   };
 }

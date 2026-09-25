@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (config.custom.fleet) ai;
+  inherit (config.fleet) ai;
   models = lib.unique [ ai.model ai.codingModel ai.embeddingModel ];
   img = pkgs.containerImages.ollama;
   localApi = "http://127.0.0.1:${toString ai.endpoint.port}";

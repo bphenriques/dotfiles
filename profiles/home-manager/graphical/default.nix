@@ -9,14 +9,14 @@
     ./niri.nix              # Window Manager
   ];
 
-  custom.programs = {
+  my.programs = {
     screenshot.enable = true;
     screen-recorder.enable = true;
     session.enable = true;
     volume-osd.enable = true;
     brightness-osd.enable = true;
     niri-keyboard-layout.enable = true;
-    file-explorer.browser = config.custom.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
+    file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
     status-glance.enable = true;
   };
 
@@ -29,11 +29,11 @@
       initial-tool = "brush";
       copy-command = "wl-copy";
       save-after-copy = false;
-      output-filename = with config.custom.programs.screenshot; "${directory}/${format}";
+      output-filename = with config.my.programs.screenshot; "${directory}/${format}";
     };
   };
 
-  custom.services = {
+  my.services = {
     upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
   };
 }

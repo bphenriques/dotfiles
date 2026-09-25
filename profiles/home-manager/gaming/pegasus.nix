@@ -44,7 +44,7 @@ let
     else sys.launch;
 
   configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
-    romsDir = "${osConfig.custom.shares.media.root}/gaming/emulation/roms";
+    romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
 
     # Maps Skyscraper folder to Pegasus asset
     artworkMapping = [

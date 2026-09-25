@@ -1,6 +1,6 @@
 { lib, pkgs, config, self, ... }:
 let
-  cfg = config.custom.programs.screenshot;
+  cfg = config.my.programs.screenshot;
 
   screenshot = lib.getExe cfg.package;
   exec = {
@@ -10,7 +10,7 @@ let
   };
 in
 {
-  options.custom.programs.screenshot = {
+  options.my.programs.screenshot = {
     enable = lib.mkEnableOption "custom-screenshot";
     package = lib.mkOption {
       type = lib.types.package;
@@ -36,7 +36,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.screenshot" pkgs lib.platforms.linux) ];
+    assertions = [ (lib.hm.assertions.assertPlatform "my.programs.screenshot" pkgs lib.platforms.linux) ];
 
     home.packages = [ cfg.package ];
 

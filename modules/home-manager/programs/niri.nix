@@ -3,7 +3,7 @@
 # position; Nix merge order is not visible to contributors. Rules sharing a stage must not
 # match the same window or layer. Keep this the only writer of upstream `extraConfig`.
 let
-  cfg = config.custom.programs.niri;
+  cfg = config.my.programs.niri;
 
   workspaceOpt = lib.types.submodule ({ name, ... }: {
     options = {
@@ -43,7 +43,7 @@ let
   startupNodes = lib.map (cmd: { spawn-sh-at-startup._args = [ cmd ]; }) cfg.spawnShAtStartup;
 in
 {
-  options.custom.programs.niri = {
+  options.my.programs.niri = {
     enable = lib.mkEnableOption "programs-niri";
 
     workspaces = lib.mkOption {
@@ -123,7 +123,7 @@ in
     assertions = [
       {
         assertion = lib.length (lib.unique (lib.map (ws: ws.order) workspaces)) == lib.length workspaces;
-        message = "custom.programs.niri.workspaces: `order` must be unique";
+        message = "my.programs.niri.workspaces: `order` must be unique";
       }
     ];
 

@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  inherit (config.custom.fleet) ai;
+  inherit (config.fleet) ai;
 in
 {
   environment.systemPackages = [

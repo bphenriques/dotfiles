@@ -1,6 +1,6 @@
 { lib, pkgs, config, osConfig, ... }:
 let
-  mediaRoot = osConfig.custom.shares.media.root;
+  mediaRoot = osConfig.fleet.shares.media.root;
   stateDir = "${config.xdg.stateHome}/retroarch";
 
 

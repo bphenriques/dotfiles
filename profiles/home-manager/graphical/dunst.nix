@@ -77,7 +77,7 @@ in
     };
   };
 
-  custom.programs.niri = {
+  my.programs.niri = {
     bindings = let dunstctl = lib.getExe' pkgs.dunst "dunstctl"; in {
       "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
       "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';

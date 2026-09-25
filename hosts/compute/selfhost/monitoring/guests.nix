@@ -3,7 +3,7 @@
 # and alerts select on instance, not job, because fleet.nix picks the job names.
 { config, lib, ... }:
 let
-  cfg = config.custom.microvm.host;
+  cfg = config.my.microvm.host;
 
   guestScope = {
     rules = [{
@@ -26,7 +26,7 @@ let
   };
 in
 {
-  options.custom.microvm.host.guests = lib.mkOption {
+  options.my.microvm.host.guests = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options.monitoring = {
         traefikMetrics = lib.mkOption { type = lib.types.bool; default = false; };

@@ -3,6 +3,7 @@
   selfhost.services.bazarr = {
     meta.category = "media automation";
     storage.mounts = [ "media" ];
+    storage.users = [ "bazarr" ];
     integrations.homepage.group = "Admin";
     extraConfig.landingPage = { enable = true; listed = false; };
   };
@@ -40,5 +41,4 @@
   sops.secrets."bazarr/opensubtitles/username" = { };
   sops.secrets."bazarr/opensubtitles/password" = { };
 
-  users.users.bazarr.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
 }

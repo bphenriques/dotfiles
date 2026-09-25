@@ -4,7 +4,6 @@
   ...
 }:
 let
-  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
 
   # library and encoded-video come from the NAS; see hosts/compute/selfhost/default.nix.
   mediaMounts = [
@@ -13,13 +12,13 @@ let
   ];
 
   # Not config.selfhost.users: reading it here recurses, and a library for a non-Immich user is inert.
-  photoUsers = lib.attrNames (lib.filterAttrs (_: s: s.personal) config.custom.shares);
+  photoUsers = lib.attrNames (lib.filterAttrs (_: s: s.personal) config.fleet.shares);
 
   # Names are the reconcile identity: renaming one creates a second library.
   mkLibraries =
     user:
     let
-      root = config.custom.shares.${user}.root;
+      root = config.fleet.shares.${user}.root;
     in
     [
       {
@@ -110,6 +109,7 @@ lib.mkMerge [
         extraConfig.landingPage.enable = true;
         systemdServices = [ "immich-server" ];
         storage.mounts = photoUsers ++ mediaMounts;
+        storage.users = [ "immich" ];
       };
 
       users = lib.genAttrs photoUsers (user: { services.immich.libraries = mkLibraries user; });
@@ -135,7 +135,6 @@ lib.mkMerge [
     users.users.immich = {
       # Pinned: the NAS mounts name a numeric owner, and Immich has to own its files to stamp mtime.
       uid = 996;
-      extraGroups = map (user: selfhostMounts.${user}.group) photoUsers;
     };
   }
 ]

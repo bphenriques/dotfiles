@@ -1,9 +1,9 @@
 { config, lib, self, ... }:
 
 let
-  cfg = config.custom.programs.project;
+  cfg = config.my.programs.project;
 in {
-  options.custom.programs.project = {
+  options.my.programs.project = {
     enable = lib.mkEnableOption "project";
     package = lib.mkOption {
       type = lib.types.package;

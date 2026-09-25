@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  inherit (config.custom.fleet.lan) hosts;
+  inherit (config.fleet.lan) hosts;
 in
 {
   imports = [

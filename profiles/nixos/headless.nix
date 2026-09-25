@@ -7,7 +7,7 @@
 
   # Allow remote deployment via `nixos-rebuild --target-host root@...`. Still gated behind SSH key.
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
-  users.users.root.openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
+  users.users.root.openssh.authorizedKeys.keys = config.fleet.ssh.authorizedKeys;
 
   # Prevent accidental suspend/hibernate
   systemd.sleep.settings.Sleep = {

@@ -1,6 +1,6 @@
 { lib, ... }:
 {
-  options.custom.programs.terminal = {
+  options.my.programs.terminal = {
     package = lib.mkOption {
       type = lib.types.package;
       description = "Terminal emulator package";

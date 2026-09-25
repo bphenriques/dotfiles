@@ -14,6 +14,7 @@
     ./firewall.nix
     ./services
     ../../profiles/nixos/headless.nix
+    ../../profiles/nixos/ups-client.nix
   ];
 
   boot = {

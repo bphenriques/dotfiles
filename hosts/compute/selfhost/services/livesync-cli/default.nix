@@ -6,7 +6,7 @@ let
 
   stateDir = "/var/lib/livesync-cli";
   vault = import ./vault.nix;
-  vaultDir = "${config.custom.shares.${vault.owner}.root}/${vault.subpath}";
+  vaultDir = "${config.fleet.shares.${vault.owner}.root}/${vault.subpath}";
 
   livesyncUser = {
     name = "livesync-cli";
@@ -26,6 +26,7 @@ in
       meta.homepage = "https://github.com/vrtmrz/obsidian-livesync";
       meta.description = "Obsidian vault sync daemon";
       storage.mounts = [ vault.owner ];
+      storage.users = [ livesyncUser.name ];
     };
 
     storage.mounts.smb.shares.${vault.owner}.systemd.dependentServices = [ "podman-livesync-cli" ];
@@ -35,7 +36,6 @@ in
   users.users.${livesyncUser.name} = {
     inherit (livesyncUser) uid group;
     isSystemUser = true;
-    extraGroups = [ selfhostMounts.${vault.owner}.group ];
   };
 
   systemd.tmpfiles.rules = [
@@ -68,7 +68,7 @@ in
       "--pids-limit=128"
       # CIFS forces root:homelab-bphenriques 0660, so the vault is reachable by group alone.
       "--group-add=${toString selfhostMounts.${vault.owner}.gid}"
-      "--add-host=${cfg.services.couchdb.publicHost}:${config.custom.fleet.lan.hosts.compute}"
+      "--add-host=${cfg.services.couchdb.publicHost}:${config.fleet.lan.hosts.compute}"
     ];
   };
 }

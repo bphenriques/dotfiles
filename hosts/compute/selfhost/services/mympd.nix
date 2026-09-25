@@ -27,7 +27,7 @@ in
   sops.secrets."mympd/pin" = { };
   systemd.services.mympd = {
     environment = {
-      MPD_HOST = config.custom.fleet.lan.hosts.inky;
+      MPD_HOST = config.fleet.lan.hosts.inky;
       MPD_PORT = toString 6600;
     };
     path = [ pkgs.coreutils ];

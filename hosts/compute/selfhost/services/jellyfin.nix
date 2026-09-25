@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  shares = config.custom.shares;
+  shares = config.fleet.shares;
 
   transcodeDir = "${config.services.jellyfin.cacheDir}/transcodes";
 
@@ -50,7 +50,6 @@ let
       TonemappingAlgorithm = "bt2390";
     };
 
-    users.users.jellyfin.extraGroups = [ "video" "render" ];
     systemd.services.jellyfin.environment.LIBVA_DRIVER_NAME = "iHD"; # Force iHD (intel-media-driver) over legacy i965
   };
 in
@@ -108,11 +107,10 @@ lib.mkMerge [
 
       services.jellyfin = {
         storage.mounts = [ "media" ];
+        storage.users = [ "jellyfin" ];
         extraConfig.landingPage.enable = true;
       };
     };
-
-    users.users.jellyfin.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
 
     systemd.services.jellyfin = {
       serviceConfig.ReadOnlyPaths = [ "${shares.media.root}/music/library" ];

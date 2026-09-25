@@ -1,12 +1,12 @@
 { pkgs, config, lib, ... }:
 let
-  cfg = config.custom.hardware.gamepad-8bitdo-ultimate2c;
+  cfg = config.my.hardware.gamepad-8bitdo-ultimate2c;
 
   # Discoverable using lsusb. You will find 2dc8:310a.
   vendorId = "2dc8";
   productId = "310a";
 in {
-  options.custom.hardware.gamepad-8bitdo-ultimate2c = {
+  options.my.hardware.gamepad-8bitdo-ultimate2c = {
     enable = lib.mkEnableOption "8bitdo 2.4 Ultimate 2C Controller support";
   };
 

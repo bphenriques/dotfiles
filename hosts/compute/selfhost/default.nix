@@ -61,7 +61,7 @@ in
     ../../../profiles/nixos/selfhost-smb-client.nix
   ];
 
-  custom = {
+  fleet = {
     locale = {
       timezone = config.time.timeZone;
       latitude = 38.736946;

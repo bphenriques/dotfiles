@@ -1,16 +1,28 @@
-{ config, ... }:
+{ config, lib, ... }:
+let
+  # Generated here, where upsd validates them. Clients keep their own copy in their own secret store.
+  upsUsers = [
+    "storage"
+    "compute"
+    "ai"
+  ];
+  upsPassword = name: config.selfhost.runtimeSecrets."ups-password-${name}".path;
+  inherit (config.fleet) ups;
+in
 {
-  sops.secrets = {
-    "ups/storage-password" = { };
-    "ups/compute-password" = { };
-    "ups/ai-password" = { };
-  };
+  selfhost.runtimeSecrets = lib.genAttrs (map (n: "ups-password-${n}") upsUsers) (_: {
+    bytes = 24;
+    restartUnits = [
+      "upsd.service"
+      "upsmon.service"
+    ];
+  });
 
   power.ups = {
     enable = true;
     mode = "netserver";
     openFirewall = false; # ../firewall.nix opens 3493 to compute only.
-    ups.storage = {
+    ups.${ups.name} = {
       driver = "usbhid-ups";
       port = "auto";
       description = "Storage UPS";
@@ -19,23 +31,23 @@
     upsd.listen = [ { address = "0.0.0.0"; } ];
     users = {
       storage = {
-        passwordFile = config.sops.secrets."ups/storage-password".path;
+        passwordFile = upsPassword "storage";
         upsmon = "primary";
       };
       compute = {
-        passwordFile = config.sops.secrets."ups/compute-password".path;
+        passwordFile = upsPassword "compute";
         upsmon = "secondary";
       };
       ai = {
-        passwordFile = config.sops.secrets."ups/ai-password".path;
+        passwordFile = upsPassword "ai";
         upsmon = "secondary";
       };
     };
-    upsmon.monitor.storage = {
-      system = "storage@localhost";
+    upsmon.monitor.${ups.name} = {
+      system = "${ups.name}@localhost";
       powerValue = 1;
       user = "storage";
-      passwordFile = config.sops.secrets."ups/storage-password".path;
+      passwordFile = upsPassword "storage";
       type = "primary";
     };
   };

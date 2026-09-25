@@ -66,18 +66,7 @@
     cpuFreqGovernor = "powersave";     # Favor low frequencies, still allows turbo when needed
   };
 
-  # UPS NUT client. Credentials are storage's `ups/compute-password`.
-  power.ups = {
-    enable = true;
-    mode = "netclient";
-    upsmon.monitor.storage = {
-      system = "storage@${config.custom.fleet.lan.hosts.storage}";
-      powerValue = 1;
-      user = "compute";
-      passwordFile = config.sops.secrets."upsmon/password".path;
-      type = "secondary";
-    };
-  };
+  # Client comes from profiles/nixos/ups-client.nix. This only widens its secret.
   sops.secrets."upsmon/password" = {
     mode = "0440";   # NUT exporter reads via SupplementaryGroups=keys
     group = "keys";

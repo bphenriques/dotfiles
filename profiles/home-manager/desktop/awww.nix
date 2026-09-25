@@ -19,7 +19,7 @@ in
     };
   };
 
-  custom.programs.niri.layerRules.base = [
+  my.programs.niri.layerRules.base = [
     ''
       layer-rule {
         match namespace="^awww-daemon$"

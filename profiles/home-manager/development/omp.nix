@@ -14,7 +14,7 @@ let
 
   jsonFormat = pkgs.formats.json { };
 
-  inherit (osConfig.custom.fleet) ai;
+  inherit (osConfig.fleet) ai;
 in
 {
   imports = [ inputs.omp.homeManagerModules.default ];

@@ -1,11 +1,11 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (config.custom.programs) screenshot;
+  inherit (config.my.programs) screenshot;
   colors = config.lib.stylix.colors.withHashtag;
 
-  volume          = lib.getExe config.custom.programs.volume-osd.package;
-  brightness      = lib.getExe config.custom.programs.brightness-osd.package;
-  terminal        = config.custom.programs.terminal.exec;
+  volume          = lib.getExe config.my.programs.volume-osd.package;
+  brightness      = lib.getExe config.my.programs.brightness-osd.package;
+  terminal        = config.my.programs.terminal.exec;
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
 
@@ -16,7 +16,7 @@ let
   };
 in
 {
-  custom.programs.niri = {
+  my.programs.niri = {
     enable = true;
 
     # Pinned to the default output so niri moves them to the active monitor when kanshi disables it.
@@ -153,9 +153,9 @@ in
       "Mod+Escape"  = "toggle-keyboard-shortcuts-inhibit";
 
        # Screenshots
-      "Print"       = ''spawn-sh "${config.custom.programs.screenshot.exec.screen}"'';
-      "Shift+Print" = ''spawn-sh "${config.custom.programs.screenshot.exec.region}"'';
-      "Mod+Shift+S" = ''spawn-sh "${config.custom.programs.screenshot.exec.window}"'';
+      "Print"       = ''spawn-sh "${config.my.programs.screenshot.exec.screen}"'';
+      "Shift+Print" = ''spawn-sh "${config.my.programs.screenshot.exec.region}"'';
+      "Mod+Shift+S" = ''spawn-sh "${config.my.programs.screenshot.exec.window}"'';
 
       # Screencasting
       "Mod+Shift+P"      = "set-dynamic-cast-window";
@@ -168,10 +168,10 @@ in
       "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
-      "Mod+K"             = ''spawn-sh "${lib.getExe config.custom.programs.niri-keyboard-layout.package} next"'';
-      "Mod+Shift+Q"       = ''spawn-sh "${config.custom.programs.session.exec.dmenu}"'';
-      "Mod+L"             = ''spawn-sh "${config.custom.programs.session.exec.lock}"'';
-      "Mod+I"             = lib.mkIf config.custom.programs.status-glance.enable ''spawn "${lib.getExe config.custom.programs.status-glance.package}"'';
+      "Mod+K"             = ''spawn-sh "${lib.getExe config.my.programs.niri-keyboard-layout.package} next"'';
+      "Mod+Shift+Q"       = ''spawn-sh "${config.my.programs.session.exec.dmenu}"'';
+      "Mod+L"             = ''spawn-sh "${config.my.programs.session.exec.lock}"'';
+      "Mod+I"             = lib.mkIf config.my.programs.status-glance.enable ''spawn "${lib.getExe config.my.programs.status-glance.package}"'';
 
       # Focus management
       "Mod+Tab repeat=false" = "toggle-overview";

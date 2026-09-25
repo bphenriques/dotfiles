@@ -3,8 +3,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.mpd = {
     enable = true;
 
-    musicDirectory = "${osConfig.custom.shares.media.root}/music/library";
-    playlistDirectory = "${osConfig.custom.shares.media.root}/music/playlists";
+    musicDirectory = "${osConfig.fleet.shares.media.root}/music/library";
+    playlistDirectory = "${osConfig.fleet.shares.media.root}/music/playlists";
     network.startWhenNeeded = true;
     extraConfig = ''
       audio_output {
@@ -28,7 +28,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     '';
   };
 
-  custom.programs.mpc-plus = {
+  my.programs.mpc-plus = {
     enable = true;
     devices = {
       "local" = {
@@ -37,12 +37,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         notifications = true;
       };
       "inky" = {
-        host = osConfig.custom.fleet.lan.hosts.inky;
+        host = osConfig.fleet.lan.hosts.inky;
         notifications = true;
       };
     };
   };
-  custom.services.mpc-plus.enable = true;
+  my.services.mpc-plus.enable = true;
   services.mpdris2 = {
     enable = true;
     multimediaKeys = true;  # Integration with multimedia keys.

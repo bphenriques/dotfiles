@@ -29,6 +29,12 @@ in
 
   microvms.compute = builtins.mapAttrs (_: g: g.ip) computeGuests.guests; # Used to seed /etc/hosts and ssh jump
 
+  # Two facts that happen to share a spelling: the UPS as upsd names it, and the machine serving it.
+  ups = {
+    name = "storage";
+    host = lan.hosts.storage;
+  };
+
   # Required to define how transmission maps downloads to folders and enable declaretively adding them.
   media.downloadCategories = {
     radarr = "radarr";

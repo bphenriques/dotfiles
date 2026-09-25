@@ -1,8 +1,6 @@
 { config, ... }:
 let
   cfg = config.selfhost;
-  serviceCfg = cfg.services.filebrowser-quantum;
-  selfhostMounts = cfg.storage.mounts.smb.shares;
 in
 {
   config = {
@@ -22,6 +20,5 @@ in
       showHidden = false;
     };
 
-    users.users.filebrowser-quantum.extraGroups = map (m: selfhostMounts.${m}.group) serviceCfg.storage.mounts;
   };
 }

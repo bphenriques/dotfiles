@@ -1,6 +1,6 @@
 { lib, pkgs, config, self, ... }:
 let
-  cfg = config.custom.services.upower-notify;
+  cfg = config.my.services.upower-notify;
 
   mkIcon = text: icon: textColor: self.lib.builders.mkNerdFontIcon { inherit textColor; } text icon;
 
@@ -24,7 +24,7 @@ let
   }) batteryLevels);
 in
 {
-  options.custom.services.upower-notify = {
+  options.my.services.upower-notify = {
     enable = lib.mkEnableOption "upower-notify";
 
     device = lib.mkOption {
@@ -56,10 +56,10 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "custom.services.upower-notify" pkgs lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "my.services.upower-notify" pkgs lib.platforms.linux)
       {
         assertion = cfg.percentageCritical < cfg.percentageLow;
-        message = "custom.services.upower-notify: percentageCritical (${toString cfg.percentageCritical}) must be less than percentageLow (${toString cfg.percentageLow})";
+        message = "my.services.upower-notify: percentageCritical (${toString cfg.percentageCritical}) must be less than percentageLow (${toString cfg.percentageLow})";
       }
     ];
     systemd.user.services.upower-notify = {

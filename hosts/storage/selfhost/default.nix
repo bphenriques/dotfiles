@@ -6,11 +6,7 @@
   ...
 }:
 let
-  # The registry decides who holds an account; the password is this host's own secret, since the account
-  # lives here rather than on the host the principal comes from.
-  smbPeople = lib.filterAttrs (_: p: p.storage.smb.enable or false) private.users;
-  smbPassword = name: config.sops.secrets."samba/${name}-password".path;
-
+  # Generated here, where samba validates them. Clients keep their own copy in their own secret store.
   serviceAccounts = {
     machine-compute = {
       description = "Compute's SMB principal";
@@ -28,6 +24,14 @@ let
         gid = 998;
       };
     };
+    machine-laptop = {
+      description = "Laptop's SMB principal";
+      systemUser = {
+        enable = true;
+        uid = 978;
+        gid = 978;
+      };
+    };
   };
 in
 {
@@ -41,28 +45,15 @@ in
 
     # Ids pinned: these own files on a pool that outlives the root recording the allocation.
     serviceAccounts = lib.mapAttrs (
-      name: account:
+      _name: account:
       account
       // {
-        storage.smb = {
-          enable = true;
-          passwordFile = smbPassword name;
-        };
+        storage.smb.enable = true;
       }
     ) serviceAccounts;
 
     # The same registry compute reads, so membership is decided once. Per-service config belongs to the
     # host running the service; a person with no SMB account is inert here.
-    users = lib.mapAttrs (
-      name: person:
-      removeAttrs person [ "services" ]
-      // lib.optionalAttrs (smbPeople ? ${name}) {
-        storage.smb = person.storage.smb // { passwordFile = smbPassword name; };
-      }
-    ) private.users;
+    users = lib.mapAttrs (_: person: removeAttrs person [ "services" ]) private.users;
   };
-
-  sops.secrets = lib.genAttrs (
-    map (name: "samba/${name}-password") (lib.attrNames serviceAccounts ++ lib.attrNames smbPeople)
-  ) (_: { restartUnits = [ "selfhost-smb-passwords.service" ]; });
 }

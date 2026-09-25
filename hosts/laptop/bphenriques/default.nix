@@ -14,7 +14,7 @@ in
       ++ lib.optionals config.services.sunshine.enable          [ "input" ]
       ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.shares);
 
-    openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
+    openssh.authorizedKeys.keys = config.fleet.ssh.authorizedKeys;
   };
 
   programs.git = {

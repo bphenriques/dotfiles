@@ -4,7 +4,7 @@ let
     share:
     lib.optional share.snapshots share.dataset
     ++ map (child: "${share.dataset}/${child}") share.childDatasets
-  ) (lib.attrValues config.custom.storage.shares);
+  ) (lib.attrValues config.fleet.storage.shares);
 in
 {
   services.sanoid = {

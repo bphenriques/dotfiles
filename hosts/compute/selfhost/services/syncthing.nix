@@ -1,8 +1,7 @@
 { config, lib, ... }:
 let
   serviceCfg = config.selfhost.services.syncthing;
-  sharesCfg = config.custom.shares;
-  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
+  sharesCfg = config.fleet.shares;
   syncthingUsers = lib.filterAttrs (_: u: u.services.syncthing.enable) config.selfhost.users;
 
   # Intentional as select the exact systems to sync
@@ -72,6 +71,7 @@ in
         access.model = "forwardAuth";
         integrations.homepage.group = "Admin";
         storage.mounts = [ "media" "bphenriques" ];
+        storage.users = [ "syncthing" ];
         extraConfig.landingPage.enable = true;
       };
 
@@ -80,11 +80,6 @@ in
         restartUnits = [ "syncthing.service" ];
       };
     };
-
-    users.users.syncthing.extraGroups = [
-      selfhostMounts.media.group
-      selfhostMounts.bphenriques.group
-    ];
 
     services.syncthing = {
       enable = true;

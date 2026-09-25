@@ -61,9 +61,9 @@ in
       homeassistant = {
         name = "Home";
         unit_system = "metric";
-        time_zone = config.custom.locale.timezone;
-        inherit (config.custom.locale) latitude;
-        inherit (config.custom.locale) longitude;
+        time_zone = config.fleet.locale.timezone;
+        inherit (config.fleet.locale) latitude;
+        inherit (config.fleet.locale) longitude;
         external_url = serviceCfg.publicUrl;
         internal_url = serviceCfg.url;
       };
@@ -107,7 +107,7 @@ in
       OT_REST_LISTEN_ADDR = "127.0.0.1";
       OT_REST_LISTEN_PORT = "8091";
       OT_LOG_LEVEL = "5";
-      TZ = config.custom.locale.timezone;
+      TZ = config.fleet.locale.timezone;
     };
 
     volumes = [ "${otbrDataDir}:/data" ];

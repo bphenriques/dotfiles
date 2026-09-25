@@ -7,13 +7,13 @@ in
 
   selfhost.storage.mounts.smb = {
     enable = true;
-    hostname = config.custom.fleet.lan.hosts.storage;
+    hostname = config.fleet.lan.hosts.storage;
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
   };
 
   # A share named after someone in the household registry is theirs; everything else is a household share.
   # The laptop carries no registry, so it marks nothing personal; nothing there reads the flag.
-  custom.shares = lib.mapAttrs (name: mount: {
+  fleet.shares = lib.mapAttrs (name: mount: {
     root = mount.localMount;
     personal = (private.users or { }) ? ${name};
   }) cfg.shares;

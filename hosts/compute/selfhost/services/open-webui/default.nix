@@ -1,8 +1,8 @@
 { config, lib, ... }:
 let
   cfg = config.selfhost;
-  inherit (config.custom.fleet) ai;
-  agentVmIp = config.custom.fleet.microvms.compute.agent-vm;
+  inherit (config.fleet) ai;
+  agentVmIp = config.fleet.microvms.compute.agent-vm;
   agentVm = import ../../../../guests/agent-vm/settings.nix;
 
   hermesModel = "hermes-agent";

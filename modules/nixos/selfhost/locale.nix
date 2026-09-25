@@ -1,6 +1,6 @@
 { lib, ... }:
 {
-  options.custom.locale = {
+  options.fleet.locale = {
     timezone = lib.mkOption {
       type = lib.types.str;
       description = "Timezone for services (e.g. 'Europe/Lisbon')";

@@ -2,7 +2,7 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
-  nasShares = osConfig.custom.shares;
+  nasShares = osConfig.fleet.shares;
   mounts = {
     nasPrivate = nasShares.bphenriques.root;
     nasMedia = nasShares.media.root;
@@ -34,8 +34,8 @@ in
     "file://${nasShares.media.root}/downloads NAS Downloads"
   ];
 
-  custom.dotfiles.enable = true;
-  custom.programs.file-explorer = {
+  my.dotfiles.enable = true;
+  my.programs.file-explorer = {
     enable = true;
     bookmarks = [
       {

@@ -126,5 +126,5 @@
     };
   };
 
-  custom.xdgDefaultApps.text = lib.mkBefore [ "Helix.desktop" ];
+  my.xdgDefaultApps.text = lib.mkBefore [ "Helix.desktop" ];
 }

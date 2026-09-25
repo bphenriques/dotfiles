@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  inherit (config.custom.fleet.lan) hosts;
+  inherit (config.fleet.lan) hosts;
   inherit (config.services.prometheus) exporters;
 
   dports = ports: lib.concatMapStringsSep ", " toString ports;

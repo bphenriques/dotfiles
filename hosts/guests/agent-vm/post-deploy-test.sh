@@ -32,8 +32,8 @@ check 1.1.1.1 443 open "internet egress"
 
 # ai sleeps when idle; the gate doubles as ground truth that its :22 is genuinely open.
 if ssh -o BatchMode=yes -o ConnectTimeout=8 "$jump" "timeout 3 bash -c 'echo > /dev/tcp/$ai/22'" 2>/dev/null; then
-  check "$ai" 11434 open    "ai Ollama (the hole)"
-  check "$ai" 22    blocked "ai, other ports"
+  check "$ai" 11434 open "ai Ollama (the hole)"
+  check "$ai" 22 blocked "ai, other ports"
 else
   printf 'SKIP  %-22s ai is down; wake it to test the egress hole\n' "ai egress hole"
 fi

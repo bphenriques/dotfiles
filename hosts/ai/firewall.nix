@@ -1,7 +1,7 @@
 { config, ... }:
 let
-  inherit (config.custom.fleet.lan) hosts subnet;
-  inherit (config.custom.fleet.ai) endpoint imageEndpoint;
+  inherit (config.fleet.lan) hosts subnet;
+  inherit (config.fleet.ai) endpoint imageEndpoint;
   inherit (config.services.prometheus) exporters;
 in
 {

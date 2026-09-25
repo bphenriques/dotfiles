@@ -88,12 +88,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     "mpv360" = "${lib.getExe config.programs.mpv.package} --script-opts=360plugin-enabled=yes";
   };
 
-  custom.xdgDefaultApps = {
+  my.xdgDefaultApps = {
     video = lib.mkBefore [ "mpv.desktop" ];
     audio = lib.mkBefore [ "mpv.desktop" ];
   };
 
-  custom.programs.niri.windowRules.byApp = [
+  my.programs.niri.windowRules.byApp = [
     ''
       window-rule {
         match app-id="mpv"

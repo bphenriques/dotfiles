@@ -2,8 +2,8 @@
 let
   inherit (lib) foldl';
 
-  musicDir = "${osConfig.custom.shares.media.root}/music";
-  musicLibrary = "${osConfig.custom.shares.media.root}/music/library";
+  musicDir = "${osConfig.fleet.shares.media.root}/music";
+  musicLibrary = "${osConfig.fleet.shares.media.root}/music/library";
 
   database = "${config.xdg.dataHome}/beets/library.db";
   databaseBackup = "${musicDir}/beets.db.backup";
@@ -82,7 +82,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       playlist = {
         auto = true;                        # Automatically remove/move items inside the playlists in case they move.
         relative_to = musicLibrary;
-        playlist_dir = "${osConfig.custom.shares.media.root}/music/playlists";
+        playlist_dir = "${osConfig.fleet.shares.media.root}/music/playlists";
       };
       fetchart = {
         auto = true;
@@ -92,7 +92,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       replaygain.backend = "ffmpeg"; # default `command` backend (mp3gain) covers fewer formats than this library uses
       smartplaylist = {
         relative_to = musicLibrary;
-        playlist_dir = "${osConfig.custom.shares.media.root}/music/playlists";
+        playlist_dir = "${osConfig.fleet.shares.media.root}/music/playlists";
         # Generated files land beside the hand-written radio-*.m3u, so keep names distinct.
         playlists = [
           { name = "1990s.m3u"; query = "year:1990..1999"; }

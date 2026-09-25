@@ -10,6 +10,6 @@ in
     hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path;
     extraGroups = [ "wheel" ] ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.shares);
 
-    openssh.authorizedKeys.keys = config.custom.fleet.ssh.authorizedKeys;
+    openssh.authorizedKeys.keys = config.fleet.ssh.authorizedKeys;
   };
 }

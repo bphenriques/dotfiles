@@ -3,7 +3,7 @@ let
   inherit (builtins) listToAttrs;
   inherit (lib) nameValuePair mapAttrsToList;
 
-  cfg = config.custom.programs.session;
+  cfg = config.my.programs.session;
 
   mkAppOpt = lib.mkOption {
     type = lib.types.str;
@@ -38,7 +38,7 @@ let
   };
 in
 {
-  options.custom.programs.session = {
+  options.my.programs.session = {
     enable = lib.mkEnableOption "custom-session";
     exec = {
       dmenu             = mkAppOpt' ''${lib.getExe dmenu}'';
@@ -51,7 +51,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-   assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.session" pkgs lib.platforms.linux) ];
+   assertions = [ (lib.hm.assertions.assertPlatform "my.programs.session" pkgs lib.platforms.linux) ];
     home.packages = [
       dmenu
       (pkgs.makeDesktopItem {

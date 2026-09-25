@@ -4,7 +4,7 @@ let
   serviceCfg = cfg.services.papra;
   oidcCfg = cfg.auth.oidc;
   selfhostMounts = cfg.storage.mounts.smb.shares;
-  sharesCfg = config.custom.shares;
+  sharesCfg = config.fleet.shares;
   dataDir = "/var/lib/papra";
   img = pkgs.containerImages.papra;
 
@@ -34,6 +34,7 @@ in
       healthcheck.path = "/";
       healthcheck.probeModule = "http_any";
       storage.mounts = [ "bphenriques" ];
+      storage.users = [ papraUser.name ];
       extraConfig.landingPage.enable = true;
     };
 
@@ -54,7 +55,6 @@ in
   users.users.${papraUser.name} = {
     inherit (papraUser) uid group;
     isSystemUser = true;
-    extraGroups = [ selfhostMounts.bphenriques.group ];
   };
 
   systemd.tmpfiles.rules = [
@@ -123,8 +123,8 @@ in
       "--memory=1g"
       "--pids-limit=128"
       "--group-add=${toString selfhostMounts.bphenriques.gid}"
-      "--add-host=${cfg.services.pocket-id.publicHost}:${config.custom.fleet.lan.hosts.compute}"
-      "--add-host=${serviceCfg.publicHost}:${config.custom.fleet.lan.hosts.compute}"
+      "--add-host=${cfg.services.pocket-id.publicHost}:${config.fleet.lan.hosts.compute}"
+      "--add-host=${serviceCfg.publicHost}:${config.fleet.lan.hosts.compute}"
     ];
   };
 }

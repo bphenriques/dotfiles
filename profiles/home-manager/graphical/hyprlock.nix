@@ -12,7 +12,7 @@ let
   };
 in
 {
-  custom.programs.session.exec.lock = lib.getExe lockPackage;
+  my.programs.session.exec.lock = lib.getExe lockPackage;
   programs.hyprlock = {
     enable = true;
     settings = {

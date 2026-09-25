@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  fleetHosts = config.custom.fleet.lan.hosts // lib.concatMapAttrs (_: guests: guests) config.custom.fleet.microvms;
+  fleetHosts = config.fleet.lan.hosts // lib.concatMapAttrs (_: guests: guests) config.fleet.microvms;
 in
 {
   imports = [

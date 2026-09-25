@@ -2,7 +2,7 @@
 let
   inherit (lib) foldl';
 
-  cfg = config.custom.xdgDefaultApps;
+  cfg = config.my.xdgDefaultApps;
 
   setDefault = types: target: foldl' (acc: type: acc // { "${type}" = target; }) { } types;
   mkDefaultAppOption = type: lib.mkOption {
@@ -18,7 +18,7 @@ let
   };
 in
 {
-  options.custom.xdgDefaultApps = {
+  options.my.xdgDefaultApps = {
     enable = lib.mkEnableOption "xdg-custom" // {
       default = config.xdg.mimeApps.enable;
     };

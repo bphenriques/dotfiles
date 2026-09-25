@@ -1,6 +1,6 @@
 { config, lib, pkgs, inputs, private, fleet, ... }:
 let
-  cfg = config.custom.microvm.guest;
+  cfg = config.my.microvm.guest;
 
   hostKeyDir = "${cfg.stateRoot}/.ssh-host-keys";
   sshHostKey = "${hostKeyDir}/ssh_host_ed25519_key";
@@ -12,7 +12,7 @@ in
     inputs.sops-nix.nixosModules.sops
   ];
 
-  options.custom.microvm.guest = {
+  options.my.microvm.guest = {
     ip = lib.mkOption { type = lib.types.str; };
     mac = lib.mkOption { type = lib.types.str; };
     vsockCid = lib.mkOption { type = lib.types.int; }; # for readiness systemd integration

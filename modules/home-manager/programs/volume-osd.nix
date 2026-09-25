@@ -1,12 +1,12 @@
 { lib, pkgs, config, osConfig, self, ... }:
 let
-  cfg = config.custom.programs.volume-osd;
+  cfg = config.my.programs.volume-osd;
 
   volume-osd = lib.getExe cfg.package;
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
-  options.custom.programs.volume-osd = {
+  options.my.programs.volume-osd = {
     enable = lib.mkEnableOption "custom-volume-osd";
     package = lib.mkOption {
       type = lib.types.package;
@@ -33,7 +33,7 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "custom.programs.volume-osd" pkgs lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "my.programs.volume-osd" pkgs lib.platforms.linux)
       { assertion = osConfig.services.pipewire.enable; message = "Requires pipewire enabled in the system."; }
       { assertion = osConfig.services.pipewire.pulse.enable; message = "Requires pipewire-pulse enabled in the system."; }
       { assertion = osConfig.services.pipewire.wireplumber.enable; message = "Requires pipewire wireplumber enabled in the system."; }

@@ -1,11 +1,11 @@
 { lib, pkgs, config, self, ... }:
 let
-  cfg = config.custom.programs.brightness-osd;
+  cfg = config.my.programs.brightness-osd;
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
-  options.custom.programs.brightness-osd = {
+  options.my.programs.brightness-osd = {
     enable = lib.mkEnableOption "custom-brightness-osd";
     package = lib.mkOption {
       type = lib.types.package;
@@ -20,7 +20,7 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "custom.programs.custom-brightness-osd" pkgs lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "my.programs.custom-brightness-osd" pkgs lib.platforms.linux)
     ];
 
     home.packages = [

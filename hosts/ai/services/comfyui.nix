@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (config.custom.fleet.ai) imageEndpoint;
+  inherit (config.fleet.ai) imageEndpoint;
   img = pkgs.containerImages.comfyui;
 
   # Taken from the image's own `start_comfy_ui` alias. `--disable-mmap` is the load-bearing one:

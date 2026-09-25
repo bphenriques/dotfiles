@@ -3,7 +3,7 @@ let
   ghostty = lib.getExe pkgs.ghostty;
 in
 {
-  custom.programs.terminal = {
+  my.programs.terminal = {
     package = pkgs.ghostty;
     exec = "${ghostty} +new-window";
     execApp = { cmd, title ? null }: "${ghostty} +new-window${lib.optionalString (title != null) " --title=${title}"} -e ${cmd}";
@@ -39,8 +39,8 @@ in
     "x-scheme-handler/x-executable" = [ "Ghostty.desktop" ];
   };
 
-  custom.programs.niri = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    spawnShAtStartup = [ config.custom.programs.terminal.exec ];
+  my.programs.niri = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    spawnShAtStartup = [ config.my.programs.terminal.exec ];
     windowRules = {
       byApp = [
         ''

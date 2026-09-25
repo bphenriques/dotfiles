@@ -1,10 +1,10 @@
 { lib, config, self, ... }:
 
 let
-  cfg = config.custom.dotfiles;
+  cfg = config.my.dotfiles;
 in
 {
-  options.custom.dotfiles = {
+  options.my.dotfiles = {
     enable = lib.mkEnableOption "dotfiles";
     directory = lib.mkOption {
       type = lib.types.str;
@@ -27,6 +27,6 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package cfg.packageSecrets ];
-    home.sessionVariables.DOTFILES_LOCATION = config.custom.dotfiles.directory;
+    home.sessionVariables.DOTFILES_LOCATION = config.my.dotfiles.directory;
   };
 }

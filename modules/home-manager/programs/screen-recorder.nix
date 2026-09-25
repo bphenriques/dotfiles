@@ -3,7 +3,7 @@ let
   inherit (builtins) listToAttrs;
   inherit (lib) nameValuePair;
 
-  cfg = config.custom.programs.screen-recorder;
+  cfg = config.my.programs.screen-recorder;
 
   mkAppOpt = default: lib.mkOption {
     inherit default;
@@ -29,7 +29,7 @@ let
   };
 in
 {
-  options.custom.programs.screen-recorder = {
+  options.my.programs.screen-recorder = {
     enable = lib.mkEnableOption "custom-screen-recorder";
     package = lib.mkOption {
       type = lib.types.package;
@@ -56,7 +56,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-   assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.screen-recorder" pkgs lib.platforms.linux) ];
+   assertions = [ (lib.hm.assertions.assertPlatform "my.programs.screen-recorder" pkgs lib.platforms.linux) ];
 
     home.packages = [
       pkgs.wl-screenrec

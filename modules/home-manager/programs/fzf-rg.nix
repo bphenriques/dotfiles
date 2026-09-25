@@ -1,9 +1,9 @@
 { config, lib, self, ... }:
 
 let
-  cfg = config.custom.programs.fzf-rg;
+  cfg = config.my.programs.fzf-rg;
 in {
-  options.custom.programs.fzf-rg = {
+  options.my.programs.fzf-rg = {
     enable = lib.mkEnableOption "fzf-rg";
 
     package = lib.mkOption {

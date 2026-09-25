@@ -38,7 +38,7 @@ let
   };
 in
 {
-  options.custom.media = {
+  options.my.media = {
     radarr = lib.mkOption {
       type = mediaServiceOpt;
       description = "Radarr quality profile settings";

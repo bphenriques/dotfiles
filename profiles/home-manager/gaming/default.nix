@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  niriWorkspaces = config.custom.programs.niri.workspaces;
+  niriWorkspaces = config.my.programs.niri.workspaces;
 in
 {
   imports = [
@@ -16,7 +16,7 @@ in
   ];
 
   # Gaming apps go to the "gaming" workspace: fullscreen, no transparency.
-  custom.programs.niri.windowRules = {
+  my.programs.niri.windowRules = {
     byApp = [
       ''
         window-rule {

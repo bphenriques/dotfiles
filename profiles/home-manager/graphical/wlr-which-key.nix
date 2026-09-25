@@ -3,7 +3,7 @@ let
   inherit (config.lib.stylix) colors;
   inherit (config.stylix) fonts;
 
-  terminal = config.custom.programs.terminal;
+  terminal = config.my.programs.terminal;
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.wlr-which-key = {
@@ -28,8 +28,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
       menu = [
         { key = "n"; desc = "Network Manager"; cmd = terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
-      ] ++ lib.optionals config.custom.programs.session.enable [
-        { key = "q"; desc = "Session"; cmd = config.custom.programs.session.exec.dmenu; }
+      ] ++ lib.optionals config.my.programs.session.enable [
+        { key = "q"; desc = "Session"; cmd = config.my.programs.session.exec.dmenu; }
       ];
     };
   };

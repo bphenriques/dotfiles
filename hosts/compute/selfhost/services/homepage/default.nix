@@ -54,7 +54,7 @@ in
       }
       {
         openmeteo = {
-          inherit (config.custom.locale) latitude longitude timezone;
+          inherit (config.fleet.locale) latitude longitude timezone;
           label = "Lisbon";
           units = "metric";
           cache = 300;

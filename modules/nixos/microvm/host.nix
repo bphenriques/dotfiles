@@ -1,14 +1,14 @@
-# Host-agnostic microVM host: bridge, NAT, egress seal and per-guest taps, all driven by custom.microvm.host.guests.
+# Host-agnostic microVM host: bridge, NAT, egress seal and per-guest taps, all driven by my.microvm.host.guests.
 { config, lib, self, inputs, ... }:
 let
-  cfg = config.custom.microvm.host;
+  cfg = config.my.microvm.host;
   inherit (cfg) bridge;
 
   inherit (import ./lib/sandboxes.nix) vmSandbox virtiofsdSandbox;
 
   # LAN egress allowlist (default none), flattened once for both the nft accepts and the assertions.
-  ownIp = config.custom.fleet.lan.hosts.${config.networking.hostName} or null;
-  resolveHost = h: config.custom.fleet.lan.hosts.${h} or h;
+  ownIp = config.fleet.lan.hosts.${config.networking.hostName} or null;
+  resolveHost = h: config.fleet.lan.hosts.${h} or h;
   egressEntries = lib.concatLists (lib.mapAttrsToList (name: g:
     map (e: { inherit name; inherit (g) ip; inherit (e) host ports; target = resolveHost e.host; }) g.egress.allowLan
   ) cfg.guests);
@@ -23,7 +23,7 @@ in
 {
   imports = [ inputs.microvm.nixosModules.host ];
 
-  options.custom.microvm.host = {
+  options.my.microvm.host = {
     enable = lib.mkEnableOption "hosting microVM guests on an internal NAT bridge";
     uplink = lib.mkOption {
       type = lib.types.str;
@@ -71,7 +71,7 @@ in
     (lib.mkIf cfg.enable {
       assertions = [{
         assertion = cfg.guests != { };
-        message = "custom.microvm.host: enabled with an empty guest table; disable it instead";
+        message = "my.microvm.host: enabled with an empty guest table; disable it instead";
       }] ++ map (e: {
         assertion = e.target != ownIp;
         message = "microvm guest ${e.name}: egress.allowLan may not target the host's own LAN IP (${e.host}), which would bypass the host seal";

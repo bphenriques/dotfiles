@@ -1,6 +1,6 @@
 { lib, fleet, ... }:
 {
-  options.custom.fleet = {
+  options.fleet = {
     ssh = {
       authorizedKeys = lib.mkOption {
         type = lib.types.listOf lib.types.str;
@@ -29,6 +29,18 @@
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
       default = { };
       description = "MicroVM host to its { guest hostname -> bridge IP } table";
+    };
+
+    ups = {
+      name = lib.mkOption {
+        type = lib.types.str;
+        description = "Name of the UPS as upsd serves it, which is what a client names in its MONITOR line.";
+      };
+
+      host = lib.mkOption {
+        type = lib.types.str;
+        description = "Address of the machine running upsd.";
+      };
     };
 
     media.downloadCategories = lib.mkOption {
@@ -76,5 +88,5 @@
     };
   };
 
-  config.custom.fleet = fleet;
+  config.fleet = fleet;
 }

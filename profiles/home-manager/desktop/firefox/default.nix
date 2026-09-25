@@ -89,10 +89,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
-  custom.xdgDefaultApps.internetBrowser = lib.mkBefore [ "firefox.desktop" ];
+  my.xdgDefaultApps.internetBrowser = lib.mkBefore [ "firefox.desktop" ];
   home.sessionVariables.BROWSER = "firefox";
 
-  custom.programs.niri.windowRules.byApp = [
+  my.programs.niri.windowRules.byApp = [
     ''
       window-rule {
         match app-id="firefox"

@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   serviceCfg = config.selfhost.services.kapowarr;
-  sharesCfg = config.custom.shares;
+  sharesCfg = config.fleet.shares;
 
   dataDir = "/var/lib/kapowarr";
   img = pkgs.containerImages.kapowarr;
@@ -37,7 +37,7 @@ in
     environment = {
       PUID = "0";
       PGID = "0";
-      TZ = config.custom.locale.timezone;
+      TZ = config.fleet.locale.timezone;
     };
 
     volumes = [

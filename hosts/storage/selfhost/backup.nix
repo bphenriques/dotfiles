@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (config.custom) shares;
+  inherit (config.fleet) shares;
   mounted = lib.filterAttrs (_: s: s.root != null) shares;
   backed = lib.filterAttrs (_: s: s.backup) mounted;
   skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
@@ -14,7 +14,7 @@ in
   # The opt-in silently omits, so the exclusions have to stay visible.
   warnings = lib.optional (
     skipped != [ ]
-  ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set custom.storage.shares.<name>.backup if unintended.";
+  ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set fleet.storage.shares.<name>.backup if unintended.";
 
   sops = {
     secrets."backup/b2/bucket" = { };

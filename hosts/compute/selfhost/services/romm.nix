@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.selfhost;
-  selfhostMounts = cfg.storage.mounts.smb.shares;
-  shares = config.custom.shares;
+  shares = config.fleet.shares;
 
   turn = {
     listenPort = 3478;
@@ -46,7 +45,7 @@ let
       ice_servers =
         let
           port = toString config.services.coturn.listening-port;
-          lanIP = config.custom.fleet.lan.hosts.compute;
+          lanIP = config.fleet.lan.hosts.compute;
           wgIP = "10.100.0.1";
           turnCreds = { inherit (turn) username credential; };
         in
@@ -95,6 +94,7 @@ in
     services.romm = {
       access.allowedGroups = with cfg.groups; [ guests users admin ];
       storage.mounts = [ "media" ];
+      storage.users = [ "romm" "nginx" ];
       extraConfig.landingPage = { enable = true; listed = false; };
     };
 
@@ -120,11 +120,6 @@ in
       ENABLE_SCHEDULED_RESCAN = "true";
       SCHEDULED_RESCAN_CRON = "0 3 * * *";
     };
-  };
-
-  users.users = {
-    romm.extraGroups = [ selfhostMounts.media.group ];
-    nginx.extraGroups = [ selfhostMounts.media.group ]; # nginx serves the ROM bytes, and the share is mounted 0660
   };
 
   # Upstream fixes the library to `${dataDir}/library`, so the NAS directories are linked in. Symlinks

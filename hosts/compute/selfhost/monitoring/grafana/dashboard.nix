@@ -1,6 +1,6 @@
 # Single dashboard for the fleet: an always-visible strip (host, NAS and guests), then one collapsed
 # detail row per entity, host first (richest), then the NAS, then each microVM guest. Guest rows are
-# generated from config.custom.microvm.host.guests (the table that also drives scrape/alerts), so
+# generated from config.my.microvm.host.guests (the table that also drives scrape/alerts), so
 # a new guest needs no edit here. Host and guest CPU/IO share one time axis for easy correlation:
 # the guests run on the host's own cores.
 { hostName, guests, storageName, aiName }:

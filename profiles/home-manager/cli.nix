@@ -6,7 +6,7 @@ let
       ProxyJump = vmHost;
       StrictHostKeyChecking = "accept-new";
     }) guests
-  ) osConfig.custom.fleet.microvms;
+  ) osConfig.fleet.microvms;
 in
 {
   programs.nushell.enable = true;         # Adhoc shell for data processing
@@ -62,10 +62,10 @@ in
   stylix.targets.bat.enable = true;
 
   programs.fd.enable = true;              # Better `find`.
-  custom.programs.fzf-fd.enable = true;   # Fuzzy fd
+  my.programs.fzf-fd.enable = true;   # Fuzzy fd
   programs.jq.enable = true;              # JSON query.
-  custom.programs.project.enable = true;  # Easier way to navigate jump through different projects
-  custom.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
+  my.programs.project.enable = true;  # Easier way to navigate jump through different projects
+  my.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
 
   home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive

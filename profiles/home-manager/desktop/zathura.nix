@@ -20,5 +20,5 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   };
   stylix.targets.zathura.enable = true;
 
-  custom.xdgDefaultApps.document = lib.mkBefore [ "org.pwmt.zathura-pdf-mupdf.desktop" ];
+  my.xdgDefaultApps.document = lib.mkBefore [ "org.pwmt.zathura-pdf-mupdf.desktop" ];
 }

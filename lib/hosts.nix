@@ -14,7 +14,7 @@ in
       };
       modules = [
         self.nixosModules.microvm-guest
-        { custom.microvm.guest = guestPlacement; }   # allocated by the host
+        { my.microvm.guest = guestPlacement; }   # allocated by the host
         { nixpkgs.overlays = attrValues self.overlays; }
         { networking.hostName = hostName; }
         configPath

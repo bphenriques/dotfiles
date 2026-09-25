@@ -11,7 +11,7 @@ in
 
   _module.args.agentVm = agentVm;
 
-  custom.microvm.guest = {
+  my.microvm.guest = {
     inherit (agentVm) stateRoot;        # SSH host key + hermes state
     ingressPorts = [ agentVm.apiPort ]; # hermes API, reached by the chat UI over the bridge
   };

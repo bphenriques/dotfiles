@@ -3,7 +3,7 @@
 # only one box runs keeps its scrape next to its rules instead, as ups.nix does.
 { config, lib, ... }:
 let
-  inherit (config.custom.fleet.lan) hosts;
+  inherit (config.fleet.lan) hosts;
   inherit (config.services.prometheus) exporters;
 
   hostEntries = {
@@ -26,7 +26,7 @@ let
 
   # Guests run the same node_exporter, so they join the same job. Their traefik cannot: the framework
   # already owns a `traefik` job for this host's own instance.
-  microvm = config.custom.microvm.host;
+  microvm = config.my.microvm.host;
   guestEntries = lib.optionalAttrs microvm.enable (
     lib.mapAttrs (_: g: {
       address = g.ip;

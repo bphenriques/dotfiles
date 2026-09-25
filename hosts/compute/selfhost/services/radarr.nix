@@ -4,8 +4,8 @@
     enable = true;
     configureAfter = [ "transmission.service" ];  # radarr does connection tests when configuring
     rootFolders = [{
-      path = "${config.custom.shares.media.root}/movies";
-      defaultQualityProfile = config.custom.media.radarr.profiles.default.name;
+      path = "${config.fleet.shares.media.root}/movies";
+      defaultQualityProfile = config.my.media.radarr.profiles.default.name;
     }];
     downloadClients = [
       {
@@ -16,7 +16,7 @@
           host = "127.0.0.1";
           inherit (config.selfhost.services.transmission) port;
           urlBase = "/transmission/";
-          movieCategory = config.custom.fleet.media.downloadCategories.radarr;
+          movieCategory = config.fleet.media.downloadCategories.radarr;
         };
       }
     ];
@@ -30,15 +30,14 @@
   selfhost.services.radarr = {
     meta.category = "media automation";
     storage.mounts = [ "media" ];
+    storage.users = [ "radarr" ];
     integrations.notify.topic = "admin";
     integrations.homepage.group = "Admin";
     extraConfig.landingPage.enable = true;
   };
 
-  users.users.radarr.extraGroups = [ config.selfhost.storage.mounts.smb.shares.media.group ];
-
   # Quality taste (recyclarr / TRaSH guides): consumer-owned, never in the framework.
-  custom.media.radarr = {
+  my.media.radarr = {
     qualityDefinitionType = "movie";
     profiles = {
       default = {

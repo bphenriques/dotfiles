@@ -1,9 +1,9 @@
 { config, lib, self, ... }:
 
 let
-  cfg = config.custom.programs.fzf-fd;
+  cfg = config.my.programs.fzf-fd;
 in {
-  options.custom.programs.fzf-fd = {
+  options.my.programs.fzf-fd = {
     enable = lib.mkEnableOption "fzf-fd";
 
     package = lib.mkOption {

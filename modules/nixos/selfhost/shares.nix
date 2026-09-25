@@ -1,6 +1,6 @@
 { lib, ... }:
 {
-  options.custom.shares = lib.mkOption {
+  options.fleet.shares = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule {
         options = {

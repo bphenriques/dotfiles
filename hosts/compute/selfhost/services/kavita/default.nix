@@ -2,8 +2,7 @@
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
-  sharesCfg = config.custom.shares;
-  selfhostMounts = config.selfhost.storage.mounts.smb.shares;
+  sharesCfg = config.fleet.shares;
 
   kavitaCfg = config.services.kavita;
 in
@@ -52,6 +51,7 @@ in
         };
         healthcheck.path = "/api/health";
         storage.mounts = [ "media" ];
+        storage.users = [ "kavita" ];
         extraConfig.landingPage.enable = true;
       };
 
@@ -102,6 +102,5 @@ in
       '';
     };
 
-    users.users.kavita.extraGroups = [ selfhostMounts.media.group ];
   };
 }

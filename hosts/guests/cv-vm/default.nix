@@ -7,7 +7,7 @@
     ./services
   ];
 
-  custom.microvm.guest = {
+  my.microvm.guest = {
     stateRoot = cvVm.dataRoot;                    # SSH host key / sops age identity live here
     ingressPorts = [ cvVm.traefikMetricsPort ];   # Traefik metrics, scraped by compute over the bridge
   };

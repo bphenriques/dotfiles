@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, ... }:
 let
   inherit (lib.attrsets) mapAttrs' nameValuePair;
-  cfg = config.custom.programs.mpc-plus;
+  cfg = config.my.programs.mpc-plus;
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
@@ -30,7 +30,7 @@ let
   };
 in
 {
-  options.custom.programs.mpc-plus = {
+  options.my.programs.mpc-plus = {
     enable = lib.mkEnableOption "custom-mpc";
     package = lib.mkOption {
       type = lib.types.package;
@@ -60,7 +60,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.mpc-plus" pkgs lib.platforms.linux) ];
+    assertions = [ (lib.hm.assertions.assertPlatform "my.programs.mpc-plus" pkgs lib.platforms.linux) ];
 
     xdg.configFile = mapAttrs' (name: value: (nameValuePair "mpc-plus/${name}.json" { text = builtins.toJSON { inherit (value) host port; }; })) cfg.devices;
 

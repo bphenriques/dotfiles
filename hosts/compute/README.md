@@ -52,11 +52,11 @@ Made some tweaks to ensure thermal stability with sustained workloads:
 
 ## Access Control
 
-| Group    | Target                        | Example access        |
-| -------- | ----------------------------- | --------------------- |
-| `admin`  | Homelab owner                 | Everything            |
-| `users`  | Household                     | Media, recipes        |
-| `guests` | Family and friends, invited   | Immich, Kavita, RomM  |
+| Group    | Target                      | Example access       |
+| -------- | --------------------------- | -------------------- |
+| `admin`  | Homelab owner               | Everything           |
+| `users`  | Household                   | Media, recipes       |
+| `guests` | Family and friends, invited | Immich, Kavita, RomM |
 
 `admin` and `users` are declared in `dotfiles-private/users`. `guests` are not declared anywhere:
 membership lives in Pocket-ID, so inviting someone is the whole grant and needs no deploy. The tier is
@@ -109,8 +109,8 @@ holds who had which address and which key.
 
 | Dependency   | What                                                   | Reference                                                  |
 | ------------ | ------------------------------------------------------ | ---------------------------------------------------------- |
-| SMB Server   | Access to a SMB server                                 | [storage](../storage.md)                                   |
-| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../infrastructure.md)                     |
+| SMB Server   | Access to a SMB server                                 | [storage](../storage/README.md)                            |
+| Cloudflare   | DNS zone + API token (DNS-01 ACME challenge)           | [infrastructure](../../infra/README.md)                    |
 | SMTP         | Account credentials for transactional email            |                                                            |
 | Backblaze B2 | Bucket + application key for off-site backups          |                                                            |
 | ZBT-2 Dongle | Nabu Casa Connect ZBT-2 (Thread/Matter radio)          | Flash OpenThread RCP firmware post-install                 |
@@ -173,8 +173,7 @@ On the new device:
 2. Install Self-hosted LiveSync from Community plugins. Plugins are not synced, so this is per device.
 3. Open the URI or scan the QR, then enter the passphrase.
 4. Welcome notice: `I am adding a device to an existing synchronisation setup` → `Use a Setup URI`
-   → `Restart and Fetch Data` → `Overwrite all with remote files` → `Keep local files even if not
-   on remote`.
+   → `Restart and Fetch Data` → `Overwrite all with remote files` → `Keep local files even if not on remote`.
 5. Set Sync Mode to **LiveSync**. On Events misses remote changes.
 
 `couchdb.<domain>` points at a LAN address, so the device needs the LAN or WireGuard. Phones sync

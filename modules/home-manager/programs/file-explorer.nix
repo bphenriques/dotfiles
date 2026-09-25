@@ -3,7 +3,7 @@ let
   inherit (builtins) listToAttrs replaceStrings;
   inherit (lib) nameValuePair;
 
-  cfg = config.custom.programs.file-explorer;
+  cfg = config.my.programs.file-explorer;
 
   fileBookmarkOpt = lib.types.submodule {
     options = {
@@ -16,7 +16,7 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 in
 {
-  options.custom.programs.file-explorer = {
+  options.my.programs.file-explorer = {
     enable = lib.mkEnableOption "file-explorer";
     browser = lib.mkOption {
       description = "Package or executable to run that supports a single path argument";
@@ -30,7 +30,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [ (lib.hm.assertions.assertPlatform "custom.programs.file-explorer" pkgs lib.platforms.linux) ];
+    assertions = [ (lib.hm.assertions.assertPlatform "my.programs.file-explorer" pkgs lib.platforms.linux) ];
 
     home.packages = [
       (pkgs.makeDesktopItem {
@@ -46,10 +46,10 @@ in
         in listToAttrs (lib.map bookmarkToAction cfg.bookmarks);
       })
     ];
-    custom.xdgDefaultApps.fileBrowser = lib.mkBefore [ "file-explorer.desktop" ];
+    my.xdgDefaultApps.fileBrowser = lib.mkBefore [ "file-explorer.desktop" ];
 
     # Set some sane defaults
-    custom.programs.file-explorer.bookmarks = lib.mkDefault [
+    my.programs.file-explorer.bookmarks = lib.mkDefault [
       {
         name = "Documents";
         icon = mkIcon "documents" "󱧶";

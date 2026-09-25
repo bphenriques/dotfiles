@@ -25,8 +25,8 @@
     "d ${config.xdg.userDirs.extraConfig.RECORDINGS}  - - - -"
   ];
 
-  custom.programs.screenshot.directory = config.xdg.userDirs.extraConfig.SCREENSHOTS;
-  custom.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.RECORDINGS;
+  my.programs.screenshot.directory = config.xdg.userDirs.extraConfig.SCREENSHOTS;
+  my.programs.screen-recorder.directory = config.xdg.userDirs.extraConfig.RECORDINGS;
 
   gtk.gtk3.bookmarks = [
     "file://${config.xdg.userDirs.extraConfig.SCREENSHOTS}"

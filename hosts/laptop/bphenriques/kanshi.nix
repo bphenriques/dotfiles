@@ -81,7 +81,7 @@ in
     ]; }
   ];
 
-  custom.programs.niri.output.default = {
+  my.programs.niri.output.default = {
     identifier = laptopScreen.criteria;
     inherit (laptopScreen) resolution refreshRate scale;
   };

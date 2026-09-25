@@ -1,7 +1,7 @@
 # The SMB view over ../shares; another transport reads the same inventory and its own per-share block.
 { config, lib, ... }:
 let
-  cfg = config.custom.storage;
+  cfg = config.fleet.storage;
 in
 {
   # Child datasets are already mounted, so they ride in with the plain directories: ownership only.

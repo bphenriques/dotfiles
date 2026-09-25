@@ -1,6 +1,6 @@
 # Agent VM
 
-A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running hermes-agent as a personal assistant reachable via [the chat UI](../../compute/selfhost/services/open-webui.nix) on compute.
+A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running hermes-agent as a personal assistant reachable via [the chat UI](../../compute/selfhost/services/open-webui) on compute.
 
 Security concerns:
 
@@ -14,10 +14,10 @@ Security concerns:
 Full read and write, including delete and rename. Two layers grant it, and each fails differently,
 so check them in this order:
 
-| layer | what it grants | how a failure reads |
-| --- | --- | --- |
-| CIFS mount on compute | the share forces `gid=5000` with `0660`, so `users.groups.vault.gid = 5000` here with hermes in it is the whole of the write permission | `EACCES`, permission denied |
-| `ReadWritePaths` on `hermes-agent` | `ProtectSystem = "strict"` makes everything read-only, so the vault path is listed explicitly | `EROFS`, read-only file system |
+| layer                              | what it grants                                                                                                                          | how a failure reads            |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| CIFS mount on compute              | the share forces `gid=5000` with `0660`, so `users.groups.vault.gid = 5000` here with hermes in it is the whole of the write permission | `EACCES`, permission denied    |
+| `ReadWritePaths` on `hermes-agent` | `ProtectSystem = "strict"` makes everything read-only, so the vault path is listed explicitly                                           | `EROFS`, read-only file system |
 
 Nothing withholds deletion. A client-side `tools.exclude` used to, but mcpvault offers its tools
 regardless, so it only ever hid them from the model. Recovery is the real backstop: the B2 backup of

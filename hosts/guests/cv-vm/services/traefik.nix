@@ -1,7 +1,7 @@
 { config, cvVm, fleetFacts, ... }:
 let
   inherit (cvVm) tunnelPort staticPort traefikMetricsPort;
-  guest = config.custom.microvm.guest;
+  guest = config.my.microvm.guest;
   vmIp = guest.ip;
 in
 {

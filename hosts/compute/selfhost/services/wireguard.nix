@@ -6,11 +6,11 @@
     clientSubnet = "10.100.0.0/24";
     fullAccessSubnet = "10.100.0.0/28";   # Only my own devices; everything above reaches Traefik alone
     endpoint = private.settings.services.wireguard.endpoint;
-    dns = config.custom.fleet.dns;
+    dns = config.fleet.dns;
     lanAccess = {
       enable = true;
-      subnet = config.custom.fleet.lan.subnet;
-      serverAddress = config.custom.fleet.lan.hosts.compute;
+      subnet = config.fleet.lan.subnet;
+      serverAddress = config.fleet.lan.hosts.compute;
       masquerade = true;
       wakeOnLan = true;   # Wake a powered-off fleet host from the VPN
     };

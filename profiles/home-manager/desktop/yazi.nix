@@ -29,7 +29,7 @@
     "d ${config.xdg.cacheHome}/yazi 700 ${config.home.username} users 10d -"
   ];
 
-  custom.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-    "Mod+E" = ''spawn-sh "${config.custom.programs.file-explorer.browser}"'';
+  my.programs.niri.bindings = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+    "Mod+E" = ''spawn-sh "${config.my.programs.file-explorer.browser}"'';
   };
 }
