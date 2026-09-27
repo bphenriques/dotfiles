@@ -75,10 +75,11 @@
   ];
 
   # The module's cross-origin isolation map predates the js-dos player, whose DOSBox-X backend is a
-  # threaded build and refuses to start without SharedArrayBuffer. A regex location beats the
-  # module's `/` prefix, so the headers land on the player URL without redefining its map.
+  # threaded build and refuses to start without SharedArrayBuffer. The trailing `=404` keeps
+  # /index.html a try_files *file*: as the fallback URI it would internally redirect into the
+  # module's `/` location, whose own add_header set replaces everything below.
   services.nginx.virtualHosts.${config.services.romm.nginx.virtualHost}.locations."~ ^/rom/.*/jsdos$" = {
-    tryFiles = "$uri $uri/ /index.html";
+    tryFiles = "$uri $uri/ /index.html =404";
     extraConfig = ''
       add_header Cache-Control "no-cache";
       add_header Cross-Origin-Embedder-Policy "require-corp";

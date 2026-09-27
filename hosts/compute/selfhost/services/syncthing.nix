@@ -30,6 +30,7 @@ let
 
   publicFolders = {
     music = mkSendOnlyFolder "music" "${sharesCfg.media.root}/music/library" allSyncthingDevices;
+    "music AAC" = mkSendOnlyFolder "music-aac" "${sharesCfg.media.root}/music/library-aac" allSyncthingDevices;
   } // lib.listToAttrs (map (system: lib.nameValuePair "roms-${system}" (
     mkSendOnlyFolder "roms-${system}" "${sharesCfg.media.root}/gaming/emulation/roms/${system}" allSyncthingDevices
   )) romSystems);
