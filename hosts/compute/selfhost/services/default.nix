@@ -12,6 +12,7 @@ in
     ./jellyfin.nix
     ./kapowarr.nix
     ./kavita
+    ./navidrome.nix
     ./seerr
     ./prowlarr
     ./romm.nix
