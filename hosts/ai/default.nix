@@ -31,8 +31,6 @@
     age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   };
 
-  nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
-
   # `podman compose` shells out to docker-compose; dockerCompat also answers `docker compose`.
   virtualisation.podman.dockerCompat = true;
   environment.systemPackages = [ pkgs.docker-compose ];

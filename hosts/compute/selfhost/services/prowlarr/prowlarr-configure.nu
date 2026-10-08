@@ -1,4 +1,3 @@
-#!/usr/bin/env nu
 # Initializes Prowlarr declaratively via the API:
 # - Creates entities if missing;
 # - Reconciles applications whenever there is a config drift;
@@ -72,6 +71,8 @@ def ensure_indexers [] {
     error make {msg: $"Failed to get indexer schemas: ($schemas.status)"}
   }
   let app_profile_id = get_default_app_profile_id
+
+  # Best-effort: indexer creation fails intermittently upstream, so failures are reported and skipped.
   mut failed = []
   for idx in $indexers {
     # Create-only: an existing indexer is left as-is (change in the UI or delete-to-recreate).

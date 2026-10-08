@@ -18,6 +18,7 @@ in
     settings = {
       min-free = 10 * 1024 * 1024 * 1024;  # Start GC if we are under 10 GiB free
       max-free = 50 * 1024 * 1024 * 1024;  # ...until 50 GiB is free
+      trusted-users = [ "bphenriques" ];
     };
   };
 

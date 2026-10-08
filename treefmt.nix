@@ -17,6 +17,7 @@ _:
     deadnix.no-lambda-pattern-names = true;          # Skip NixOS/HM module args (e.g., { pkgs, lib, ... })
     deadnix.priority = 1;                            # Run deadnix before statix
     statix.enable = true;                            # Nix anti-pattern linter
+    statix.disabled-lints = [ "repeated_keys" ];     # dotted `a.b = ...` siblings are the style here
     statix.priority = 2;
   };
 

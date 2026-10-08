@@ -15,12 +15,12 @@ in
 
   services.transmission.settings = {
     download-dir = "${sharesCfg.media.root}/downloads";
-    incomplete_dir_enabled = true;
+    incomplete-dir-enabled = true;
     incomplete-dir = "${sharesCfg.media.root}/downloads/incomplete";
     ratio-limit-enabled = true;
     ratio-limit = 1;
-    idle_seeding_limit_enabled = true;
-    idle_seeding_limit = 60;
+    idle-seeding-limit-enabled = true;
+    idle-seeding-limit = 60;
     umask = 2; # group-writable downloads for the media group (arr/jellyfin share)
   };
 

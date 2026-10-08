@@ -1,4 +1,3 @@
-#!/usr/bin/env nu
 # Reconciles the LiveSync CLI settings file from generated secrets.
 #
 # Built on `init-settings`, the CLI's own ~170-key baseline, so upstream's defaults stay upstream's.

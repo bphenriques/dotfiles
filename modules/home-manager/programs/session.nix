@@ -5,10 +5,7 @@ let
 
   cfg = config.my.programs.session;
 
-  mkAppOpt = lib.mkOption {
-    type = lib.types.str;
-  };
-  mkAppOpt' = default: mkAppOpt // { inherit default; };
+  mkAppOpt = default: lib.mkOption { type = lib.types.str; inherit default; };
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
@@ -41,17 +38,17 @@ in
   options.my.programs.session = {
     enable = lib.mkEnableOption "custom-session";
     exec = {
-      dmenu             = mkAppOpt' ''${lib.getExe dmenu}'';
-      lock              = mkAppOpt;
-      suspend           = mkAppOpt' "${systemctl} suspend";
-      shutdown          = mkAppOpt' "${systemctl} poweroff";
-      reboot            = mkAppOpt' "${systemctl} reboot";
-      reboot-efi        = mkAppOpt' "${systemctl} reboot --firmware-setup";
+      dmenu      = mkAppOpt ''${lib.getExe dmenu}'';
+      lock       = lib.mkOption { type = lib.types.str; };   # comes from the lock-screen profile
+      suspend    = mkAppOpt "${systemctl} suspend";
+      shutdown   = mkAppOpt "${systemctl} poweroff";
+      reboot     = mkAppOpt "${systemctl} reboot";
+      reboot-efi = mkAppOpt "${systemctl} reboot --firmware-setup";
     };
   };
 
   config = lib.mkIf cfg.enable {
-   assertions = [ (lib.hm.assertions.assertPlatform "my.programs.session" pkgs lib.platforms.linux) ];
+    assertions = [ (lib.hm.assertions.assertPlatform "my.programs.session" pkgs lib.platforms.linux) ];
     home.packages = [
       dmenu
       (pkgs.makeDesktopItem {

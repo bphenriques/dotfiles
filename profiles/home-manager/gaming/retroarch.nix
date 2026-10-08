@@ -137,7 +137,9 @@ let
       displayName = "DOSBox-pure";
       options = {
         dosbox_pure_conf = "inside";           # auto-run the DOSBOX.conf bundled inside each game zip (no start menu)
-        dosbox_pure_mouse_input = "virtual";   # single emulated cursor; right analog stick drives the mouse (no host double-cursor)
+        dosbox_pure_mouse_input = "direct";    # absolute positioning; "virtual" only moves while RetroArch grabs the mouse (F11)
+        dosbox_pure_mouse_speed_factor = "1.4";
+        dosbox_pure_mouse_speed_factor_x = "0.64";
       };
       shader = dosCrtShader;   # gentler CRT than crtShader; keeps DOS/Windows text readable
     };
@@ -189,6 +191,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
       # Video
       video_driver = "vulkan";
+      video_fullscreen = "true";     # Pegasus launches without -f, and windowed leaves the host cursor drawn over the guest one
       vulkan_gpu_index = "1";  # Force NVIDIA dGPU (GPU0=AMD iGPU, GPU1=NVIDIA RTX 4060)
       video_shader_enable = "true";
       video_scale_integer = "true";  # Automatic integer scale

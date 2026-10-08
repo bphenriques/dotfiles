@@ -22,11 +22,6 @@ resource "cloudflare_dns_record" "redirect" {
   ttl     = 1
 }
 
-moved {
-  from = cloudflare_dns_record.funnel
-  to   = cloudflare_dns_record.redirect
-}
-
 # Per-zone dynamic-redirect ruleset (a singleton), so TF owns every rule in it.
 resource "cloudflare_ruleset" "redirects" {
   zone_id = var.zone_id

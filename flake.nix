@@ -17,7 +17,7 @@
     # Personal flakes
     dotfiles-private.url = "git+ssh://git@github.com/bphenriques/dotfiles-private"; # Private dotfiles
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
-    selfhost-nix.url = "git+ssh://git@github.com/bphenriques/selfhost-nix";         # Selfhost abstractions
+    selfhost-nix.url = "github:bphenriques/selfhost-nix";                           # Selfhost abstractions
     selfhost-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Community flakes

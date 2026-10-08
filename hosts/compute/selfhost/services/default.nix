@@ -4,6 +4,7 @@ let
 in
 {
   imports = [
+    ./dnsmasq.nix
     ./radarr.nix
     ./sonarr.nix
     ./bazarr.nix
@@ -27,7 +28,6 @@ in
     ./livesync-cli
     ./filebrowser.nix
     ./papra.nix
-    # ./mympd.nix  # inky (its MPD backend) is retired; re-enable when it is back
     ./open-webui
   ];
 

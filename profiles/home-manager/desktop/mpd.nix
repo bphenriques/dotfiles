@@ -45,7 +45,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.services.mpc-plus.enable = true;
   services.mpdris2 = {
     enable = true;
-    multimediaKeys = true;  # Integration with multimedia keys.
-    notifications = false;  # Disabling as I prefer my own for finer grain control.
+    settings.Bling = {
+      mmkeys = true;
+      notify = false;  # Disabling as I prefer my own for finer grain control.
+    };
   };
 }

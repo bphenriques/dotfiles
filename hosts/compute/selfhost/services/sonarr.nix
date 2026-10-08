@@ -15,7 +15,7 @@
         host = "127.0.0.1";
         inherit (config.selfhost.services.transmission) port;
         urlBase = "/transmission/";
-        tvCategory = config.fleet.media.downloadCategories.sonarr;
+        tvCategory = config.fleet.downloadCategories.sonarr;
       };
     }];
     notifyOnImport = false; # Seerr announces arrivals to the family; this connection stays operational

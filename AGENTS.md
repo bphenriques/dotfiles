@@ -12,6 +12,9 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - `modules/nixos` defines options and mechanism; `profiles/nixos` sets the values a host picks. A module that only sets values belongs in a profile.
 - Every `.nix` under `modules/nixos` is imported into every host by `mkNixosHost`, so it must declare options and stay inert until enabled. `microvm/guest.nix` is excluded there because importing it makes the importer a guest; only `mkMicrovmGuest` takes it.
 - Profiles layer as `base.nix` (every machine, guests included) then `standalone.nix` (non-guests, imports base), then one kind: `headless.nix`, `graphical/` or `guest.nix`. Everything else is additive and picked per host.
+- Fleet facts (`hosts/shared.nix`) reach modules two ways. Read `config.fleet.*`, which is typed and available on every host built by `mkNixosHost`. The bare `fleet` specialArg is the same data untyped, and is only for microVM guests and home-manager, neither of which has `config.fleet`.
+- `fleet.*` is facts that are the same fleet-wide or a host's view of a shared fleet resource; `my.*` is mechanism and host-local option trees this repo defines.
+- New option trees are declared under `modules/`. A host declares options itself only to extend a tree it consumes (as kavita and seerr do for `selfhost.users`), or when the defaults derive from host-only config (`my.storage` reads this host's disko pool).
 
 ## Naming Conventions
 
