@@ -3,9 +3,9 @@
 # generated from config.my.microvm.host.guests (the table that also drives scrape/alerts), so
 # a new guest needs no edit here. Host and guest CPU/IO share one time axis for easy correlation:
 # the guests run on the host's own cores.
-{ hostName, guests, storageName, aiName }:
+{ lib, hostName, guests, storageName, aiName }:
 let
-  inherit (import ./lib.nix) mkPanel mkStat mkRow layout2 fullW;
+  inherit (import ./lib.nix { inherit lib; }) mkPanel mkStat mkRow layout2 fullW;
 
   hostInst = ''instance="${hostName}"'';
   storageInst = ''instance="${storageName}"'';

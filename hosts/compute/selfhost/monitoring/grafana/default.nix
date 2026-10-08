@@ -21,7 +21,7 @@ let
   computeDashboard = json.generate "compute.json" (import ./dashboard.nix {
     hostName = config.networking.hostName;
     guests = config.my.microvm.host.guests;
-    inherit storageName aiName;
+    inherit lib storageName aiName;
   });
 in
 {

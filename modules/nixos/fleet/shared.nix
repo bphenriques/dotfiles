@@ -19,6 +19,11 @@
         description = "Main LAN subnet in CIDR notation";
       };
 
+      gateway = lib.mkOption {
+        type = lib.types.str;
+        description = "LAN gateway (the router), used as resolved's listed fallback resolver";
+      };
+
       hosts = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         description = "Static hostname to IP address mappings";
@@ -43,7 +48,7 @@
       };
     };
 
-    media.downloadCategories = lib.mkOption {
+    downloadCategories = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       description = "Download-client category per arr. The client writes completed downloads to <download-dir>/<category>, and the NAS precreates those directories.";
     };

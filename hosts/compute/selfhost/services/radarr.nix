@@ -16,7 +16,7 @@
           host = "127.0.0.1";
           inherit (config.selfhost.services.transmission) port;
           urlBase = "/transmission/";
-          movieCategory = config.fleet.media.downloadCategories.radarr;
+          movieCategory = config.fleet.downloadCategories.radarr;
         };
       }
     ];

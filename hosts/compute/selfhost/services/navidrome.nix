@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
   serviceCfg = config.selfhost.services.navidrome;
   sharesCfg = config.fleet.shares;
@@ -11,17 +11,20 @@ in
     meta.category = "media";
     port = 4533;
     access.model = "native";
-    healthcheck.path = "/healthz";
+    storage.mounts = [ "media" ];
+    storage.users = [ config.services.navidrome.user ];
+    extraConfig.landingPage.enable = true;
   };
-
-  systemd.services.navidrome.serviceConfig.ReadOnlyPaths = [
-    "${sharesCfg.media.root}/music/library"
-  ];
 
   services.navidrome = {
     enable = true;
     openFirewall = false;
-    settings.Address = "127.0.0.1";
-    settings.EnableInsightsCollector = false;
+    settings = {
+      Address = "127.0.0.1";
+      Port = serviceCfg.port;
+      MusicFolder = "${sharesCfg.media.root}/music/library";
+      EnableInsightsCollector = false;
+      Scanner.Schedule = "@every 24h";  # CIFS has no inotify
+    };
   };
 }

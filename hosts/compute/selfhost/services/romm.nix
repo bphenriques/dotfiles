@@ -1,64 +1,17 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 let
   cfg = config.selfhost;
   shares = config.fleet.shares;
 
-  turn = {
-    listenPort = 3478;
-    minPort = 49152;
-    maxPort = 49999;
-    # Static credentials, shared by the coturn user and the EmulatorJS client below so they cannot
-    # desync. Plaintext is acceptable: the relay is LAN/WG-only (firewall-scoped below).
-    username = "romm";
-    credential = "romm-netplay";
-  };
+  wg = cfg.apps.wireguard;
+  turn = config.services.coturn;
+  peerRange = cidr: let p = lib.removeSuffix ".0/24" cidr; in "${p}.0-${p}.255";
+
+  relayAddresses = [ config.fleet.lan.hosts.compute (lib.removeSuffix "/24" wg.address) ];
 
   dataDir = config.services.romm.dataDir;
   romsDir = "${shares.media.root}/gaming/emulation/roms";
   biosDir = "${shares.media.root}/gaming/emulation/bios";
-
-  # Example: https://github.com/rommapp/romm/blob/master/examples/config.example.yml
-  yamlFormat = pkgs.formats.yaml { };
-  configFile = yamlFormat.generate "romm-config.yml" {
-    exclude.roms = {
-      single_file = {
-        extensions = [ "stfolder" ];
-        names = [ ".stignore" ];
-      };
-      multi_file.names = [
-        ".stfolder"
-        ".idea"
-        "media"
-      ];
-    };
-    system.platforms = {
-      megadrive = "genesis";
-      dreamcast = "dc";
-      fbneo = "arcade";
-      pico8 = "pico";
-      gc = "ngc";
-    };
-
-    # Works somewhat but the display is buggy and laggy and only works Chrome<->Chrome. I do not recommend yet.
-    emulatorjs.netplay = {
-      enabled = true;
-      ice_servers =
-        let
-          port = toString config.services.coturn.listening-port;
-          lanIP = config.fleet.lan.hosts.compute;
-          wgIP = "10.100.0.1";
-          turnCreds = { inherit (turn) username credential; };
-        in
-        lib.concatMap (ip: [
-          { urls = "stun:${ip}:${port}"; }
-          ({ urls = "turn:${ip}:${port}?transport=udp"; } // turnCreds)
-        ]) [ lanIP wgIP ];
-    };
-
-    emulatorjs.settings = {
-      dosbox_pure.dosbox_pure_conf = "inside"; # autorun the bundled DOSBOX.conf
-    };
-  };
 in
 {
   sops = {
@@ -70,8 +23,6 @@ in
       "romm/screenscraper/dev-password" = { };
     };
 
-    # RomM reads credentials from the environment: the `_FILE` suffix its docs mention is a feature of the
-    # container entrypoint, which the package does not ship.
     templates."romm-scrapers.env" = {
       owner = "root";
       group = "root";
@@ -80,8 +31,8 @@ in
         MOBYGAMES_API_KEY=${config.sops.placeholder."romm/mobygames/api-key"}
         SCREENSCRAPER_USER=${config.sops.placeholder."romm/screenscraper/user"}
         SCREENSCRAPER_PASSWORD=${config.sops.placeholder."romm/screenscraper/password"}
+
         # Application credentials, distinct from the account ones: upstream bakes its own into the image
-        # from CI secrets, so a from-source package sends an empty devid and ScreenScraper 403s.
         SCREENSCRAPER_DEV_ID=${config.sops.placeholder."romm/screenscraper/dev-user"}
         SCREENSCRAPER_DEV_PASSWORD=${config.sops.placeholder."romm/screenscraper/dev-password"}
       '';
@@ -89,24 +40,49 @@ in
   };
 
   selfhost = {
-    apps.romm.enable = true;
-
-    services.romm = {
-      access.allowedGroups = with cfg.groups; [ guests users admin ];
-      storage.mounts = [ "media" ];
-      storage.users = [ "romm" "nginx" ];
-      extraConfig.landingPage = { enable = true; listed = false; };
+    apps.coturn = {
+      enable = true;
+      advertisedAddresses = relayAddresses;
+      allowedPeerRanges = [ (peerRange wg.clientSubnet) (peerRange config.fleet.lan.subnet) ];
     };
 
-    # coturn serves no HTTP, so only its socket is registered, for the port-collision guard.
-    internal.listeningPorts = [
-      {
-        name = "coturn";
-        host = "0.0.0.0";
-        port = turn.listenPort;
-        protocol = "udp";
-      }
-    ];
+    apps.romm = {
+      enable = true;
+      settings = {
+        # Curation artefacts beside the ROMs; handheld-sync mirrors this list for its own pushes.
+        exclude.roms = {
+          single_file.names = [ ".stignore" "README.md" "systeminfo.txt" ]; # RomM skips dot folders but not files
+          multi_file.names = [ "media" "patches" "archive" ];
+        };
+
+        system.platforms = {
+          megadrive = "genesis";
+          dreamcast = "dc";
+          fbneo = "arcade";
+          pico8 = "pico";
+          gc = "ngc";
+        };
+
+        emulatorjs.settings.dosbox_pure.dosbox_pure_conf = "inside"; # autorun the bundled DOSBOX.conf
+      };
+    };
+
+    services.romm = {
+      access.allowedGroups = [ cfg.groups.users cfg.groups.admin ]; # guests browse anonymously through KIOSK_MODE
+      storage.mounts = [ "media" ];
+      extraConfig.landingPage = {
+        enable = true;
+        listed = false;
+      };
+    };
+  };
+
+  # Relay sockets above the ephemeral range: the firewall has to open the whole range, and the kernel
+  # hands out 32768-60999, so anything inside it would expose unrelated sockets on bond0/wg0.
+  services.coturn = {
+    listening-ips = relayAddresses; # not the podman/microvm bridges or the routable IPv6 it would bind otherwise
+    min-port = 61000;
+    max-port = 61999;
   };
 
   services.romm = {
@@ -114,7 +90,6 @@ in
     environmentFile = config.sops.templates."romm-scrapers.env".path;
 
     extraEnvironment = {
-      DISABLE_SETUP_WIZARD = "true";
       HASHEOUS_API_ENABLED = "true";
       KIOSK_MODE = "true";
       ENABLE_SCHEDULED_RESCAN = "true";
@@ -125,48 +100,21 @@ in
   # Upstream fixes the library to `${dataDir}/library`, so the NAS directories are linked in. Symlinks
   # rather than binds: the automount keeps its idle unmount and self-heals on a NAS reboot. They stay
   # read-only through the units' ProtectSystem=strict, matching the container's `:ro` volumes.
-  systemd = {
-    tmpfiles.settings."20-romm-library" = {
-      "${dataDir}/library/roms"."L+".argument = romsDir;
-      "${dataDir}/library/bios"."L+".argument = biosDir;
-      "${dataDir}/config/config.yml"."L+".argument = "${configFile}";
-    };
-
-    # Every unit of the service reads it: the API serves it, the worker scans with it.
-    services = lib.genAttrs cfg.services.romm.systemdServices (_: { restartTriggers = [ configFile ]; });
+  systemd.tmpfiles.settings."20-romm-library" = {
+    "${dataDir}/library/roms"."L+".argument = romsDir;
+    "${dataDir}/library/bios"."L+".argument = biosDir;
   };
 
-  # Minimal STUN/TURN for the EmulatorJS netplay above. Accepted risk: static credentials in the Nix
-  # store, mitigated by the LAN/WG-scoped firewall below.
-  services.coturn = {
-    enable = true;
-    listening-port = turn.listenPort;
-    lt-cred-mech = true;
-    no-cli = true;
-    no-tcp-relay = true;
-    min-port = turn.minPort;
-    max-port = turn.maxPort;
-    extraConfig = ''
-      no-multicast-peers
-      no-loopback-peers
-      user=${turn.username}:${turn.credential}
+  # LAN, and only the VPN peers that already reach the LAN: the relay originates its traffic locally,
+  # so a restricted peer using it would get the UDP into the LAN that the forward chain denies them.
+  networking.firewall = {
+    interfaces.bond0 = {
+      allowedUDPPorts = [ turn.listening-port ];
+      allowedUDPPortRanges = [{ from = turn.min-port; to = turn.max-port; }];
+    };
 
-      # Only allow relaying to LAN/VPN peers
-      allowed-peer-ip=10.100.0.0-10.100.0.255
-      allowed-peer-ip=192.168.1.0-192.168.1.255
+    extraInputRules = ''
+      iifname "wg0" ip saddr ${wg.fullAccessSubnet} udp dport { ${toString turn.listening-port}, ${toString turn.min-port}-${toString turn.max-port} } accept
     '';
   };
-
-  # Interface-scoped firewall: only LAN (bond0) and VPN (wg0), not WAN
-  networking.firewall.interfaces =
-    let
-      relay = {
-        allowedUDPPorts = [ turn.listenPort ];
-        allowedUDPPortRanges = [{ from = turn.minPort; to = turn.maxPort; }];
-      };
-    in
-    {
-      bond0 = relay;
-      wg0 = relay;
-    };
 }

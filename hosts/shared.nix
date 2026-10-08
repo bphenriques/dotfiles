@@ -1,9 +1,10 @@
 let
   computeGuests = import ./compute/microvm/guests.nix;
 
-  # Set using static DHCP IPs.  I should have disabled DHCP for a specific range but here we are.
+  # Set using static DHCP IPs. I should have disabled DHCP for a specific range but here we are.
   lan = {
     subnet = "192.168.1.0/24";
+    gateway = "192.168.1.1";
     hosts = {
       laptop = "192.168.1.121";
       compute = "192.168.1.196";
@@ -15,28 +16,24 @@ let
   };
 in
 {
-  ssh = {
-    authorizedKeys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfNK2CGbIOfCrFsuWsX8bxqod4vtRJYYXpO54NWUdIY android-phone"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7T3w1ex/9s2FBy8EM0HTSjF0kQIQi61ZwBh/mXQyNv ios-terminus"
-    ];
-  };
+  inherit lan;
 
   dns = "1.1.1.1";
 
-  inherit lan;
-
+  ssh = {
+    authorizedKeys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7T3w1ex/9s2FBy8EM0HTSjF0kQIQi61ZwBh/mXQyNv ios-terminus"
+    ];
+  };
   microvms.compute = builtins.mapAttrs (_: g: g.ip) computeGuests.guests; # Used to seed /etc/hosts and ssh jump
-
-  # Two facts that happen to share a spelling: the UPS as upsd names it, and the machine serving it.
   ups = {
     name = "storage";
     host = lan.hosts.storage;
   };
 
   # Required to define how transmission maps downloads to folders and enable declaretively adding them.
-  media.downloadCategories = {
+  downloadCategories = {
     radarr = "radarr";
     sonarr = "sonarr";
   };

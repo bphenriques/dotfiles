@@ -1,11 +1,15 @@
-{ cvVm, ... }:
+_:
+let
+  cvVm = import ./settings.nix;
+in
 {
   imports = [
-    ./settings.nix
     ../../../profiles/nixos/guest.nix
     ./microvm.nix
     ./services
   ];
+
+  _module.args.cvVm = cvVm;
 
   my.microvm.guest = {
     stateRoot = cvVm.dataRoot;                    # SSH host key / sops age identity live here

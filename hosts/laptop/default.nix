@@ -1,6 +1,5 @@
 { config, pkgs, inputs, private, ... }:
 let
-  primaryUser = "bphenriques";
   rootDisk = "/dev/disk/by-path/pci-0000:05:00.0-nvme-1";
 in
 {
@@ -40,19 +39,23 @@ in
     kernelParams = [ "boot.shell_on_fail" "resume_offset=533760" ];
   };
 
+  # Networking: rank ethernet below wifi for the default route (NetworkManager's wifi metric is 600).
+  networking.networkmanager.ensureProfiles.profiles.lan = {
+    connection = { id = "lan"; type = "ethernet"; };
+    ipv4 = { method = "auto"; route-metric = 700; dns-priority = 200; };
+    ipv6 = { method = "auto"; route-metric = 700; dns-priority = 200; };
+  };
+
   # Homelab integration
   selfhost.storage.mounts.smb.shares = {
-    bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5190; };
-    media = { uid = config.users.users.bphenriques.uid; gid = 5512; };
+    bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5000; };
+    media = { uid = config.users.users.bphenriques.uid; gid = 5001; };
   };
   # Secrets
   sops = {
     defaultSopsFile = private.sopsSecretsFile;
     age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   };
-
-  # Users
-  nix.settings.trusted-users = [ config.users.users.${primaryUser}.name ];
 
   system.stateVersion = "24.05"; # The release version of the first install of this system. Leave as it is!
 }

@@ -1,4 +1,3 @@
-#!/usr/bin/env nu
 let base_url = $env.KAVITA_URL
 let config = open $env.KAVITA_CONFIG_FILE
 

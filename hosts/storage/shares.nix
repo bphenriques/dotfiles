@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.fleet.storage;
+  cfg = config.my.storage;
 
   personal = private.settings.storage.personalShares;
 
@@ -68,7 +68,7 @@ let
           "downloads/incomplete"
         ]
         # The arrs health-check their category dir before any download would create it.
-        ++ map (c: "downloads/${c}") (lib.attrValues config.fleet.media.downloadCategories);
+        ++ map (c: "downloads/${c}") (lib.attrValues config.fleet.downloadCategories);
         access = {
           groups = {
             ${private.groups.admin} = "rw";
@@ -99,7 +99,7 @@ let
   shareNameCollisions = lib.intersectLists (lib.attrNames personal) (lib.attrNames household);
 in
 {
-  options.fleet.storage = {
+  options.my.storage = {
     shares = lib.mkOption {
       description = "Shares served by this host, pairing the ZFS backing with the SMB export.";
       type = lib.types.attrsOf (
@@ -150,7 +150,7 @@ in
   };
 
   config = {
-    fleet.storage.shares = personal // household;
+    my.storage.shares = personal // household;
 
     # Same rule as the SMB clients.
     fleet.shares = lib.mapAttrs (name: share: {

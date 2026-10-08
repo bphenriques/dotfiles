@@ -3,10 +3,6 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   nasShares = osConfig.fleet.shares;
-  mounts = {
-    nasPrivate = nasShares.bphenriques.root;
-    nasMedia = nasShares.media.root;
-  };
 in
 {
   imports = [
@@ -20,14 +16,14 @@ in
 
   # NAS symlinks. Avoid mounting directly to $HOME to prevent slowdowns when offline
   systemd.user.tmpfiles.rules = [
-    "L ${config.xdg.userDirs.pictures}/nas  - - - - ${mounts.nasPrivate}/photos"
-    "L ${config.xdg.userDirs.music}/nas     - - - - ${mounts.nasMedia}/music"
-    "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"  # was in the shared HM base
+    "L ${config.xdg.userDirs.pictures}/nas  - - - - ${nasShares.bphenriques.root}/photos"
+    "L ${config.xdg.userDirs.music}/nas     - - - - ${nasShares.media.root}/music"
+    "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"
   ];
 
   gtk.gtk3.bookmarks = [
-    "file://${mounts.nasPrivate} NAS Private"
-    "file://${mounts.nasMedia} NAS Media"
+    "file://${nasShares.bphenriques.root} NAS Private"
+    "file://${nasShares.media.root} NAS Media"
     "file://${nasShares.bphenriques.root}/documents NAS Documents"
     "file://${nasShares.media.root}/movies NAS Movies"
     "file://${nasShares.media.root}/tv NAS TV"
@@ -41,12 +37,12 @@ in
       {
         name = "NAS Private";
         icon = mkIcon "nas-private" "󰉐";
-        path = mounts.nasPrivate;
+        path = nasShares.bphenriques.root;
       }
       {
         name = "NAS Media";
         icon = mkIcon "nas-media" "󰥠";
-        path = mounts.nasMedia;
+        path = nasShares.media.root;
       }
       {
         name = "NAS Documents";

@@ -1,0 +1,28 @@
+# Miyoo Mini V4, OnionOS, single card. No wifi, so the card is the only way in.
+cardRoot: /mnt/SDCARD
+
+roms:
+  source: /mnt/homelab-media/gaming/emulation/roms
+  root: Roms
+  directories:
+    gb: GB
+    gbc: GBC
+    gba: GBA
+    nes: FC
+    snes: SFC
+    megadrive: MD
+    psx: PS
+    fbneo: FBNEO
+    dos: DOS
+    pico8: PICO
+
+sync:
+  - source: /mnt/homelab-media/gaming/emulation/bios
+    dest: BIOS
+  - source: /mnt/homelab-media/music/library-mp3
+    dest: Media/Music
+  # Custom overlays keep their own tree, separate from Onion's /overlays pack and RetroArch's own dir.
+  - source: /mnt/homelab-bphenriques/devices/miyoo-mini-v4/overlay
+    dest: overlay
+  - source: /mnt/homelab-bphenriques/devices/miyoo-mini-v4/Themes
+    dest: Themes

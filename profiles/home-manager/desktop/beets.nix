@@ -1,10 +1,9 @@
 { pkgs, lib, osConfig, config, ... }:
 let
-  inherit (lib) foldl';
 
   musicDir = "${osConfig.fleet.shares.media.root}/music";
   musicLibrary = "${osConfig.fleet.shares.media.root}/music/library";
-  aacLibrary = "${osConfig.fleet.shares.media.root}/music/library-aac";
+  mp3Library = "${osConfig.fleet.shares.media.root}/music/library-mp3";
 
   database = "${config.xdg.dataHome}/beets/library.db";
   databaseBackup = "${musicDir}/beets.db.backup";
@@ -19,7 +18,7 @@ let
   in providers ++ health ++ metadata ++ utility;
   basePackage = pkgs.python3.pkgs.beets.override {
     # Reference: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/audio/beets/builtin-plugins.nix
-    pluginOverrides = foldl' (acc: plugin: acc // { "${plugin}".enable = true; }) { } plugins;
+    pluginOverrides = lib.genAttrs plugins (_: { enable = true; });
   };
 
   # Sanity check + backup database file to NAS. Can't store the DB file in the NAS as it leads to lock issues.
@@ -47,11 +46,11 @@ let
     '';
   };
 
-  # fdkaac writes the iTunSMPB gapless atom that ffmpeg's own aac encoder omits. -ar caps hi-res, -xerror refuses corrupt input.
-  flacToAac = pkgs.writeShellApplication {
-    name = "flac-to-aac";
-    runtimeInputs = [ pkgs.ffmpeg pkgs.fdk-aac-encoder ];
-    text = ''ffmpeg -v error -xerror -i "$1" -vn -ar 44100 -f caf - | fdkaac -b 192000 -o "$2" -'';
+  # -ar caps hi-res to what these players accept, -xerror refuses corrupt input.
+  flacToMp3 = pkgs.writeShellApplication {
+    name = "flac-to-mp3";
+    runtimeInputs = [ pkgs.ffmpeg ];
+    text = ''ffmpeg -v error -xerror -i "$1" -vn -ar 44100 -codec:a libmp3lame -b:a 256k "$2"'';
   };
 
   # Some sources ship FLACs with no STREAMINFO MD5, which leaves `flac -t` unable to verify them and `beet bad` red.
@@ -120,23 +119,25 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       fetchart = {
         auto = true;
         cautious = true;
+        cover_format = "JPEG"; # the resizer keeps the source format, and a 1000px PNG embeds ~20x larger than its JPEG equivalent
       };
       embedart = {
         maxwidth = 1000;
         quality = 90;
       };
       badfiles.check_on_import = true;
+      unimported.ignore_subdirectories = [ ".stfolder" ]; # syncthing's folder marker, not stray music
       lyrics.synced = true;
       replaygain.backend = "ffmpeg"; # default `command` backend (mp3gain) covers fewer formats than this library uses
       convert = {
-        dest = aacLibrary;
-        format = "aac";
-        formats.aac = {
-          command = "${lib.getExe flacToAac} $source $dest";
-          extension = "m4a";
+        dest = mp3Library;
+        format = "mp3";
+        formats.mp3 = {
+          command = "${lib.getExe flacToMp3} $source $dest";
+          extension = "mp3";
         };
         never_convert_lossy_files = true;
-        album_art_maxwidth = 1000;
+        album_art_maxwidth = 500; # convert never passes embedart.quality, so width is the only lever; the panel is 720x480 anyway
       };
       smartplaylist = {
         relative_to = musicLibrary;

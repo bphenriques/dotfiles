@@ -32,8 +32,6 @@
     age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   };
 
-  nix.settings.trusted-users = [ config.users.users.bphenriques.name ];
-
   environment.systemPackages = [
     pkgs.gptfdisk # sgdisk: the degraded-pool runbook partitions a replacement by hand
   ];

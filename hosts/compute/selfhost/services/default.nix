@@ -19,7 +19,6 @@ in
     ./romm.nix
     ./romm-5.3.1.nix
     ./homepage
-    ./syncthing.nix
     ./transmission.nix
     ./wireguard.nix
     ./home-assistant.nix
@@ -32,12 +31,6 @@ in
   ];
 
   selfhost.external = {
-    inky = {
-      displayName = "Inky";
-      meta.description = "E-Ink Display";
-      url = "http://${hosts.inky}";
-      integrations.homepage.group = "Admin";
-    };
     jetkvm = {
       displayName = "JetKVM";
       meta.description = "Remote KVM";

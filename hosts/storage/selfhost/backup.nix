@@ -1,3 +1,4 @@
+# Repo, credentials and retention come from profiles/nixos/backup-backblaze.nix. This host prunes it.
 {
   config,
   lib,
@@ -14,45 +15,19 @@ in
   # The opt-in silently omits, so the exclusions have to stay visible.
   warnings = lib.optional (
     skipped != [ ]
-  ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set fleet.storage.shares.<name>.backup if unintended.";
+  ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set my.storage.shares.<name>.backup if unintended.";
 
-  sops = {
-    secrets."backup/b2/bucket" = { };
-    secrets."backup/b2/bucket_id" = { };
-    secrets."backup/b2/application_key_id" = { };
-    secrets."backup/b2/application_key" = { };
-    secrets."backup/rustic/password" = { };
-    secrets."notify/backup-token" = { };
-    templates."homelab-backup-secrets.toml" = {
-      owner = "root";
-      group = "root";
-      mode = "0400";
-      content = ''
-        [repository.options]
-        bucket = "${config.sops.placeholder."backup/b2/bucket"}"
-        bucket_id = "${config.sops.placeholder."backup/b2/bucket_id"}"
-        application_key_id = "${config.sops.placeholder."backup/b2/application_key_id"}"
-        application_key = "${config.sops.placeholder."backup/b2/application_key"}"
-      '';
-    };
-  };
+  sops.secrets."notify/backup-token" = { };
 
   # Publishes to compute's ntfy. No provider runs here to mint a publisher token, so it comes from this
   # host's own secrets; the README carries the one-time mint.
   selfhost.notify.url = private.settings.notify.url;
   selfhost.tasks.backup.integrations.notify.tokenFile = config.sops.secrets."notify/backup-token".path;
 
-  selfhost.backup.targets.backblaze = {
-    repository = "opendal:b2";
-    backendCredentialsFile = config.sops.templates."homelab-backup-secrets.toml".path;
-    passwordFile = config.sops.secrets."backup/rustic/password".path;
-    retention = {
-      daily = "7 days";
-      weekly = "1 month";
-      monthly = "1 year";
-      yearly = "2 years";
-    };
-    # Local folders which will enable storing the ownership information making restores safer.
-    bindings = lib.mapAttrs' (name: s: lib.nameValuePair "/nas/${name}" s.root) backed;
-  };
+  # Resolve it on the LAN: the public record needs internet, and it is the only name this host looks up.
+  networking.hosts.${config.fleet.lan.hosts.compute} = [ (lib.removePrefix "https://" private.settings.notify.url) ];
+
+  # Local folders which will enable storing the ownership information making restores safer.
+  selfhost.backup.targets.backblaze.bindings =
+    lib.mapAttrs' (name: s: lib.nameValuePair "/nas/${name}" s.root) backed;
 }

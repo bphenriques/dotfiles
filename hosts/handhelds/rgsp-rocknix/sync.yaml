@@ -1,0 +1,27 @@
+# Anbernic RG SP, ROCKNIX, single card. Alternative to rgsp-spruce on the same device.
+# Directory names come from that build's es_systems.cfg: pico-8 is hyphenated, DOS lives under pc,
+# and FBNeo is named fbn there but pathed at fbneo.
+cardRoot: /storage
+
+roms:
+  source: /mnt/homelab-media/gaming/emulation/roms
+  root: roms
+  directories:
+    gb: gb
+    gbc: gbc
+    gba: gba
+    nes: nes
+    snes: snes
+    megadrive: megadrive
+    psx: psx
+    n64: n64
+    nds: nds
+    fbneo: fbneo
+    dos: pc
+    pico8: pico-8
+
+sync:
+  - source: /mnt/homelab-media/gaming/emulation/bios
+    dest: roms/bios
+  - source: /mnt/homelab-media/music/library-mp3
+    dest: music

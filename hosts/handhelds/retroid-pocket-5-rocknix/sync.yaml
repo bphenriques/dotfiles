@@ -1,0 +1,30 @@
+# Retroid Pocket 5, ROCKNIX.
+# ps2/wii/3ds are unverified: no ROCKNIX build I could read defines them, so these are the library's
+# own names. Confirm with: grep -A4 '<name>ps2' /usr/config/emulationstation/es_systems.cfg
+cardRoot: /storage
+
+roms:
+  source: /mnt/homelab-media/gaming/emulation/roms
+  root: roms
+  directories:
+    gb: gb
+    gbc: gbc
+    gba: gba
+    nes: nes
+    snes: snes
+    megadrive: megadrive
+    psx: psx
+    n64: n64
+    nds: nds
+    fbneo: fbneo
+    dreamcast: dreamcast
+    psp: psp
+    pico8: pico-8
+    dos: pc
+    ps2: ps2
+    wii: wii
+    3ds: 3ds
+
+sync:
+  - source: /mnt/homelab-media/gaming/emulation/bios
+    dest: roms/bios

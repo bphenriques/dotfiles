@@ -38,6 +38,7 @@ in
   imports = [
     inputs.selfhost-nix.nixosModules.default
     ./backup.nix
+    ../../../profiles/nixos/backup-backblaze.nix
   ];
 
   selfhost = {

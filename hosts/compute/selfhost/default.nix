@@ -59,6 +59,7 @@ in
     ./tasks
     ./monitoring
     ../../../profiles/nixos/selfhost-smb-client.nix
+    ../../../profiles/nixos/backup-backblaze.nix
   ];
 
   fleet = {
@@ -204,7 +205,7 @@ in
     };
   };
 
-  # FIXME: Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so own the secret by its
+  # Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so the secret is owned by its
   # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env nu
 # Initializes Seerr (partially) declaratively via the API. Create-only: existing entities aren't
 # reconciled on config drift: change them in the UI, or delete-to-recreate.
 let base_url = $env.SEERR_URL
@@ -62,7 +61,7 @@ def complete_setup_wizard [] {
   # Mark as initialized
   let init_r = http post $"($base_url)/api/v1/settings/initialize" {} --headers $headers --content-type application/json --full --allow-errors
   if $init_r.status not-in [200, 204] {
-    error make {msg: $"  Warning: Failed to mark as initialized: ($init_r.status) - ($init_r.body)"}
+    error make {msg: $"Failed to mark as initialized: ($init_r.status) - ($init_r.body)"}
   }
   print "  Setup wizard completed"
 }

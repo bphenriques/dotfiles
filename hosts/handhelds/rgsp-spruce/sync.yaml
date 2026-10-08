@@ -1,0 +1,31 @@
+# Anbernic RG SP, spruceOS, single card.
+cardRoot: /mnt/SDCARD
+
+ssh:
+  user: spruce                                # uid 0 despite the name
+  rsync: /mnt/SDCARD/spruce/bin64/rsync       # off the default PATH on spruceOS
+
+roms:
+  source: /mnt/homelab-media/gaming/emulation/roms
+  root: Roms
+  directories:
+    gb: GB
+    gbc: GBC
+    gba: GBA
+    nes: FC
+    snes: SFC
+    megadrive: MD
+    psx: PS
+    n64: N64
+    nds: NDS
+    fbneo: FBNEO
+    dos: DOS
+    pico8: PICO8
+
+sync:
+  - source: /mnt/homelab-media/gaming/emulation/bios
+    dest: BIOS
+  - source: /mnt/homelab-media/music/library-mp3
+    dest: Media/Music
+  - source: /mnt/homelab-bphenriques/devices/rg-sp/overlay
+    dest: RetroArch/.config/retroarch/overlays

@@ -50,6 +50,11 @@
           DHCP = "ipv4";
           IPv6AcceptRA = true; # keep the routable global IPv6 (RA)
         };
+        # Take no DNS from the LAN: resolved must prefer the local resolver, with the router only as the listed fallback.
+        # Three channels offer it: DHCPv4, the RA itself, and the DHCPv6 client the RA's other-config flag starts.
+        dhcpV4Config.UseDNS = false;
+        ipv6AcceptRAConfig.UseDNS = false;
+        dhcpV6Config.UseDNS = false;
       };
     };
 

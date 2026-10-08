@@ -5,6 +5,10 @@ FLAKE_URL="${FLAKE_URL:-github:bphenriques/dotfiles/${BRANCH_NAME:-main}}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-$HOME/.dotfiles}"
 SOPS_AGE_SYSTEM_FILE="/var/lib/sops-nix/system-keys.txt"
 
+# Secrets staged in /tmp during an install. Named here so the cleanup traps and the writers agree.
+LUKS_TMP_FILE="/tmp/luks-interactive-password.key"
+SSH_TMP_FILE="/tmp/github-deploy-ssh.$$"
+
 fatal() {
   printf '[FAIL] %s\n' "$1" >&2
   exit 1
@@ -59,7 +63,7 @@ remote_install() {
 
   info "Fetching sops key for ${host}..."
   post_format_files="$(mktemp -d)"
-  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
+  if dotfiles-secrets "$bw_email" exists sops-secret "${host}"; then
     # nixos-anywhere preserves the staged mode, so it has to be right here. sops-nix creates this key 0600.
     install -D -m 0600 /dev/null "${post_format_files}${SOPS_AGE_SYSTEM_FILE}"
     dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >"${post_format_files}${SOPS_AGE_SYSTEM_FILE}"
@@ -88,9 +92,9 @@ remote_install() {
 
   info "Checking for luks encryption keys..."
   luks_files="$(mktemp -d)"
-  if dotfiles-secrets "$bw_email" fetch luks-key "$host" >/dev/null; then
+  if dotfiles-secrets "$bw_email" exists luks-key "$host"; then
     luks_local_file="${luks_files}/luks-interactive-password.key"
-    luks_disko_expected_file_location="/tmp/luks-interactive-password.key"
+    luks_disko_expected_file_location="$LUKS_TMP_FILE"
 
     info "Fetching luks encryption key..."
     dotfiles-secrets "$bw_email" fetch luks-key "$host" >"${luks_local_file}"
@@ -105,12 +109,13 @@ local_install() {
   local host="$1"
   local bw_email="$2"
 
-  trap 'sudo rm -f /tmp/luks-interactive-password.key' EXIT
+  # Both are also removed eagerly below; this is the backstop for a failure in between.
+  trap 'sudo rm -f "$LUKS_TMP_FILE" "$SSH_TMP_FILE"' EXIT
 
   unlock_bitwarden "$bw_email"
 
   info "Fetching SSH deploy key due to private Github flakes..."
-  local tmp_ssh_key="/tmp/github-deploy-ssh.$$"
+  local tmp_ssh_key="$SSH_TMP_FILE"
   sudo mkdir -m 700 -p /root/.ssh
   dotfiles-secrets "$bw_email" fetch ssh-private-key "${host}" | sudo tee "$tmp_ssh_key" >/dev/null
   sudo chmod 600 "$tmp_ssh_key"
@@ -120,7 +125,7 @@ local_install() {
 
   if dotfiles-secrets "$bw_email" exists luks-key "$host"; then
     info "Fetching luks encryption key..."
-    dotfiles-secrets "$bw_email" fetch luks-key "$host" >"/tmp/luks-interactive-password.key"
+    dotfiles-secrets "$bw_email" fetch luks-key "$host" >"$LUKS_TMP_FILE"
   fi
 
   # The remote path decrypts pool keys from sops; a local install expects them already in place, so
@@ -143,7 +148,7 @@ local_install() {
   done
 
   info "Fetching sops key for ${host}..."
-  if dotfiles-secrets "$bw_email" fetch sops-secret "${host}" >/dev/null 2>&1; then
+  if dotfiles-secrets "$bw_email" exists sops-secret "${host}"; then
     info "Copying sops system private key to /mnt${SOPS_AGE_SYSTEM_FILE}"
     sudo install -D -m 0600 -o root -g root /dev/null "/mnt${SOPS_AGE_SYSTEM_FILE}"
     dotfiles-secrets "$bw_email" fetch sops-secret "${host}" | sudo tee "/mnt${SOPS_AGE_SYSTEM_FILE}" >/dev/null
@@ -165,9 +170,11 @@ rescue() {
   local host="$1"
   local bw_email="$2"
 
+  trap 'sudo rm -f "$LUKS_TMP_FILE"' EXIT
+
   unlock_bitwarden "$bw_email"
 
-  dotfiles-secrets "$bw_email" fetch luks-key "$host" >"/tmp/luks-interactive-password.key" || fatal "No luks key available"
+  dotfiles-secrets "$bw_email" fetch luks-key "$host" >"$LUKS_TMP_FILE" || fatal "No luks key available"
   sudo disko --mode mount --root-mountpoint /mnt --flake "${FLAKE_URL}#${host}"
 }
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env nu
 # Idempotent Cleanuparr reconcile. Config lives in a database behind an authenticated API, so this
 # bootstraps an account, then applies each section read-modify-write to preserve keys we do not declare.
 let base_url = $env.CLEANUPARR_URL

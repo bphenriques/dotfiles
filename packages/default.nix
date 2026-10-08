@@ -35,6 +35,7 @@ let
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
       rom-artwork = pkgs.callPackage ./cli/rom-artwork { };
+      handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }
   );
 in mergeAllSystems [ crossPlatform linux ]

@@ -1,4 +1,5 @@
 # Grafana dashboard-as-code helpers, shared across dashboards.
+{ lib }:
 rec {
   datasource = {
     type = "prometheus";
@@ -92,6 +93,6 @@ rec {
     builtins.genList
       (i:
         let s = builtins.elemAt specs i;
-        in s // { gridPos = { x = (i - 2 * (builtins.div i 2)) * w; y = y0 + (builtins.div i 2) * h; inherit w h; }; })
+        in s // { gridPos = { x = (lib.mod i 2) * w; y = y0 + (builtins.div i 2) * h; inherit w h; }; })
       (builtins.length specs);
 }
