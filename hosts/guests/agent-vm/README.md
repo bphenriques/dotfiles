@@ -5,7 +5,7 @@ A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running herm
 Security concerns:
 
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
-- Egress is internet-only plus a single hole to `ai:11434` (Ollama), never the rest of the LAN
+- Egress is internet-only plus two holes, `ai:11434` (Ollama) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
 - The vault is the live NAS copy, shared in RW over virtiofs from compute's CIFS mount; write access is group gid 5000, nothing else
 - The API (`:8642`) is bridge-only, gated by a key compute generates and shares in read-only over virtiofs; the VM holds no secrets of its own
 
@@ -29,6 +29,18 @@ than redeployed.
 The share is also mounted `noexec`, and the sync daemon ignores every dotted path, so `.obsidian/`
 plugin code never enters the vault sync and is not reachable this way.
 
+## Forge access
+
+Git over SSH to gitea on compute, as the `personal-agent` service account declared in
+[compute's selfhost config](../../compute/selfhost/default.nix).
+
+- The keypair is generated here, as `hermes` under `/var/lib/hermes/.ssh`, so it sits on the state volume
+  and survives reboots; root's home does not. Only the public half is declared on compute.
+- Remotes use `ssh://gitea@10.20.1.1:2222/<owner>/<repo>.git`: the bridge address rather than the public
+  name, which resolves to compute's LAN address and stays dropped. The login is gitea's `RUN_USER`.
+- The hole is `egress.allowHostPorts = [ 2222 ]` in [guests.nix](../../compute/microvm/guests.nix), pinned
+  to the bridge address so the same port on compute's LAN address remains unreachable.
+
 ## Ops
 
 The fleet-wide SSH profile disables TCP forwarding, so `-J` cannot reach the bridge; relay through compute instead:
@@ -47,3 +59,4 @@ The API key needs no sops: compute generates it (`selfhost.runtimeSecrets`), fee
 
 1. **Vault**: compute must have the `bphenriques` SMB share mounted; virtiofsd will not start without it, so the guest will not boot while the NAS is down.
 2. **Deploy compute.** It builds and runs the guest, generates the API key, and shares it in; hermes reads it on start-up. The VM holds no secrets, so there is no `dotfiles-private` entry and no re-key dance.
+3. **Forge**: generate the keypair here (`sudo -u hermes ssh-keygen -t ed25519 -N "" -C personal-agent@agent-vm -f /var/lib/hermes/.ssh/id_ed25519`), declare the public half on compute, pin the host key (`sudo -u hermes sh -c 'ssh-keyscan -p 2222 10.20.1.1 >> /var/lib/hermes/.ssh/known_hosts'`), then add `personal-agent` to the repository with write access in gitea, which the framework does not provision. Verify with `sudo -u hermes ssh -p 2222 -T gitea@10.20.1.1`.

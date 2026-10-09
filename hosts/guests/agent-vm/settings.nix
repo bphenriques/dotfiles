@@ -2,6 +2,7 @@
 {
   stateRoot = "/var/lib/hermes";
   apiPort = 8642;
+  webuiPort = 8787;
   vaultRoot = "/var/lib/vault";           # The live vault, RW over virtiofs from compute
   secretsRoot = "/var/lib/agent-secrets"; # Readonly from compute
 }

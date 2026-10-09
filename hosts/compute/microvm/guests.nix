@@ -31,13 +31,14 @@
         Slice = "throttled.slice";
         CPUWeight = 10;
         CPUQuota = "100%";
-        MemoryMax = "2G";
+        MemoryMax = "5G";   # guest RAM plus hypervisor overhead: the cap has to sit above microvm.mem
       };
       monitoring = {
         storageMount = "/var/lib/hermes";
       };
       # The one LAN hole in the seal: the ai host's Ollama.
       egress.allowLan = [{ host = "ai"; ports = [ 11434 ]; }];
+      egress.allowHostPorts = [ 2222 ];   # gitea's built-in SSH (selfhost.apps.gitea.ssh.port), for the agent's own repo
     };
   };
 }

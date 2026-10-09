@@ -15,6 +15,16 @@ let
   # Exact direct-tcpip targets for the sshd PermitOpen override.
   guestSshTargets = lib.concatMapStringsSep " " (g: "${g.ip}:22") (lib.attrValues cfg.guests);
 
+  hostPortGuests = lib.filterAttrs (_: g: g.egress.allowHostPorts != [ ]) cfg.guests;
+
+  # Pinned to the bridge address: a packet to the host's LAN address is routed as input too, so without
+  # the daddr match this would open the port there as well, where the forward drop can never see it.
+  inputRules =
+    lib.mapAttrsToList (name: g:
+      ''iifname "${bridge.name}" ip saddr ${g.ip} ip daddr ${bridge.gateway} tcp dport { ${lib.concatMapStringsSep ", " toString g.egress.allowHostPorts} } accept comment "${name} to host"''
+    ) hostPortGuests
+    ++ [ ''iifname "${bridge.name}" ct state new drop comment "Guests never initiate to the host (return traffic is ct established)"'' ];
+
   # Per-guest accepts first (first match wins); the RFC1918 drop is the floor beneath them.
   forwardRules =
     map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.host}"'') egressEntries
@@ -51,6 +61,13 @@ in
             default = { };
             description = "Raw serviceConfig merged over the sandbox (a list key replaces, it does not append).";
           };
+          egress.allowHostPorts = lib.mkOption {
+            type = lib.types.listOf lib.types.port;
+            default = [ ];
+            description = "TCP ports on the host's own bridge address this guest may reach: the named exception to the input chain's blanket drop. Reaching the host's LAN address stays impossible.";
+            example = [ 2222 ];
+          };
+
           egress.allowLan = lib.mkOption {
             default = [ ];
             description = "LAN hosts this guest may reach, per TCP port (default: none; there is no all-ports form).";
@@ -75,7 +92,11 @@ in
       }] ++ map (e: {
         assertion = e.target != ownIp;
         message = "microvm guest ${e.name}: egress.allowLan may not target the host's own LAN IP (${e.host}), which would bypass the host seal";
-      }) egressEntries;
+      }) egressEntries
+      ++ lib.mapAttrsToList (name: g: {
+        assertion = !(lib.elem 22 g.egress.allowHostPorts);
+        message = "microvm guest ${name}: egress.allowHostPorts may not include 22; the host's sshd is reached the other way, through the adminUser PermitOpen override";
+      }) hostPortGuests;
 
       # Narrow override of the no-forwarding baseline: local forwards to a guest's :22, nothing else.
       services.openssh.extraConfig = ''
@@ -83,6 +104,11 @@ in
           AllowTcpForwarding local
           PermitOpen ${guestSshTargets}
       '';
+
+      # nixos-fw hooks at priority 0, so the accept above is not the end of it: the port has to be open
+      # on the bridge here too, and nowhere else.
+      networking.firewall.interfaces.${bridge.name}.allowedTCPPorts =
+        lib.unique (lib.concatMap (g: g.egress.allowHostPorts) (lib.attrValues hostPortGuests));
 
       networking.nat = {
         enable = true;
@@ -100,7 +126,7 @@ in
           }
           chain input {
             type filter hook input priority filter - 1; policy accept;
-            iifname "${bridge.name}" ct state new drop comment "Guests never initiate to the host (return traffic is ct established)"
+            ${lib.concatStringsSep "\n            " inputRules}
           }
         '';
       };

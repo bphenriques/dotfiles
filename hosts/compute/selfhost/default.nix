@@ -170,6 +170,18 @@ in
     };
 
     users = private.users // extraUsers;
+
+    # agent-vm's forge identity. The keypair is generated in the guest as the `hermes` user, so the
+    # private half never leaves it; only the public half is declared here and registered on deploy.
+    serviceAccounts.personal-agent = {
+      description = "agent-vm's forge principal, for git over SSH to its inbox repository";
+      services.gitea = {
+        enable = true;
+        sshKeys = [
+          { key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOHDIQhIOmKJMbCGKncBgpYnKnReeUR4TK1CgxMZbbj+ personal-agent@agent-vm"; }
+        ];
+      };
+    };
   };
 
   virtualisation = {

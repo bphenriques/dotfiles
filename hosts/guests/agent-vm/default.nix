@@ -13,7 +13,7 @@ in
 
   my.microvm.guest = {
     inherit (agentVm) stateRoot;        # SSH host key + hermes state
-    ingressPorts = [ agentVm.apiPort ]; # hermes API, reached by the chat UI over the bridge
+    ingressPorts = [ agentVm.apiPort agentVm.webuiPort ]; # hermes API and web UI, both fronted by compute's Traefik
   };
 
   system.stateVersion = "26.05";

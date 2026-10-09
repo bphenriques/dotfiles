@@ -28,6 +28,7 @@ in
     ./filebrowser.nix
     ./papra.nix
     ./open-webui
+    ./hermes.nix
   ];
 
   selfhost.external = {

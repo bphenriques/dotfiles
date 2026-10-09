@@ -343,6 +343,27 @@
         "type": "github"
       }
     },
+    "hermes-webui": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791581145,
+        "narHash": "sha256-GjobD+b5RSNPZv9AXAL/19knlcbvkRsb7JRTZvkOC70=",
+        "owner": "nesquena",
+        "repo": "hermes-webui",
+        "rev": "8fadf85ac7445bb4fd9813333e69cae1d1c128fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nesquena",
+        "ref": "exp-v0.52.449",
+        "repo": "hermes-webui",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -665,6 +686,7 @@
         "disko": "disko",
         "dotfiles-private": "dotfiles-private",
         "hermes-agent": "hermes-agent",
+        "hermes-webui": "hermes-webui",
         "home-manager": "home-manager",
         "microvm": "microvm",
         "nix-index-database": "nix-index-database",
@@ -710,11 +732,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1791546137,
-        "narHash": "sha256-8mFafu2uudHv80Xw0A669N00NyWv80hDwWwQfB0Tfcw=",
+        "lastModified": 1791587356,
+        "narHash": "sha256-idYZAewdUpFtATqiTvOdj0+Aoqx7wgQUUqbU9+oRUm0=",
         "owner": "bphenriques",
         "repo": "selfhost-nix",
-        "rev": "b0a1331f70dceabac96e713d19bef79db140b038",
+        "rev": "52f424e84602109af99167b02bd22de15960610e",
         "type": "github"
       },
       "original": {

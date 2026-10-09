@@ -75,7 +75,17 @@ in
       # listing passes 5% of context, and the model then calls them without their required arguments.
       tools.tool_search.enabled = "off";
 
-      platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" ];
+      platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" "cronjob" "terminal" "file" "skills" ];
+
+      # `mode` stays at its default `smart`, which escalates what it cannot clear to an approval card in
+      # the clients. This list is the floor underneath that: it holds even when approvals are off.
+      approvals.deny = [
+        "git push --force*"
+        "git push *--force*"
+        "git push *--delete*"
+        "*curl*|*sh*"
+        "rm -rf /var/lib/vault*"
+      ];
       platforms.api_server = {
         enabled = true;
         extra = {
