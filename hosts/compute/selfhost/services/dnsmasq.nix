@@ -23,6 +23,7 @@
     };
   };
 
-  networking.nameservers = [ "127.0.0.1" config.fleet.lan.gateway ];  # the router stays listed: a global DNS stops resolved's own fallbacks applying
-  services.resolved.settings.Resolve.Domains = [ "~." ];   # every query to the local resolver, not the one DHCP offers
+  # Only the zone reaches dnsmasq: routing everything here made resolved mark it unhealthy when its upstream died.
+  services.resolved.settings.Resolve.Domains = [ "~${config.selfhost.ingress.domain}" ];
+  networking.nameservers = [ "127.0.0.1" config.fleet.lan.gateway ];  # the router answers zone names if dnsmasq is down
 }

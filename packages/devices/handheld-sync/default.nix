@@ -4,7 +4,7 @@ let
 in
 pkgs.writeShellApplication {
   name = "handheld-sync";
-  runtimeInputs = [ pkgs.nushell pkgs.rsync pkgs.openssh ];
+  runtimeInputs = [ pkgs.nushell pkgs.rsync pkgs.openssh pkgs.skyscraper ]; # skyscraper: the miyoo post-sync hook
   text = ''
     exec nu ${script} "$@"
   '';

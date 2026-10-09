@@ -1,4 +1,4 @@
-# Push a handheld's hosts/handhelds/<device>/sync.toml onto it, over ssh or through its mounted card.
+# Push a handheld's hosts/handhelds/<device>/sync.yaml onto it, over ssh or through its mounted card.
 # rsync is idempotent either way, so re-running costs nothing.
 #
 #   handheld-sync hosts/handhelds/rgsp-spruce          --ssh 192.168.1.50
@@ -7,8 +7,8 @@
 # Syncthing's leftovers and editor noise: never wanted on a device.
 const NEVER_PUSH = [ ".stfolder" ".stignore" ".idea" ]
 
-# Mirrors fleet.roms.excluded. Scoped to the ROM directories, or it would also drop the README.md files
-# the overlay trees legitimately carry.
+# Mirrors selfhost.apps.romm.settings.exclude.roms. Scoped to the ROM directories, or it would also
+# drop the README.md files the overlay trees legitimately carry.
 const ROMS_EXCLUDE = [ "media" "patches" "archive" "README.md" "systeminfo.txt" ]
 
 def read-config [dir: string]: nothing -> record {
@@ -32,7 +32,7 @@ def read-config [dir: string]: nothing -> record {
 
   let extra = $cfg | get -o sync | default [] | each {|p|
     if (($p | get -o source | default "") | is-empty) or (($p | get -o dest | default "") | is-empty) {
-      error make --unspanned { msg: $"($file): every [[sync]] needs both source and dest" }
+      error make --unspanned { msg: $"($file): every sync entry needs both source and dest" }
     }
     { source: $p.source, dest: $p.dest, mirror: false }
   }
@@ -95,7 +95,7 @@ def main [
   }
 
   # post-sync/*.nu in name order, run from the device directory with the card as the first argument, so a
-  # hook can read its own sync.toml. Local rather than on the device: these adapt content for this
+  # hook can read its own sync.yaml. Local rather than on the device: these adapt content for this
   # handheld, and the tooling for that (Skyscraper, artwork.xml) lives here.
   if ($cfg.hooks | is-not-empty) {
     if ($card | is-empty) {

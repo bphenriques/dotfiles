@@ -36,10 +36,6 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         inherit (config.services.mpd.network) port;
         notifications = true;
       };
-      "inky" = {
-        host = osConfig.fleet.lan.hosts.inky;
-        notifications = true;
-      };
     };
   };
   my.services.mpc-plus.enable = true;
