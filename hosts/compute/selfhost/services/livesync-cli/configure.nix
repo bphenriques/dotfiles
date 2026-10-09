@@ -27,7 +27,7 @@ in
     environment = {
       LIVESYNC_SETTINGS_FILE = "${stateDir}/.livesync/settings.json";
       LIVESYNC_STATE_DIR = stateDir;
-      LIVESYNC_IMAGE = "${img.image}:${img.version}-cli";
+      LIVESYNC_IMAGE = "${img.image}:${img.tag}";
       LIVESYNC_PODMAN = "${pkgs.podman}/bin/podman";
       LIVESYNC_USER = livesyncUser.name;
       LIVESYNC_GROUP = livesyncUser.group;

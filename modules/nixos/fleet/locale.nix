@@ -1,8 +1,10 @@
-{ lib, ... }:
+{ config, lib, ... }:
 {
   options.fleet.locale = {
     timezone = lib.mkOption {
       type = lib.types.str;
+      default = config.time.timeZone;
+      defaultText = lib.literalExpression "config.time.timeZone";
       description = "Timezone for services (e.g. 'Europe/Lisbon')";
     };
 

@@ -31,7 +31,7 @@ in
   # (--group-add is lost). Running as root (PUID=0) skips gosu entirely and avoids both
   # the chown and group issues. The container is isolated by Podman and behind forwardAuth.
   virtualisation.oci-containers.containers.kapowarr = {
-    image = "${img.image}:v${img.version}";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
 
     environment = {

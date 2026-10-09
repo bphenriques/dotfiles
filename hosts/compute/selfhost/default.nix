@@ -64,7 +64,6 @@ in
 
   fleet = {
     locale = {
-      timezone = config.time.timeZone;
       latitude = 38.736946;
       longitude = -9.142685;
     };

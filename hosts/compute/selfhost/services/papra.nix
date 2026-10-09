@@ -69,7 +69,7 @@ in
   };
 
   virtualisation.oci-containers.containers.papra = {
-    image = "${img.image}:${img.version}-rootless";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
 
     environment = {

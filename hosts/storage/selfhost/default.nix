@@ -16,14 +16,6 @@ let
         gid = 999;
       };
     };
-    machine-inky = {
-      description = "Inky's read-only SMB principal";
-      unixAccount = {
-        enable = true;
-        uid = 998;
-        gid = 998;
-      };
-    };
     machine-laptop = {
       description = "Laptop's SMB principal";
       unixAccount = {

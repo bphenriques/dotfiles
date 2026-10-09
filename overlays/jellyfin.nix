@@ -3,7 +3,7 @@ _final: prev: let
   packages = {
     elegantfin-jellyfin-theme = prev.stdenvNoCC.mkDerivation rec {
       pname = "elegantfin-jellyfin-theme";
-      version = "26.06.06";
+      version = "26.09.05";
 
       src = prev.fetchurl {
         url = "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@v${version}/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css";

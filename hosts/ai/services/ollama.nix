@@ -13,7 +13,7 @@ let
 in
 {
   virtualisation.oci-containers.containers.ollama = {
-    image = "${img.image}:${img.version}-rocm";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
     volumes = [ "ollama:/root/.ollama" ];
     environment = {

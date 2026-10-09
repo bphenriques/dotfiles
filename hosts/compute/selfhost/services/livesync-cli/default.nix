@@ -54,7 +54,7 @@ in
   };
 
   virtualisation.oci-containers.containers.livesync-cli = {
-    image = "${img.image}:${img.version}-cli";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
     # The entrypoint prepends the database path, so this reads `/data --vault /vault daemon`.
     cmd = [ "--vault" "/vault" "daemon" ];

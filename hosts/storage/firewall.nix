@@ -14,7 +14,7 @@ in
 {
   networking.nftables.enable = true;
 
-  # Samba stays LAN-wide in ./services/samba.nix: laptop, inky and the phone all mount it. Everything
+  # Samba stays LAN-wide in ./services/samba.nix: laptop and the phone both mount it. Everything
   # else answers to compute alone, and none of it authenticates beyond NUT's shared password.
   networking.firewall.extraInputRules = ''
     ip saddr ${hosts.compute} tcp dport { ${dports exporterPorts} } accept comment "exporters, scraped by compute"

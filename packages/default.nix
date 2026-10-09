@@ -15,7 +15,6 @@ let
       bw-session = pkgs.callPackage ./dotfiles/bw-session { };
       dotfiles = pkgs.callPackage ./dotfiles/dotfiles { builders = b; fleetHostIPs = (import ../hosts/shared.nix).lan.hosts; };
       dotfiles-secrets = pkgs.callPackage ./dotfiles/dotfiles-secrets { inherit bw-session; };
-      inky-setup = pkgs.callPackage ../hosts/inky { };
     }
   );
 

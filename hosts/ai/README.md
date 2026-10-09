@@ -15,6 +15,33 @@ so it is either running or off. What depends on it fails per request meanwhile a
 - **Network**: dual 10GbE, one cabled. ~130W sustained
 - **UPS**: EATON Ellipse ECO 650, monitored over the network from [storage](../storage/README.md)
 
+## Fan curve
+
+The board exposes no hwmon PWM, no tachometer and no ACPI fan object, so the EC's own curve tables are
+the only control surface. Stock sits at a flat 20% from 25C up with no fan-stop point, which is the
+whole of the idle noise: at a 36C idle there is no lower band to drop into. TDP modes, governor and
+C-states are all dead ends for it.
+
+[`fan-curve.nix`](hardware/fan-curve.nix) rewrites only the two records below 45C. Everything from 55C
+up is left stock, so behaviour under load is unchanged. Raising that end is parked in
+[`TODO.md`](TODO.md).
+
+| Temp  | 25C | 45C | 55C | 65C | 75C | 85C | 90C |
+| ----- | --- | --- | --- | --- | --- | --- | --- |
+| Stock | 20% | 20% | 22% | 23% | 25% | 28% | 32% |
+| Now   | 10% | 10% | 22% | 23% | 25% | 28% | 32% |
+
+The EC reverts to stock on power cycle, hence the boot-time oneshot. Firmware re-reads the tables
+continuously, so `fan-idle-duty <percent>` applies immediately and is how to find the stall floor by
+ear, there being no tachometer to read. Values set that way are lost on reboot; the declared one is
+`runtimeEnv.IDLE_DUTY`. Going too low can only stall the fans below 45C, where the untouched 22%
+record takes over. 10% is quiet and holds temperature at 38.5C idle, 2C above stock. Community profiles
+for this board put idle between 6% (`ultrasilenzioso`) and 12% (`silenzioso`), so 10% is ordinary and
+going down to 6% is known not to stall these fans.
+
+A BIOS update is not a fan fix: 1.10 and 1.11 are EC firmware bumps plus a Windows WOL fix. An EC
+firmware change could move these offsets, so the script vets each record's temperature before writing.
+
 ## Architecture
 
 ```

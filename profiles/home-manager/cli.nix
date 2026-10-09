@@ -1,4 +1,4 @@
-{ pkgs, lib, osConfig, ... }:
+{ pkgs, lib, osConfig, self, ... }:
 let
   guestBlocks = lib.concatMapAttrs (vmHost: guests:
     lib.mapAttrs (_: ip: {
@@ -62,12 +62,13 @@ in
   stylix.targets.bat.enable = true;
 
   programs.fd.enable = true;              # Better `find`.
-  my.programs.fzf-fd.enable = true;   # Fuzzy fd
   programs.jq.enable = true;              # JSON query.
-  my.programs.project.enable = true;  # Easier way to navigate jump through different projects
-  my.programs.fzf-rg.enable = true;   # Fuzzy ripgrep
+  my.programs.project.enable = true;      # Easier way to navigate jump through different projects
 
-  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+  home.packages = [
+    self.packages.fzf-fd   # Fuzzy fd
+    self.packages.fzf-rg   # Fuzzy ripgrep
+  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive
     pkgs.p7zip     # 7zip for linux
     pkgs.unrar     # Still need it

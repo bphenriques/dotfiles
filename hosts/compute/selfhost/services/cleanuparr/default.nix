@@ -91,7 +91,7 @@ in
   ];
 
   virtualisation.oci-containers.containers.cleanuparr = {
-    image = "${img.image}:${img.version}";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
 
     environment = {

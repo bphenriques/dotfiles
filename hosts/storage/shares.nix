@@ -76,7 +76,6 @@ let
           };
           users = {
             machine-compute = "rw";
-            machine-inky = "ro";
             machine-laptop = "rw";
           };
         };

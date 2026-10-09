@@ -18,7 +18,7 @@ let
 in
 {
   virtualisation.oci-containers.containers.comfyui = {
-    image = "${img.image}:${img.version}";
+    image = "${img.image}:${img.tag}";
     autoStart = true;
 
     # Not /root: Fedora ships it mode 0550, unwritable once --cap-drop=ALL removes CAP_DAC_OVERRIDE.

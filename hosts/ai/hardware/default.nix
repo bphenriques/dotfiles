@@ -1,6 +1,9 @@
 { pkgs, private, ... }:
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ./fan-curve.nix
+  ];
 
   hardware.enableRedistributableFirmware = true;
 

@@ -15,7 +15,7 @@ rec {
   readModulesAttrs = dir:
     let
       rootPath = toString dir;
-      ignoredDirs = [ "/schemas/" "/internal/" "/lib/" ];
+      ignoredDirs = [ "/lib/" ];
       relPath = path: removePrefix "${rootPath}/" (toString path);
       isExportedModule = path: let
         rel = relPath path;
