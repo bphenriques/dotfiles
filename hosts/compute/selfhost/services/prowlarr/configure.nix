@@ -40,9 +40,9 @@ in
   systemd.services.prowlarr-configure = {
     description = "Prowlarr setup";
     wantedBy = [ "prowlarr.service" ];
-    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
+    after = [ "prowlarr.service" "radarr-configure.service" "sonarr-configure.service" config.selfhost.notify.provisioningUnit ];
     requires = [ "prowlarr.service" ];
-    wants = [ "radarr-configure.service" "sonarr-configure.service" "ntfy-configure.service" ];
+    wants = [ "radarr-configure.service" "sonarr-configure.service" config.selfhost.notify.provisioningUnit ];
     partOf = [ "prowlarr.service" ];
     restartTriggers = [ settingsFile ./prowlarr-configure.nu ];
     startLimitIntervalSec = 300;

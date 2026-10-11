@@ -53,6 +53,11 @@
       description = "Download-client category per arr. The client writes completed downloads to <download-dir>/<category>, and the NAS precreates those directories.";
     };
 
+    notifyTopics = lib.mkOption {
+      type = lib.types.attrsOf lib.types.bool;
+      description = "Notification topic vocabulary, as topic -> readable without authentication. Fleet-wide because a publishing host validates its own publishers against the names it declares, while a different host runs the provider that grants them.";
+    };
+
     ai = {
       endpoint = {
         host = lib.mkOption {

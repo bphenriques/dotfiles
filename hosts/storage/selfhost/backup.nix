@@ -22,7 +22,15 @@ in
   # Publishes to compute's ntfy. No provider runs here to mint a publisher token, so it comes from this
   # host's own secrets; the README carries the one-time mint.
   selfhost.notify.url = private.settings.notify.url;
-  selfhost.tasks.backup.integrations.notify.tokenFile = config.sops.secrets."notify/backup-token".path;
+
+  # Declared here too: publishers are validated against the names their own host knows, and compute is
+  # what grants them. One vocabulary, so the two cannot drift.
+  selfhost.notify.topics = lib.mapAttrs (_: public: { inherit public; }) config.fleet.notifyTopics;
+  selfhost.tasks.backup.integrations.notify = {
+    topic = "backup";
+    failureTopic = "admin";
+    tokenFile = config.sops.secrets."notify/backup-token".path;
+  };
 
   # Resolve it on the LAN: the public record needs internet, and it is the only name this host looks up.
   networking.hosts.${config.fleet.lan.hosts.compute} = [ (lib.removePrefix "https://" private.settings.notify.url) ];

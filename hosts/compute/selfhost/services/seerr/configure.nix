@@ -64,9 +64,9 @@ in
   systemd.services.seerr-configure = {
     description = "Seerr setup";
     wantedBy = [ "seerr.service" ];
-    after = [ "seerr.service" "jellyfin-configure.service" "radarr.service" "sonarr.service" "ntfy-configure.service" ];
+    after = [ "seerr.service" "jellyfin-configure.service" "radarr.service" "sonarr.service" config.selfhost.notify.provisioningUnit ];
     requires = [ "seerr.service" ];
-    wants = [ "jellyfin.service" "radarr.service" "sonarr.service" "ntfy-configure.service" ];
+    wants = [ "jellyfin.service" "radarr.service" "sonarr.service" config.selfhost.notify.provisioningUnit ];
     partOf = [ "seerr.service" "jellyfin-configure.service" ];
     restartTriggers = [ initConfigFile ./configure.nu ];
     startLimitIntervalSec = 300;

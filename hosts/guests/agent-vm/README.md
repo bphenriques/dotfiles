@@ -7,7 +7,7 @@ Security concerns:
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
 - Egress is internet-only plus two holes, `ai:11434` (Ollama) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
 - The vault is the live NAS copy, shared in RW over virtiofs from compute's CIFS mount; write access is group gid 5000, nothing else
-- The API (`:8642`) is bridge-only, gated by a key compute generates and shares in read-only over virtiofs; the VM holds no secrets of its own
+- The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs, so the VM holds no secrets of its own
 
 ## What the agent may do to the vault
 
@@ -40,6 +40,17 @@ Git over SSH to gitea on compute, as the `personal-agent` service account declar
   name, which resolves to compute's LAN address and stays dropped. The login is gitea's `RUN_USER`.
 - The hole is `egress.allowHostPorts = [ 2222 ]` in [guests.nix](../../compute/microvm/guests.nix), pinned
   to the bridge address so the same port on compute's LAN address remains unreachable.
+
+## Admin console
+
+[hermes-webui](https://github.com/nesquena/hermes-webui) at `https://hermes-webui.<domain>`, which is the
+only surface onto the agent's memory, skills, cron jobs and sessions: the OpenAI-compatible API the chat UI
+speaks has no concept of them. It is a front end over the same `HERMES_HOME`, not a second agent, so it runs
+as `hermes` and its own state sits in `webui/` inside that home.
+
+Its password auth is unused: Pocket ID is the gate, and the stored `password_hash` in
+`$HERMES_HOME/webui/settings.json` is what to clear if it ever comes back (the env var outranks it, the file
+is the fallback).
 
 ## Ops
 

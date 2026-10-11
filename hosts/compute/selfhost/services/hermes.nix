@@ -1,5 +1,6 @@
 { config, ... }:
 let
+  cfg = config.selfhost;
   agentVmIp = config.fleet.microvms.compute.agent-vm;
   agentVm = import ../../../guests/agent-vm/settings.nix;
 in
@@ -23,12 +24,14 @@ in
     meta.description = "Assistant dashboard";
     host = agentVmIp;
     port = agentVm.webuiPort;
-    access.model = "native";        # its own password gate, which is the only one its phone client speaks
+    access.allowedGroups = [ cfg.groups.admin ];
+    access.model = "oidc";
+    access.oidc.callbackURLs = [ "${cfg.services.hermes-webui.publicUrl}/api/auth/oidc/callback" ];
     healthcheck.path = "/health";
     systemdServices = [ ];
     extraConfig.landingPage.enable = true;
 
-    # A static password is the whole lock, so bound how fast it can be guessed.
+    # Belt and braces behind Pocket ID: this is the one route whose backend holds the vault.
     traefik.middlewares.hermes-webui-ratelimit.rateLimit = {
       average = 5;
       burst = 10;

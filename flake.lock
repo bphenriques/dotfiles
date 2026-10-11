@@ -732,11 +732,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1791587356,
-        "narHash": "sha256-idYZAewdUpFtATqiTvOdj0+Aoqx7wgQUUqbU9+oRUm0=",
+        "lastModified": 1791700946,
+        "narHash": "sha256-SnE4Py+/7/gHahVN8VvWSfdv2f9TGNCw9RWLdVCvXoc=",
         "owner": "bphenriques",
         "repo": "selfhost-nix",
-        "rev": "52f424e84602109af99167b02bd22de15960610e",
+        "rev": "51d61deeb0a56712df8c787b5cb03081c5744258",
         "type": "github"
       },
       "original": {

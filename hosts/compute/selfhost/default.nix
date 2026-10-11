@@ -1,4 +1,4 @@
-{ config, inputs, private, ... }:
+{ config, lib, inputs, private, ... }:
 let
   # Ad-hoc (non-private) users; per-user service config rides under `services` on selfhost.users.
   extraUsers = {
@@ -109,18 +109,22 @@ in
       };
     };
 
-    # Rotation self-registers a homelab-rotation topic; keep its failures on the admin one instead.
-    tasks.oidc-rotate.integrations.notify.topic = "admin";
+    # Backup is the one stream whose routine half would drown the rest, so it gets its own topic while
+    # its failures stay with everything else that wants reading.
+    tasks.backup.integrations.notify = {
+      topic = "backup";
+      failureTopic = "admin";
+    };
 
     notify = {
       ntfy.enable = true;
-      # Storage runs no notify provider; its token is provisioned here and copied across by hand.
-      ntfy.remotePublishers.storage-backup.topic = "homelab-backup";
-      topics = {
-        media.public = true;
-        download.public = false;
-        admin.public = false;
-      };
+      # Anything that does not say otherwise. Forgetting to route something then means hearing about it
+      # here, rather than that failure going nowhere.
+      defaultTopic = "admin";
+      # Storage runs no notify provider; its token is provisioned here and copied across by hand. It
+      # needs both topics because its backup task routes failures the same way this host's does.
+      ntfy.remotePublishers.storage-backup.topics = [ "backup" "admin" ];
+      topics = lib.mapAttrs (_: public: { inherit public; }) config.fleet.notifyTopics;
     };
 
     mail = private.settings.smtp // {
@@ -183,6 +187,10 @@ in
       };
     };
   };
+
+  # Upstream keeps messages 12h, which a phone switched off for a weekend outlives: a backup failure
+  # would expire before anyone read it.
+  services.ntfy-sh.settings.cache-duration = "72h";
 
   virtualisation = {
     podman.enable = true;

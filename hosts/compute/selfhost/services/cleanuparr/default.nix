@@ -122,9 +122,9 @@ in
   systemd.services.cleanuparr-configure = {
     description = "Cleanuparr setup (download client, *arr instances, queue cleaner, malware blocker)";
     wantedBy = [ "multi-user.target" ];
-    after = [ "podman-cleanuparr.service" "sonarr-configure.service" "radarr-configure.service" "ntfy-configure.service" ];
+    after = [ "podman-cleanuparr.service" "sonarr-configure.service" "radarr-configure.service" config.selfhost.notify.provisioningUnit ];
     requires = [ "podman-cleanuparr.service" ];
-    wants = [ "sonarr-configure.service" "radarr-configure.service" "ntfy-configure.service" ];
+    wants = [ "sonarr-configure.service" "radarr-configure.service" config.selfhost.notify.provisioningUnit ];
     partOf = [ "podman-cleanuparr.service" ];
     restartTriggers = [ settingsFile ./cleanuparr-configure.nu ];
     startLimitIntervalSec = 300;

@@ -21,7 +21,7 @@ in
     port = agentVm.webuiPort;
 
     agent.package = config.services.hermes-agent.package;       # HERMES_WEBUI_PYTHON, from its passthru.hermesVenv
-    environmentFiles = [ "${agentVm.secretsRoot}/webui.env" ];  # HERMES_WEBUI_PASSWORD, generated on compute
+    environmentFiles = [ "${agentVm.secretsRoot}/webui.env" ];  # Pocket ID client credentials, rendered on compute
   };
 
   # Same reason as hermes-agent: the env file arrives over virtiofs, which is not mounted at activation.
