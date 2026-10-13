@@ -137,10 +137,9 @@ let
       displayName = "DOSBox-pure";
       options = {
         dosbox_pure_conf = "inside";           # auto-run the DOSBOX.conf bundled inside each game zip (no start menu)
-        dosbox_pure_mouse_input = "direct";    # absolute positioning; "virtual" only moves while RetroArch grabs the mouse (F11)
-        dosbox_pure_mouse_speed_factor = "1.4";
-        dosbox_pure_mouse_speed_factor_x = "0.64";
+        dosbox_pure_mouse_input = "virtual";   # "direct" desyncs games that track their own cursor, so it stops short of the screen edge
       };
+      overrides = { input_auto_mouse_grab = "true"; };  # virtual needs the grab, otherwise the host pointer hits the edge
       shader = dosCrtShader;   # gentler CRT than crtShader; keeps DOS/Windows text readable
     };
     prboom = {

@@ -7,7 +7,7 @@ _final: prev: let
 
       src = prev.fetchurl {
         url = "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@v${version}/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css";
-        hash = "sha256-XCzoCb1Ylj785EF1XYixCb8Tn09ZT8YBsdarj/t/cK4=";
+        hash = "sha256-d5qoAbkS0hCJ1Ijd9aQm/IwClw7JU1Zs7uQW4Ni85kM=";
       };
 
       dontUnpack = true;
