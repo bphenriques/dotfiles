@@ -1,7 +1,10 @@
 # Nix generated files
 result
 .nix-host
+
+# Other
 .claude
+.idea/
 
 # OpenTofu / Terraform (infra) — state is kept, encrypted, in dotfiles-private
 .terraform/

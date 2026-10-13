@@ -24,6 +24,8 @@
     ## Basic
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nix-darwin.url = "github:lnl7/nix-darwin/master";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     stylix.url = "github:danth/stylix";                                 # Consistent coloring across my system. I can still tweak manually.
     tinted-schemes.follows = "stylix/tinted-schemes";
     sops-nix.url = "github:Mic92/sops-nix";                             # Manage secrets using sops
@@ -116,5 +118,6 @@
           configPath = ./hosts/ai;
         };
       } // microvmGuests;
+      darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
     };
 }
