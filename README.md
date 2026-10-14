@@ -27,6 +27,7 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 | [ai](./hosts/ai)                    | NixOS         | Headless AI inference                                  |
 | [cv-vm](./hosts/guests/cv-vm)       | NixOS microVM | Public landing page exposed only via Cloudflare Tunnel |
 | [agent-vm](./hosts/guests/agent-vm) | NixOS microVM | Private AI assistant                                   |
+| [work-macos](./hosts/work-macos)    | nix-darwin    | Work laptop                                            |
 
 ## Nix Stack
 

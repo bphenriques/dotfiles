@@ -5,7 +5,7 @@ let
   inherit (lib.filesystem) listFilesRecursive;
 in
 rec {
-  forAllSystems = genAttrs [ "x86_64-linux" "aarch64-linux" ];
+  forAllSystems = genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
   forLinuxSystems = genAttrs [ "x86_64-linux" "aarch64-linux" ];
 
   mergeAllSystems = attrs: forAllSystems (system: mergeAttrsList (map (attrs: attrs.${system} or { }) attrs));

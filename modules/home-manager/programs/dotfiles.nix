@@ -18,6 +18,7 @@ in
       description = "package to install regarding management dotfiles.";
     };
 
+    enableSecrets = lib.mkEnableOption "the secrets package" // { default = true; };
     packageSecrets = lib.mkOption {
       type = lib.types.package;
       default = self.packages.dotfiles-secrets;
@@ -26,7 +27,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package cfg.packageSecrets ];
+    home.packages = [ cfg.package ] ++ lib.optional cfg.enableSecrets cfg.packageSecrets;
     home.sessionVariables.DOTFILES_LOCATION = config.my.dotfiles.directory;
   };
 }

@@ -30,36 +30,33 @@ _:
         FXEnableExtensionChangeWarning = false;     # Disable warning when changing file extension.
         ShowPathbar = true;                         # Show breadcrumbs.
         FXPreferredViewStyle = "clmv";              # Show preview window by default.
+        _FXSortFoldersFirst = true;                 # Show folders first.
+        _FXSortFoldersFirstOnDesktop = true;        # Show folders first on desktop.
+        FXDefaultSearchScope = "SCcf";              # Search the current folder by default.
+        ShowHardDrivesOnDesktop = false;            # Hide hard disks on desktop.
+        ShowExternalHardDrivesOnDesktop = false;    # Hide external disks on desktop.
+        ShowRemovableMediaOnDesktop = false;        # Hide removal media on desktop.
+        ShowMountedServersOnDesktop = false;        # Hide mounted servers on desktop.
+      };
+
+      screencapture = {
+        show-thumbnail = false;                     # Dont need the thumbnail.
+        type = "png";                               # Higher quality.
       };
 
       SoftwareUpdate = {
         AutomaticallyInstallMacOSUpdates = false;   # Only when I want.
       };
 
-      CustomSystemPreferences = {
+      CustomUserPreferences = {
         "com.apple.TextEdit" = {
           RichText = false;                         # Let me use plain-text.
-        };
-
-        "com.apple.screencapture" = {
-          show-thumbnail = false;                   # Dont need the thumbnail.
-          type = "png";                             # Higher quality.
         };
 
         # Avoid creating .DS_Store files on network or USB volumes
         "com.apple.desktopservices" = {
           DSDontWriteNetworkStores = true;
           DSDontWriteUSBStores = true;
-        };
-
-        "com.apple.finder" = {
-          _FXSortFoldersFirst = true;               # Show folders first.
-          _FXSortFoldersFirstOnDesktop = true;      # Show folders first on desktop.
-          FXDefaultSearchScope = "SCcf";            # Search the current folder by default.
-          ShowHardDrivesOnDesktop = false;          # Hide hard disks on desktop.
-          ShowExternalHardDrivesOnDesktop = false;  # Hide external disks on desktop.
-          ShowRemovableMediaOnDesktop = false;      # Hide removal media on desktop.
-          ShowMountedServersOnDesktop = false;      # Hide mounted servers on desktop.
         };
 
         "com.apple.AdLib" = {

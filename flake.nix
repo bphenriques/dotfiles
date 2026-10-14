@@ -53,7 +53,7 @@
       generators = import ./lib/generators.nix { inherit (nixpkgs) lib; };
       hostBuilders = import ./lib/hosts.nix { inherit nixpkgs self inputs; };
       inherit (generators) forAllSystems readModulesAttrs;
-      inherit (hostBuilders) mkNixosHost mkMicrovmGuest;
+      inherit (hostBuilders) mkNixosHost mkMicrovmGuest mkDarwinHost;
 
       evalChecks = system: nixpkgs.lib.mapAttrs'
         (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
@@ -118,6 +118,7 @@
           configPath = ./hosts/ai;
         };
       } // microvmGuests;
-      darwinConfigurations.work-macos = import ./hosts/work-macos inputs;
+
+      darwinConfigurations.work-macos = mkDarwinHost { configPath = ./hosts/work-macos; };
     };
 }

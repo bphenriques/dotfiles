@@ -39,4 +39,20 @@ in
         configPath
       ];
     };
+
+  mkDarwinHost = { system ? "aarch64-darwin", configPath }:
+    inputs.nix-darwin.lib.darwinSystem {
+      specialArgs = {
+        inherit inputs fleet;
+        self = self // {
+          packages = self.packages.${system} // inputs.dotfiles-private.packages.${system};
+          lib = self.lib // { builders = self.lib.builders.${system}; };
+        };
+      };
+      modules = [
+        { nixpkgs.hostPlatform = system; }
+        { nixpkgs.overlays = attrValues self.overlays; }
+        configPath
+      ];
+    };
 }

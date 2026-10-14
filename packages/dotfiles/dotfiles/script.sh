@@ -83,7 +83,7 @@ _darwin_sync() {
   esac
   _darwin_build
   _show_changelog
-  ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
+  sudo ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
 }
 _darwin_update() {
   if have_cmd brew; then

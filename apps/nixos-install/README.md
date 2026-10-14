@@ -15,7 +15,7 @@
    nixos-generate-config --no-filesystems --root /mnt --show-hardware-config
    ```
 
-3. Create host directory: `hosts/<name>/` with `config.nix`, `hardware-configuration.nix`, `disko.nix`
+3. Create host directory: `hosts/<name>/` with `default.nix`, `hardware-configuration.nix`, `disko.nix`
 
 4. Bootstrap secrets in Bitwarden: `dotfiles-secrets init-host <BITWARDEN_EMAIL> <host> [--luks]`
 

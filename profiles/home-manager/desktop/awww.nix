@@ -1,8 +1,8 @@
-{ lib, config, self, ... }:
+{ lib, config, self, pkgs, ... }:
 let
   wallpapers = "${self.packages.wallpapers}/share/wallpapers";
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.awww.enable = true;
   home.packages = [ self.packages.awww-util ];
 

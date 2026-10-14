@@ -1,4 +1,4 @@
-{ pkgs, lib, osConfig, self, ... }:
+{ pkgs, lib, fleet, self, ... }:
 let
   guestBlocks = lib.concatMapAttrs (vmHost: guests:
     lib.mapAttrs (_: ip: {
@@ -6,7 +6,7 @@ let
       ProxyJump = vmHost;
       StrictHostKeyChecking = "accept-new";
     }) guests
-  ) osConfig.fleet.microvms;
+  ) fleet.microvms;
 in
 {
   programs.nushell.enable = true;         # Adhoc shell for data processing

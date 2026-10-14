@@ -1,24 +1,29 @@
-{ self, nixpkgs, home-manager, nix-darwin, dotfiles-private, stylix, ... }:
+_:
 let
-  inherit (nixpkgs.lib.attrsets) attrValues;
+  username = "bruno.henriques";
+in
+{
+  imports = [
+    ../../profiles/darwin
+  ];
 
-  system = "aarch64-darwin";
-  nixModule = {
-    nixpkgs = {
-      hostPlatform = system;
-      overlays = [ ];
-    };
+  homebrew = {
+    taps = [
+      { name = "Scalr/scalr"; trusted = true; }
+    ];
+
+    brews = [
+      "scalr"
+      "helm"
+      "bazelisk"
+    ];
   };
 
-  darwinModules = [ home-manager.darwinModules.home-manager ];
+  nix.settings.trusted-users = [ username ];
+  system.primaryUser = username;
 
-  hmModule = {
-    home-manager = {
-      sharedModules = attrValues self.homeManagerModules;
-      extraSpecialArgs = { };
-    };
-  };
-in nix-darwin.lib.darwinSystem {
-  inherit system;
-  modules = darwinModules ++ [ nixModule hmModule ./config.nix ];
+  users.users.${username}.home = "/Users/${username}";
+  home-manager.users.${username} = ./brunohenriques.nix;
+
+  system.stateVersion = 6;
 }

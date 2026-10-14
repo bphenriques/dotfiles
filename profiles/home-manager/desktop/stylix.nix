@@ -40,7 +40,7 @@
     };
 
     icons = {
-      enable = true;
+      enable = pkgs.stdenv.hostPlatform.isLinux;
       package = pkgs.papirus-icon-theme;
       light = "Papirus-Light";
       dark = "Papirus-Dark";
@@ -59,5 +59,5 @@
     };
   };
 
-  home.pointerCursor.enable = true;
+  home.pointerCursor.enable = pkgs.stdenv.hostPlatform.isLinux;  # stylix only sets the cursor on Linux
 }

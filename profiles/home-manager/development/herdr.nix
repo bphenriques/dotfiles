@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.herdr = {
     enable = true;
     settings.onboarding = false; # nix owns the install, so the first-run wizard has nothing left to set up

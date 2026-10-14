@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   xdg.userDirs = {
     enable = true;
     createDirectories = false;  # Created separately via tmpfiles

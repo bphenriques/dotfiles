@@ -1,10 +1,10 @@
 { config, pkgs, self, lib, ... }:
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  programs.rofi.enable = true;
   stylix.targets.rofi = {
     enable = true;
     alternatePattern = false;
   };
-  programs.rofi.enable = true;
 
   xdg.configFile = {
     "rofi/wallpaper.rasi".text = ''

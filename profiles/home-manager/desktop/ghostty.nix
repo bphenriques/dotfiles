@@ -3,7 +3,7 @@ let
   ghostty = lib.getExe pkgs.ghostty;
 in
 {
-  my.programs.terminal = {
+  my.programs.terminal = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     package = pkgs.ghostty;
     exec = "${ghostty} +new-window";
     execApp = { cmd, title ? null }: "${ghostty} +new-window${lib.optionalString (title != null) " --title=${title}"} -e ${cmd}";
@@ -12,6 +12,7 @@ in
   stylix.targets.ghostty.enable = true;
   programs.ghostty = {
     enable = true;
+    package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin null;  # Homebrew cask
 
     settings = let
       common = {
