@@ -25,7 +25,7 @@
   ];
 
   programs.gpg = {
-    enable = pkgs.stdenv.hostPlatform.isLinux;
+    enable = true;
     homedir = "${config.xdg.dataHome}/gnupg";
   };
 

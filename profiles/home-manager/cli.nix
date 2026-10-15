@@ -41,8 +41,8 @@ in
   };
 
   services.gpg-agent = {
-    enable = pkgs.stdenv.hostPlatform.isLinux;
-    pinentry.package = pkgs.pinentry-gnome3;
+    enable = true;
+    pinentry.package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gnome3;
   };
 
   programs.ripgrep = {

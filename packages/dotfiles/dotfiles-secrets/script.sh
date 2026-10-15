@@ -20,10 +20,6 @@ fetch() {
       bw get item "github-gpg-private" | jq -re '.notes'
       return
       ;;
-    gpg-public-key)
-      bw get item "github-gpg-public" | jq -re '.notes'
-      return
-      ;;
   esac
 
   # All other secrets require a host
@@ -83,8 +79,61 @@ init_host() {
     echo "LUKS password: Check field 'luks-interactive-password' in Bitwarden"
   fi
 
-  # Only the two non-obvious placements for the generated key; the rest (secrets.yaml, rebuild) is the standard flow.
-  echo "Next: add the public key to .sops.yaml, and append the private key to ~/.config/sops/age/keys.txt (chmod 600 it; age does not refuse a world-readable identity file)"
+  echo "Next: add the public key to .sops.yaml (reprint: dotfiles-secrets <email> fetch sops-secret $host | age-keygen -y)"
+  echo "      desktops: desktop-post-install installs the private key"
+}
+
+bw_set_notes() {
+  local item
+  item="$(bw get item "$1" </dev/null)"
+  jq --arg notes "$(cat)" '.notes = $notes' <<<"$item" | bw encode | bw edit item "$(jq -r .id <<<"$item")" >/dev/null
+}
+
+# Imports the Bitwarden GPG key into a keyring removed on exit. Sets `tmp_gpg` and `fpr`.
+gpg_tmp_keyring() {
+  # Not `local`: see init_host.
+  gpg_tmp="$(mktemp -d)"
+  trap 'gpgconf --homedir "$gpg_tmp" --kill gpg-agent; rm -rf "$gpg_tmp"' EXIT
+  tmp_gpg=(gpg --quiet --homedir "$gpg_tmp" --pinentry-mode loopback)
+
+  fetch gpg-private-key | "${tmp_gpg[@]}" --batch --import
+  fpr="$("${tmp_gpg[@]}" --list-secret-keys --with-colons | grep -m1 '^fpr' | cut -d: -f10)"
+}
+
+# Minimal: each extension adds a self-signature, and Bitwarden caps notes at 10k encrypted chars.
+gpg_public_key() { "${tmp_gpg[@]}" --armor --export-options export-minimal --export "$fpr"; }
+
+gpg_extend() {
+  local duration="${1:-2y}"
+  gpg_tmp_keyring
+
+  if ! "${tmp_gpg[@]}" --list-keys --with-colons "$fpr" | grep -qE '^(pub|sub):e:'; then
+    "${tmp_gpg[@]}" --list-keys "$fpr"
+    echo "GPG key has not expired. Nothing to do."
+    return
+  fi
+
+  echo "GPG key expired. Enter its passphrase to extend it by $duration."
+  "${tmp_gpg[@]}" --quick-set-expire "$fpr" "$duration"
+  "${tmp_gpg[@]}" --quick-set-expire "$fpr" "$duration" '*'
+
+  local secret_key
+  secret_key="$("${tmp_gpg[@]}" --armor --export-options export-minimal --export-secret-keys "$fpr")"
+  [[ $secret_key == *"BEGIN PGP PRIVATE KEY BLOCK"* ]] || fatal "Secret key export failed; Bitwarden left untouched"
+
+  bw_set_notes github-gpg-private <<<"$secret_key"
+  bw sync >/dev/null
+
+  gpg_public_key | gpg --batch --import
+  echo "Next: re-upload the public key to GitHub (dotfiles-secrets <email> gpg public-key)"
+}
+
+gpg_command() {
+  case "${1:-}" in
+    public-key) gpg_tmp_keyring && gpg_public_key ;;
+    extend) shift && gpg_extend "$@" ;;
+    *) fatal "Unknown gpg command: ${1:-}" ;;
+  esac
 }
 
 usage() {
@@ -109,18 +158,20 @@ Commands:
   init-host <host> [--luks]    Set up secrets for a new host
   fetch <type> [host]          Retrieve secret value
   exists <type> [host]         Check if secret exists (exit 0/1)
+  gpg public-key               Print the GPG public key
+  gpg extend [duration]        Extend an expired GPG key (default 2y) in Bitwarden and the local keyring
 
 Secret Types:
   sops-secret       Age private key for sops-nix (per-host)
   luks-key          LUKS disk encryption password (per-host)
   gpg-private-key   GPG private key (shared)
-  gpg-public-key    GPG public key (shared)
 
 Examples:
   dotfiles-secrets me@example.com init-host laptop
   dotfiles-secrets me@example.com init-host homelab/compute --luks
   dotfiles-secrets me@example.com fetch sops-secret laptop
   dotfiles-secrets me@example.com fetch gpg-private-key
+  dotfiles-secrets me@example.com gpg extend 1y
 
 Bitwarden Structure:
   Host "homelab/compute" creates item "system-nixos-homelab-compute" with fields:
@@ -143,5 +194,6 @@ case "${1:-}" in
   fetch) shift && fetch "$@" ;;
   exists) shift && fetch "$@" >/dev/null 2>&1 ;;
   init-host) shift && init_host "$@" ;;
+  gpg) shift && gpg_command "$@" ;;
   *) fatal "Unknown command: $1" ;;
 esac

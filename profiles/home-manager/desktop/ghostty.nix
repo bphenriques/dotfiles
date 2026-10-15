@@ -3,7 +3,7 @@ let
   ghostty = lib.getExe pkgs.ghostty;
 in
 {
-  my.programs.terminal = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  my.programs.terminal = {
     package = pkgs.ghostty;
     exec = "${ghostty} +new-window";
     execApp = { cmd, title ? null }: "${ghostty} +new-window${lib.optionalString (title != null) " --title=${title}"} -e ${cmd}";

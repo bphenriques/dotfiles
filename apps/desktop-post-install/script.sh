@@ -81,8 +81,7 @@ import_age_private_key() {
 
 import_gpg() {
   info "GPG - Importing..."
-  dotfiles-secrets "$bw_email" fetch gpg-private-key | gpg --batch --yes --import || fatal "Failed to import GPG private key"
-  dotfiles-secrets "$bw_email" fetch gpg-public-key | gpg --batch --yes --import || fatal "Failed to import GPG public key"
+  dotfiles-secrets "$bw_email" fetch gpg-private-key | gpg --batch --yes --import || fatal "Failed to import GPG key"
   success "GPG - Imported!"
 }
 

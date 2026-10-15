@@ -17,10 +17,7 @@
     { name = "nvm"; inherit (pkgs.fishPlugins.nvm) src; }
   ];
 
-  my.dotfiles = {
-    enable = true;
-    enableSecrets = false;
-  };
+  my.dotfiles.enable = true;
 
   home.stateVersion = "26.05";
 }
