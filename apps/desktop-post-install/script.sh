@@ -6,6 +6,7 @@ DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
 HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
+export GNUPGHOME="${GNUPGHOME:-"$HOME/.local/share/gnupg"}" # Matches programs.gpg.homedir, as this may run before the first sync
 
 fatal() {
   printf '[FAIL] %s\n' "$1" >&2
@@ -59,6 +60,7 @@ setup_ssh_key() {
     echo "Public key (add to GitHub/servers):"
     cat "$HOME/.ssh/id_ed25519.pub"
     echo ""
+    read -rp "Add it to GitHub, then press Enter to continue..."
   else
     info "SSH Key - Already exists. Skipping."
   fi
@@ -66,6 +68,11 @@ setup_ssh_key() {
 
 import_age_private_key() {
   local host="$1"
+
+  if ! dotfiles-secrets "$bw_email" exists sops-secret "${host}"; then
+    info "Sops - Not set up for ${host}. If needed: dotfiles-secrets ${bw_email} init-host ${host}"
+    return
+  fi
 
   info "Sops Private Key - Fetching for ${host}..."
   local key
@@ -80,7 +87,9 @@ import_age_private_key() {
 }
 
 import_gpg() {
-  info "GPG - Importing..."
+  info "GPG - Importing into ${GNUPGHOME}..."
+  mkdir -p "$GNUPGHOME"
+  chmod 700 "$GNUPGHOME"
   dotfiles-secrets "$bw_email" fetch gpg-private-key | gpg --batch --yes --import || fatal "Failed to import GPG key"
   success "GPG - Imported!"
 }

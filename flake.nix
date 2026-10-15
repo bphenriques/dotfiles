@@ -119,6 +119,9 @@
         };
       } // microvmGuests;
 
-      darwinConfigurations.work-macos = mkDarwinHost { configPath = ./hosts/work-macos; };
+      darwinConfigurations.work-macos = mkDarwinHost {
+        hostName = "work-macos";
+        configPath = ./hosts/work-macos;
+      };
     };
 }

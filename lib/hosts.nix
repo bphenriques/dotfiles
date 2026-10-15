@@ -40,10 +40,11 @@ in
       ];
     };
 
-  mkDarwinHost = { system ? "aarch64-darwin", configPath }:
+  mkDarwinHost = { hostName, system ? "aarch64-darwin", configPath }:
     inputs.nix-darwin.lib.darwinSystem {
       specialArgs = {
         inherit inputs fleet;
+        private = inputs.dotfiles-private.hosts.${hostName};
         self = self // {
           packages = self.packages.${system} // inputs.dotfiles-private.packages.${system};
           lib = self.lib // { builders = self.lib.builders.${system}; };

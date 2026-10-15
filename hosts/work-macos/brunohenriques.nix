@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, private, ... }:
 {
   imports = [
     ../../profiles/home-manager/base.nix
@@ -30,6 +30,11 @@
   programs.fish.plugins = [
     { name = "nvm"; inherit (pkgs.fishPlugins.nvm) src; }
   ];
+
+  programs.git.includes = [{
+    condition = "hasconfig:remote.*.url:git@github.com:${private.settings.git.org}/**";
+    contents.user.email = private.settings.git.email;
+  }];
 
   my.dotfiles.enable = true;
 

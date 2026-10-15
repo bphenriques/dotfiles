@@ -19,7 +19,7 @@
 
 4. Bootstrap secrets in Bitwarden: `dotfiles-secrets <BITWARDEN_EMAIL> init-host <host> [--luks]`
 
-5. Update `.sops.yaml` with the public key from step 2
+5. Add the public key printed in step 4 to `.sops.yaml` in `dotfiles-private`
 
 ## Install locally
 
