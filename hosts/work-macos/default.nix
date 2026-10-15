@@ -12,10 +12,23 @@ in
       { name = "Scalr/scalr"; trusted = true; }
     ];
 
+    casks = [
+      "cursor"
+    ];
+
     brews = [
+      # Coding
+
+      # Infrastructure / DevOps
       "scalr"
       "helm"
+
+      # Scala
       "bazelisk"
+
+      # Typescript
+      "nvm"
+      "pnpm"
     ];
   };
 

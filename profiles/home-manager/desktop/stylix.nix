@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ lib, pkgs, inputs, ... }:
 {
   imports = [ inputs.stylix.homeModules.stylix ];
 
@@ -32,7 +32,7 @@
       };
 
       sizes = {
-        terminal = 15;
+        terminal = if pkgs.stdenv.hostPlatform.isDarwin then 10.5 else 15; # Ghostty scales by 4/3 on macOS
         applications = 12;
         desktop = 10;
         popups = 14;
@@ -52,7 +52,7 @@
       size = 16;
     };
 
-    opacity.terminal = 0.92; # Needed for niri blur to show through
+    opacity.terminal = lib.mkIf pkgs.stdenv.hostPlatform.isLinux 0.92; # Needed for niri blur to show through
 
     targets = {
       font-packages.enable = true;

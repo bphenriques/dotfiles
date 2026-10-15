@@ -7,10 +7,24 @@
   ];
 
   home.packages = [
+    # Generic
+    pkgs.go-task
+    pkgs.wget
+
+    # Infrastructure / Gitops
     pkgs.awscli2
     pkgs.kubectl
-    pkgs.go-task
     pkgs.kubectx
+
+    # FIXME:
+    # readline -> better experience for python repl. Will skip for now.
+    # openssl -> MacOS already bundleds.
+    # xz
+    # zlib
+    # imagemagick
+
+    # Python
+    pkgs.pyenv
   ];
 
   programs.fish.plugins = [

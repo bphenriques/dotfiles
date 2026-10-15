@@ -30,6 +30,8 @@ in
         window-colorspace = "display-p3";
         macos-non-native-fullscreen = "visible-menu";
         macos-option-as-alt = "left";
+        macos-titlebar-style = "tabs";
+        keybind = "global:cmd+grave_accent=toggle_quick_terminal"; #
         mouse-hide-while-typing = true;
       };
     in lib.mergeAttrsList [ common linux darwin ];

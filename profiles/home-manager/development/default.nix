@@ -18,10 +18,8 @@
     will-cite = true;
   };
 
-  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-    pkgs.yq-go            # Query YAML
-    pkgs.dateutils
-    pkgs.openssl
+  home.packages = [
+    pkgs.gh
   ];
 
   programs.gpg = {
