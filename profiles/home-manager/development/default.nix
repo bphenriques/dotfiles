@@ -3,7 +3,6 @@
   imports = [
     ./git.nix             # Version control
     ./direnv.nix          # Automate dev environment when we enter directories
-    ./lang-scala.nix      # Programming language
     ./jetbrains.nix       # IDE
     ./claude-code.nix     # AI Assistant
     ./omp.nix             # AI Assistant
@@ -14,13 +13,18 @@
 
   programs.parallel = {
     enable = pkgs.stdenv.hostPlatform.isLinux;
-    package = pkgs.parallel;  # `parallel-full` default drags in 28MiB of SQL/niceload extras I don't use
+    package = pkgs.parallel;
     will-cite = true;
   };
 
-  home.packages = [
-    pkgs.gh
-  ];
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocol = "ssh";
+      color_labels = "enabled";
+      telemetry = "disabled";
+    };
+  };
 
   programs.gpg = {
     enable = true;

@@ -14,6 +14,7 @@ in
 
     casks = [
       "cursor"
+      "visual-studio-code"
     ];
 
     brews = [
@@ -22,13 +23,20 @@ in
       # Infrastructure / DevOps
       "scalr"
       "helm"
+      "colima"
+      "docker"
+      "docker-compose"
 
-      # Scala
+      # Scala (JDK via SDKMAN on work-macos; see hosts/work-macos/sdkman.nix)
       "bazelisk"
+      "sbt"
+      "scala-cli"
+      "metals"
 
       # Typescript
-      "nvm"
-      "pnpm"
+      "nvm"     # Node version
+      "yarn"    # Package manager:
+      "pnpm@10" # Package Manager: Requires brew link --overwrite pnpm@10
     ];
   };
 

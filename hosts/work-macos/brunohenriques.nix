@@ -4,6 +4,7 @@
     ../../profiles/home-manager/base.nix
     ../../profiles/home-manager/desktop
     ../../profiles/home-manager/development
+    ./sdkman.nix
   ];
 
   home.packages = [
@@ -12,7 +13,6 @@
     pkgs.wget
 
     # Infrastructure / Gitops
-    pkgs.awscli2
     pkgs.kubectl
     pkgs.kubectx
 
@@ -22,21 +22,20 @@
     # xz
     # zlib
     # imagemagick
-
-    # Python
-    pkgs.pyenv
   ];
 
+  my.dotfiles.enable = true;
   programs.fish.plugins = [
     { name = "nvm"; inherit (pkgs.fishPlugins.nvm) src; }
   ];
-
   programs.git.includes = [{
     condition = "hasconfig:remote.*.url:git@github.com:${private.settings.git.org}/**";
     contents.user.email = private.settings.git.email;
   }];
 
-  my.dotfiles.enable = true;
+  programs.awscli.enable = true;
+  programs.pyenv.enable = true;
+  programs.ssh.includes = [ "$HOME/.ssh/iterable-config.local" ];
 
   home.stateVersion = "26.05";
 }

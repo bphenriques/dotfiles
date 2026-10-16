@@ -19,13 +19,14 @@ in
     settings = {
       "*" = {
         SetEnv.TERM = "xterm-256color";   # Sane default across different terminals. Don't need more.
-        AddKeysToAgent = "4h";            # Cache the keys temporarily but expire after 4 hours.
+        AddKeysToAgent = "8h";            # Cache the keys temporarily but expire after a working day.
       };
+
+      # Per host
       "pi-zero".User = "pi";
       "rg353m".User = "ark";
       "pixel".User = "bruno";
-      # accept-new: persistent key, so a one-time bootstrap TOFU; a *changed* key is still refused.
-      "compute".StrictHostKeyChecking = "accept-new";
+      "compute".StrictHostKeyChecking = "accept-new"; # one-time accept on first connection.
     } // guestBlocks;
   };
 
