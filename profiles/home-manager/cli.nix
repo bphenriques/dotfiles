@@ -1,4 +1,4 @@
-{ pkgs, lib, fleet, self, ... }:
+{ pkgs, lib, fleet, self, config, ... }:
 let
   guestBlocks = lib.concatMapAttrs (vmHost: guests:
     lib.mapAttrs (_: ip: {
@@ -45,6 +45,26 @@ in
     enable = true;
     pinentry.package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gnome3;
   };
+
+  # home-manager#5801: launchctl setenv for home.sessionVariables (macOS has no environment.d).
+  launchd.agents.launchctl-setenv = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+    let
+      launchctl-setenv = pkgs.writeShellScriptBin "launchctl-setenv" (
+        lib.concatStringsSep "\n" (lib.mapAttrsToList
+          (name: val:
+            "/bin/launchctl setenv ${lib.escapeShellArg name} ${lib.escapeShellArg (toString val)}")
+          config.home.sessionVariables)
+      );
+    in
+    {
+      enable = true;
+      config = {
+        ProgramArguments = [ "${launchctl-setenv}/bin/launchctl-setenv" ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+      };
+    }
+  );
 
   programs.ripgrep = {
     enable = true;
