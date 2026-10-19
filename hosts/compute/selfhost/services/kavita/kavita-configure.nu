@@ -71,6 +71,7 @@ def create_library [lib: record, headers: record] {
     manageReadingLists: true
     allowScrobbling: false
     enableMetadata: true
+    metadataProvider: $lib.metadataProvider
     fileGroupTypes: $lib.fileGroupTypes
     excludePatterns: []
   }
@@ -100,6 +101,8 @@ def update_library [existing: record, lib: record, headers: record] {
     enableMetadata: ($existing.enableMetadata? | default true)
     removePrefixForSortName: ($existing.removePrefixForSortName? | default false)
     inheritWebLinksFromFirstChapter: ($existing.inheritWebLinksFromFirstChapter? | default false)
+    metadataProvider: ($existing.metadataProvider? | default $lib.metadataProvider)
+    defaultLanguage: $existing.defaultLanguage?
     excludePatterns: ($existing.excludePatterns? | default [])
   }
   let r = http post $"($base_url)/api/Library/update" $body --headers $headers --content-type application/json --full --allow-errors

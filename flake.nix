@@ -40,12 +40,12 @@
     nur.url = "github:nix-community/nur";                               # Collection of packages. Use it for Firefox extensions
     microvm.url = "github:microvm-nix/microvm.nix";                     # Lightweight, isolated guests
     microvm.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";   # Local-LLM assistant runtime (agent-vm brain)
+    hermes-agent.url = "github:NousResearch/hermes-agent/v0.22.0";   # Local-LLM assistant
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
     hermes-webui.url = "github:nesquena/hermes-webui/exp-v0.52.449";    # Browser and phone front end over the agent's own state; upstream tags every build under `exp-`
     hermes-webui.inputs.nixpkgs.follows = "nixpkgs";
     hermes-agent.inputs.home-manager.follows = "home-manager";
-    omp.url = "github:can1357/oh-my-pi/v17.4.0";                        # Terminal coding agent. No binary cache, so keep upstream's tested nixpkgs.
+    omp.url = "github:can1357/oh-my-pi/v18.11.0";                        # Terminal coding agent. No binary cache, so keep upstream's tested nixpkgs.
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:

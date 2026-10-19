@@ -41,12 +41,14 @@ let
     };
 
     # type: 0=Manga, 1=Comic, 2=Book, 3=Image, 4=LightNovel
+    # metadataProvider only seeds new libraries; existing ones keep theirs.
     libraries = let
       fileType = { archive = 1; epub = 2; pdf = 3; image = 4; };
+      provider = { hardcover = 2; mangabaka = 3; comicBookRoundup = 4; };
     in [
-      { name = "Books";   type = 2; folders = [ "${sharesCfg.media.root}/books/library" ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
-      { name = "Comics";  type = 1; folders = [ "${sharesCfg.media.root}/comics/library" ]; fileGroupTypes = [ fileType.archive ];           }
-      { name = "Manga";   type = 0; folders = [ "${sharesCfg.media.root}/manga/library" ];  fileGroupTypes = [ fileType.archive ];           }
+      { name = "Books";   type = 2; metadataProvider = provider.hardcover;        folders = [ "${sharesCfg.media.root}/books/library" ];  fileGroupTypes = [ fileType.epub fileType.pdf ]; }
+      { name = "Comics";  type = 1; metadataProvider = provider.comicBookRoundup; folders = [ "${sharesCfg.media.root}/comics/library" ]; fileGroupTypes = [ fileType.archive ];           }
+      { name = "Manga";   type = 0; metadataProvider = provider.mangabaka;        folders = [ "${sharesCfg.media.root}/manga/library" ];  fileGroupTypes = [ fileType.archive ];           }
     ];
 
     # Local users provisioned with password authentication (all get public libraries)

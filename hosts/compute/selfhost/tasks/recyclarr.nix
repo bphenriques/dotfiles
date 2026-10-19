@@ -41,8 +41,9 @@ in
   systemd.services.recyclarr = {
     description = "Recyclarr sync";
     wantedBy = [ "multi-user.target" ];
-    after = [ "radarr.service" "sonarr.service" ];
-    wants = [ "radarr.service" "sonarr.service" ];
+    # The configure units finish only once the API answers; the arr units themselves are Type=simple.
+    after = [ "radarr-configure.service" "sonarr-configure.service" ];
+    wants = [ "radarr-configure.service" "sonarr-configure.service" ];
     serviceConfig = {
       Type = "oneshot";
       StateDirectory = "recyclarr";

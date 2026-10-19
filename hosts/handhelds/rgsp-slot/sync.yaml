@@ -1,0 +1,17 @@
+# Anbernic RG SP, slot frontend on BaseOS, second card (TF2). Alternative to rgsp-spruce on the same device.
+# Game Boy family only: slot plays nothing else. The frontend itself comes from the slot repo (task sync:card).
+cardRoot: /mnt/sdcard
+
+roms:
+  source: /mnt/homelab-media/gaming/emulation/roms
+  root: Games
+  directories:
+    gb: GB
+    gbc: GBC
+    gba: GBA
+
+sync:
+  - source: /mnt/homelab-media/gaming/emulation/bios
+    dest: BIOS
+  - source: /mnt/homelab-media/music/library-mp3
+    dest: Music

@@ -55,6 +55,7 @@ let
     services.immich.machine-learning.environment = {
       MACHINE_LEARNING_REQUEST_THREADS = "1";
       MACHINE_LEARNING_MODEL_INTRA_OP_THREADS = "1";
+      MACHINE_LEARNING_MODEL_REVISION = "v2"; # same models re-exported: less memory, no re-index
     };
 
     systemd.services.immich-machine-learning.serviceConfig = throttled {

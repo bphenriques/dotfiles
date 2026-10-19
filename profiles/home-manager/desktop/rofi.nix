@@ -1,9 +1,13 @@
 { config, pkgs, self, lib, ... }:
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  programs.rofi.enable = true;
   stylix.targets.rofi = {
     enable = true;
     alternatePattern = false;
+    fonts.enable = false; # stylix still sets the renamed programs.rofi.font
+  };
+  programs.rofi = {
+    enable = true;
+    settings.font = "${config.stylix.fonts.monospace.name} ${toString config.stylix.fonts.sizes.popups}";
   };
 
   xdg.configFile = {

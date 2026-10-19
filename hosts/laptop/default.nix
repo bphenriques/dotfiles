@@ -37,6 +37,12 @@ in
     initrd.systemd.enable = true;
     resumeDevice = "${rootDisk}-part2";
     kernelParams = [ "boot.shell_on_fail" "resume_offset=533760" ];
+
+    # arm64 containers for handheld builds. Static emulators are preloaded, so they work inside Docker.
+    binfmt = {
+      emulatedSystems = [ "aarch64-linux" ];
+      preferStaticEmulators = true;
+    };
   };
 
   # Networking: rank ethernet below wifi for the default route (NetworkManager's wifi metric is 600).

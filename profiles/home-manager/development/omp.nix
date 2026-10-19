@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, osConfig, ... }:
 let
   onedarkTransparent = lib.recursiveUpdate
-    (lib.importJSON "${inputs.omp}/packages/coding-agent/src/modes/theme/defaults/dark-one.json")
+    (lib.importJSON "${inputs.omp}/packages/tui/src/theme/defaults/dark-one.json")
     {
       name = "onedark-transparent";
       vars = {
@@ -35,7 +35,7 @@ in
         secrets.enabled = true;       # Redact credentials before they reach the provider.
 
         # `/model` still switches freely until the next home-manager switch restores these.
-        # `:high` is the thinking selector; Ollama's /v1 drops reasoning_effort, so it only bites elsewhere.
+        # `:high` is the thinking selector; it reaches Ollama as reasoning.effort.
         modelRoles.default = "ollama/${ai.codingModel}:high";
         # Pinned so background tasks stay local, on the MoE because it decodes 3x the dense coder.
         modelRoles.tiny = "ollama/${ai.model}";

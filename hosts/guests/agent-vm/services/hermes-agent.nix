@@ -28,18 +28,6 @@ in
       fetch.command = "${pkgs.mcp-server-fetch}/bin/mcp-server-fetch";
       time.command = "${pkgs.mcp-server-time}/bin/mcp-server-time";
 
-      # uvx resolves the package from PyPI on first start (guest has internet), same as vault below.
-      web-search = {
-        command = "${pkgs.uv}/bin/uvx";
-        args = [ "duckduckgo-mcp-server@0.7.0" ];
-
-        # uv otherwise fetches a generic-linux CPython that NixOS cannot exec.
-        env = {
-          UV_PYTHON_DOWNLOADS = "never";
-          UV_PYTHON = "${pkgs.python3}/bin/python3";
-        };
-      };
-
       # npx fetches mcpvault on first boot (guest has internet).
       vault = {
         command = "${pkgs.nodejs}/bin/npx";
@@ -75,7 +63,8 @@ in
       # listing passes 5% of context, and the model then calls them without their required arguments.
       tools.tool_search.enabled = "off";
 
-      platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" "cronjob" "terminal" "file" "skills" ];
+      # `search` is web_search alone, over the keyless free-tier ring; pages still go through the direct `fetch` MCP.
+      platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" "cronjob" "terminal" "file" "skills" "search" ];
 
       # `mode` stays at its default `smart`, which escalates what it cannot clear to an approval card in
       # the clients. This list is the floor underneath that: it holds even when approvals are off.
