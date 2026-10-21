@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   inherit (config.fleet) ai;
-  models = lib.unique [ ai.model ai.codingModel ai.embeddingModel ];
+  models = lib.unique [ ai.model ai.codingModel ai.embeddingModel ai.uncensoredModel ];
   img = pkgs.containerImages.ollama;
   localApi = "http://127.0.0.1:${toString ai.endpoint.port}";
 
@@ -18,15 +18,15 @@ in
     volumes = [ "ollama:/root/.ollama" ];
     environment = {
       OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-      OLLAMA_MAX_LOADED_MODELS = toString (builtins.length models);
+      # ComfyUI peaks at ~54 GB, so only the pinned `ai.model` and one other may stay resident: two 27Bs
+      # left ~1 GB spare. ollama-configure pins at -1, so it is evicted last; the rest reload in 5-8s.
+      OLLAMA_MAX_LOADED_MODELS = "2";
+      OLLAMA_KEEP_ALIVE = "10m";
       # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.
       OLLAMA_NUM_PARALLEL = "1";
       OLLAMA_FLASH_ATTENTION = "1";
       OLLAMA_KV_CACHE_TYPE = "q8_0";       # halves KV VRAM (needs flash attention above)
       OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;
-      # Keeping all three resident OOM-killed ComfyUI, which needs ~30 GB on demand. ollama-configure
-      # pins `ai.model` alone at -1, which later requests preserve; the rest reload in 5-8s.
-      OLLAMA_KEEP_ALIVE = "10m";
     };
     # Host networking: netavark DNATs published ports before the input hook, out of ../firewall.nix's reach.
     extraOptions = [

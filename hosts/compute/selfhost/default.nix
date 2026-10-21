@@ -85,12 +85,7 @@ in
   };
 
   selfhost = {
-    # One spelling of each group name: the canonical names come from the household vocabulary rather
-    # than defaulting alongside it.
     groups = { inherit (private.groups) admin users; };
-
-    # Curated apps that need no host-specific config beyond enabling them (per-user opt-ins live on
-    # selfhost.users.<name>.apps.<name>); apps with deployment overrides keep their own ./services file.
     apps = {
       radicale.enable = true;
       miniflux.enable = true;
@@ -109,8 +104,6 @@ in
       };
     };
 
-    # Backup is the one stream whose routine half would drown the rest, so it gets its own topic while
-    # its failures stay with everything else that wants reading.
     tasks.backup.integrations.notify = {
       topic = "backup";
       failureTopic = "admin";
@@ -118,12 +111,8 @@ in
 
     notify = {
       ntfy.enable = true;
-      # Anything that does not say otherwise. Forgetting to route something then means hearing about it
-      # here, rather than that failure going nowhere.
-      defaultTopic = "admin";
-      # Storage runs no notify provider; its token is provisioned here and copied across by hand. It
-      # needs both topics because its backup task routes failures the same way this host's does.
       ntfy.remotePublishers.storage-backup.topics = [ "backup" "admin" ];
+      defaultTopic = "admin";
       topics = lib.mapAttrs (_: public: { inherit public; }) config.fleet.notifyTopics;
     };
 

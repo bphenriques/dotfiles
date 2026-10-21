@@ -18,6 +18,7 @@ in
       common = {
         copy-on-select = "clipboard";
         command = lib.getExe config.programs.fish.package;
+        keybind = "ctrl+enter=unbind";                      # Conflicts and I do not need it.
       };
 
       linux = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {

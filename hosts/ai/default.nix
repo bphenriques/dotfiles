@@ -1,10 +1,4 @@
-{
-  config,
-  inputs,
-  pkgs,
-  private,
-  ...
-}:
+{ config, inputs, pkgs, private, ... }:
 {
   imports = [
     inputs.sops-nix.nixosModules.sops
@@ -31,8 +25,7 @@
     age.keyFile = "/var/lib/sops-nix/system-keys.txt";
   };
 
-  # `podman compose` shells out to docker-compose; dockerCompat also answers `docker compose`.
-  virtualisation.podman.dockerCompat = true;
+  virtualisation.podman.dockerCompat = true; # `podman compose` shells out to docker-compose; dockerCompat also answers `docker compose`.
   environment.systemPackages = [ pkgs.docker-compose ];
 
   system.stateVersion = "26.05";

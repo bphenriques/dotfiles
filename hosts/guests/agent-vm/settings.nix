@@ -1,8 +1,12 @@
-# Guest-owned facts. Imported by the guest's modules and by compute, which fronts its API.
 {
   stateRoot = "/var/lib/hermes";
   apiPort = 8642;
   webuiPort = 8787;
-  vaultRoot = "/var/lib/vault";           # The live vault, RW over virtiofs from compute
+
+  # Read only
   secretsRoot = "/var/lib/agent-secrets"; # Readonly from compute
+
+  # R/W
+  vaultRoot = "/var/lib/vault";
+  recipesRoot = "/var/lib/recipes";
 }

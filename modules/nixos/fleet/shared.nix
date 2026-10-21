@@ -83,6 +83,10 @@
         type = lib.types.str;
         description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
       };
+      uncensoredModel = lib.mkOption {
+        type = lib.types.str;
+        description = "Model ID for uncensored model.";
+      };
       codingModel = lib.mkOption {
         type = lib.types.str;
         description = "Model id the terminal coding agents default to. Distinct from `model` because coding and assistant turns want different weights.";

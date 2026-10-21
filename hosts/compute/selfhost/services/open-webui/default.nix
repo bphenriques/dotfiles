@@ -41,7 +41,7 @@ let
     {
       url = "http://${ai.endpoint.host}:${toString ai.endpoint.port}/v1";
       key = "ollama"; # dummy; Ollama needs no auth
-      model_ids = [ ai.model ai.codingModel ];
+      model_ids = [ ai.model ai.codingModel ai.uncensoredModel ];
     }
     {
       url = "http://${agentVmIp}:${toString agentVm.apiPort}/v1";

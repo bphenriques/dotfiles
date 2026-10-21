@@ -1,12 +1,9 @@
 # Agent VM
 
-A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running hermes-agent as a personal assistant reachable via [the chat UI](../../compute/selfhost/services/open-webui) on compute.
-
-Security concerns:
-
+A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running `hermes-agent` as a personal assistant reachable via [the chat UI](../../compute/selfhost/services/open-webui) on compute:
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
 - Egress is internet-only plus two holes, `ai:11434` (Ollama) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
-- The vault is the live NAS copy, shared in RW over virtiofs from compute's CIFS mount; write access is group gid 5000, nothing else
+- Curated set of RW directories from the live NAS 
 - The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs, so the VM holds no secrets of its own
 
 ## What the agent may do to the vault

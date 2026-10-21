@@ -97,6 +97,8 @@ they are there. Entries 1 to 4 pull the two models the chat UI uses, each with i
 podman exec -it comfyui /opt/get_qwen_image.sh <n>
 ```
 
+Entries 1 and 3 serve text-to-image, 2 and 4 image editing. The chat UI's [workflows](../compute/selfhost/services/open-webui) name the exact files each one loads.
+
 ## References
 
 Strix Halo is niche enough that the sharp edges live in a handful of places:
