@@ -48,3 +48,7 @@ in
 
   system.stateVersion = 6;
 }
+
+# https://github.com/EngFlow/auth/releases
+# sudo curl -L -o /usr/local/bin/engflow_auth "https://github.com/EngFlow/auth/releases/download/v0.0.14/engflow_auth_macos_arm64"
+# sudo chmod +x /usr/local/bin/engflow_auth

@@ -4,7 +4,7 @@ let
   javaHome = "${sdkmanDir}/candidates/java/current";
 in
 {
-  # FIXME: Automate installation of sdkman.
+  # FIXME: Automate installation of sdkman: curl -s "https://get.sdkman.io" | bash
   # SDKMan is practical in a work setting. Personal projects can use plain nix shells that skip sdkman.
   home = {
     sessionPath = [ "${javaHome}/bin" ];
