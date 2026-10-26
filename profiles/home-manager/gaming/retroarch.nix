@@ -51,6 +51,12 @@ let
     aspect_ratio_index = "22";
   };
 
+  # Hides 1 frame of game-internal lag, which almost every game on these systems has
+  preemptiveFramesOverrides = {
+    preemptive_frames_enable = "true";
+    run_ahead_frames = "1";
+  };
+
   # Key: canonical core id. `displayName` must match RetroArch's core display name exactly (used for per-core config/shader directory names).
   coreConfigs = {
     genesis_plus_gx = {
@@ -59,7 +65,7 @@ let
         genesis_plus_gx_overscan = "disabled";
         genesis_plus_gx_render = "single field";
       };
-      overrides = { rewind_enable = "true"; };
+      overrides = preemptiveFramesOverrides // { rewind_enable = "true"; };
       shader = crtShader;
     };
     fceumm = {
@@ -68,11 +74,12 @@ let
         fceumm_overscan_h = "enabled";
         fceumm_overscan_v = "enabled";
       };
+      overrides = preemptiveFramesOverrides;
       shader = crtShader;
     };
     snes9x = {
       displayName = "Snes9x";
-      overrides = { rewind_enable = "true"; };
+      overrides = preemptiveFramesOverrides // { rewind_enable = "true"; };
       shader = crtShader;
     };
     swanstation = {
@@ -118,7 +125,7 @@ let
         gambatte_mix_frames = "accurate";
         gambatte_dark_filter_level = "0";
       };
-      overrides = { rewind_enable = "true"; };
+      overrides = preemptiveFramesOverrides // { rewind_enable = "true"; };
       shader = lcdShader;
     };
     mgba = {
@@ -126,7 +133,7 @@ let
       options = {
         mgba_interframe_blending = "mix";
       };
-      overrides = { rewind_enable = "true"; };
+      overrides = preemptiveFramesOverrides // { rewind_enable = "true"; };
       shader = lcdShader;
     };
     fbneo = {
@@ -202,6 +209,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
       # Rewind: off globally, enabled per-core for lightweight systems
       rewind_enable = "false";
+
+      input_auto_game_focus = "2";  # Detect: keyboard cores (DOS) get every key, Scroll Lock toggles back
+
+      # Log in once via Settings > Achievements, then Save Current Configuration: the token persists in the mutable retroarch.cfg
+      cheevos_enable = "true";
+      cheevos_hardcore_mode_enable = "false";  # hardcore disables save states and rewind
 
       # Gamepad hotkeys (Xbox-style button indices: Select=6, Start=7, LB=4, RB=5, X=2, Y=3, LT=axis+2, RT=axis+5)
       input_enable_hotkey_btn = "6";        # Select: hold to activate hotkeys

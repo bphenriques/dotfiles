@@ -3,10 +3,7 @@
   apiPort = 8642;
   webuiPort = 8787;
 
-  # Read only
-  secretsRoot = "/var/lib/agent-secrets"; # Readonly from compute
-
-  # R/W
+  secretsRoot = "/var/lib/agent-secrets";   # read-only, from compute
   vaultRoot = "/var/lib/vault";
   recipesRoot = "/var/lib/recipes";
 }

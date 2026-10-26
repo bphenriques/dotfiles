@@ -19,13 +19,6 @@ in
   my.programs.niri = {
     enable = true;
 
-    # Pinned to the default output so niri moves them to the active monitor when kanshi disables it.
-    workspaces = {
-      browser = { order = 1; openOnDefaultOutput = true; };
-      main    = { order = 2; openOnDefaultOutput = true; };
-      gaming  = { order = 3; openOnDefaultOutput = true; };
-    };
-
     windowRules = {
       byType = {
         popups = lib.map (title: ''title="${title}"'') [

@@ -19,4 +19,5 @@ in
 {
   hosts = builtins.length (builtins.attrNames nixosConfigurations);
   services = lib.concatLists (lib.mapAttrsToList fromHost producerCfgs);
+  publicUrls = lib.foldl' (acc: cfg: acc // lib.mapAttrs (_: s: s.publicUrl) cfg.config.selfhost.services) { } (lib.attrValues producerCfgs);
 }

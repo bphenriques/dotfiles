@@ -11,6 +11,7 @@
     # Generic
     pkgs.go-task
     pkgs.wget
+    pkgs.fnm               # Node versions, reads .nvmrc
 
     # Infrastructure / Gitops
     pkgs.kubectl
@@ -25,9 +26,8 @@
   ];
 
   my.dotfiles.enable = true;
-  programs.fish.plugins = [
-    { name = "nvm"; inherit (pkgs.fishPlugins.nvm) src; }
-  ];
+  programs.fish.interactiveShellInit = "fnm env --use-on-cd --shell fish | source";
+  programs.zsh.initContent = ''eval "$(fnm env --use-on-cd --shell zsh)"'';
   programs.git.includes = [{
     condition = "hasconfig:remote.*.url:git@github.com:${private.settings.git.org}/**";
     contents.user.email = private.settings.git.email;

@@ -1,8 +1,8 @@
 { config, ... }:
 let
   cfg = config.selfhost;
-  agentVmIp = config.fleet.microvms.compute.agent-vm;
-  agentVm = import ../../../guests/agent-vm/settings.nix;
+  alfredVmIp = config.fleet.microvms.compute.agent-alfred-vm;
+  alfredVm = import ../../../guests/agent-alfred-vm/settings.nix;
 in
 {
   # Fronts the guest's API for phone clients. No change to the seal: the guest already admits the
@@ -11,8 +11,8 @@ in
     displayName = "Hermes";
     meta.description = "Assistant API";
     subdomain = "hermes";
-    host = agentVmIp;
-    port = agentVm.apiPort;
+    host = alfredVmIp;
+    port = alfredVm.apiPort;
     access.model = "native";        # API_SERVER_KEY is the whole lock
     healthcheck.path = "/health";   # the one route that answers without the key
     systemdServices = [ ];          # the unit runs in the guest, so there is nothing here to attach to
@@ -22,8 +22,8 @@ in
   selfhost.services.hermes-webui = {
     displayName = "Hermes WebUI";
     meta.description = "Assistant dashboard";
-    host = agentVmIp;
-    port = agentVm.webuiPort;
+    host = alfredVmIp;
+    port = alfredVm.webuiPort;
     access.allowedGroups = [ cfg.groups.admin ];
     access.model = "oidc";
     access.oidc.callbackURLs = [ "${cfg.services.hermes-webui.publicUrl}/api/auth/oidc/callback" ];

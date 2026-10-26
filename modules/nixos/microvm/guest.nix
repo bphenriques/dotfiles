@@ -22,6 +22,11 @@ in
       type = lib.types.str;
       description = "Persistent state dir holding the SSH host key (doubles as the sops age identity).";
     };
+    tap = lib.mkOption {
+      type = lib.types.str;
+      default = "vm-${config.networking.hostName}";
+      description = "Host-side tap name; must start with `vm-` (the host's enslave glob) and fit IFNAMSIZ.";
+    };
     ingressPorts = lib.mkOption {
       type = lib.types.listOf lib.types.port;
       default = [ ];
@@ -51,7 +56,7 @@ in
 
     microvm.interfaces = [{
       type = "tap";
-      id = "vm-${config.networking.hostName}"; # matches the host's vm-* enslave glob
+      id = cfg.tap;
       inherit (cfg) mac;
     }];
     microvm.vsock.cid = cfg.vsockCid;
@@ -66,10 +71,16 @@ in
     networking.firewall.extraInputRules = "ip saddr ${cfg.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
 
     # sshd and node-exporter listen on every address, so the rule above is the only gate.
-    assertions = [{
-      assertion = with config.networking.firewall; trustedInterfaces == [ "lo" ] && allowedTCPPorts == [ ] && allowedUDPPorts == [ ] && interfaces == { };
-      message = "microvm guest ${config.networking.hostName}: firewall widened beyond the gateway-only rule, which is what keeps sshd and node-exporter off other interfaces";
-    }];
+    assertions = [
+      {
+        assertion = with config.networking.firewall; trustedInterfaces == [ "lo" ] && allowedTCPPorts == [ ] && allowedUDPPorts == [ ] && interfaces == { };
+        message = "microvm guest ${config.networking.hostName}: firewall widened beyond the gateway-only rule, which is what keeps sshd and node-exporter off other interfaces";
+      }
+      {
+        assertion = lib.hasPrefix "vm-" cfg.tap && builtins.stringLength cfg.tap <= 15;
+        message = "microvm guest ${config.networking.hostName}: tap `${cfg.tap}` must start with `vm-` and be at most 15 characters (IFNAMSIZ); set my.microvm.guest.tap";
+      }
+    ];
 
     services.openssh = {
       enable = true;

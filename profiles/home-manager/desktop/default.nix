@@ -5,6 +5,7 @@
     ./xdg-userdirs.nix    # XDG user directories, screenshots, recordings
     ./btop.nix            # System Monitor
     ./fish.nix            # Shell
+    ./zsh.nix             # POSIX-ish shell, trialled alongside fish
     ./fzf.nix             # Fuzzy search
     ./qt.nix              # Setup theming for some set of apps
     ./gtk.nix             # Setup theming for some set of apps

@@ -3,6 +3,10 @@
   imports = [ inputs.nix-index-database.nixosModules.nix-index ];
 
   programs.fish.enable = true;
+  programs.zsh = {
+    enable = true;
+    enableGlobalCompInit = false;   # home-manager runs compinit; twice doubles startup.
+  };
 
   environment.systemPackages = [
     pkgs.vim

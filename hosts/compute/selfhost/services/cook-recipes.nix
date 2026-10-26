@@ -2,7 +2,14 @@
 let
   serviceCfg = config.selfhost.services.cook-recipes;
   recipesDir = "${config.fleet.shares.media.root}/recipes";
-  siteDir = "/var/lib/cook-recipes/site";
+  stateDir = "/var/lib/cook-recipes";
+  siteDir = "${stateDir}/site";   # a symlink to the current build
+
+  build = pkgs.writeShellApplication {
+    name = "cook-recipes-build";
+    runtimeInputs = [ pkgs.cook-cli pkgs.coreutils pkgs.findutils ];
+    text = builtins.readFile ./cook-recipes-build.sh;
+  };
 in
 {
   selfhost.services.cook-recipes = {
@@ -29,13 +36,8 @@ in
       Type = "oneshot";
       User = "cook-recipes";
       StateDirectory = "cook-recipes";
-      ExecStartPre = [
-        "${pkgs.coreutils}/bin/test -d ${recipesDir}/library"
-        "${pkgs.coreutils}/bin/rm -rf ${siteDir}"
-      ];
-      ExecStart = "${pkgs.cook-cli}/bin/cook build web --base-path ${recipesDir}/library ${siteDir}";
-      Restart = "on-failure";
-      RestartSec = "1min";
+      ExecStartPre = "${pkgs.coreutils}/bin/test -d ${recipesDir}/library";
+      ExecStart = "${pkgs.lib.getExe build} ${recipesDir}/library ${stateDir}";
       ProtectSystem = "strict";
       ProtectHome = true;
       PrivateTmp = true;
@@ -70,13 +72,14 @@ in
     };
   };
 
-  # Refresh the site weekly to pick up recipe changes (inotify does not work on SMB mounts).
+  # Alfred's plans and the Cookidoo sync write through this host (it serves the VM its share), so their changes raise
+  # inotify events here. Edits made straight on the NAS raise none, hence the daily run as well.
+  systemd.paths.cook-recipes-build = {
+    wantedBy = [ "paths.target" ];
+    pathConfig.PathChanged = [ "${recipesDir}/library" "${recipesDir}/library/plans" ];
+  };
   systemd.timers.cook-recipes-build = {
     wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "weekly";
-      RandomizedDelaySec = "1h";
-      Persistent = true;
-    };
+    timerConfig = { OnCalendar = "daily"; Persistent = true; };
   };
 }

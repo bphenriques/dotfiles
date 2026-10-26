@@ -21,6 +21,30 @@ _final: prev: let
         platforms = lib.platforms.all;
       };
     };
+
+    # The Cooklang MCP server; the checksum is the one its npm installer verifies.
+    cook-mcp = prev.stdenv.mkDerivation rec {
+      pname = "cook-mcp";
+      version = "0.2.3";
+
+      src = prev.fetchurl {
+        url = "https://github.com/cook-md/cook-mcp/releases/download/v${version}/cook-mcp-x86_64-unknown-linux-gnu.tar.gz";
+        sha256 = "fa7e9425b1cddcbda8bb09f55d1371d15a340d9513e44d194ac89e4c1dea2378";
+      };
+
+      sourceRoot = ".";
+      nativeBuildInputs = [ prev.autoPatchelfHook ];
+      buildInputs = [ prev.stdenv.cc.cc.lib ];
+      installPhase = "install -Dm755 cook-mcp $out/bin/cook-mcp";
+
+      passthru.updateInfo = { repo = "cook-md/cook-mcp"; stripPrefix = "v"; };
+      meta = {
+        description = "MCP server for Cooklang recipes";
+        homepage = "https://github.com/cook-md/cook-mcp";
+        platforms = [ "x86_64-linux" ];
+        mainProgram = "cook-mcp";
+      };
+    };
   };
 in
   packages // {

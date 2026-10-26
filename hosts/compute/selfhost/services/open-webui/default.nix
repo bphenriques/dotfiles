@@ -2,13 +2,14 @@
 let
   cfg = config.selfhost;
   inherit (config.fleet) ai;
-  agentVmIp = config.fleet.microvms.compute.agent-vm;
-  agentVm = import ../../../../guests/agent-vm/settings.nix;
+  alfredVmIp = config.fleet.microvms.compute.agent-alfred-vm;
+  alfredVm = import ../../../../guests/agent-alfred-vm/settings.nix;
 
   hermesModel = "hermes-agent";
   comfyUrl = "http://${ai.imageEndpoint.host}:${toString ai.imageEndpoint.port}";
 
-  # kyuz0's validated workflow, with the unet swapped bf16 -> fp8mixed to halve what it loads.
+  # kyuz0's validated workflow, with the unet swapped bf16 -> fp8mixed to halve what it loads, and
+  # scaled to 1.0 MP (ComfyUI's own template) rather than 1.6 for faster sampling.
   # Compacted because an EnvironmentFile line cannot hold newlines.
   imageEditWorkflow = builtins.toJSON (builtins.fromJSON (builtins.readFile ./qwen-image-edit.json));
 
@@ -44,7 +45,7 @@ let
       model_ids = [ ai.model ai.codingModel ai.uncensoredModel ];
     }
     {
-      url = "http://${agentVmIp}:${toString agentVm.apiPort}/v1";
+      url = "http://${alfredVmIp}:${toString alfredVm.apiPort}/v1";
       key = cfg.runtimePlaceholder."hermes-api-server-key";
       model_ids = [ hermesModel ]; # hermes re-exports the raw models, which would double the dropdown
     }

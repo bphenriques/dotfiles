@@ -17,5 +17,6 @@
   };
 
   programs.fish.enable = true;
+  programs.zsh.enableGlobalCompInit = false;   # home-manager runs compinit; twice doubles startup.
   environment.shells = [ config.programs.fish.package ];  # Register the shell
 }

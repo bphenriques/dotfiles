@@ -10,6 +10,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 ## Layout
 
 - `modules/nixos` defines options and mechanism; `profiles/nixos` sets the values a host picks. A module that only sets values belongs in a profile.
+- `agents/<name>` is one agent's definition (persona, skills, tool policy) as a plain function; the host that runs it owns the model, network, mounts and state. Agents share nothing until a second one needs it.
 - Every `.nix` under `modules/nixos` is imported into every host by `mkNixosHost`, so it must declare options and stay inert until enabled. `microvm/guest.nix` is excluded there because importing it makes the importer a guest; only `mkMicrovmGuest` takes it.
 - Profiles layer as `base.nix` (every machine, guests included) then `standalone.nix` (non-guests, imports base), then one kind: `headless.nix`, `graphical/` or `guest.nix`. Everything else is additive and picked per host.
 - Fleet facts (`hosts/shared.nix`) reach modules two ways. Read `config.fleet.*`, which is typed and available on every host built by `mkNixosHost`. The bare `fleet` specialArg is the same data untyped, and is only for microVM guests and home-manager, neither of which has `config.fleet`.

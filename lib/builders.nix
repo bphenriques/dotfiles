@@ -35,7 +35,7 @@ rec {
       '';
     in toString derivation; # only care about the path to the png file
 
-  mkFishShellPlugin = { drv, fishPluginSrc }:
+  mkShellPlugin = { drv, fishPluginSrc, zshPlugin }:
     pkgs.symlinkJoin {
       inherit (drv) name;
       paths = [ drv ];
@@ -48,6 +48,7 @@ rec {
           mkdir -p $out/share/fish/vendor_conf.d
           cp ${fishPluginSrc}/conf.d/*.fish $out/share/fish/vendor_conf.d/
         fi
+        install -Dm644 ${zshPlugin} $out/share/zsh/plugins/${drv.name}/${drv.name}.plugin.zsh
       '';
       meta.platforms = lib.platforms.all;
     };

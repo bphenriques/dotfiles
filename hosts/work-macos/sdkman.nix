@@ -18,4 +18,13 @@ in
     description = "SDKMAN CLI (bash)";
     body = ''bash -c 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk "$@"' bash $argv'';
   };
+
+  # Sourced on first use to keep startup fast; unlike fish, `sdk use` then works in this shell.
+  programs.zsh.initContent = ''
+    sdk() {
+      unfunction sdk
+      source "$SDKMAN_DIR/bin/sdkman-init.sh"
+      sdk "$@"
+    }
+  '';
 }

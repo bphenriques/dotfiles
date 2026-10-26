@@ -8,7 +8,7 @@ let
       pkgs.procps
       pkgs.hyprlock
     ];
-    text = ''pidof hyprlock || niri msg action do-screen-transition --delay-ms 750 && hyprlock'';
+    text = ''pidof hyprlock || { niri msg action do-screen-transition --delay-ms 750 && hyprlock; }'';
   };
 in
 {

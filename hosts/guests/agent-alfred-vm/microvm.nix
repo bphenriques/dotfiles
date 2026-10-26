@@ -1,4 +1,4 @@
-{ agentVm, ... }:
+{ alfredVm, ... }:
 {
   microvm = {
     hypervisor = "cloud-hypervisor";
@@ -12,12 +12,13 @@
       # The mount forces gid 5000 with 0660, so the guest's own gid-5000 group is what grants access.
       # posixAcl drops `--posix-acl --xattr`, which CIFS cannot answer: with them on, even opendir
       # returns EOPNOTSUPP and the guest sees an unusable mount rather than a permission error.
-      #{ source = "/mnt/homelab-media/recipes/library"; mountPoint = agentVm.recipesRoot; tag = "recipes"; proto = "virtiofs"; posixAcl = false; }
-      { source = "/mnt/homelab-bphenriques/notes"; mountPoint = agentVm.vaultRoot; tag = "vault"; proto = "virtiofs"; posixAcl = false; }
-      { source = "/var/lib/agent-vm-secrets"; mountPoint = agentVm.secretsRoot; tag = "secrets"; proto = "virtiofs"; readOnly = true; } # API_SERVER_KEY env
+      { source = "/mnt/homelab-bphenriques/notes"; mountPoint = alfredVm.vaultRoot; tag = "vault"; proto = "virtiofs"; posixAcl = false; }
+      # Same mechanism, gid 5001. The parent of library/, for its AGENTS.md and formatting.md.
+      { source = "/mnt/homelab-media/recipes"; mountPoint = alfredVm.recipesRoot; tag = "recipes"; proto = "virtiofs"; posixAcl = false; }
+      { source = "/var/lib/agent-alfred-vm-secrets"; mountPoint = alfredVm.secretsRoot; tag = "secrets"; proto = "virtiofs"; readOnly = true; } # API_SERVER_KEY env
     ];
     volumes = [
-      { image = "hermes-state.img"; label = "hermes-state"; mountPoint = agentVm.stateRoot; size = 4096; } # host key + hermes state
+      { image = "hermes-state.img"; label = "hermes-state"; mountPoint = alfredVm.stateRoot; size = 4096; } # host key + hermes state
     ];
   };
 }

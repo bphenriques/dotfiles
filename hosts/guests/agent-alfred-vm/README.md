@@ -4,7 +4,7 @@ A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running `her
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
 - Egress is internet-only plus two holes, `ai:11434` (Ollama) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
 - Curated set of RW directories from the live NAS 
-- The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs, so the VM holds no secrets of its own
+- The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs; the one credential of its own is the Cookidoo token (see below)
 
 ## What the agent may do to the vault
 
@@ -25,6 +25,11 @@ than redeployed.
 
 The share is also mounted `noexec`, and the sync daemon ignores every dotted path, so `.obsidian/`
 plugin code never enters the vault sync and is not reachable this way.
+
+## The agent
+
+What runs here is [Alfred](../../../agents/alfred): its persona, skills and tool policy live there. This
+folder deploys it: the model and endpoints, the shares, the state volume and the seal.
 
 ## Forge access
 
@@ -54,7 +59,7 @@ is the fallback).
 The fleet-wide SSH profile disables TCP forwarding, so `-J` cannot reach the bridge; relay through compute instead:
 
 ```bash
-ssh -o ProxyCommand='ssh root@compute nc %h %p' bphenriques@agent-vm
+ssh -o ProxyCommand='ssh root@compute nc %h %p' bphenriques@agent-alfred-vm
 
 systemctl status hermes-agent      # the assistant runtime
 journalctl -u hermes-agent -f      # tool calls and model errors
@@ -65,6 +70,8 @@ The API key needs no sops: compute generates it (`selfhost.runtimeSecrets`), fee
 
 ## Setup (one-time)
 
-1. **Vault**: compute must have the `bphenriques` SMB share mounted; virtiofsd will not start without it, so the guest will not boot while the NAS is down.
-2. **Deploy compute.** It builds and runs the guest, generates the API key, and shares it in; hermes reads it on start-up. The VM holds no secrets, so there is no `dotfiles-private` entry and no re-key dance.
-3. **Forge**: generate the keypair here (`sudo -u hermes ssh-keygen -t ed25519 -N "" -C personal-agent@agent-vm -f /var/lib/hermes/.ssh/id_ed25519`), declare the public half on compute, pin the host key (`sudo -u hermes sh -c 'ssh-keyscan -p 2222 10.20.1.1 >> /var/lib/hermes/.ssh/known_hosts'`), then add `personal-agent` to the repository with write access in gitea, which the framework does not provision. Verify with `sudo -u hermes ssh -p 2222 -T gitea@10.20.1.1`.
+1. **Shares**: compute must have the `bphenriques` and `media` SMB shares mounted; virtiofsd will not start without them, so the guest will not boot while the NAS is down.
+2. **Deploy compute.** It builds and runs the guest, generates the API key, and shares it in; hermes reads it on start-up. There is no sops file and no re-key dance; `dotfiles-private` holds only non-secret household facts.
+3. **Forge**: generate the keypair here (`sudo -u hermes ssh-keygen -t ed25519 -N "" -C personal-agent@agent-alfred-vm -f /var/lib/hermes/.ssh/id_ed25519`), declare the public half on compute, pin the host key (`sudo -u hermes sh -c 'ssh-keyscan -p 2222 10.20.1.1 >> /var/lib/hermes/.ssh/known_hosts'`), then add `personal-agent` to the repository with write access in gitea, which the framework does not provision. Verify with `sudo -u hermes ssh -p 2222 -T gitea@10.20.1.1`.
+4. **Skills**: after the first deploy with the allowlist, drop the previously seeded catalog with `sudo -u hermes hermes skills opt-out --remove` (it deletes only unmodified bundled skills), then remove whatever `sudo -u hermes hermes skills list` still shows outside the allowlist.
+5. **Cookidoo**: sign in once, see [Alfred](../../../agents/alfred/README.md#meals-cozinha).

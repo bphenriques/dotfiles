@@ -2,7 +2,7 @@
 let
   hostIPsJSON = pkgs.writeText "fleet-host-ips.json" (builtins.toJSON fleetHostIPs);
 in
-builders.mkFishShellPlugin {
+builders.mkShellPlugin {
   drv = pkgs.writeShellApplication {
     name = "dotfiles";
     runtimeInputs = [ pkgs.nvd pkgs.nix-output-monitor pkgs.jq ];
@@ -12,4 +12,5 @@ builders.mkFishShellPlugin {
     meta.platforms = lib.platforms.all;
   };
   fishPluginSrc = ./fish-plugin;
+  zshPlugin = ./plugin.zsh;
 }

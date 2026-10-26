@@ -1,4 +1,4 @@
-{ config, agentVm, inputs, ... }:
+{ config, alfredVm, inputs, ... }:
 let
   # The agent's module derives HERMES_HOME as `${stateDir}/.hermes`, and that state is the whole point of
   # this front end: pointed anywhere else it comes up as a second agent with empty memory and no config.
@@ -18,15 +18,15 @@ in
     stateDir = "${hermesHome}/webui";   # upstream's own layout, and on the volume: the module's default is not
 
     host = "0.0.0.0";   # the gateway-only rule is the gate here too, so openFirewall stays off
-    port = agentVm.webuiPort;
+    port = alfredVm.webuiPort;
 
     agent.package = config.services.hermes-agent.package;       # HERMES_WEBUI_PYTHON, from its passthru.hermesVenv
-    environmentFiles = [ "${agentVm.secretsRoot}/webui.env" ];  # Pocket ID client credentials, rendered on compute
+    environmentFiles = [ "${alfredVm.secretsRoot}/webui.env" ];  # Pocket ID client credentials, rendered on compute
   };
 
   # Same reason as hermes-agent: the env file arrives over virtiofs, which is not mounted at activation.
   systemd.services.hermes-webui = {
-    unitConfig.RequiresMountsFor = [ agentVm.secretsRoot ];
+    unitConfig.RequiresMountsFor = [ alfredVm.secretsRoot ];
 
     # Upstream's unit sets no sandbox at all. ProtectSystem is left out on purpose: it would need the
     # agent's home and the vault listed back as writable, which is the whole of what this serves.

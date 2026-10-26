@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Behavioural check of the agent-vm network seal. This guest has one deliberate hole
-# (egress.allowLan -> ai:11434), so the test asserts the hole is open AND still port-scoped.
+# Behavioural check of the agent-alfred-vm network seal. This guest has two deliberate holes
+# (egress.allowLan -> ai:11434, egress.allowHostPorts -> the bridge address on 2222 for gitea's SSH),
+# so the test asserts each hole is open AND still scoped to its port and address.
 # Run after each deploy:
-#   ./hosts/guests/agent-vm/post-deploy-test.sh
+#   ./hosts/guests/agent-alfred-vm/post-deploy-test.sh
 #
-# Probed ports must be OPEN when reachable (NAS SMB 445, compute sshd 22, ai sshd 22) so that a
-# "blocked" result unambiguously means the firewall dropped, not a closed port. Needs admin SSH.
+# Probed ports must be OPEN when reachable (NAS SMB 445, compute sshd 22 and gitea 2222, ai sshd 22) so
+# that a "blocked" result unambiguously means the firewall dropped, not a closed port. Needs admin SSH.
 set -euo pipefail
 
-jump=compute vm=agent-vm user=bphenriques ai=192.168.1.200
+jump=compute vm=agent-alfred-vm user=bphenriques ai=192.168.1.200 compute=192.168.1.196 bridge=10.20.1.1
 fail=0
 
 # want=blocked|open. A DROP hangs to timeout; a closed port RSTs, and both fail the /dev/tcp
@@ -25,9 +26,15 @@ check() {
   fi
 }
 
-echo "== agent-vm containment =="
+# check() scores a failed ssh as "blocked", so an unreachable guest would pass every blocked check.
+ssh -o BatchMode=yes -o ConnectTimeout=8 -J "$jump" "$user@$vm" true 2>/dev/null \
+  || { echo "ABORT: cannot ssh to $vm via $jump; nothing was tested."; exit 2; }
+
+echo "== agent-alfred-vm containment =="
 check 192.168.1.199 445 blocked "LAN (NAS SMB)"
-check 10.20.1.1 22 blocked "host (compute pivot)"
+check "$bridge" 22 blocked "host (compute pivot)"
+check "$bridge" 2222 open "gitea SSH (the hole)"
+check "$compute" 2222 blocked "gitea on LAN address"
 check 1.1.1.1 443 open "internet egress"
 
 # ai sleeps when idle; the gate doubles as ground truth that its :22 is genuinely open.

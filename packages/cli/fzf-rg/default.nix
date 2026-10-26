@@ -1,5 +1,5 @@
 { lib, pkgs, builders, ... }:
-builders.mkFishShellPlugin {
+builders.mkShellPlugin {
   drv = pkgs.writeShellApplication {
     name = "fzf-rg";
     runtimeInputs = [ pkgs.ripgrep pkgs.fzf pkgs.bat ];
@@ -7,4 +7,5 @@ builders.mkFishShellPlugin {
     meta.platforms = lib.platforms.all;
   };
   fishPluginSrc = ./fish-plugin;
+  zshPlugin = ./plugin.zsh;
 }

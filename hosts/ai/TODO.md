@@ -37,3 +37,68 @@ too, because their trip points differ (`silenzioso` is 50/62/72/80/86/92/97 agai
 55/65/75/85/90). More code, more to get wrong, and the interpolated version above captures the shape.
 
 Do not write `0x26-0x28` (fan 1) or `0x46-0x48` (fan 2). Those are firmware-managed and volatile.
+
+## Inference runtime
+
+Measured 2026-10-25 on Ollama 0.40.2-rocm. Short prompts are a 300-word story (prose) and a Python module with
+tests (code); the long prompt is 10K tokens.
+
+| Model                         | Prose tok/s | Code tok/s | Prefill tok/s @10K | MTP acceptance        |
+| ----------------------------- | ----------- | ---------- | ------------------ | --------------------- |
+| `qwen3.6:35b-a3b` (`ai.model`) | 64-67       | 83         | 1102               | 43-48% prose, 82% code |
+| `qwen3.8:27b` (`codingModel`)  | 15-16       | 24-29      | 277-334            | 28-33% prose, 76% code |
+
+- ROCm works: gfx1151 detected, every layer offloaded, flash attention on. The "Ollama ignores ROCm" reputation
+  does not apply here.
+- Ollama already runs MTP speculative decoding on both models (`draft-mtp` in the journal). The `-mtp` library
+  tags add nothing; 0.40.11 measured the same.
+- The dense 27B decodes at the ~256 GB/s bandwidth wall when MTP misses (prose). No runtime fixes that.
+- Measure with `/api/generate`, `think:false`, and read `prompt_eval_*` / `eval_*` from the response.
+
+### Candidates
+
+**Qwen3.8-Flash-Next** is the Qwen3.8 MoE: 125B with 6B active, plus a 51B n-gram table and a 4B MTP head
+([unsloth GGUF](https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF)). Not in the Ollama library. Q4_K_XL is
+111 GB against a 112 GiB `ttm.pages_limit`, so it only fits with ComfyUI stopped and nothing else resident.
+On llama.cpp it collapses with depth, which is what Ollama would get
+([Gufo's measurements](https://github.com/gufo-org/gufo/blob/main/docs/models/qwen3.8-flash-next/BENCHMARKS.md)):
+
+| Depth | Gufo pp | llama.cpp pp | Gufo tg (MTP, mixed) | llama.cpp tg (MTP, mixed) |
+| ----- | ------- | ------------ | -------------------- | ------------------------- |
+| 0     | 1735    | 469          | 36                   | 32                        |
+| 32K   | 1619    | 278          | 40                   | 25                        |
+| 64K   | 1556    | 208          | 39                   | 20                        |
+| 128K  | 1481    | 135          | 40                   | 15                        |
+
+**[Gufo](https://github.com/gufo-org/gufo)**: gfx1151-only engine with per-model HIP kernels, MIT, Nix flake and
+podman image. The real wins are prefill (27B: ~650 vs 357 pp) and Flash-Next at depth. Its 27B "70 tok/s"
+headline is repetitive text; mixed text is ~27. Rejected for now: a second server that does not coordinate
+memory with Ollama means remembering to unload one, and the project is two months old with no releases, three
+text models and no embeddings.
+
+**[Lemonade](https://phoronix.com/review/lemonade-vulkan-rocm)**: AMD's server over llama.cpp (ROCm or Vulkan),
+FLM for the NPU, and the experimental HRX ROCm backend (30-50% prefill claimed, one Qwen3 MoE so far).
+Same llama.cpp underneath, so expect Ollama-like numbers; the appeal is maturity and one front end managing
+backends.
+
+Swapping is count-based, not memory-budgeted ([multi-model](https://github.com/lemonade-sdk/lemonade/blob/main/docs/guide/configuration/multi-model.md)):
+
+- `max_loaded_models` is an LRU slot count per model type (LLM, embedding, ...), default 1. Pinning exists.
+- A failed load (e.g. out of memory) evicts every model and retries once. That is what would make room for a big
+  model, after a failed first attempt.
+- `auto_evict` (opt-in) polls GPU usage every 2s and unloads the most disposable idle model above a threshold
+  (default 90%). On an APU it reads GTT and counts other processes, so ComfyUI would push it out. Reactive only:
+  nothing checks fit before a load, and a model mid-request is never evicted.
+- No Gufo backend, so Lemonade cannot serve Flash-Next any faster than Ollama would.
+
+Remaining questions:
+
+- Does it run llama.cpp's MTP for qwen35/qwen35moe, or would it regress the numbers above?
+- Embeddings (`embeddinggemma`) and the OpenAI endpoint hermes and the chat UI already use.
+- HRX prefill on qwen3.6:35b-a3b once it covers more than one model.
+
+### Quality
+
+Only data point is [one 10-task coding benchmark on this chip](https://www.soothill.io/blog/2026/08/14/coding-model-benchmark-strix-halo/):
+gpt-oss-120b 9/10 at 50 tok/s, Qwen3.8-27B + MTP 8/10 at 22-25, qwen3.6-35B-A3B 6/10 at 60. Flash-Next untested
+there; its scores are vendor-only.

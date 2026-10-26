@@ -5,52 +5,11 @@
 let
   cfg = config.my.programs.niri;
 
-  workspaceOpt = lib.types.submodule ({ name, ... }: {
-    options = {
-      name = lib.mkOption {
-        type = lib.types.str;
-        default = name;
-        description = "Niri workspace name (defaults to the attribute key)";
-      };
-      order = lib.mkOption {
-        type = lib.types.int;
-        description = "Position in niri's named-workspace list; must be unique";
-      };
-      openOnDefaultOutput = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Pin workspace to the default output so it follows monitor switches";
-      };
-    };
-  });
-
-  displayOutputOpt = lib.types.submodule {
-    options = {
-      identifier  = lib.mkOption { type = lib.types.str; };
-      resolution  = lib.mkOption { type = lib.types.str; };
-      refreshRate = lib.mkOption { type = lib.types.str; };
-      scale       = lib.mkOption { type = lib.types.float; };
-    };
-  };
-
-  workspaces = lib.sort (a: b: a.order < b.order) (lib.attrValues cfg.workspaces);
-
-  workspaceNodes = lib.map (ws: {
-    workspace = { _args = [ ws.name ]; }
-      // lib.optionalAttrs ws.openOnDefaultOutput { open-on-output = cfg.output.default.identifier; };
-  }) workspaces;
-
   startupNodes = lib.map (cmd: { spawn-sh-at-startup._args = [ cmd ]; }) cfg.spawnShAtStartup;
 in
 {
   options.my.programs.niri = {
     enable = lib.mkEnableOption "programs-niri";
-
-    workspaces = lib.mkOption {
-      description = "Named workspaces; attribute keys are stable identifiers, .name is the niri-visible label";
-      type = lib.types.attrsOf workspaceOpt;
-      default = {};
-    };
 
     spawnShAtStartup = lib.mkOption {
       description = "Shell commands to run at startup (supports arguments, pipes, etc.)";
@@ -110,23 +69,9 @@ in
         default = [];
       };
     };
-
-    output = {
-      default = lib.mkOption {
-        description = "Default display output";
-        type = displayOutputOpt;
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = lib.length (lib.unique (lib.map (ws: ws.order) workspaces)) == lib.length workspaces;
-        message = "my.programs.niri.workspaces: `order` must be unique";
-      }
-    ];
-
     wayland.systemd.target = "niri.service";
 
     wayland.windowManager.niri = {
@@ -134,15 +79,7 @@ in
       systemd.enable = false; # units and portals come from the NixOS `programs.niri` module
       portalPackage = null;
 
-      settings = {
-        output = {
-          _args = [ cfg.output.default.identifier ];
-          mode = "${cfg.output.default.resolution}@${cfg.output.default.refreshRate}";
-          inherit (cfg.output.default) scale;
-        };
-
-        _children = workspaceNodes ++ startupNodes;
-      };
+      settings._children = startupNodes;
 
       extraConfig = ''
         // 1. Base defaults
