@@ -10,10 +10,9 @@ let
     in rec {
       preview = pkgs.callPackage ./cli/preview { };
       fzf-rg = pkgs.callPackage ./cli/fzf-rg { builders = b; };
-      fzf-fd = pkgs.callPackage ./cli/fzf-fd { inherit preview; builders = b; };
       project = pkgs.callPackage ./cli/project { inherit preview; builders = b; };
       bw-session = pkgs.callPackage ./dotfiles/bw-session { };
-      dotfiles = pkgs.callPackage ./dotfiles/dotfiles { builders = b; fleetHostIPs = (import ../hosts/shared.nix).lan.hosts; };
+      dotfiles = pkgs.callPackage ./dotfiles/dotfiles { builders = b; };
       dotfiles-secrets = pkgs.callPackage ./dotfiles/dotfiles-secrets { inherit bw-session; };
     }
   );

@@ -47,9 +47,6 @@ nix_build() {
   fi
 }
 
-# Prints the host's IP, or exits non-zero (callers handle the failure so `exit` runs outside any subshell).
-get_host_ip() { jq -re --arg h "$1" '.[$h] // empty' "$FLEET_HOST_IPS"; }
-
 _show_changelog() {
   [[ -e /run/current-system && -e ./result ]] || return 0
   have_cmd nvd || return 0
@@ -96,13 +93,11 @@ _darwin_update() {
 # Note: For health checks and auto-rollback, consider deploy-rs: https://github.com/serokell/deploy-rs
 _nixos_deploy() {
   local host="$1"
-  local target_ip
-  target_ip=$(get_host_ip "$host") || fatal "Could not find IP for host '$host'."
 
-  info "Deploying '$host' to root@${target_ip}..."
+  info "Deploying '$host'..."
   case "${2:-}" in
-    --boot) nixos-rebuild boot --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
-    "") nixos-rebuild switch --flake ".#${host}" --target-host "root@${target_ip}" --use-remote-sudo ;;
+    --boot) nixos-rebuild boot --flake ".#${host}" --target-host "root@${host}" ;;
+    "") nixos-rebuild switch --flake ".#${host}" --target-host "root@${host}" ;;
     *)
       usage
       exit 1
@@ -179,8 +174,7 @@ case "${1:-}" in
       have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
       _nvd_diff_generations "${1:-2}"
     else
-      target_ip=$(get_host_ip "$target") || fatal "Could not find IP for host '$target'."
-      _nvd_diff_generations "${1:-2}" ssh "root@$target_ip"
+      _nvd_diff_generations "${1:-2}" ssh "root@$target"
     fi
     ;;
   update | u)

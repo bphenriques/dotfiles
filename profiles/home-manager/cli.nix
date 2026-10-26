@@ -90,7 +90,6 @@ in
     pkgs.dateutils
     pkgs.openssl
     pkgs.yq-go             # Query YAML
-    self.packages.fzf-fd   # Fuzzy fd
     self.packages.fzf-rg   # Fuzzy ripgrep
   ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     # Archive

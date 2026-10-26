@@ -1,8 +1,16 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, self, ... }:
+let
+  fd = "${lib.getExe pkgs.fd} --hidden --exclude=.git";
+  preview = "--preview '${lib.getExe self.packages.preview} {}'";
+in
 {
   programs.fzf = {
     enable = true;
-    defaultCommand = "${lib.getExe pkgs.fd} --type file --hidden --exclude=.git";
+    defaultCommand = "${fd} --type file";
+
+    # fd instead of fzf's walker so .gitignore is respected.
+    fileWidget = { command = fd; options = [ preview ]; };
+    changeDirWidget = { command = "${fd} --type directory"; options = [ preview ]; };
 
     defaultOptions = [
       "--height='80%'"

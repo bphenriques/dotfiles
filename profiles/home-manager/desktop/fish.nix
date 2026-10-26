@@ -16,7 +16,6 @@ in
       # Print the binding combo using `fish_key_reader`
       fish_user_key_bindings = concatStringsSep "\n" [
         ''bind alt-/ __frg-widget''                                   # Find text (fzf-rg)
-        ''bind alt-. __ffd-widget''                                   # Find file (fzf-fd)
         ''bind alt-p __project-widget''                               # Switch project
         ''bind alt-space ${config.programs.yazi.shellWrapperName}''   # Browse files
       ];

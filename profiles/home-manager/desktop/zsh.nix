@@ -12,13 +12,20 @@ in
     dotDir = "${config.xdg.configHome}/zsh";
     defaultKeymap = "emacs";
     autocd = true;
-    setOptions = [ "INTERACTIVE_COMMENTS" "HIST_REDUCE_BLANKS" "HIST_VERIFY" ];
+    setOptions = [
+      "INTERACTIVE_COMMENTS" "HIST_REDUCE_BLANKS" "HIST_VERIFY" "INC_APPEND_HISTORY"
+      "NO_FLOW_CONTROL" "NO_BEEP"
+      "AUTO_PUSHD" "PUSHD_IGNORE_DUPS" "PUSHD_SILENT"
+      "COMPLETE_IN_WORD" "ALWAYS_TO_END"
+    ];
 
     history = {
       path = "${config.xdg.stateHome}/zsh/history";
       size = 100000;
       ignoreAllDups = true;
-      expireDuplicatesFirst = true;
+      ignorePatterns = [ "rm *" "sudo rm *" "git reset --hard*" "git clean *" ];
+      share = false;
+      extended = true;
     };
 
     autosuggestion = {
@@ -35,7 +42,6 @@ in
     plugins = [
       { name = "fzf-tab"; src = pkgs.zsh-fzf-tab; file = "share/fzf-tab/fzf-tab.plugin.zsh"; }
       { name = "autopair"; src = pkgs.zsh-autopair; file = "share/zsh/zsh-autopair/autopair.zsh"; }
-      (shellPlugin self.packages.fzf-fd)
       (shellPlugin self.packages.fzf-rg)
     ] ++ lib.optional config.my.programs.project.enable (shellPlugin config.my.programs.project.package)
       ++ lib.optional config.my.dotfiles.enable (shellPlugin config.my.dotfiles.package);
@@ -48,14 +54,15 @@ in
       autoload -Uz prompt_pure_setup && prompt_pure_setup
 
       zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-      zstyle -e ':completion:*' list-colors 'reply=(''${(s.:.)LS_COLORS})'
-      zstyle ':completion:*:descriptions' format '[%d]'
       zstyle ':completion:*' menu no
+      zstyle ':completion:*' rehash true
+      zstyle ':completion:*:git-checkout:*' sort false
       zstyle ':fzf-tab:complete:*' fzf-preview '${lib.getExe self.packages.preview} $realpath'
 
-      WORDCHARS=''${WORDCHARS//\/}
-      autoload -Uz bracketed-paste-url-magic
+      autoload -Uz select-word-style bracketed-paste-url-magic edit-command-line
+      select-word-style bash
       zle -N bracketed-paste bracketed-paste-url-magic
+      zle -N edit-command-line
 
       __yazi-widget() {
         BUFFER=${config.programs.yazi.shellWrapperName}
@@ -64,17 +71,13 @@ in
       zle -N __yazi-widget
 
       bindkey '^[/' __frg-widget        # Find text (fzf-rg)
-      bindkey '^[.' __ffd-widget        # Find file (fzf-fd)
       bindkey '^[p' __project-widget    # Switch project
       bindkey '^[ ' __yazi-widget       # Browse files
-      bindkey '^[[H' beginning-of-line
-      bindkey '^[[F' end-of-line
-      bindkey '^[[3~' delete-char
-      bindkey '^[[1;5C' forward-word
-      bindkey '^[[1;5D' backward-word
-      bindkey '^[[1;3C' forward-word
-      bindkey '^[[1;3D' backward-word
-      bindkey '^[[3;5~' kill-word
+      bindkey '^[e' edit-command-line
+      bindkey '^[[1;3C' forward-word    # Alt+Right
+      bindkey '^[[1;3D' backward-word   # Alt+Left
+      bindkey '^[[1;5C' forward-word    # Ctrl+Right
+      bindkey '^[[1;5D' backward-word   # Ctrl+Left
 
       [[ -f $ZDOTDIR/local.zsh ]] && source $ZDOTDIR/local.zsh
     '';
