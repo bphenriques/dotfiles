@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../settings.nix
@@ -16,7 +16,12 @@
     };
   };
 
+  # Register the shells
   programs.fish.enable = true;
+  programs.zsh.enable = true;
   programs.zsh.enableGlobalCompInit = false;   # home-manager runs compinit; twice doubles startup.
-  environment.shells = [ config.programs.fish.package ];  # Register the shell
+  environment.shells = [
+    config.programs.fish.package
+    pkgs.zsh
+  ];
 }
