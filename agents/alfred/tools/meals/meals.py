@@ -7,11 +7,12 @@ import random
 import re
 import subprocess
 import unicodedata
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 PLAN = Path("@planFile@")
 LIBRARY = Path("@library@")
@@ -35,6 +36,8 @@ PROTEINS = {"meat": "carne", "fish": "peixe", "both": "carne e peixe", "vegetari
 SOUP_DAYS = 3
 RATINGS = ("liked", "never")   # tags, which the Cookidoo sync keeps on its copies
 MEAL_SERVINGS = 2   # one per adult; a main lasts as many days as its servings cover
+LEVELS = ("easy", "medium", "hard")
+SHOWN_FOR = timedelta(hours=1)   # a "sim" in a later chat must not save a plan the user no longer has in front of them
 
 
 def words(*terms):
@@ -43,7 +46,7 @@ def words(*terms):
 
 MEAT_RE, FISH_RE = words(*MEAT), words(*FISH)
 
-mcp = FastMCP("meals")
+mcp = MCPServer("meals")
 plan_lock = asyncio.Lock()   # one change to the current plan at a time
 
 
@@ -92,9 +95,9 @@ async def cookidoo(*args, order=None):
         done = await asyncio.to_thread(subprocess.run, [COOKIDOO, *args], input=order and json.dumps(order),
                                        capture_output=True, text=True, timeout=COOKIDOO_TIMEOUT)
     except subprocess.TimeoutExpired:
-        raise RuntimeError(f"cookidoo {args[0]}: sem resposta do Cookidoo em {COOKIDOO_TIMEOUT} s") from None
+        raise ToolError(f"cookidoo {args[0]}: sem resposta do Cookidoo em {COOKIDOO_TIMEOUT} s") from None
     if done.returncode:
-        raise RuntimeError(done.stderr.strip().splitlines()[-1] if done.stderr.strip() else f"cookidoo {args[0]} failed")
+        raise ToolError(done.stderr.strip().splitlines()[-1] if done.stderr.strip() else f"cookidoo {args[0]} failed")
     return json.loads(done.stdout)
 
 
@@ -114,7 +117,7 @@ async def gather(span):
             planned[day] = known.get(r["id"]) or {
                 "source": "cookidoo", "id": r["id"], "cookidoo_id": r["id"], "name": r["name"], "url": r["url"],
                 "protein": "unknown", "minutes": None, "difficulty": None, "servings": None}
-    except RuntimeError as e:
+    except ToolError as e:
         notes.append(f"Sem acesso ao Cookidoo ({e}); o plano não tem em conta o My week.")
     return found["soup"], found["main"], planned, notes, recent(span[0])
 
@@ -142,17 +145,41 @@ def clash(a, b):
     return meat or fish or hard
 
 
+def within(r, limit):
+    """Whether a main fits a limit {"max_minutes": n, "difficulty": the hardest allowed}; a missing field never fits."""
+    limit = limit or {}
+    if limit.get("max_minutes") and not (r["minutes"] and r["minutes"] <= limit["max_minutes"]):
+        return False
+    return not limit.get("difficulty") or (r["difficulty"] in LEVELS and LEVELS.index(r["difficulty"]) <= LEVELS.index(limit["difficulty"]))
+
+
+def described(limit):
+    parts = ([f"até {limit['max_minutes']} min"] if limit.get("max_minutes") else []) + \
+        ([{"easy": "fácil", "medium": "fácil ou média", "hard": "qualquer dificuldade"}[limit["difficulty"]]] if limit.get("difficulty") else [])
+    return ", ".join(parts)
+
+
+def check(max_minutes, difficulty):
+    """The limit a tool was asked for, or None."""
+    if difficulty not in (None, *LEVELS):
+        raise ToolError(f"difficulty must be easy, medium or hard, not {difficulty!r}.")
+    if max_minutes is not None and max_minutes <= 0:
+        raise ToolError("max_minutes must be a positive number of minutes.")
+    return {k: v for k, v in {"max_minutes": max_minutes, "difficulty": difficulty}.items() if v} or None
+
+
 def lasts(r):
     """How many days a main dish feeds the household."""
     return max(1, (r["servings"] or MEAL_SERVINGS) // MEAL_SERVINGS)
 
 
-def compose(span, soups, mains, planned, keep_mains, keep_soups, exclude, force=None, recent=frozenset()):
+def compose(span, soups, mains, planned, keep_mains, keep_soups, exclude, force=None, recent=frozenset(), limits=None):
     """A plan that keeps the fixed days and fills the rest by the household rules, each main followed by its leftovers
     for as long as it lasts. Seeded by the start day, so the same inputs give the same plan and a change touches only
-    what it names. `force` is {date: protein} the user asked for, which wins over the rules. Dishes in `recent` (the
-    last two weeks) come last among those that fit."""
-    force = force or {}
+    what it names. `force` is {date: protein} the user asked for, which wins over the rules; `limits` is {date: limit}
+    (see within), which a main cooked that day must fit. Dishes in `recent` (the last two weeks) come last among those
+    that fit."""
+    force, limits = force or {}, limits or {}
     rng = random.Random(span[0].isoformat())
     by_id = {r["id"]: r for r in soups + mains}
     pool = [r for r in mains if r["id"] not in exclude and r.get("rating") != "never"]
@@ -201,7 +228,7 @@ def compose(span, soups, mains, planned, keep_mains, keep_soups, exclude, force=
         the wanted protein first."""
         d = span[i].isoformat()
         prev = chosen[i - 1] if i else None
-        free = [r for r in pool if r["id"] not in used and r["protein"] == force.get(d, r["protein"])]
+        free = [r for r in pool if r["id"] not in used and r["protein"] == force.get(d, r["protein"]) and within(r, limits.get(d))]
         last = next((c["protein"] for c in reversed(chosen[:i]) if c and c["protein"] in ("meat", "fish")), "fish")
         want = force.get(d) or ("fish" if last == "meat" else "meat")
         fits = sorted((r for r in free if not clash(r, prev) and not clash(r, after(i, r))), key=lambda r: (r["protein"] != want, *rank(r)))
@@ -231,7 +258,8 @@ def compose(span, soups, mains, planned, keep_mains, keep_soups, exclude, force=
             fits, free, want = options(i)
             pick = next(iter(fits), None) or next(iter(free), None)
             if pick is None:
-                notes.append(f"{label(d)}: não há mais pratos de {PROTEINS.get(want, want)} por usar.")
+                limit = described(limits.get(d.isoformat()) or {})
+                notes.append(f"{label(d)}: não há mais pratos " + (f"({limit}) por usar." if limit else f"de {PROTEINS.get(want, want)} por usar."))
                 continue
             if not fits:
                 notes.append(f"{label(d)}: {pick['name']} fica junto de outro prato de {PROTEINS[pick['protein']]} ou difícil.")
@@ -302,6 +330,8 @@ def summary(state):
         main, soup = d["main"], soups.get(d["date"])
         dish = "por decidir" if not main else f"sobras de {main['name']}" if d.get("leftover") else main["name"]
         lines.append(f"{label(d['date'])}: {dish}" + (f" · sopa: {soup['name']}" if soup else ""))
+    if state.get("limit"):
+        lines.append(f"Pratos {described(state['limit'])}.")
     lines += [f"Nota: {n}" for n in plan["notes"]]
     if state.get("committed"):
         lines += ["", f"Plano guardado: {SITE}/menu/plans/{quote(state['start'])}.html"]
@@ -331,7 +361,7 @@ async def commit(state):
             today = date.today().isoformat()
             state["in_week"] = [p for p in ours if p[0] not in span and p[0] >= today] + want
             notes += [f"No My week: {len(want)} prato(s) do Cookidoo."] if want else []
-        except RuntimeError as e:
+        except ToolError as e:
             notes.append(f"O My week não foi atualizado ({e}); guarda de novo para tentar outra vez.")
     cookidoo_recipes, items = await asyncio.to_thread(groceries, state)
     order = {"recipes": [r["cookidoo_id"] for r in cookidoo_recipes], "items": [f"{name} {qty}".strip() for name, qty in items]}
@@ -342,7 +372,7 @@ async def commit(state):
             state["shopping"] = {**done, "texts": order["items"]}
         notes.append(f"Na lista de compras do Cookidoo: ingredientes de {len(cookidoo_recipes)} receita(s) do Cookidoo "
                      f"e {len(items)} artigo(s).")
-    except RuntimeError as e:
+    except ToolError as e:
         notes.append(f"A lista de compras não foi atualizada ({e}); guarda de novo para tentar outra vez.")
     save(state)
     return state, notes
@@ -354,17 +384,23 @@ async def commit_plan() -> str:
     dishes in Cookidoo's My week and its groceries on Cookidoo's shopping list, and return the summary to relay as it
     is. Only when the user says to save or confirm it; a later change to the plan or its recipes needs saving again."""
     async with plan_lock:
-        state, notes = await commit(load())
+        state = load()
+        if datetime.now() - datetime.fromisoformat(state.get("shown", "2000-01-01")) > SHOWN_FOR:
+            raise ToolError("This plan was not shown in the last hour: call propose_week, relay it, and save only "
+                            "when the user confirms it.")
+        state, notes = await commit(state)
     return "\n".join([summary(state), *notes])
 
 
 def load():
     if not PLAN.exists():
-        raise RuntimeError("There is no plan yet: call propose_week first.")
+        raise ToolError("There is no plan yet: call propose_week first.")
     return json.loads(PLAN.read_text())
 
 
 def save(state):
+    """Every save is followed by showing the plan, so it also records when it was last shown."""
+    state["shown"] = datetime.now().isoformat(timespec="seconds")
     tmp = PLAN.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, ensure_ascii=False))
     tmp.replace(PLAN)
@@ -393,7 +429,7 @@ def resolve(state, day):
         named = text[:3] == plain(WEEKDAYS[d.weekday()]) or nth and int(nth[1]) - 2 == d.weekday()
         if text in (iso, f"{d:%d/%m}", f"{d.day}/{d.month}") or named:
             return iso
-    raise ValueError(f"{day!r} is not a day of the current plan ({', '.join(map(label, dates))}).")
+    raise ToolError(f"{day!r} is not a day of the current plan ({', '.join(map(label, dates))}).")
 
 
 def cooked_on(state, iso):
@@ -405,10 +441,13 @@ def cooked_on(state, iso):
     return days[i]["date"]
 
 
-async def replan(state, keep_mains, keep_soups, exclude, force=None, catalog=None):
+async def replan(state, keep_mains, keep_soups, exclude, force=None, catalog=None, day_limit=None):
+    """Compose and save a new plan for the state's days. The week's limit holds on every day; `day_limit`
+    {date: limit} adds to it on that day."""
     span = plan_span(state)
     soups, mains, planned, notes, recently = catalog or await gather(span)
-    plan = compose(span, soups, mains, planned, keep_mains, keep_soups, set(exclude), force, recently)
+    limits = {d.isoformat(): {**(state.get("limit") or {}), **(day_limit or {}).get(d.isoformat(), {})} for d in span}
+    plan = compose(span, soups, mains, planned, keep_mains, keep_soups, set(exclude), force, recently, limits)
     plan["notes"][:0] = notes
     state = {**state, "exclude": sorted(exclude), "plan": plan, "committed": False}
     save(state)
@@ -423,34 +462,47 @@ def kept(state, skip_day=None, skip_soup=None):
 
 
 @mcp.tool(structured_output=False)   # plain text for the user; a structured copy would only double it
-async def propose_week(start: str | None = None, days: int = 7, different: bool = False) -> str:
+async def propose_week(start: str | None = None, days: int = 7, different: bool = False,
+                       max_minutes: int | None = None, difficulty: str | None = None) -> str:
     """The meal plan for the week: a short summary to relay as it is, with a link to the full plan. Shows the current plan if there
     is one for these days, and makes one otherwise.
 
-    start: first day, YYYY-MM-DD (default today). days: how many days (default 7).
+    start: first day, YYYY-MM-DD (default: the current plan's while today is in it, otherwise today).
+    days: how many days (default 7).
     different: true when the user wants other options: a new plan that avoids every dish of the current one.
+    max_minutes, difficulty ("easy", "medium" or "hard", the hardest allowed): when the user is short of time,
+    e.g. "esta semana estou sem tempo" is 30 and "easy". Every main of the new plan fits them; a different plan
+    keeps the current one's limit unless new ones are given.
     """
+    limit = check(max_minutes, difficulty)
     async with plan_lock:
-        first = date.fromisoformat(start) if start else date.today()
-        if not different and PLAN.exists():
-            current = load()
-            if (current["start"], current["days"]) == (first.isoformat(), days):
-                return summary(current)
+        current = load() if PLAN.exists() else None
+        if start:
+            first = date.fromisoformat(start)
+        elif current and date.today() in plan_span(current):   # mid-week, "the plan" is the one being cooked
+            first, days = date.fromisoformat(current["start"]), current["days"]
+        else:
+            first = date.today()
+        same = current and (current["start"], current["days"]) == (first.isoformat(), days)
+        if same and not different and not limit:
+            save(current)
+            return summary(current)
         exclude = set()
-        if different and PLAN.exists():
-            old = load()
-            exclude = set(old["exclude"]) | {d["main"]["id"] for d in old["plan"]["days"] if d["main"] and d["fixed"] != "cookidoo"}
-            exclude |= {b["soup"]["id"] for b in old["plan"]["soups"] if b["soup"]}
-        shopping = load().get("shopping") if PLAN.exists() and load()["start"] == first.isoformat() else None   # replaced on the next send
-        state = await replan({"start": first.isoformat(), "days": days, "in_week": placed(), "shopping": shopping}, {}, {}, exclude)
+        if different and current:
+            limit = limit or current.get("limit")
+            exclude = set(current["exclude"]) | {d["main"]["id"] for d in current["plan"]["days"] if d["main"] and d["fixed"] != "cookidoo"}
+            exclude |= {b["soup"]["id"] for b in current["plan"]["soups"] if b["soup"]}
+        shopping = current.get("shopping") if current and current["start"] == first.isoformat() else None   # replaced on the next send
+        state = await replan({"start": first.isoformat(), "days": days, "in_week": placed(), "shopping": shopping, "limit": limit},
+                             {}, {}, exclude)
     return summary(state)
 
 
 def find(dishes, name):
-    """The one dish whose name contains `name`."""
-    matches = [r for r in dishes if plain(name) in plain(r["name"])]
+    """The one dish named `name`, or else the one whose name contains it."""
+    matches = [r for r in dishes if plain(r["name"]) == plain(name)] or [r for r in dishes if plain(name) in plain(r["name"])]
     if len(matches) != 1:
-        raise ValueError(f"{len(matches)} dishes match {name!r}: {[r['name'] for r in matches[:6]]}")
+        raise ToolError(f"{len(matches)} dishes match {name!r}: {[r['name'] for r in matches[:6]]}")
     return matches[0]
 
 
@@ -464,7 +516,7 @@ def retag(path, rating):
     tmp.write_text(new)
     if read(tmp)["metadata"]["map"].get("tags") != want:
         tmp.unlink()
-        raise ValueError(f"Could not set the tags of {path.stem}; edit its frontmatter by hand.")
+        raise ToolError(f"Could not set the tags of {path.stem}; edit its frontmatter by hand.")
     tmp.replace(path)
 
 
@@ -476,7 +528,7 @@ async def rate_dish(recipe: str, rating: str | None) -> str:
     or null to forget an earlier rating.
     """
     if rating not in (None, *RATINGS):
-        raise ValueError(f"rating must be liked, never or null, not {rating!r}.")
+        raise ToolError(f"rating must be liked, never or null, not {rating!r}.")
     found = await asyncio.to_thread(library)
     dish = find(found["main"] + found["soup"], recipe)
     await asyncio.to_thread(retag, LIBRARY / f"{dish['id']}.cook", rating)
@@ -485,15 +537,19 @@ async def rate_dish(recipe: str, rating: str | None) -> str:
 
 
 @mcp.tool(structured_output=False)
-async def swap_day(day: str, protein: str | None = None, recipe: str | None = None) -> str:
+async def swap_day(day: str, protein: str | None = None, recipe: str | None = None,
+                   max_minutes: int | None = None, difficulty: str | None = None) -> str:
     """Change the main dish of one day of the current plan and return the updated summary to relay as it is.
 
     day: as the user or the table says it, e.g. "quarta", "qua", "28/10" or "2026-10-28". A day of leftovers
     changes the dish they come from. protein: "meat", "fish" or "vegetarian" when the user asks for one.
     recipe: a dish the user named, by name. With neither, it picks another dish that follows the rules.
+    max_minutes, difficulty ("easy", "medium" or "hard", the hardest allowed): for that day only, e.g.
+    "quarta algo rápido" is 30 and "easy".
     """
     if protein not in (None, "meat", "fish", "vegetarian"):
-        raise ValueError(f"protein must be meat, fish or vegetarian, not {protein!r}.")
+        raise ToolError(f"protein must be meat, fish or vegetarian, not {protein!r}.")
+    limit = check(max_minutes, difficulty)
     async with plan_lock:
         state = load()
         iso = cooked_on(state, resolve(state, day))
@@ -504,14 +560,14 @@ async def swap_day(day: str, protein: str | None = None, recipe: str | None = No
         if recipe:
             try:
                 match = find(catalog[1], recipe)
-            except ValueError:
+            except ToolError:
                 if any(plain(recipe) in plain(f.stem) for f in LIBRARY.glob("*.cook")):
-                    raise ValueError(f"{recipe!r} is in the library but not planned as a main dish: give it the `mains` "
-                                     "tag as formatting.md says, then call swap_day again.") from None
+                    raise ToolError(f"{recipe!r} is in the library but not planned as a main dish: give it the `mains` "
+                                    "tag as formatting.md says, then call swap_day again.") from None
                 raise
             mains[iso] = match["id"]
             exclude.discard(match["id"])
-        state = await replan(state, mains, soups, exclude, {iso: protein} if protein else None, catalog)
+        state = await replan(state, mains, soups, exclude, {iso: protein} if protein else None, catalog, {iso: limit} if limit else None)
     return summary(state)
 
 

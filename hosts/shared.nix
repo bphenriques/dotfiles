@@ -55,6 +55,10 @@ in
       host = lan.hosts.ai;
       port = 8000;                      # the toolbox image's own launcher port, kept so its docs still apply
     };
+    speechEndpoint = {
+      host = lan.hosts.ai;
+      port = 8090;                      # whisper-server's default 8080 is the ad-hoc experiments port
+    };
     model = "qwen3.6:35b-a3b";
     uncensoredModel = "huggingface.co/orcarouter/Qwen3.8-27B-Uncensored-GGUF";
     codingModel = "qwen3.8:27b";

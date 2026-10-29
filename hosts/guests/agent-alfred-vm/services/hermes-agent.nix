@@ -68,7 +68,7 @@ in
     ];
   };
 
-  environment.systemPackages = [ alfred.cookidoo alfred.meals ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
+  environment.systemPackages = [ alfred.cookidoo alfred.meals alfred.drafts ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
 
   # The vault arrives over virtiofs from compute's CIFS mount, which forces gid 5000 with 0660 and
   # ignores any ownership set here. Group membership is the whole of the agent's write access.

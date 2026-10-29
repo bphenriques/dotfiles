@@ -9,8 +9,9 @@ let
   ) fleet.microvms;
 in
 {
-  programs.nushell.enable = true;         # Adhoc shell for data processing
-  programs.bash.enable = true;            # Login/ssh shell; without it home.sessionVariables reach fish only
+  programs.nushell.enable = true;               # Adhoc shell for data processing
+  programs.nushell.loadSessionVariables = true;
+  programs.bash.enable = true;                  # Login/ssh shell; without it home.sessionVariables reach fish only
 
   programs.ssh = {
     enable = true;

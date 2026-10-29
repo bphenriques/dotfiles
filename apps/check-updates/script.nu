@@ -116,7 +116,7 @@ def check-group [entries: list<any>, label: string, check: closure]: nothing -> 
 
 def main [] {
   print "Checking for updates...\n"
-  let pkg_results = check-group (open $env.PACKAGES_FILE) "Pinned packages (overlays/jellyfin.nix)" {|e| check-package $e }
+  let pkg_results = check-group (open $env.PACKAGES_FILE) "GitHub releases (overlays/github-releases.nix)" {|e| check-package $e }
   print ""
   let container_results = check-group (open $env.CONTAINERS_FILE) "Container images (overlays/containers.nix)" {|e| check-container $e }
   print ""

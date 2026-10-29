@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Behavioural check of the agent-alfred-vm network seal. This guest has two deliberate holes
-# (egress.allowLan -> ai:11434, egress.allowHostPorts -> the bridge address on 2222 for gitea's SSH),
+# (egress.allowLan -> ai:11434 and :8090, egress.allowHostPorts -> the bridge address on 2222 for gitea's SSH),
 # so the test asserts each hole is open AND still scoped to its port and address.
 # Run after each deploy:
 #   ./hosts/guests/agent-alfred-vm/post-deploy-test.sh
@@ -40,6 +40,7 @@ check 1.1.1.1 443 open "internet egress"
 # ai sleeps when idle; the gate doubles as ground truth that its :22 is genuinely open.
 if ssh -o BatchMode=yes -o ConnectTimeout=8 "$jump" "timeout 3 bash -c 'echo > /dev/tcp/$ai/22'" 2>/dev/null; then
   check "$ai" 11434 open "ai Ollama (the hole)"
+  check "$ai" 8090 open "ai whisper (the hole)"
   check "$ai" 22 blocked "ai, other ports"
 else
   printf 'SKIP  %-22s ai is down; wake it to test the egress hole\n' "ai egress hole"

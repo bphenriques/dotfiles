@@ -1,9 +1,10 @@
 # AI Host
 
 NixOS box running local inference for the fleet: Ollama serves an OpenAI-compatible endpoint on the
-iGPU and ComfyUI serves image generation. `agent-alfred-vm`'s hermes, the chat UI and the laptop's coding
-agent all reach them through `fleet.ai`. Powered on over Wake-on-LAN when needed; suspend is off,
-so it is either running or off. What depends on it fails per request meanwhile and recovers on its own.
+iGPU, ComfyUI serves image generation and whisper.cpp (native, Vulkan) serves speech-to-text.
+`agent-alfred-vm`'s hermes, the chat UI and the laptop's coding agent all reach them through
+`fleet.ai`. Powered on over Wake-on-LAN when needed; suspend is off, so it is either running or off.
+What depends on it fails per request meanwhile and recovers on its own.
 
 ## Hardware
 
@@ -47,8 +48,9 @@ firmware change could move these offsets, so the script vets each record's tempe
 ```
   compute         ──┐                                     ┌──▶ Ollama  :11434  (chat, coding, hermes)
   laptop          ──┼──▶ nftables, per-host allow ────────┤
-  agent-alfred-vm ──┘    nothing behind it authenticates  └──▶ ComfyUI :8000   (image generation)
-   (via compute's NAT)                                               │
+  agent-alfred-vm ──┘    nothing behind it authenticates  ├──▶ ComfyUI :8000   (image generation)
+   (via compute's NAT)                                    └──▶ whisper :8090   (speech-to-text)
+                                                                     │
                                                                      ▼
                                                  Radeon 8060S iGPU, one pool, no arbitration
 
@@ -56,11 +58,11 @@ firmware change could move these offsets, so the script vets each record's tempe
   upsmon ───────────────────────────────────────────▶ storage NUT
 ```
 
-Neither endpoint authenticates, so reachability is the access control and `firewall.nix` is the whole
+No endpoint authenticates, so reachability is the access control and `firewall.nix` is the whole
 gate: compute and laptop, nothing else. `agent-alfred-vm` egresses through compute's NAT, which is why
 compute is on the list and why every guest on compute reaches the endpoints too.
 
-Ollama and ComfyUI share the one iGPU with no arbitration between them, so a long image generation
+All three share the one iGPU with no arbitration between them, so a long image generation
 stalls chat and coding for its duration.
 
 ## Models

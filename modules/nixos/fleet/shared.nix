@@ -79,6 +79,16 @@
           description = "Port the image API listens on.";
         };
       };
+      speechEndpoint = {
+        host = lib.mkOption {
+          type = lib.types.str;
+          description = "Address serving speech-to-text: whisper.cpp's server, a multipart `file` posted to `/inference`.";
+        };
+        port = lib.mkOption {
+          type = lib.types.port;
+          description = "Port the speech-to-text API listens on.";
+        };
+      };
       model = lib.mkOption {
         type = lib.types.str;
         description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";

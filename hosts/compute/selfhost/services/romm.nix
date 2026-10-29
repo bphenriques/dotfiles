@@ -97,6 +97,19 @@ in
     };
   };
 
+  # The module's cross-origin isolation map predates the js-dos player, whose DOSBox-X backend is a
+  # threaded build and refuses to start without SharedArrayBuffer. The trailing `=404` keeps
+  # /index.html a try_files *file*: as the fallback URI it would internally redirect into the
+  # module's `/` location, whose own add_header set replaces everything below.
+  services.nginx.virtualHosts.${config.services.romm.nginx.virtualHost}.locations."~ ^/rom/.*/jsdos$" = {
+    tryFiles = "$uri $uri/ /index.html =404";
+    extraConfig = ''
+      add_header Cache-Control "no-cache";
+      add_header Cross-Origin-Embedder-Policy "require-corp";
+      add_header Cross-Origin-Opener-Policy "same-origin";
+    '';
+  };
+
   # Upstream fixes the library to `${dataDir}/library`, so the NAS directories are linked in. Symlinks
   # rather than binds: the automount keeps its idle unmount and self-heals on a NAS reboot. They stay
   # read-only through the units' ProtectSystem=strict, matching the container's `:ro` volumes.

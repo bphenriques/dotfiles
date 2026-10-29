@@ -17,7 +17,6 @@ in
     ./seerr
     ./prowlarr
     ./romm.nix
-    ./romm-5.3.1.nix
     ./homepage
     ./transmission.nix
     ./wireguard.nix

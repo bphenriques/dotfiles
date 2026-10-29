@@ -1,7 +1,7 @@
-# Alfred's meals and cookidoo programs, tested on build.
+# Alfred's meals, cookidoo and drafts programs, tested on build.
 { pkgs, lib, facts }:
 let
-  inherit (facts) recipesRoot recipesUrl stateRoot cookidooCollection;
+  inherit (facts) recipesRoot recipesUrl stateRoot cookidooCollection modelUrl model speechUrl;
 
   # Filled once for real and once against ./fixtures for the tests.
   fill = name: values:
@@ -14,15 +14,19 @@ let
   cook = lib.getExe pkgs.cook-cli;
 
   tests = pkgs.runCommand "alfred-tools-tests" {
-    nativeBuildInputs = [ (pkgs.python3.withPackages (ps: with ps; [ cookidoo-api mcp pytest ])) ];
+    nativeBuildInputs = [ (pkgs.python3.withPackages (ps: with ps; [ cookidoo-api mcp recipe-scrapers pytest ])) ];
   } (let
     fixture = { tokenFile = "token.json"; planFile = "plan.json"; library = "${./fixtures}"; site = "https://recipes.test";
-                collection = "test"; cookidoo = "cookidoo"; inherit cook; };
+                collection = "test"; cookidoo = "cookidoo"; drafts = "drafts"; modelUrl = "http://model.test";
+                model = "test"; speechUrl = "http://speech.test"; ytDlp = "yt-dlp"; curl = "curl"; magick = "magick";
+                inherit cook; };
   in ''
     cp ${pkgs.writeText "cookidoo.py" (fill "cookidoo" fixture)} cookidoo.py
     cp ${pkgs.writeText "meals.py" (fill "meals" fixture)} meals.py
+    cp ${pkgs.writeText "drafts.py" (fill "drafts" fixture)} drafts.py
     cp ${./cookidoo/test_cookidoo.py} test_cookidoo.py
     cp ${./meals/test_meals.py} test_meals.py
+    cp ${./drafts/test_drafts.py} test_drafts.py
     python -m pytest -q -p no:cacheprovider
     touch $out
   '');
@@ -40,7 +44,12 @@ let
     planFile = "${stateRoot}/meals-plan.json"; library = "${recipesRoot}/library"; site = recipesUrl;
     cookidoo = lib.getExe cookidoo; inherit cook;
   };
+  # Drafts sit beside the library, so the site, plans and shopping lists never see them.
+  drafts = program "drafts" [ pkgs.python3Packages.recipe-scrapers ] {
+    library = "${recipesRoot}/library"; drafts = "${recipesRoot}/drafts"; inherit modelUrl model speechUrl cook;
+    ytDlp = lib.getExe pkgs.yt-dlp; curl = lib.getExe pkgs.curl; magick = lib.getExe' pkgs.imagemagick "magick";
+  };
 in
 {
-  inherit cookidoo meals;
+  inherit cookidoo meals drafts;
 }

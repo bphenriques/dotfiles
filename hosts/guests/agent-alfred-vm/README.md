@@ -2,7 +2,7 @@
 
 A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running `hermes-agent` as a personal assistant reachable via [the chat UI](../../compute/selfhost/services/open-webui) on compute:
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
-- Egress is internet-only plus two holes, `ai:11434` (Ollama) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
+- Egress is internet-only plus two holes, `ai:11434` and `ai:8090` (Ollama, whisper) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
 - Curated set of RW directories from the live NAS 
 - The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs; the one credential of its own is the Cookidoo token (see below)
 

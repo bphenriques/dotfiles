@@ -14,4 +14,6 @@
 ## Recipes
 
 - Cooklang recipes in `@recipesRoot@`, via the `cook` tools. Read `@recipesRoot@/AGENTS.md` before recipe work.
+- A recipe link (a web page, Instagram, YouTube, TikTok): load the `recipe-import` skill first, and never `fetch`
+  a video link.
 - Published at `@recipesUrl@/recipe/<name>.html` (percent-encoded).

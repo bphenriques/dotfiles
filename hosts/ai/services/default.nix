@@ -4,6 +4,7 @@
     ./comfyui.nix
     ./monitoring.nix
     ./ollama.nix
+    ./whisper.nix
   ];
 
   virtualisation = {

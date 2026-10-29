@@ -34,7 +34,6 @@ in
     };
 
     # Hibernation: resume from btrfs swapfile on the root partition. To get the offset: sudo btrfs inspect-internal map-swapfile -r /.swapvol/swapfile
-    initrd.systemd.enable = true;
     resumeDevice = "${rootDisk}-part2";
     kernelParams = [ "boot.shell_on_fail" "resume_offset=533760" ];
 

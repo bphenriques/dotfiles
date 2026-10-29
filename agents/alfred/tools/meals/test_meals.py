@@ -6,6 +6,7 @@ import shutil
 from datetime import date, timedelta
 
 import pytest
+from mcp.server.mcpserver.exceptions import UnexpectedToolError
 
 import cookidoo as c
 import meals as k
@@ -132,7 +133,7 @@ def test_resolve(text, iso):
 
 
 def test_resolve_outside_the_plan():
-    with pytest.raises(ValueError):
+    with pytest.raises(k.ToolError):
         k.resolve({"plan": plan()}, "15/11")
 
 
@@ -239,7 +240,7 @@ def test_a_frontmatter_that_cannot_be_rewritten_is_left_alone(library):
     path.unlink()
     path.write_text("---\nservings: 4\ntags:\n  - mains\n---\n\n@frango{1%kg}.\n\nAssar.\n")
     before = path.read_text()
-    with pytest.raises(ValueError):
+    with pytest.raises(k.ToolError):
         asyncio.run(k.rate_dish("frango", "liked"))
     assert path.read_text() == before
 
@@ -366,7 +367,7 @@ def test_commit_writes_the_menu_and_only_committed_plans_of_the_last_two_weeks_c
 def test_a_hung_cookidoo_ends_in_a_clear_error_not_a_hung_chat(library, fake_cookidoo, monkeypatch):
     (fake_cookidoo[0] / "slow").touch()
     monkeypatch.setattr(k, "COOKIDOO_TIMEOUT", 1)
-    with pytest.raises(RuntimeError, match="sem resposta do Cookidoo em 1 s"):
+    with pytest.raises(k.ToolError, match="sem resposta do Cookidoo em 1 s"):
         asyncio.run(k.cookidoo("week", "2026-10-26", "7"))
 
 
@@ -374,5 +375,68 @@ def test_swap_day_to_an_untagged_recipe_says_how_to_plan_it(library, fake_cookid
     found = k.library()
     k.save({"start": "2026-10-26", "days": 3, "exclude": [], "plan": k.compose(WEEK[:3], found["soup"], found["main"], {}, {}, {}, set())})
     (library / "Folhado de pato.cook").write_text("---\nservings: 6\ntime: 30\ntags: [simples]\n---\n\n@folhado de pato{2}.\n")
-    with pytest.raises(ValueError, match="`mains` tag"):
+    with pytest.raises(k.ToolError, match="`mains` tag"):
         asyncio.run(k.swap_day("4f", recipe="Folhado de pato"))
+
+
+SLOW = [{**recipe(f"slow{p}{n}", p, difficulty="medium"), "minutes": 90} for p in ("meat", "fish") for n in range(3)]
+
+
+def test_a_limit_keeps_every_main_quick_and_easy():
+    limits = {d.isoformat(): {"max_minutes": 30, "difficulty": "easy"} for d in WEEK}
+    p = k.compose(WEEK, SOUPS, MAINS + SLOW, {}, {}, {}, set(), limits=limits)
+    assert all(m["minutes"] <= 30 and m["difficulty"] == "easy" for m in mains_of(p))
+
+
+def test_a_day_limit_that_nothing_fits_says_so():
+    p = k.compose(WEEK[:2], SOUPS, SLOW, {}, {}, {}, set(), limits={WEEK[0].isoformat(): {"max_minutes": 20}})
+    assert mains_of(p)[0] is None and p["notes"] == ["seg 26/10: não há mais pratos (até 20 min) por usar."]
+
+
+def test_within_needs_the_field_it_limits():
+    assert not k.within({"minutes": None, "difficulty": "easy"}, {"max_minutes": 30})
+    assert k.within({"minutes": 40, "difficulty": "medium"}, {"difficulty": "medium"})
+    with pytest.raises(k.ToolError):
+        k.check(30, "quick")
+
+
+def test_a_week_limit_is_kept_by_a_different_plan_and_shown(library, fake_cookidoo):
+    said = asyncio.run(k.propose_week("2026-10-26", 3, max_minutes=60))
+    assert k.load()["limit"] == {"max_minutes": 60} and "Pratos até 60 min." in said
+    asyncio.run(k.propose_week("2026-10-26", 3, different=True))
+    assert k.load()["limit"] == {"max_minutes": 60}
+
+
+def test_a_plan_not_shown_lately_is_not_saved(library, fake_cookidoo):
+    found = k.library()
+    k.save({"start": "2026-10-27", "days": 5, "exclude": [],
+            "plan": k.compose(WEEK[1:6], found["soup"], found["main"], {}, {}, {}, set())})
+    k.PLAN.write_text(json.dumps(k.load() | {"shown": "2026-10-20T09:00:00"}))
+    with pytest.raises(k.ToolError, match="not shown in the last hour"):
+        asyncio.run(k.commit_plan())
+    asyncio.run(k.propose_week("2026-10-27", 5))
+    assert "Plano guardado" in asyncio.run(k.commit_plan())
+
+
+def test_a_tool_error_reaches_the_model_with_its_reason(library, fake_cookidoo):
+    with pytest.raises(k.ToolError, match="There is no plan yet") as raised:
+        asyncio.run(k.mcp.call_tool("swap_day", {"day": "qua"}))
+    assert not isinstance(raised.value, UnexpectedToolError)   # mcp hides the text of any other exception
+
+
+def test_showing_the_plan_mid_week_keeps_the_one_being_cooked(library, fake_cookidoo, monkeypatch):
+    asyncio.run(k.propose_week("2026-10-26", 7))
+    before = k.load()
+
+    class Wednesday(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 10, 28)
+    monkeypatch.setattr(k, "date", Wednesday)
+    asyncio.run(k.propose_week())
+    assert k.load() == before
+
+
+def test_find_prefers_the_exact_name():
+    dishes = [{"name": "Arroz de Pato no forno"}, {"name": "Arroz de Pato"}]
+    assert k.find(dishes, "arroz de pato")["name"] == "Arroz de Pato"

@@ -1,7 +1,7 @@
 { config, ... }:
 let
   inherit (config.fleet.lan) hosts subnet;
-  inherit (config.fleet.ai) endpoint imageEndpoint;
+  inherit (config.fleet.ai) endpoint imageEndpoint speechEndpoint;
   inherit (config.services.prometheus) exporters;
 in
 {
@@ -13,6 +13,7 @@ in
     ip saddr ${hosts.compute} tcp dport { ${toString exporters.node.port}, ${toString exporters.smartctl.port} } accept comment "exporters, scraped by compute"
     ip saddr { ${hosts.compute}, ${hosts.laptop} } tcp dport ${toString endpoint.port} accept comment "inference endpoint; compute covers agent-alfred-vm's NAT egress"
     ip saddr { ${hosts.compute}, ${hosts.laptop} } tcp dport ${toString imageEndpoint.port} accept comment "ComfyUI: its own UI from the laptop, the chat UI from compute"
+    ip saddr ${hosts.compute} tcp dport ${toString speechEndpoint.port} accept comment "speech-to-text, for agent-alfred-vm's video imports"
     ip saddr ${hosts.laptop} tcp dport 8080 accept comment "ad-hoc experiments; rootless publishing binds a host socket, so this chain does see it"
     ip saddr ${subnet} tcp dport 7880 accept comment "FaceFusion UI; the phone has no static lease, so the subnet not a host"
   '';

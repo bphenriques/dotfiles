@@ -15,6 +15,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - Profiles layer as `base.nix` (every machine, guests included) then `standalone.nix` (non-guests, imports base), then one kind: `headless.nix`, `graphical/` or `guest.nix`. Everything else is additive and picked per host.
 - Fleet facts (`hosts/shared.nix`) reach modules two ways. Read `config.fleet.*`, which is typed and available on every host built by `mkNixosHost`. The bare `fleet` specialArg is the same data untyped, and is only for microVM guests and home-manager, neither of which has `config.fleet`.
 - `fleet.*` is facts that are the same fleet-wide or a host's view of a shared fleet resource; `my.*` is mechanism and host-local option trees this repo defines.
+- Package overrides (`nixpkgs.overlays`, `overrideAttrs` of a nixpkgs package) live in `overlays/`, one file per concern registered in `overlays/default.nix`, never inline in a host. Temporary ones say what upstream change lets them go. Exception: bundling a host's own assets into a package (homepage's wallpaper and favicon) is host config and stays inline.
 - New option trees are declared under `modules/`. A host declares options itself only to extend a tree it consumes (as kavita and seerr do for `selfhost.users`), or when the defaults derive from host-only config (`my.storage` reads this host's disko pool).
 
 ## Naming Conventions

@@ -4,7 +4,7 @@ _final: prev: let
   images = {
     cleanuparr = {
       image = "ghcr.io/cleanuparr/cleanuparr";
-      version = "2.10.9";
+      version = "2.10.12";
       homepage = "https://github.com/Cleanuparr/Cleanuparr";
       updateInfo = { repo = "Cleanuparr/Cleanuparr"; stripPrefix = "v"; };
     };
@@ -17,14 +17,14 @@ _final: prev: let
     };
     livesync-cli = {
       image = "ghcr.io/vrtmrz/livesync-cli";
-      version = "1.0.32";
+      version = "1.0.42";
       tagSuffix = "-cli";
       homepage = "https://github.com/vrtmrz/obsidian-livesync";
       updateInfo = { repo = "vrtmrz/obsidian-livesync"; };
     };
     papra = {
       image = "ghcr.io/papra-hq/papra";
-      version = "26.6.2";
+      version = "26.7.1";
       tagSuffix = "-rootless";
       homepage = "https://github.com/papra-hq/papra";
       updateInfo = { repo = "papra-hq/papra"; stripPrefix = "@papra/app@"; };
@@ -38,7 +38,7 @@ _final: prev: let
     };
     ollama = {
       image = "docker.io/ollama/ollama";
-      version = "0.40.2";
+      version = "0.40.12";
       tagSuffix = "-rocm";   # The variant that carries the AMD GPU runtime.
       homepage = "https://github.com/ollama/ollama";
       updateInfo = { repo = "ollama/ollama"; stripPrefix = "v"; };
