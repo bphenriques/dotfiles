@@ -7,21 +7,6 @@
   };
 
   guests = {
-    cv-vm = {
-      ip = "10.20.1.12";
-      mac = "02:00:00:00:01:12";
-      vsockCid = 4;
-      serviceConfig = {
-        Slice = "throttled.slice";
-        CPUWeight = 10;
-        CPUQuota = "100%";
-        MemoryMax = "768M";
-      };
-      monitoring = {
-        traefikMetrics = true;
-      };
-    };
-
     # hermes-agent fronting the ai host's Ollama; the chat UI runs on compute.
     agent-alfred-vm = {
       ip = "10.20.1.13";

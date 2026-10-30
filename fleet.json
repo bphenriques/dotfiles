@@ -1,5 +1,5 @@
 {
-  "hosts": 6,
+  "hosts": 5,
   "services": {
     "alertmanager": {
       "category": "monitoring",

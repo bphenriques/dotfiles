@@ -68,45 +68,21 @@ resource "cloudflare_zone_setting" "security_header" {
   }
 }
 
-# Apex landing: a Cloudflare Tunnel (config_src = cloudflare -> ingress managed here) + apex CNAME.
-resource "cloudflare_zero_trust_tunnel_cloudflared" "cv" {
-  account_id = var.account_id
-  name       = var.tunnel.name
-  config_src = "cloudflare"
-}
-
-resource "cloudflare_zero_trust_tunnel_cloudflared_config" "cv" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.cv.id
-
-  config = {
-    ingress = [
-      {
-        hostname = var.tunnel.hostname
-        service  = var.tunnel.service
-      },
-      {
-        service = "http_status:404"
-      },
-    ]
-  }
-}
-
+# Apex landing: GitHub Pages (bphenriques/bphenriques), flattened by Cloudflare. Unproxied so GitHub can issue its certificate.
 resource "cloudflare_dns_record" "apex" {
   zone_id = var.zone_id
   name    = var.domain
   type    = "CNAME"
-  content = "${cloudflare_zero_trust_tunnel_cloudflared.cv.id}.cfargotunnel.com"
-  proxied = true
+  content = "bphenriques.github.io"
+  proxied = false
   ttl     = 1
 }
 
-data "cloudflare_zero_trust_tunnel_cloudflared_token" "cv" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.cv.id
-}
-
-output "tunnel_token" {
-  value     = data.cloudflare_zero_trust_tunnel_cloudflared_token.cv.token
-  sensitive = true
+# Verified domain: no other GitHub account can claim it for Pages.
+resource "cloudflare_dns_record" "github_pages_verification" {
+  zone_id = var.zone_id
+  name    = "_github-pages-challenge-bphenriques.${var.domain}"
+  type    = "TXT"
+  content = "\"${var.github_pages_verification}\""
+  ttl     = 1
 }

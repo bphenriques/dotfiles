@@ -36,7 +36,6 @@ Made some tweaks to ensure thermal stability with sustained workloads:
                        │  Alertmanager──▶ ntfy ──▶ push notif     │
                        │                                          │
                        │  sealed microVMs on an internal bridge:  │
-                       │    cv-vm           → Cloudflare (public) │
                        │    agent-alfred-vm → ai Ollama (private) │
                        │                                          │
                        │  rustic (cron) ──────────────────────────├──▶ Backblaze B2

@@ -29,7 +29,6 @@ in
   options.my.microvm.host.guests = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options.monitoring = {
-        traefikMetrics = lib.mkOption { type = lib.types.bool; default = false; };
         storageMount = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
       };
     });

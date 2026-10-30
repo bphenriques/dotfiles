@@ -25,7 +25,6 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 | [compute](./hosts/compute)                        | NixOS         | Compute headless server                                |
 | [storage](./hosts/storage)                        | NixOS         | Headless NAS                                           |
 | [ai](./hosts/ai)                                  | NixOS         | Headless AI inference                                  |
-| [cv-vm](./hosts/guests/cv-vm)                     | NixOS microVM | Public landing page exposed only via Cloudflare Tunnel |
 | [agent-alfred-vm](./hosts/guests/agent-alfred-vm) | NixOS microVM | Private AI assistant                                   |
 | [work-macos](./hosts/work-macos)                  | nix-darwin    | Work laptop                                            |
 

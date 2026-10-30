@@ -170,16 +170,6 @@ let
             { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"}''; legend = "Total"; }
             { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"} - node_filesystem_avail_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"}''; legend = "Used"; }
           ];
-        }] else [ ])
-        ++ (if mon.traefikMetrics then [{
-          id = base + 4;
-          title = "HTTP responses by status";
-          legend = "{{code}}";
-          unit = "reqps";
-          # entrypoint-level, not service: middleware rejections (auth/rate-limit) never reach a backend.
-          # Exclude "metrics" rather than pin "web" (cloudflared serves "tunnel"); this merges a guest's
-          # serving entrypoints, which is fine while each guest has exactly one.
-          expr = ''sum by (code) (rate(traefik_entrypoint_requests_total{${inst},entrypoint!="metrics"}[5m]))'';
         }] else [ ]);
     in
     mkRow {

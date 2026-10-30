@@ -18,10 +18,6 @@ variable "redirects" {
   type = map(string) # <sub> -> 302 target URL
 }
 
-variable "tunnel" {
-  type = object({
-    name     = string
-    hostname = string
-    service  = string
-  })
+variable "github_pages_verification" {
+  type = string # TXT value from github.com/settings/pages
 }
