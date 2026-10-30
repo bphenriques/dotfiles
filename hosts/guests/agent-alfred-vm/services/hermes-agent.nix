@@ -61,7 +61,7 @@ in
             port = alfredVm.apiPort;
 
             # Extra dropdown models need an explicit route or they fall back to model.default.
-            model_routes = lib.genAttrs [ fleet.ai.codingModel ] (m: aiEndpoint // { provider = "ollama"; model = m; });
+            model_routes = lib.genAttrs [ fleet.ai.codingModel ] (m: aiEndpoint // { provider = "custom:ai"; model = m; });
           };
         };
       }

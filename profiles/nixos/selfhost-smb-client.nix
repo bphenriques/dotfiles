@@ -11,6 +11,9 @@ in
     credentialsPath = config.sops.templates."homelab-samba-credentials".path;
   };
 
+  # User services (mpd) hold shares open; stop them before the shares and network go down or shutdown hangs.
+  systemd.services."user@".after = [ "remote-fs.target" ];
+
   # A share named after someone in the household registry is theirs; everything else is a household share.
   # The laptop carries no registry, so it marks nothing personal; nothing there reads the flag.
   fleet.shares = lib.mapAttrs (name: mount: {

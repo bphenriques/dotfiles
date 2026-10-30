@@ -17,7 +17,17 @@ in
     enable = true;
     uplink = "bond0";
     adminUser = config.users.users.bphenriques.name;
-    inherit (guests) bridge guests;
+    inherit (guests) bridge;
+    guests = lib.mkMerge [
+      guests.guests
+      {
+        agent-alfred-vm.egress = {
+          # The one LAN hole in the seal: the ai host's Ollama and speech-to-text.
+          allowLan = [{ host = "ai"; ports = [ config.fleet.ai.endpoint.port config.fleet.ai.speechEndpoint.port ]; }];
+          allowHostPorts = [ config.selfhost.apps.gitea.ssh.port ];   # for the agent's own repo
+        };
+      }
+    ];
   };
 
   # Without this virtiofsd can pin the empty mountpoint and hand the guest a share with nothing in it.

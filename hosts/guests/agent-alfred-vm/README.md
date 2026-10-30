@@ -40,7 +40,7 @@ Git over SSH to gitea on compute, as the `personal-agent` service account declar
   and survives reboots; root's home does not. Only the public half is declared on compute.
 - Remotes use `ssh://gitea@10.20.1.1:2222/<owner>/<repo>.git`: the bridge address rather than the public
   name, which resolves to compute's LAN address and stays dropped. The login is gitea's `RUN_USER`.
-- The hole is `egress.allowHostPorts = [ 2222 ]` in [guests.nix](../../compute/microvm/guests.nix), pinned
+- The hole is `egress.allowHostPorts` (gitea's SSH port) in compute's [microvm/host.nix](../../compute/microvm/host.nix), pinned
   to the bridge address so the same port on compute's LAN address remains unreachable.
 
 ## Admin console
@@ -56,10 +56,8 @@ is the fallback).
 
 ## Ops
 
-The fleet-wide SSH profile disables TCP forwarding, so `-J` cannot reach the bridge; relay through compute instead:
-
 ```bash
-ssh -o ProxyCommand='ssh root@compute nc %h %p' bphenriques@agent-alfred-vm
+ssh -J compute bphenriques@agent-alfred-vm
 
 systemctl status hermes-agent      # the assistant runtime
 journalctl -u hermes-agent -f      # tool calls and model errors

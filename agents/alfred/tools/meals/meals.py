@@ -35,6 +35,7 @@ WEEKDAYS = ("seg", "ter", "qua", "qui", "sex", "sáb", "dom")
 PROTEINS = {"meat": "carne", "fish": "peixe", "both": "carne e peixe", "vegetarian": "vegetariano", "unknown": "?"}
 SOUP_DAYS = 3
 RATINGS = ("liked", "never")   # tags, which the Cookidoo sync keeps on its copies
+GATHERING = "grupos"   # a tag for dishes meant for guests, planned only when the user names one
 MEAL_SERVINGS = 2   # one per adult; a main lasts as many days as its servings cover
 LEVELS = ("easy", "medium", "hard")
 SHOWN_FOR = timedelta(hours=1)   # a "sim" in a later chat must not save a plan the user no longer has in front of them
@@ -84,7 +85,7 @@ def library():
             "url": f"{SITE}/recipe/{quote(f.stem)}.html",
             "protein": protein([i["name"] for i in recipe["ingredients"]], meta.get("protein")),
             "minutes": meta.get("time"), "difficulty": meta.get("difficulty"), "servings": meta.get("servings"),
-            "rating": next((t for t in tags if t in RATINGS), None),
+            "rating": next((t for t in tags if t in RATINGS), None), "gathering": GATHERING in tags,
         })
     return found
 
@@ -182,8 +183,8 @@ def compose(span, soups, mains, planned, keep_mains, keep_soups, exclude, force=
     force, limits = force or {}, limits or {}
     rng = random.Random(span[0].isoformat())
     by_id = {r["id"]: r for r in soups + mains}
-    pool = [r for r in mains if r["id"] not in exclude and r.get("rating") != "never"]
-    soup_pool = [r for r in soups if r["id"] not in exclude and r.get("rating") != "never"]
+    pool = [r for r in mains if r["id"] not in exclude and r.get("rating") != "never" and not r.get("gathering")]
+    soup_pool = [r for r in soups if r["id"] not in exclude and r.get("rating") != "never" and not r.get("gathering")]
 
     def rank(r):
         return r["id"] in recent, r.get("rating") != "liked"
@@ -323,15 +324,19 @@ def write_menu(state):
 
 
 def summary(state):
-    """What Alfred says: one line per day with the dish names, then the plan's page once it is committed (the links
-    live there), or the question whether to commit it."""
-    plan, soups, lines = state["plan"], soup_starts(state["plan"]), []
+    """What Alfred says: a table of the dish names per day, then the plan's page once it is committed (the links
+    live there), or the question whether to commit it. A table, because the model redraws plain lines as one and
+    fills its cells by guessing."""
+    plan, lines = state["plan"], ["| Dia | Jantar | Sopa |", "|---|---|---|"]
     for d in plan["days"]:
-        main, soup = d["main"], soups.get(d["date"])
+        main = d["main"]
+        block = next(b for b in plan["soups"] if b["start"] <= d["date"] <= b["end"])
         dish = "por decidir" if not main else f"sobras de {main['name']}" if d.get("leftover") else main["name"]
-        lines.append(f"{label(d['date'])}: {dish}" + (f" · sopa: {soup['name']}" if soup else ""))
+        soup = "por decidir" if not block["soup"] else block["soup"]["name"] if block["start"] == d["date"] else "sobras"
+        lines.append(f"| {label(d['date'])} | {dish} | {soup} |")
+    lines.append("")
     if state.get("limit"):
-        lines.append(f"Pratos {described(state['limit'])}.")
+        lines.append(f"Pratos: {described(state['limit'])}.")
     lines += [f"Nota: {n}" for n in plan["notes"]]
     if state.get("committed"):
         lines += ["", f"Plano guardado: {SITE}/menu/plans/{quote(state['start'])}.html"]
@@ -420,7 +425,8 @@ def plain(text):
 
 
 def resolve(state, day):
-    """A day of the current plan from what the user or the table says: 2026-10-28, 28/10, qua, quarta or 4f (4ª feira)."""
+    """A day of the current plan from what the user or the table says: 2026-10-28, 28/10, qua, quarta, 4f (4ª feira)
+    or a dish on it."""
     dates = [d["date"] for d in state["plan"]["days"]]
     text = plain(day)
     nth = re.match(r"([2-6])\s*[af]", text)   # segunda-feira is the 2nd day, so 2f is Monday
@@ -429,7 +435,10 @@ def resolve(state, day):
         named = text[:3] == plain(WEEKDAYS[d.weekday()]) or nth and int(nth[1]) - 2 == d.weekday()
         if text in (iso, f"{d:%d/%m}", f"{d.day}/{d.month}") or named:
             return iso
-    raise ToolError(f"{day!r} is not a day of the current plan ({', '.join(map(label, dates))}).")
+    for d in state["plan"]["days"]:
+        if d["main"] and text in plain(d["main"]["name"]):
+            return d["date"]
+    raise ToolError(f"{day!r} is neither a day nor a dish of the current plan ({', '.join(map(label, dates))}).")
 
 
 def cooked_on(state, iso):
@@ -464,7 +473,7 @@ def kept(state, skip_day=None, skip_soup=None):
 @mcp.tool(structured_output=False)   # plain text for the user; a structured copy would only double it
 async def propose_week(start: str | None = None, days: int = 7, different: bool = False,
                        max_minutes: int | None = None, difficulty: str | None = None) -> str:
-    """The meal plan for the week: a short summary to relay as it is, with a link to the full plan. Shows the current plan if there
+    """The meal plan for the week: a table to relay as it is, with a link to the full plan. Shows the current plan if there
     is one for these days, and makes one otherwise.
 
     start: first day, YYYY-MM-DD (default: the current plan's while today is in it, otherwise today).
@@ -541,8 +550,8 @@ async def swap_day(day: str, protein: str | None = None, recipe: str | None = No
                    max_minutes: int | None = None, difficulty: str | None = None) -> str:
     """Change the main dish of one day of the current plan and return the updated summary to relay as it is.
 
-    day: as the user or the table says it, e.g. "quarta", "qua", "28/10" or "2026-10-28". A day of leftovers
-    changes the dish they come from. protein: "meat", "fish" or "vegetarian" when the user asks for one.
+    day: as the user or the table says it, e.g. "quarta", "qua", "28/10" or "2026-10-28", or the dish to replace,
+    e.g. "lasanha". A day of leftovers changes the dish they come from. protein: "meat", "fish" or "vegetarian" when the user asks for one.
     recipe: a dish the user named, by name. With neither, it picks another dish that follows the rules.
     max_minutes, difficulty ("easy", "medium" or "hard", the hardest allowed): for that day only, e.g.
     "quarta algo rápido" is 30 and "easy".

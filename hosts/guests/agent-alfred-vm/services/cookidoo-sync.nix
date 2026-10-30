@@ -16,6 +16,6 @@
   };
   systemd.timers.cookidoo-sync = {
     wantedBy = [ "timers.target" ];
-    timerConfig = { OnCalendar = "daily"; RandomizedDelaySec = "1h"; Persistent = true; };
+    timerConfig = { OnCalendar = "daily"; RandomizedDelaySec = "1h"; };
   };
 }

@@ -67,9 +67,17 @@ stalls chat and coding for its duration.
 
 ## Models
 
-`fleet.ai` declares the models the fleet depends on and they are pulled on boot. Anything pulled by
+`fleet.ai` declares the models the fleet depends on and they are pulled or created on boot. Anything pulled by
 hand survives deploys and reboots until removed; `ollama-models {list,pull,rm}` on compute is the way
 to manage those.
+
+`qwen3.8-flash-next` (`codingModel`) is created instead, from a sharded GGUF plus its MTP head (`DRAFT`),
+neither of which the registry serves. `ollama-configure` downloads the files and runs `ollama create` when
+the model is missing; to apply an edit to its Modelfile, `ollama rm` it and restart the unit.
+
+Loading it evicts the pinned `ai.model`: Ollama predicts 89.7 GiB (llama.cpp uses 66.7) and evicts when a
+load exceeds 80% of free memory. `ai.model` reloads on its next request, but with the default 10m keep-alive
+instead of the pin, so it can cold-load after idle periods until `ollama-configure` runs again.
 
 ## Monitoring
 

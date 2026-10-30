@@ -1,4 +1,4 @@
-{ config, inputs, pkgs, private, ... }:
+{ inputs, pkgs, private, ... }:
 {
   imports = [
     inputs.sops-nix.nixosModules.sops

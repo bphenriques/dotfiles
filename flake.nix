@@ -59,6 +59,11 @@
         (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
         (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations);
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
+      fleetFacts = import ./lib/fleet.nix {
+        inherit (self) nixosConfigurations;
+        inherit (nixpkgs) lib;
+        producers = [ "compute" ];   # selfhost hosts that supply landing-page services
+      };
     in {
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
@@ -66,12 +71,18 @@
           pkgs = nixpkgs.legacyPackages.${system};
         }
       );
-      apps      = import ./apps { inherit nixpkgs self generators; };
+      apps      = import ./apps { inherit nixpkgs self generators fleetFacts; };
       packages  = import ./packages { inherit nixpkgs generators; builders = self.lib.builders; };
       overlays  = import ./overlays inputs;
-      checks    = forAllSystems (system: {
-        formatting = treefmtEval.${system}.config.build.check self;
-      } // evalChecks system);
+      checks    = forAllSystems (system:
+        let pkgs = nixpkgs.legacyPackages.${system}; in {
+          formatting = treefmtEval.${system}.config.build.check self;
+          fleet-json = pkgs.runCommandLocal "fleet-json-check" { } ''
+            diff -u ${./fleet.json} ${(pkgs.callPackage ./apps/fleet-json { inherit fleetFacts; }).json} \
+              || { echo "fleet.json is stale: nix run .#fleet-json" >&2; exit 1; }
+            touch "$out"
+          '';
+        } // evalChecks system);
       formatter = forAllSystems (system: treefmtEval.${system}.config.build.wrapper);
       devShells = forAllSystems (system: {
         default = import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; };
@@ -85,11 +96,6 @@
       # Hosts
       nixosConfigurations = let
         computeMicrovm = import ./hosts/compute/microvm/guests.nix;
-        fleetFacts = import ./lib/fleet.nix {
-          inherit (self) nixosConfigurations;
-          inherit (nixpkgs) lib;
-          producers = [ "compute" ];   # selfhost hosts that supply landing-page services
-        };
         microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
           configPath = ./hosts/guests/${name};

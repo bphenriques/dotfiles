@@ -1,4 +1,4 @@
-{ nixpkgs, generators, self }:
+{ nixpkgs, generators, self, fleetFacts }:
 let
   inherit (generators) forAllSystems forLinuxSystems mergeAllSystems;
   inherit (nixpkgs) lib;
@@ -12,6 +12,7 @@ let
     in pkgsToApps {
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
       host-secrets = pkgs.callPackage ./host-secrets { inherit self; };
+      fleet-json = pkgs.callPackage ./fleet-json { inherit fleetFacts; };
       check-updates = pkgsWithOverlays.callPackage ./check-updates {
         inherit (self.lib.builders.${system}) writeNushellScript;
       };
@@ -23,5 +24,6 @@ let
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
+      seal-test = pkgs.callPackage ../hosts/compute/microvm/seal-test { inherit self; };
     });
 in mergeAllSystems [ crossPlatform linux ]

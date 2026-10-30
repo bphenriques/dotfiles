@@ -10,12 +10,13 @@ import tempfile
 import urllib.request
 from fractions import Fraction
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from recipe_scrapers import scrape_html
 
 LIBRARY = Path("@library@")
 DRAFTS = Path("@drafts@")
+PLAN = Path("@planFile@")
 MODEL_URL = "@modelUrl@"
 MODEL = "@model@"
 SPEECH_URL = "@speechUrl@"
@@ -24,6 +25,7 @@ CURL = "@curl@"
 MAGICK = "@magick@"
 COOK = "@cook@"
 TIMEOUT = 600   # seconds, for the model and the downloads
+MAX_IMAGE = 10 * 2**20
 
 VIDEO_HOSTS = ("instagram.com", "youtube.com", "youtu.be", "tiktok.com")
 CATEGORIES = {"mains": "main", "soups": "starter", "desserts": "dessert", "breakfast": "breakfast", "baby-food": None}
@@ -251,8 +253,8 @@ def cooklang(recipe, name, doubts=()):
     meta = {"servings": recipe["servings"], "time": recipe["time"], "time.prep": recipe["prep"],
             "time.cook": recipe["cook"], "course": CATEGORIES[recipe["category"]], "difficulty": recipe["difficulty"],
             "source": recipe["url"], "author": recipe["author"], "image": f"{name}.jpg" if recipe["image"] else None,
-            "tags": f"[{recipe['category']}]"}
-    front = "\n".join(f"{k}: {v}" for k, v in meta.items() if v)
+            "tags": [recipe["category"]]}
+    front = "\n".join(f"{k}: {json.dumps(v, ensure_ascii=False)}" for k, v in meta.items() if v)
     checks = "".join(f"{CHECK} {d}\n" for d in doubts) + ("\n" if doubts else "")
     return f"---\n{front}\n---\n\n{checks}{ingredients(recipe)}\n\n" + "\n\n".join(recipe["steps"]) + "\n"
 
@@ -274,9 +276,14 @@ def new(url, text, name=None, category=None):
     DRAFTS.mkdir(exist_ok=True)
     if recipe["image"]:
         try:
+            if urlparse(recipe["image"]).scheme not in ("http", "https"):   # urllib would read a file:// one
+                raise OSError("not a web address")
             with tempfile.NamedTemporaryFile() as f:
                 with urllib.request.urlopen(urllib.request.Request(recipe["image"], headers=UA), timeout=TIMEOUT) as r:
-                    shutil.copyfileobj(r, f)
+                    data = r.read(MAX_IMAGE + 1)
+                if len(data) > MAX_IMAGE:
+                    raise OSError("larger than 10 MiB")
+                f.write(data)
                 f.flush()
                 subprocess.run([MAGICK, f.name, str(DRAFTS / f"{name}.jpg")], check=True, capture_output=True)
         except (OSError, subprocess.CalledProcessError):
@@ -428,7 +435,29 @@ def relink(old, new):
         if (relinked := text.replace(f"@./{old}{{", f"@./{new}{{").replace(f"sobras: {old}", f"sobras: {new}")) != text:
             menu.write_text(relinked)
             changed += 1
+    relink_plan(old, new)
     return changed
+
+
+def relink_plan(old, new):
+    """Point the meals planner's current plan at a renamed recipe, or its next save writes the old name back."""
+    if not PLAN.exists():
+        return
+
+    def renamed(node):
+        if isinstance(node, list):
+            return [renamed(x) for x in node]
+        if not isinstance(node, dict):
+            return node
+        node = {k: renamed(v) for k, v in node.items()}
+        if node.get("source") == "library" and node.get("id") == old:
+            node |= {"id": new, "name": new, "url": node["url"].replace(f"/{quote(old)}.html", f"/{quote(new)}.html")}
+        return node
+    state = renamed(json.loads(PLAN.read_text()))
+    state["exclude"] = [new if x == old else x for x in state.get("exclude", [])]
+    tmp = PLAN.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, ensure_ascii=False))
+    tmp.replace(PLAN)
 
 
 def promote(name, replace=None):
@@ -459,6 +488,8 @@ def promote(name, replace=None):
         shutil.move(LIBRARY / f"{replace}.cook", DRAFTS / f"{replace}.cook.old")   # the user's undo
         if carried:
             shutil.move(LIBRARY / f"{replace}.jpg", photo)
+        elif (LIBRARY / f"{replace}.jpg").exists():   # the draft brings its own photo
+            shutil.move(LIBRARY / f"{replace}.jpg", DRAFTS / f"{replace}.jpg.old")
     saved = [draft.name] + ([photo.name] if photo.exists() else [])
     for f in saved:
         shutil.move(DRAFTS / f, LIBRARY / f)

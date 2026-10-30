@@ -61,7 +61,7 @@ in
     };
     model = "qwen3.6:35b-a3b";
     uncensoredModel = "huggingface.co/orcarouter/Qwen3.8-27B-Uncensored-GGUF";
-    codingModel = "qwen3.8:27b";
+    codingModel = "qwen3.8-flash-next";      # not in the registry: hosts/ai/services/ollama.nix creates it
     embeddingModel = "embeddinggemma";
     contextLength = 65536;              # Hermes requires >=64K
   };

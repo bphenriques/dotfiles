@@ -12,6 +12,7 @@ let
     in
     lib.throwIf (left != [ ]) "${name}.py: no value for ${lib.concatMapStringsSep ", " (m: "@${builtins.head m}@") left}" text;
   cook = lib.getExe pkgs.cook-cli;
+  planFile = "${stateRoot}/meals-plan.json";   # meals' current plan, which drafts relinks on a rename
 
   tests = pkgs.runCommand "alfred-tools-tests" {
     nativeBuildInputs = [ (pkgs.python3.withPackages (ps: with ps; [ cookidoo-api mcp recipe-scrapers pytest ])) ];
@@ -41,12 +42,11 @@ let
     inherit cook;
   };
   meals = program "meals" [ pkgs.python3Packages.mcp ] {
-    planFile = "${stateRoot}/meals-plan.json"; library = "${recipesRoot}/library"; site = recipesUrl;
-    cookidoo = lib.getExe cookidoo; inherit cook;
+    library = "${recipesRoot}/library"; site = recipesUrl; cookidoo = lib.getExe cookidoo; inherit planFile cook;
   };
   # Drafts sit beside the library, so the site, plans and shopping lists never see them.
   drafts = program "drafts" [ pkgs.python3Packages.recipe-scrapers ] {
-    library = "${recipesRoot}/library"; drafts = "${recipesRoot}/drafts"; inherit modelUrl model speechUrl cook;
+    library = "${recipesRoot}/library"; drafts = "${recipesRoot}/drafts"; inherit planFile modelUrl model speechUrl cook;
     ytDlp = lib.getExe pkgs.yt-dlp; curl = lib.getExe pkgs.curl; magick = lib.getExe' pkgs.imagemagick "magick";
   };
 in

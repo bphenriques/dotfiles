@@ -1,0 +1,208 @@
+{
+  "hosts": 6,
+  "services": {
+    "alertmanager": {
+      "category": "monitoring",
+      "displayName": "Alertmanager",
+      "homepage": "https://github.com/prometheus/alertmanager",
+      "listed": true,
+      "order": 1
+    },
+    "bazarr": {
+      "category": "media automation",
+      "displayName": "Bazarr",
+      "homepage": "https://www.bazarr.media",
+      "listed": false,
+      "order": 1
+    },
+    "bentopdf": {
+      "category": "productivity",
+      "displayName": "BentoPDF",
+      "homepage": "https://www.bentopdf.com",
+      "listed": true,
+      "order": 1
+    },
+    "cleanuparr": {
+      "category": "media automation",
+      "displayName": "Cleanuparr",
+      "homepage": "https://github.com/Cleanuparr/Cleanuparr",
+      "listed": false,
+      "order": 1
+    },
+    "cook-recipes": {
+      "category": "productivity",
+      "displayName": "Recipes",
+      "homepage": "https://cooklang.org",
+      "listed": true,
+      "order": 1
+    },
+    "filebrowser-quantum": {
+      "category": "files",
+      "displayName": "File Browser",
+      "homepage": "https://github.com/gtsteffaniak/filebrowser",
+      "listed": true,
+      "order": 1
+    },
+    "gitea": {
+      "category": "productivity",
+      "displayName": "Gitea",
+      "homepage": "https://about.gitea.com",
+      "listed": true,
+      "order": 1
+    },
+    "grafana": {
+      "category": "monitoring",
+      "displayName": "Grafana",
+      "homepage": "https://grafana.com",
+      "listed": true,
+      "order": 1
+    },
+    "hermes-webui": {
+      "category": "other",
+      "displayName": "Hermes WebUI",
+      "homepage": null,
+      "listed": true,
+      "order": 1
+    },
+    "home-assistant": {
+      "category": "home",
+      "displayName": "Home Assistant",
+      "homepage": "https://www.home-assistant.io",
+      "listed": true,
+      "order": 1
+    },
+    "immich": {
+      "category": "media",
+      "displayName": "Immich",
+      "homepage": "https://immich.app",
+      "listed": true,
+      "order": 1
+    },
+    "jellyfin": {
+      "category": "media",
+      "displayName": "Jellyfin",
+      "homepage": "https://jellyfin.org",
+      "listed": true,
+      "order": 1
+    },
+    "kapowarr": {
+      "category": "media automation",
+      "displayName": "Kapowarr",
+      "homepage": "https://github.com/Casvt/Kapowarr",
+      "listed": false,
+      "order": 1
+    },
+    "kavita": {
+      "category": "media",
+      "displayName": "Kavita",
+      "homepage": "https://www.kavitareader.com",
+      "listed": true,
+      "order": 1
+    },
+    "miniflux": {
+      "category": "productivity",
+      "displayName": "Miniflux",
+      "homepage": "https://miniflux.app",
+      "listed": true,
+      "order": 1
+    },
+    "navidrome": {
+      "category": "media",
+      "displayName": "Navidrome",
+      "homepage": "https://www.navidrome.org",
+      "listed": true,
+      "order": 1
+    },
+    "ntfy": {
+      "category": "monitoring",
+      "displayName": "Ntfy",
+      "homepage": "https://ntfy.sh",
+      "listed": true,
+      "order": 1
+    },
+    "open-webui": {
+      "category": "productivity",
+      "displayName": "Chat",
+      "homepage": "https://github.com/open-webui/open-webui",
+      "listed": true,
+      "order": 1
+    },
+    "papra": {
+      "category": "productivity",
+      "displayName": "Papra",
+      "homepage": "https://papra.app",
+      "listed": true,
+      "order": 1
+    },
+    "pocket-id": {
+      "category": "identity",
+      "displayName": "Pocket ID",
+      "homepage": "https://pocket-id.org",
+      "listed": true,
+      "order": 0
+    },
+    "prometheus": {
+      "category": "monitoring",
+      "displayName": "Prometheus",
+      "homepage": "https://prometheus.io",
+      "listed": true,
+      "order": 1
+    },
+    "prowlarr": {
+      "category": "downloads",
+      "displayName": "Prowlarr",
+      "homepage": "https://prowlarr.com",
+      "listed": false,
+      "order": 1
+    },
+    "radarr": {
+      "category": "media automation",
+      "displayName": "Radarr",
+      "homepage": "https://radarr.video",
+      "listed": true,
+      "order": 1
+    },
+    "radicale": {
+      "category": "productivity",
+      "displayName": "Radicale",
+      "homepage": "https://radicale.org",
+      "listed": true,
+      "order": 1
+    },
+    "romm": {
+      "category": "media",
+      "displayName": "RomM",
+      "homepage": "https://romm.app",
+      "listed": false,
+      "order": 1
+    },
+    "seerr": {
+      "category": "media",
+      "displayName": "Seerr",
+      "homepage": "https://github.com/fallenbagel/jellyseerr",
+      "listed": false,
+      "order": 1
+    },
+    "sonarr": {
+      "category": "media automation",
+      "displayName": "Sonarr",
+      "homepage": "https://sonarr.tv",
+      "listed": true,
+      "order": 1
+    },
+    "tinyauth": {
+      "category": "identity",
+      "displayName": "Tinyauth",
+      "homepage": "https://tinyauth.app",
+      "listed": true,
+      "order": 1
+    },
+    "transmission": {
+      "category": "downloads",
+      "displayName": "Transmission",
+      "homepage": "https://transmissionbt.com",
+      "listed": false,
+      "order": 1
+    }
+  }
+}

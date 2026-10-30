@@ -1,4 +1,4 @@
-{ config, pkgs, utils, ... }:
+{ config, lib, pkgs, utils, ... }:
 let
   cfg = config.selfhost;
   serviceCfg = cfg.services.home-assistant;
@@ -6,7 +6,6 @@ let
 
   donglePath = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90D1A20-if00";
   dongleUnit = "${utils.escapeSystemdPath donglePath}.device";
-  otbrDataDir = "/var/lib/otbr";
   inherit (config.services.home-assistant) configDir;
 in
 {
@@ -50,7 +49,7 @@ in
       "zeroconf"      # Device discovery
       "dhcp"          # Device discovery
 
-      # Thread / Matter (ZBT-2 dongle via OTBR container)
+      # Thread / Matter (ZBT-2 dongle via OTBR)
       "thread"
       "matter"
       "otbr"
@@ -86,7 +85,6 @@ in
     "f ${configDir}/automations.yaml 0644 ${User} ${Group} -"
     "f ${configDir}/scenes.yaml 0644 ${User} ${Group} -"
     "f ${configDir}/scripts.yaml 0644 ${User} ${Group} -"
-    "d ${otbrDataDir} 0755 root root -"
   ];
 
   # Matter controller: bridges HA to Matter/Thread devices via websocket (port 5580).
@@ -94,45 +92,28 @@ in
 
   # OpenThread Border Router: bridges the ZBT-2 dongle's Thread radio to the IP network.
   # Home Assistant connects to OTBR's REST API (port 8091) for Thread/Matter device management.
-  virtualisation.oci-containers.containers.otbr = {
-    # Upstream only publishes :latest and :main tags
-    image = "openthread/border-router:latest";
-    # Started by the dongle's .device unit, not at boot (see below).
-    autoStart = false;
-
-    environment = {
-      OT_RCP_DEVICE = "spinel+hdlc+uart:///dev/ttyACM0?uart-baudrate=460800";
-      OT_INFRA_IF = "bond0";
-      OT_THREAD_IF = "wpan0";
-      OT_REST_LISTEN_ADDR = "127.0.0.1";
-      OT_REST_LISTEN_PORT = "8091";
-      OT_LOG_LEVEL = "5";
-      TZ = config.fleet.locale.timezone;
+  services.openthread-border-router = {
+    enable = true;
+    backboneInterfaces = [ "bond0" ];
+    logLevel = "notice";
+    rest.listenPort = 8091;
+    radio = {
+      device = donglePath;
+      baudRate = 460800;
     };
-
-    volumes = [ "${otbrDataDir}:/data" ];
-    extraOptions = [
-      "--network=host"
-      "--device=${donglePath}:/dev/ttyACM0"
-      "--device=/dev/net/tun:/dev/net/tun"
-      "--cap-add=NET_ADMIN"
-      "--cap-add=NET_RAW"
-      "--memory=128m"
-    ];
   };
 
   # Gate OTBR on the dongle being plugged: the .device unit starts it on hotplug
   # (wantedBy), bindsTo stops it on unplug, so it never restart-loops when absent.
-  # (network-online ordering comes from the oci-containers module.)
-  systemd.services.podman-otbr = {
+  systemd.services.otbr-agent = {
     after = [ dongleUnit ];
     bindsTo = [ dongleUnit ];
-    wantedBy = [ dongleUnit ];
+    wantedBy = lib.mkForce [ dongleUnit ];
   };
 
   systemd.services.home-assistant = {
-    after = [ "podman-otbr.service" ];
-    wants = [ "podman-otbr.service" ];
+    after = [ "otbr-agent.service" ];
+    wants = [ "otbr-agent.service" ];
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";
@@ -144,7 +125,6 @@ in
   # IPv6 forwarding required for Thread border routing
   boot.kernel.sysctl = {
     "net.ipv6.conf.all.disable_ipv6" = 0;
-    "net.ipv6.conf.all.forwarding" = 1;
     "net.ipv6.conf.all.accept_ra" = 2;
     "net.ipv6.conf.all.accept_ra_rt_info_max_plen" = 64;
     "net.ipv6.conf.default.forwarding" = 1;

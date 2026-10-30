@@ -36,9 +36,7 @@
       monitoring = {
         storageMount = "/var/lib/hermes";
       };
-      # The one LAN hole in the seal: the ai host's Ollama and speech-to-text.
-      egress.allowLan = [{ host = "ai"; ports = [ 11434 8090 ]; }];
-      egress.allowHostPorts = [ 2222 ];   # gitea's built-in SSH (selfhost.apps.gitea.ssh.port), for the agent's own repo
+      # Egress holes are set in ./host.nix, where the ports they open are readable from config.
     };
   };
 }

@@ -61,7 +61,7 @@ def test_check_flags_missing_fields():
 def test_cooklang_parses(tmp_path):
     r = recipe(("cebola", "2", "", "picada (fina)", "2 cebolas"), ("sal", "", "", "", "sal"))
     text = d.cooklang(r, "Teste", ["sal: no quantity"])
-    assert "@cebola{2}(picada fina), @sal{}." in text and "image: Teste.jpg" in text and "tags: [mains]" in text
+    assert "@cebola{2}(picada fina), @sal{}." in text and 'image: "Teste.jpg"' in text and 'tags: ["mains"]' in text
     assert "---\n\n> Check: sal: no quantity\n\n@cebola" in text
     Path(tmp_path, "Teste.cook").write_text(text)
     subprocess.run([d.COOK, "doctor", "validate", "--strict", "-b", str(tmp_path)], check=True, capture_output=True)
@@ -81,7 +81,23 @@ def test_new_takes_the_name_and_category_the_user_gave(tmp_path, monkeypatch):
     monkeypatch.setattr(d, "from_text", lambda text: recipe(("ovo", "1", "", "", None), evidence=text, name="Pequeno-almoço",
                                                             category="desserts", image=None, notes=[]))
     d.new(None, "1 ovo", "Ovo cozido", "breakfast")
-    assert "tags: [breakfast]" in (d.DRAFTS / "Ovo cozido.cook").read_text()
+    assert 'tags: ["breakfast"]' in (d.DRAFTS / "Ovo cozido.cook").read_text()
+
+
+def test_cooklang_quotes_what_yaml_would_misread(tmp_path):
+    text = d.cooklang(recipe(("sal", "", "", "", "sal"), author="Receitas: rápidas"), "Teste")
+    assert 'author: "Receitas: rápidas"' in text
+    Path(tmp_path, "Teste.cook").write_text(text)
+    subprocess.run([d.COOK, "doctor", "validate", "--strict", "-b", str(tmp_path)], check=True, capture_output=True)
+
+
+def test_new_saves_no_photo_that_is_not_a_web_address(tmp_path, monkeypatch):
+    library(tmp_path, monkeypatch, "")
+    monkeypatch.setattr(d, "translate", lambda r, keep_name: False)
+    monkeypatch.setattr(d, "from_page", lambda url: recipe(("sal", "", "", "", "sal"), name="Bom", image="file:///etc/passwd", notes=[]))
+    d.new("https://example.test/r", None)
+    assert "the photo could not be saved: file:///etc/passwd" in (d.DRAFTS / "Bom.cook").read_text()
+    assert not (d.DRAFTS / "Bom.jpg").exists()
 
 
 def test_new_keeps_an_existing_draft(tmp_path, monkeypatch):
@@ -173,12 +189,29 @@ def test_promote_replaces_a_recipe_and_carries_its_photo_and_plan_links(tmp_path
     (d.LIBRARY / "Garlic toast.jpg").write_bytes(b"jpg")
     (d.LIBRARY / "plans").mkdir()
     (d.LIBRARY / "plans" / "w.menu").write_text("- @./Garlic toast{} \\\n- sobras: Garlic toast\n")
+    dish = {"source": "library", "id": "Garlic toast", "name": "Garlic toast", "url": "https://recipes.test/recipe/Garlic%20toast.html"}
+    monkeypatch.setattr(d, "PLAN", tmp_path / "plan.json")
+    d.PLAN.write_text(json.dumps({"exclude": ["Garlic toast"], "plan": {"days": [{"main": dish}], "soups": []}}))
     d.DRAFTS.mkdir()
     (d.DRAFTS / "Torrada de alho.cook").write_text("---\nservings: 2\ntime: 10\ndifficulty: easy\ntags: [breakfast]\n---\n\n@alho{1}.\n\nTorrar.\n")
     d.promote("Torrada de alho", "Garlic toast")
     assert sorted(p.name for p in d.LIBRARY.glob("*.*")) == ["Torrada de alho.cook", "Torrada de alho.jpg"]
     assert (d.DRAFTS / "Garlic toast.cook.old").exists() and "image: Torrada de alho.jpg" in (d.LIBRARY / "Torrada de alho.cook").read_text()
     assert (d.LIBRARY / "plans" / "w.menu").read_text() == "- @./Torrada de alho{} \\\n- sobras: Torrada de alho\n"
+    assert json.loads(d.PLAN.read_text()) == {"exclude": ["Torrada de alho"], "plan": {"days": [{"main": {
+        "source": "library", "id": "Torrada de alho", "name": "Torrada de alho",
+        "url": "https://recipes.test/recipe/Torrada%20de%20alho.html"}}], "soups": []}}
+
+
+def test_promote_keeps_the_replaced_photo_when_the_draft_has_its_own(tmp_path, monkeypatch):
+    library(tmp_path, monkeypatch, "", **{"Garlic toast": "---\nservings: 2\ntime: 10\ndifficulty: easy\ntags: [breakfast]\n---\n\n@alho{1}."})
+    (d.LIBRARY / "Garlic toast.jpg").write_bytes(b"old")
+    d.DRAFTS.mkdir()
+    (d.DRAFTS / "Torrada de alho.cook").write_text("---\nservings: 2\ntime: 10\ndifficulty: easy\ntags: [breakfast]\n---\n\n@alho{1}.\n\nTorrar.\n")
+    (d.DRAFTS / "Torrada de alho.jpg").write_bytes(b"new")
+    d.promote("Torrada de alho", "Garlic toast")
+    assert sorted(p.name for p in d.LIBRARY.glob("*.*")) == ["Torrada de alho.cook", "Torrada de alho.jpg"]
+    assert (d.DRAFTS / "Garlic toast.jpg.old").read_bytes() == b"old"
 
 
 def test_a_brazilian_word_is_a_check(tmp_path):

@@ -38,7 +38,7 @@ _final: prev: let
     };
     ollama = {
       image = "docker.io/ollama/ollama";
-      version = "0.40.12";
+      version = "0.40.13";
       tagSuffix = "-rocm";   # The variant that carries the AMD GPU runtime.
       homepage = "https://github.com/ollama/ollama";
       updateInfo = { repo = "ollama/ollama"; stripPrefix = "v"; };

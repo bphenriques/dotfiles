@@ -19,7 +19,6 @@
 
   systemd.services = lib.genAttrs [ "podman-ollama" "podman-comfyui" ] (_: {
     serviceConfig = {
-      Restart = "on-failure";
       RestartSec = "10s";
       RestartMaxDelaySec = "5min";
       RestartSteps = 5;

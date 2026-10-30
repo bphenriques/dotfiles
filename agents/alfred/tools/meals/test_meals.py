@@ -132,6 +132,12 @@ def test_resolve(text, iso):
     assert k.resolve({"plan": plan()}, text) == iso
 
 
+def test_resolve_a_dish_of_the_plan():
+    p = plan()
+    dish = next(d for d in p["days"] if d["main"] and d["date"] != WEEK[0].isoformat())
+    assert k.resolve({"plan": p}, dish["main"]["name"].upper()) == dish["date"]
+
+
 def test_resolve_outside_the_plan():
     with pytest.raises(k.ToolError):
         k.resolve({"plan": plan()}, "15/11")
@@ -140,7 +146,7 @@ def test_resolve_outside_the_plan():
 def test_a_draft_asks_to_be_saved_and_a_committed_plan_links_its_page():
     draft = k.summary({"start": "2026-10-26", "plan": plan()})
     lines = draft.splitlines()
-    assert lines[0].startswith("seg 26/10: ") and " · sopa: " in lines[0] and " · sopa: " not in lines[1]
+    assert lines[0] == "| Dia | Jantar | Sopa |" and lines[2].startswith("| seg 26/10 | ") and lines[3].endswith(" | sobras |")
     assert lines[-1] == "Rascunho, ainda não guardado. Guardo este plano?" and "https://" not in draft
     committed = k.summary({"start": "2026-10-26", "plan": plan(), "committed": True})
     assert committed.splitlines()[-1] == "Plano guardado: https://recipes.test/menu/plans/2026-10-26.html"
@@ -149,7 +155,7 @@ def test_a_draft_asks_to_be_saved_and_a_committed_plan_links_its_page():
 def test_the_summary_names_the_leftovers():
     meat = recipe("meat", "meat", servings=4)
     lines = k.summary({"start": "2026-10-26", "plan": plan(span=WEEK[:2], mains=[meat])}).splitlines()
-    assert lines[0].startswith("seg 26/10: meat · sopa: soup") and lines[1] == "ter 27/10: sobras de meat"
+    assert lines[2].startswith("| seg 26/10 | meat | soup") and lines[3] == "| ter 27/10 | sobras de meat | sobras |"
 
 
 def test_recent_dishes_come_last_among_those_that_fit():
@@ -170,6 +176,12 @@ def test_never_is_not_planned_and_liked_comes_first():
     mains = [{**r, "rating": "never" if r["id"] == "meat0" else "liked" if r["id"] == "fish2" else None} for r in mains]
     p = plan(span=WEEK[:4], mains=mains)
     assert "meat0" not in {m["id"] for m in mains_of(p)} and "fish2" in {m["id"] for m in mains_of(p)}
+
+
+def test_a_gathering_dish_is_planned_only_when_named():
+    mains = [{**r, "gathering": r["id"] == "fish0"} for r in MAINS]
+    assert "fish0" not in {m["id"] for m in mains_of(plan(mains=mains))}
+    assert next(d["main"]["id"] for d in plan(mains=mains, keep_mains={WED: "fish0"})["days"] if d["date"] == WED) == "fish0"
 
 
 def test_library_reads_the_fixtures():
@@ -402,7 +414,7 @@ def test_within_needs_the_field_it_limits():
 
 def test_a_week_limit_is_kept_by_a_different_plan_and_shown(library, fake_cookidoo):
     said = asyncio.run(k.propose_week("2026-10-26", 3, max_minutes=60))
-    assert k.load()["limit"] == {"max_minutes": 60} and "Pratos até 60 min." in said
+    assert k.load()["limit"] == {"max_minutes": 60} and "Pratos: até 60 min." in said
     asyncio.run(k.propose_week("2026-10-26", 3, different=True))
     assert k.load()["limit"] == {"max_minutes": 60}
 
