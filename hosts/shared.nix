@@ -1,6 +1,4 @@
 let
-  computeGuests = import ./compute/microvm/guests.nix;
-
   # Static DHCP IPs. I should have disabled DHCP but here we are.
   lan = {
     subnet = "192.168.1.0/24";
@@ -29,7 +27,7 @@ in
     name = "storage";
     host = lan.hosts.storage;
   };
-  microvms.compute = builtins.mapAttrs (_: g: g.ip) computeGuests.guests; # Used to seed /etc/hosts and ssh jump
+  microvms = builtins.mapAttrs (_: table: builtins.mapAttrs (_: g: g.ip) table.guests) (import ./microvms.nix); # Used to seed /etc/hosts and ssh jump
 
   # Required to define how transmission maps downloads to folders and enable declaratively adding them.
   downloadCategories = {

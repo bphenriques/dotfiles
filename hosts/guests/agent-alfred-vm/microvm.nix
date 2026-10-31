@@ -3,7 +3,7 @@
   microvm = {
     hypervisor = "cloud-hypervisor";
     vcpu = 2;
-    mem = 4096;            # the web UI runs agent turns in-process, alongside the gateway's own
+    mem = 4096;
     balloon = true;        # virtio-balloon: host can reclaim guest memory the VM isn't using
     deflateOnOOM = true;   # on guest OOM, auto-deflate the balloon before the OOM killer fires
 

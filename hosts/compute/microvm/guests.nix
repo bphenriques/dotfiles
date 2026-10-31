@@ -1,4 +1,4 @@
-# Allocation table: read by flake.nix to build each guest, and by ./host.nix to drive the bridge and seal.
+# Allocation table: listed in ../../microvms.nix, and read by ./host.nix to drive the bridge and seal.
 {
   bridge = {
     name = "compute-microvm";   # 15-char IFNAMSIZ limit
@@ -17,9 +17,6 @@
         CPUWeight = 10;
         CPUQuota = "100%";
         MemoryMax = "5G";   # guest RAM plus hypervisor overhead: the cap has to sit above microvm.mem
-      };
-      monitoring = {
-        storageMount = "/var/lib/hermes";
       };
       # Egress holes are set in ./host.nix, where the ports they open are readable from config.
     };

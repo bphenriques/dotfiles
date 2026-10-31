@@ -1,8 +1,7 @@
 # Single dashboard for the fleet: an always-visible strip (host, NAS and guests), then one collapsed
 # detail row per entity, host first (richest), then the NAS, then each microVM guest. Guest rows are
-# generated from config.my.microvm.host.guests (the table that also drives scrape/alerts), so
-# a new guest needs no edit here. Host and guest CPU/IO share one time axis for easy correlation:
-# the guests run on the host's own cores.
+# generated from fleet.microvms (the table that also drives scrape/alerts), so a new guest needs no
+# edit here.
 { lib, hostName, guests, storageName, aiName }:
 let
   inherit (import ./lib.nix { inherit lib; }) mkPanel mkStat mkRow layout2 fullW;
@@ -156,21 +155,21 @@ let
 
   mkVmRow = i: name:
     let
-      mon = guests.${name}.monitoring;
+      stateRoot = guests.${name};
       inst = ''instance="${name}"'';
       rowY = 9 + i;  # after the fleet strip (y0 row, y1..5 tiles), host (y6), NAS (y7) and ai (y8)
       base = 1000 + 100 * i;   # clear of the fixed rows, with room for any number of guests
       specs =
         common base inst
-        ++ (if mon.storageMount != null then [{
+        ++ [{
           id = base + 3;
-          title = "Storage (${mon.storageMount})";
+          title = "Storage (${stateRoot})";
           unit = "bytes";
           expr = [
-            { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"}''; legend = "Total"; }
-            { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"} - node_filesystem_avail_bytes{${inst},mountpoint="${mon.storageMount}",fstype="ext4"}''; legend = "Used"; }
+            { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${stateRoot}",fstype="ext4"}''; legend = "Total"; }
+            { expr = ''node_filesystem_size_bytes{${inst},mountpoint="${stateRoot}",fstype="ext4"} - node_filesystem_avail_bytes{${inst},mountpoint="${stateRoot}",fstype="ext4"}''; legend = "Used"; }
           ];
-        }] else [ ]);
+        }];
     in
     mkRow {
       id = base;

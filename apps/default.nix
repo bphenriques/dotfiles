@@ -24,6 +24,6 @@ let
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
-      seal-test = pkgs.callPackage ../hosts/compute/microvm/seal-test { inherit self; };
+      seal-test = pkgs.callPackage ./seal-test { inherit self; };
     });
 in mergeAllSystems [ crossPlatform linux ]

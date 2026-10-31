@@ -3,7 +3,6 @@
   imports = [
     ./cookidoo-sync.nix
     ./hermes-agent.nix
-    ./hermes-webui.nix
   ];
 
   _module.args.alfred = import ../../../../agents/alfred {

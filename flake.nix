@@ -42,8 +42,6 @@
     microvm.inputs.nixpkgs.follows = "nixpkgs";
     hermes-agent.url = "github:NousResearch/hermes-agent/v0.22.0";   # Local-LLM assistant
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-webui.url = "github:nesquena/hermes-webui/exp-v0.52.449";    # Browser and phone front end over the agent's own state; upstream tags every build under `exp-`
-    hermes-webui.inputs.nixpkgs.follows = "nixpkgs";
     hermes-agent.inputs.home-manager.follows = "home-manager";
     omp.url = "github:can1357/oh-my-pi/v18.11.0";                        # Terminal coding agent. No binary cache, so keep upstream's tested nixpkgs.
   };
@@ -95,16 +93,15 @@
 
       # Hosts
       nixosConfigurations = let
-        computeMicrovm = import ./hosts/compute/microvm/guests.nix;
-        microvmGuests = nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
+        microvmGuests = nixpkgs.lib.concatMapAttrs (_: table: nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
           configPath = ./hosts/guests/${name};
           inherit fleetFacts;
           guestPlacement = {
             inherit (entry) ip mac vsockCid;
-            inherit (computeMicrovm.bridge) gateway prefixLength;
+            inherit (table.bridge) gateway prefixLength;
           };
-        }) computeMicrovm.guests;
+        }) table.guests) (import ./hosts/microvms.nix);
       in {
         laptop = mkNixosHost {
           hostName = "laptop";

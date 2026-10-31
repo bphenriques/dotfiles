@@ -24,14 +24,11 @@ let
     };
   };
 
-  # Guests run the same node_exporter, so they join the same job.
-  microvm = config.my.microvm.host;
-  guestEntries = lib.optionalAttrs microvm.enable (
-    lib.mapAttrs (_: g: {
-      address = g.ip;
-      ports = { node = 9100; };
-    }) microvm.guests
-  );
+  # Guests run the same node_exporter, so they join the same job, whichever host runs them.
+  guestEntries = lib.mapAttrs (_: ip: {
+    address = ip;
+    ports = { node = 9100; };
+  }) (lib.concatMapAttrs (_: guests: guests) config.fleet.microvms);
 
   fleet = hostEntries // guestEntries;
 

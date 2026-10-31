@@ -343,27 +343,6 @@
         "type": "github"
       }
     },
-    "hermes-webui": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791581145,
-        "narHash": "sha256-GjobD+b5RSNPZv9AXAL/19knlcbvkRsb7JRTZvkOC70=",
-        "owner": "nesquena",
-        "repo": "hermes-webui",
-        "rev": "8fadf85ac7445bb4fd9813333e69cae1d1c128fa",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nesquena",
-        "ref": "exp-v0.52.449",
-        "repo": "hermes-webui",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -707,7 +686,6 @@
         "disko": "disko",
         "dotfiles-private": "dotfiles-private",
         "hermes-agent": "hermes-agent",
-        "hermes-webui": "hermes-webui",
         "home-manager": "home-manager",
         "microvm": "microvm",
         "nix-darwin": "nix-darwin",

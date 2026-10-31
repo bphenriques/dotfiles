@@ -1,6 +1,5 @@
 { config, ... }:
 let
-  cfg = config.selfhost;
   alfredVmIp = config.fleet.microvms.compute.agent-alfred-vm;
   alfredVm = import ../../../guests/agent-alfred-vm/settings.nix;
 in
@@ -17,24 +16,5 @@ in
     healthcheck.path = "/health";   # the one route that answers without the key
     systemdServices = [ ];          # the unit runs in the guest, so there is nothing here to attach to
     integrations.homepage.enable = false;   # an API with no browser UI, so a tile would lead nowhere
-  };
-
-  selfhost.services.hermes-webui = {
-    displayName = "Hermes WebUI";
-    meta.description = "Assistant dashboard";
-    host = alfredVmIp;
-    port = alfredVm.webuiPort;
-    access.allowedGroups = [ cfg.groups.admin ];
-    access.model = "oidc";
-    access.oidc.callbackURLs = [ "${cfg.services.hermes-webui.publicUrl}/api/auth/oidc/callback" ];
-    healthcheck.path = "/health";
-    systemdServices = [ ];
-    extraConfig.landingPage.enable = true;
-
-    # Belt and braces behind Pocket ID: this is the one route whose backend holds the vault.
-    traefik.middlewares.hermes-webui-ratelimit.rateLimit = {
-      average = 5;
-      burst = 10;
-    };
   };
 }

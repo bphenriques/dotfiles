@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 
-jump=compute user=bphenriques
+user=bphenriques
 only=${1:-}
 current="" fail=0
 
@@ -10,7 +10,7 @@ probe() {
   ssh -n -o BatchMode=yes -o ConnectTimeout=8 "$@" "timeout 3 bash -c 'echo > /dev/tcp/$host/$port'" 2>/dev/null
 }
 
-while read -r vm host port want label; do
+while read -r jump vm host port want label; do
   [ -z "$only" ] || [ "$vm" = "$only" ] || continue
   if [ "$vm" != "$current" ]; then
     current=$vm
@@ -19,7 +19,7 @@ while read -r vm host port want label; do
     ssh -n -o BatchMode=yes -o ConnectTimeout=8 -J "$jump" "$user@$vm" true 2>/dev/null \
       || { echo "ABORT: cannot ssh to $vm via $jump" >&2; exit 2; }
   fi
-  # Only a target compute reaches proves anything: then "blocked" can only mean the seal dropped it.
+  # Only a target the jump host reaches proves anything: then "blocked" can only mean the seal dropped it.
   if ! probe "$host" "$port" "$jump"; then
     printf 'SKIP  %-26s %s:%s unreachable from %s\n' "$label" "$host" "$port" "$jump"
     continue

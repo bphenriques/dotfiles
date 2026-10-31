@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  self,
   ...
 }:
 let
@@ -20,7 +21,8 @@ let
 
   computeDashboard = json.generate "compute.json" (import ./dashboard.nix {
     hostName = config.networking.hostName;
-    guests = config.my.microvm.host.guests;
+    guests = lib.mapAttrs (name: _: self.nixosConfigurations.${name}.config.my.microvm.guest.stateRoot)
+      (lib.concatMapAttrs (_: guests: guests) config.fleet.microvms);
     inherit lib storageName aiName;
   });
 in

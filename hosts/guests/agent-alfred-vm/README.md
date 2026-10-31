@@ -4,7 +4,7 @@ A **sealed** cloud-hypervisor microVM on [`compute`](../../compute) running `her
 - No inference here; the model runs on the [`ai`](../../ai) host, tools and memory stay local
 - Egress is internet-only plus two holes, `ai:11434` and `ai:8090` (Ollama, whisper) and the host's bridge address on `2222` (gitea's SSH), never the rest of the LAN
 - Curated set of RW directories from the live NAS 
-- The API (`:8642`) and the admin console (`:8787`) are bridge-only, both fronted by compute's Traefik: the API gated by a key compute generates, the console by Pocket ID. Credentials arrive read-only over virtiofs; the one credential of its own is the Cookidoo token (see below)
+- The API (`:8642`) is bridge-only, fronted by compute's Traefik and gated by a key compute generates. It arrives read-only over virtiofs; the one credential of its own is the Cookidoo token (see below)
 
 ## What the agent may do to the vault
 
@@ -42,17 +42,6 @@ Git over SSH to gitea on compute, as the `personal-agent` service account declar
   name, which resolves to compute's LAN address and stays dropped. The login is gitea's `RUN_USER`.
 - The hole is `egress.allowHostPorts` (gitea's SSH port) in compute's [microvm/host.nix](../../compute/microvm/host.nix), pinned
   to the bridge address so the same port on compute's LAN address remains unreachable.
-
-## Admin console
-
-[hermes-webui](https://github.com/nesquena/hermes-webui) at `https://hermes-webui.<domain>`, which is the
-only surface onto the agent's memory, skills, cron jobs and sessions: the OpenAI-compatible API the chat UI
-speaks has no concept of them. It is a front end over the same `HERMES_HOME`, not a second agent, so it runs
-as `hermes` and its own state sits in `webui/` inside that home.
-
-Its password auth is unused: Pocket ID is the gate, and the stored `password_hash` in
-`$HERMES_HOME/webui/settings.json` is what to clear if it ever comes back (the env var outranks it, the file
-is the fallback).
 
 ## Ops
 

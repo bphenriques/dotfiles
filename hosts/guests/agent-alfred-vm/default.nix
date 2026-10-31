@@ -14,7 +14,7 @@ in
   my.microvm.guest = {
     inherit (alfredVm) stateRoot;        # SSH host key + hermes state
     tap = "vm-alfred";                   # vm-<hostname> would exceed IFNAMSIZ
-    ingressPorts = [ alfredVm.apiPort alfredVm.webuiPort ]; # hermes API and web UI, both fronted by compute's Traefik
+    ingressPorts = [ alfredVm.apiPort ]; # hermes API, fronted by compute's Traefik
   };
 
   system.stateVersion = "26.05";
