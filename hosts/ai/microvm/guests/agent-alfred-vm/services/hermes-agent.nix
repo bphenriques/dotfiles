@@ -59,7 +59,7 @@ in
           enabled = true;
           extra = {
             host = "0.0.0.0";
-            port = alfredVm.apiPort;
+            inherit (fleet.ai.assistantEndpoint) port;
 
             # Extra dropdown models need an explicit route or they fall back to model.default.
             model_routes = lib.genAttrs [ fleet.ai.codingModel ] (m: aiEndpoint // { provider = "custom:ai"; model = m; });

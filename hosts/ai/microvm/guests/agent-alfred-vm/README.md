@@ -43,6 +43,10 @@ Git over SSH to gitea on compute, as the `personal-agent` service account declar
 
 ## Accepted trade-offs
 
+- **The agent can be steered by what it reads.** Web pages, captions and notes reach a model with a
+  terminal, write and delete on the vault and recipes, push to its repo and open internet egress, so a
+  prompt injection can alter notes or send them out. The VM, the folder-scoped NAS principal and the B2
+  backup bound the damage; nothing prevents it.
 - **No backup of `/var/lib/hermes`.** It holds the agent's memory, sessions and tokens (~50M), all
   rebuildable: what matters lives on the NAS, which is backed up. Losing it means a new SSH host key, so
   re-key the guest's sops file from the laptop (`base-microvm`), sign in to Cookidoo and redo the forge key.

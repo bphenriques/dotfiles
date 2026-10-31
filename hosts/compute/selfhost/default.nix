@@ -92,7 +92,10 @@ in
       bentopdf.enable = true;
       gitea = {
         enable = true;
-        ssh.enable = true;
+        ssh = {
+          enable = true;
+          inherit (config.fleet.forge.sshEndpoint) port;
+        };
       };
     };
 

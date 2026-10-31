@@ -1,7 +1,6 @@
-{ config, self, ... }:
+{ config, ... }:
 let
-  alfredVmIp = config.fleet.microvms.ai.agent-alfred-vm;
-  apiPort = self.nixosConfigurations.agent-alfred-vm.config.services.hermes-agent.settings.platforms.api_server.extra.port;
+  inherit (config.fleet.ai) assistantEndpoint;
 in
 {
   # The guest keeps a copy in its own sops: to rotate, delete this file and re-copy it there.
@@ -12,8 +11,7 @@ in
     displayName = "Hermes";
     meta.description = "Assistant API";
     subdomain = "hermes";
-    host = alfredVmIp;
-    port = apiPort;
+    inherit (assistantEndpoint) host port;
     access.model = "native";        # API_SERVER_KEY is the whole lock
     healthcheck.path = "/health";   # the one route that answers without the key
     systemdServices = [ ];          # the unit runs in the guest, so there is nothing here to attach to

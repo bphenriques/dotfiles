@@ -1,4 +1,4 @@
-{ config, lib, self, ... }:
+{ config, lib, ... }:
 let
   guests = import ./guests;
 in
@@ -15,7 +15,7 @@ in
           allowHostPorts = [ config.fleet.ai.endpoint.port config.fleet.ai.speechEndpoint.port ];   # Ollama and speech-to-text
           allowLan = [
             { host = "storage"; ports = [ 445 ]; }   # its NAS doors
-            { host = "compute"; ports = [ self.nixosConfigurations.compute.config.selfhost.apps.gitea.ssh.port ]; }   # its own repo
+            { inherit (config.fleet.forge.sshEndpoint) host; ports = [ config.fleet.forge.sshEndpoint.port ]; }   # its own repo
           ];
         };
       }

@@ -89,6 +89,16 @@
           description = "Port the speech-to-text API listens on.";
         };
       };
+      assistantEndpoint = {
+        host = lib.mkOption {
+          type = lib.types.str;
+          description = "Address serving the assistant's OpenAI-compatible API, the agent guest on ai.";
+        };
+        port = lib.mkOption {
+          type = lib.types.port;
+          description = "Port the assistant API listens on.";
+        };
+      };
       model = lib.mkOption {
         type = lib.types.str;
         description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
@@ -108,6 +118,17 @@
       contextLength = lib.mkOption {
         type = lib.types.ints.positive;
         description = "Context window the endpoint actually serves. Clients otherwise assume the window declared in model metadata and overrun it.";
+      };
+    };
+
+    forge.sshEndpoint = {
+      host = lib.mkOption {
+        type = lib.types.str;
+        description = "Address serving the forge's git over SSH.";
+      };
+      port = lib.mkOption {
+        type = lib.types.port;
+        description = "Port the forge's SSH listens on.";
       };
     };
   };

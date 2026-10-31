@@ -1,4 +1,6 @@
 let
+  microvmTables = import ./microvms.nix;
+
   # Static DHCP IPs. I should have disabled DHCP but here we are.
   lan = {
     subnet = "192.168.1.0/24";
@@ -27,7 +29,7 @@ in
     name = "storage";
     host = lan.hosts.storage;
   };
-  microvms = builtins.mapAttrs (_: table: builtins.mapAttrs (_: g: g.ip) table.guests) (import ./microvms.nix); # Used to seed /etc/hosts and ssh jump
+  microvms = builtins.mapAttrs (_: table: builtins.mapAttrs (_: g: g.ip) table.guests) microvmTables; # Used to seed /etc/hosts and ssh jump
 
   # Required to define how transmission maps downloads to folders and enable declaratively adding them.
   downloadCategories = {
@@ -57,10 +59,19 @@ in
       host = lan.hosts.ai;
       port = 8090;                      # whisper-server's default 8080 is the ad-hoc experiments port
     };
+    assistantEndpoint = {
+      host = microvmTables.ai.guests.agent-alfred-vm.ip;
+      port = 8642;                      # hermes-agent's API server default
+    };
     model = "qwen3.6:35b-a3b";
     uncensoredModel = "huggingface.co/orcarouter/Qwen3.8-27B-Uncensored-GGUF";
     codingModel = "qwen3.8-flash-next";      # not in the registry: hosts/ai/services/ollama.nix creates it
     embeddingModel = "embeddinggemma";
     contextLength = 65536;              # Hermes requires >=64K
+  };
+
+  forge.sshEndpoint = {
+    host = lan.hosts.compute;
+    port = 2222;                        # gitea's built-in SSH, beside the host's own on 22
   };
 }

@@ -13,10 +13,10 @@ in
   _module.args.alfredVm = alfredVm;
 
   my.microvm.guest = {
-    inherit (alfredVm) stateRoot;              # SSH host key + hermes state
-    tap = "vm-alfred";                         # vm-<hostname> would exceed IFNAMSIZ
-    ingressPorts = [ alfredVm.apiPort ];       # hermes API, fronted by compute's Traefik
-    ingressFrom = [ fleet.lan.hosts.compute ]; # Traefik, Open WebUI and Prometheus
+    inherit (alfredVm) stateRoot;                       # SSH host key + hermes state
+    tap = "vm-alfred";                                  # vm-<hostname> would exceed IFNAMSIZ
+    ingressPorts = [ fleet.ai.assistantEndpoint.port ]; # hermes API, fronted by compute's Traefik
+    ingressFrom = [ fleet.lan.hosts.compute ];          # Traefik, Open WebUI and Prometheus
   };
 
   system.stateVersion = "26.05";
