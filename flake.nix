@@ -93,9 +93,9 @@
 
       # Hosts
       nixosConfigurations = let
-        microvmGuests = nixpkgs.lib.concatMapAttrs (_: table: nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
+        microvmGuests = nixpkgs.lib.concatMapAttrs (host: table: nixpkgs.lib.mapAttrs (name: entry: mkMicrovmGuest {
           hostName = name;
-          configPath = ./hosts/guests/${name};
+          configPath = ./hosts/${host}/microvm/guests/${name};
           inherit fleetFacts;
           guestPlacement = {
             inherit (entry) ip mac vsockCid;

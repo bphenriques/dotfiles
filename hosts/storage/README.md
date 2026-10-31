@@ -41,11 +41,13 @@ Alerting lives on compute by decision: a NAS should not be the thing that notice
 - **Private settings** own personal share names, owners, Samba access and the 5GbE MAC. Datasets and
   their children are read back from `disko/pool.nix`, so the pool layout is declared once. The share
   inventory in `shares/` is transport-neutral; the SMB view over it is `services/samba.nix`.
-- **Principals** are `selfhost.users` and `selfhost.serviceAccounts` entries with `storage.smb.enable`.
-  Holding an account is separate from being let into a share: grants live on the share, and a share can
-  be owned by a principal holding none. Clients must speak SMB 3.1.1.
+- **Principals** are `selfhost.users` (people) and `selfhost.serviceAccounts` (machines) with
+  `storage.smb.enable`, granted on a share under `access.users` and `access.serviceAccounts`. Clients must
+  speak SMB 3.1.1.
+- **Doors**: `services/samba.nix` opens extra shares onto a subdirectory of a share, for a principal that
+  must see only that part. They take the share's group, so files stay readable through every door.
 - **Permissions**: shares are `2770` setgid owned by `storage-<name>`. Samba drops to the connecting
-  user, so `/srv/storage` itself must stay `0755` root-owned; `selfhost-smb-permissions` asserts that on
+  user, so `/srv/storage` itself must stay `0755` root-owned; `storage-permissions` asserts that on
   every boot.
 - **Previous Versions** reaches back about five days. `shadow:format` must match a whole snapshot
   name, so only sanoid's `_hourly` snapshots surface; dropping the suffix to catch `_daily` matches

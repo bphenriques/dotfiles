@@ -1,9 +1,9 @@
-{ config, lib, ... }:
+{ config, lib, self, ... }:
 let
   cfg = config.selfhost;
   inherit (config.fleet) ai;
-  alfredVmIp = config.fleet.microvms.compute.agent-alfred-vm;
-  alfredVm = import ../../../../guests/agent-alfred-vm/settings.nix;
+  alfredVmIp = config.fleet.microvms.ai.agent-alfred-vm;
+  hermesApiPort = self.nixosConfigurations.agent-alfred-vm.config.services.hermes-agent.settings.platforms.api_server.extra.port;
 
   hermesModel = "hermes-agent";
   comfyUrl = "http://${ai.imageEndpoint.host}:${toString ai.imageEndpoint.port}";
@@ -45,7 +45,7 @@ let
       model_ids = [ ai.model ai.codingModel ai.uncensoredModel ];
     }
     {
-      url = "http://${alfredVmIp}:${toString alfredVm.apiPort}/v1";
+      url = "http://${alfredVmIp}:${toString hermesApiPort}/v1";
       key = cfg.runtimePlaceholder."hermes-api-server-key";
       model_ids = [ hermesModel ]; # hermes re-exports the raw models, which would double the dropdown
     }

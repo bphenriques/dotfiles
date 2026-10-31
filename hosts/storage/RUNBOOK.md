@@ -12,7 +12,7 @@ ss -lnt                                              # 22, 445, 3493, 9100, 9134
 
 `keystatus available` after a cold boot is the one that matters: it proves the pool key was read from
 the unencrypted root without intervention. Storage mounts use `nofail`, so a missing pool leaves the
-host reachable for repair while `selfhost-smb-permissions` and Samba fail closed rather than writing to
+host reachable for repair while `storage-permissions` and Samba fail closed rather than writing to
 empty directories on the root NVMe. Never fix that by creating plain directories or relaxing the
 mount guards.
 
@@ -60,7 +60,7 @@ Standing constraints:
 `nixos-rebuild` never creates or destroys datasets; it only emits the mount. Do the ZFS half by hand,
 and mind the order.
 
-**Adding, dataset first.** A share whose mount is missing fails `selfhost-smb-permissions`, which Samba
+**Adding, dataset first.** A share whose mount is missing fails `storage-permissions`, which Samba
 requires, so it takes down every share rather than just the new one.
 
 ```bash

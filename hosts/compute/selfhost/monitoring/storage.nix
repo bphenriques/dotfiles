@@ -32,7 +32,7 @@ _:
         {
           # The framework declares this alert on the host serving the shares; that host runs no Prometheus.
           alert = "SmbSharesUnserved";
-          expr = ''node_systemd_unit_state{instance="storage",name=~"samba-smbd.service|selfhost-smb-permissions.service",state="failed"} == 1'';
+          expr = ''node_systemd_unit_state{instance="storage",name=~"samba-smbd.service|storage-permissions.service",state="failed"} == 1'';
           "for" = "5m";
           labels.severity = "critical";
           annotations.summary = "{{ $labels.name }}: SMB shares are not being served";

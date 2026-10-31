@@ -32,6 +32,12 @@ in
       default = [ ];
       description = "Extra TCP ports reachable from the host bridge, beyond 22 + node-exporter.";
     };
+    ingressFrom = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ cfg.gateway ];
+      defaultText = lib.literalExpression "[ gateway ]";
+      description = "Addresses admitted to node-exporter and `ingressPorts`; SSH stays gateway-only.";
+    };
   };
 
   config = {
@@ -68,13 +74,16 @@ in
     };
 
     networking.nftables.enable = true;
-    networking.firewall.extraInputRules = "ip saddr ${cfg.gateway} tcp dport { 22, 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept";
+    networking.firewall.extraInputRules = ''
+      ip saddr ${cfg.gateway} tcp dport 22 accept
+      ip saddr { ${lib.concatStringsSep ", " cfg.ingressFrom} } tcp dport { 9100${lib.concatMapStrings (p: ", ${toString p}") cfg.ingressPorts} } accept
+    '';
 
     # sshd and node-exporter listen on every address, so the rule above is the only gate.
     assertions = [
       {
         assertion = with config.networking.firewall; trustedInterfaces == [ "lo" ] && allowedTCPPorts == [ ] && allowedUDPPorts == [ ] && interfaces == { };
-        message = "microvm guest ${config.networking.hostName}: firewall widened beyond the gateway-only rule, which is what keeps sshd and node-exporter off other interfaces";
+        message = "microvm guest ${config.networking.hostName}: firewall widened beyond its source-pinned rules, which are what keep sshd and node-exporter off other interfaces";
       }
       {
         assertion = lib.hasPrefix "vm-" cfg.tap && builtins.stringLength cfg.tap <= 15;

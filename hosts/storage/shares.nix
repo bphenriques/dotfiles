@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   private,
   ...
@@ -17,15 +18,13 @@ let
   household = {
     shared = {
       backup = true;
-      smb = {
-        owner = "bphenriques";
-        gid = 989;
-        access = {
-          groups.${private.groups.users} = "rw";
-          users = {
-            machine-compute = "rw";
-            machine-laptop = "rw";
-          };
+      owner = "bphenriques";
+      gid = 989;
+      smb.access = {
+        groups.${private.groups.users} = "rw";
+        serviceAccounts = {
+          machine-compute = "rw";
+          machine-laptop = "rw";
         };
       };
     };
@@ -35,12 +34,10 @@ let
     immich-uploads = {
       root = "/srv/storage/immich/uploads";
       backup = true;
-      smb = {
-        owner = "bphenriques";
-        gid = 985;
-        # Machine-only: compute is the sole reader, and no human principal holds a grant here.
-        access.users.machine-compute = "rw";
-      };
+      owner = "bphenriques";
+      gid = 985;
+      # Machine-only: compute is the sole reader, and no human principal holds a grant here.
+      smb.access.serviceAccounts.machine-compute = "rw";
     };
     immich-encoded-video = {
       root = "/srv/storage/immich/encoded-video";
@@ -49,35 +46,31 @@ let
       # warning naming this share is the intended opt-out record.
       backup = false;
       snapshots = false;
-      smb = {
-        owner = "bphenriques";
-        gid = 984;
-        access.users.machine-compute = "rw";
-      };
+      owner = "bphenriques";
+      gid = 984;
+      smb.access.serviceAccounts.machine-compute = "rw";
     };
     media = {
       backup = true;
       snapshots = false;
-      smb = {
-        owner = "bphenriques";
-        gid = 990;
-        directories = [
-          "movies"
-          "tv"
-          "downloads"
-          "downloads/incomplete"
-        ]
-        # The arrs health-check their category dir before any download would create it.
-        ++ map (c: "downloads/${c}") (lib.attrValues config.fleet.downloadCategories);
-        access = {
-          groups = {
-            ${private.groups.admin} = "rw";
-            ${private.groups.users} = "ro";
-          };
-          users = {
-            machine-compute = "rw";
-            machine-laptop = "rw";
-          };
+      owner = "bphenriques";
+      gid = 990;
+      directories = [
+        "movies"
+        "tv"
+        "downloads"
+        "downloads/incomplete"
+      ]
+      # The arrs health-check their category dir before any download would create it.
+      ++ map (c: "downloads/${c}") (lib.attrValues config.fleet.downloadCategories);
+      smb.access = {
+        groups = {
+          ${private.groups.admin} = "rw";
+          ${private.groups.users} = "ro";
+        };
+        serviceAccounts = {
+          machine-compute = "rw";
+          machine-laptop = "rw";
         };
       };
     };
@@ -96,6 +89,20 @@ let
   orphanShares = lib.attrNames (lib.filterAttrs (_: s: s.dataset == "") cfg.shares);
 
   shareNameCollisions = lib.intersectLists (lib.attrNames personal) (lib.attrNames household);
+
+  permissionRules = pkgs.writeText "storage-permissions.conf" (
+    lib.concatLines (
+      map (p: "d ${p} 0755 root root -") (lib.unique (map (s: dirOf s.root) (lib.attrValues cfg.shares)))
+      ++ lib.concatLists (
+        lib.mapAttrsToList (
+          name: s:
+          map (p: "d ${p} 2770 ${s.owner} storage-${name} -") (
+            [ s.root ] ++ map (d: "${s.root}/${d}") (s.childDatasets ++ s.directories)
+          )
+        ) cfg.shares
+      )
+    )
+  );
 in
 {
   options.my.storage = {
@@ -134,12 +141,25 @@ in
                 readOnly = true;
                 default = map (lib.removePrefix "${key}/") (childKeys key);
                 defaultText = lib.literalMD "disko datasets nested under `dataset`";
-                description = "Child datasets under this share, snapshotted independently and ownership-fixed with it.";
+                description = "Child datasets under this share, snapshotted independently and owned like it.";
+              };
+              owner = lib.mkOption {
+                type = lib.types.str;
+                description = "Unix owner of the share root.";
+              };
+              gid = lib.mkOption {
+                type = lib.types.int;
+                description = "Pinned gid of `storage-<name>`, the group owning everything in the share; the data outlives the root that would record an allocation.";
+              };
+              directories = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "Plain directories under the root, created with the share's ownership.";
               };
               smb = lib.mkOption {
                 type = lib.types.attrsOf lib.types.anything;
                 default = { };
-                description = "Passed verbatim to `selfhost.storage.shares.smb.shares.<name>`, which is what types it. `path` and the child datasets come from the fields above.";
+                description = "Passed verbatim to `selfhost.storage.shares.smb.shares.<name>`, which is what types it. `path` comes from `root`.";
               };
             };
           }
@@ -156,6 +176,27 @@ in
       inherit (share) root backup;
       personal = private.users ? ${name};
     }) cfg.shares;
+
+    users.groups = lib.mapAttrs' (name: share: lib.nameValuePair "storage-${name}" { inherit (share) gid; }) cfg.shares;
+
+    # Not boot-time tmpfiles: the pool mounts with `nofail`, and this must fail closed rather than create
+    # directories on the root filesystem. Parents stay traversable, since smbd drops to the connecting user.
+    systemd.services.storage-permissions = {
+      description = "Prepare share ownership";
+      wantedBy = [ "multi-user.target" ];
+      unitConfig.RequiresMountsFor = lib.concatMap (s: [ s.root ] ++ map (c: "${s.root}/${c}") s.childDatasets) (
+        lib.attrValues cfg.shares
+      );
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.systemd}/bin/systemd-tmpfiles --create ${permissionRules}";
+        PrivateTmp = true;
+        NoNewPrivileges = true;
+        ProtectKernelTunables = true;
+        ProtectControlGroups = true;
+      };
+    };
 
     warnings = lib.optional (strayDatasets != [ ])
       "Datasets mounted here but reached by no share: ${toString strayDatasets}. They are not snapshotted, exported or backed up. Declare a share, or `zfs destroy` them if a removal is unfinished.";

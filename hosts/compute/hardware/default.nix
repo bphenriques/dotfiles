@@ -50,6 +50,8 @@
           DHCP = "ipv4";
           IPv6AcceptRA = true; # keep the routable global IPv6 (RA)
         };
+        # ai's guest bridge (hosts/ai/microvm/guests.nix): Traefik and Prometheus reach the guests there.
+        routes = [{ Destination = "10.20.2.0/24"; Gateway = config.fleet.lan.hosts.ai; }];
       };
     };
 

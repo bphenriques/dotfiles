@@ -1,4 +1,4 @@
-# Alfred's definition for hermes-agent; hosts/guests/agent-alfred-vm deploys it. See ./README.md.
+# Alfred's definition for hermes-agent; hosts/ai/microvm/guests/agent-alfred-vm deploys it. See ./README.md.
 { pkgs, lib, inputs, facts }:
 let
   inherit (facts) vaultRoot recipesRoot recipesUrl;

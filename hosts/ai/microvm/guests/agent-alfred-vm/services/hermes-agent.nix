@@ -1,6 +1,7 @@
 { config, lib, pkgs, fleet, alfred, alfredVm, private, inputs, ... }:
 let
-  endpoint = "http://${fleet.ai.endpoint.host}:${toString fleet.ai.endpoint.port}/v1";
+  # ai is this guest's host, reached through the bridge gateway; the seal drops its LAN address.
+  endpoint = "http://${config.my.microvm.guest.gateway}:${toString fleet.ai.endpoint.port}/v1";
   aiEndpoint = {
     api_key = "ollama";   # dummy; Ollama needs no auth
     base_url = endpoint;
@@ -70,19 +71,14 @@ in
 
   environment.systemPackages = [ alfred.cookidoo alfred.meals alfred.drafts ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
 
-  # The vault arrives over virtiofs from compute's CIFS mount, which forces gid 5000 with 0660 and
-  # ignores any ownership set here. Group membership is the whole of the agent's write access.
-  users.groups.vault.gid = 5000;
-  users.groups.recipes.gid = 5001;   # the media share's forced gid, for the recipes subtree
+  # The mounts force their group with 0660, so membership is the whole of the agent's write access.
   users.users.hermes.extraGroups = [ "vault" "recipes" ];
 
-  # Inject API_SERVER_KEY at start-up: its virtiofs mount isn't ready at activation (the module's .env merge).
-  systemd.services.hermes-agent = {
-    serviceConfig = {
-      EnvironmentFile = "${alfredVm.secretsRoot}/hermes.env";
-      # ProtectSystem = "strict" would otherwise keep the vault read-only whatever the group allows.
-      ReadWritePaths = [ alfredVm.vaultRoot alfredVm.recipesRoot ];
-    };
-    unitConfig.RequiresMountsFor = [ alfredVm.secretsRoot alfredVm.vaultRoot alfredVm.recipesRoot ];
-  };
+  # A copy of the key compute generates for Open WebUI (hosts/compute/selfhost/services/hermes.nix).
+  sops.secrets."hermes/api-key" = { };
+  sops.templates."hermes.env".content = "API_SERVER_KEY=${config.sops.placeholder."hermes/api-key"}\n";
+  services.hermes-agent.environmentFiles = [ config.sops.templates."hermes.env".path ];
+
+  # ProtectSystem = "strict" would otherwise keep the vault read-only whatever the group allows.
+  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [ alfredVm.vaultRoot alfredVm.recipesRoot ];
 }

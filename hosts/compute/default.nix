@@ -9,7 +9,6 @@
     ../../profiles/nixos/headless.nix
     ../../profiles/nixos/ups-client.nix
     ./selfhost
-    ./microvm/host.nix
   ];
 
   # Basic setup

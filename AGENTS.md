@@ -41,7 +41,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 ## Verifying
 
 - A refactor that should change nothing: compare `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` before and after. Same hash means same system.
-- compute always differs by its `install-microvm-*` units, which embed the flake source path and change on any edit.
+- A microVM host (ai) always differs by its `install-microvm-*` units, which embed the flake source path and change on any edit.
 - Comparing across commits or copies needs the label pinned, since `system.nixos.label` is timestamp-derived.
 
 ## Shell Scripts

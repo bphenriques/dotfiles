@@ -19,14 +19,14 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 
 ## Hosts
 
-| Host                                              | Platform      | Description                                            |
-| ------------------------------------------------- | ------------- | ------------------------------------------------------ |
-| [laptop](./hosts/laptop)                          | NixOS         | Personal laptop                                        |
-| [compute](./hosts/compute)                        | NixOS         | Compute headless server                                |
-| [storage](./hosts/storage)                        | NixOS         | Headless NAS                                           |
-| [ai](./hosts/ai)                                  | NixOS         | Headless AI inference                                  |
-| [agent-alfred-vm](./hosts/guests/agent-alfred-vm) | NixOS microVM | Private AI assistant                                   |
-| [work-macos](./hosts/work-macos)                  | nix-darwin    | Work laptop                                            |
+| Host                                                         | Platform      | Description                                            |
+| ------------------------------------------------------------ | ------------- | ------------------------------------------------------ |
+| [laptop](./hosts/laptop)                                     | NixOS         | Personal laptop                                        |
+| [compute](./hosts/compute)                                   | NixOS         | Compute headless server                                |
+| [storage](./hosts/storage)                                   | NixOS         | Headless NAS                                           |
+| [ai](./hosts/ai)                                             | NixOS         | Headless AI inference                                  |
+| [agent-alfred-vm](./hosts/ai/microvm/guests/agent-alfred-vm) | NixOS microVM | Private AI assistant                                   |
+| [work-macos](./hosts/work-macos)                             | nix-darwin    | Work laptop                                            |
 
 ## Nix Stack
 

@@ -6,6 +6,7 @@
     ./disko.nix
     ./users.nix
     ./firewall.nix
+    ./microvm/host.nix
     ./services
     ../../profiles/nixos/headless.nix
     ../../profiles/nixos/ups-client.nix

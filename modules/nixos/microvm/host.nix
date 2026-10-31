@@ -25,9 +25,11 @@ let
     ) hostPortGuests
     ++ [ ''iifname "${bridge.name}" ct state new drop comment "Guests never initiate to the host (return traffic is ct established)"'' ];
 
-  # Per-guest accepts first (first match wins); the RFC1918 drop is the floor beneath them.
+  # Replies first, so a LAN client the guest admits hears back; then per-guest accepts (first match
+  # wins), with the RFC1918 drop as the floor beneath them.
   forwardRules =
-    map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.host}"'') egressEntries
+    [ ''iifname "${bridge.name}" ct state established,related accept comment "Replies to connections guests admitted"'' ]
+    ++ map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.host}"'') egressEntries
     ++ [ ''iifname "${bridge.name}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop comment "Guests: internet-only, never the LAN"'' ];
 in
 {

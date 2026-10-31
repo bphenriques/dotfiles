@@ -3,7 +3,6 @@
 {
   systemd.services.cookidoo-sync = {
     description = "Copy the Cookidoo collection into the recipe library";
-    unitConfig.RequiresMountsFor = [ alfredVm.recipesRoot ];
     serviceConfig = {
       Type = "oneshot";
       User = "hermes";

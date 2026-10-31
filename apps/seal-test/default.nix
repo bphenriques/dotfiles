@@ -10,7 +10,7 @@ let
     lib.concatLists (lib.mapAttrsToList (name: g:
       map (p: "${vmHost} ${name} ${p}") (
         [
-          "${hosts.storage} 445 blocked LAN"
+          "${config.fleet.lan.gateway} 80 blocked LAN"
           "${bridge.gateway} 22 blocked host"
           "1.1.1.1 443 open internet"
         ]

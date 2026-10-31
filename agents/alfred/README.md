@@ -1,6 +1,6 @@
 # Alfred
 
-Deployed by [agent-alfred-vm](../../hosts/guests/agent-alfred-vm). `SOUL.md` gets the private `household.md`
+Deployed by [agent-alfred-vm](../../hosts/ai/microvm/guests/agent-alfred-vm). `SOUL.md` gets the private `household.md`
 appended; `environment.md` becomes the workspace `AGENTS.md`.
 
 - The tool policy in [default.nix](./default.nix) steers the model but is not a boundary (`terminal` runs anything
