@@ -55,6 +55,7 @@ in
   selfhost.storage.mounts.smb.shares = {
     bphenriques = { uid = config.users.users.bphenriques.uid; gid = 5000; };
     media = { uid = config.users.users.bphenriques.uid; gid = 5001; };
+    shared = { uid = config.users.users.bphenriques.uid; gid = 5002; };
   };
   # Secrets
   sops = {

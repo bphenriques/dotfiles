@@ -16,7 +16,6 @@
       pkgs.texlab                                  # LSP for LaTeX
       pkgs.nil                                     # LSP for Nix
       pkgs.terraform-ls                            # LSP for Terraform
-      pkgs.ltex-ls                                 # LSP for grammar/spell check
       pkgs.dockerfile-language-server              # LSP for docker
       pkgs.docker-compose-language-service         # LSP for docker-compose
     ];

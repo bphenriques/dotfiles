@@ -16,8 +16,8 @@ in
 
     settings = let
       common = {
-        copy-on-select = "clipboard";
-        keybind = "ctrl+enter=unbind";                      # Conflicts and I do not need it.
+        copy-on-select = "both";
+        keybind = [ "ctrl+enter=unbind" ];                  # Conflicts and I do not need it.
       };
 
       linux = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
@@ -33,7 +33,7 @@ in
         macos-non-native-fullscreen = "visible-menu";
         macos-option-as-alt = "left";
         macos-titlebar-style = "tabs";
-        keybind = "global:cmd+grave_accent=toggle_quick_terminal"; #
+        keybind = common.keybind ++ [ "global:cmd+grave_accent=toggle_quick_terminal" ];
         mouse-hide-while-typing = true;
       };
     in lib.mergeAttrsList [ common linux darwin ];
@@ -46,6 +46,7 @@ in
 
   my.programs.niri = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     spawnShAtStartup = [ config.my.programs.terminal.exec ];
+    bindings."Mod+Shift+Return" = ''spawn-sh "${ghostty} +toggle-quick-terminal"'';
     windowRules = {
       byApp = [
         ''
