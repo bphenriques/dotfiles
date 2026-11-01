@@ -30,11 +30,11 @@ MAX_IMAGE = 10 * 2**20
 MAX_PAGE = 30000   # characters of a page's text the model reads
 
 VIDEO_HOSTS = ("instagram.com", "youtube.com", "youtu.be", "tiktok.com")
-CATEGORIES = {"mains": "main", "soups": "starter", "desserts": "dessert", "breakfast": "breakfast", "baby-food": None}
+CATEGORIES = ("Pratos", "Sopas", "Sobremesas", "Pequeno-almoço", "Bases", "Bebé")   # the library's folders (formatting.md)
 LEVELS = ("easy", "medium", "hard")
 UA = {"User-Agent": "Mozilla/5.0"}
 AISLE = "aisle.conf"
-REQUIRED = ("servings", "time", "difficulty", "tags")   # formatting.md's, but `image`: a recipe may have no photo yet
+REQUIRED = ("servings", "time", "difficulty")   # formatting.md's, but `image`: a recipe may have no photo yet
 CHECK = "> Check:"   # a doubt in the draft, which the user deletes once resolved
 # Brazilian words the model slips into European Portuguese, with the Portuguese for each.
 BRAZILIAN = {"assadeira": "tabuleiro", "barbante": "cordel", "gergelim": "sésamo", "saquê": "saqué", "talharim": "massa",
@@ -269,9 +269,8 @@ def ingredients(recipe):
 
 def cooklang(recipe, name, doubts=()):
     meta = {"servings": recipe["servings"], "time": recipe["time"], "time.prep": recipe["prep"],
-            "time.cook": recipe["cook"], "course": CATEGORIES[recipe["category"]], "difficulty": recipe["difficulty"],
-            "source": recipe["url"], "author": recipe["author"], "image": f"{name}.jpg" if recipe["image"] else None,
-            "tags": [recipe["category"]]}
+            "time.cook": recipe["cook"], "difficulty": recipe["difficulty"], "source": recipe["url"],
+            "author": recipe["author"], "image": f"{name}.jpg" if recipe["image"] else None}
     front = "\n".join(f"{k}: {json.dumps(v, ensure_ascii=False)}" for k, v in meta.items() if v)
     checks = "".join(f"{CHECK} {d}\n" for d in doubts) + ("\n" if doubts else "")
     return f"---\n{front}\n---\n\n{checks}{ingredients(recipe)}\n\n" + "\n\n".join(recipe["steps"]) + "\n"
@@ -288,10 +287,10 @@ def new(url, text, name=None, category=None):
     translated = translate(recipe, keep_name=bool(name))
     name = re.sub(r'[/\\:*?"<>|]', "", recipe["name"]).strip() or "Receita"
     name = name[0].upper() + name[1:]
-    draft = DRAFTS / f"{name}.cook"
-    if draft.exists():
-        sys.exit(f"A draft {draft} exists already: review it, or delete it to start over.")
-    DRAFTS.mkdir(exist_ok=True)
+    draft = DRAFTS / recipe["category"] / f"{name}.cook"
+    if found := named(DRAFTS, name):
+        sys.exit(f"A draft {found[0]} exists already: review it, or delete it to start over.")
+    draft.parent.mkdir(parents=True, exist_ok=True)
     if recipe["image"]:
         try:
             if urlparse(recipe["image"]).scheme not in ("http", "https"):   # urllib would read a file:// one
@@ -303,7 +302,7 @@ def new(url, text, name=None, category=None):
                     raise OSError("larger than 10 MiB")
                 f.write(data)
                 f.flush()
-                subprocess.run([MAGICK, f.name, str(DRAFTS / f"{name}.jpg")], check=True, capture_output=True)
+                subprocess.run([MAGICK, f.name, str(draft.with_name(f"{name}.jpg"))], check=True, capture_output=True)
         except (OSError, subprocess.CalledProcessError):
             recipe["notes"].append(f"the photo could not be saved: {recipe['image']}")
             recipe["image"] = None
@@ -313,9 +312,10 @@ def new(url, text, name=None, category=None):
         doubts += [f"{x['name']}: no Portuguese name in config/{AISLE}" for x in recipe["ingredients"] if x["name"].lower() not in names]
     draft.write_text(cooklang(recipe, name, doubts))
     facts = [recipe["servings"] and f"{recipe['servings']} servings", recipe["time"] and f"{recipe['time']} min",
-             recipe["category"], recipe["difficulty"], f"photo: {recipe['image'] or 'none'}"]
-    taken = " A recipe of that name is in the library already." if (LIBRARY / draft.name).exists() else ""
-    lines = [f"{name}: drafted in drafts/{draft.name}.{taken}", " · ".join(filter(None, facts)), "",
+             recipe["difficulty"], f"photo: {recipe['image'] or 'none'}"]
+    taken = " A recipe of that name is in the library already." if named(LIBRARY, name) else ""
+    lines = [f"{name}: drafted in drafts/{recipe['category']}/, its folder in the library (move it to change it).{taken}",
+             " · ".join(filter(None, facts)), "",
              f"```\n{ingredients(recipe)}\n```", ""]
     if doubts:
         lines += [f"{len(doubts)} to check, each a `{CHECK}` line in the draft: fix it there, then delete the line."]
@@ -323,6 +323,12 @@ def new(url, text, name=None, category=None):
     else:
         lines.append("Nothing to check.")
     print("\n".join(lines + ["", "Approve it to move it into the library."]))
+
+
+def named(base, name):
+    """The recipes in `base`'s folders called `name`, or `<folder>/<name>`, in any case: the share ignores it."""
+    want = name.casefold()
+    return [f for f in sorted(base.glob("*/*.cook")) if want in (f.stem.casefold(), f"{f.parent.name}/{f.stem}".casefold())]
 
 
 def missing(base):
@@ -445,20 +451,25 @@ def promote_aisle():
           f"{len(missing(LIBRARY))} ingredients are still missing from it.")
 
 
+def ident(path):
+    """A library recipe as plans link it: Pratos/Arroz de pato."""
+    return f"{path.parent.name}/{path.stem}"
+
+
 def relink(old, new):
-    """Point the saved plans at a renamed recipe, and say how many changed."""
-    changed = 0
+    """Point the saved plans at a recipe that moved or was renamed, and say how many changed."""
+    was, now, changed = ident(old), ident(new), 0
     for menu in (LIBRARY / "plans").glob("*.menu"):
         text = menu.read_text()
-        if (relinked := text.replace(f"@./{old}{{", f"@./{new}{{").replace(f"sobras: {old}", f"sobras: {new}")) != text:
+        if (relinked := text.replace(f"@./{was}{{", f"@./{now}{{").replace(f"sobras: {old.stem}", f"sobras: {new.stem}")) != text:
             menu.write_text(relinked)
             changed += 1
-    relink_plan(old, new)
+    relink_plan(was, now)
     return changed
 
 
 def relink_plan(old, new):
-    """Point the meals planner's current plan at a renamed recipe, or its next save writes the old name back."""
+    """Point the meals planner's current plan at a recipe that moved, or its next save writes the old one back."""
     if not PLAN.exists():
         return
 
@@ -469,7 +480,7 @@ def relink_plan(old, new):
             return node
         node = {k: renamed(v) for k, v in node.items()}
         if node.get("source") == "library" and node.get("id") == old:
-            node |= {"id": new, "name": new, "url": node["url"].replace(f"/{quote(old)}.html", f"/{quote(new)}.html")}
+            node |= {"id": new, "name": new.split("/")[-1], "url": node["url"].replace(f"/{quote(old)}.html", f"/{quote(new)}.html")}
         return node
     state = renamed(json.loads(PLAN.read_text()))
     state["exclude"] = [new if x == old else x for x in state.get("exclude", [])]
@@ -481,13 +492,19 @@ def relink_plan(old, new):
 def promote(name, replace=None):
     if name == AISLE:
         return promote_aisle()
-    draft, photo = DRAFTS / f"{name}.cook", DRAFTS / f"{name}.jpg"
-    if not draft.exists():
-        sys.exit(f"No draft {draft}")
-    if replace and not (LIBRARY / f"{replace}.cook").exists():
-        sys.exit(f"No recipe {LIBRARY / replace}.cook to replace")
-    if (LIBRARY / draft.name).exists() and name.casefold() != (replace or "").casefold():   # the share ignores case
-        sys.exit(f"{LIBRARY / draft.name} exists already: rename the draft first")
+    if len(found := named(DRAFTS, name)) != 1:
+        sys.exit(f"{len(found)} drafts are called {name}: name its folder too" if found else f"No draft {name} in a folder of {DRAFTS}")
+    draft = found[0]
+    photo, folder = draft.with_name(f"{draft.stem}.jpg"), draft.parent.name
+    if folder not in CATEGORIES:
+        sys.exit(f"{draft} is in no category: move it into one of {', '.join(f'drafts/{c}/' for c in CATEGORIES)}")
+    old = None
+    if replace:
+        if len(found := named(LIBRARY, replace)) != 1:
+            sys.exit(f"No single recipe {replace} in {LIBRARY} to replace")
+        old = found[0]
+    if (taken := named(LIBRARY, draft.stem)) and taken != [old]:
+        sys.exit(f"{taken[0]} exists already: rename the draft first")
     if checks := [line for line in draft.read_text().splitlines() if line.startswith(CHECK)]:
         sys.exit(f"The draft has {len(checks)} open check(s): resolve each and delete its line first.\n" + "\n".join(checks))
     with tempfile.TemporaryDirectory() as tmp:   # validate scans a folder; this one holds only the draft
@@ -496,27 +513,30 @@ def promote(name, replace=None):
     if checked.returncode != 0:
         sys.exit(f"The draft has issues, fix them first:\n{checked.stdout}{checked.stderr}")
     text = draft.read_text()
-    carried = replace and (LIBRARY / f"{replace}.jpg").exists() and not photo.exists()   # the old photo moves in below
+    old_photo = old and old.with_name(f"{old.stem}.jpg")
+    carried = old and old_photo.exists() and not photo.exists()   # the old photo moves in below
     if (photo.exists() or carried) and text.startswith("---\n") and not re.search(r"(?m)^image:", text):
         draft.write_text(text.replace("---\n", f"---\nimage: {photo.name}\n", 1))
     if found := lint(draft):
         add_checks(draft, found)
         sys.exit(f"The draft needs {len(found)} fix(es), now `{CHECK}` lines in it:\n" + "\n".join(f"- {f}" for f in found))
-    if replace:
-        shutil.move(LIBRARY / f"{replace}.cook", DRAFTS / f"{replace}.cook.old")   # the user's undo
+    if old:
+        shutil.move(old, DRAFTS / f"{old.stem}.cook.old")   # the user's undo
         if carried:
-            shutil.move(LIBRARY / f"{replace}.jpg", photo)
-        elif (LIBRARY / f"{replace}.jpg").exists():   # the draft brings its own photo
-            shutil.move(LIBRARY / f"{replace}.jpg", DRAFTS / f"{replace}.jpg.old")
-    saved = [draft.name] + ([photo.name] if photo.exists() else [])
+            shutil.move(old_photo, photo)
+        elif old_photo.exists():   # the draft brings its own photo
+            shutil.move(old_photo, DRAFTS / f"{old.stem}.jpg.old")
+    saved = [f for f in (draft, photo) if f.exists()]
+    (LIBRARY / folder).mkdir(exist_ok=True)
     for f in saved:
-        shutil.move(DRAFTS / f, LIBRARY / f)
-    lacking = [n for n, files in missing(LIBRARY).items() if draft.name in files]
+        shutil.move(f, LIBRARY / folder / f.name)
+    where = LIBRARY / folder / draft.name
+    lacking = [n for n, files in missing(LIBRARY).items() if f"{folder}/{draft.name}" in files]
     hint = f" Not in config/{AISLE}: {', '.join(lacking)}; `drafts aisle` drafts them." if lacking else ""
-    if replace:
-        plans = relink(replace, name) if replace != name else 0
-        hint = f" It replaces {replace}, now drafts/{replace}.cook.old; {plans} plan(s) relinked.{hint}"
-    print(f"Saved {' and '.join(saved)} in {LIBRARY}.{hint}")
+    if old:
+        plans = relink(old, where) if ident(old) != ident(where) else 0
+        hint = f" It replaces {ident(old)}, now drafts/{old.stem}.cook.old; {plans} plan(s) relinked.{hint}"
+    print(f"Saved {' and '.join(f.name for f in saved)} in {LIBRARY / folder}.{hint}")
 
 
 def main():

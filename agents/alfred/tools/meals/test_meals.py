@@ -188,7 +188,8 @@ def test_library_reads_the_fixtures():
     found = k.library()
     assert [r["name"] for r in found["soup"]] == ["Sopa de legumes"]
     assert {r["name"]: r["protein"] for r in found["main"]} == {"Bacalhau com natas": "fish", "Frango assado": "meat"}
-    assert all(" " not in r["url"] for r in found["main"])
+    assert found["main"][0]["id"] == "Pratos/Bacalhau com natas"
+    assert found["main"][0]["url"] == "https://recipes.test/recipe/Pratos/Bacalhau%20com%20natas.html"
 
 
 def test_groceries_sum_and_include_the_soups():
@@ -207,8 +208,9 @@ def test_propose_week_shows_the_current_plan_instead_of_replanning():
 
 @pytest.fixture
 def library(tmp_path, monkeypatch):
-    for f in k.LIBRARY.glob("*.cook"):
-        shutil.copy(f, tmp_path)
+    for f in k.LIBRARY.rglob("*.cook"):   # copyfile: the store's copies are read-only
+        (tmp_path / f.relative_to(k.LIBRARY)).parent.mkdir(exist_ok=True)
+        shutil.copyfile(f, tmp_path / f.relative_to(k.LIBRARY))
     monkeypatch.setattr(k, "LIBRARY", tmp_path)
     monkeypatch.setattr(c, "LIBRARY", tmp_path)
     return tmp_path
@@ -226,7 +228,7 @@ def test_a_synced_copy_is_planned_and_sent_by_its_cookidoo_id(library):
 
 
 def test_groceries_follow_the_library_s_cook_config(library):
-    (library / "Puré.cook").write_text("---\nservings: 2\ntags: [mains]\n---\n\n@batata{2}, @sal{}.\n\nCozer.\n")
+    (library / "Pratos" / "Puré.cook").write_text("---\nservings: 2\n---\n\n@batata{2}, @sal{}.\n\nCozer.\n")
     (library / "config").mkdir()
     (library / "config" / "aisle.conf").write_text("[legumes]\nbatata|batatas\n")
     (library / "config" / "pantry.conf").write_text("[despensa]\nalho = {}\nsal = {}\n")
@@ -237,20 +239,16 @@ def test_groceries_follow_the_library_s_cook_config(library):
 
 
 def test_rating_a_dish_tags_it_and_keeps_its_other_tags(library):
-    path = library / "Frango assado.cook"
-    text = path.read_text()
-    path.unlink()
-    path.write_text(text)
+    path = library / "Pratos" / "Frango assado.cook"
     assert asyncio.run(k.rate_dish("frango", "never")) == "Anotado: Frango assado não volta a ser planeado."
-    assert k.read(path)["metadata"]["map"]["tags"] == ["mains", "never"]
+    assert k.read(path)["metadata"]["map"]["tags"] == ["forno", "nunca"]
     asyncio.run(k.rate_dish("frango", None))
-    assert k.read(path)["metadata"]["map"]["tags"] == ["mains"]
+    assert k.read(path)["metadata"]["map"]["tags"] == ["forno"]
 
 
 def test_a_frontmatter_that_cannot_be_rewritten_is_left_alone(library):
-    path = library / "Frango assado.cook"
-    path.unlink()
-    path.write_text("---\nservings: 4\ntags:\n  - mains\n---\n\n@frango{1%kg}.\n\nAssar.\n")
+    path = library / "Pratos" / "Frango assado.cook"
+    path.write_text("---\nservings: 4\ntags:\n  - forno\n---\n\n@frango{1%kg}.\n\nAssar.\n")
     before = path.read_text()
     with pytest.raises(k.ToolError):
         asyncio.run(k.rate_dish("frango", "liked"))
@@ -258,9 +256,9 @@ def test_a_frontmatter_that_cannot_be_rewritten_is_left_alone(library):
 
 
 def test_an_unreadable_recipe_is_left_out_with_a_note(library):
-    (library / "Frango assado.cook").chmod(0)
+    (library / "Pratos" / "Frango assado.cook").chmod(0)
     found = k.library()
-    assert found["broken"] == ["Frango assado"] and [r["name"] for r in found["main"]] == ["Bacalhau com natas"]
+    assert found["broken"] == ["Pratos/Frango assado"] and [r["name"] for r in found["main"]] == ["Bacalhau com natas"]
 
 
 @pytest.fixture
@@ -317,10 +315,8 @@ def test_commit_sends_the_groceries_once(library, fake_cookidoo):
     assert order["recipes"] == ["r20307"] and order["items"] and not any("atum" in i for i in order["items"]) and order["sent"] is None
     asyncio.run(k.commit_plan())
     assert json.loads(fake_cookidoo[1].read_text()) == order   # nothing changed, so nothing was sent again
-    frango = library / "Frango assado.cook"
-    text = frango.read_text()
-    frango.unlink()   # the copy is read-only, like the fixture it came from
-    frango.write_text(text.replace("{1%kg}", "{2%kg}"))
+    frango = library / "Pratos" / "Frango assado.cook"
+    frango.write_text(frango.read_text().replace("{1%kg}", "{2%kg}"))
     asyncio.run(k.commit_plan())   # a recipe changed after sending: the earlier send is replaced
     resent = json.loads(fake_cookidoo[1].read_text())
     assert resent["sent"] == {"recipes": ["r20307"], "items": ["i1"], "texts": order["items"]} and resent["items"] != order["items"]
@@ -383,11 +379,12 @@ def test_a_hung_cookidoo_ends_in_a_clear_error_not_a_hung_chat(library, fake_coo
         asyncio.run(k.cookidoo("week", "2026-10-26", "7"))
 
 
-def test_swap_day_to_an_untagged_recipe_says_how_to_plan_it(library, fake_cookidoo):
+def test_swap_day_to_a_recipe_outside_pratos_says_how_to_plan_it(library, fake_cookidoo):
     found = k.library()
     k.save({"start": "2026-10-26", "days": 3, "exclude": [], "plan": k.compose(WEEK[:3], found["soup"], found["main"], {}, {}, {}, set())})
-    (library / "Folhado de pato.cook").write_text("---\nservings: 6\ntime: 30\ntags: [simples]\n---\n\n@folhado de pato{2}.\n")
-    with pytest.raises(k.ToolError, match="`mains` tag"):
+    (library / "Bases").mkdir()
+    (library / "Bases" / "Folhado de pato.cook").write_text("---\nservings: 6\ntime: 30\n---\n\n@folhado de pato{2}.\n")
+    with pytest.raises(k.ToolError, match="into Pratos/"):
         asyncio.run(k.swap_day("4f", recipe="Folhado de pato"))
 
 

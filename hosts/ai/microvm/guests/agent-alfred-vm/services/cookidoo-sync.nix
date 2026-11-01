@@ -15,6 +15,7 @@
   };
   systemd.timers.cookidoo-sync = {
     wantedBy = [ "timers.target" ];
-    timerConfig = { OnCalendar = "daily"; RandomizedDelaySec = "1h"; };
+    # Counted from boot: the guest forgets timer state on every restart, so a calendar time missed while down never ran.
+    timerConfig = { OnBootSec = "15min"; OnUnitActiveSec = "1d"; };
   };
 }

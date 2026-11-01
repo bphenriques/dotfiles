@@ -1,7 +1,7 @@
 ---
 name: recipe-new
 description: Add a recipe the user describes to the recipe library, asking for what is missing.
-version: 2.2.0
+version: 2.3.0
 metadata:
   hermes:
     category: productivity
@@ -19,8 +19,9 @@ The user describes a recipe of their own, or wants a dish that is not in the lib
 Follow the lifecycle in the recipes `AGENTS.md`: code makes the draft from the user's words, and you never write or
 edit it.
 
-1. Ask in one message for whatever is missing: the name, the category (`mains`, `soups`, `desserts`, `breakfast` or
-   `baby-food`), servings, total time in minutes, difficulty, each ingredient with its quantity, and the steps.
+1. Ask in one message for whatever is missing: the name, the category (`Pratos`, `Sopas`, `Sobremesas`,
+   `Pequeno-almoço`, `Bases` or `Bebé`), servings, total time in minutes, difficulty, each ingredient with its
+   quantity, and the steps.
    Never guess a quantity.
 2. `search_recipes` to check it is not in the library already.
 3. Pass the recipe in the user's words, adding nothing:

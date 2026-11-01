@@ -12,7 +12,7 @@ if [ -L "$state/site" ] && [ "$current" = "$(cat "$state/fingerprint" 2>/dev/nul
   exit 0
 fi
 
-# A write during the build may not re-trigger the path unit, so build again until the library holds still.
+# A sync writes many files over a minute or so, so build again until the library holds still.
 while true; do
   mkdir -p "$state/builds"
   build=$(mktemp -d "$state/builds/XXXXXX")
