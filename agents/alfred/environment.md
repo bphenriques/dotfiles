@@ -14,6 +14,8 @@
 ## Recipes
 
 - Cooklang recipes in `@recipesRoot@`, via the `cook` tools. Read `@recipesRoot@/AGENTS.md` before recipe work.
+- Recipe files change only through `drafts`. Never write or edit them yourself, never delete a `> Check:` line (the
+  user resolves those), and run `drafts promote` only after the user approves in this conversation.
 - A recipe link (a web page, Instagram, YouTube, TikTok): load the `recipe-import` skill first, and never `fetch`
   a video link.
 - Published at `@recipesUrl@/recipe/<name>.html` (percent-encoded).

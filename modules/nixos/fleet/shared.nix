@@ -21,7 +21,7 @@
 
       gateway = lib.mkOption {
         type = lib.types.str;
-        description = "LAN gateway (the router), used as resolved's listed fallback resolver";
+        description = "LAN gateway (the router)";
       };
 
       hosts = lib.mkOption {
@@ -39,7 +39,7 @@
     ups = {
       name = lib.mkOption {
         type = lib.types.str;
-        description = "Name of the UPS as upsd serves it, which is what a client names in its MONITOR line.";
+        description = "UPS name as upsd serves it.";
       };
 
       host = lib.mkOption {
@@ -50,29 +50,29 @@
 
     downloadCategories = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      description = "Download-client category per arr. The client writes completed downloads to <download-dir>/<category>, and the NAS precreates those directories.";
+      description = "Download-client category per arr.";
     };
 
     notifyTopics = lib.mkOption {
       type = lib.types.attrsOf lib.types.bool;
-      description = "Notification topic vocabulary, as topic -> readable without authentication. Fleet-wide because a publishing host validates its own publishers against the names it declares, while a different host runs the provider that grants them.";
+      description = "Notification topics, as topic -> readable without authentication.";
     };
 
     ai = {
       endpoint = {
         host = lib.mkOption {
           type = lib.types.str;
-          description = "Address serving the fleet's OpenAI-compatible inference API. Consumers need only this and a model id, never the runtime behind it.";
+          description = "Address serving the OpenAI-compatible inference API.";
         };
         port = lib.mkOption {
           type = lib.types.port;
-          description = "Port the inference API listens on. Runtime-specific, so it moves with the endpoint.";
+          description = "Port the inference API listens on.";
         };
       };
       imageEndpoint = {
         host = lib.mkOption {
           type = lib.types.str;
-          description = "Address serving image generation and editing. Separate from `endpoint`: diffusion is a different runtime with a different API and can move host on its own.";
+          description = "Address serving image generation and editing.";
         };
         port = lib.mkOption {
           type = lib.types.port;
@@ -82,7 +82,7 @@
       speechEndpoint = {
         host = lib.mkOption {
           type = lib.types.str;
-          description = "Address serving speech-to-text: whisper.cpp's server, a multipart `file` posted to `/inference`.";
+          description = "Address serving speech-to-text (whisper.cpp server).";
         };
         port = lib.mkOption {
           type = lib.types.port;
@@ -92,7 +92,7 @@
       assistantEndpoint = {
         host = lib.mkOption {
           type = lib.types.str;
-          description = "Address serving the assistant's OpenAI-compatible API, the agent guest on ai.";
+          description = "Address serving the assistant's OpenAI-compatible API.";
         };
         port = lib.mkOption {
           type = lib.types.port;
@@ -101,23 +101,23 @@
       };
       model = lib.mkOption {
         type = lib.types.str;
-        description = "Fleet-wide default model id, opaque and understood by the endpoint. Served as the Hermes default, the chat UI default.";
+        description = "Default model id for the assistant and the chat UI.";
       };
       uncensoredModel = lib.mkOption {
         type = lib.types.str;
-        description = "Model ID for uncensored model.";
+        description = "Uncensored model id.";
       };
       codingModel = lib.mkOption {
         type = lib.types.str;
-        description = "Model id the terminal coding agents default to. Distinct from `model` because coding and assistant turns want different weights.";
+        description = "Default model id for terminal coding agents.";
       };
       embeddingModel = lib.mkOption {
         type = lib.types.str;
-        description = "Model id used to embed documents for retrieval. Never offered in the chat dropdown.";
+        description = "Model id for document embeddings.";
       };
       contextLength = lib.mkOption {
         type = lib.types.ints.positive;
-        description = "Context window the endpoint actually serves. Clients otherwise assume the window declared in model metadata and overrun it.";
+        description = "Context window the endpoint serves.";
       };
     };
 

@@ -8,12 +8,16 @@ in
     nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs fleet fleetFacts;   # fleet = shared.nix, no path-imports in guests
-        self = self // { lib = self.lib // { builders = self.lib.builders.${system}; }; };
+        inherit inputs fleet fleetFacts;
+        self = self // {
+          packages = self.packages.${system} // inputs.dotfiles-private.packages.${system};
+          lib = self.lib // { builders = self.lib.builders.${system}; };
+        };
         private = inputs.dotfiles-private.hosts.${hostName};
       };
       modules = [
         self.nixosModules.microvm-guest
+        self.nixosModules.fleet-shared
         { my.microvm.guest = guestPlacement; }   # allocated by the host
         { nixpkgs.overlays = attrValues self.overlays; }
         { networking.hostName = hostName; }

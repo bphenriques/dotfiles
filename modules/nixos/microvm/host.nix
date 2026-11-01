@@ -6,30 +6,27 @@ let
 
   inherit (import ./lib/sandboxes.nix) vmSandbox virtiofsdSandbox;
 
-  # LAN egress allowlist (default none), flattened once for both the nft accepts and the assertions.
   ownIp = config.fleet.lan.hosts.${config.networking.hostName} or null;
   resolveHost = h: config.fleet.lan.hosts.${h} or h;
+  hostNameOf = lib.mapAttrs' (name: ip: lib.nameValuePair ip name) config.fleet.lan.hosts;
   egressEntries = lib.concatLists (lib.mapAttrsToList (name: g:
-    map (e: { inherit name; inherit (g) ip; inherit (e) host ports; target = resolveHost e.host; }) g.egress.allowLan
+    map (e: rec { inherit name; inherit (g) ip; inherit (e) host ports; target = resolveHost e.host; label = hostNameOf.${target} or e.host; }) g.egress.allowLan
   ) cfg.guests);
-  # Exact direct-tcpip targets for the sshd PermitOpen override.
   guestSshTargets = lib.concatMapStringsSep " " (g: "${g.ip}:22") (lib.attrValues cfg.guests);
 
   hostPortGuests = lib.filterAttrs (_: g: g.egress.allowHostPorts != [ ]) cfg.guests;
 
-  # Pinned to the bridge address: a packet to the host's LAN address is routed as input too, so without
-  # the daddr match this would open the port there as well, where the forward drop can never see it.
+  # daddr pin: without it the port also opens on the host's LAN address, which the forward drop never sees.
   inputRules =
     lib.mapAttrsToList (name: g:
       ''iifname "${bridge.name}" ip saddr ${g.ip} ip daddr ${bridge.gateway} tcp dport { ${lib.concatMapStringsSep ", " toString g.egress.allowHostPorts} } accept comment "${name} to host"''
     ) hostPortGuests
     ++ [ ''iifname "${bridge.name}" ct state new drop comment "Guests never initiate to the host (return traffic is ct established)"'' ];
 
-  # Replies first, so a LAN client the guest admits hears back; then per-guest accepts (first match
-  # wins), with the RFC1918 drop as the floor beneath them.
+  # Order matters: replies, then per-guest accepts, then the RFC1918 drop.
   forwardRules =
     [ ''iifname "${bridge.name}" ct state established,related accept comment "Replies to connections guests admitted"'' ]
-    ++ map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.host}"'') egressEntries
+    ++ map (e: ''iifname "${bridge.name}" ip saddr ${e.ip} ip daddr ${e.target} tcp dport { ${lib.concatMapStringsSep ", " toString e.ports} } accept comment "${e.name} to ${e.label}"'') egressEntries
     ++ [ ''iifname "${bridge.name}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop comment "Guests: internet-only, never the LAN"'' ];
 in
 {
@@ -39,11 +36,11 @@ in
     enable = lib.mkEnableOption "hosting microVM guests on an internal NAT bridge";
     uplink = lib.mkOption {
       type = lib.types.str;
-      description = "Host interface guests egress through (NAT external interface).";
+      description = "Host interface guests egress through.";
     };
     adminUser = lib.mkOption {
       type = lib.types.str;
-      description = "User allowed to `ssh -J` through to guests (scoped local-forward override to guest :22 only).";
+      description = "User allowed to `ssh -J` through to guests.";
     };
     bridge = {
       name = lib.mkOption { type = lib.types.str; };
@@ -52,7 +49,7 @@ in
     };
     guests = lib.mkOption {
       default = { };
-      description = "Allocation table (imported from the host's guests.nix).";
+      description = "Guest allocation table.";
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
           ip = lib.mkOption { type = lib.types.str; };
@@ -61,21 +58,21 @@ in
           serviceConfig = lib.mkOption {
             type = lib.types.attrsOf lib.types.anything;
             default = { };
-            description = "Raw serviceConfig merged over the sandbox (a list key replaces, it does not append).";
+            description = "Raw serviceConfig merged over the sandbox; lists replace.";
           };
           egress.allowHostPorts = lib.mkOption {
             type = lib.types.listOf lib.types.port;
             default = [ ];
-            description = "TCP ports on the host's own bridge address this guest may reach: the named exception to the input chain's blanket drop. Reaching the host's LAN address stays impossible.";
+            description = "TCP ports on the host's bridge address this guest may reach.";
             example = [ 2222 ];
           };
 
           egress.allowLan = lib.mkOption {
             default = [ ];
-            description = "LAN hosts this guest may reach, per TCP port (default: none; there is no all-ports form).";
+            description = "LAN hosts and TCP ports this guest may reach.";
             type = lib.types.listOf (lib.types.submodule {
               options = {
-                host = lib.mkOption { type = lib.types.str; description = "Fleet hostname (resolved via fleet.lan.hosts) or a raw IP."; };
+                host = lib.mkOption { type = lib.types.str; description = "Fleet hostname or IP."; };
                 ports = lib.mkOption { type = lib.types.nonEmptyListOf lib.types.port; description = "TCP ports to open on that host."; };
               };
             });
@@ -100,15 +97,14 @@ in
         message = "microvm guest ${name}: egress.allowHostPorts may not include 22; the host's sshd is reached the other way, through the adminUser PermitOpen override";
       }) hostPortGuests;
 
-      # Narrow override of the no-forwarding baseline: local forwards to a guest's :22, nothing else.
+      # Exception to base.nix's AllowTcpForwarding = false.
       services.openssh.extraConfig = ''
         Match User ${cfg.adminUser}
           AllowTcpForwarding local
           PermitOpen ${guestSshTargets}
       '';
 
-      # nixos-fw hooks at priority 0, so the accept above is not the end of it: the port has to be open
-      # on the bridge here too, and nowhere else.
+      # nixos-fw also sees these packets (priority 0), so open the ports there too, bridge only.
       networking.firewall.interfaces.${bridge.name}.allowedTCPPorts =
         lib.unique (lib.concatMap (g: g.egress.allowHostPorts) (lib.attrValues hostPortGuests));
 
@@ -124,11 +120,11 @@ in
         content = ''
           chain forward {
             type filter hook forward priority filter - 1; policy accept;
-            ${lib.concatStringsSep "\n          " forwardRules}
+            ${lib.concatStringsSep "\n  " forwardRules}
           }
           chain input {
             type filter hook input priority filter - 1; policy accept;
-            ${lib.concatStringsSep "\n            " inputRules}
+            ${lib.concatStringsSep "\n  " inputRules}
           }
         '';
       };

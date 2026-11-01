@@ -13,7 +13,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - `agents/<name>` is one agent's definition (persona, skills, tool policy) as a plain function; the host that runs it owns the model, network, mounts and state. Agents share nothing until a second one needs it.
 - Every `.nix` under `modules/nixos` is imported into every host by `mkNixosHost`, so it must declare options and stay inert until enabled. `microvm/guest.nix` is excluded there because importing it makes the importer a guest; only `mkMicrovmGuest` takes it.
 - Profiles layer as `base.nix` (every machine, guests included) then `standalone.nix` (non-guests, imports base), then one kind: `headless.nix`, `graphical/` or `guest.nix`. Everything else is additive and picked per host.
-- Fleet facts (`hosts/shared.nix`) reach modules two ways. Read `config.fleet.*`, which is typed and available on every host built by `mkNixosHost`. The bare `fleet` specialArg is the same data untyped, and is only for microVM guests and home-manager, neither of which has `config.fleet`.
+- Fleet facts (`hosts/shared.nix`) reach modules two ways. Read `config.fleet.*`, which is typed and available on every NixOS host and microVM guest. The bare `fleet` specialArg is the same data untyped, and is only for home-manager, which has no `config.fleet`.
 - `fleet.*` is facts that are the same fleet-wide or a host's view of a shared fleet resource; `my.*` is mechanism and host-local option trees this repo defines.
 - Package overrides (`nixpkgs.overlays`, `overrideAttrs` of a nixpkgs package) live in `overlays/`, one file per concern registered in `overlays/default.nix`, never inline in a host. Temporary ones say what upstream change lets them go. Exception: bundling a host's own assets into a package (homepage's wallpaper and favicon) is host config and stays inline.
 - New option trees are declared under `modules/`. A host declares options itself only to extend a tree it consumes (as kavita and seerr do for `selfhost.users`), or when the defaults derive from host-only config (`my.storage` reads this host's disko pool).
@@ -37,12 +37,15 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - Add one only for what the code can't say: the *why*, a non-obvious constraint, or a cross-file pointer. Never restate clear code, echo an option's name as a label, or repeat architecture/design that belongs in a README.
 - When you do comment, one line and succinct; cut every word the sentence survives without.
 - Architecture and design choices (the why/how of a host or subsystem, the threat model, the network posture) live in that host's `README.md`, not in module headers. A module header is at most a one-line orientation plus a pointer to the README.
+- Option descriptions are one line.
 
 ## Verifying
 
 - A refactor that should change nothing: compare `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` before and after. Same hash means same system.
 - A microVM host (ai) always differs by its `install-microvm-*` units, which embed the flake source path and change on any edit.
 - Comparing across commits or copies needs the label pinned, since `system.nixos.label` is timestamp-derived.
+- A selfhost-nix change: verify here with `--override-input selfhost-nix ~/workdir/selfhost-nix`, then push it, `nix flake update selfhost-nix`, deploy.
+- Keep eval warnings at zero. A rename that drops a `*File` suffix changes meaning, not just the name.
 
 ## Shell Scripts
 

@@ -1,4 +1,4 @@
-{ fleet, ... }:
+{ config, ... }:
 let
   alfredVm = import ./settings.nix;
 in
@@ -13,10 +13,10 @@ in
   _module.args.alfredVm = alfredVm;
 
   my.microvm.guest = {
-    inherit (alfredVm) stateRoot;                       # SSH host key + hermes state
-    tap = "vm-alfred";                                  # vm-<hostname> would exceed IFNAMSIZ
-    ingressPorts = [ fleet.ai.assistantEndpoint.port ]; # hermes API, fronted by compute's Traefik
-    ingressFrom = [ fleet.lan.hosts.compute ];          # Traefik, Open WebUI and Prometheus
+    inherit (alfredVm) stateRoot;                              # SSH host key + hermes state
+    tap = "vm-alfred";                                         # vm-<hostname> would exceed IFNAMSIZ
+    ingressPorts = [ config.fleet.ai.assistantEndpoint.port ]; # hermes API, fronted by compute's Traefik
+    ingressFrom = [ config.fleet.lan.hosts.compute ];          # Traefik, Open WebUI and Prometheus
   };
 
   system.stateVersion = "26.05";

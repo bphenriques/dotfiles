@@ -48,7 +48,7 @@ in
     # the daemon's database are both lost, reseed from the vault copy in B2.
     livesync-vault-passphrase = {
       bytes = 32;
-      generateOnce = "${stateDir}/.livesync";
+      onMissing.generateOnce = "${stateDir}/.livesync";
       restartUnits = [ "livesync-cli-configure.service" ];
     };
     "couchdb-password-${vault.owner}".restartUnits = [ "livesync-cli-configure.service" ];

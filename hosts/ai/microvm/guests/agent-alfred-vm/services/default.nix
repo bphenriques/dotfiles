@@ -1,4 +1,4 @@
-{ config, lib, pkgs, fleet, fleetFacts, alfredVm, private, inputs, ... }:
+{ config, lib, pkgs, fleetFacts, alfredVm, private, inputs, ... }:
 let
   inherit (config.my.microvm.guest) gateway;
 in
@@ -13,9 +13,9 @@ in
     facts = {
       inherit (alfredVm) vaultRoot recipesRoot stateRoot;
       recipesUrl = fleetFacts.publicUrls.cook-recipes;
-      speechUrl = "http://${gateway}:${toString fleet.ai.speechEndpoint.port}/inference";
-      modelUrl = "http://${gateway}:${toString fleet.ai.endpoint.port}";
-      inherit (fleet.ai) model;
+      speechUrl = "http://${gateway}:${toString config.fleet.ai.speechEndpoint.port}/inference";
+      modelUrl = "http://${gateway}:${toString config.fleet.ai.endpoint.port}";
+      inherit (config.fleet.ai) model;
       cookidooCollection = private.cookidoo.collection;
     };
   };

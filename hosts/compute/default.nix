@@ -5,7 +5,6 @@
     ./hardware
     ./disko.nix
     ./users.nix
-    ./ollama-models.nix
     ../../profiles/nixos/headless.nix
     ../../profiles/nixos/ups-client.nix
     ./selfhost

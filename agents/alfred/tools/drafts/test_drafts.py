@@ -1,3 +1,5 @@
+import email.message
+import io
 import json
 import subprocess
 from pathlib import Path
@@ -16,7 +18,7 @@ def recipe(*ingredients, evidence=None, **extra):
 
 
 @pytest.mark.parametrize("text,expected", [
-    ("100g pancetta", {100}), ("½ limão", {0.5}), ("1,5 l água", {1.5}), ("duas cebolas", {2}), ("1/2 tsp", {0.5}),
+    ("100g pancetta", {100}), ("½ limão", {0.5}), ("1,5 l água", {1.5}), ("duas cebolas", {2}), ("1/2 tsp", {0.5}), ("3.8/5", {3.8, 5}),
 ])
 def test_numbers(text, expected):
     assert expected <= d.numbers(text)
@@ -51,6 +53,32 @@ def test_translate_flags_what_the_model_changed(monkeypatch):
 def test_check_flags_an_unused_number_but_not_salt_to_taste():
     r = recipe(("sal", "", "", "", "sal q.b."), ("pancetta", "", "", "", "100g pancetta"))
     assert d.check(r, NAMES) == ["pancetta: no quantity"]
+
+
+class Page(io.BytesIO):
+    headers = email.message.Message()
+
+
+def test_a_page_whose_recipe_data_lacks_what_its_steps_use_is_read_from_its_text(monkeypatch):
+    data = {"@context": "https://schema.org", "@type": "Recipe", "name": "Cookies", "recipeIngredient": ["120g de farinha"],
+            "recipeInstructions": [{"@type": "HowToStep", "text": "Amassar as bananas."}]}
+    page = f'<script type="application/ld+json">{json.dumps(data)}</script><ul><li>2 bananas</li><li>90g de aveia</li></ul>'
+    monkeypatch.setattr(d.urllib.request, "urlopen", lambda req, timeout: Page(page.encode()))
+    read = []
+
+    def model(prompt, schema):
+        if "lines" in schema["properties"]:
+            return {"name": "Cookies", "category": "desserts", "difficulty": "easy", "lines": [{"ingredients": []}]}
+        if "unlisted" in schema["properties"]:
+            return {"unlisted": ["bananas"]}
+        read.append(prompt)
+        return {"recipe": True, "name": "Cookies saudáveis", "category": "soups", "difficulty": "medium", "servings": 0, "time": 0,
+                "ingredients": [], "steps": ["Amassar."]}
+    monkeypatch.setattr(d, "ask_model", model)
+    r = d.from_page("https://example.test/cookies")
+    assert read[0].startswith("2 bananas\n90g de aveia") and "recipeIngredient" not in read[0]
+    assert (r["name"], r["category"], r["difficulty"], r["steps"]) == ("Cookies", "desserts", "easy", ["Amassar."])
+    assert r["notes"] == ["the page's recipe data lacks bananas, which its steps use: drafted from the page's text"]
 
 
 def test_check_flags_missing_fields():

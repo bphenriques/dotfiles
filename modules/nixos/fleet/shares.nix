@@ -13,13 +13,13 @@
           root = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "Absolute local root. A share this host does not have is simply absent from the attrset.";
+            description = "Absolute local root.";
           };
 
           backup = lib.mkOption {
             type = lib.types.bool;
             default = false;
-            description = "Whether to bind this share into the off-site backup. Opt-in, because the cost is per byte stored.";
+            description = "Whether to include this share in the off-site backup.";
           };
         };
       }

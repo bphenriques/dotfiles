@@ -69,7 +69,7 @@ stalls chat and coding for its duration.
 ## Models
 
 `fleet.ai` declares the models the fleet depends on and they are pulled or created on boot. Anything pulled by
-hand survives deploys and reboots until removed; `ollama-models {list,pull,rm}` on compute is the way
+hand survives deploys and reboots until removed; `ollama-models {list,pull,rm}` on this host is the way
 to manage those.
 
 `qwen3.8-flash-next` (`codingModel`) is created instead, from a sharded GGUF plus its MTP head (`DRAFT`),

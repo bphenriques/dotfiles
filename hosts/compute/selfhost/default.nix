@@ -221,7 +221,7 @@ in
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
 
   # Bootstrap-only creds: set at account creation, then changed in-app. Never re-read, so a lost file may
-  # regenerate (regenerateIfMissing's default, true) instead of failing the activation.
+  # regenerate (the default onMissing) instead of failing the activation.
   selfhost.runtimeSecrets = {
     home-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
     guest-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];

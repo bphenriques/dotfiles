@@ -1,6 +1,7 @@
 """Recipe drafts, reviewed in `drafts/` until `promote` moves them into the library (the recipes AGENTS.md has the
 lifecycle). Code checks every number the model gives against the source."""
 import argparse
+import html as markup
 import json
 import re
 import shutil
@@ -26,6 +27,7 @@ MAGICK = "@magick@"
 COOK = "@cook@"
 TIMEOUT = 600   # seconds, for the model and the downloads
 MAX_IMAGE = 10 * 2**20
+MAX_PAGE = 30000   # characters of a page's text the model reads
 
 VIDEO_HOSTS = ("instagram.com", "youtube.com", "youtu.be", "tiktok.com")
 CATEGORIES = {"mains": "main", "soups": "starter", "desserts": "dessert", "breakfast": "breakfast", "baby-food": None}
@@ -75,7 +77,7 @@ def numbers(text, words=True):
     """Every number written in `text`, as digits, fractions or (with `words`) words."""
     for k, v in VULGAR.items():
         text = text.replace(k, f" {v}")
-    found = {float(Fraction(m.replace(",", "."))) for m in re.findall(r"\d+(?:[.,]\d+)?(?:/\d+)?", text)}
+    found = {float(Fraction(m.replace(",", "."))) for m in re.findall(r"\d+/\d+|\d+(?:[.,]\d+)?", text)}
     found |= {float(v) for w, v in NUMBER_WORDS.items() if words and re.search(rf"\b{w}\b", text, re.IGNORECASE)}
     return found
 
@@ -135,6 +137,16 @@ def from_page(url):
             "lines": {"type": "array", "items": {"type": "object", "required": ["ingredients"], "properties": {
                 "ingredients": {"type": "array", "items": INGREDIENT}}}}}})
     split = reply.pop("lines")
+    numbered = "\n".join(f"{i}. {x}" for i, x in enumerate(recipe["steps"], 1))
+    unlisted = ask_model(
+        f"Ingredient list:\n{listed}\n\nSteps:\n{numbered}\n\nWhich foods do the steps add that the ingredient list does "
+        "not name at all? Not water, salt or pepper, not a food the list names in other words, not a mix of listed ones "
+        "(\"the spices\", \"the sauce\"). Empty when there are none.",
+        {"type": "object", "required": ["unlisted"], "properties": {"unlisted": {"type": "array", "items": {"type": "string"}}}})["unlisted"]
+    if unlisted:   # a stale ingredient list: the page's text is the source, its recipe data still names the dish
+        found = from_text(visible(html)[:MAX_PAGE])
+        found["notes"].append(f"the page's recipe data lacks {', '.join(unlisted)}, which its steps use: drafted from the page's text")
+        return found | reply | {"author": recipe["author"], "image": recipe["image"]}
     if len(split) == len(lines):
         ingredients = [x | {"line": line} for line, group in zip(lines, split) for x in group["ingredients"]]
     else:
@@ -142,6 +154,12 @@ def from_page(url):
         ingredients = [x | {"line": None} for group in split for x in group["ingredients"]]
         recipe["evidence"] = "\n".join(lines)
     return recipe | reply | {"ingredients": ingredients}
+
+
+def visible(html):
+    """A page's text, one line per element, without its scripts and styles."""
+    text = re.sub(r"(?is)<(script|style|noscript)\b.*?</\1>|<[^>]+>", "\n", html)
+    return re.sub(r"\s*\n\s*", "\n", markup.unescape(text)).strip()
 
 
 def from_video(url):

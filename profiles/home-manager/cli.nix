@@ -50,17 +50,18 @@ in
   # home-manager#5801: launchctl setenv for home.sessionVariables (macOS has no environment.d).
   launchd.agents.launchctl-setenv = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     let
-      launchctl-setenv = pkgs.writeShellScriptBin "launchctl-setenv" (
-        lib.concatStringsSep "\n" (lib.mapAttrsToList
+      launchctl-setenv = pkgs.writeShellApplication {
+        name = "launchctl-setenv";
+        text = lib.concatStringsSep "\n" (lib.mapAttrsToList
           (name: val:
             "/bin/launchctl setenv ${lib.escapeShellArg name} ${lib.escapeShellArg (toString val)}")
-          config.home.sessionVariables)
-      );
+          config.home.sessionVariables);
+      };
     in
     {
       enable = true;
       config = {
-        ProgramArguments = [ "${launchctl-setenv}/bin/launchctl-setenv" ];
+        ProgramArguments = [ (lib.getExe launchctl-setenv) ];
         KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
       };

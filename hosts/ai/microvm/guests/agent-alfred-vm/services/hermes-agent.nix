@@ -1,7 +1,7 @@
-{ config, lib, pkgs, fleet, alfred, alfredVm, private, inputs, ... }:
+{ config, lib, pkgs, alfred, alfredVm, private, inputs, ... }:
 let
   # ai is this guest's host, reached through the bridge gateway; the seal drops its LAN address.
-  endpoint = "http://${config.my.microvm.guest.gateway}:${toString fleet.ai.endpoint.port}/v1";
+  endpoint = "http://${config.my.microvm.guest.gateway}:${toString config.fleet.ai.endpoint.port}/v1";
   aiEndpoint = {
     api_key = "ollama";   # dummy; Ollama needs no auth
     base_url = endpoint;
@@ -35,12 +35,12 @@ in
         # Only injected when the module renders config.yaml itself, which configFile above bypasses.
         terminal.cwd = config.services.hermes-agent.workingDirectory;
 
-        providers.ai = aiEndpoint // { model = fleet.ai.model; };
+        providers.ai = aiEndpoint // { model = config.fleet.ai.model; };
 
         model = aiEndpoint // {
           provider = "custom:ai";
-          default = fleet.ai.model;
-          context_length = fleet.ai.contextLength;
+          default = config.fleet.ai.model;
+          context_length = config.fleet.ai.contextLength;
 
           # Detection only probes endpoints it judges local; ours is across the LAN, so declare it.
           supports_vision = true;
@@ -50,7 +50,7 @@ in
 
         # Left to `provider: auto` this resolves to a cloud chain (openrouter, then nous),
         # both unauthenticated here; base_url outranks provider and keeps it on the ai host.
-        auxiliary.compression = aiEndpoint // { model = fleet.ai.model; };
+        auxiliary.compression = aiEndpoint // { model = config.fleet.ai.model; };
 
         # Fired concurrently with the answer and doubled every turn's latency.
         auxiliary.title_generation.enabled = false;
@@ -59,10 +59,10 @@ in
           enabled = true;
           extra = {
             host = "0.0.0.0";
-            inherit (fleet.ai.assistantEndpoint) port;
+            inherit (config.fleet.ai.assistantEndpoint) port;
 
             # Extra dropdown models need an explicit route or they fall back to model.default.
-            model_routes = lib.genAttrs [ fleet.ai.codingModel ] (m: aiEndpoint // { provider = "custom:ai"; model = m; });
+            model_routes = lib.genAttrs [ config.fleet.ai.codingModel ] (m: aiEndpoint // { provider = "custom:ai"; model = m; });
           };
         };
       }

@@ -54,7 +54,7 @@
       inherit (hostBuilders) mkNixosHost mkMicrovmGuest mkDarwinHost;
 
       evalChecks = system: nixpkgs.lib.mapAttrs'
-        (name: cfg: nixpkgs.lib.nameValuePair "eval-${name}" cfg.config.system.build.toplevel)
+        (name: cfg: nixpkgs.lib.nameValuePair "nixos-${name}" cfg.config.system.build.toplevel)
         (nixpkgs.lib.filterAttrs (_: cfg: cfg.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations);
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
       fleetFacts = import ./lib/fleet.nix {

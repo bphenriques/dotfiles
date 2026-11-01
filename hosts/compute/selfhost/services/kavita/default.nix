@@ -1,10 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 let
   serviceCfg = config.selfhost.services.kavita;
   oidcCfg = config.selfhost.auth.oidc;
   sharesCfg = config.fleet.shares;
-
-  kavitaCfg = config.services.kavita;
 in
 {
   imports = [ ./configure.nix ];
@@ -62,7 +60,7 @@ in
           restartUnits = [ "kavita.service" ];
         };
         kavita-admin-password = {
-          regenerateIfMissing = false;
+          onMissing = "warn";
           owner = "kavita";
           restartUnits = [ "kavita-configure.service" ];
         };
@@ -71,36 +69,24 @@ in
 
     services.kavita = {
       enable = true;
-      tokenKeyFile = config.selfhost.runtimeSecrets.kavita-token-key.path;
+      credentials = {
+        token_key = config.selfhost.runtimeSecrets.kavita-token-key.path;
+        oidc_id = serviceCfg.access.oidc.id.file;
+        oidc_secret = serviceCfg.access.oidc.secret.file;
+      };
       settings.Port = serviceCfg.port;
       settings.IpAddresses = "127.0.0.1";
       settings.OpenIdConnectSettings = {
         Authority = oidcCfg.provider.issuerUrl;
-        ClientId = serviceCfg.access.oidc.id.placeholder;
-        Secret = serviceCfg.access.oidc.secret.placeholder;
+        ClientId = "@oidc_id@";
+        Secret = "@oidc_secret@";
       };
     };
 
-    systemd.services.kavita = {
-      serviceConfig = {
-        LoadCredential = serviceCfg.access.oidc.systemd.loadCredentials;
-        ReadOnlyPaths = [
-          "${sharesCfg.media.root}/books/library"
-          "${sharesCfg.media.root}/comics/library"
-          "${sharesCfg.media.root}/manga/library"
-        ];
-      };
-      # Kavita has no native _FILE support for OIDC credentials; replace placeholders at runtime.
-      # If upstream adds file-based config, switch to it and remove this workaround.
-      preStart = lib.mkAfter ''
-        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.access.oidc.id.placeholder}' \
-          "''${CREDENTIALS_DIRECTORY}/oidc-id" \
-          '${kavitaCfg.dataDir}/config/appsettings.json'
-        ${pkgs.replace-secret}/bin/replace-secret '${serviceCfg.access.oidc.secret.placeholder}' \
-          "''${CREDENTIALS_DIRECTORY}/oidc-secret" \
-          '${kavitaCfg.dataDir}/config/appsettings.json'
-      '';
-    };
-
+    systemd.services.kavita.serviceConfig.ReadOnlyPaths = [
+      "${sharesCfg.media.root}/books/library"
+      "${sharesCfg.media.root}/comics/library"
+      "${sharesCfg.media.root}/manga/library"
+    ];
   };
 }

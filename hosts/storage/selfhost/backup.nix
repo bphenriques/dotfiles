@@ -9,14 +9,8 @@ let
   inherit (config.fleet) shares;
   mounted = lib.filterAttrs (_: s: s.root != null) shares;
   backed = lib.filterAttrs (_: s: s.backup) mounted;
-  skipped = lib.attrNames (lib.filterAttrs (_: s: !s.backup) mounted);
 in
 {
-  # The opt-in silently omits, so the exclusions have to stay visible.
-  warnings = lib.optional (
-    skipped != [ ]
-  ) "Shares served here but excluded from the off-site backup: ${toString skipped}. Set my.storage.shares.<name>.backup if unintended.";
-
   sops.secrets."notify/backup-token" = { };
 
   # Publishes to compute's ntfy. No provider runs here to mint a publisher token, so it comes from this

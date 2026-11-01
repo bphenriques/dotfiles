@@ -25,7 +25,7 @@ let
   mcpServers = {
     meals = { command = lib.getExe meals; args = [ "serve" ]; };
 
-    # Read-only: new recipes reach the library through `drafts promote`, edits through `patch`.
+    # Read-only: recipes reach the library through `drafts promote` and the cookidoo sync.
     cook = {
       command = lib.getExe pkgs.cook-mcp;
       env.COOK_RECIPES_DIR = "${recipesRoot}/library";
@@ -70,7 +70,7 @@ in
     mcp_servers = lib.mapAttrs (_: _: { tools = { resources = false; prompts = false; }; }) mcpServers;
 
     # `search` is web_search alone; pages go through the `fetch` MCP.
-    platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" "cronjob" "terminal" "file" "skills" "search" ];
+    platform_toolsets.api_server = [ "memory" "session_search" "todo" "vision" "cronjob" "terminal" "skills" "search" ];
 
     skills = {
       # Read-only, so agent-created skills land in HERMES_HOME/skills.

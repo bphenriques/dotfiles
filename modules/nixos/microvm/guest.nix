@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, private, fleet, ... }:
+{ config, lib, pkgs, inputs, private, ... }:
 let
   cfg = config.my.microvm.guest;
 
@@ -20,23 +20,23 @@ in
     prefixLength = lib.mkOption { type = lib.types.int; };
     stateRoot = lib.mkOption {
       type = lib.types.str;
-      description = "Persistent state dir holding the SSH host key (doubles as the sops age identity).";
+      description = "Persistent dir for the SSH host key, also the sops identity.";
     };
     tap = lib.mkOption {
       type = lib.types.str;
       default = "vm-${config.networking.hostName}";
-      description = "Host-side tap name; must start with `vm-` (the host's enslave glob) and fit IFNAMSIZ.";
+      description = "Host-side tap name.";
     };
     ingressPorts = lib.mkOption {
       type = lib.types.listOf lib.types.port;
       default = [ ];
-      description = "Extra TCP ports reachable from the host bridge, beyond 22 + node-exporter.";
+      description = "Extra TCP ports open to ingressFrom.";
     };
     ingressFrom = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ cfg.gateway ];
       defaultText = lib.literalExpression "[ gateway ]";
-      description = "Addresses admitted to node-exporter and `ingressPorts`; SSH stays gateway-only.";
+      description = "Addresses allowed to reach node-exporter and ingressPorts.";
     };
   };
 
@@ -51,9 +51,9 @@ in
         networkConfig = {
           Address = "${cfg.ip}/${toString cfg.prefixLength}";
           Gateway = cfg.gateway;
-          DNS = fleet.dns;
-          LinkLocalAddressing = "ipv4";   # v4-only guest: no fe80:: and no RA-assigned v6, so the
-          IPv6AcceptRA = false;           # host's v4-only LAN-drop seal can't be sidestepped over v6
+          DNS = config.fleet.dns;
+          LinkLocalAddressing = "ipv4";   # v4-only: the host's seal is v4-only, so v6 would bypass it
+          IPv6AcceptRA = false;
         };
       };
     };

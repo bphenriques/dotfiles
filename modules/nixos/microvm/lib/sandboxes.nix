@@ -15,7 +15,7 @@
     ProtectControlGroups = true;
     ProtectProc = "invisible";
     ProcSubset = "pid";
-    DevicePolicy = "closed";                # keep host /dev but restrict to what the VMM opens
+    DevicePolicy = "closed";
     DeviceAllow = [ "/dev/kvm rw" "/dev/net/tun rw" ];
     RestrictNamespaces = true;
     SystemCallArchitectures = "native";

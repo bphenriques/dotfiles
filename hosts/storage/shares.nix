@@ -42,8 +42,7 @@ let
     immich-encoded-video = {
       root = "/srv/storage/immich/encoded-video";
       # Transcodes, plus the motion-photo halves Immich extracts here. All of it regenerates from
-      # originals that are themselves backed up, so neither snapshotted nor sent off-site; the build
-      # warning naming this share is the intended opt-out record.
+      # originals that are themselves backed up, so neither snapshotted nor sent off-site.
       backup = false;
       snapshots = false;
       owner = "bphenriques";
@@ -107,7 +106,7 @@ in
 {
   options.my.storage = {
     shares = lib.mkOption {
-      description = "Shares served by this host, pairing the ZFS backing with the SMB export.";
+      description = "Shares served by this host: ZFS dataset plus SMB export.";
       type = lib.types.attrsOf (
         lib.types.submodule (
           { name, config, ... }:
@@ -130,7 +129,7 @@ in
               backup = lib.mkOption {
                 type = lib.types.bool;
                 default = false;
-                description = "Whether to bind this share into the off-site backup. Opt-in, because the cost is per byte stored.";
+                description = "Whether to include this share in the off-site backup.";
               };
               snapshots = lib.mkOption {
                 type = lib.types.bool;
@@ -141,7 +140,7 @@ in
                 readOnly = true;
                 default = map (lib.removePrefix "${key}/") (childKeys key);
                 defaultText = lib.literalMD "disko datasets nested under `dataset`";
-                description = "Child datasets under this share, snapshotted independently and owned like it.";
+                description = "Child datasets, snapshotted independently.";
               };
               owner = lib.mkOption {
                 type = lib.types.str;
@@ -149,17 +148,17 @@ in
               };
               gid = lib.mkOption {
                 type = lib.types.int;
-                description = "Pinned gid of `storage-<name>`, the group owning everything in the share; the data outlives the root that would record an allocation.";
+                description = "Pinned gid of the `storage-<name>` group that owns the share.";
               };
               directories = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
                 default = [ ];
-                description = "Plain directories under the root, created with the share's ownership.";
+                description = "Directories to create under the root.";
               };
               smb = lib.mkOption {
                 type = lib.types.attrsOf lib.types.anything;
                 default = { };
-                description = "Passed verbatim to `selfhost.storage.shares.smb.shares.<name>`, which is what types it. `path` comes from `root`.";
+                description = "Passed to `selfhost.storage.shares.smb.shares.<name>`; `path` comes from `root`.";
               };
             };
           }

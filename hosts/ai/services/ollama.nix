@@ -22,8 +22,17 @@ let
     runtimeInputs = [ pkgs.curl pkgs.jq pkgs.podman ];
     text = builtins.readFile ./ollama-configure.sh;
   };
+
+  models-cli = pkgs.writeShellApplication {
+    name = "ollama-models";
+    runtimeInputs = [ pkgs.curl pkgs.jq pkgs.util-linux ];
+    runtimeEnv.OLLAMA_API = localApi;
+    text = builtins.readFile ./ollama-models.sh;
+  };
 in
 {
+  environment.systemPackages = [ models-cli ];
+
   virtualisation.oci-containers.containers.ollama = {
     image = "${img.image}:${img.tag}";
     autoStart = true;

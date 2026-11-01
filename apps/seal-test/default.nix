@@ -5,6 +5,7 @@ let
     let
       config = self.nixosConfigurations.${vmHost}.config;
       inherit (config.fleet.lan) hosts;
+      hostNameOf = lib.mapAttrs' (name: ip: lib.nameValuePair ip name) hosts;
       inherit (config.my.microvm.host) bridge guests;
     in
     lib.concatLists (lib.mapAttrsToList (name: g:
@@ -19,9 +20,9 @@ let
           "${hosts.${vmHost}} ${toString p} blocked host port on LAN"
         ]) g.egress.allowHostPorts
         ++ lib.concatMap (e:
-          let target = hosts.${e.host} or e.host; in
-          map (p: "${target} ${toString p} open ${e.host}") e.ports
-          ++ [ "${target} 22 blocked ${e.host}, other ports" ]
+          let target = hosts.${e.host} or e.host; label = hostNameOf.${target} or e.host; in
+          map (p: "${target} ${toString p} open ${label}") e.ports
+          ++ [ "${target} 22 blocked ${label}, other ports" ]
         ) g.egress.allowLan
       )
     ) guests);

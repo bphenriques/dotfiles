@@ -24,33 +24,33 @@ in
 
     windowRules = {
       base = lib.mkOption {
-        description = "Rendered 1st. Generic defaults (corner-radius, opacity, floating shadow)";
+        description = "Rendered 1st: generic defaults";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
 
       byApp = lib.mkOption {
-        description = "Rendered 2nd. App-specific rules contributed by individual app profiles";
+        description = "Rendered 2nd: per-app rules";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
 
       byType = {
         popups = lib.mkOption {
-          description = "Rendered 3rd. Matching rules for popup windows (overrides app defaults)";
+          description = "Rendered 3rd: popup rules";
           type = lib.types.listOf lib.types.str;
           default = [];
         };
 
         tui = lib.mkOption {
-          description = "Rendered 3rd. Matching rules for terminal user interface applications (overrides app defaults)";
+          description = "Rendered 3rd: TUI app rules";
           type = lib.types.listOf lib.types.str;
           default = [];
         };
       };
 
       overrides = lib.mkOption {
-        description = "Rendered last. Must-win rules (e.g., gaming opacity, urgent borders)";
+        description = "Rendered last: must-win rules";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
@@ -58,13 +58,13 @@ in
 
     layerRules = {
       base = lib.mkOption {
-        description = "Rendered 1st. Layer rules contributed by individual app profiles";
+        description = "Rendered 1st: per-app layer rules";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
 
       screencasting.block = lib.mkOption {
-        description = "Rendered 2nd. Matching layer rules to block from screencasting";
+        description = "Rendered 2nd: layers blocked from screencasting";
         type = lib.types.listOf lib.types.str;
         default = [];
       };

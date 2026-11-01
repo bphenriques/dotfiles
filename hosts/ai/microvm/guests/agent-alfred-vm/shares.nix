@@ -1,11 +1,11 @@
 # The NAS doors this guest's principal is granted (hosts/storage/services/samba.nix), mounted with its own credential.
-{ config, fleet, alfredVm, inputs, ... }:
+{ config, alfredVm, inputs, ... }:
 {
   imports = [ inputs.selfhost-nix.nixosModules.default ];
 
   selfhost.storage.mounts.smb = {
     enable = true;
-    hostname = fleet.lan.hosts.storage;
+    hostname = config.fleet.lan.hosts.storage;
     credentialsPath = config.sops.templates."smb-credentials".path;
     shares = {
       notes = {
