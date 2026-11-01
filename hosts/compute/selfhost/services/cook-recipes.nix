@@ -72,14 +72,10 @@ in
     };
   };
 
-  # Alfred's plans and the Cookidoo sync write through this host (it serves the VM its share), so their changes raise
-  # inotify events here. Edits made straight on the NAS raise none, hence the daily run as well.
-  systemd.paths.cook-recipes-build = {
-    wantedBy = [ "paths.target" ];
-    pathConfig.PathChanged = [ "${recipesDir}/library" "${recipesDir}/library/plans" ];
-  };
+  # Polled: every writer (Alfred, the Cookidoo sync, Obsidian) reaches the NAS directly, which raises no inotify events
+  # here. A run without changes stops at the fingerprint.
   systemd.timers.cook-recipes-build = {
     wantedBy = [ "timers.target" ];
-    timerConfig = { OnCalendar = "daily"; Persistent = true; };
+    timerConfig.OnCalendar = "*:0/10";
   };
 }

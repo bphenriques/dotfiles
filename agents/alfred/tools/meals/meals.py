@@ -34,7 +34,8 @@ FISH = ("bacalhau", "salmão", "atum", "peixe", "pescada", "dourada", "robalo", 
 WEEKDAYS = ("seg", "ter", "qua", "qui", "sex", "sáb", "dom")
 PROTEINS = {"meat": "carne", "fish": "peixe", "both": "carne e peixe", "vegetarian": "vegetariano", "unknown": "?"}
 SOUP_DAYS = 3
-RATINGS = ("liked", "never")   # tags, which the Cookidoo sync keeps on its copies
+COURSES = {"Pratos": "main", "Sopas": "soup"}   # the library folders the planner plans from
+RATINGS = {"liked": "favorita", "never": "nunca"}   # each rating's tag, which the Cookidoo sync keeps on its copies
 GATHERING = "grupos"   # a tag for dishes meant for guests, planned only when the user names one
 MEAL_SERVINGS = 2   # one per adult; a main lasts as many days as its servings cover
 LEVELS = ("easy", "medium", "hard")
@@ -69,24 +70,23 @@ def library():
     """Soups and mains from the Cooklang library, Cookidoo copies included, and the files cook could not read
     (one bad file never stops planning)."""
     found = {"soup": [], "main": [], "broken": []}
-    for f in sorted(LIBRARY.glob("*.cook")):
-        try:
-            recipe = read(f)
-        except subprocess.CalledProcessError:
-            found["broken"].append(f.stem)
-            continue
-        meta = recipe["metadata"]["map"]
-        tags = meta.get("tags") or []
-        course = "soup" if "soups" in tags else "main" if "mains" in tags else None
-        if course is None:
-            continue
-        found[course].append({
-            "source": "cookidoo" if meta.get("cookidoo") else "library", "id": f.stem, "cookidoo_id": meta.get("cookidoo"), "name": f.stem,
-            "url": f"{SITE}/recipe/{quote(f.stem)}.html",
-            "protein": protein([i["name"] for i in recipe["ingredients"]], meta.get("protein")),
-            "minutes": meta.get("time"), "difficulty": meta.get("difficulty"), "servings": meta.get("servings"),
-            "rating": next((t for t in tags if t in RATINGS), None), "gathering": GATHERING in tags,
-        })
+    for folder, course in COURSES.items():
+        for f in sorted((LIBRARY / folder).glob("*.cook")):
+            ident = f"{folder}/{f.stem}"   # as plans link it: @./Pratos/Arroz de pato
+            try:
+                recipe = read(f)
+            except subprocess.CalledProcessError:
+                found["broken"].append(ident)
+                continue
+            meta = recipe["metadata"]["map"]
+            tags = meta.get("tags") or []
+            found[course].append({
+                "source": "cookidoo" if meta.get("cookidoo") else "library", "id": ident, "cookidoo_id": meta.get("cookidoo"),
+                "name": f.stem, "url": f"{SITE}/recipe/{quote(ident)}.html",
+                "protein": protein([i["name"] for i in recipe["ingredients"]], meta.get("protein")),
+                "minutes": meta.get("time"), "difficulty": meta.get("difficulty"), "servings": meta.get("servings"),
+                "rating": next((r for r, t in RATINGS.items() if t in tags), None), "gathering": GATHERING in tags,
+            })
     return found
 
 
@@ -518,7 +518,7 @@ def find(dishes, name):
 def retag(path, rating):
     """Set a recipe's rating tag (None clears it), checked through cook so a frontmatter it cannot rewrite is left as is."""
     tags = read(path)["metadata"]["map"].get("tags") or []
-    want = [t for t in tags if t not in RATINGS] + ([rating] if rating else [])
+    want = [t for t in tags if t not in RATINGS.values()] + ([RATINGS[rating]] if rating else [])
     text = path.read_text()
     new = re.sub(r"(?m)^tags:.*$", lambda _: f"tags: {json.dumps(want, ensure_ascii=False)}", text, count=1)
     tmp = path.with_name(f".{path.name}.tmp")
@@ -570,9 +570,9 @@ async def swap_day(day: str, protein: str | None = None, recipe: str | None = No
             try:
                 match = find(catalog[1], recipe)
             except ToolError:
-                if any(plain(recipe) in plain(f.stem) for f in LIBRARY.glob("*.cook")):
-                    raise ToolError(f"{recipe!r} is in the library but not planned as a main dish: give it the `mains` "
-                                    "tag as formatting.md says, then call swap_day again.") from None
+                if any(plain(recipe) in plain(f.stem) for f in LIBRARY.rglob("*.cook")):
+                    raise ToolError(f"{recipe!r} is in the library but not planned as a main dish: the user moves it "
+                                    "into Pratos/, then call swap_day again.") from None
                 raise
             mains[iso] = match["id"]
             exclude.discard(match["id"])

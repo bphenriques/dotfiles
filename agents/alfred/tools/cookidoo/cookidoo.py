@@ -26,19 +26,15 @@ COOK = "@cook@"
 COUNTRY, LANGUAGE = "pt", "pt-PT"
 LOCALIZATION = None  # set in main(); it reads a bundled file, but through an async API
 
-# The library's category tags and the `course` each implies, as formatting.md defines them.
-CATEGORIES = {"mains": "main", "soups": "starter", "desserts": "dessert", "breakfast": "breakfast", "baby-food": None}
+# A word of a Cookidoo category and the library folder (formatting.md) its new copies go to: the first match wins.
+FOLDERS = (("sopa", "Sopas"), ("sobremesa", "Sobremesas"), ("bolo", "Sobremesas"), ("biscoito", "Sobremesas"),
+           ("doce", "Sobremesas"), ("gelado", "Sobremesas"), ("básico", "Bases"), ("molho", "Bases"), ("tempero", "Bases"),
+           ("pequeno-almoço", "Pequeno-almoço"), ("pequenos-almoços", "Pequeno-almoço"), ("bebé", "Bebé"), ("infantil", "Bebé"))
+LEVELS = {"easy": "easy", "medium": "medium", "advanced": "hard"}   # Cookidoo's difficulty, as formatting.md names it
+MAX_SERVINGS = 100   # above it, Cookidoo's yield is a weight (750 g of sauce), not people
 SYNC_TAG = "cookidoo"   # marks a copy of a Cookidoo recipe; its `cookidoo:` field is its identity
 PROSE = str.maketrans({"@": "a", "#": "nº", "~": "-", "{": "(", "}": ")"})
 MAX_IMAGE = 10 * 2**20
-
-
-def words(*terms):
-    return re.compile(r"\b(?:" + "|".join(map(re.escape, terms)) + r")(?:s|es)?\b", re.IGNORECASE)
-
-
-SOUP_RE = words("sopa", "creme", "caldo", "soup")
-DESSERT_RE = words("bolo", "bolacha", "biscoito", "sobremesa", "pudim", "mousse", "gelado", "cake", "dessert")
 
 
 # Cookidoo adapter. The only code that knows cookidoo-api: everything below it works on the plain data these return,
@@ -68,7 +64,8 @@ def recipe_of(d):
     """A Cookidoo recipe as plain data."""
     return {
         "id": d.id, "name": d.name, "url": d.url, "image": d.image, "servings": d.serving_size,
-        "minutes": round(d.total_time / 60), "difficulty": d.difficulty, "categories": [c.name for c in d.categories],
+        "minutes": round(d.total_time / 60), "active": round(d.active_time / 60), "difficulty": d.difficulty,
+        "categories": [c.name for c in d.categories],
         "ingredients": [{"name": i.name, "amount": i.description} for i in d.ingredients],
         "steps": [{"title": g.title, "texts": [s.formatted_text for s in g.recipe_steps]} for g in d.step_groups],
         "notes": list(d.notes), "utensils": list(d.utensils),
@@ -170,10 +167,16 @@ def ingredient(i):
     return f"@{name}{{{quantity}%{unit}}}" if unit else f"@{name}{{{quantity}}}"
 
 
+def folder_of(categories):
+    names = " | ".join(categories).casefold()
+    return next((folder for word, folder in FOLDERS if word in names), "Pratos")
+
+
 def to_cook(r, name, tags, image):
     """A Cookidoo recipe as a Cooklang file in the library's layout (formatting.md)."""
-    category = next((t for t in tags if t in CATEGORIES), "mains")
-    front = {"servings": r["servings"], "time": r["minutes"], "difficulty": r["difficulty"], "course": CATEGORIES[category],
+    front = {"servings": r["servings"] if 0 < r["servings"] <= MAX_SERVINGS else None, "time": r["minutes"],
+             "time.prep": r["active"] if 0 < r["active"] < r["minutes"] else None,
+             "difficulty": LEVELS.get(r["difficulty"], r["difficulty"]),
              "source": r["url"], "cookidoo": r["id"], "image": f"{name}.jpg" if image else None, "tags": tags}
     lines = ["---", *(f"{k}: {json.dumps(v, ensure_ascii=False)}" for k, v in front.items() if v is not None), "---", ""]
     lines += [", ".join(map(ingredient, r["ingredients"])) + ".", ""]
@@ -201,7 +204,7 @@ def synced_copies():
     """The library's Cookidoo copies by Cookidoo id, with the tags each has. A file cook cannot read is not one.
     Copies made before the `cookidoo:` field are still recognised by their tag and link, and get the field."""
     found = {}
-    for f in sorted(LIBRARY.glob("*.cook")):
+    for f in sorted(LIBRARY.rglob("*.cook")):
         try:
             meta = read(f)["metadata"]["map"]
         except subprocess.CalledProcessError:
@@ -214,19 +217,22 @@ def synced_copies():
 
 
 def apply(recipes, images):
-    """Copy Cookidoo recipes into the library and report each one. A copy is found by its `cookidoo:` id, keeps the
-    tags it has, and follows Cookidoo for everything else; a file of the user's with the same name is never touched."""
+    """Copy Cookidoo recipes into the library and report each one. A copy is found by its `cookidoo:` id wherever it
+    is, keeps its folder and tags, and follows Cookidoo for everything else; a new one goes to its category's folder,
+    and a recipe of the user's with the same name is never touched. Copies left out of the collection stay."""
     synced, report = synced_copies(), []
+    names = {f.stem.casefold() for f in LIBRARY.rglob("*.cook")}   # the share ignores case
     for r in recipes:
         if r["id"] in synced:
             path, tags = synced[r["id"]]
         else:
-            path = LIBRARY / f"{clean(r['name']).replace('/', '-')}.cook"
-            if path.exists():
+            path = LIBRARY / folder_of(r["categories"]) / f"{clean(r['name']).replace('/', '-')}.cook"
+            if path.stem.casefold() in names:
                 report.append(f"{path.stem}: já existe uma receita tua com este nome, não foi tocada")
                 continue
-            labels = " | ".join([r["name"], *r["categories"]])
-            tags = ["desserts" if DESSERT_RE.search(labels) else "soups" if SOUP_RE.search(labels) else "mains", SYNC_TAG]
+            path.parent.mkdir(exist_ok=True)
+            tags = [SYNC_TAG]
+        label = path.relative_to(LIBRARY).with_suffix("").as_posix()
         existed = path.exists()
         image = path.with_name(f"{path.stem}.jpg")   # not with_suffix: a recipe name may contain a dot
         picture = images.get(r["id"]) if existed or not image.exists() else None   # a photo of yours is never replaced
@@ -234,12 +240,15 @@ def apply(recipes, images):
         # cook accepts almost anything, so check the conversion kept exactly the recipe's ingredients and nothing else
         parsed = read(text=text)
         if {i["name"] for i in parsed["ingredients"]} != {ingredient_name(i) for i in r["ingredients"]} or parsed["cookware"] or parsed["timers"]:
-            report.append(f"{path.stem}: a conversão não ficou certa, não foi escrita")
+            report.append(f"{label}: a conversão não ficou certa, não foi escrita")
             continue
         changed = write_if_changed(path, text.encode())
         if picture is not None:
             changed = write_if_changed(image, picture) or changed
-        report.append(f"{path.stem}: {'atualizada' if changed and existed else 'nova' if changed else 'sem alterações'}")
+        report.append(f"{label}: {'atualizada' if changed and existed else 'nova' if changed else 'sem alterações'}")
+    kept = {r["id"] for r in recipes}
+    report += [f"{path.relative_to(LIBRARY).with_suffix('').as_posix()}: já não está na coleção, a cópia ficou"
+               for cid, (path, _) in synced.items() if cid not in kept]
     return report
 
 
