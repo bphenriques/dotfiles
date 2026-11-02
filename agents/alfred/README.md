@@ -14,7 +14,8 @@ appended; `environment.md` becomes the workspace `AGENTS.md`.
 - [cookidoo.py](./tools/cookidoo/cookidoo.py): the only Cookidoo client. Syncs the collection into the library daily, and
   writes My week and the shopping list, never touching your own entries.
 - [drafts.py](./tools/drafts/drafts.py): drafts recipes from pages ([recipe-scrapers](https://github.com/hhursev/recipe-scrapers)), videos (yt-dlp, whisper on ai) or text, in Portuguese, and `aisle.conf` entries, into `drafts/<folder>/`; `promote` moves them into the same folder of the library once reviewed. The lifecycle is in the recipes `AGENTS.md`.
-- [cook-mcp](https://github.com/cook-md/cook-mcp): searches and reads recipe files.
+- [cook-mcp](https://github.com/cook-md/cook-mcp): reads recipe files. Search is meals' `find_recipes`, which takes
+  food names in any form `aisle.conf` knows.
 
 Tests run on build: a failing test blocks the deploy.
 

@@ -88,8 +88,8 @@ def test_check_flags_missing_fields():
 
 def test_cooklang_parses(tmp_path):
     r = recipe(("cebola", "2", "", "picada (fina)", "2 cebolas"), ("sal", "", "", "", "sal"))
-    text = d.cooklang(r, "Teste", ["sal: no quantity"])
-    assert "@cebola{2}(picada fina), @sal{}." in text and 'image: "Teste.jpg"' in text and "tags:" not in text
+    text = d.cooklang(r, ["sal: no quantity"])
+    assert "@cebola{2}(picada fina), @sal{}." in text and "image:" not in text and "tags:" not in text
     assert "---\n\n> Check: sal: no quantity\n\n@cebola" in text
     Path(tmp_path, "Teste.cook").write_text(text)
     subprocess.run([d.COOK, "doctor", "validate", "--strict", "-b", str(tmp_path)], check=True, capture_output=True)
@@ -113,7 +113,7 @@ def test_new_takes_the_name_and_category_the_user_gave(tmp_path, monkeypatch):
 
 
 def test_cooklang_quotes_what_yaml_would_misread(tmp_path):
-    text = d.cooklang(recipe(("sal", "", "", "", "sal"), author="Receitas: rápidas"), "Teste")
+    text = d.cooklang(recipe(("sal", "", "", "", "sal"), author="Receitas: rápidas"))
     assert 'author: "Receitas: rápidas"' in text
     Path(tmp_path, "Teste.cook").write_text(text)
     subprocess.run([d.COOK, "doctor", "validate", "--strict", "-b", str(tmp_path)], check=True, capture_output=True)
@@ -155,7 +155,7 @@ def test_promote_waits_for_every_check_to_be_deleted(tmp_path, monkeypatch):
     monkeypatch.setattr(d, "LIBRARY", tmp_path / "library")
     (d.DRAFTS / "Pratos").mkdir(parents=True)
     d.LIBRARY.mkdir()
-    (d.DRAFTS / "Pratos" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal")), "Bom", ["no photo in the source"]))
+    (d.DRAFTS / "Pratos" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal")), ["no photo in the source"]))
     with pytest.raises(SystemExit, match="1 open check"):
         d.promote("Bom")
     assert not any(d.LIBRARY.iterdir())
@@ -170,7 +170,7 @@ def test_promote_writes_what_formatting_asks_into_the_draft(tmp_path, monkeypatc
     with pytest.raises(SystemExit, match="4 fix"):
         d.promote("Bom")
     text = (d.DRAFTS / "Pratos" / "Bom.cook").read_text()
-    assert text.startswith("---\nimage: Bom.jpg\nservings: 2\n") and "---\n\n> Check: no time\n" in text
+    assert text.startswith("---\nservings: 2\n") and "---\n\n> Check: no time\n" in text
     assert "> Check: manteiga: write 'gramas' as 'g'\n> Check: ovo: a plain count has no unit, not 'unidades'\n" in text
     assert not (d.LIBRARY / "Pratos").exists()
 
@@ -180,7 +180,7 @@ def test_promote_moves_draft_and_photo(tmp_path, monkeypatch):
     monkeypatch.setattr(d, "LIBRARY", tmp_path / "library")
     (d.DRAFTS / "Sopas").mkdir(parents=True)
     d.LIBRARY.mkdir()
-    (d.DRAFTS / "Sopas" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal")), "Bom"))
+    (d.DRAFTS / "Sopas" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal"))))
     (d.DRAFTS / "Sopas" / "Bom.jpg").write_bytes(b"jpg")
     d.promote("bom")
     assert sorted(p.relative_to(d.LIBRARY).as_posix() for p in d.LIBRARY.rglob("*.*")) == ["Sopas/Bom.cook", "Sopas/Bom.jpg"]
@@ -190,11 +190,11 @@ def test_promote_moves_draft_and_photo(tmp_path, monkeypatch):
 def test_promote_refuses_a_draft_outside_a_category_or_a_name_taken_in_another(tmp_path, monkeypatch):
     library(tmp_path, monkeypatch, "", **{"Sopas/Bom": "---\nservings: 2\ntime: 5\ndifficulty: easy\n---\n\n@sal{}."})
     (d.DRAFTS / "Outros").mkdir(parents=True)
-    (d.DRAFTS / "Outros" / "Mau.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal"), image=None), "Mau"))
+    (d.DRAFTS / "Outros" / "Mau.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal"), image=None)))
     with pytest.raises(SystemExit, match="in no category"):
         d.promote("Mau")
     (d.DRAFTS / "Pratos").mkdir()
-    (d.DRAFTS / "Pratos" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal"), image=None), "Bom"))
+    (d.DRAFTS / "Pratos" / "Bom.cook").write_text(d.cooklang(recipe(("sal", "", "", "", "sal"), image=None)))
     with pytest.raises(SystemExit, match="exists already"):
         d.promote("Bom")
 
@@ -241,7 +241,7 @@ def test_promote_replaces_a_recipe_and_carries_its_photo_and_plan_links(tmp_path
     assert sorted(p.relative_to(d.LIBRARY).as_posix() for p in d.LIBRARY.glob("*/*.*") if p.parent.name not in ("plans", "config")) == [
         "Pequeno-almoço/Torrada de alho.cook", "Pequeno-almoço/Torrada de alho.jpg"]
     moved = d.LIBRARY / "Pequeno-almoço" / "Torrada de alho.cook"
-    assert (d.DRAFTS / "Garlic toast.cook.old").exists() and "image: Torrada de alho.jpg" in moved.read_text()
+    assert (d.DRAFTS / "Garlic toast.cook.old").exists() and moved.with_suffix(".jpg").read_bytes() == b"jpg"
     assert (d.LIBRARY / "plans" / "w.menu").read_text() == "- @./Pequeno-almoço/Torrada de alho{} \\\n- sobras: Torrada de alho\n"
     assert json.loads(d.PLAN.read_text()) == {"exclude": ["Pequeno-almoço/Torrada de alho"], "plan": {"days": [{"main": {
         "source": "library", "id": "Pequeno-almoço/Torrada de alho", "name": "Torrada de alho",
@@ -269,3 +269,14 @@ def test_each_component_may_list_its_own_ingredients(tmp_path):
     path = tmp_path / "T.cook"
     path.write_text("---\nservings: 1\ntime: 5\ndifficulty: easy\n---\n\n= Massa =\n\n@sal{1%g}.\n\nMix.\n\n= Molho =\n\n@sal{2%g}.\n\nMix.\n")
     assert d.lint(path) == []
+
+
+def test_what_cooklang_reads_differently_is_a_check(tmp_path):
+    path = tmp_path / "T.cook"
+    path.write_text("---\nservings: 1\ntime: 5\ndifficulty: easy\nname: T\n---\n\nUma descrição.\n\n"
+                    "@Batata{1 kg}, @alho{1%dente}, @folhas de louro{2}.\n\nCozer.\n")
+    assert d.lint(path) == [
+        "name: not a field formatting.md knows",
+        "the first paragraph is not the ingredient list: a description goes in the `description:` field",
+        "Batata: {1 kg} is text to cook and does not scale: one number, then % and the unit", "Batata: lowercase, as the shop sells it",
+        "alho: write 'dente' as 'dentes'", "folhas de louro: name the product, 'louro', and put 'folhas' in the unit"]

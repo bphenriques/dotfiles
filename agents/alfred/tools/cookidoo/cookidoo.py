@@ -33,13 +33,22 @@ FOLDERS = {
     "Sobremesas": {"Sobremesas", "Bolos e biscoitos", "Geleias, doces e compotas"},
     "Pratos": {"Pratos de carne", "Pratos de peixe e marisco", "Pratos vegetarianos", "Pratos de arroz e massa",
                "Outros pratos", "Menus e outros", "Entradas e saladas", "Salgados, tartes e pizas"},
-    "Bases": {"Básicos", "Molhos, temperos e patês", "Acompanhamentos"},
+    "Molhos": {"Molhos, temperos e patês"},
+    "Acompanhamentos": {"Acompanhamentos"},
+    "Bases": {"Básicos"},   # Cookidoo's mixed bag (doughs, prep, some sauces and sides): the user moves the odd one
     "Pequeno-almoço": {"Pequeno-almoço", "Breakfast", "Pães", "Breads and rolls", "Snacks e aperitivos", "Para os mais novos"},
 }
 LEVELS = {"easy": "easy", "medium": "medium", "advanced": "hard"}   # Cookidoo's difficulty, as formatting.md names it
 MAX_SERVINGS = 100   # above it, Cookidoo's yield is a weight (750 g of sauce), not people
 SYNC_TAG = "cookidoo"   # marks a copy of a Cookidoo recipe; its `cookidoo:` field is its identity
 PROSE = str.maketrans({"@": "a", "#": "nº", "~": "-", "{": "(", "}": ")"})
+# Thermomix symbols, private-use characters no font outside Cookidoo draws. Any other is a mode's icon after its name.
+SYMBOLS = {"\ue003": "sentido inverso", "\ue002": "colher"}
+# One spelling per unit (formatting.md), so the shopping list sums them: Cookidoo writes the singular for one.
+UNITS = {"dente": "dentes", "folha": "folhas", "fatia": "fatias", "tira": "tiras", "talo": "talos", "pé": "pés",
+         "ramo": "ramos", "raminho": "raminhos", "lata": "latas", "gota": "gotas", "cubo": "cubos", "tsp": "c. chá",
+         "tbsp": "c. sopa"}
+PART = re.compile(r"(dentes?|folhas?|fatias?|tiras?|talos?) de (.+)")   # a count of parts, which formatting.md puts in the unit
 MAX_IMAGE = 10 * 2**20
 
 
@@ -154,23 +163,28 @@ def read(path=None, text=None):
 def clean(text):
     """Cookidoo's marked-up text as one line of plain Cooklang prose: no markup, and nothing Cooklang would parse
     (an ingredient, cookware, timer or comment inside, a section or note at the start)."""
-    text = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", text or "")).split())
+    text = re.sub(r"(?:Amassar\s*)?\ue001", "Amassar", html.unescape(re.sub(r"<[^>]+>", " ", text or "")))
+    text = re.sub(r"[\ue000-\uf8ff]", lambda m: SYMBOLS.get(m.group(), ""), text)
+    text = re.sub(r"\s+([.,;:!?)])", r"\1", " ".join(text.split()))   # tags leave a space before the punctuation
     text = text.translate(PROSE).replace("--", "-").replace("[-", "[").replace("-]", "]")
     return text.lstrip("=> ")
 
 
-def ingredient_name(i):
-    return clean(i["name"]).replace("%", "")
+def parts(i):
+    """An ingredient in the library's terms (formatting.md), as (name, quantity, unit, note): quantities such as 100 g,
+    3 or "1.5 c. chá de" split into quantity and unit; anything else (q.b., a range) stays as a note."""
+    name, amount = clean(i["name"]).replace("%", ""), clean(i["amount"]).replace("%", "")
+    name = name[:1].lower() + name[1:]
+    m = re.fullmatch(r"(\d+(?:[.,]\d+)?)(?:\s*([^\W\d].*?))?(?:\s+de)?", amount)
+    quantity, unit, note = (m.group(1).replace(",", "."), m.group(2) or "", "") if m else ("", "", amount)
+    if part := PART.fullmatch(name):   # "dentes de alho" 2: alho, 2 dentes; by weight, just alho
+        name, unit = part.group(2), unit or (part.group(1) if quantity else "")
+    return name, quantity, UNITS.get(unit.lower(), unit), note
 
 
 def ingredient(i):
-    """Quantities such as 100 g, 3 or "1.5 c. chá de" go in the braces; anything else (q.b., a range) stays as a note."""
-    name, amount = ingredient_name(i), clean(i["amount"]).replace("%", "")
-    m = re.fullmatch(r"(\d+(?:[.,]\d+)?)(?:\s*([^\W\d].*?))?(?:\s+de)?", amount)
-    if not m:
-        return f"@{name}{{}}" + (f"({amount})" if amount else "")
-    quantity, unit = m.group(1).replace(",", "."), m.group(2)
-    return f"@{name}{{{quantity}%{unit}}}" if unit else f"@{name}{{{quantity}}}"
+    name, quantity, unit, note = parts(i)
+    return f"@{name}{{{f'{quantity}%{unit}' if unit else quantity}}}" + (f"({note})" if note else "")
 
 
 def folder_of(categories):
@@ -178,12 +192,12 @@ def folder_of(categories):
     return next((folder for folder, known in FOLDERS.items() if known & set(categories)), None)
 
 
-def to_cook(r, name, tags, image):
-    """A Cookidoo recipe as a Cooklang file in the library's layout (formatting.md)."""
+def to_cook(r, tags):
+    """A Cookidoo recipe as a Cooklang file in the library's layout (formatting.md): its photo is the .jpg beside it."""
     front = {"servings": r["servings"] if 0 < r["servings"] <= MAX_SERVINGS else None, "time": r["minutes"],
              "time.prep": r["active"] if 0 < r["active"] < r["minutes"] else None,
              "difficulty": LEVELS.get(r["difficulty"], r["difficulty"]),
-             "source": r["url"], "cookidoo": r["id"], "image": f"{name}.jpg" if image else None, "tags": tags}
+             "source": r["url"], "cookidoo": r["id"], "tags": tags}
     lines = ["---", *(f"{k}: {json.dumps(v, ensure_ascii=False)}" for k, v in front.items() if v is not None), "---", ""]
     lines += [", ".join(map(ingredient, r["ingredients"])) + ".", ""]
     for group in r["steps"]:
@@ -251,10 +265,10 @@ def apply(recipes, images):
         existed = path.exists()
         image = path.with_name(f"{path.stem}.jpg")   # not with_suffix: a recipe name may contain a dot
         picture = images.get(r["id"]) if existed or not image.exists() else None   # a photo of yours is never replaced
-        text = to_cook(r, path.stem, tags, picture is not None or (existed and image.exists()))
+        text = to_cook(r, tags)
         # cook accepts almost anything, so check the conversion kept exactly the recipe's ingredients and nothing else
         parsed = read(text=text)
-        if {i["name"] for i in parsed["ingredients"]} != {ingredient_name(i) for i in r["ingredients"]} or parsed["cookware"] or parsed["timers"]:
+        if {i["name"] for i in parsed["ingredients"]} != {parts(i)[0] for i in r["ingredients"]} or parsed["cookware"] or parsed["timers"]:
             report.append(f"{label}: a conversão não ficou certa, não foi escrita")
             continue
         changed = write_if_changed(path, text.encode())

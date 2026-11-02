@@ -26,8 +26,8 @@ MAINS = [recipe(f"meat{n}", "meat") for n in range(5)] + [recipe(f"fish{n}", "fi
 SOUPS = [recipe(f"soup{n}", "vegetarian") for n in range(5)]
 
 
-def plan(span=WEEK, mains=MAINS, planned=None, keep_mains=None, keep_soups=None, exclude=(), force=None, recent=frozenset()):
-    return k.compose(span, SOUPS, mains, planned or {}, keep_mains or {}, keep_soups or {}, set(exclude), force, recent)
+def plan(span=WEEK, mains=MAINS, planned=None, keep_mains=None, keep_soups=None, exclude=(), recent=frozenset(), wishes=None):
+    return k.compose(span, SOUPS, mains, planned or {}, keep_mains or {}, keep_soups or {}, set(exclude), recent, wishes)
 
 
 def mains_of(p):
@@ -116,7 +116,7 @@ def test_forced_protein_wins_with_a_note():
     p = plan()
     mains, soups = kept(p, WED)
     neighbour = next(d["main"]["protein"] for d in p["days"] if d["date"] == "2026-10-27")
-    q = plan(keep_mains=mains, keep_soups=soups, force={WED: neighbour})
+    q = plan(keep_mains=mains, keep_soups=soups, wishes={WED: {"protein": neighbour}})
     assert next(d["main"]["protein"] for d in q["days"] if d["date"] == WED) == neighbour
     assert q["notes"]
 
@@ -200,10 +200,10 @@ def test_groceries_sum_and_include_the_soups():
     assert ("alho", "4 dentes") in items and ("cenoura", "2 unidades") in items   # leftovers are not shopped for twice
 
 
-def test_propose_week_shows_the_current_plan_instead_of_replanning():
+def test_plan_week_shows_the_current_plan_instead_of_replanning():
     p = plan()
     k.save({"start": "2026-10-26", "days": 7, "exclude": [], "plan": p})
-    assert asyncio.run(k.propose_week("2026-10-26", 7)) == k.summary(k.load())   # no Cookidoo needed, so nothing was regenerated
+    assert asyncio.run(k.plan_week("2026-10-26", 7)) == k.summary(k.load())   # no Cookidoo needed, so nothing was regenerated
 
 
 @pytest.fixture
@@ -379,26 +379,95 @@ def test_a_hung_cookidoo_ends_in_a_clear_error_not_a_hung_chat(library, fake_coo
         asyncio.run(k.cookidoo("week", "2026-10-26", "7"))
 
 
-def test_swap_day_to_a_recipe_outside_pratos_says_how_to_plan_it(library, fake_cookidoo):
+WORDS = {"salmao": "salmao", "salmon": "salmao", "sal": "sal", "salt": "sal"}
+
+
+@pytest.mark.parametrize("query, held", [
+    ("salmão", True), ("SALMAO", True), ("salmon", True), ("salmões", True), ("salt", True),
+    ("sal salmon", True), ("sal frango", False), ("lombo", True), ("lagosta", False),
+])
+def test_a_dish_holds_a_food_in_any_form_the_dictionary_knows(query, held):
+    dish = {"name": "Peixe no forno", "ingredients": ["lombos de salmão", "sal grosso"]}
+    assert k.holds(dish, query, WORDS) == held
+
+
+DISHES = [{"name": "Esparguete à bolonhesa", "ingredients": ["esparguete", "carne picada"]},
+          {"name": "Peixe no forno", "ingredients": ["lombos de salmão"]}]
+
+
+@pytest.mark.parametrize("query, fixed", [
+    ("esparguette", "esparguete"), ("sallmão", "salmão"), ("salmon esparguette", "salmon esparguete"),
+    ("salmão", None), ("salmâo", None),   # nothing to correct: accents are ignored anyway
+    ("lagosta", None),        # nothing close: a food the library lacks, not a typo
+    ("esparguette lagosta", None),
+])
+def test_a_misspelt_word_is_corrected_to_the_closest_known_one(query, fixed):
+    assert k.corrected(query, WORDS, DISHES) == fixed
+
+
+def test_find_recipes_corrects_a_typo_and_says_so(library):
+    (library / "Pratos" / "Esparguete à bolonhesa.cook").write_text("---\nservings: 4\n---\n\n@esparguete{500%g}.\n\nCozer.\n")
+    assert asyncio.run(k.find_recipes("esparguette")) == "Sem 'esparguette'; com 'esparguete': 1 receita(s):\nPratos/Esparguete à bolonhesa"
+
+
+def test_sal_is_not_salmao():
+    assert not k.holds({"name": "Peixe", "ingredients": ["salmão"]}, "sal", WORDS)
+
+
+def test_find_recipes_lists_those_named_first(library):
+    (library / "Pratos" / "Salmão no forno.cook").write_text("---\nservings: 2\n---\n\n@salmão{2%lombos}.\n\nAssar.\n")
+    (library / "Sopas" / "Sopa de peixe.cook").write_text("---\nservings: 4\n---\n\n@salmon{200%g}, @alho{1%dentes}.\n\nCozer.\n")
+    (library / "config").mkdir()
+    (library / "config" / "aisle.conf").write_text("[peixaria]\nsalmão|salmon|salmões\n")
+    assert asyncio.run(k.find_recipes("salmões")) == "2 receita(s):\nPratos/Salmão no forno\nSopas/Sopa de peixe"
+    assert asyncio.run(k.find_recipes("salmão", "Sopas")) == "1 receita(s):\nSopas/Sopa de peixe"
+    assert asyncio.run(k.find_recipes("lagosta")) == "Nenhuma receita com 'lagosta'."
+
+
+def test_a_change_for_an_ingredient_picks_a_main_with_it(library, fake_cookidoo, monday):
+    (library / "Pratos" / "Salmão no forno.cook").write_text("---\nservings: 2\ntime: 30\ndifficulty: easy\n---\n\n@salmão{2%lombos}.\n\nAssar.\n")
+    found = k.library()
+    others = [r for r in found["main"] if r["name"] != "Salmão no forno"]
+    k.save({"start": "2026-10-26", "days": 3, "exclude": [], "plan": k.compose(WEEK[:3], found["soup"], others, {}, {}, {}, set())})
+    (library / "config").mkdir()
+    (library / "config" / "aisle.conf").write_text("[peixaria]\nsalmão|salmon\n")
+    said = asyncio.run(k.adjust_week([{"day": "2026-10-27", "ingredient": "Salmon"}]))   # Monday is My week's
+    assert "| ter 27/10 | Salmão no forno |" in said
+    with pytest.raises(k.ToolError, match="from Cookidoo's My week"):
+        asyncio.run(k.adjust_week([{"day": "seg", "ingredient": "salmão"}]))
+    with pytest.raises(k.ToolError, match="No main dish with 'lagosta'"):
+        asyncio.run(k.adjust_week([{"day": "2026-10-28", "ingredient": "lagosta"}]))
+
+
+def test_a_draft_nobody_saw_lately_is_planned_afresh(library, fake_cookidoo):
+    k.save({"start": "2026-10-26", "days": 3, "exclude": [], "plan": plan(span=WEEK[:3])})
+    state = k.load()
+    k.PLAN.write_text(json.dumps({**state, "shown": "2026-10-20T10:00:00"}))
+    asyncio.run(k.plan_week("2026-10-26", 3))
+    old = {d["main"]["id"] for d in state["plan"]["days"] if d["main"]}
+    assert not old & {d["main"]["id"] for d in k.load()["plan"]["days"] if d["main"]}   # the library's dishes, not the old draft's
+
+
+def test_a_recipe_outside_pratos_says_how_to_plan_it(library, fake_cookidoo, monday):
     found = k.library()
     k.save({"start": "2026-10-26", "days": 3, "exclude": [], "plan": k.compose(WEEK[:3], found["soup"], found["main"], {}, {}, {}, set())})
     (library / "Bases").mkdir()
     (library / "Bases" / "Folhado de pato.cook").write_text("---\nservings: 6\ntime: 30\n---\n\n@folhado de pato{2}.\n")
     with pytest.raises(k.ToolError, match="into Pratos/"):
-        asyncio.run(k.swap_day("4f", recipe="Folhado de pato"))
+        asyncio.run(k.adjust_week([{"day": "4f", "recipe": "Folhado de pato"}]))
 
 
 SLOW = [{**recipe(f"slow{p}{n}", p, difficulty="medium"), "minutes": 90} for p in ("meat", "fish") for n in range(3)]
 
 
 def test_a_limit_keeps_every_main_quick_and_easy():
-    limits = {d.isoformat(): {"max_minutes": 30, "difficulty": "easy"} for d in WEEK}
-    p = k.compose(WEEK, SOUPS, MAINS + SLOW, {}, {}, {}, set(), limits=limits)
+    wishes = {d.isoformat(): {"limit": {"max_minutes": 30, "difficulty": "easy"}} for d in WEEK}
+    p = k.compose(WEEK, SOUPS, MAINS + SLOW, {}, {}, {}, set(), wishes=wishes)
     assert all(m["minutes"] <= 30 and m["difficulty"] == "easy" for m in mains_of(p))
 
 
 def test_a_day_limit_that_nothing_fits_says_so():
-    p = k.compose(WEEK[:2], SOUPS, SLOW, {}, {}, {}, set(), limits={WEEK[0].isoformat(): {"max_minutes": 20}})
+    p = k.compose(WEEK[:2], SOUPS, SLOW, {}, {}, {}, set(), wishes={WEEK[0].isoformat(): {"limit": {"max_minutes": 20}}})
     assert mains_of(p)[0] is None and p["notes"] == ["seg 26/10: não há mais pratos (até 20 min) por usar."]
 
 
@@ -410,9 +479,9 @@ def test_within_needs_the_field_it_limits():
 
 
 def test_a_week_limit_is_kept_by_a_different_plan_and_shown(library, fake_cookidoo):
-    said = asyncio.run(k.propose_week("2026-10-26", 3, max_minutes=60))
+    said = asyncio.run(k.plan_week("2026-10-26", 3, wishes=[{"max_minutes": 60}]))
     assert k.load()["limit"] == {"max_minutes": 60} and "Pratos: até 60 min." in said
-    asyncio.run(k.propose_week("2026-10-26", 3, different=True))
+    asyncio.run(k.plan_week("2026-10-26", 3, different=True))
     assert k.load()["limit"] == {"max_minutes": 60}
 
 
@@ -423,18 +492,18 @@ def test_a_plan_not_shown_lately_is_not_saved(library, fake_cookidoo):
     k.PLAN.write_text(json.dumps(k.load() | {"shown": "2026-10-20T09:00:00"}))
     with pytest.raises(k.ToolError, match="not shown in the last hour"):
         asyncio.run(k.commit_plan())
-    asyncio.run(k.propose_week("2026-10-27", 5))
+    asyncio.run(k.plan_week("2026-10-27", 5))
     assert "Plano guardado" in asyncio.run(k.commit_plan())
 
 
 def test_a_tool_error_reaches_the_model_with_its_reason(library, fake_cookidoo):
     with pytest.raises(k.ToolError, match="There is no plan yet") as raised:
-        asyncio.run(k.mcp.call_tool("swap_day", {"day": "qua"}))
+        asyncio.run(k.mcp.call_tool("adjust_week", {"changes": [{"day": "qua"}]}))
     assert not isinstance(raised.value, UnexpectedToolError)   # mcp hides the text of any other exception
 
 
 def test_showing_the_plan_mid_week_keeps_the_one_being_cooked(library, fake_cookidoo, monkeypatch):
-    asyncio.run(k.propose_week("2026-10-26", 7))
+    asyncio.run(k.plan_week("2026-10-26", 7))
     before = k.load()
 
     class Wednesday(date):
@@ -442,10 +511,91 @@ def test_showing_the_plan_mid_week_keeps_the_one_being_cooked(library, fake_cook
         def today(cls):
             return date(2026, 10, 28)
     monkeypatch.setattr(k, "date", Wednesday)
-    asyncio.run(k.propose_week())
+    asyncio.run(k.plan_week())
     assert k.load() == before
 
 
 def test_find_prefers_the_exact_name():
     dishes = [{"name": "Arroz de Pato no forno"}, {"name": "Arroz de Pato"}]
     assert k.find(dishes, "arroz de pato")["name"] == "Arroz de Pato"
+
+
+BIG = [recipe(f"meat{n}", "meat", servings=4) for n in range(3)] + [recipe(f"fish{n}", "fish", servings=4) for n in range(3)] + \
+    [recipe("party", "fish", servings=6)]
+
+
+def test_guests_get_a_dish_that_serves_them_and_eat_its_leftovers():
+    p = plan(span=WEEK[:3], mains=BIG, wishes={WED: {"people": 6}})
+    wed = next(d for d in p["days"] if d["date"] == WED)
+    assert wed["main"]["id"] == "party" and not wed["leftover"] and wed["people"] == 6   # 6 servings, all eaten that day
+
+
+def test_a_day_out_needs_no_dinner_and_its_leftovers_wait_for_the_next():
+    p = plan(span=WEEK[:3], mains=BIG, wishes={"2026-10-27": {"skip": "fora"}})
+    days = p["days"]
+    assert days[1]["main"] is None and days[1]["note"] == "fora"
+    assert days[2]["leftover"] and days[2]["main"] == days[0]["main"]   # Monday's 4 servings: Monday, then Wednesday
+
+
+def test_a_dish_feeds_at_most_three_days_after_it_is_cooked():
+    p = plan(span=WEEK[:5], mains=[recipe("huge", "meat", servings=20)] + MAINS, keep_mains={"2026-10-26": "huge"})
+    assert [d["leftover"] for d in p["days"]] == [False, True, True, True, False]
+
+
+@pytest.fixture
+def monday(monkeypatch):
+    """Today is the plans' Monday, so none of their days has passed."""
+    class Monday(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 10, 26)
+    monkeypatch.setattr(k, "date", Monday)
+
+
+def adjusted_week(changes):
+    found = k.library()
+    k.save({"start": "2026-10-27", "days": 3, "exclude": [], "plan": k.compose(WEEK[1:4], found["soup"], found["main"], {}, {}, {}, set())})
+    before = k.load()["plan"]
+    return before, asyncio.run(k.adjust_week(changes)), k.load()
+
+
+def test_adjusting_a_day_keeps_the_others(library, fake_cookidoo, monday):
+    before, said, after = adjusted_week([{"day": "qui", "note": "restos do almoço"}])
+    assert "| qui 29/10 | restos do almoço |" in said and after["wishes"] == {"2026-10-29": {"note": "restos do almoço"}}
+    assert [d["main"] for d in after["plan"]["days"][:2]] == [d["main"] for d in before["days"][:2]]
+
+
+def test_changes_add_up_and_eating_out_can_be_undone(library, fake_cookidoo, monday):
+    adjusted_week([{"day": "ter", "away": True}])
+    asyncio.run(k.adjust_week([{"day": "qua", "people": 4}]))
+    assert k.load()["wishes"] == {"2026-10-27": {"away": True}, "2026-10-28": {"people": 4}}
+    said = asyncio.run(k.adjust_week([{"day": "ter", "away": False}]))
+    assert "| ter 27/10 | fora |" not in said and k.load()["wishes"]["2026-10-27"] == {}
+
+
+def test_a_day_that_has_passed_does_not_change(library, fake_cookidoo, monkeypatch):
+    class Wednesday(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 10, 28)
+    monkeypatch.setattr(k, "date", Wednesday)
+    with pytest.raises(k.ToolError, match="já passou"):
+        adjusted_week([{"day": "ter", "swap": True}])
+
+
+def test_a_new_plan_keeps_the_days_already_eaten(library, fake_cookidoo, monday, monkeypatch):
+    adjusted_week([{"day": "ter", "away": True}])
+
+    class Wednesday(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 10, 28)
+    monkeypatch.setattr(k, "date", Wednesday)
+    said = asyncio.run(k.plan_week("2026-10-27", 3, wishes=[{"day": "qui", "protein": "fish"}]))
+    assert "| ter 27/10 | fora |" in said and k.load()["wishes"]["2026-10-27"] == {"away": True}
+
+
+def test_a_wish_without_a_day_goes_on_the_first_free_one(library, fake_cookidoo, monday):
+    (library / "Pratos" / "Salmão no forno.cook").write_text("---\nservings: 2\ntime: 30\ndifficulty: easy\n---\n\n@salmão{2%lombos}.\n\nAssar.\n")
+    said = asyncio.run(k.plan_week("2026-10-26", 3, wishes=[{"ingredient": "salmão"}, {"max_minutes": 90}]))
+    assert "| ter 27/10 | Salmão no forno |" in said and k.load()["limit"] == {"max_minutes": 90}   # Monday is My week's

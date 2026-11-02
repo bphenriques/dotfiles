@@ -54,9 +54,10 @@ def test_the_adapter_reads_cookidoo_api_s_real_types():
 
 
 @pytest.mark.parametrize("categories, folder", [   # combinations from the household's collection
-    (["Pratos de peixe e marisco"], "Pratos"), (["Bolos e biscoitos"], "Sobremesas"), (["Molhos, temperos e patês", "Básicos"], "Bases"),
+    (["Pratos de peixe e marisco"], "Pratos"), (["Bolos e biscoitos"], "Sobremesas"), (["Molhos, temperos e patês", "Básicos"], "Molhos"),
     (["Sopas", "Pratos de carne"], "Sopas"), (["Salgados, tartes e pizas", "Snacks e aperitivos", "Para os mais novos"], "Pratos"),
-    (["Snacks e aperitivos", "Acompanhamentos"], "Bases"), (["Bebidas"], "Bebidas"), (["Pães"], "Pequeno-almoço"), (["Novidades"], None),
+    (["Snacks e aperitivos", "Acompanhamentos"], "Acompanhamentos"), (["Básicos", "Acompanhamentos"], "Acompanhamentos"),
+    (["Básicos", "Pequeno-almoço"], "Bases"), (["Bebidas"], "Bebidas"), (["Pães"], "Pequeno-almoço"), (["Novidades"], None),
 ])
 def test_a_new_copy_goes_to_its_category_s_folder(categories, folder):
     assert c.folder_of(categories) == folder
@@ -74,19 +75,19 @@ def test_a_copy_of_an_unknown_category_goes_to_pratos_and_says_so(library):
 
 
 def test_cookidoo_recipe_becomes_valid_cooklang():
-    text = c.to_cook(LASANHA, "Lasanha de atum", ["cookidoo"], True)
+    text = c.to_cook(LASANHA, ["cookidoo"])
     parsed = c.read(text=text)
     meta = parsed["metadata"]["map"]
     assert meta["tags"] == ["cookidoo"] and "course" not in meta and meta["servings"] == 6 and meta["time"] == 60
     assert meta["time.prep"] == 35 and meta["difficulty"] == "easy"
     assert meta["cookidoo"] == "r20307"
-    assert [i["name"] for i in parsed["ingredients"]] == ["queijo da Ilha", "dentes de alho", "fermento p/ bolos", "sal", "atum em lata"]
-    assert "@fermento p/ bolos{1.5%c. chá}" in text and "@sal{}(q.b.)" in text
+    assert [i["name"] for i in parsed["ingredients"]] == ["queijo da Ilha", "alho", "fermento p/ bolos", "sal", "atum em lata"]
+    assert "@alho{3%dentes}" in text and "@fermento p/ bolos{1.5%c. chá}" in text and "@sal{}(q.b.)" in text
     assert "<nobr>" not in text and "& sirva a 180°C" in text and "> Utensílios: forno, pirex" in text
 
 
 def test_cookidoo_s_terms_become_the_library_s():
-    meta = c.read(text=c.to_cook({**LASANHA, "difficulty": "advanced", "servings": 750, "active": 60}, "Molho", [], False))["metadata"]["map"]
+    meta = c.read(text=c.to_cook({**LASANHA, "difficulty": "advanced", "servings": 750, "active": 60}, []))["metadata"]["map"]
     assert meta["difficulty"] == "hard" and "servings" not in meta and "time.prep" not in meta   # a yield in grams, all active
 
 
@@ -117,7 +118,7 @@ def test_a_copy_left_out_of_the_collection_stays_and_is_reported(library):
 
 def test_a_copy_from_before_the_cookidoo_field_is_recognised_and_gets_it(library):
     path = library / "Pratos" / "Lasanha de atum.cook"
-    path.write_text(c.to_cook(LASANHA, "Lasanha de atum", ["cookidoo"], False).replace('cookidoo: "r20307"\n', ""))
+    path.write_text(c.to_cook(LASANHA, ["cookidoo"]).replace('cookidoo: "r20307"\n', ""))
     assert c.apply([LASANHA], {}) == ["Pratos/Lasanha de atum: atualizada"]
     assert c.read(path)["metadata"]["map"]["cookidoo"] == "r20307"
 
@@ -132,10 +133,29 @@ def test_sync_never_touches_a_file_of_yours(library):
 
 def test_clean_leaves_only_prose():
     nasty = "= Título > @sal e #panela ~{5%min} -- comentário [- bloco -] {x} <b>negrito</b> &amp; fim"
-    parsed = c.read(text=c.to_cook({**LASANHA, "steps": [{"title": "", "texts": [nasty]}]}, "Lasanha de atum", [], False))
-    assert {i["name"] for i in parsed["ingredients"]} == {c.ingredient_name(i) for i in LASANHA["ingredients"]}
+    parsed = c.read(text=c.to_cook({**LASANHA, "steps": [{"title": "", "texts": [nasty]}]}, []))
+    assert {i["name"] for i in parsed["ingredients"]} == {c.parts(i)[0] for i in LASANHA["ingredients"]}
     assert parsed["cookware"] == [] and parsed["timers"] == []
     assert "Título" in c.clean(nasty) and "negrito & fim" in c.clean(nasty)
+
+
+def test_thermomix_symbols_become_words():
+    assert c.clean("cozinhe <nobr>8 min/120°C/\ue003/vel \ue002</nobr>.") == "cozinhe 8 min/120°C/sentido inverso/vel colher."
+    assert c.clean("amasse <nobr>2 min/\ue001</nobr>.") == "amasse 2 min/Amassar."
+    assert c.clean("inicie o modo Amassar \ue001/2 min.") == "inicie o modo Amassar/2 min."
+    assert c.clean("inicie o modo Arroz \ue00d .") == "inicie o modo Arroz."
+
+
+@pytest.mark.parametrize("name, amount, expected", [
+    ("Dente de alho", "1", ("alho", "1", "dentes", "")),
+    ("folhas de gelatina neutra", "4", ("gelatina neutra", "4", "folhas", "")),
+    ("folhas de tomilho", "1 c. chá", ("tomilho", "1", "c. chá", "")),
+    ("dentes de alho", "150 g", ("alho", "150", "g", "")),
+    ("açúcar", "1 Tbsp", ("açúcar", "1", "c. sopa", "")),
+    ("Cubos de gelo", "q.b.", ("cubos de gelo", "", "", "q.b.")),
+])
+def test_ingredients_take_the_library_s_names_and_units(name, amount, expected):
+    assert c.parts({"name": name, "amount": amount}) == expected
 
 
 def test_a_dotted_name_gets_its_own_photo(library):

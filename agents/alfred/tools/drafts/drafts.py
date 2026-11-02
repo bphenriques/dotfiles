@@ -30,11 +30,12 @@ MAX_IMAGE = 10 * 2**20
 MAX_PAGE = 30000   # characters of a page's text the model reads
 
 VIDEO_HOSTS = ("instagram.com", "youtube.com", "youtu.be", "tiktok.com")
-CATEGORIES = ("Pratos", "Sopas", "Sobremesas", "Pequeno-almoço", "Bases", "Bebidas", "Bebé")   # the library's folders (formatting.md)
+CATEGORIES = ("Pratos", "Sopas", "Sobremesas", "Pequeno-almoço", "Molhos", "Acompanhamentos", "Bases", "Bebidas", "Bebé")   # the library's folders (formatting.md)
 LEVELS = ("easy", "medium", "hard")
 UA = {"User-Agent": "Mozilla/5.0"}
 AISLE = "aisle.conf"
-REQUIRED = ("servings", "time", "difficulty")   # formatting.md's, but `image`: a recipe may have no photo yet
+REQUIRED = ("servings", "time", "difficulty")   # formatting.md's
+FIELDS = (*REQUIRED, "time.prep", "time.cook", "description", "source", "author", "tags", "cookidoo")
 CHECK = "> Check:"   # a doubt in the draft, which the user deletes once resolved
 # Brazilian words the model slips into European Portuguese, with the Portuguese for each.
 BRAZILIAN = {"assadeira": "tabuleiro", "barbante": "cordel", "gergelim": "sésamo", "saquê": "saqué", "talharim": "massa",
@@ -48,12 +49,14 @@ NUMBER_WORDS = {"um": 1, "uma": 1, "dois": 2, "duas": 2, "três": 3, "quatro": 4
                 "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "half": 0.5}
 # One Portuguese spelling per unit (formatting.md), so the shopping list sums them; a plain count has none.
 UNITS = {"gram": "g", "grams": "g", "gramas": "g", "dente": "dentes", "clove": "dentes", "cloves": "dentes",
-         "folha": "folhas", "leaf": "folhas", "leaves": "folhas", "tbsp": "c. sopa", "tablespoon": "c. sopa",
+         "folha": "folhas", "leaf": "folhas", "leaves": "folhas", "fatia": "fatias", "tira": "tiras", "talo": "talos",
+         "pé": "pés", "ramo": "ramos", "lata": "latas", "gota": "gotas", "cubo": "cubos", "tbsp": "c. sopa", "tablespoon": "c. sopa",
          "tablespoons": "c. sopa", "c. de sopa": "c. sopa", "colher de sopa": "c. sopa", "colheres de sopa": "c. sopa",
          "tsp": "c. chá", "teaspoon": "c. chá", "teaspoons": "c. chá", "c. de chá": "c. chá", "colher de chá": "c. chá",
          "colheres de chá": "c. chá", "pinch": "pitada", "pinches": "pitada", "pitadas": "pitada", "bunch": "molho",
          "sprig": "raminhos", "sprigs": "raminhos", "raminho": "raminhos", "cup": "chávena", "cups": "chávena",
          "chávenas": "chávena", "unid.": "", "unid": "", "unidade": "", "unidades": "", "un.": ""}
+PART = re.compile(r"(dentes?|folhas?|fatias?|tiras?|talos?) de (.+)")   # a count of parts, which goes in the unit
 VULGAR = {"½": "1/2", "⅓": "1/3", "⅔": "2/3", "¼": "1/4", "¾": "3/4", "⅛": "1/8"}
 
 INGREDIENT = {"type": "object", "required": ["name", "quantity", "unit", "note"], "properties": {
@@ -267,10 +270,11 @@ def ingredients(recipe):
     return ", ".join(map(one, recipe["ingredients"])) + "."
 
 
-def cooklang(recipe, name, doubts=()):
+def cooklang(recipe, doubts=()):
+    """The draft's text; its photo is the .jpg beside it, which cook finds by name (an `image:` field breaks it in a folder)."""
     meta = {"servings": recipe["servings"], "time": recipe["time"], "time.prep": recipe["prep"],
             "time.cook": recipe["cook"], "difficulty": recipe["difficulty"], "source": recipe["url"],
-            "author": recipe["author"], "image": f"{name}.jpg" if recipe["image"] else None}
+            "author": recipe["author"]}
     front = "\n".join(f"{k}: {json.dumps(v, ensure_ascii=False)}" for k, v in meta.items() if v)
     checks = "".join(f"{CHECK} {d}\n" for d in doubts) + ("\n" if doubts else "")
     return f"---\n{front}\n---\n\n{checks}{ingredients(recipe)}\n\n" + "\n\n".join(recipe["steps"]) + "\n"
@@ -310,7 +314,7 @@ def new(url, text, name=None, category=None):
     doubts = recipe["notes"] + check(recipe, names)
     if translated:
         doubts += [f"{x['name']}: no Portuguese name in config/{AISLE}" for x in recipe["ingredients"] if x["name"].lower() not in names]
-    draft.write_text(cooklang(recipe, name, doubts))
+    draft.write_text(cooklang(recipe, doubts))
     facts = [recipe["servings"] and f"{recipe['servings']} servings", recipe["time"] and f"{recipe['time']} min",
              recipe["difficulty"], f"photo: {recipe['image'] or 'none'}"]
     taken = " A recipe of that name is in the library already." if named(LIBRARY, name) else ""
@@ -418,9 +422,21 @@ def lint(path):
         used = [names[i["index"]] for c in section["content"] if c["type"] == "step"
                 for i in c["value"]["items"] if i["type"] == "ingredient"]
         twice |= {n for n in used if used.count(n) > 1}
-    found = [f"no {field}" for field in REQUIRED if field not in recipe["metadata"]["map"]]
+    meta = recipe["metadata"]["map"]
+    found = [f"no {field}" for field in REQUIRED if field not in meta]
+    found += [f"{field}: not a field formatting.md knows" for field in meta if field not in FIELDS]
+    steps = [c["value"]["items"] for s in recipe["sections"] for c in s["content"] if c["type"] == "step"]
+    if steps and not any(i["type"] == "ingredient" for i in steps[0]):
+        found.append("the first paragraph is not the ingredient list: a description goes in the `description:` field")
     found += [f"{n}: listed twice, give one total" for n in sorted(twice)]
     for x in recipe["ingredients"]:
+        quantity = (x["quantity"] or {}).get("value") or {}
+        if quantity.get("type") == "text" and re.match(r"\d", quantity["value"]):
+            found.append(f"{x['name']}: {{{quantity['value']}}} is text to cook and does not scale: one number, then % and the unit")
+        if x["name"][:1].isupper():
+            found.append(f"{x['name']}: lowercase, as the shop sells it")
+        if part := PART.fullmatch(x["name"]):
+            found.append(f"{x['name']}: name the product, {part.group(2)!r}, and put {part.group(1)!r} in the unit")
         unit = (x["quantity"] or {}).get("unit") or ""
         if unit.lower() in UNITS:
             found.append(f"{x['name']}: " + (f"write {unit!r} as {UNITS[unit.lower()]!r}" if UNITS[unit.lower()] else f"a plain count has no unit, not {unit!r}"))
@@ -512,11 +528,8 @@ def promote(name, replace=None):
         checked = subprocess.run([COOK, "doctor", "validate", "--strict", "-b", tmp], capture_output=True, text=True)
     if checked.returncode != 0:
         sys.exit(f"The draft has issues, fix them first:\n{checked.stdout}{checked.stderr}")
-    text = draft.read_text()
     old_photo = old and old.with_name(f"{old.stem}.jpg")
     carried = old and old_photo.exists() and not photo.exists()   # the old photo moves in below
-    if (photo.exists() or carried) and text.startswith("---\n") and not re.search(r"(?m)^image:", text):
-        draft.write_text(text.replace("---\n", f"---\nimage: {photo.name}\n", 1))
     if found := lint(draft):
         add_checks(draft, found)
         sys.exit(f"The draft needs {len(found)} fix(es), now `{CHECK}` lines in it:\n" + "\n".join(f"- {f}" for f in found))

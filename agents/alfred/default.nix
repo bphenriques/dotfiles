@@ -25,11 +25,12 @@ let
   mcpServers = {
     meals = { command = lib.getExe meals; args = [ "serve" ]; };
 
-    # Read-only: recipes reach the library through `drafts promote` and the cookidoo sync.
+    # Read-only: recipes reach the library through `drafts promote` and the cookidoo sync. Search is meals'
+    # find_recipes, which knows aisle.conf's food names (cook's needs every word exactly, accents included).
     cook = {
       command = lib.getExe pkgs.cook-mcp;
       env.COOK_RECIPES_DIR = "${recipesRoot}/library";
-      tools.include = [ "search_recipes" "read_recipe" ];
+      tools.include = [ "read_recipe" ];
     };
     fetch.command = lib.getExe pkgs.mcp-server-fetch;
     time.command = lib.getExe pkgs.mcp-server-time;
