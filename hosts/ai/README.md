@@ -3,7 +3,7 @@
 NixOS box running local inference for the fleet: Ollama serves an OpenAI-compatible endpoint on the
 iGPU, ComfyUI serves image generation and whisper.cpp (native, Vulkan) serves speech-to-text.
 The chat UI and the laptop's coding agent reach them through `fleet.ai`. It also hosts the sealed
-[`agent-alfred-vm`](microvm/guests/agent-alfred-vm), which reaches them through its bridge gateway. Powered on over
+[`agent-alfredo-vm`](microvm/guests/agent-alfredo-vm), which reaches them through its bridge gateway. Powered on over
 Wake-on-LAN when needed; suspend is off, so it is either running or off.
 What depends on it fails per request meanwhile and recovers on its own.
 
@@ -49,7 +49,7 @@ firmware change could move these offsets, so the script vets each record's tempe
 ```
   compute         ──┐                                     ┌──▶ Ollama  :11434  (chat, coding, hermes)
   laptop          ──┼──▶ nftables, per-host allow ────────┤
-  agent-alfred-vm ──┘    nothing behind it authenticates  ├──▶ ComfyUI :8000   (image generation)
+  agent-alfredo-vm ─┘    nothing behind it authenticates  ├──▶ ComfyUI :8000   (image generation)
    (bridge, Ollama + whisper only)                        └──▶ whisper :8090   (speech-to-text)
                                                                      │
                                                                      ▼

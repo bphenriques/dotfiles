@@ -9,12 +9,12 @@ let
     notes = {
       tree = "bphenriques";
       subpath = "notes";
-      access.serviceAccounts.machine-agent-alfred-vm = "rw";
+      access.serviceAccounts.machine-agent-alfredo-vm = "rw";
     };
     recipes = {
       tree = "media";
       subpath = "recipes";
-      access.serviceAccounts.machine-agent-alfred-vm = "rw";
+      access.serviceAccounts.machine-agent-alfredo-vm = "rw";
     };
   };
   treeOf = name: doors.${name}.tree or name;

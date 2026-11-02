@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  alfredVm = import ./settings.nix;
+  alfredoVm = import ./settings.nix;
 in
 {
   imports = [
@@ -10,11 +10,11 @@ in
     ./services
   ];
 
-  _module.args.alfredVm = alfredVm;
+  _module.args.alfredoVm = alfredoVm;
 
   my.microvm.guest = {
-    inherit (alfredVm) stateRoot;                              # SSH host key + hermes state
-    tap = "vm-alfred";                                         # vm-<hostname> would exceed IFNAMSIZ
+    inherit (alfredoVm) stateRoot;                              # SSH host key + hermes state
+    tap = "vm-alfredo";                                         # vm-<hostname> would exceed IFNAMSIZ
     ingressPorts = [ config.fleet.ai.assistantEndpoint.port ]; # hermes API, fronted by compute's Traefik
     ingressFrom = [ config.fleet.lan.hosts.compute ];          # Traefik, Open WebUI and Prometheus
   };

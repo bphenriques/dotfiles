@@ -11,7 +11,7 @@ in
     guests = lib.mkMerge [
       guests.guests
       {
-        agent-alfred-vm.egress = {
+        agent-alfredo-vm.egress = {
           allowHostPorts = [ config.fleet.ai.endpoint.port config.fleet.ai.speechEndpoint.port ];   # Ollama and speech-to-text
           allowLan = [
             { host = "storage"; ports = [ 445 ]; }   # its NAS doors

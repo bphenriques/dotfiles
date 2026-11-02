@@ -1,4 +1,4 @@
-{ alfredVm, ... }:
+{ alfredoVm, ... }:
 {
   microvm = {
     hypervisor = "cloud-hypervisor";
@@ -8,7 +8,7 @@
     deflateOnOOM = true;   # on guest OOM, auto-deflate the balloon before the OOM killer fires
 
     volumes = [
-      { image = "hermes-state.img"; label = "hermes-state"; mountPoint = alfredVm.stateRoot; size = 4096; } # host key + hermes state
+      { image = "hermes-state.img"; label = "hermes-state"; mountPoint = alfredoVm.stateRoot; size = 4096; } # host key + hermes state
     ];
   };
 }

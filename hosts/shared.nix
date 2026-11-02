@@ -59,7 +59,7 @@ in
       port = 8090;                      # whisper-server's default 8080 is the ad-hoc experiments port
     };
     assistantEndpoint = {
-      host = microvmTables.ai.guests.agent-alfred-vm.ip;
+      host = microvmTables.ai.guests.agent-alfredo-vm.ip;
       port = 8642;                      # hermes-agent's API server default
     };
     model = "qwen3.6:35b-a3b";

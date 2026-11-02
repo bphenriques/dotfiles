@@ -3,7 +3,7 @@
 A **sealed** cloud-hypervisor microVM on [`ai`](../../..) running `hermes-agent` as a personal assistant reachable via [the chat UI](../../../../compute/selfhost/services/open-webui) on compute:
 - Inference stays on the host, reached through the bridge gateway; tools and memory stay in the guest
 - Egress is internet-only plus four holes: the gateway on `11434` and `8090` (Ollama, whisper), `storage:445` (its NAS doors) and `compute:2222` (gitea's SSH), never the rest of the LAN
-- The vault and recipes come from the NAS as its own SMB principal, `machine-agent-alfred-vm`, through doors that expose only those folders ([storage](../../../../storage/README.md))
+- The vault and recipes come from the NAS as its own SMB principal, `machine-agent-alfredo-vm`, through doors that expose only those folders ([storage](../../../../storage/README.md))
 - The API (`:8642`) admits only compute (`ingressFrom`), which routes to ai's bridge and fronts it with Traefik. The key is generated on compute and copied into this guest's sops, like the SMB password; the one credential of its own is the Cookidoo token (see below)
 
 ## What the agent may do to the vault
@@ -13,7 +13,7 @@ so check them in this order:
 
 | layer                              | what it grants                                                                                                                          | how a failure reads            |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| SMB door on storage                | `machine-agent-alfred-vm` is granted `rw` on `notes` only; the mount forces `gid=5000` with `0660`, so hermes's `vault` group is the write permission | mount fails, or `EACCES`       |
+| SMB door on storage                | `machine-agent-alfredo-vm` is granted `rw` on `notes` only; the mount forces `gid=5000` with `0660`, so hermes's `vault` group is the write permission | mount fails, or `EACCES`       |
 | `ReadWritePaths` on `hermes-agent` | `ProtectSystem = "strict"` makes everything read-only, so the vault path is listed explicitly                                           | `EROFS`, read-only file system |
 
 Nothing withholds deletion. A client-side `tools.exclude` used to, but mcpvault offers its tools
@@ -28,8 +28,11 @@ plugin code never enters the vault sync and is not reachable this way.
 
 ## The agent
 
-What runs here is [Alfred](../../../../../agents/alfred): its persona, skills and tool policy live there. This
-folder deploys it: the model and endpoints, the shares, the state volume and the seal.
+What runs here is [Alfredo](https://github.com/bphenriques/agents-alfredo): its persona, skills and tool policy live there. This
+folder deploys it: the model and endpoints, the shares, the state volume and the seal. The private `household.md` is
+appended to its `SOUL.md`, and the Cookidoo collection comes from dotfiles-private.
+
+To iterate on it, deploy with `--override-input agents-alfredo ~/workdir/agents-alfredo`.
 
 ## Forge access
 
@@ -58,19 +61,20 @@ Git over SSH to gitea on compute, as the `personal-agent` service account declar
 ## Ops
 
 ```bash
-ssh -J ai bphenriques@agent-alfred-vm
+ssh -J ai bphenriques@agent-alfredo-vm
 
 systemctl status hermes-agent      # the assistant runtime
 journalctl -u hermes-agent -f      # tool calls and model errors
 sudo -u hermes hermes chat         # CLI against the same state
+sudo systemctl start cookidoo-sync # sync the Cookidoo collection now
 ```
 
 To rotate the API key, delete `/var/lib/homelab-secrets/hermes-api-server-key` on compute, deploy it, and copy the new value into this guest's `secrets.yaml` as `hermes.api-key`.
 
 ## Setup (one-time)
 
-1. **Storage** generates the SMB password (`/var/lib/homelab-secrets/smb-password-machine-agent-alfred-vm`). Put it in `dotfiles-private/hosts/agent-alfred-vm/secrets.yaml` as `smb.password` and `sops encrypt -i` it; the guest decrypts with its SSH host key.
+1. **Storage** generates the SMB password (`/var/lib/homelab-secrets/smb-password-machine-agent-alfredo-vm`). Put it in `dotfiles-private/hosts/agent-alfredo-vm/secrets.yaml` as `smb.password` and `sops encrypt -i` it; the guest decrypts with its SSH host key.
 2. **API key**: copy `/var/lib/homelab-secrets/hermes-api-server-key` from compute into the same file as `hermes.api-key`, then deploy ai.
-3. **Forge**: generate the keypair here (`sudo -u hermes ssh-keygen -t ed25519 -N "" -C personal-agent@agent-alfred-vm -f /var/lib/hermes/.ssh/id_ed25519`), declare the public half on compute, pin the host key (`sudo -u hermes sh -c 'ssh-keyscan -p 2222 <compute-ip> >> /var/lib/hermes/.ssh/known_hosts'`), then add `personal-agent` to the repository with write access in gitea, which the framework does not provision. Verify with `sudo -u hermes ssh -p 2222 -T gitea@<compute-ip>`.
+3. **Forge**: generate the keypair here (`sudo -u hermes ssh-keygen -t ed25519 -N "" -C personal-agent@agent-alfredo-vm -f /var/lib/hermes/.ssh/id_ed25519`), declare the public half on compute, pin the host key (`sudo -u hermes sh -c 'ssh-keyscan -p 2222 <compute-ip> >> /var/lib/hermes/.ssh/known_hosts'`), then add `personal-agent` to the repository with write access in gitea, which the framework does not provision. Verify with `sudo -u hermes ssh -p 2222 -T gitea@<compute-ip>`.
 4. **Skills**: after the first deploy with the allowlist, drop the previously seeded catalog with `sudo -u hermes hermes skills opt-out --remove` (it deletes only unmodified bundled skills), then remove whatever `sudo -u hermes hermes skills list` still shows outside the allowlist.
-5. **Cookidoo**: sign in once, see [Alfred](../../../../../agents/alfred/README.md#meals-cozinha).
+5. **Cookidoo**: sign in once with `sudo -u hermes cookidoo login`.

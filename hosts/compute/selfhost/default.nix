@@ -167,10 +167,10 @@ in
 
     users = private.users // extraUsers;
 
-    # agent-alfred-vm's forge identity. The keypair is generated in the guest as the `hermes` user, so the
+    # agent-alfredo-vm's forge identity. The keypair is generated in the guest as the `hermes` user, so the
     # private half never leaves it; only the public half is declared here and registered on deploy.
     serviceAccounts.personal-agent = {
-      description = "agent-alfred-vm's forge principal, for git over SSH to its inbox repository";
+      description = "agent-alfredo-vm's forge principal, for git over SSH to its inbox repository";
       services.gitea = {
         enable = true;
         sshKeys = [

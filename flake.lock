@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "agents-alfredo": {
+      "inputs": {
+        "hermes-agent": [
+          "hermes-agent"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793613601,
+        "narHash": "sha256-cR9fLlFxGrDhn8O917Z+Nb4a44XfZZOaoMEJXMCQ1zs=",
+        "ref": "refs/heads/main",
+        "rev": "19109f68e3892940e73e29e58d64372b9c1e1285",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/agents-alfredo"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/agents-alfredo"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -143,11 +166,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793461465,
-        "narHash": "sha256-hOFPGmpwqBXT/M0ZzSDZfzYvOObPE8Es8AJgOszoh/4=",
+        "lastModified": 1793613733,
+        "narHash": "sha256-yN/pWuGoTEMAODCw+bMy+JfkYrPjFDgrl4b5F2s8748=",
         "ref": "refs/heads/main",
-        "rev": "0d8f90a0bcf3641277d25d04bac029ef6340606d",
-        "revCount": 152,
+        "rev": "a59ffb8886e13afa9503b94df2f3b1d117378417",
+        "revCount": 153,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/dotfiles-private"
       },
@@ -683,6 +706,7 @@
     },
     "root": {
       "inputs": {
+        "agents-alfredo": "agents-alfredo",
         "disko": "disko",
         "dotfiles-private": "dotfiles-private",
         "hermes-agent": "hermes-agent",

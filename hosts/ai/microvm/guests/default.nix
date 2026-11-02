@@ -7,7 +7,7 @@
   };
 
   guests = {
-    agent-alfred-vm = {
+    agent-alfredo-vm = {
       ip = "10.20.2.13";
       mac = "02:00:00:00:02:13";
       vsockCid = 5;

@@ -1,14 +1,14 @@
-# The Cookidoo collection, copied into the recipe library daily; Alfred can also run it on request.
-{ lib, alfred, alfredVm, ... }:
+# The Cookidoo collection, copied into the recipe library daily; Alfredo can also run it on request.
+{ lib, alfredo, alfredoVm, ... }:
 {
   systemd.services.cookidoo-sync = {
     description = "Copy the Cookidoo collection into the recipe library";
     serviceConfig = {
       Type = "oneshot";
       User = "hermes";
-      ExecStart = "${lib.getExe alfred.cookidoo} sync";
+      ExecStart = "${lib.getExe alfredo.cookidoo} sync";
       ProtectSystem = "strict";
-      ReadWritePaths = [ alfredVm.stateRoot alfredVm.recipesRoot ];   # the token rotates; the copies land in the library
+      ReadWritePaths = [ alfredoVm.stateRoot alfredoVm.recipesRoot ];   # the token rotates; the copies land in the library
       PrivateTmp = true;
       NoNewPrivileges = true;
     };

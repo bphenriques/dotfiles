@@ -24,8 +24,8 @@ let
         gid = 978;
       };
     };
-    machine-agent-alfred-vm = {
-      description = "agent-alfred-vm's SMB principal";
+    machine-agent-alfredo-vm = {
+      description = "agent-alfredo-vm's SMB principal";
       unixAccount = {
         enable = true;
         uid = 977;

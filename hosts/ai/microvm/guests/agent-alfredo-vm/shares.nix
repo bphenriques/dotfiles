@@ -1,5 +1,5 @@
 # The NAS doors this guest's principal is granted (hosts/storage/services/samba.nix), mounted with its own credential.
-{ config, alfredVm, inputs, ... }:
+{ config, alfredoVm, inputs, ... }:
 {
   imports = [ inputs.selfhost-nix.nixosModules.default ];
 
@@ -9,13 +9,13 @@
     credentialsPath = config.sops.templates."smb-credentials".path;
     shares = {
       notes = {
-        localMount = alfredVm.vaultRoot;
+        localMount = alfredoVm.vaultRoot;
         group = "vault";
         gid = 5000;
         systemd.dependentServices = [ "hermes-agent" ];
       };
       recipes = {
-        localMount = alfredVm.recipesRoot;
+        localMount = alfredoVm.recipesRoot;
         group = "recipes";
         gid = 5001;
         systemd.dependentServices = [ "hermes-agent" "cookidoo-sync" ];
@@ -25,7 +25,7 @@
 
   sops.secrets."smb/password" = { };
   sops.templates."smb-credentials".content = ''
-    username=machine-agent-alfred-vm
+    username=machine-agent-alfredo-vm
     password=${config.sops.placeholder."smb/password"}
   '';
 }

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, alfred, alfredVm, private, inputs, ... }:
+{ config, lib, pkgs, alfredo, alfredoVm, private, inputs, ... }:
 let
   # ai is this guest's host, reached through the bridge gateway; the seal drops its LAN address.
   endpoint = "http://${config.my.microvm.guest.gateway}:${toString config.fleet.ai.endpoint.port}/v1";
@@ -17,20 +17,20 @@ in
 
   services.hermes-agent = {
     enable = true;
-    stateDir = alfredVm.stateRoot;
-    hermesHomeFiles."SOUL.md" = alfred.soul + "\n" + builtins.readFile private.household;
-    hermesHomeFiles.".no-bundled-skills" = "";   # seed only `hermes-agent`; the rest come from alfred's skills
+    stateDir = alfredoVm.stateRoot;
+    hermesHomeFiles."SOUL.md" = alfredo.soul + "\n" + builtins.readFile private.household;
+    hermesHomeFiles.".no-bundled-skills" = "";   # seed only `hermes-agent`; the rest come from alfredo's skills
 
     # Gateway sessions load AGENTS.md from terminal.cwd.
-    workingDirectory = "${alfredVm.stateRoot}/workspace";
-    documents."AGENTS.md" = alfred.environment;
+    workingDirectory = "${alfredoVm.stateRoot}/workspace";
+    documents."AGENTS.md" = alfredo.environment;
     addToSystemPackages = true;   # `hermes` CLI in the guest, for debugging against the live state
 
-    extraPackages = alfred.packages;
-    inherit (alfred) mcpServers;
+    extraPackages = alfredo.packages;
+    inherit (alfredo) mcpServers;
 
     settings = lib.mkMerge [
-      alfred.settings
+      alfredo.settings
       {
         # Only injected when the module renders config.yaml itself, which configFile above bypasses.
         terminal.cwd = config.services.hermes-agent.workingDirectory;
@@ -69,7 +69,7 @@ in
     ];
   };
 
-  environment.systemPackages = [ alfred.cookidoo alfred.meals alfred.drafts ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
+  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
 
   # The mounts force their group with 0660, so membership is the whole of the agent's write access.
   users.users.hermes.extraGroups = [ "vault" "recipes" ];
@@ -80,5 +80,5 @@ in
   services.hermes-agent.environmentFiles = [ config.sops.templates."hermes.env".path ];
 
   # ProtectSystem = "strict" would otherwise keep the vault read-only whatever the group allows.
-  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [ alfredVm.vaultRoot alfredVm.recipesRoot ];
+  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [ alfredoVm.vaultRoot alfredoVm.recipesRoot ];
 }
