@@ -12,15 +12,15 @@
       "locked": {
         "lastModified": 1793613601,
         "narHash": "sha256-cR9fLlFxGrDhn8O917Z+Nb4a44XfZZOaoMEJXMCQ1zs=",
-        "ref": "refs/heads/main",
+        "owner": "bphenriques",
+        "repo": "agents-alfredo",
         "rev": "19109f68e3892940e73e29e58d64372b9c1e1285",
-        "revCount": 2,
-        "type": "git",
-        "url": "ssh://git@github.com/bphenriques/agents-alfredo"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/bphenriques/agents-alfredo"
+        "owner": "bphenriques",
+        "repo": "agents-alfredo",
+        "type": "github"
       }
     },
     "base16": {

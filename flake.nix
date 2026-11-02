@@ -19,7 +19,7 @@
     dotfiles-private.inputs.nixpkgs.follows = "nixpkgs";
     selfhost-nix.url = "github:bphenriques/selfhost-nix";                           # Selfhost abstractions
     selfhost-nix.inputs.nixpkgs.follows = "nixpkgs";
-    agents-alfredo.url = "git+ssh://git@github.com/bphenriques/agents-alfredo";    # Household assistant
+    agents-alfredo.url = "github:bphenriques/agents-alfredo";                       # Household assistant
     agents-alfredo.inputs.nixpkgs.follows = "nixpkgs";
     agents-alfredo.inputs.hermes-agent.follows = "hermes-agent";
 

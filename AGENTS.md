@@ -7,6 +7,19 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - No em-dashes or other AI tells. Use plain punctuation: periods, commas, colons, parentheses.
 - Keep prose, docs, and comments succinct and clear. Cut filler.
 
+## Related repositories
+
+Flake inputs with a local checkout. Edit them there, never in a scratch clone.
+
+| input | checkout | |
+|---|---|---|
+| `dotfiles-private` | `~/.dotfiles-private` | secrets, household data, per-host private facts |
+| `selfhost-nix` | `~/workdir/selfhost-nix` | selfhost framework, own AGENTS.md |
+| `agents-alfredo` | `~/workdir/agents-alfredo` | Alfredo's definition, own AGENTS.md |
+
+- Iterate with `--override-input <input> <checkout>` on eval, build or deploy. It reads the working tree, uncommitted changes included.
+- Land a change by pushing the checkout, then `nix flake update <input>` here. Until then hosts keep the locked revision.
+
 ## Layout
 
 - `modules/nixos` defines options and mechanism; `profiles/nixos` sets the values a host picks. A module that only sets values belongs in a profile.
@@ -44,7 +57,7 @@ NixOS dotfiles flake. See [README.md](./README.md) for overview.
 - A refactor that should change nothing: compare `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` before and after. Same hash means same system.
 - A microVM host (ai) always differs by its `install-microvm-*` units, which embed the flake source path and change on any edit.
 - Comparing across commits or copies needs the label pinned, since `system.nixos.label` is timestamp-derived.
-- A selfhost-nix change: verify here with `--override-input selfhost-nix ~/workdir/selfhost-nix`, then push it, `nix flake update selfhost-nix`, deploy.
+- A change in a related repository: verify here with its override, then land it as above and deploy.
 - Keep eval warnings at zero. A rename that drops a `*File` suffix changes meaning, not just the name.
 
 ## Shell Scripts
