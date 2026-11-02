@@ -23,7 +23,7 @@ in
 
     # Gateway sessions load AGENTS.md from terminal.cwd.
     workingDirectory = "${alfredoVm.stateRoot}/workspace";
-    documents."AGENTS.md" = alfredo.environment;
+    documents."AGENTS.md" = alfredo.workspace;
     addToSystemPackages = true;   # `hermes` CLI in the guest, for debugging against the live state
 
     extraPackages = alfredo.packages;
