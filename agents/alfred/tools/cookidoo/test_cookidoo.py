@@ -53,12 +53,24 @@ def test_the_adapter_reads_cookidoo_api_s_real_types():
     assert c.item_of(CookidooAdditionalItem(id="i1", name="cebola 3", is_owned=True)) == ("i1", "cebola 3", True)
 
 
-@pytest.mark.parametrize("categories, folder", [
+@pytest.mark.parametrize("categories, folder", [   # combinations from the household's collection
     (["Pratos de peixe e marisco"], "Pratos"), (["Bolos e biscoitos"], "Sobremesas"), (["Molhos, temperos e patês", "Básicos"], "Bases"),
-    (["Sopas"], "Sopas"), (["Salgados, tartes e pizas", "Snacks e aperitivos", "Para os mais novos"], "Pratos"), ([], "Pratos"),
+    (["Sopas", "Pratos de carne"], "Sopas"), (["Salgados, tartes e pizas", "Snacks e aperitivos", "Para os mais novos"], "Pratos"),
+    (["Snacks e aperitivos", "Acompanhamentos"], "Bases"), (["Bebidas"], "Bebidas"), (["Pães"], "Pequeno-almoço"), (["Novidades"], None),
 ])
 def test_a_new_copy_goes_to_its_category_s_folder(categories, folder):
     assert c.folder_of(categories) == folder
+
+
+def test_two_cookidoo_recipes_of_one_name_both_get_a_copy(library):
+    other = {**LASANHA, "id": "r1"}
+    assert c.apply([LASANHA, other], {}) == ["Pratos/Lasanha de atum: nova", "Pratos/Lasanha de atum (r1): nova"]
+    assert c.apply([LASANHA, other], {}) == ["Pratos/Lasanha de atum: sem alterações", "Pratos/Lasanha de atum (r1): sem alterações"]
+
+
+def test_a_copy_of_an_unknown_category_goes_to_pratos_and_says_so(library):
+    assert c.apply([{**LASANHA, "categories": ["Novidades"]}], {}) == [
+        "Pratos/Lasanha de atum: nova (categoria Novidades sem pasta, ficou em Pratos)"]
 
 
 def test_cookidoo_recipe_becomes_valid_cooklang():

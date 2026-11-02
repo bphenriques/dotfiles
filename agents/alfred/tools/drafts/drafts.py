@@ -30,7 +30,7 @@ MAX_IMAGE = 10 * 2**20
 MAX_PAGE = 30000   # characters of a page's text the model reads
 
 VIDEO_HOSTS = ("instagram.com", "youtube.com", "youtu.be", "tiktok.com")
-CATEGORIES = ("Pratos", "Sopas", "Sobremesas", "Pequeno-almoço", "Bases", "Bebé")   # the library's folders (formatting.md)
+CATEGORIES = ("Pratos", "Sopas", "Sobremesas", "Pequeno-almoço", "Bases", "Bebidas", "Bebé")   # the library's folders (formatting.md)
 LEVELS = ("easy", "medium", "hard")
 UA = {"User-Agent": "Mozilla/5.0"}
 AISLE = "aisle.conf"

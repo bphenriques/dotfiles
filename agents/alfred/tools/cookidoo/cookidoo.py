@@ -26,10 +26,16 @@ COOK = "@cook@"
 COUNTRY, LANGUAGE = "pt", "pt-PT"
 LOCALIZATION = None  # set in main(); it reads a bundled file, but through an async API
 
-# A word of a Cookidoo category and the library folder (formatting.md) its new copies go to: the first match wins.
-FOLDERS = (("sopa", "Sopas"), ("sobremesa", "Sobremesas"), ("bolo", "Sobremesas"), ("biscoito", "Sobremesas"),
-           ("doce", "Sobremesas"), ("gelado", "Sobremesas"), ("básico", "Bases"), ("molho", "Bases"), ("tempero", "Bases"),
-           ("pequeno-almoço", "Pequeno-almoço"), ("pequenos-almoços", "Pequeno-almoço"), ("bebé", "Bebé"), ("infantil", "Bebé"))
+# Each library folder (formatting.md), most specific first, with the Cookidoo categories whose new copies go to it.
+FOLDERS = {
+    "Sopas": {"Sopas"},
+    "Bebidas": {"Bebidas"},
+    "Sobremesas": {"Sobremesas", "Bolos e biscoitos", "Geleias, doces e compotas"},
+    "Pratos": {"Pratos de carne", "Pratos de peixe e marisco", "Pratos vegetarianos", "Pratos de arroz e massa",
+               "Outros pratos", "Menus e outros", "Entradas e saladas", "Salgados, tartes e pizas"},
+    "Bases": {"Básicos", "Molhos, temperos e patês", "Acompanhamentos"},
+    "Pequeno-almoço": {"Pequeno-almoço", "Breakfast", "Pães", "Breads and rolls", "Snacks e aperitivos", "Para os mais novos"},
+}
 LEVELS = {"easy": "easy", "medium": "medium", "advanced": "hard"}   # Cookidoo's difficulty, as formatting.md names it
 MAX_SERVINGS = 100   # above it, Cookidoo's yield is a weight (750 g of sauce), not people
 SYNC_TAG = "cookidoo"   # marks a copy of a Cookidoo recipe; its `cookidoo:` field is its identity
@@ -168,8 +174,8 @@ def ingredient(i):
 
 
 def folder_of(categories):
-    names = " | ".join(categories).casefold()
-    return next((folder for word, folder in FOLDERS if word in names), "Pratos")
+    """The folder for a new copy, or None when none of its Cookidoo categories is known."""
+    return next((folder for folder, known in FOLDERS.items() if known & set(categories)), None)
 
 
 def to_cook(r, name, tags, image):
@@ -222,15 +228,24 @@ def apply(recipes, images):
     and a recipe of the user's with the same name is never touched. Copies left out of the collection stay."""
     synced, report = synced_copies(), []
     names = {f.stem.casefold() for f in LIBRARY.rglob("*.cook")}   # the share ignores case
+    copies = {path.stem.casefold() for path, _ in synced.values()}
     for r in recipes:
+        unknown = ""
         if r["id"] in synced:
             path, tags = synced[r["id"]]
         else:
-            path = LIBRARY / folder_of(r["categories"]) / f"{clean(r['name']).replace('/', '-')}.cook"
-            if path.stem.casefold() in names:
-                report.append(f"{path.stem}: já existe uma receita tua com este nome, não foi tocada")
+            name = clean(r["name"]).replace("/", "-")
+            if name.casefold() in copies:   # two Cookidoo recipes share a name: the id tells them apart
+                name = f"{name} ({r['id']})"
+            elif name.casefold() in names:
+                report.append(f"{name}: já existe uma receita tua com este nome, não foi tocada")
                 continue
+            if not (folder := folder_of(r["categories"])):
+                folder, unknown = "Pratos", f" (categoria {', '.join(r['categories']) or 'nenhuma'} sem pasta, ficou em Pratos)"
+            path = LIBRARY / folder / f"{name}.cook"
             path.parent.mkdir(exist_ok=True)
+            names.add(name.casefold())
+            copies.add(name.casefold())
             tags = [SYNC_TAG]
         label = path.relative_to(LIBRARY).with_suffix("").as_posix()
         existed = path.exists()
@@ -245,7 +260,7 @@ def apply(recipes, images):
         changed = write_if_changed(path, text.encode())
         if picture is not None:
             changed = write_if_changed(image, picture) or changed
-        report.append(f"{label}: {'atualizada' if changed and existed else 'nova' if changed else 'sem alterações'}")
+        report.append(f"{label}: {'atualizada' if changed and existed else 'nova' if changed else 'sem alterações'}{unknown}")
     kept = {r["id"] for r in recipes}
     report += [f"{path.relative_to(LIBRARY).with_suffix('').as_posix()}: já não está na coleção, a cópia ficou"
                for cid, (path, _) in synced.items() if cid not in kept]

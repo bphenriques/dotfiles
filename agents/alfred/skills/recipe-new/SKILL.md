@@ -20,7 +20,7 @@ Follow the lifecycle in the recipes `AGENTS.md`: code makes the draft from the u
 edit it.
 
 1. Ask in one message for whatever is missing: the name, the category (`Pratos`, `Sopas`, `Sobremesas`,
-   `Pequeno-almoço`, `Bases` or `Bebé`), servings, total time in minutes, difficulty, each ingredient with its
+   `Pequeno-almoço`, `Bases`, `Bebidas` or `Bebé`), servings, total time in minutes, difficulty, each ingredient with its
    quantity, and the steps.
    Never guess a quantity.
 2. `search_recipes` to check it is not in the library already.
