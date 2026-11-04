@@ -19,6 +19,7 @@ let
     { dir = "nds"; }
     { dir = "fbneo"; scraper = "arcade"; }
     { dir = "dreamcast"; }
+    { dir = "dos"; scraper = "pc"; }
   ];
 
   romArtworkArgs = map (p: "${p.scraper or p.dir}:${romsDir}/${p.dir}") platforms;
@@ -45,7 +46,7 @@ in
   };
 
   systemd.services.scrape-roms = {
-    description = "Scrape ROM artwork from ScreenScraper";
+    description = "Scrape ROM artwork from ScreenScraper and TheGamesDB";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     serviceConfig = {

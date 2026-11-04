@@ -91,6 +91,7 @@ in
 
     extraEnvironment = {
       HASHEOUS_API_ENABLED = "true";
+      LAUNCHBOX_API_ENABLED = "true"; # keyless; strong DOS/Windows box-art coverage
       KIOSK_MODE = "true";
       ENABLE_SCHEDULED_RESCAN = "true";
       SCHEDULED_RESCAN_CRON = "0 3 * * *";

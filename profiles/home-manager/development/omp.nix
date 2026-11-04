@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, osConfig, ... }:
 let
   onedarkTransparent = lib.recursiveUpdate
-    (lib.importJSON "${inputs.omp}/packages/tui/src/theme/defaults/dark-one.json")
+    (lib.importJSON "${inputs.omp}/packages/tui/src/theme/defaults.json")."dark-one"
     {
       name = "onedark-transparent";
       vars = {
