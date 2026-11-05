@@ -6,10 +6,11 @@ let
   built = {
     "qwen3.8-flash-next" = {
       modelfile = ./qwen3.8-flash-next.Modelfile;
-      files = map (f: "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/766911a6b7369840a91dbcd95f9f997acaab6cd6/${f}") [
-        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00003.gguf"
-        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00002-of-00003.gguf"
-        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00003-of-00003.gguf"
+      files = map (f: "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/d96201194f103c906994f283f504209dc8d2a10c/${f}") [
+        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00004.gguf"
+        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00002-of-00004.gguf"
+        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00003-of-00004.gguf"
+        "UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00004-of-00004.gguf"
         "mtp-Qwen3.8-Flash-Next-Q8_0.gguf"
       ];
     };

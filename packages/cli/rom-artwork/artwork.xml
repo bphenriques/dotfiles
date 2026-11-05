@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- One file per resource, unmodified, in the folders Pegasus reads (media/<type>s/). -->
-<artwork>
-  <output type="cover"/>
-  <output type="screenshot"/>
-  <output type="wheel"/>
-  <output type="marquee"/>
-  <output type="texture"/>
-</artwork>

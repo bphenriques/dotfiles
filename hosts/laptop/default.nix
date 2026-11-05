@@ -50,6 +50,8 @@ in
     ipv4 = { method = "auto"; route-metric = 700; dns-priority = 200; };
     ipv6 = { method = "auto"; route-metric = 700; dns-priority = 200; };
   };
+  # Keep wifi up across a switch: PID1 reexec freezes on a stalled CIFS mount. https://github.com/systemd/systemd/issues/44396
+  systemd.services.NetworkManager.stopIfChanged = false;
 
   # Homelab integration
   selfhost.storage.mounts.smb.shares = {

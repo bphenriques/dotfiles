@@ -28,6 +28,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     '';
   };
 
+  # Clients connect at login before the media share is reachable; never let early failures kill the socket.
+  systemd.user.services.mpd.Unit.StartLimitIntervalSec = 0;
+
   my.programs.mpc-plus = {
     enable = true;
     devices = {

@@ -15,6 +15,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Install.WantedBy = [ config.wayland.systemd.target ];
     Service = {
       Type = "oneshot";
+      # awww-daemon signals no readiness, so the first attempt can beat its socket.
+      Restart = "on-failure";
+      RestartSec = 1;
       ExecStart = lib.escapeShellArgs [ "${lib.getExe self.packages.awww-util}" "random" wallpapers ];
     };
   };

@@ -31,8 +31,6 @@ let
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       status-glance = pkgs.callPackage ./desktop/status-glance { inherit upower-notify volume-osd niri-keyboard-layout; };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
-      generate-pegasus-metadata = pkgs.callPackage ./desktop/generate-pegasus-metadata { inherit (b) writeNushellScript; };
-      rom-artwork = pkgs.callPackage ./cli/rom-artwork { };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }
   );

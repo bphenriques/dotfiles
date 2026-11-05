@@ -36,8 +36,6 @@ list_radio_stream() {
 }
 select_radio_stream() { list_radio_stream | fuzzel --dmenu --accept-nth=1 --with-nth="2.."; }
 
-# Resolves album artwork for a file path, using album-level caching.
-# Skips streams, writes atomically via mktemp+mv.
 # Runs in a subshell with pipefail so a failing mpc doesn't get masked by magick's exit code.
 _try_mpc_art() {
   local cmd="$1" file="$2" out="$3"
@@ -47,34 +45,39 @@ _try_mpc_art() {
   ) && [[ -s $out ]]
 }
 
+# Cache key is album-level (directory). For per-track artwork, replace $album_dir with $1.
+art_cache_path() {
+  local album_dir="${1%/*}" key
+  key="$(printf '%s\0%s\0%s' "$MPD_HOST" "$MPD_PORT" "$album_dir" | sha256sum | cut -d' ' -f1)"
+  printf '%s' "$MPC_PLUS_CACHE_DIR/$key.png"
+}
+
+# Skips streams, writes atomically via mktemp+mv. An empty file marks an album without artwork.
+cache_artwork() {
+  local file="$1" destination tmp
+
+  [[ -n $file && $file != *://* ]] || return 0
+  destination="$(art_cache_path "$file")"
+  [[ -e $destination ]] && return 0
+
+  tmp="$(mktemp "$MPC_PLUS_CACHE_DIR/.art.XXXXXX.png")" || return 0
+  _try_mpc_art readpicture "$file" "$tmp" || _try_mpc_art albumart "$file" "$tmp" || : >"$tmp"
+  mv -f "$tmp" "$destination"
+}
+
 get_mpc_artwork_icon() {
-  local file="$1" album_dir key destination tmp
+  local file="$1" destination
 
   [[ -n $file && $file != *://* ]] || {
     printf '%s' "$MPC_PLUS_SONG_ICON"
     return
   }
 
-  # Cache key is album-level (directory). For per-track artwork, replace $album_dir with $file.
-  album_dir="${file%/*}"
-  key="$(printf '%s\0%s\0%s' "$MPD_HOST" "$MPD_PORT" "$album_dir" | sha256sum | cut -d' ' -f1)"
-  destination="$MPC_PLUS_CACHE_DIR/$key.png"
-
-  [[ -s $destination ]] && {
-    printf '%s' "$destination"
-    return
-  }
-
-  tmp="$(mktemp "$MPC_PLUS_CACHE_DIR/.art.XXXXXX.png")" || {
-    printf '%s' "$MPC_PLUS_SONG_ICON"
-    return
-  }
-
-  if _try_mpc_art readpicture "$file" "$tmp" || _try_mpc_art albumart "$file" "$tmp"; then
-    mv -f "$tmp" "$destination"
+  cache_artwork "$file"
+  destination="$(art_cache_path "$file")"
+  if [[ -s $destination ]]; then
     printf '%s' "$destination"
   else
-    rm -f "$tmp"
     printf '%s' "$MPC_PLUS_SONG_ICON"
   fi
 }
@@ -85,7 +88,7 @@ CURRENT_MSG=""
 CURRENT_ICON="$MPC_PLUS_STOPPED_ICON"
 
 refresh_current_state() {
-  local file title artist name state
+  local file title artist name state next
 
   state="$(mpc status '%state%' 2>/dev/null || true)"
   case "$state" in
@@ -113,6 +116,9 @@ refresh_current_state() {
   fi
 
   CURRENT_ICON="$(get_mpc_artwork_icon "$file")"
+
+  next="$(mpc queued -f '%file%' 2>/dev/null || true)"
+  cache_artwork "$next" &
 }
 
 handle_event() {

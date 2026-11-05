@@ -1,4 +1,4 @@
-{ lib, pkgs, config, osConfig, self, ... }:
+{ lib, pkgs, osConfig, ... }:
 let
   gameOS-theme = pkgs.fetchFromGitHub {
     owner = "PlayingKarrde";
@@ -7,23 +7,27 @@ let
     hash = "sha256-EBpIe0aw1FO7DzB6F3oAWD5FRLF2iZGtOHllMxuamdc=";
   };
 
-  # Maps a ROM directory to a Pegasus collection and a launch command (retroarch using the `core` key, or `launch` for other executables).
+  romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
+
+  # Games and media come from RomM's export in each ROM directory (<dir>/metadata.pegasus.txt). Pegasus merges
+  # collections by name, so `name` must be RomM's for that platform; this host only adds the launch command
+  # (retroarch using the `core` key, or `launch` for other executables).
   systems = [
-    { dir = "megadrive"; name = "Megadrive";        core = "genesis_plus_gx"; extensions = [ "md" ]; }
-    { dir = "nes";       name = "NES";              core = "fceumm";          extensions = [ "nes" ]; }
-    { dir = "snes";      name = "Super Nintendo";   core = "snes9x";          extensions = [ "smc" "sfc" ]; }
-    { dir = "psx";       name = "PlayStation";      core = "swanstation";     extensions = [ "chd" "m3u" ]; }
-    { dir = "gb";        name = "Game Boy";         core = "gambatte";        extensions = [ "gb" ]; }
-    { dir = "gbc";       name = "Game Boy Color";   core = "gambatte";        extensions = [ "gbc" ]; }
-    { dir = "gba";       name = "Game Boy Advance"; core = "mgba";            extensions = [ "gba" ]; }
-    { dir = "nds";       name = "Nintendo DS";      core = "desmume";         extensions = [ "nds" ]; }
-    { dir = "dos";       name = "DOS";              core = "dosbox_pure";     extensions = [ "zip" ]; }
-    { dir = "doom";      name = "Doom";             core = "prboom";          extensions = [ "wad" ]; }
-    { dir = "fbneo";     name = "Arcade";           core = "fbneo";           extensions = [ "zip" ]; shortname = "arcade"; }
-    { dir = "dreamcast"; name = "Dreamcast";        core = "flycast";         extensions = [ "chd" ]; }
-    { dir = "psp";       name = "PSP";              launch = "${lib.getExe pkgs.ppsspp} --fullscreen --pause-menu-exit \"{file.path}\"";  extensions = [ "iso" "cso" ]; }
-    { dir = "ps2";       name = "PlayStation 2";    launch = "${lib.getExe pkgs.pcsx2} -fullscreen -fastboot -batch -- \"{file.path}\"";  extensions = [ "iso" "chd" ]; }
-    { dir = "wii";       name = "Wii";              launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\"";                      extensions = [ "iso" "wbfs" "rvz" ]; }
+    { dir = "megadrive"; name = "Sega Genesis";                        core = "genesis_plus_gx"; }
+    { dir = "nes";       name = "Nintendo Entertainment System";       core = "fceumm"; }
+    { dir = "snes";      name = "Super Nintendo Entertainment System"; core = "snes9x"; }
+    { dir = "psx";       name = "PlayStation";                         core = "swanstation"; }
+    { dir = "gb";        name = "Game Boy";                            core = "gambatte"; }
+    { dir = "gbc";       name = "Game Boy Color";                      core = "gambatte"; }
+    { dir = "gba";       name = "Game Boy Advance";                    core = "mgba"; }
+    { dir = "nds";       name = "Nintendo DS";                         core = "desmume"; }
+    { dir = "dos";       name = "DOS";                                 core = "dosbox_pure"; }
+    { dir = "doom";      name = "Doom";                                core = "prboom"; }
+    { dir = "fbneo";     name = "Arcade";                              core = "fbneo"; }
+    { dir = "dreamcast"; name = "Sega Dreamcast";                      core = "flycast"; }
+    { dir = "psp";       name = "PlayStation Portable";                launch = "${lib.getExe pkgs.ppsspp} --fullscreen --pause-menu-exit \"{file.path}\""; }
+    { dir = "ps2";       name = "PlayStation 2";                       launch = "${lib.getExe pkgs.pcsx2} -fullscreen -fastboot -batch -- \"{file.path}\""; }
+    { dir = "wii";       name = "Nintendo Wii";                        launch = "${lib.getExe pkgs.dolphin-emu} -b -e \"{file.path}\""; }
   ];
 
   # Paths are solved in runtime. Assumes bin/retroarch and lib/retroarch/cores live under the package root.
@@ -42,58 +46,19 @@ let
     if sys ? core
     then "${lib.getExe retroarchWithCore} ${sys.core} \"{file.path}\""
     else sys.launch;
-
-  configFile = pkgs.writeText "pegasus-metadata-config.json" (builtins.toJSON {
-    romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
-
-    # Maps Skyscraper folder to Pegasus asset
-    artworkMapping = [
-      { folder = "covers";      asset = "box_front"; }
-      { folder = "screenshots"; asset = "screenshot"; }
-      { folder = "wheels";      asset = "logo"; }
-      { folder = "marquees";    asset = "marquee"; }
-      { folder = "textures";    asset = "background"; }
-    ];
-
-    systems = map (sys: {
-      inherit (sys) dir name extensions;
-      shortname = sys.shortname or sys.dir;
-      launch = mkLaunchCmd sys;
-    }) systems;
-  });
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.pegasus-frontend ];
 
-  systemd.user = {
-    # Re-run after RetroArch changes: systemctl --user start generate-pegasus-metadata.service
-    services.generate-pegasus-metadata = {
-      Unit.Description = "Generate Pegasus frontend metadata files";
-      Service = {
-        Type = "oneshot";
-        ExecStart = lib.escapeShellArgs [
-          (lib.getExe self.packages.generate-pegasus-metadata)
-          configFile
-          "${config.xdg.configHome}/pegasus-frontend/metafiles"
-        ];
-      };
-    };
-
-    timers.generate-pegasus-metadata = {
-      Unit.Description = "Generate Pegasus metadata weekly";
-      Install.WantedBy = [ "timers.target" ];
-      Timer = {
-        OnCalendar = "weekly";
-        RandomizedDelaySec = "6h";
-        Persistent = true;
-      };
-    };
-  };
-
   xdg.configFile = {
     "pegasus-frontend/themes/gameOS".source = gameOS-theme;
+    "pegasus-frontend/game_dirs.txt".text = lib.concatMapStrings (sys: "${romsDir}/${sys.dir}\n") systems;
+    "pegasus-frontend/metafiles/launch.metadata.pegasus.txt".text =
+      lib.concatMapStrings (sys: "collection: ${sys.name}\nlaunch: ${mkLaunchCmd sys}\n\n") systems;
+    # Games come only from RomM's export, so the importers for other launchers' libraries stay off.
     "pegasus-frontend/settings.txt".text = ''
       general.theme: themes/gameOS
-    '';
+    '' + lib.concatMapStrings (p: "providers.${p}.enabled: false\n")
+      [ "steam" "gog" "es2" "launchbox" "logiqx" "lutris" "playnite" "skraper" ];
   };
 }

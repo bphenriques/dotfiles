@@ -7,9 +7,16 @@
 # Syncthing's leftovers and editor noise: never wanted on a device.
 const NEVER_PUSH = [ ".stfolder" ".stignore" ".idea" ]
 
-# Mirrors selfhost.apps.romm.settings.exclude.roms. Scoped to the ROM directories, or it would also
-# drop the README.md files the overlay trees legitimately carry.
-const ROMS_EXCLUDE = [ "media" "patches" "archive" "README.md" "systeminfo.txt" ]
+# Mirrors selfhost.apps.romm.settings.exclude.roms, plus RomM's Pegasus export (scan.media there) and the
+# gamelist.xml covers it reads. Scoped to the ROM directories, or it would also drop the README.md files the
+# overlay trees legitimately carry. Imgs is the other way round: a post-sync hook's output on the device,
+# which an exclude also keeps --delete from removing.
+const ROMS_EXCLUDE = [
+  "patches" "archive" "README.md" "systeminfo.txt"
+  "metadata.pegasus.txt" "covers" "screenshots" "marquees"
+  "gamelist.xml" "images"
+  "Imgs"
+]
 
 def read-config [dir: string]: nothing -> record {
   let file = [$dir "sync.yaml"] | path join
@@ -84,8 +91,9 @@ def main [
     print $"(ansi cyan)($source) -> ($dest)(ansi reset)"
 
     # No owner/group/mode: FAT32 rejects all three with EPERM, which exits 23 and leaves every file
-    # looking different next run. Times stay, or rsync loses its quick check and re-sends everything.
-    let flags = [--archive --no-owner --no-group --no-perms --no-links --human-readable --itemize-changes --mkpath]
+    # looking different next run. Times stay, or rsync loses its quick check and re-sends everything; FAT32
+    # keeps them in 2-second steps, hence the window.
+    let flags = [--archive --no-owner --no-group --no-perms --no-links --modify-window=1 --human-readable --itemize-changes --mkpath]
       | append ($NEVER_PUSH | append (if $p.mirror { $ROMS_EXCLUDE } else { [] }) | each {|n| $"--exclude=($n)" })
       | append (if $p.mirror { [--delete] } else { [] })
       | append (if $apply { [] } else { [--dry-run] })
@@ -96,7 +104,7 @@ def main [
 
   # post-sync/*.nu in name order, run from the device directory with the card as the first argument, so a
   # hook can read its own sync.yaml. Local rather than on the device: these adapt content for this
-  # handheld, and the tooling for that (Skyscraper, artwork.xml) lives here.
+  # handheld from the library, which this host mounts.
   if ($cfg.hooks | is-not-empty) {
     if ($card | is-empty) {
       print $"\n(ansi yellow)skipping ($cfg.hooks | length) post-sync script\(s\): they need --card, not --ssh(ansi reset)"

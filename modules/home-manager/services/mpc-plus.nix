@@ -11,7 +11,8 @@ let
     && device.port == config.services.mpd.network.port;
 
   mkService = name: device: {
-    Install.WantedBy = [ "graphical-session.target" ];
+    # PartOf only propagates stops, so mpd starting must pull the notifier back in.
+    Install.WantedBy = [ "graphical-session.target" ] ++ lib.optional (isLocalMpd device) "mpd.service";
     Unit = {
       Description = "mpc-plus notifications for ${name}";
     } // lib.optionalAttrs (isLocalMpd device) {
