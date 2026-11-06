@@ -61,8 +61,8 @@ in
         default = [];
       };
 
-      screencasting.block = lib.mkOption {
-        description = "Rendered 2nd: layers blocked from screencasting";
+      screenCapture.block = lib.mkOption {
+        description = "Rendered 2nd: layers blocked from screen capture";
         type = lib.types.listOf lib.types.str;
         default = [];
       };
@@ -117,10 +117,10 @@ in
         // 5. Layer rules
         ${lib.concatStringsSep "\n\n" cfg.layerRules.base}
 
-        ${lib.optionalString (cfg.layerRules.screencasting.block != []) ''
+        ${lib.optionalString (cfg.layerRules.screenCapture.block != []) ''
         layer-rule {
-          ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.layerRules.screencasting.block}
-          block-out-from "screencast"
+          ${lib.strings.concatMapStringsSep "\n" (match: ''match ${match}'') cfg.layerRules.screenCapture.block}
+          block-out-from "screen-capture"
         }
         ''}
 

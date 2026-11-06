@@ -84,7 +84,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
     };
     layerRules = {
-      screencasting.block = [ ''namespace="^notifications$"'' ];
+      screenCapture.block = [ ''namespace="^notifications$"'' ];
       base = [
         ''
           layer-rule {

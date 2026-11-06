@@ -17,7 +17,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.fuzzel.settings.colors.background = lib.mkForce "${config.lib.stylix.colors.base00}EB"; # 92% opacity for blur (override stylix's FF alpha)
 
   my.programs.niri.layerRules = {
-    screencasting.block = [ ''namespace="^launcher$"'' ];
+    screenCapture.block = [ ''namespace="^launcher$"'' ];
     base = [
       ''
         layer-rule {

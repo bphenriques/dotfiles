@@ -4,7 +4,7 @@ VOLUME_LIMIT=1.5 # wpctl decimal: 1.0 = 100%, 1.5 = 150%
 
 # Device queries (pactl for rich JSON properties, no wpctl equivalent)
 list_sources() { pactl -f json list sources | jq -cr '[ .[] | select((.ports // []) | any(.type == "Mic" or .type == "Headset")) ]'; }
-list_sinks() { pactl -f json list sinks; }
+list_sinks() { pactl -f json list sinks | jq -cr '[ .[] | select((.ports // []) | length > 0) ]'; }
 get_sink() { pactl -f json list sinks | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
 get_source() { pactl -f json list sources | jq -cr --arg name "$1" '.[] | select(.name == $name)'; }
 

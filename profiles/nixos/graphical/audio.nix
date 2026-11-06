@@ -20,6 +20,36 @@ _:
         "default.clock.min-quantum" = 512;
         "default.clock.max-quantum" = 2048;
       };
+
+      # Desktop + mic mix that screen-recorder captures from `recording.monitor`. Passive, so the mic only opens while recording.
+      "93-recording-mix" = let
+        loopback = captureProps: {
+          name = "libpipewire-module-loopback";
+          args = {
+            "capture.props" = captureProps // { "node.passive" = true; };
+            "playback.props" = {
+              "target.object" = "recording";
+              "node.passive" = true;
+              "node.dont-fallback" = true;  # never leak into the speakers if `recording` is missing
+            };
+          };
+        };
+      in {
+        "context.objects" = [{
+          factory = "adapter";
+          args = {
+            "factory.name" = "support.null-audio-sink";
+            "node.name" = "recording";
+            "node.description" = "Recording mix";
+            "media.class" = "Audio/Sink";
+            "audio.position" = [ "FL" "FR" ];
+          };
+        }];
+        "context.modules" = [
+          (loopback { "stream.capture.sink" = true; })
+          (loopback { })
+        ];
+      };
     };
   };
   security.rtkit.enable = true;        # Recommended for pipewire when gaming (realtime)
