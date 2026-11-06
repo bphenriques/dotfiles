@@ -1,11 +1,10 @@
 { lib, pkgs, builders, ... }:
-builders.mkShellPlugin {
+builders.mkZshPlugin {
   drv = pkgs.writeShellApplication {
     name = "dotfiles";
-    runtimeInputs = [ pkgs.nvd pkgs.nix-output-monitor ];
+    runtimeInputs = [ pkgs.nh pkgs.nvd pkgs.coreutils ];   # GNU ls: macOS ls -v is not a version sort
     text = lib.fileContents ./script.sh;
     meta.platforms = lib.platforms.all;
   };
-  fishPluginSrc = ./fish-plugin;
   zshPlugin = ./plugin.zsh;
 }

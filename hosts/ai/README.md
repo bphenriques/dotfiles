@@ -76,7 +76,7 @@ to manage those.
 neither of which the registry serves. `ollama-configure` downloads the files and runs `ollama create` when
 the model is missing; to apply an edit to its Modelfile, `ollama rm` it and restart the unit.
 
-Loading it evicts the pinned `ai.model`: Ollama predicts 89.7 GiB (llama.cpp uses 66.7) and evicts when a
+Loading it evicts the pinned `ai.model`: Ollama predicts 89.7 GiB (61 GiB of GPU plus the 27.5 GiB n-gram table, mapped in system RAM) and evicts when a
 load exceeds 80% of free memory. `ai.model` reloads on its next request, but with the default 10m keep-alive
 instead of the pin, so it can cold-load after idle periods until `ollama-configure` runs again.
 

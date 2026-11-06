@@ -53,7 +53,7 @@ Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence
 
 ## `dot` cli
 
-Using a personal wrapper to manage both local and remote machines called [`dot`](./packages/dotfiles/dotfiles):
+A thin wrapper over [`nh`](https://github.com/nix-community/nh) for local and remote machines, called [`dot`](./packages/dotfiles/dotfiles):
 
 ```bash
 dot . s              # build, preview changes, and apply to the current host

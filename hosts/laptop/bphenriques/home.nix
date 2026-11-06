@@ -11,6 +11,7 @@ in
     ../../../profiles/home-manager/desktop
     ../../../profiles/home-manager/development
     ../../../profiles/home-manager/gaming
+    ../../../profiles/home-manager/music
     ./kanshi.nix
   ];
 
@@ -21,16 +22,8 @@ in
     "z ${config.home.homeDirectory}/.ssh    0700 ${config.home.username} users"
   ];
 
-  gtk.gtk3.bookmarks = [
-    "file://${nasShares.bphenriques.root} NAS Private"
-    "file://${nasShares.media.root} NAS Media"
-    "file://${nasShares.bphenriques.root}/documents NAS Documents"
-    "file://${nasShares.media.root}/movies NAS Movies"
-    "file://${nasShares.media.root}/tv NAS TV"
-    "file://${nasShares.media.root}/downloads NAS Downloads"
-  ];
+  gtk.gtk3.bookmarks = map (b: "file://${b.path} ${b.name}") config.my.programs.file-explorer.bookmarks;
 
-  my.dotfiles.enable = true;
   my.programs.file-explorer = {
     enable = true;
     bookmarks = [

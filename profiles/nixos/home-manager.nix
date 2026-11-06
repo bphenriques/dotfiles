@@ -1,4 +1,4 @@
-{ self, inputs, fleet, private, lib, ... }:
+{ self, inputs, private, lib, ... }:
 {
   imports = [ inputs.home-manager.nixosModules.home-manager ];
 
@@ -6,6 +6,6 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     sharedModules = lib.attrValues self.homeManagerModules;
-    extraSpecialArgs = { inherit self inputs fleet private; };  # mirror the host's specialArgs into HM
+    extraSpecialArgs = { inherit self inputs private; };  # mirror the host's specialArgs into HM
   };
 }

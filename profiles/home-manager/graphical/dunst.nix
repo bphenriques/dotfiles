@@ -34,7 +34,7 @@ in
         progress_bar_corner_radius = 3;
         alignment = "left";
         vertical_alignment = "center";
-        format = "<big><b>%s</b></big>\\n%b";
+        format = "<b>%s</b>\\n%b";
         corner_radius = 10;
 
         # Behaviour

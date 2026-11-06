@@ -6,9 +6,7 @@
     ./jetbrains.nix       # IDE
     ./claude-code.nix     # AI Assistant
     ./omp.nix             # AI Assistant
-    ./herdr.nix           # Agent multiplexer
     ./helix.nix           # Editor
-    ./zellij.nix          # Terminal multiplexer
   ];
 
   programs.parallel = {

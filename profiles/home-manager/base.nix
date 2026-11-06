@@ -1,6 +1,6 @@
 _:
 {
-  imports = [ ./cli.nix ];
+  imports = [ ./cli ./dotfiles.nix ];
 
   # XDG compliance to tidy up $HOME.
   xdg.enable = true;

@@ -1,4 +1,4 @@
-{ pkgs, private, ... }:
+{ config, pkgs, private, ... }:
 {
   imports = [
     ../../profiles/home-manager/base.nix
@@ -25,8 +25,7 @@
     # imagemagick
   ];
 
-  my.dotfiles.enable = true;
-  programs.fish.interactiveShellInit = "fnm env --use-on-cd --shell fish | source";
+  programs.nh.darwinFlake = "${config.programs.nh.flake}#work-macos";   # the work-managed hostname must stay
   programs.zsh.initContent = ''eval "$(fnm env --use-on-cd --shell zsh)"'';
   programs.git.includes = [{
     condition = "hasconfig:remote.*.url:git@github.com:${private.settings.git.org}/**";

@@ -8,7 +8,6 @@ usage() {
 Log in to and unlock Bitwarden CLI.
 
 sh:   export BW_SESSION="$(bw-session session <EMAIL>)"
-fish: set -x BW_SESSION (bw-session session <EMAIL>)
 
 Escape hatch: if BW_SESSION is already set in the environment (e.g.
 you ran `bw unlock --raw` manually), this command echoes it back

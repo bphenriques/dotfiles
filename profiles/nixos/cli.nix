@@ -1,13 +1,5 @@
-{ pkgs, lib, config, inputs, ... }:
+{ pkgs, lib, config, ... }:
 {
-  imports = [ inputs.nix-index-database.nixosModules.nix-index ];
-
-  programs.fish.enable = true;
-  programs.zsh = {
-    enable = true;
-    enableGlobalCompInit = false;   # home-manager runs compinit; twice doubles startup.
-  };
-
   environment.systemPackages = [
     pkgs.vim
     pkgs.tree
@@ -36,8 +28,5 @@
     NIXPKGS_ALLOW_UNFREE = "1";
   };
 
-  # Replaces stock `command-not-found` with comma: `, {cmd}`
-  programs.nix-index.enable = true;
-  programs.nix-index-database.comma.enable = true;
-  programs.command-not-found.enable = false;
+  programs.command-not-found.enable = false;   # Needs channels, which this fleet does not use
 }

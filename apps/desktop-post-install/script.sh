@@ -4,7 +4,6 @@ set -euo pipefail
 BRANCH_NAME="${BRANCH_NAME:-main}"
 DOTFILES_LOCATION="${DOTFILES_LOCATION:-"$HOME"/.dotfiles}"
 DOTFILES_PRIVATE_LOCATION="${DOTFILES_LOCATION}-private"
-HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
 SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-"$HOME/.config/sops/age/keys.txt"}"
 export GNUPGHOME="${GNUPGHOME:-"$HOME/.local/share/gnupg"}" # Matches programs.gpg.homedir, as this may run before the first sync
 
@@ -33,19 +32,6 @@ clone_dotfiles() {
   else
     success "dotfiles-private - available in ${DOTFILES_PRIVATE_LOCATION}"
   fi
-}
-
-set_host() {
-  local host="$1"
-  test -z "${host}" && fatal "host must not be empty!"
-  ! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
-
-  if [ -f "$HOST_FILE_LOCATION" ] && [ "$(cat "$HOST_FILE_LOCATION")" != "${host}" ]; then
-    fatal "There is already a host set that is not identical. Delete ${HOST_FILE_LOCATION} and try again."
-  fi
-
-  echo "${host}" >"${HOST_FILE_LOCATION}"
-  success "Host - Set to ${host}!"
 }
 
 setup_ssh_key() {
@@ -107,7 +93,7 @@ export BW_SESSION
 
 setup_ssh_key
 clone_dotfiles
-set_host "${host}"
+! test -d "${DOTFILES_LOCATION}/hosts/${host}" && fatal "No matching '${host}' under '${DOTFILES_LOCATION}/hosts'"
 import_age_private_key "${host}"
 import_gpg
 

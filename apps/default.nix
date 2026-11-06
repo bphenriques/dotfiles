@@ -13,9 +13,7 @@ let
       desktop-post-install = pkgs.callPackage ./desktop-post-install { inherit selfPkgs; };
       host-secrets = pkgs.callPackage ./host-secrets { inherit self; };
       fleet-json = pkgs.callPackage ./fleet-json { inherit fleetFacts; };
-      check-updates = pkgsWithOverlays.callPackage ./check-updates {
-        inherit (self.lib.builders.${system}) writeNushellScript;
-      };
+      check-updates = pkgsWithOverlays.callPackage ./check-updates { };
     });
 
   linux = forLinuxSystems (system:

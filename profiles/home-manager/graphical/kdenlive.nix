@@ -1,0 +1,13 @@
+{ lib, pkgs, ... }:
+{
+  home.packages = [ pkgs.kdePackages.kdenlive ];
+
+  my.programs.niri.windowRules.byApp = [
+    ''
+      window-rule {
+        match app-id="org.kde.kdenlive"
+        open-maximized true
+      }
+    ''
+  ];
+}

@@ -1,4 +1,4 @@
-{ config, lib, osConfig, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 {
   imports = [
     ./fuzzel.nix            # Application launcher
@@ -7,11 +7,29 @@
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
+    ./screen-recorder.nix   # Screen recording menu
+    ./awww.nix              # Wallpaper daemon
+    ./xdg-userdirs.nix      # XDG user directories, screenshots, recordings
+    ./gtk.nix               # Setup theming for some set of apps
+    ./qt.nix                # Setup theming for some set of apps
+    ./firefox               # Browser
+    ./zathura.nix           # Documents
+    ./mpv.nix               # Videos
+    ./imv.nix               # Images
+    ./discord.nix           # Social
+    ./kdenlive.nix          # Video editor
+    ./qbittorrent.nix       # Torrent client
+  ];
+
+  xdg.mimeApps.enable = true;   # Default apps and directories
+
+  home.packages = [
+    pkgs.xdg-user-dirs  # Relevant for desktop
+    pkgs.gparted        # GUI partition editor
   ];
 
   my.programs = {
     screenshot.enable = true;
-    screen-recorder.enable = true;
     session.enable = true;
     volume-osd.enable = true;
     brightness-osd.enable = true;

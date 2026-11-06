@@ -1,197 +1,70 @@
-#!/usr/bin/env bash
-# Standalone-run affordance (unused today): the writeShellApplication build re-injects shebang + strict mode.
-set -e
+#shellcheck shell=bash
 
-have_cmd() { command -v "$1" >/dev/null 2>&1; }
-info() { printf '[ .. ] %s\n' "$1"; }
+usage() {
+  cat <<EOF
+dot <host|.> <command>
+
+  '.' is this machine. Any other host is deployed as root@<host>.
+
+  [s]ync [--boot|--test]   Build, show the diff and apply
+  [b]uild                  Build and show the diff [local]
+  [c]hangelog [N]          Diff the last N generations (default: 2)
+  [u]pdate                 Update flake inputs, and Homebrew on macOS [local]
+EOF
+}
+
 fatal() {
   printf '[FAIL] %s\n' "$1" >&2
   exit 1
 }
 
-DOTFILES_LOCATION=${DOTFILES_LOCATION:-"$HOME/.dotfiles"}
-HOST_FILE_LOCATION="$DOTFILES_LOCATION/.nix-host"
-
-[[ -f $HOST_FILE_LOCATION ]] || fatal "$HOST_FILE_LOCATION not found"
-CURRENT_HOST=$(<"$HOST_FILE_LOCATION")
-
-OS="$(uname -s)"
-SYSTEM_TYPE=
-case "$OS" in
-  Darwin) SYSTEM_TYPE="darwin" ;;
-  Linux) [[ -d /etc/nixos ]] && SYSTEM_TYPE="nixos" ;; # home-manager only installs are not supported (yet)
-esac
-[[ -n $SYSTEM_TYPE ]] || fatal "Unsupported OS: $OS"
-
-usage() {
-  cat <<EOF
-dotfiles <host|.> <command>
-
-  '.' targets the current host ($CURRENT_HOST). Commands that only apply locally
-  are marked with [local].
-
-  [s]ync [--boot] [--test] [--dry-activate]   Apply configuration
-  [c]hangelog [N]                              Show changelog between last N profiles (default: 2)
-  [u]pdate                  [local]            Update flake inputs (and brew on Darwin)
-  [b]uild                   [local]            Build configuration
-EOF
-}
-
-NIX=(nix --extra-experimental-features 'nix-command flakes')
-
-nix_build() {
-  if have_cmd nom; then
-    nom build "$@"
-  else
-    "${NIX[@]}" build "$@"
-  fi
-}
-
-_show_changelog() {
-  [[ -e /run/current-system && -e ./result ]] || return 0
-  have_cmd nvd || return 0
-  nvd diff /run/current-system ./result
-}
-
-_nixos_build() { nix_build ".#nixosConfigurations.$CURRENT_HOST.config.system.build.toplevel"; }
-_nixos_sync() {
-  _nixos_build
-  _show_changelog
+action() {
   case "${1:-}" in
-    --boot) sudo nixos-rebuild boot --flake ".#$CURRENT_HOST" ;;
-    --test) sudo nixos-rebuild test --flake ".#$CURRENT_HOST" ;;
-    --dry-activate) sudo nixos-rebuild dry-activate --flake ".#$CURRENT_HOST" ;;
-    "") sudo nixos-rebuild switch --flake ".#$CURRENT_HOST" ;;
-    *)
-      usage
-      exit 1
-      ;;
+    "") echo switch ;;
+    --boot) echo boot ;;
+    --test) echo test ;;
+    *) fatal "Unknown sync flag: $1" ;;
   esac
 }
 
-_darwin_build() { nix_build ".#darwinConfigurations.$CURRENT_HOST.system"; }
-_darwin_sync() {
-  case "${1:-}" in
-    "") ;;
-    *)
-      usage
-      exit 1
-      ;;
-  esac
-  _darwin_build
-  _show_changelog
-  sudo ./result/sw/bin/darwin-rebuild switch --flake ".#$CURRENT_HOST"
-}
-_darwin_update() {
-  if have_cmd brew; then
-    brew update && brew upgrade
-  else
-    info "Homebrew not installed; skipping brew update/upgrade"
-  fi
-}
-
-# Note: For health checks and auto-rollback, consider deploy-rs: https://github.com/serokell/deploy-rs
-_nixos_deploy() {
-  local host="$1"
-
-  info "Deploying '$host'..."
-  case "${2:-}" in
-    --boot) nixos-rebuild boot --flake ".#${host}" --target-host "root@${host}" ;;
-    "") nixos-rebuild switch --flake ".#${host}" --target-host "root@${host}" ;;
-    *)
-      usage
-      exit 1
-      ;;
-  esac
-}
-
-# Lists system profile paths, version-sorted. Args are an optional command prefix (e.g., ssh root@ip).
-_list_profiles() {
-  # shellcheck disable=SC2012
-  if (($# == 0)); then
-    ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null
-  else
-    "$@" 'ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null'
-  fi
-}
-
-# Diffs the last N system generations. Args after count are an optional command prefix for remote execution.
-_nvd_diff_generations() {
-  local count="$1"
+# Args after the count run each command, locally (bash -c) or remotely (ssh root@host).
+changelog() {
+  local count="${1:-2}" gens i
   shift
-
   [[ $count =~ ^[1-9][0-9]*$ ]] || fatal "Changelog count must be a positive integer"
-
-  local -a profiles=()
-  local line
-  while IFS= read -r line; do
-    [[ -n $line ]] && profiles+=("$line")
-  done < <(_list_profiles "$@")
-
-  local total=${#profiles[@]}
-  if ((total < 2)); then
-    info "Not enough profiles to compare"
-    return 0
-  fi
-
-  local start=0
-  ((total > count)) && start=$((total - count))
-
-  local i
-  for ((i = start; i < total - 1; i++)); do
-    "$@" nvd diff "${profiles[$i]}" "${profiles[$((i + 1))]}"
+  mapfile -t gens < <("$@" 'ls -dv /nix/var/nix/profiles/system-*-link' | tail -n "$count")
+  for ((i = 1; i < ${#gens[@]}; i++)); do
+    "$@" "nvd diff ${gens[i - 1]} ${gens[i]}"
   done
 }
 
-cd "$DOTFILES_LOCATION" || fatal "Failed to set the current directory"
-
-target="${1:-}"
-[[ -n $target ]] || {
+[[ $# -ge 2 ]] || {
   usage
   exit 0
 }
-shift
+target="$1"
+command="$2"
+shift 2
 
-# Resolve '.' to the current host
-[[ $target == "." ]] && target="$CURRENT_HOST"
+: "${NH_FLAKE:?NH_FLAKE is unset; it comes from programs.nh.flake}"
+platform=os
+[[ $(uname -s) == Darwin ]] && platform=darwin
 
-is_local() { [[ $target == "$CURRENT_HOST" ]]; }
-assert_local() { is_local || fatal "'$1' can only be run on the current host (use '.' or '$CURRENT_HOST')"; }
-
-case "${1:-}" in
-  sync | s)
-    shift
-    if is_local; then
-      info "Dotfiles Sync - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
-      "_${SYSTEM_TYPE}_sync" "$@"
-    else
-      _nixos_deploy "$target" "${1:-}"
-    fi
-    ;;
-  changelog | c)
-    shift
-    if is_local; then
-      have_cmd nvd || fatal "changelog requires 'nvd'. Install it or run via the flake."
-      _nvd_diff_generations "${1:-2}"
-    else
-      _nvd_diff_generations "${1:-2}" ssh "root@$target"
-    fi
-    ;;
-  update | u)
-    assert_local update
-    info "Dotfiles Update - '$CURRENT_HOST' ($SYSTEM_TYPE) .."
-    "${NIX[@]}" flake update
-    case "$SYSTEM_TYPE" in
-      darwin) _darwin_update ;;
-    esac
-    ;;
-  build | b)
-    assert_local build
-    "_${SYSTEM_TYPE}_build"
-    _show_changelog
-    ;;
-  *)
-    usage
-    exit 1
-    ;;
-esac
+if [[ $target == . ]]; then
+  case "$command" in
+    s | sync) act=$(action "$@") && nh "$platform" "$act" ;;
+    b | build) nh "$platform" build ;;
+    c | changelog) changelog "${1:-}" bash -c ;;
+    u | update)
+      nix flake update --flake "$NH_FLAKE"
+      if [[ $platform == darwin ]]; then brew update && brew upgrade; fi
+      ;;
+    *) fatal "Unknown command: $command" ;;
+  esac
+else
+  case "$command" in
+    s | sync) act=$(action "$@") && nh os "$act" --hostname "$target" --target-host "root@$target" ;;
+    c | changelog) changelog "${1:-}" ssh "root@$target" ;;
+    *) fatal "'$command' only runs on this machine: dot . $command" ;;
+  esac
+fi

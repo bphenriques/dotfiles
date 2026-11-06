@@ -3,10 +3,16 @@ let
   smbCfg = config.selfhost.storage.mounts.smb;
 in
 {
+  programs.zsh = {
+    enable = true;
+    enableGlobalCompInit = false;   # home-manager runs compinit; twice doubles startup.
+  };
+
   sops.secrets."users/bphenriques/hashedPassword".neededForUsers = true;
   users.users.bphenriques = {
     isNormalUser = true;
     uid = 1000;
+    shell = config.programs.zsh.package;
     hashedPasswordFile = config.sops.secrets."users/bphenriques/hashedPassword".path; # mkpasswd --method=SHA-512 --stdin
     extraGroups = [ "wheel" ]
       ++ lib.optionals config.networking.networkmanager.enable  [ "networkmanager" ]

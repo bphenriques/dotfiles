@@ -1,0 +1,34 @@
+{ config, lib, pkgs, ... }:
+{
+  gtk = {
+    enable = true;
+    gtk3 = {
+      bookmarks = [
+        "file://${config.xdg.userDirs.documents}"
+        "file://${config.xdg.userDirs.pictures}"
+        "file://${config.xdg.userDirs.music}"
+        "file://${config.xdg.userDirs.desktop}"
+        "file://${config.xdg.userDirs.download}"
+        "file://${config.home.homeDirectory}/.config"
+      ];
+      extraConfig = {
+        gtk-error-bell = 0;
+        gtk-application-prefer-dark-theme = if (config.stylix.polarity == "dark") then 1 else 0;
+      };
+    };
+
+    gtk4.extraConfig = {
+      gtk-error-bell = 0;
+      gtk-application-prefer-dark-theme = if (config.stylix.polarity == "dark") then 1 else 0;
+    };
+  };
+
+  stylix.targets.gtk = {
+    enable = true;
+    flatpakSupport.enable = true;
+  };
+
+  # niri does not set this for us (unlike GNOME); browsers/portal need it for `prefers-color-scheme`.
+  dconf.settings."org/gnome/desktop/interface".color-scheme =
+    if config.stylix.polarity == "dark" then "prefer-dark" else "default";
+}

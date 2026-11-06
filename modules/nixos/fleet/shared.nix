@@ -1,4 +1,4 @@
-{ lib, fleet, ... }:
+{ lib, ... }:
 {
   options.fleet = {
     ssh = {
@@ -132,6 +132,4 @@
       };
     };
   };
-
-  config.fleet = fleet;
 }

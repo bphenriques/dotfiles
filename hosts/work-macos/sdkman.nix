@@ -14,12 +14,7 @@ in
     };
   };
 
-  programs.fish.functions.sdk = {
-    description = "SDKMAN CLI (bash)";
-    body = ''bash -c 'source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk "$@"' bash $argv'';
-  };
-
-  # Sourced on first use to keep startup fast; unlike fish, `sdk use` then works in this shell.
+  # Sourced on first use to keep startup fast.
   programs.zsh.initContent = ''
     sdk() {
       unfunction sdk

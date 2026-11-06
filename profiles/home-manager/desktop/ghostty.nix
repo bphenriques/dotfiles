@@ -16,19 +16,18 @@ in
 
     settings = let
       common = {
+        command = lib.getExe config.programs.zsh.package;
         copy-on-select = "both";
         keybind = [ "ctrl+enter=unbind" ];                  # Conflicts and I do not need it.
       };
 
       linux = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-        command = lib.getExe config.programs.fish.package;
         gtk-single-instance = true;
         window-decoration = true;
         quit-after-last-window-closed = false; # Reduces latency when opening new windows
       };
 
       darwin = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-        command = lib.getExe pkgs.zsh;
         window-colorspace = "display-p3";
         macos-non-native-fullscreen = "visible-menu";
         macos-option-as-alt = "left";

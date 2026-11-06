@@ -8,7 +8,6 @@ _:
     mdformat.enable = true;                          # Markdown formatter
     mdformat.plugins = ps: [ ps.mdformat-gfm ];      # GitHub Flavored Markdown (tables, task lists, strikethrough)
     mdformat.settings.number = true;                 # Preserve consecutive numbering in ordered lists
-    fish_indent.enable = true;                       # Fish shell formatter
 
     # Checks
     shellcheck.enable = true;                        # Shell script linter

@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, inputs, ... }:
 {
   imports = [
     ../standalone.nix
@@ -6,7 +6,12 @@
     ./audio.nix
     ./wayland.nix
     ./nautilus.nix
+    inputs.nix-index-database.nixosModules.nix-index
   ];
+
+  # Replaces stock `command-not-found` with comma: `, {cmd}`
+  programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
 
   networking.networkmanager.enable = true;    # More complete package to manage connectivity. Suitable for desktop.
 
