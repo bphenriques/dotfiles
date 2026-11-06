@@ -34,8 +34,7 @@ in
         tools.approvalMode = "write";
         secrets.enabled = true;       # Redact credentials before they reach the provider.
 
-        # `/model` still switches freely until the next home-manager switch restores these.
-        # `:high` is the thinking selector; it reaches Ollama as reasoning.effort.
+        # `/model` switches until the next switch restores these; `:high` reaches Ollama as reasoning.effort.
         modelRoles.default = "ollama/${ai.codingModel}:high";
         # Pinned so background tasks stay local, on the MoE because it decodes 3x the dense coder.
         modelRoles.tiny = "ollama/${ai.model}";

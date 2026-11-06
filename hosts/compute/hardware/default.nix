@@ -32,8 +32,7 @@
     "i915.enable_guc=3"                 # Enable GuC/HuC firmware for better media scheduling
   ];
 
-  # bond0 over enp1s0/enp2s0 (active-backup) via systemd-networkd. The bond MAC is pinned to
-  # enp1s0's: the DHCP reservation is keyed on it (private.settings.network.bond0MAC).
+  # Active-backup bond; its MAC is pinned to enp1s0's because the DHCP reservation is keyed on it.
   networking.useDHCP = false;
   networking.useNetworkd = true;
   systemd.network = {

@@ -40,8 +40,7 @@ let
       disablePasswordAuth = false;
     };
 
-    # type: 0=Manga, 1=Comic, 2=Book, 3=Image, 4=LightNovel
-    # metadataProvider only seeds new libraries; existing ones keep theirs.
+    # type: 0=Manga 1=Comic 2=Book 3=Image 4=LightNovel. metadataProvider only seeds new libraries.
     libraries = let
       fileType = { archive = 1; epub = 2; pdf = 3; image = 4; };
       provider = { hardcover = 2; mangabaka = 3; comicBookRoundup = 4; };

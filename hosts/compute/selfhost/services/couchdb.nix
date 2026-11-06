@@ -2,8 +2,7 @@
 let
   vault = import ./livesync-cli/vault.nix;
 
-  # Obsidian's clients are the only reason CouchDB needs CORS at all, so the origins and the sizing
-  # live here rather than in the framework app.
+  # Obsidian is the only reason CouchDB needs CORS, so origins and sizing live here, not in the app.
   cors = {
     origins = [
       "app://obsidian.md"
@@ -20,8 +19,7 @@ in
   selfhost = {
     apps.couchdb.enable = true;
 
-    # The Obsidian vault database. Kept out of dotfiles-private, which holds identity rather than
-    # per-app deployment detail.
+    # Not in dotfiles-private, which holds identity rather than per-app deployment detail.
     users.${vault.owner}.services.couchdb = {
       enable = true;
       databases = [ vault.database ];

@@ -25,8 +25,7 @@
     SystemCallFilter = [ "@system-service" ];
   };
 
-  # virtiofsd talks vhost-user straight to the guest, yet upstream runs it as root with every capability.
-  # Not narrowed further: ProtectSystem=strict needs per-share ReadWritePaths, RestrictSUIDSGID breaks guest setuid files.
+  # Upstream runs virtiofsd as root with every capability. Not narrowed further: per-share ReadWritePaths, guest setuid.
   virtiofsdSandbox = {
     CapabilityBoundingSet = [
       "CAP_SETPCAP"         # it drops its own caps at startup; without this it fails closed

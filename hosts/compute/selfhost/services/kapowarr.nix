@@ -27,9 +27,7 @@ in
     "d ${dataDir}/downloads 0750 root root -"
   ];
 
-  # Kapowarr's entrypoint uses gosu to drop privileges, which resets supplementary groups
-  # (--group-add is lost). Running as root (PUID=0) skips gosu entirely and avoids both
-  # the chown and group issues. The container is isolated by Podman and behind forwardAuth.
+  # PUID=0: the entrypoint's gosu resets supplementary groups. Podman isolates it and forwardAuth fronts it.
   virtualisation.oci-containers.containers.kapowarr = {
     image = "${img.image}:${img.tag}";
     autoStart = true;

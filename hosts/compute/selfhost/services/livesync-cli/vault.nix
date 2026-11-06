@@ -1,5 +1,4 @@
-# The vault's database and its path under its owner's share, paired here so the daemon, the Setup URI
-# command and the CouchDB grant cannot drift apart.
+# The vault database and its share path, paired so the daemon, Setup URI and CouchDB grant cannot drift.
 {
   owner = "bphenriques";
   subpath = "notes";

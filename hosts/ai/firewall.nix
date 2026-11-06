@@ -7,8 +7,7 @@ in
 {
   networking.nftables.enable = true;
 
-  # The endpoint has no authentication, so reachability is the access control. Ollama runs with
-  # --network=host so this chain actually sees its traffic; a published port would bypass it.
+  # Nothing behind these ports authenticates, so reachability is the access control (Ollama uses --network=host so this chain sees it).
   networking.firewall.extraInputRules = ''
     ip saddr ${hosts.compute} tcp dport { ${toString exporters.node.port}, ${toString exporters.smartctl.port} } accept comment "exporters, scraped by compute"
     ip saddr { ${hosts.compute}, ${hosts.laptop} } tcp dport ${toString endpoint.port} accept comment "inference endpoint"

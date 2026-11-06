@@ -1,6 +1,4 @@
-# The exporters every machine runs, hosts and microVM guests alike. A job names the exporter kind and
-# `instance` names who it came from, so `up{job="node"}` means every node_exporter here. An exporter
-# only one box runs keeps its scrape next to its rules instead, as ups.nix does.
+# Exporters every machine runs: `job` is the exporter kind, `instance` the source. Single-box exporters scrape next to their rules (ups.nix).
 { config, lib, ... }:
 let
   inherit (config.fleet.lan) hosts;
@@ -73,8 +71,7 @@ in
     rules = [{
       name = "fleet";
       rules = [{
-        # Hosts only: a guest going away is the profile's GuestDown, at warning rather than critical.
-        # Escalates the framework's 10m PrometheusTargetDown; a single dead exporter stays that warning.
+        # Hosts only (guests have GuestDown); escalates the framework's 10m PrometheusTargetDown.
         alert = "FleetHostDown";
         expr = ''up{job="node",instance=~"${lib.concatStringsSep "|" (lib.attrNames hostEntries)}"} == 0'';
         "for" = "5m";

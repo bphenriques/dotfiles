@@ -69,8 +69,7 @@ in
     };
   };
 
-  # Landing-page opt-in for framework-provided services; their category comes from each service's
-  # meta.category default. Pocket ID is pinned to the top (order 0).
+  # Landing-page opt-in for framework services; category comes from each service's meta.category.
   selfhost.services = {
     pocket-id.extraConfig.landingPage = { enable = true; order = 0; };
     tinyauth.extraConfig.landingPage.enable = true;
@@ -127,11 +126,7 @@ in
       bphenriques = { gid = 5000; };
       media = { gid = 5001; };
       shared = { gid = 5002; };
-      # Immich's media location is a StateDirectory, so systemd owns /var/lib/immich and the NAS lands
-      # on the two subfolders that grow instead. thumbs stays local (read on every timeline scroll).
-      #
-      # uid, not just gid: upload -> library now crosses devices, and Immich's EXDEV fallback ends in
-      # utimes(), which is owner-only whatever the mode says. Owner also makes the group grant moot.
+      # Only the two growing subfolders live on the NAS (thumbs stays local). uid too: the EXDEV fallback ends in owner-only utimes().
       immich-uploads = {
         localMount = "/var/lib/immich/library";
         uid = config.users.users.immich.uid;
@@ -167,8 +162,7 @@ in
 
     users = private.users // extraUsers;
 
-    # agent-alfredo-vm's forge identity. The keypair is generated in the guest as the `hermes` user, so the
-    # private half never leaves it; only the public half is declared here and registered on deploy.
+    # agent-alfredo-vm's forge identity: the key is generated in the guest, so only the public half is declared here.
     serviceAccounts.personal-agent = {
       description = "agent-alfredo-vm's forge principal, for git over SSH to its inbox repository";
       services.gitea = {
@@ -180,8 +174,7 @@ in
     };
   };
 
-  # Upstream keeps messages 12h, which a phone switched off for a weekend outlives: a backup failure
-  # would expire before anyone read it.
+  # Upstream's 12h would expire a backup failure before a phone switched off for the weekend reads it.
   services.ntfy-sh.settings.cache-duration = "72h";
 
   virtualisation = {
@@ -216,12 +209,10 @@ in
     };
   };
 
-  # Pocket-ID (the only SMTP consumer) reads mail.passwordFile directly, so the secret is owned by its
-  # service user to make it readable. A second consumer would need a per-service owner-adjusted copy.
+  # Owned by Pocket-ID's user, the only SMTP consumer; a second one would need its own copy.
   sops.secrets."smtp-password".owner = config.services.pocket-id.user;
 
-  # Bootstrap-only creds: set at account creation, then changed in-app. Never re-read, so a lost file may
-  # regenerate (the default onMissing) instead of failing the activation.
+  # Bootstrap-only creds, never re-read, so a lost file may regenerate instead of failing activation.
   selfhost.runtimeSecrets = {
     home-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];
     guest-jellyfin-initial-credentials.restartUnits = [ "jellyfin-configure.service" ];

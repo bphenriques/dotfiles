@@ -11,8 +11,7 @@ in
     disk = {
       vda = {
         type = "disk";
-        # Using `by-path` as b/c I won't move the SSDs and `by-id` may change (e.g., `/dev/nvme0n1`).
-        # How to: run `ls /dev/disk/by-path/ -l` and cross-reference with `sudo nix run nixpkgs#nvme-cli -- list`
+        # `by-path`, since the SSDs stay put and `by-id` may change. Find it with `ls -l /dev/disk/by-path/` and `nvme list`.
         device = rootDisk;
         content = {
           type = "gpt";

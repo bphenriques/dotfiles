@@ -1,8 +1,4 @@
-# The images playground posts the edit payload wrapped as {"form_data": {...}}, but
-# /api/v1/images/edit declares an unembedded body, so FastAPI rejects it with 422 before the
-# request ever reaches ComfyUI. Generation is unaffected: its call is not wrapped. Naming the
-# parameter in `embed` matches what the frontend already sends. Drop once upstream reconciles
-# the route it exposed in 0.11.1 with the frontend.
+# The playground wraps the edit body in form_data, which /api/v1/images/edit rejects with 422. Drop once upstream reconciles the 0.11.1 route.
 _final: prev: {
   open-webui = prev.open-webui.overrideAttrs (old: {
     postPatch = (old.postPatch or "") + ''

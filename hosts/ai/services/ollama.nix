@@ -40,8 +40,7 @@ in
     volumes = [ "ollama:/root/.ollama" ];
     environment = {
       OLLAMA_HOST = "0.0.0.0:${toString ai.endpoint.port}";
-      # The pinned `ai.model` plus one other. ComfyUI (~54 GB) does not fit beside `codingModel` (~65 GB).
-      # ollama-configure pins at -1, so it is evicted last.
+      # The pinned `ai.model` plus one: ComfyUI (~54 GB) does not fit beside `codingModel` (~65 GB). The pin evicts last.
       OLLAMA_MAX_LOADED_MODELS = "2";
       OLLAMA_KEEP_ALIVE = "10m";
       # qwen35moe cannot do parallel requests; ollama forces this back to 1 and logs why.

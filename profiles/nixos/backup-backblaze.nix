@@ -1,5 +1,4 @@
-# Off-site backup to the shared Backblaze B2 repo. Compute and storage are co-tenants, so credentials
-# and retention are one fact; what each feeds in, and which prunes, stays with the host.
+# Off-site backup to the shared B2 repo: credentials and retention are shared, inputs and pruning stay per host.
 { config, ... }:
 {
   sops = {

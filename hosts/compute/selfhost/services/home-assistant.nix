@@ -127,13 +127,4 @@ in
       RestartSteps = 5;
     };
   };
-
-  # IPv6 forwarding required for Thread border routing
-  boot.kernel.sysctl = {
-    "net.ipv6.conf.all.disable_ipv6" = 0;
-    "net.ipv6.conf.all.accept_ra" = 2;
-    "net.ipv6.conf.all.accept_ra_rt_info_max_plen" = 64;
-    "net.ipv6.conf.default.forwarding" = 1;
-    "net.ipv6.conf.default.accept_ra" = 2;
-  };
 }

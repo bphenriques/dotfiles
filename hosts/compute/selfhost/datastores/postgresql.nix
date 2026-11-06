@@ -6,12 +6,7 @@
     package = pkgs.postgresql_18;
   };
 
-  # After an unclean shutdown the stale postmaster.pid can name a PID a boot-time transient
-  # now holds, and postgres refuses to start until that PID exits. Upstream sizes the start
-  # limit for 5 slow attempts but never sets RestartSec, so instant failures burn all 5 in
-  # under a second. Spreading them over a minute lets the colliding PID clear.
-  # Not an ExecStartPre that deletes the pid file: it cannot distinguish a stale lock from a
-  # live postmaster, so it would trade a self-healing outage for silent data corruption.
+  # Spread restarts over a minute so a stale postmaster.pid colliding with a boot-time PID can clear. Never delete the pid file: it can't tell stale from live.
   systemd.services.postgresql.serviceConfig.RestartSec = 15;
 
   selfhost.monitoring.scopes.postgres = {

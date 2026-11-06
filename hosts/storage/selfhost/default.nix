@@ -53,8 +53,7 @@ in
       }
     ) serviceAccounts;
 
-    # The same registry compute reads, so membership is decided once. Per-service config belongs to the
-    # host running the service; a person with no SMB account is inert here.
+    # The registry compute reads, so membership is decided once; a person with no SMB account is inert here.
     users = lib.mapAttrs (
       _: person:
       lib.recursiveUpdate (removeAttrs person [ "services" ]) {

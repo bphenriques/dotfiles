@@ -271,9 +271,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       };
     };
 
-    # Keyboard-triggered actions use short fixed durations (easing).
-    # Gesture-sensitive actions (touchpad swipes) use springs to respond to finger velocity.
-    # Springs: higher stiffness = snappier. damping-ratio=1.0 = no oscillation (critically damped).
+    # Keyboard actions ease, gestures use springs (stiffness = snappiness, damping-ratio 1.0 = no oscillation).
     animations = {
       window-open.duration-ms = 150;
       window-close.duration-ms = 150;

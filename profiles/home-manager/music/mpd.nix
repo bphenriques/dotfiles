@@ -28,8 +28,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     '';
   };
 
-  # Upstream mkdirs playlistDirectory, which fails at login while the media share is still unreachable.
-  # MPD itself tolerates the missing share, and a user unit cannot wait on the system mount.
+  # Upstream mkdirs playlistDirectory and fails while the share is unreachable; a user unit cannot wait on the system mount.
   systemd.user.services.mpd.Service.ExecStartPre = lib.mkForce [ ];
 
   services.mpdris2 = {

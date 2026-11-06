@@ -51,8 +51,7 @@ in
         exclude.roms = {
           single_file.names = [
             ".stignore" "README.md" "systeminfo.txt" # RomM skips dot folders but not files
-            # Each disc of a set, so the set lists once, through its .m3u. Not an artefact: handheld-sync keeps
-            # these. A folder per set would also list once, but the Pegasus export points at the folder.
+            # Each disc of a set, so the set lists once through its .m3u. Handheld-sync keeps these.
             "*(Disc [0-9]*"
           ];
           multi_file.names = [ "patches" "archive" ];
@@ -66,8 +65,7 @@ in
           gc = "ngc";
         };
 
-        # Homebrew sits in modern/ for the handhelds' sake. Listing that level as a layout of its own makes each
-        # file a game, where the default layout alone would read the whole folder as one.
+        # Its own layout so each homebrew file in modern/ is a game, not the whole folder.
         filesystem.structure = lib.genAttrs [ "gb" "gbc" "gba" "nes" ] (_: [
           "roms/{platform}/{game}"
           "roms/{platform}/modern/{game}"
@@ -75,13 +73,11 @@ in
 
         emulatorjs.settings.dosbox_pure.dosbox_pure_conf = "inside"; # autorun the bundled DOSBOX.conf
 
-        # After each scan, write <platform>/metadata.pegasus.txt and copy this media beside the ROMs
-        # (covers/, screenshots/, marquees/). Pegasus reads both; each host adds its own launch command.
+        # After each scan, writes metadata.pegasus.txt and media beside the ROMs; each host adds its launch command.
         scan = {
           media = [ "box2d" "screenshot" "manual" "logo" "marquee" ];
           pegasus.export = true;
-          # gamelist.xml holds hand-made corrections, so it outranks the scrapers. It lists only the exceptions,
-          # so every other game resolves as before. Sources left out here follow these.
+          # Hand-made gamelist.xml corrections outrank the scrapers; it lists only exceptions.
           priority = {
             metadata = [ "gamelist" "ss" "launchbox" "hasheous" ];
             artwork = [ "gamelist" "ss" "libretro" "launchbox" "hasheous" ];
@@ -102,8 +98,7 @@ in
     tasks.romm-export-refresh.storage.mounts = [ "media" ];
   };
 
-  # Relay sockets above the ephemeral range: the firewall has to open the whole range, and the kernel
-  # hands out 32768-60999, so anything inside it would expose unrelated sockets on bond0/wg0.
+  # Above the ephemeral range (32768-60999), or opening the relay range would expose unrelated sockets.
   services.coturn = {
     listening-ips = relayAddresses; # not the podman/microvm bridges or the routable IPv6 it would bind otherwise
     min-port = 61000;
@@ -126,10 +121,7 @@ in
     };
   };
 
-  # The module's cross-origin isolation map predates the js-dos player, whose DOSBox-X backend is a
-  # threaded build and refuses to start without SharedArrayBuffer. The trailing `=404` keeps
-  # /index.html a try_files *file*: as the fallback URI it would internally redirect into the
-  # module's `/` location, whose own add_header set replaces everything below.
+  # js-dos needs SharedArrayBuffer. `=404` keeps /index.html a try_files file, or the redirect drops these headers.
   services.nginx.virtualHosts.${config.services.romm.nginx.virtualHost}.locations."~ ^/rom/.*/jsdos$" = {
     tryFiles = "$uri $uri/ /index.html =404";
     extraConfig = ''
@@ -139,11 +131,7 @@ in
     '';
   };
 
-  # Upstream fixes the library to `${dataDir}/library`, so the NAS directories are linked in. Symlinks
-  # rather than binds: the automount keeps its idle unmount and self-heals on a NAS reboot. They stay
-  # read-only through the units' ProtectSystem=strict, matching the container's `:ro` volumes, except the
-  # ROMs for the worker: its scans write the Pegasus export there. RomM chmods every file it writes, and the
-  # share presents files as root's, so the worker needs CAP_FOWNER for that to succeed.
+  # Symlinks into the fixed library dir keep the automount's idle unmount. The worker writes the Pegasus export, so it gets CAP_FOWNER.
   systemd.tmpfiles.settings."20-romm-library" = {
     "${dataDir}/library/roms"."L+".argument = romsDir;
     "${dataDir}/library/bios"."L+".argument = biosDir;
@@ -153,8 +141,7 @@ in
     AmbientCapabilities = [ "CAP_FOWNER" ];
   };
 
-  # RomM's export only adds: it never replaces an exported image, and keeps the entries of games it no longer
-  # has. Clearing it before the 03:00 rescan has it written again from RomM's current state.
+  # The export only adds, so clear it before the 03:00 rescan rewrites it from current state.
   systemd.services.romm-export-refresh = {
     description = "Clear RomM's Pegasus export before the nightly rescan";
     script = ''
@@ -176,8 +163,7 @@ in
     timerConfig.OnCalendar = "02:45";
   };
 
-  # LAN, and only the VPN peers that already reach the LAN: the relay originates its traffic locally,
-  # so a restricted peer using it would get the UDP into the LAN that the forward chain denies them.
+  # LAN and full-access peers only: the relay egresses locally, which would bypass the forward chain for restricted peers.
   networking.firewall = {
     interfaces.bond0 = {
       allowedUDPPorts = [ turn.listening-port ];

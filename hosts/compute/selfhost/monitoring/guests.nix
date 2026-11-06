@@ -1,5 +1,4 @@
-# The alerts compute raises for every microVM guest, whichever host runs it. Scrape targets live in
-# fleet.nix, and alerts select on instance, not job, because fleet.nix picks the job names.
+# Alerts for every microVM guest, selecting on instance since fleet.nix owns the job names.
 { config, lib, self, ... }:
 let
   guests = lib.concatMapAttrs (_: guests: guests) config.fleet.microvms;

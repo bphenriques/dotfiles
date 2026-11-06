@@ -2,14 +2,11 @@
 { config, ... }:
 {
   selfhost.backup.targets.backblaze = {
-    # Storage prunes this shared repository; rustic takes no lock, and two concurrent prunes read packs
-    # the other is deleting. Forget still runs here, and storage reclaims this host's space too.
+    # Storage prunes this shared repo (rustic has no lock); forget still runs here.
     prune = false;
-    # App DBs (Immich/Miniflux/RomM) are deliberately not dumped: in a real disaster they are trivially
-    # rebuilt (re-scan) or non-critical; the irreplaceable data (files, gitea repos, config) is covered here.
+    # App DBs are not dumped: rebuildable by re-scan or non-critical.
     services = [ "bazarr" "gitea" "home-assistant" "ntfy" "radarr" "radicale" "sonarr" "wireguard" ];
-    # The NAS shares are storage's job now: it reads the datasets locally and records their real
-    # ownership, where this host's CIFS mounts could only record a fabricated uid/gid.
+    # NAS shares are backed up by storage, which records real ownership instead of CIFS's fabricated ids.
     bindings."/system/homelab-secrets" = config.selfhost.runtimeSecretsDir;
   };
 }

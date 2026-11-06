@@ -10,8 +10,7 @@ let
   prometheusCfg = config.selfhost.services.prometheus;
   json = pkgs.formats.json { };
 
-  # Instance labels. Their only definition is the fleet table in ../fleet.nix; naming one that is not
-  # scraped renders empty panels rather than failing, so the assertion below checks them.
+  # Defined only in ../fleet.nix; an unscraped label renders empty panels, so the assertion below checks them.
   storageName = "storage";
   aiName = "ai";
 

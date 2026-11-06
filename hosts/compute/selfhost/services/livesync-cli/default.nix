@@ -19,8 +19,7 @@ in
   imports = [ ./configure.nix ./setup-uri.nix ];
 
   selfhost = {
-    # No port: the daemon speaks out to CouchDB and has no backend of its own. The entry is here for
-    # the automount ordering and the failure notification.
+    # No port: the daemon only calls out. The entry carries the automount ordering and failure notification.
     services.livesync-cli = {
       displayName = "LiveSync";
       meta.homepage = "https://github.com/vrtmrz/obsidian-livesync";

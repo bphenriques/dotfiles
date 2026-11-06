@@ -1,7 +1,4 @@
-# Single dashboard for the fleet: an always-visible strip (host, NAS and guests), then one collapsed
-# detail row per entity, host first (richest), then the NAS, then each microVM guest. Guest rows are
-# generated from fleet.microvms (the table that also drives scrape/alerts), so a new guest needs no
-# edit here.
+# One fleet dashboard: an always-visible strip, then a collapsed row per entity. Guest rows are generated from fleet.microvms.
 { lib, hostName, guests, storageName, aiName }:
 let
   inherit (import ./lib.nix { inherit lib; }) mkPanel mkStat mkRow layout2 fullW;
@@ -72,9 +69,7 @@ let
     panels = map mkPanel (layout2 7 hostSpecs);
   };
 
-  # The NAS answers on one instance label across the node, smartctl and zfs jobs. Pool figures come
-  # from the zfs exporter, disk temperatures from smartctl. Its memory panel counts the ZFS ARC under
-  # Used rather than cache, because ARC is kernel slab.
+  # The NAS: one instance label across node, smartctl and zfs. ARC counts as Used, since it is kernel slab.
   storageSpecs = common 200 storageInst ++ [
     (rootDisk 203 storageInst)
     {
@@ -108,10 +103,7 @@ let
     panels = map mkPanel (layout2 8 storageSpecs);
   };
 
-  # The inference box. hwmon names its chips by PCI path, so every sensor panel joins
-  # node_hwmon_sensor_label to get a readable series name; that join also drops unlabelled sensors.
-  # Job-pinned: a renamed job leaves its old series in the index, and two matches per (chip, sensor)
-  # make this a many-to-one error rather than a graph.
+  # Sensor panels join node_hwmon_sensor_label for readable names, job-pinned so a renamed job cannot make the join many-to-one.
   withLabel = metric: ''
     ${metric}{${aiInst},job="node"} * on(chip, sensor) group_left(label) node_hwmon_sensor_label{${aiInst},job="node"}
   '';
@@ -202,8 +194,7 @@ in
       id = 3;
       title = "Disk %";
       unit = "percent";
-      # The fullest filesystem per box, so a new guest or volume needs no edit here. The allowlist drops
-      # the ones reporting someone else's disk: cifs is the NAS from compute, virtiofs the host from a guest.
+      # Fullest filesystem per box, dropping cifs and virtiofs, which report someone else's disk.
       expr = ''
         max by(instance) (
           (1 - node_filesystem_avail_bytes{job="node",fstype=~"ext4|zfs|xfs|btrfs"}

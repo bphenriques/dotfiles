@@ -8,8 +8,7 @@ let
   database = "${config.xdg.dataHome}/beets/library.db";
   databaseBackup = "${musicDir}/beets.db.backup";
 
-  # Routine maintenance: beet-manage. Ad-hoc: beet mbsync (-p to preview), beet fingerprint, beet scrub.
-  # Docs: https://beets.readthedocs.io/en/stable/plugins/index.html
+  # Routine: beet-manage. Ad-hoc: beet mbsync (-p previews), fingerprint, scrub.
   plugins = let
     providers = [ "musicbrainz" "chroma" "spotify" "deezer" ];
     metadata  = [ "fetchart" "embedart" "lyrics" "mbsync" "mbsubmit" "replaygain" ];

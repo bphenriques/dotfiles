@@ -61,8 +61,7 @@ _:
           annotations.summary = "{{ $labels.mountpoint }} > 85%";
         }
         {
-          # Fleet-wide: the named criticals cover specific units, nothing covered "a unit failed".
-          # Measured quiet over the last 7d on every host before adding.
+          # Fleet-wide catch-all for failed units, measured quiet over 7d on every host before adding.
           alert = "UnitFailed";
           expr = ''node_systemd_unit_state{state="failed"} == 1'';
           "for" = "15m";

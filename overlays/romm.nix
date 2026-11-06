@@ -1,6 +1,4 @@
-# Drop once nixpkgs' romm catches up with 5.4: it still wraps the rq-scheduler daemon upstream dropped
-# for `rq cron`, runs one worker without the `scans` queue or --with-scheduler, and its Python env
-# lacks deps 5.4 imports.
+# Drop once nixpkgs' romm (5.4.1 still wraps rqscheduler) uses `rq cron`, runs the `scans` queue with --with-scheduler and has 5.4's Python deps.
 _final: prev: {
   romm = prev.romm.overrideAttrs (finalAttrs: prevAttrs: {
     passthru = prevAttrs.passthru // {

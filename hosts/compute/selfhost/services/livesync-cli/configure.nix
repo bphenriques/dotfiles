@@ -44,8 +44,7 @@ in
   };
 
   selfhost.runtimeSecrets = {
-    # Never silently replaced: a new value would not decrypt what CouchDB already holds. If this and
-    # the daemon's database are both lost, reseed from the vault copy in B2.
+    # A new value would not decrypt what CouchDB holds; if both are lost, reseed from the vault copy in B2.
     livesync-vault-passphrase = {
       bytes = 32;
       onMissing.generateOnce = "${stateDir}/.livesync";

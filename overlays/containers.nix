@@ -25,8 +25,7 @@ _final: prev: let
       tagSuffix = "-rootless";
       homepage = "https://github.com/papra-hq/papra";
     };
-    # Toolbox image, so `Cmd` is a bare shell; `hosts/ai/services/comfyui.nix` supplies the launch line.
-    # Datestamped tags only, hence its own version pattern.
+    # Toolbox image with a bare-shell Cmd (comfyui.nix supplies the launch line), datestamped tags only.
     comfyui = {
       image = "docker.io/kyuz0/amd-strix-halo-comfyui";
       version = "20260811-102353";

@@ -14,8 +14,7 @@ in
   # User services (mpd) hold shares open; stop them before the shares and network go down or shutdown hangs.
   systemd.services."user@".after = [ "remote-fs.target" ];
 
-  # A share named after someone in the household registry is theirs; everything else is a household share.
-  # The laptop carries no registry, so it marks nothing personal; nothing there reads the flag.
+  # A share named after someone in the registry is theirs. The laptop has no registry, so nothing is personal there.
   fleet.shares = lib.mapAttrs (name: mount: {
     root = mount.localMount;
     personal = (private.users or { }) ? ${name};

@@ -1,7 +1,6 @@
 { pkgs, lib, config, ... }:
 let
-  # Sunshine runs with cap_sys_admin (setcap wrapper). Steam's bwrap sandbox rejects inherited capabilities.
-  # setpriv clears ambient+inheritable caps so Steam launches cleanly.
+  # Steam's bwrap rejects the inherited cap_sys_admin, so setpriv clears ambient and inheritable caps.
   steamBigPicture = pkgs.writeShellScript "sunshine-steam-big-picture" ''
     exec ${lib.getExe' pkgs.util-linux "setsid"} \
       ${lib.getExe' pkgs.util-linux "setpriv"} \
@@ -38,9 +37,7 @@ in
     };
   };
 
-  # TODO: Is this still required?
-  # Sunshine needs access to /dev/uinput (virtual mouse/keyboard) and /dev/uhid (DS5 gamepad emulation).
-  # The NixOS module runs Sunshine as a user service, so these devices must be group-accessible.
+  # TODO: still required? The user service needs group access to /dev/uinput and /dev/uhid.
   services.udev.extraRules = lib.optionalString config.services.sunshine.enable ''
     KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
     KERNEL=="uhid", SUBSYSTEM=="misc", MODE="0660", GROUP="input", OPTIONS+="static_node=uhid"

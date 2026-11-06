@@ -10,9 +10,7 @@ in {
     enable = lib.mkEnableOption "8bitdo 2.4 Ultimate 2C Controller support";
   };
 
-  # Tip: When on: press and hold X/B and Home to power off. Then hold X/B to power on. The mode will be the one selected:
-  # - X -> Xinput (displays as Xbox Controller)
-  # - D -> DInput (displays as 8Bitdo Ultimate 2C Wireless)
+  # Mode: hold X (Xinput) or D (DInput) with Home to power off, then the same button to power on.
   config = lib.mkIf cfg.enable {
     hardware.xpadneo.enable = true;   # Wireless Xbox(ish) gamepads (e.g., 8bitdo)
 

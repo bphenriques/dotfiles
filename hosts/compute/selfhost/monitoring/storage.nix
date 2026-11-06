@@ -1,5 +1,4 @@
-# Storage-specific alert rules. The scrape targets live in fleet.nix and the disk rules in
-# smartctl.nix, both of which cover every host, so only the pool and the shares are left here.
+# Storage alert rules: pool and shares only (scrapes in fleet.nix, disks in smartctl.nix).
 _:
 {
   selfhost.monitoring.scopes.storage = {
@@ -21,8 +20,7 @@ _:
           annotations.summary = "{{ $labels.pool }}: {{ $value | printf \"%.0f\" }}% full";
         }
         {
-          # Quota'd datasets are invisible to the pool alert above: the pool has terabytes free while
-          # the dataset is full. Inert until a dataset is given a quota.
+          # A quota'd dataset can be full while the pool has terabytes free; inert until a quota exists.
           alert = "ZFSDatasetQuotaAlmostFull";
           expr = "zfs_dataset_quota_bytes > 0 and (zfs_dataset_used_bytes / zfs_dataset_quota_bytes) * 100 > 85";
           "for" = "15m";

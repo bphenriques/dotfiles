@@ -3,8 +3,7 @@ let
   inherit (config.fleet.ai) imageEndpoint;
   img = pkgs.containerImages.comfyui;
 
-  # Taken from the image's own `start_comfy_ui` alias. `--disable-mmap` is the load-bearing one:
-  # mmap above 64GB is pathologically slow on gfx1151. `--listen` is ours, the alias binds loopback.
+  # From the image's `start_comfy_ui` alias: `--disable-mmap` matters (mmap above 64GB crawls on gfx1151), `--listen` is ours.
   args = [
     "--listen" "0.0.0.0"
     "--port" (toString imageEndpoint.port)

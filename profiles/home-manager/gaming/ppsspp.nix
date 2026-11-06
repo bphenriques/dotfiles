@@ -1,6 +1,5 @@
 { lib, pkgs, ... }:
-# Manual setup (one-time since it is a trap doing this declaratively):
-# 1. Settings → Graphics → set Vulkan backend, 3x resolution.
+# Manual one-time setup: Settings, Graphics, Vulkan backend at 3x.
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.ppsspp ];
 }

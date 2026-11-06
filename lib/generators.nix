@@ -10,8 +10,7 @@ rec {
 
   mergeAllSystems = attrs: forAllSystems (system: mergeAttrsList (map (attrs: attrs.${system} or { }) attrs));
 
-  # Generates an attrset { "path-like-name" = <module-path>; } from .nix files.
-  # Skips default modules and internal implementation folders.
+  # Attrset { "path-like-name" = <module-path>; } from .nix files, skipping default.nix and lib/ folders.
   readModulesAttrs = dir:
     let
       rootPath = toString dir;

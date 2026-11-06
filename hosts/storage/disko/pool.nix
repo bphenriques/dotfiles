@@ -15,8 +15,7 @@ let
     content = {
       type = "gpt";
       partitions.zfs = {
-        # Short of the end on purpose: a mirror member must not be smaller than the vdev, and
-        # nominally identical drives differ by a few MB. 8 GiB verified free on both spindles.
+        # Short of the end: a mirror member must not be smaller than the vdev (8 GiB verified free on both).
         end = "-8G";
         content = {
           type = "zfs";

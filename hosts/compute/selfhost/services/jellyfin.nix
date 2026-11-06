@@ -12,8 +12,7 @@ let
 
   # Both blocks below feed `encoding`; names must be real EncodingOptions fields or Jellyfin drops them.
 
-  # Transcode scratch is RAM, not disk. The bounds below exist because of that fixed budget: unbounded,
-  # ffmpeg races ~6x ahead and never reclaims, so a long film fills the tmpfs and wedges mid-playback.
+  # Transcode scratch is a fixed RAM budget: unbounded, ffmpeg races ~6x ahead and a long film wedges the tmpfs.
   inMemoryTranscoding = {
     selfhost.apps.jellyfin.encoding = {
       EnableThrottling = true;

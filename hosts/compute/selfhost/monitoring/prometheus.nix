@@ -1,7 +1,4 @@
-# Replaces the framework's self-scrape to drop ~1200 of Prometheus' 1700 series about itself: Go
-# runtime counters and the per-target histograms a sharded deployment needs. By family rather than a
-# keep-list, which goes stale the next time one of them is worth reading. The whole job has to be
-# restated because scrape configs cannot be appended to.
+# Replaces the self-scrape to drop ~1200 of 1700 self series by family. Restated whole, since scrape configs cannot be appended to.
 { config, ... }:
 {
   selfhost.services.prometheus.integrations.monitoring.scrapeConfigs = [{

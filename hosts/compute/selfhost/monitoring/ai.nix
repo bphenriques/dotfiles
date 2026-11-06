@@ -1,12 +1,7 @@
-# ai-specific alert rules; the scrape targets live in fleet.nix. Temperature rules are per sensor
-# rather than the fleet-wide `max(node_hwmon_temp_celsius) > 80`, which takes a max across parts with
-# very different limits: NVMe crit is 89.85C against a CPU Tjmax of 100C. Measured peak under
-# inference is CPU 60C / GPU 48C, so these thresholds sit well above normal load and below the point
-# each part protects itself. Disk rules come from smartctl.nix, which is host-agnostic.
+# ai alert rules, per sensor since parts differ (NVMe crit 89.85C, CPU Tjmax 100C; measured peak 60C/48C). Scrapes in fleet.nix, disks in smartctl.nix.
 _:
 let
-  # hwmon exposes chips by PCI path, so match the human label instead: node_hwmon_sensor_label
-  # carries it and joins on (chip, sensor).
+  # hwmon names chips by PCI path, so match node_hwmon_sensor_label on (chip, sensor).
   tempOf = label: ''
     node_hwmon_temp_celsius{instance="ai"}
       * on(chip, sensor) group_left() node_hwmon_sensor_label{instance="ai", label="${label}"}

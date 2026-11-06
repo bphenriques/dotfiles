@@ -6,26 +6,20 @@ let
   hermesModel = "hermes-agent";
   comfyUrl = "http://${ai.imageEndpoint.host}:${toString ai.imageEndpoint.port}";
 
-  # kyuz0's validated workflow, with the unet swapped bf16 -> fp8mixed to halve what it loads, and
-  # scaled to 1.0 MP (ComfyUI's own template) rather than 1.6 for faster sampling.
-  # Compacted because an EnvironmentFile line cannot hold newlines.
+  # kyuz0's workflow with the unet as fp8mixed and 1.0 MP sampling, compacted because an EnvironmentFile line holds no newlines.
   imageEditWorkflow = builtins.toJSON (builtins.fromJSON (builtins.readFile ./qwen-image-edit.json));
 
-  # Only these three are safe: `image_edits` never populates steps, and the edit form has no
-  # negative_prompt field, so mapping either writes a null into the graph. Steps stays at the
-  # LoRA's 4, and output size follows the uploaded image rather than IMAGE_EDIT_SIZE.
+  # Only these three: mapping steps or negative_prompt writes a null into the graph. Size follows the uploaded image.
   imageEditNodes = builtins.toJSON [
     { type = "prompt"; node_ids = [ "68" ]; key = "prompt"; }
     { type = "image"; node_ids = [ "41" ]; key = "image"; }
     { type = "seed"; node_ids = [ "65" ]; key = "seed"; }
   ];
 
-  # Same treatment. Upstream's JSON loads the *Edit* LoRA into a text-to-image graph, which reads
-  # as a copy-paste slip, so this names the matching Qwen-Image one that menu entry 3 fetches.
+  # Upstream loads the *Edit* LoRA into text-to-image (a copy-paste slip), so this names the Qwen-Image one.
   imageWorkflow = builtins.toJSON (builtins.fromJSON (builtins.readFile ./qwen-image.json));
 
-  # negative_prompt is left out for the reason it is above: the Images playground never sends one,
-  # and a mapped node would write a null. The rest are always populated for generation.
+  # No negative_prompt: the playground never sends one, so a mapped node would write a null.
   imageNodes = builtins.toJSON [
     { type = "prompt"; node_ids = [ "6" ]; key = "text"; }
     { type = "width"; node_ids = [ "58" ]; key = "width"; }
@@ -52,8 +46,7 @@ in
 {
   selfhost.apps.open-webui.enable = true;
 
-  # The app registers the entry, the OIDC client, the login-form lockout and the telemetry opt-outs.
-  # What stays is this deployment: who may reach it, and which models and image pipelines it talks to.
+  # This deployment only: who may reach it, and which models and image pipelines it talks to.
   selfhost.services.open-webui = {
     displayName = "Chat";
     access.allowedGroups = [ cfg.groups.admin ];
@@ -74,8 +67,7 @@ in
   };
 
   services.open-webui = {
-    # The app leaves `environmentFile` free for exactly this; systemd concatenates it with the one
-    # carrying the OIDC credentials.
+    # Free for this; systemd concatenates it with the app's OIDC environment file.
     environmentFile = cfg.runtimeTemplates."open-webui-backends.env".path;
 
     environment = {
@@ -103,8 +95,7 @@ in
       ENABLE_IMAGE_GENERATION = "True";
       IMAGE_GENERATION_ENGINE = "comfyui";
       COMFYUI_BASE_URL = comfyUrl;
-      # Both reach the graph, unlike on the edit side: Qwen-Image is 1328x1328 native, and the
-      # Lightning LoRA wants 4 steps rather than the 50 this would otherwise default to.
+      # Both reach the graph here: Qwen-Image is 1328x1328 native and Lightning wants 4 steps, not 50.
       IMAGE_SIZE = "1328x1328";
       IMAGE_STEPS = "4";
 

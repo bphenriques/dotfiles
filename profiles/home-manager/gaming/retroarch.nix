@@ -22,8 +22,7 @@ let
     scale_type0 = viewport
   '';
 
-  # Gentle CRT for text-heavy DOS/Windows content: flat (no curvature), soft
-  # scanlines, shadow-mask disabled so text stays sharp (gdv-mini-ultra mangles it).
+  # Gentle CRT for text-heavy DOS content: flat, soft scanlines, no shadow mask (gdv-mini-ultra mangles text).
   dosCrtShader = ''
     #reference "${shaderPath}/crt/crt-easymode.slangp"
     parameters = "MASK_STRENGTH;SCANLINE_STRENGTH;BRIGHT_BOOST;GAMMA_OUTPUT"

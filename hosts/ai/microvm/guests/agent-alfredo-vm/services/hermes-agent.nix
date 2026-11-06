@@ -10,8 +10,7 @@ in
 {
   imports = [ inputs.hermes-agent.nixosModules.default ];
 
-  # The module deep-merges `settings` into the stateful config.yaml and never drops a key, so
-  # anything removed from Nix lingers forever. Installing it verbatim keeps the file declarative.
+  # Installed verbatim: the module deep-merges `settings` and never drops a key removed from Nix.
   services.hermes-agent.configFile =
     pkgs.writeText "hermes-config.yaml" (builtins.toJSON config.services.hermes-agent.settings);
 
@@ -48,8 +47,7 @@ in
 
         compression.enabled = true;            # auto-summarise old turns
 
-        # Left to `provider: auto` this resolves to a cloud chain (openrouter, then nous),
-        # both unauthenticated here; base_url outranks provider and keeps it on the ai host.
+        # `provider: auto` would resolve to an unauthenticated cloud chain; base_url keeps it on the ai host.
         auxiliary.compression = aiEndpoint // { model = config.fleet.ai.model; };
 
         # Fired concurrently with the answer and doubled every turn's latency.

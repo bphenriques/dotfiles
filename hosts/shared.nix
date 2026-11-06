@@ -36,8 +36,7 @@ in
     sonarr = "sonarr";
   };
 
-  # Topic is the only thing a subscriber can mute, so these divide by how urgently they want reading
-  # rather than by which subsystem produced them. Only media is readable without an account.
+  # Split by urgency, the only thing a subscriber can mute. Only media is readable without an account.
   notifyTopics = {
     admin = false;
     backup = false;

@@ -13,12 +13,10 @@ in
 {
   sops.secrets."notify/backup-token" = { };
 
-  # Publishes to compute's ntfy. No provider runs here to mint a publisher token, so it comes from this
-  # host's own secrets; the README carries the one-time mint.
+  # No provider here, so the publisher token comes from this host's secrets (one-time mint in the README).
   selfhost.notify.url = private.settings.notify.url;
 
-  # Declared here too: publishers are validated against the names their own host knows, and compute is
-  # what grants them. One vocabulary, so the two cannot drift.
+  # Declared here too, since publishers are validated against their own host's names. One vocabulary.
   selfhost.notify.topics = lib.mapAttrs (_: public: { inherit public; }) config.fleet.notifyTopics;
   selfhost.tasks.backup.integrations.notify = {
     topic = "backup";

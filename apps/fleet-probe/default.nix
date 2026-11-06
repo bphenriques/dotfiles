@@ -3,8 +3,7 @@ let
   configOf = name: self.nixosConfigurations.${name}.config;
   inherit ((configOf "compute").fleet.lan) hosts;
 
-  # Each probe asserts that `from` reaching `to`:`port` is `expect` (open or blocked). `control` must reach it
-  # first, so "blocked" can only mean `from` was filtered. Sources are ssh destinations; guests jump via ssh config.
+  # Each probe asserts `from` reaching `to`:`port` is `expect`; `control` must reach it first, so "blocked" means `from` was filtered.
   toLine = p: "${p.from} ${p.control} ${p.to} ${toString p.port} ${p.expect} ${p.label}";
 
   # Each microVM guest's egress seal, from the tables its nft rules are built from.

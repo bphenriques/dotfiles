@@ -2,9 +2,7 @@
 let
   romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
 in
-# Manual setup (one-time) with Steam closed:
-# 1. open SRM → create parser per system using a community preset and set missing options. Retroarch likely needs to set to /etc/profiles/per-user/bphenriques/bin/retroarch
-# 2. systemctl --user start sync-steam-shortcuts.service
+# Manual one-time setup with Steam closed: a parser per system from a community preset, then start sync-steam-shortcuts.
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.steam-rom-manager ];
 

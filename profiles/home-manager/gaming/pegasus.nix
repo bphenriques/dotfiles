@@ -9,9 +9,7 @@ let
 
   romsDir = "${osConfig.fleet.shares.media.root}/gaming/emulation/roms";
 
-  # Games and media come from RomM's export in each ROM directory (<dir>/metadata.pegasus.txt). Pegasus merges
-  # collections by name, so `name` must be RomM's for that platform; this host only adds the launch command
-  # (retroarch using the `core` key, or `launch` for other executables).
+  # Games come from RomM's export; `name` must match RomM's so collections merge, and this only adds the launch command.
   systems = [
     { dir = "megadrive"; name = "Sega Genesis";                        core = "genesis_plus_gx"; }
     { dir = "nes";       name = "Nintendo Entertainment System";       core = "fceumm"; }

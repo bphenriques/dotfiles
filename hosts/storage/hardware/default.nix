@@ -28,8 +28,7 @@
     fstrim.enable = true;
     smartd = {
       enable = true;
-      # Long test on the 15th at 07:00: the 1st at 03:00 collided with the monthly scrub window and
-      # the nightly backup, all on the same two spindles.
+      # The 15th at 07:00 avoids the monthly scrub and nightly backup on the same spindles.
       defaults.autodetected = "-a -s (S/../../7/02|L/../15/./07)";
     };
   };

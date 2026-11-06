@@ -1,7 +1,5 @@
 { lib, config, ... }:
-# niri resolves rule precedence positionally, so the staged options below fix each rule's
-# position; Nix merge order is not visible to contributors. Rules sharing a stage must not
-# match the same window or layer. Keep this the only writer of upstream `extraConfig`.
+# niri resolves rule precedence by position, so these staged options fix it. Rules sharing a stage must not overlap.
 let
   cfg = config.my.programs.niri;
 

@@ -72,8 +72,7 @@ in
     };
   };
 
-  # Polled: every writer (Alfredo, the Cookidoo sync, Obsidian) reaches the NAS directly, which raises no inotify events
-  # here. A run without changes stops at the fingerprint.
+  # Polled: writers reach the NAS directly, which raises no inotify events here. Unchanged runs stop at the fingerprint.
   systemd.timers.cook-recipes-build = {
     wantedBy = [ "timers.target" ];
     timerConfig.OnCalendar = "*:0/10";

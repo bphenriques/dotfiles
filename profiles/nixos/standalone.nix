@@ -8,7 +8,6 @@ in
     ./cli.nix
   ];
 
-  # Nix
   # A count floor so a quiet week cannot leave boot counting without a fallback generation.
   programs.nh.clean = {
     enable = true;
@@ -23,8 +22,7 @@ in
     };
   };
 
-  # Networking
-  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts
+  # Invert { hostname = ip; } to { ip = [hostnames]; } for /etc/hosts.
   networking.hosts = lib.foldlAttrs (acc: name: ip: acc // { ${ip} = (acc.${ip} or [ ]) ++ [ name ]; }) { } fleetHosts;
 
   # Misc

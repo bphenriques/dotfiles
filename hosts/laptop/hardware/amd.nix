@@ -1,9 +1,6 @@
 _:
 {
-  # Known issue: TSC clocksource is unstable on this laptop (Legion Slim 5 14APH8).
-  # The kernel falls back to HPET due to massive TSC warp between CPU cores (~2.8s skew).
-  # This is a Lenovo BIOS/AGESA bug affecting many AMD Ryzen laptops. See: https://forums.lenovo.com/t5/Other-Linux-Discussions/Unusable-TSC-on-P14s-and-X13-with-the-latest-LTS-kernel/m-p/5064905
-  # Do NOT force `tsc=reliable clocksource=tsc` - causes crashes and negative time deltas.
+  # TSC is unstable here (Lenovo BIOS bug, ~2.8s core skew), so the kernel uses HPET. Never force `tsc=reliable`: it crashes.
   boot.kernelParams = [
     "amdgpu.sg_display=0" # Fixes flickering or stays white (https://wiki.archlinux.org/title/AMDGPU)
   ];

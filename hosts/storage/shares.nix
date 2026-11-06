@@ -28,9 +28,7 @@ let
         };
       };
     };
-    # Immich's media location lives on compute; the two folders that actually grow are mounted from
-    # here. `immich-uploads` is Immich's `library/`, which holds only what people upload through the
-    # app: household members reach their own photos as external libraries from their personal share.
+    # The Immich library, which holds only app uploads; members reach their own photos as external libraries.
     immich-uploads = {
       root = "/srv/storage/immich/uploads";
       backup = true;
@@ -41,8 +39,7 @@ let
     };
     immich-encoded-video = {
       root = "/srv/storage/immich/encoded-video";
-      # Transcodes, plus the motion-photo halves Immich extracts here. All of it regenerates from
-      # originals that are themselves backed up, so neither snapshotted nor sent off-site.
+      # Transcodes and motion-photo halves, regenerable from backed-up originals, so no snapshots or off-site copy.
       backup = false;
       snapshots = false;
       owner = "bphenriques";
@@ -178,8 +175,7 @@ in
 
     users.groups = lib.mapAttrs' (name: share: lib.nameValuePair "storage-${name}" { inherit (share) gid; }) cfg.shares;
 
-    # Not boot-time tmpfiles: the pool mounts with `nofail`, and this must fail closed rather than create
-    # directories on the root filesystem. Parents stay traversable, since smbd drops to the connecting user.
+    # Not boot-time tmpfiles: the pool mounts `nofail`, and this must fail closed rather than write to root.
     systemd.services.storage-permissions = {
       description = "Prepare share ownership";
       wantedBy = [ "multi-user.target" ];
