@@ -30,7 +30,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     configs.shell = shell;
   };
 
-  systemd.user.services.quickshell.Unit.X-Restart-Triggers = [ "${shell}" ];
+  systemd.user.services.quickshell.Unit = {
+    PartOf = [ config.wayland.systemd.target ];
+    X-Restart-Triggers = [ "${shell}" ];
+  };
 
   my.programs.niri.layerRules.screenCapture.block = [ ''namespace="^recording-indicator$"'' ];
 }
