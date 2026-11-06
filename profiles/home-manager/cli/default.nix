@@ -59,9 +59,10 @@ in
     let
       launchctl-setenv = pkgs.writeShellApplication {
         name = "launchctl-setenv";
+        # Values are shell expressions like hm-session-vars.sh; some reference themselves while unset.
+        bashOptions = [ "errexit" "pipefail" ];
         text = lib.concatStringsSep "\n" (lib.mapAttrsToList
-          (name: val:
-            "/bin/launchctl setenv ${lib.escapeShellArg name} ${lib.escapeShellArg (toString val)}")
+          (name: val: "/bin/launchctl setenv ${name} \"${toString val}\"")
           config.home.sessionVariables);
       };
     in

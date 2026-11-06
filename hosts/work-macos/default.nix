@@ -18,8 +18,6 @@ in
     ];
 
     brews = [
-      # Coding
-
       # Infrastructure / DevOps
       "scalr"
       "helm"
