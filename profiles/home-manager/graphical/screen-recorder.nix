@@ -6,7 +6,6 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   package = self.packages.screen-recorder.override {
-    recordIcon = mkIcon "screen-recorder-record-icon" "󰑋";
     informationIcon = mkIcon "screen-recorder-information-icon" "";
     errorIcon = mkIcon "screen-recorder-error-icon" "";
     audioDevice = "recording.monitor";  # desktop + mic mix, profiles/nixos/graphical/audio.nix

@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  recordIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/actions/media-record-symbolic.svg",
   informationIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-information-symbolic.svg",
   errorIcon ? "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/symbolic/status/dialog-error-symbolic.svg",
   audioDevice ? "@DEFAULT_MONITOR@",
@@ -19,7 +18,6 @@ pkgs.writeShellApplication {
     pkgs.xdg-utils
   ];
   text = ''
-    RECORD_ICON="${recordIcon}"
     INFORMATION_ICON="${informationIcon}"
     ERROR_ICON="${errorIcon}"
     AUDIO_DEVICE="${audioDevice}"

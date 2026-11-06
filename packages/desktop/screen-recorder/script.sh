@@ -2,13 +2,9 @@
 
 _notify() { notify-send --category "screen-recorder" --hint string:x-canonical-private-synchronous:screen-recorder "$@"; }
 
-is_recording() { pidof wl-screenrec >/dev/null; }
+STATE_FILE="${XDG_RUNTIME_DIR:?}/screen-recorder"
 
-watch_stop() {
-  local action
-  action="$(_notify --wait --expire-time 0 --action "stop=Stop" --icon "$RECORD_ICON" "Screen Recorder" "Recording..." || true)"
-  if [[ $action == "stop" ]]; then pkill --signal INT --exact wl-screenrec || true; fi
-}
+is_recording() { pidof wl-screenrec >/dev/null; }
 
 notify_saved() {
   local destination="$1" thumb action
@@ -29,10 +25,12 @@ record() {
   shift 1
   wl-screenrec --filename="$destination" --audio --audio-device "$AUDIO_DEVICE" "$@" &
   local recorder=$!
-  watch_stop &
+  date +%s >"$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+  trap 'rm -f "$STATE_FILE"' EXIT
 
   local status=0
   wait "$recorder" || status=$?
+  rm -f "$STATE_FILE"
 
   if [[ $status -eq 0 && -f $destination ]]; then
     notify_saved "$destination"

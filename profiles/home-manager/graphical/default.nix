@@ -7,7 +7,8 @@
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
-    ./screen-recorder.nix   # Screen recording menu
+    ./screen-recorder.nix   # Screen recording
+    ./quickshell            # Desktop shell (recording indicator)
     ./awww.nix              # Wallpaper daemon
     ./xdg-userdirs.nix      # XDG user directories, screenshots, recordings
     ./gtk.nix               # Setup theming for some set of apps
