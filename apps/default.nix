@@ -22,6 +22,6 @@ let
       selfPkgs = self.packages.${system};
     in pkgsToApps {
       nixos-install = pkgs.callPackage ./nixos-install { inherit selfPkgs; };
-      seal-test = pkgs.callPackage ./seal-test { inherit self; };
+      fleet-probe = pkgs.callPackage ./fleet-probe { inherit self; };
     });
 in mergeAllSystems [ crossPlatform linux ]

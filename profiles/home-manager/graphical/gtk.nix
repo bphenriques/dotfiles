@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   gtk = {
     enable = true;
     gtk3 = {

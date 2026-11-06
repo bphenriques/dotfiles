@@ -25,7 +25,7 @@ in
     selfhost = {
       services.seerr = {
         displayName = "Seerr";
-        meta.homepage = "https://github.com/fallenbagel/jellyseerr";
+        meta.homepage = "https://github.com/seerr-team/seerr";
         meta.description = "TV / Movie Finder";
         meta.category = "media";
         port = 9099;

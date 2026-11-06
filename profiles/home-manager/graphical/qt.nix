@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   qt.enable = true;
   stylix.targets.qt = {
     enable = true;

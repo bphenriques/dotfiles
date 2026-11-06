@@ -1,8 +1,8 @@
 { lib, pkgs, ... }:
-lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  home.packages = [ pkgs.jetbrains.idea ];
+{
+  home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.jetbrains.idea ];  # macOS: Homebrew cask
 
-  my.programs.niri.windowRules.byApp = [
+  my.programs.niri.windowRules.byApp = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [
     ''
       window-rule {
         match app-id="jetbrains-idea"

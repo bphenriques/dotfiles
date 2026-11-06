@@ -11,7 +11,7 @@ let
     '';
   };
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.awww.enable = true;
   home.packages = [
     self.packages.awww-util

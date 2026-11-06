@@ -103,6 +103,12 @@ in
     };
   };
 
+  # Thread border routing between the dongle's network and the LAN.
+  networking.firewall.extraForwardRules = ''
+    iifname "${config.services.openthread-border-router.interfaceName}" accept
+    oifname "${config.services.openthread-border-router.interfaceName}" accept
+  '';
+
   # Gate OTBR on the dongle being plugged: the .device unit starts it on hotplug
   # (wantedBy), bindsTo stops it on unplug, so it never restart-loops when absent.
   systemd.services.otbr-agent = {

@@ -86,7 +86,8 @@ Pocket-ID account ends access; the Immich data outlives it and is removed in the
 
 A device's tier is its address: `10.100.0.0/28` reaches the LAN, every other address in the tunnel
 reaches Traefik on 80 and 443 and nothing else. The firewall matches the prefix, so an address is
-bounded by where it sits rather than by any list being correct.
+bounded by where it sits rather than by any list being correct. Compute forwards only for those
+full-access devices, containers and Thread (`firewall.nix`); anything else routed through it is dropped.
 
 Peers are runtime state in `/var/lib/wireguard/peers.json`, applied live.
 
@@ -174,10 +175,6 @@ On the new device:
 
 `couchdb.<domain>` points at a LAN address, so the device needs the LAN or WireGuard. Phones sync
 only while Obsidian is open: background replication is desktop-only.
-
-### Syncthing
-
-Accept device connections: approve pending devices on first sync
 
 ### Radicale
 

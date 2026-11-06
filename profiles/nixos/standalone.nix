@@ -9,12 +9,13 @@ in
   ];
 
   # Nix
+  # A count floor so a quiet week cannot leave boot counting without a fallback generation.
+  programs.nh.clean = {
+    enable = true;
+    dates = "weekly";
+    extraArgs = "--keep 5 --keep-since 7d --no-direnv";
+  };
   nix = {
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
     settings = {
       min-free = 10 * 1024 * 1024 * 1024;  # Start GC if we are under 10 GiB free
       max-free = 50 * 1024 * 1024 * 1024;  # ...until 50 GiB is free

@@ -1,5 +1,5 @@
 { lib, pkgs, osConfig, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.mpd = {
     enable = true;
 

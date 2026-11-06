@@ -42,7 +42,6 @@ in
       enable_cors = true;
       max_http_request_size = 104857600; # 100MB, headroom over the 50MB document cap below
     };
-    httpd.enable_cors = true;
     couchdb.max_document_size = 50000000; # an Obsidian attachment, not a note
     cors = {
       origins = lib.concatStringsSep ", " cors.origins;

@@ -1,5 +1,5 @@
 { lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.kdePackages.kdenlive ];
 
   my.programs.niri.windowRules.byApp = [

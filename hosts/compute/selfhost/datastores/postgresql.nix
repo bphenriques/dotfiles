@@ -1,14 +1,9 @@
-# Services: Miniflux, Immich
-{ lib, pkgs, config, ... }:
+# Services: Miniflux, Immich, RomM
+{ pkgs, config, ... }:
 {
-  assertions = [{
-    assertion = lib.versionOlder config.services.postgresql.package.version "17";
-    message = "PostgreSQL must be < 17 (Immich + pgvecto.rs constraint). Got: ${config.services.postgresql.package.version}";
-  }];
-
   services.postgresql = {
     enable = true;
-    package = pkgs.postgresql_16; # Immich + pgvecto.rs requires <= 16
+    package = pkgs.postgresql_18;
   };
 
   # After an unclean shutdown the stale postmaster.pid can name a PID a boot-time transient

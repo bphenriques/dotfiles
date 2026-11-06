@@ -5,6 +5,7 @@
     ./hardware
     ./disko.nix
     ./users.nix
+    ./firewall.nix
     ../../profiles/nixos/headless.nix
     ../../profiles/nixos/ups-client.nix
     ./selfhost
@@ -24,13 +25,6 @@
   sops = {
     defaultSopsFile = private.sopsSecretsFile;
     age.keyFile = "/var/lib/sops-nix/system-keys.txt";
-  };
-
-  # Networking
-  services.openssh.openFirewall = false; # Firewall is managed manually to ensure SSH is restricted (e.g., podman cant access)
-  networking.firewall.interfaces = {
-    bond0.allowedTCPPorts = [ 22 ];
-    wg0.allowedTCPPorts = [ 22 ];   # the emergency path if the LAN side is wedged
   };
 
   system.stateVersion = "25.11"; # The release version of the first install of this system!

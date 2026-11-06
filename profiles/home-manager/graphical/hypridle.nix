@@ -5,7 +5,7 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
   notify = { msg, icon }: ''${lib.getExe pkgs.libnotify} -i "${icon}" --category "hypridle-notify" -h string:x-canonical-private-synchronous:hypridle-notify --transient "${msg}"'';
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.hypridle = {
     enable = true;
     settings = {

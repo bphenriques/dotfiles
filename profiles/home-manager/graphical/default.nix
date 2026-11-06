@@ -21,37 +21,39 @@
     ./qbittorrent.nix       # Torrent client
   ];
 
-  xdg.mimeApps.enable = true;   # Default apps and directories
+  config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    xdg.mimeApps.enable = true;   # Default apps and directories
 
-  home.packages = [
-    pkgs.xdg-user-dirs  # Relevant for desktop
-    pkgs.gparted        # GUI partition editor
-  ];
+    home.packages = [
+      pkgs.xdg-user-dirs  # Relevant for desktop
+      pkgs.gparted        # GUI partition editor
+    ];
 
-  my.programs = {
-    screenshot.enable = true;
-    session.enable = true;
-    volume-osd.enable = true;
-    brightness-osd.enable = true;
-    niri-keyboard-layout.enable = true;
-    file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
-    status-glance.enable = true;
-  };
-
-  programs.satty = {
-    enable = true;
-    settings.general = {
-      fullscreen = true;
-      early-exit = true;
-      disable-notifications = false;
-      initial-tool = "brush";
-      copy-command = "wl-copy";
-      save-after-copy = false;
-      output-filename = with config.my.programs.screenshot; "${directory}/${format}";
+    my.programs = {
+      screenshot.enable = true;
+      session.enable = true;
+      volume-osd.enable = true;
+      brightness-osd.enable = true;
+      niri-keyboard-layout.enable = true;
+      file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
+      status-glance.enable = true;
     };
-  };
 
-  my.services = {
-    upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
+    programs.satty = {
+      enable = true;
+      settings.general = {
+        fullscreen = true;
+        early-exit = true;
+        disable-notifications = false;
+        initial-tool = "brush";
+        copy-command = "wl-copy";
+        save-after-copy = false;
+        output-filename = with config.my.programs.screenshot; "${directory}/${format}";
+      };
+    };
+
+    my.services = {
+      upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
+    };
   };
 }

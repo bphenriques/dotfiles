@@ -18,7 +18,7 @@ let
 
   inherit (config.services.mpd.network) listenAddress port;
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ pkgs.mpc package ];
 
   xdg.configFile."mpc-plus/local.json".text = builtins.toJSON { host = listenAddress; inherit port; };

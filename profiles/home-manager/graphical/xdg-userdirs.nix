@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   xdg.userDirs = {
     enable = true;
     createDirectories = false;  # Created separately via tmpfiles
@@ -16,7 +16,7 @@
   };
 
   # https://www.mankier.com/5/tmpfiles.d
-  systemd.user.tmpfiles.rules = [
+  systemd.user.tmpfiles.rules = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     "d ${config.xdg.userDirs.desktop}     - - - -"
     "d ${config.xdg.userDirs.pictures}    - - - -"
     "d ${config.xdg.userDirs.music}       - - - -"

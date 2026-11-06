@@ -15,7 +15,7 @@ let
     text = ''BEMOJI_PICKER_CMD="${dmenu}" ${lib.getExe pkgs.bemoji} --noline --type --clip'';
   };
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.niri = {
     enable = true;
 

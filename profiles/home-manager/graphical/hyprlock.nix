@@ -11,7 +11,7 @@ let
     text = ''pidof hyprlock || { niri msg action do-screen-transition --delay-ms 750 && hyprlock; }'';
   };
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.session.exec.lock = lib.getExe lockPackage;
   programs.hyprlock = {
     enable = true;

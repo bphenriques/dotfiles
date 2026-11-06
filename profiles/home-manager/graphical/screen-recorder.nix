@@ -27,7 +27,7 @@ let
     extraArgs = ''--minimal-lines --hide-prompt'';
   };
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [
     pkgs.wl-screenrec
     package

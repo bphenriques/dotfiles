@@ -76,9 +76,27 @@ to manage those.
 neither of which the registry serves. `ollama-configure` downloads the files and runs `ollama create` when
 the model is missing; to apply an edit to its Modelfile, `ollama rm` it and restart the unit.
 
-Loading it evicts the pinned `ai.model`: Ollama predicts 89.7 GiB (61 GiB of GPU plus the 27.5 GiB n-gram table, mapped in system RAM) and evicts when a
-load exceeds 80% of free memory. `ai.model` reloads on its next request, but with the default 10m keep-alive
-instead of the pin, so it can cold-load after idle periods until `ollama-configure` runs again.
+It and `ai.model` evict each other, so the assistant works while coding, just slower. `ai.model` reloads
+with the default 10m keep-alive instead of the pin until `ollama-configure` runs again.
+
+## Memory
+
+The iGPU's pool (`ttm.pages_limit`) is carved from the same 123.5 GiB of RAM, and Ollama checks fit
+against the pool only. The cap must leave room for what lives outside it, mostly Flash-Next's 28 GiB
+n-gram table:
+
+| Mode                    | iGPU         | RAM outside it |
+| ----------------------- | ------------ | -------------- |
+| Coding                  | 67 GiB       | 28 + ~5 GiB    |
+| Assistant plus ComfyUI  | 22 + 54 GiB  | ~5 GiB         |
+
+86 GiB fits either mode, and Ollama swaps between `ai.model` and Flash-Next within it. Raising it lets
+Ollama load both (89 GiB plus the table), which overcommits RAM and lets the kernel OOM killer take the
+agent VM and user managers (2026-11-05).
+
+Do not generate images while coding. ComfyUI also stages ~24 GiB in RAM outside the pool while loading,
+and nothing coordinates it with Ollama: an overlap OOM-kills Flash-Next's runner, or panics and reboots the
+host when the killed GPU processes do not release memory (2026-11-06).
 
 ## Monitoring
 

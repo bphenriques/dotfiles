@@ -53,6 +53,12 @@ in
       zstyle :prompt:pure:prompt:success color green
       prompt_newline=' '   # Single line; pure keeps a non-empty value.
       autoload -Uz prompt_pure_setup && prompt_pure_setup
+      # Pure prints a newline before every prompt; undo it for the first one.
+      __pure_skip_first_newline() {
+        print -n '\e[A'
+        add-zsh-hook -d precmd __pure_skip_first_newline
+      }
+      add-zsh-hook precmd __pure_skip_first_newline
 
       zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
       zstyle ':completion:*' menu no

@@ -1,8 +1,6 @@
-{ config, pkgs, lib, ... }:
+{ config, lib, ... }:
 let
-  appDataDir = "/var/lib/recyclarr";
-  radarrCfg = config.selfhost.services.radarr;
-  sonarrCfg = config.selfhost.services.sonarr;
+  inherit (config.selfhost) apps services;
 
   # Build v8 guide-backed quality profiles from media settings
   mkQualityProfiles = mediaCfg:
@@ -12,65 +10,37 @@ let
       reset_unmatched_scores.enabled = true;
     }) (lib.attrValues mediaCfg.profiles);
 
-  mkServiceConfig = mediaCfg: serviceCfg: {
+  mkServiceConfig = mediaCfg: serviceCfg: apiKeyFile: {
     base_url = serviceCfg.url;
+    api_key._secret = apiKeyFile;
     quality_definition.type = mediaCfg.qualityDefinitionType;
     quality_profiles = mkQualityProfiles mediaCfg;
   };
-
-  recyclarrConfig = {
-    radarr.movies = mkServiceConfig config.my.media.radarr radarrCfg;
-    sonarr.tv = mkServiceConfig config.my.media.sonarr sonarrCfg;
-  };
-
-  yamlFormat = pkgs.formats.yaml { };
-  configFile = yamlFormat.generate "recyclarr.yml" recyclarrConfig;
 in
 {
-  # Override path: recyclarr reads from its config dir, not the default /run/homelab-secrets/templates/.
-  selfhost.runtimeTemplates."recyclarr-secrets.yml" = {
-    content = ''
-      movies_api_key: ${config.selfhost.runtimePlaceholder.radarr-api-key}
-      tv_api_key: ${config.selfhost.runtimePlaceholder.sonarr-api-key}
-    '';
-    path = "${appDataDir}/secrets.yml";
-    restartUnits = [ "recyclarr.service" ];
+  services.recyclarr = {
+    enable = true;
+    schedule = "*-*-* 02:00:00"; # before the 03:00 backup, so the arr-configure restarts do not race it
+    configuration = {
+      radarr.movies = mkServiceConfig config.my.media.radarr services.radarr apps.radarr.apiKeyFile;
+      sonarr.tv = mkServiceConfig config.my.media.sonarr services.sonarr apps.sonarr.apiKeyFile;
+    };
   };
 
-  # Runs once at boot (to apply config on deploy) and daily at 2 AM via timer
+  selfhost.runtimeSecrets = {
+    radarr-api-key.restartUnits = [ "recyclarr.service" ];
+    sonarr-api-key.restartUnits = [ "recyclarr.service" ];
+  };
+
+  # Also on deploy, after the configure units: they wait for the APIs, the arr units are Type=simple.
   systemd.services.recyclarr = {
-    description = "Recyclarr sync";
     wantedBy = [ "multi-user.target" ];
-    # The configure units finish only once the API answers; the arr units themselves are Type=simple.
     after = [ "radarr-configure.service" "sonarr-configure.service" ];
     wants = [ "radarr-configure.service" "sonarr-configure.service" ];
     serviceConfig = {
-      Type = "oneshot";
-      StateDirectory = "recyclarr";
-      CacheDirectory = "recyclarr";
-      ExecStart = "${pkgs.recyclarr}/bin/recyclarr sync --config ${configFile}";
-      ExecStartPost = "+${pkgs.systemd}/bin/systemctl restart --no-block radarr-configure sonarr-configure";
-
-      # Hardening
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      PrivateTmp = true;
-      NoNewPrivileges = true;
-      ProtectKernelTunables = true;
-      ProtectControlGroups = true;
-      RestrictSUIDSGID = true;
-    };
-    environment = {
-      RECYCLARR_CONFIG_DIR = appDataDir;
-    };
-  };
-
-  systemd.timers.recyclarr = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 02:00:00"; # Run before backup (3 AM) to avoid racing with arr-configure restarts
-      RandomizedDelaySec = "1h";
-      Persistent = true;
+      # The configure units seed root folders with profiles that only exist once recyclarr has run.
+      ExecStartPost = "+${config.systemd.package}/bin/systemctl restart --no-block radarr-configure sonarr-configure";
+      StateDirectoryMode = "0700";   # upstream renders the API keys into a world-readable config.yml
     };
   };
 }

@@ -72,7 +72,7 @@ in
     };
   };
 
-  # Polled: every writer (Alfred, the Cookidoo sync, Obsidian) reaches the NAS directly, which raises no inotify events
+  # Polled: every writer (Alfredo, the Cookidoo sync, Obsidian) reaches the NAS directly, which raises no inotify events
   # here. A run without changes stops at the fingerprint.
   systemd.timers.cook-recipes-build = {
     wantedBy = [ "timers.target" ];

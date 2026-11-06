@@ -5,7 +5,7 @@ let
 
   backgroundOpacity = "F2"; # 95%
 in
-{
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.dunst = {
     enable = true;
     iconTheme = {
