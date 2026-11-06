@@ -54,6 +54,14 @@ Variants {
             ? "Stop"
             : Math.floor(Recorder.elapsed / 60) + ":" + String(Recorder.elapsed % 60).padStart(2, "0")
         }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          font.family: Theme.monospaceFont
+          color: Recorder.micLive ? Theme.accent : Theme.foreground
+          opacity: Recorder.micLive ? 1 : 0.5
+          text: String.fromCodePoint(Recorder.micLive ? 0xF036C : 0xF036D)  // nf-md-microphone / microphone_off
+        }
       }
 
       MouseArea {
