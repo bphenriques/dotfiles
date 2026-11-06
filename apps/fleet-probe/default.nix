@@ -3,9 +3,9 @@ let
   configOf = name: self.nixosConfigurations.${name}.config;
   inherit ((configOf "compute").fleet.lan) hosts;
 
-  # "<from> <control> <host> <port> <open|blocked> <label>": <control> must reach the target first, so
-  # "blocked" can only mean <from> was filtered. Sources are ssh destinations; guests jump via ssh config.
-  probe = from: control: host: port: want: label: "${from} ${control} ${host} ${toString port} ${want} ${label}";
+  # Each probe asserts that `from` reaching `to`:`port` is `expect` (open or blocked). `control` must reach it
+  # first, so "blocked" can only mean `from` was filtered. Sources are ssh destinations; guests jump via ssh config.
+  toLine = p: "${p.from} ${p.control} ${p.to} ${toString p.port} ${p.expect} ${p.label}";
 
   # Each microVM guest's egress seal, from the tables its nft rules are built from.
   guestProbes = vmHost:
@@ -15,21 +15,23 @@ let
       inherit (config.my.microvm.host) bridge guests;
     in
     lib.concatLists (lib.mapAttrsToList (name: g:
-      let guest = probe name vmHost; in
-      [
-        (guest config.fleet.lan.gateway 80 "blocked" "LAN")
-        (guest bridge.gateway 22 "blocked" "host")
-        (guest "1.1.1.1" 443 "open" "internet")
-      ]
-      ++ lib.concatMap (p: [
-        (guest bridge.gateway p "open" "host port")
-        (guest hosts.${vmHost} p "blocked" "host port on LAN")
-      ]) g.egress.allowHostPorts
-      ++ lib.concatMap (e:
-        let target = hosts.${e.host} or e.host; label = hostNameOf.${target} or e.host; in
-        map (p: guest target p "open" label) e.ports
-        ++ [ (guest target 22 "blocked" "${label}, other ports") ]
-      ) g.egress.allowLan
+      let guest = p: { from = name; control = vmHost; } // p; in
+      map guest (
+        [
+          { to = config.fleet.lan.gateway; port = 80; expect = "blocked"; label = "LAN"; }
+          { to = bridge.gateway; port = 22; expect = "blocked"; label = "host"; }
+          { to = "1.1.1.1"; port = 443; expect = "open"; label = "internet"; }
+        ]
+        ++ lib.concatMap (port: [
+          { to = bridge.gateway; inherit port; expect = "open"; label = "host port"; }
+          { to = hosts.${vmHost}; inherit port; expect = "blocked"; label = "host port on LAN"; }
+        ]) g.egress.allowHostPorts
+        ++ lib.concatMap (e:
+          let to = hosts.${e.host} or e.host; label = hostNameOf.${to} or e.host; in
+          map (port: { inherit to port label; expect = "open"; }) e.ports
+          ++ [ { inherit to; port = 22; expect = "blocked"; label = "${label}, other ports"; } ]
+        ) g.egress.allowLan
+      )
     ) guests);
 
   # Host firewalls seen from a LAN peer they do not admit, with compute as the control.
@@ -40,18 +42,18 @@ let
       compute = configOf "compute";
     in
     [
-      (probe "storage" "compute" hosts.compute 443 "open" "compute: Traefik")
-      (probe "storage" "compute" hosts.compute compute.selfhost.apps.gitea.ssh.port "open" "compute: Gitea SSH")
-      (probe "storage" "compute" hosts.compute compute.selfhost.services.jellyfin.port "blocked" "compute: Jellyfin only via Traefik")
-      (probe "storage" "compute" hosts.ai ai.endpoint.port "blocked" "ai: inference endpoint")
-      (probe "storage" "compute" hosts.ai ai.imageEndpoint.port "blocked" "ai: ComfyUI")
-      (probe "ai" "compute" hosts.storage storageExporters.node.port "blocked" "storage: node exporter")
+      { from = "storage"; control = "compute"; to = hosts.compute; port = 443; expect = "open"; label = "compute: Traefik"; }
+      { from = "storage"; control = "compute"; to = hosts.compute; port = compute.selfhost.apps.gitea.ssh.port; expect = "open"; label = "compute: Gitea SSH"; }
+      { from = "storage"; control = "compute"; to = hosts.compute; port = compute.selfhost.services.jellyfin.port; expect = "blocked"; label = "compute: Jellyfin only via Traefik"; }
+      { from = "storage"; control = "compute"; to = hosts.ai; port = ai.endpoint.port; expect = "blocked"; label = "ai: inference endpoint"; }
+      { from = "storage"; control = "compute"; to = hosts.ai; port = ai.imageEndpoint.port; expect = "blocked"; label = "ai: ComfyUI"; }
+      { from = "ai"; control = "compute"; to = hosts.storage; port = storageExporters.node.port; expect = "blocked"; label = "storage: node exporter"; }
     ];
 in
 pkgs.writeShellApplication {
   name = "fleet-probe";
   runtimeInputs = [ pkgs.openssh ];
-  runtimeEnv.PROBES = lib.concatStringsSep "\n" (
+  runtimeEnv.PROBES = lib.concatMapStringsSep "\n" toLine (
     hostProbes ++ lib.concatMap guestProbes (lib.attrNames (import ../../hosts/microvms.nix))
   );
   text = lib.fileContents ./script.sh;
