@@ -67,6 +67,18 @@ in
         default = [];
       };
     };
+
+    keyboardLayouts = lib.mkOption {
+      description = "Keyboard layouts in switching order, with the short label the Quickshell menu shows";
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          layout = lib.mkOption { type = lib.types.str; };
+          variant = lib.mkOption { type = lib.types.str; default = ""; };
+          label = lib.mkOption { type = lib.types.str; };
+        };
+      });
+      default = [];
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -78,6 +90,10 @@ in
       portalPackage = null;
 
       settings._children = startupNodes;
+      settings.input.keyboard.xkb = lib.mkIf (cfg.keyboardLayouts != []) {
+        layout = lib.concatMapStringsSep "," (l: l.layout) cfg.keyboardLayouts;
+        variant = lib.concatMapStringsSep "," (l: l.variant) cfg.keyboardLayouts;
+      };
 
       extraConfig = ''
         // 1. Base defaults

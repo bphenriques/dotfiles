@@ -29,8 +29,8 @@ let
       awww-util = pkgs.callPackage ./desktop/awww-util { };
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
-      status-glance = pkgs.callPackage ./desktop/status-glance { inherit upower-notify volume-osd niri-keyboard-layout; };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
+      desktop-shell = pkgs.callPackage ./desktop/desktop-shell { };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }
   );

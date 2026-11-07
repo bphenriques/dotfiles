@@ -73,6 +73,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         msg_urgency = "critical";
         fullscreen = "show";
       };
+      fullscreen_show_volume = { category = "volume-osd*"; fullscreen = "show"; };
+      fullscreen_show_brightness = { category = "brightness-osd"; fullscreen = "show"; };
+      fullscreen_show_keyboard = { category = "keyboard-input"; fullscreen = "show"; };
 
     };
   };
@@ -82,6 +85,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
       "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
       "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
+      "Mod+D"        = ''spawn-sh "${dunstctl} set-paused toggle"'';
     };
     layerRules = {
       screenCapture.block = [ ''namespace="^notifications$"'' ];

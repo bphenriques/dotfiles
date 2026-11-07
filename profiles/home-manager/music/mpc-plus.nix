@@ -2,14 +2,20 @@
 let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
+  glyphs = {
+    music = "";
+    shuffle = "";
+    repeat = "󰑖";
+  };
+
   package = self.packages.mpc-plus.override {
-    musicIcon = mkIcon "mpc-plus-track" "";
+    musicIcon = mkIcon "mpc-plus-track" glyphs.music;
     artistIcon = mkIcon "mpc-plus-artist" "󰠃";
     albumIcon = mkIcon "mpc-plus-album" "󰀥";
     stoppedIcon = mkIcon "mpc-plus-stopped" "";
-    shuffleIcon = mkIcon "mpc-plus-shuffle" "";
+    shuffleIcon = mkIcon "mpc-plus-shuffle" glyphs.shuffle;
     noShuffleIcon = mkIcon "mpc-plus-no-shuffle" "󰒞";
-    repeatSongIcon = mkIcon "mpc-plus-repeat-song" "󰑖";
+    repeatSongIcon = mkIcon "mpc-plus-repeat-song" glyphs.repeat;
     noRepeatIcon = mkIcon "mpc-plus-no-repeat" "󰑗";
     deviceIcon = mkIcon "mpc-plus-device" "󰓃";
     errorIcon = mkIcon "mpc-plus-error" "";
@@ -40,16 +46,18 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
-  programs.wlr-which-key.settings.menu = lib.mkOrder 100 [
-    { key = "m"; desc = "Music"; submenu = [
-      { key = "p";            desc = "Play/Pause";        cmd = "${mpc-plus} play-pause";           keep_open = true; }
+  my.programs.desktop-shell.settings.glyphs.music = glyphs;
+
+  my.programs.desktop-shell.menu.entries = lib.mkOrder 100 [
+    { key = "m"; desc = "Music"; status = "music"; submenu = [
+      { key = "p";            desc = "Play/Pause";        cmd = "${mpc-plus} play-pause";           keepOpen = true; }
       { key = "s";            desc = "Stop";              cmd = "${mpc-plus} stop"; }
-      { key = ["Left" "h"];   desc = "Previous";          cmd = "${mpc-plus} previous";             keep_open = true; }
-      { key = ["Right" "l"];  desc = "Next";              cmd = "${mpc-plus} next";                 keep_open = true; }
-      { key = ["Up" "k"];     desc = "Increase volume";   cmd = "${mpc-plus} volume-increase";      keep_open = true; }
-      { key = ["Down" "j"];   desc = "Reduce volume";     cmd = "${mpc-plus} volume-decrease";      keep_open = true; }
-      { key = "z";            desc = "Toggle repeat";     cmd = "${mpc-plus} toggle-repeat";        keep_open = true; }
-      { key = "x";            desc = "Toggle random";     cmd = "${mpc-plus} toggle-random";        keep_open = true; }
+      { key = "Left";         desc = "Previous track";    cmd = "${mpc-plus} previous";             keepOpen = true; }
+      { key = "Right";        desc = "Next track";        cmd = "${mpc-plus} next";                 keepOpen = true; }
+      { key = "Up";           desc = "Increase volume";   cmd = "${mpc-plus} volume-increase";      keepOpen = true; }
+      { key = "Down";         desc = "Reduce volume";     cmd = "${mpc-plus} volume-decrease";      keepOpen = true; }
+      { key = "z";            desc = "Repeat";            cmd = "${mpc-plus} toggle-repeat";        keepOpen = true; }
+      { key = "x";            desc = "Random";            cmd = "${mpc-plus} toggle-random";        keepOpen = true; }
       { key = "space";        desc = "Play...";           cmd = "${mpc-plus} dmenu-file-exec play"; }
       { key = "r";            desc = "Stream...";         cmd = "${mpc-plus} dmenu-radio-stream"; }
       { key = "a";            desc = "Shuffle library";   cmd = "${mpc-plus} play-shuffled"; }

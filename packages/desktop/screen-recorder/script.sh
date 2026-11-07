@@ -25,12 +25,12 @@ record() {
   shift 1
   wl-screenrec --filename="$destination" --audio --audio-device "$AUDIO_DEVICE" "$@" &
   local recorder=$!
-  date +%s >"$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
-  trap 'rm -f "$STATE_FILE"' EXIT
+  date +%s >"$STATE_FILE" # in place: replacing the file would drop the Quickshell watch
+  trap ': >"$STATE_FILE"' EXIT
 
   local status=0
   wait "$recorder" || status=$?
-  rm -f "$STATE_FILE"
+  : >"$STATE_FILE"
 
   if [[ $status -eq 0 && -f $destination ]]; then
     notify_saved "$destination"

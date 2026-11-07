@@ -2,26 +2,25 @@
 let
   wallpapers = "${self.packages.wallpapers}/share/wallpapers";
 
-  browseWallpapers = pkgs.writeShellApplication {
-    name = "browse-wallpapers";
-    runtimeInputs = [ config.programs.imv.package self.packages.awww-util ];
-    text = ''
-      # shellcheck disable=SC2016
-      imv -r -c 'bind <Return> exec awww-util one "$imv_current_file"' ${wallpapers}
-    '';
-  };
+  awww-util = lib.getExe self.packages.awww-util;
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.awww.enable = true;
-  home.packages = [
-    self.packages.awww-util
-    (pkgs.makeDesktopItem {
-      name = "browse-wallpapers";
-      desktopName = "Browse Wallpapers";
-      icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "wallpaper" "󰸉";
-      exec = lib.getExe browseWallpapers;
-    })
-  ];
+  home.packages = [ self.packages.awww-util ];
+
+  # The wallpaper state file must exist up front for the desktop shell to watch it.
+  systemd.user.tmpfiles.rules = [ "f %t/wallpaper 0600 - - -" ];
+
+  my.programs.desktop-shell = {
+    settings.glyphs.wallpaper = "󰸉";
+    menu.entries = lib.mkOrder 1600 [
+      { key = "w"; desc = "Wallpaper"; status = "wallpaper"; submenu = [
+        { key = [ "Left" "Up" ];    desc = "Previous wallpaper"; cmd = "${awww-util} prev ${wallpapers}";   keepOpen = true; }
+        { key = [ "Right" "Down" ]; desc = "Next wallpaper";     cmd = "${awww-util} next ${wallpapers}";   keepOpen = true; }
+        { key = "r";                desc = "Random";             cmd = "${awww-util} random ${wallpapers}"; keepOpen = true; }
+      ]; }
+    ];
+  };
 
   systemd.user.services.set-wallpaper = {
     Unit = {
@@ -35,7 +34,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       # awww-daemon signals no readiness, so the first attempt can beat its socket.
       Restart = "on-failure";
       RestartSec = 1;
-      ExecStart = lib.escapeShellArgs [ "${lib.getExe self.packages.awww-util}" "random" wallpapers ];
+      ExecStart = lib.escapeShellArgs [ awww-util "random" wallpapers ];
     };
   };
 

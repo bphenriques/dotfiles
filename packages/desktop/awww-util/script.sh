@@ -1,8 +1,34 @@
 #shellcheck shell=bash
-set_wallpaper() { test -f "$1" && awww img --transition-type none "$1"; }
+
+# Contract with the desktop shell: the state file holds the wallpaper last set.
+STATE_FILE="${XDG_RUNTIME_DIR:?}/wallpaper"
+
+set_wallpaper() {
+  test -f "$1" || return 0
+  awww img --transition-type none "$1"
+  printf '%s\n' "$1" >"$STATE_FILE" # in place: replacing the file would drop the desktop shell's watch
+}
+
 random_file() { find "$1" -type f | shuf -n 1; }
 
+# The file after the current one (before it when $2 is -1), wrapping around.
+step_file() {
+  local current count index=-1
+  local -a files
+  current="$(cat "$STATE_FILE" 2>/dev/null || true)"
+  mapfile -t files < <(find "$1" -type f | sort)
+  count=${#files[@]}
+  [ "$count" -gt 0 ] || return 0
+  for i in "${!files[@]}"; do
+    [ "${files[$i]}" = "$current" ] && index=$i
+  done
+  [ "$index" -ge 0 ] || index=$((${2} > 0 ? -1 : 0))
+  printf '%s' "${files[$(((index + $2 + count) % count))]}"
+}
+
 case "${1:-}" in
-  random) shift 1 && set_wallpaper "$(random_file "$1")" ;;
-  one) shift 1 && set_wallpaper "$1" ;;
+  random) set_wallpaper "$(random_file "$2")" ;;
+  one) set_wallpaper "$2" ;;
+  next) set_wallpaper "$(step_file "$2" 1)" ;;
+  prev) set_wallpaper "$(step_file "$2" -1)" ;;
 esac

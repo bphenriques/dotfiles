@@ -46,8 +46,8 @@ in
     ];
   };
 
-  programs.wlr-which-key.settings.menu = lib.mkAfter [
-    { key = "d"; desc = "Display"; submenu = [
+  my.programs.desktop-shell.menu.entries = lib.mkAfter [
+    { key = "d"; desc = "Display"; status = "display"; submenu = [
       { key = "l"; desc = "Laptop";         cmd = "${kanshictl} switch internal"; }
       { key = "o"; desc = "Office monitor"; cmd = "${kanshictl} switch external-office"; }
       { key = "t"; desc = "Living room TV"; cmd = "${kanshictl} switch external-living-room"; }

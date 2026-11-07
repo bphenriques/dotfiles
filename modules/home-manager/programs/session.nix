@@ -65,5 +65,9 @@ in
         in listToAttrs (lib.map toAction sessionActions);
       })
     ];
+
+    my.programs.desktop-shell.menu.entries = lib.mkOrder 2000 [
+      { key = "q"; desc = "Session"; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; cmd = cfg.exec.dmenu; }
+    ];
   };
 }

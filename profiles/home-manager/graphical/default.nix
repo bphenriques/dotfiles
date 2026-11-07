@@ -2,13 +2,13 @@
 {
   imports = [
     ./fuzzel.nix            # Application launcher
-    ./wlr-which-key.nix     # Which.key as regular overlays
     ./dunst.nix             # Notifications
+    ./bluetooth.nix         # Bluetooth menu entry
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
     ./screen-recorder.nix   # Screen recording
-    ./quickshell            # Desktop shell (recording indicator)
+    ./desktop-shell.nix     # Menu and recording indicator (Quickshell)
     ./awww.nix              # Wallpaper daemon
     ./xdg-userdirs.nix      # XDG user directories, screenshots, recordings
     ./gtk.nix               # Setup theming for some set of apps
@@ -37,7 +37,6 @@
       brightness-osd.enable = true;
       niri-keyboard-layout.enable = true;
       file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
-      status-glance.enable = true;
     };
 
     programs.satty = {

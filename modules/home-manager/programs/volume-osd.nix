@@ -4,6 +4,15 @@ let
 
   volume-osd = lib.getExe cfg.package;
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
+
+  glyphs = {
+    headphones = "󰋋";
+    headset = "󰋎";
+    internal = "󰽟";
+    external = "󰓃";
+    microphone = "󰍬";
+    microphoneOff = "󰍭";
+  };
 in
 {
   options.my.programs.volume-osd = {
@@ -11,22 +20,22 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       default = self.packages.volume-osd.override {
-        headphonesIcon = mkIcon "volume-osd-headphones" "󰋋";
+        headphonesIcon = mkIcon "volume-osd-headphones" glyphs.headphones;
         headphonesMuteIcon = mkIcon "volume-osd-headphones" "󰋐";
-        headsetIcon = mkIcon "volume-osd-headset" "󰋎";
+        headsetIcon = mkIcon "volume-osd-headset" glyphs.headset;
         headsetMuteIcon = mkIcon "volume-osd-headset-mute" "󰋐";
-        internalSpeakersIcon = mkIcon "volume-osd-internal" "󰽟";
+        internalSpeakersIcon = mkIcon "volume-osd-internal" glyphs.internal;
         internalSpeakersMuteIcon = mkIcon "volume-osd-internal-mute" "󰽠";
-        externalSpeakersIcon = mkIcon "volume-osd-external" "󰓃";
+        externalSpeakersIcon = mkIcon "volume-osd-external" glyphs.external;
         externalSpeakersMuteIcon = mkIcon "volume-osd-external-mute" "󰓄";
-        microphoneIcon = mkIcon "volume-osd-micro" "󰍬";
-        microphoneMuteIcon = mkIcon "volume-osd-micro-mute" "󰍭";
+        microphoneIcon = mkIcon "volume-osd-micro" glyphs.microphone;
+        microphoneMuteIcon = mkIcon "volume-osd-micro-mute" glyphs.microphoneOff;
         errorIcon = mkIcon "volume-osd-error-icon" "󰀨";
-        headphonesGlyph = "󰋋";
-        headsetGlyph = "󰋎";
-        internalSpeakersGlyph = "󰽟";
-        externalSpeakersGlyph = "󰓃";
-        microphoneGlyph = "󰍬";
+        headphonesGlyph = glyphs.headphones;
+        headsetGlyph = glyphs.headset;
+        internalSpeakersGlyph = glyphs.internal;
+        externalSpeakersGlyph = glyphs.external;
+        microphoneGlyph = glyphs.microphone;
       };
     };
   };
@@ -39,23 +48,25 @@ in
       { assertion = osConfig.services.pipewire.wireplumber.enable; message = "Requires pipewire wireplumber enabled in the system."; }
     ];
 
-    programs.wlr-which-key.settings.menu = lib.mkOrder 200 [
-      { key = "a"; desc = "Audio Output"; submenu = [
-        { key = ["Up" "k"];       desc = "Increase volume"; cmd = "${volume-osd} sink-increase";    keep_open = true; }
-        { key = ["Down" "j"];     desc = "Reduce volume";   cmd = "${volume-osd} sink-decrease";    keep_open = true; }
-        { key = ["Left" "h"];     desc = "Previous device"; cmd = "${volume-osd} sink-move-prev";   keep_open = true; }
-        { key = "m";              desc = "Mute";            cmd = "${volume-osd} sink-toggle-mute"; keep_open = true; }
+    my.programs.desktop-shell.settings.glyphs.audio = glyphs;
+
+    my.programs.desktop-shell.menu.entries = lib.mkOrder 200 [
+      { key = "a"; desc = "Audio Output"; status = "sink"; submenu = [
+        { key = "Up";             desc = "Increase volume"; cmd = "${volume-osd} sink-increase";    keepOpen = true; }
+        { key = "Down";           desc = "Reduce volume";   cmd = "${volume-osd} sink-decrease";    keepOpen = true; }
+        { key = "Left";           desc = "Previous device"; cmd = "${volume-osd} sink-move-prev";   keepOpen = true; }
+        { key = "m";              desc = "Mute";            cmd = "${volume-osd} sink-toggle-mute"; keepOpen = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} sink-move-fuzzel"; }
-        { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} sink-move-next";   keep_open = true; }
+        { key = "Right";          desc = "Next device";     cmd = "${volume-osd} sink-move-next";   keepOpen = true; }
         { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
       ]; }
 
-      { key = "A"; desc = "Audio Input"; submenu = [
-        { key = ["Up" "k"];       desc = "Increase volume"; cmd = "${volume-osd} source-increase";    keep_open = true; }
-        { key = ["Down" "j"];     desc = "Reduce volume";   cmd = "${volume-osd} source-decrease";    keep_open = true; }
-        { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keep_open = true; }
-        { key = ["Left" "h"];     desc = "Previous device"; cmd = "${volume-osd} source-move-prev";   keep_open = true; }
-        { key = ["Right" "l"];    desc = "Next device";     cmd = "${volume-osd} source-move-next";   keep_open = true; }
+      { key = "A"; desc = "Audio Input"; status = "source"; submenu = [
+        { key = "Up";             desc = "Increase volume"; cmd = "${volume-osd} source-increase";    keepOpen = true; }
+        { key = "Down";           desc = "Reduce volume";   cmd = "${volume-osd} source-decrease";    keepOpen = true; }
+        { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keepOpen = true; }
+        { key = "Left";           desc = "Previous device"; cmd = "${volume-osd} source-move-prev";   keepOpen = true; }
+        { key = "Right";          desc = "Next device";     cmd = "${volume-osd} source-move-next";   keepOpen = true; }
         { key = "space";          desc = "Select device";   cmd = "${volume-osd} source-move-fuzzel"; }
         { key = "c";              desc = "Configure";       cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
       ]; }

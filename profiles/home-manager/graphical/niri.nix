@@ -19,6 +19,11 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.niri = {
     enable = true;
 
+    keyboardLayouts = [
+      { layout = "us"; variant = "euro"; label = "EN"; }
+      { layout = "pt"; label = "PT"; }
+    ];
+
     windowRules = {
       byType = {
         popups = lib.map (title: ''title="${title}"'') [
@@ -157,14 +162,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
       # Shortcuts
       "Mod+Space"         = ''spawn "${lib.getExe config.programs.fuzzel.package}"'';
-      "Mod+Ctrl+Space"    = lib.mkIf config.programs.wlr-which-key.enable ''spawn-sh "${lib.getExe config.programs.wlr-which-key.package}"'';
       "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
       "Mod+K"             = ''spawn-sh "${lib.getExe config.my.programs.niri-keyboard-layout.package} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.my.programs.session.exec.dmenu}"'';
       "Mod+L"             = ''spawn-sh "${config.my.programs.session.exec.lock}"'';
-      "Mod+I"             = lib.mkIf config.my.programs.status-glance.enable ''spawn "${lib.getExe config.my.programs.status-glance.package}"'';
 
       # Focus management
       "Mod+Tab repeat=false" = "toggle-overview";
@@ -217,11 +220,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
     input = {
       keyboard = {
-        xkb = {
-          layout = "us,pt";
-          variant = "euro,";
-          options = "caps:ctrl_modifier";
-        };
+        xkb.options = "caps:ctrl_modifier";
         track-layout = "global"; # Keep layout consistent across all windows
       };
 
