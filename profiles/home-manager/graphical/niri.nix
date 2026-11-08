@@ -165,7 +165,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
-      "Mod+Shift+Q"       = ''spawn-sh "${config.my.programs.session.exec.dmenu}"'';
+      "Mod+Shift+Q repeat=false" = ''spawn-sh "${config.my.programs.session.exec.menu}"'';
       "Mod+L"             = ''spawn-sh "${config.my.programs.session.exec.lock}"'';
 
       # Focus management

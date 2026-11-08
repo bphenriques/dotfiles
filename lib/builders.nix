@@ -1,27 +1,5 @@
 { lib, pkgs }:
 rec {
-  writeFuzzelDmenuApplication = {
-    name,
-    runtimeInputs ? [ ],
-    package ? pkgs.fuzzel,
-    extraArgs ? "",
-    entries
-  }: pkgs.writeShellApplication {
-      inherit name runtimeInputs;
-      text = let
-        options = lib.concatMapStringsSep "\n" (entry: entry.label) entries;
-        exec = "${lib.getExe package} --dmenu ${extraArgs}";
-      in ''
-        #shellcheck shell=bash
-
-        chosen="$(printf '%s' "${options}" | ${exec})"
-        case "''${chosen}" in
-          ${lib.concatMapStringsSep "\n" (entry: ''"${entry.label}") ${entry.exec} ;;'') entries}
-        esac
-      '';
-      meta.platforms = lib.platforms.linux;
-    };
-
   # Good enough: I can point directly to the generated file.
   mkNerdFontIcon = { textColor ? "black", size ? "128x128", fontSize ? 160 }: name: symbol:
     let

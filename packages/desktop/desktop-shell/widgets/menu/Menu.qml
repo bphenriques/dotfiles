@@ -66,6 +66,10 @@ Scope {
     function toggle(): void {
       menu.toggle();
     }
+
+    function toggleEntry(key: string): void {
+      menu.toggleEntry(key);
+    }
   }
 
   LazyLoader {

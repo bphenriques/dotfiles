@@ -45,7 +45,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
   my.programs.niri = {
     bindings = {
-      "Mod+Ctrl+Space" = ''spawn-sh "${cfg.exec.ipc} menu toggle"'';
+      "Mod+Ctrl+Space repeat=false" = ''spawn-sh "${cfg.exec.ipc} menu toggle"'';
       # A spawn, not the switch-layout action: only spawns run while locked.
       "Mod+K allow-when-locked=true" = ''spawn-sh "${niri} msg action switch-layout next"'';
       "Mod+I" = ''spawn-sh "${cfg.exec.ipc} idle toggle"'';

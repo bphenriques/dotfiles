@@ -6,6 +6,7 @@ let
   cfg = config.my.programs.session;
 
   mkAppOpt = default: lib.mkOption { type = lib.types.str; inherit default; };
+  menuKey = "q";
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
@@ -28,18 +29,12 @@ let
   ] ++ systemd-boot-windows ++ [
     { id = "session-efi";       key = "E"; symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
   ];
-
-  dmenu = self.lib.builders.writeFuzzelDmenuApplication {
-    name = "session-dmenu";
-    entries = lib.map (e: { inherit (e) exec; label = "${e.symbol}     ${e.label}"; }) sessionActions;
-    extraArgs = ''--minimal-lines --hide-prompt'';
-  };
 in
 {
   options.my.programs.session = {
     enable = lib.mkEnableOption "custom-session";
     exec = {
-      dmenu      = mkAppOpt ''${lib.getExe dmenu}'';
+      menu       = mkAppOpt "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}";
       lock       = lib.mkOption { type = lib.types.str; };   # comes from the lock-screen profile
       suspend    = mkAppOpt "${systemctl} suspend";
       shutdown   = mkAppOpt "${systemctl} poweroff";
@@ -51,12 +46,11 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "my.programs.session" pkgs lib.platforms.linux) ];
     home.packages = [
-      dmenu
       (pkgs.makeDesktopItem {
         name = "session-menu";
         desktopName = "Session";
         icon = mkIcon "session" "";
-        exec = cfg.exec.dmenu;
+        exec = cfg.exec.menu;
         actions = let
           toAction = b: nameValuePair b.id {
             name = b.label;
@@ -68,7 +62,7 @@ in
     ];
 
     my.programs.desktop-shell.menu.entries = lib.mkOrder 2000 [
-      { key = "q"; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; }) sessionActions; }
+      { key = menuKey; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; }) sessionActions; }
     ];
   };
 }

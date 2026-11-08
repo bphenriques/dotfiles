@@ -122,16 +122,29 @@ Scope {
     }
   }
 
+  function show() {
+    // Sources without change events are read as the menu opens.
+    Audio.refresh();
+    Audio.refreshDevices();
+    Display.refresh();
+    open = true;
+  }
+
   function toggle() {
-    if (open) {
+    if (open) hide();
+    else show();
+  }
+
+  function toggleEntry(key) {
+    const item = find(itemsOf(null), key);
+    if (!item) return;
+    if (level?.entry === item.entry) {
       hide();
-    } else {
-      // Sources without change events are read as the menu opens.
-      Audio.refresh();
-      Audio.refreshDevices();
-      Display.refresh();
-      open = true;
+      return;
     }
+    stack = [];
+    if (!open) show();
+    activate(item, key);
   }
 
   function hide() {
