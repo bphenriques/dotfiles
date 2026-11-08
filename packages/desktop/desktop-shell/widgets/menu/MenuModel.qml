@@ -91,7 +91,7 @@ Scope {
     return devices.map(device => ({
       id: device.name,
       desc: device.label,
-      icon: device.kind === "sink" ? Glyphs.audioDevice(device.type) : Glyphs.microphone,
+      icon: Glyphs.audioDevice(device.type),
       active: device.name === current,
       audio: device
     }));

@@ -73,7 +73,7 @@ Scope {
         : root.kind === "idle" ? !IdleInhibit.enabled
         : false
       readonly property string glyph: root.kind === "sink" ? (muted ? Glyphs.volumeOff : Glyphs.audioDevice(Audio.sinkType))
-        : root.kind === "source" ? (muted ? Glyphs.microphoneOff : Glyphs.microphone)
+        : root.kind === "source" ? (muted ? Glyphs.microphoneOff : Glyphs.audioDevice(Audio.sourceType))
         : root.kind === "brightness" ? Glyphs.brightness(Brightness.percentage)
         : root.kind === "idle" ? Glyphs.keepAwake
         : Glyphs.keyboard

@@ -15,10 +15,10 @@ Process {
   // The command is set here rather than by a binding: a running binding can turn true before a command binding has it.
   function refresh() {
     if (!shell) return;
+    command = ["sh", "-c", shell];
     if (running) {
       pending = true;
     } else {
-      command = ["sh", "-c", shell];
       running = true;
     }
   }

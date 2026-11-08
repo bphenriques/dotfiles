@@ -30,5 +30,13 @@ Singleton {
     stdout: SplitParser {
       onRead: line => root.enabled = line.trim() === "true"
     }
+    // Delayed so a command that fails at once cannot loop.
+    onExited: restartTimer.restart()
+  }
+
+  Timer {
+    id: restartTimer
+    interval: 5000
+    onTriggered: root.watch()
   }
 }

@@ -21,6 +21,7 @@ Singleton {
   readonly property real sourceVolume: source?.audio?.volume ?? 0
   readonly property bool sinkMuted: sink?.audio?.muted ?? false
   readonly property string sourceName: source?.nickname || source?.description || ""
+  readonly property string sourceType: sources.find(device => device.name === source?.name)?.type ?? "microphone"
   readonly property bool sourceMuted: source?.audio?.muted ?? false
   // Set while the menu is open: the device list only follows it then.
   property bool live: false
@@ -65,6 +66,8 @@ Singleton {
 
   Connections {
     target: Pipewire
+    function onDefaultAudioSourceChanged() { root.refreshDevices(); }
+
     function onDefaultAudioSinkChanged() {
       // What the device list knows shows at once, so the old device's glyph does not linger until the classifier answers.
       const known = root.devices.find(device => device.name === Pipewire.defaultAudioSink?.name);
@@ -79,6 +82,7 @@ Singleton {
   CommandReader {
     id: lister
     shell: Config.commands.audioDevices
+    atStart: true
     onRead: text => root.devices = text.trim().split("\n").filter(line => line).map(line => {
       const [kind, name, type, label] = line.split("\t");
       return { kind, name, type, label };

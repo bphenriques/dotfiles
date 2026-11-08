@@ -47,7 +47,7 @@ StatusLine {
   function glyphFor(status) {
     switch (status) {
     case "sink": return Audio.sinkMuted ? Glyphs.volumeOff : Glyphs.audioDevice(Audio.sinkType);
-    case "source": return Audio.sourceMuted ? Glyphs.microphoneOff : Glyphs.microphone;
+    case "source": return Audio.sourceMuted ? Glyphs.microphoneOff : Glyphs.audioDevice(Audio.sourceType);
     case "music": return Glyphs.music;
     case "network": return Network.kind === "wifi" ? Glyphs.wifi : Network.kind === "wired" ? Glyphs.ethernet : Glyphs.disconnected;
     case "brightness": return Glyphs.brightness(Brightness.percentage);

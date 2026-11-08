@@ -11,11 +11,13 @@ Singleton {
   readonly property var player: Mpris.players.values.find(player => player.identity === "Music Player Daemon") ?? null
   readonly property bool present: player !== null
   readonly property bool playing: player?.isPlaying ?? false
+  // mpd keeps its last song while stopped.
+  readonly property var track: player?.playbackState === MprisPlaybackState.Stopped ? null : player
   // Bauer Media radio sends an XML document as the stream title; its song and artist are inside.
-  readonly property string rawTitle: player?.trackTitle ?? ""
+  readonly property string rawTitle: track?.trackTitle ?? ""
   readonly property bool xmlTitle: rawTitle.startsWith("<?xml")
   readonly property string title: xmlTitle ? field("DB_SONG_NAME") : rawTitle
-  readonly property string artist: xmlTitle ? field("DB_LEAD_ARTIST_NAME") : player?.trackArtist ?? ""
+  readonly property string artist: xmlTitle ? field("DB_LEAD_ARTIST_NAME") : track?.trackArtist ?? ""
   readonly property bool repeat: (player?.loopState ?? MprisLoopState.None) !== MprisLoopState.None
   readonly property bool shuffle: player?.shuffle ?? false
 

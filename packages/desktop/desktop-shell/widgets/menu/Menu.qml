@@ -15,6 +15,11 @@ Scope {
 
   readonly property bool open: menu.open
 
+  function ordinal(day) {
+    if (day >= 11 && day <= 13) return "th";
+    return ["th", "st", "nd", "rd"][day % 10] ?? "th";
+  }
+
   // A row of the menu: its key, then its status or label.
   component MenuRow: ListItem {
     id: row
@@ -134,7 +139,7 @@ Scope {
 
               Label {
                 font.bold: true
-                text: menu.level?.title ?? Qt.formatDateTime(clock.date, "dddd hh:mm")
+                text: menu.level?.title ?? Qt.formatDateTime(clock.date, "dddd, d'" + root.ordinal(clock.date.getDate()) + "' MMMM hh:mm")
               }
             }
 
