@@ -3,8 +3,7 @@
 _notify() { notify-send --category "screen-recorder" --hint string:x-canonical-private-synchronous:screen-recorder "$@"; }
 
 STATE_FILE="${XDG_RUNTIME_DIR:?}/screen-recorder"
-
-is_recording() { pidof wl-screenrec >/dev/null; }
+LOCK_FILE="${XDG_RUNTIME_DIR:?}/screen-recorder.lock"
 
 notify_saved() {
   local destination="$1" thumb action
@@ -19,6 +18,7 @@ notify_saved() {
   rm -f -- "$thumb"
 }
 
+# Runs holding the lock on fd 9, which wl-screenrec inherits: it stays held until the recorder has finished saving.
 record() {
   local destination
   destination="$1/record-$(date +'%Y%m%d-%H%M%S').mp4"
@@ -31,6 +31,8 @@ record() {
   local status=0
   wait "$recorder" || status=$?
   : >"$STATE_FILE"
+  trap - EXIT
+  exec 9>&- # the next recording may start while the notification below waits
 
   if [[ $status -eq 0 && -f $destination ]]; then
     notify_saved "$destination"
@@ -39,22 +41,37 @@ record() {
   fi
 }
 
+# Hides the pill at once; a recorder that has not finished saving within 5 seconds is hung, and is killed.
 stop() {
-  if is_recording; then
-    pkill --signal INT --exact wl-screenrec
-  else
+  if ! pidof wl-screenrec >/dev/null; then
     _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Nothing being recorded..."
+    return
+  fi
+  : >"$STATE_FILE"
+  pkill --signal INT --exact wl-screenrec
+  timeout 5 pidwait --exact wl-screenrec || pkill --signal KILL --exact wl-screenrec
+}
+
+# Start, or stop the running recording; a press while one is still saving only says so, and one during region selection does nothing.
+toggle() {
+  exec 9>"$LOCK_FILE"
+  if ! flock --nonblock 9; then
+    if [[ -s $STATE_FILE ]]; then
+      stop
+    elif pidof wl-screenrec >/dev/null; then
+      _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Still saving the last recording..."
+    fi
+    exit 0
   fi
 }
 
-if [[ ${1:-} == "screen" || ${1:-} == "region" ]] && is_recording; then
-  stop
-  exit 0
-fi
-
 case "${1:-}" in
-  screen) record "${2:?}" ;;
+  screen)
+    toggle
+    record "${2:?}"
+    ;;
   region)
+    toggle
     geometry="$(slurp -d)" || exit 0
     record "${2:?}" --geometry "$geometry"
     ;;

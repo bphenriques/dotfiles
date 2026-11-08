@@ -2,22 +2,47 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import qs
 
-// kanshi emits no change events, so the profile is read when the first subscriber appears.
+// The display profile and the outputs, read on refresh(): neither emits change events the shell can follow.
 Singleton {
   id: root
 
-  property int subscribers: 0
   property string profile: ""
+  // Each output twice, as profiles match them: its connector name, and its make, model and serial.
+  property var connected: []
+  // The same, for the outputs that are on.
+  property var enabled: []
 
-  onSubscribersChanged: if (subscribers === 1) status.running = true
+  function refresh() {
+    status.refresh();
+    outputs.refresh();
+  }
 
-  Process {
+  // Whether an entry's requirements hold: the outputs it needs connected, and those it needs on.
+  function available(requires) {
+    return Array.from(requires?.connected ?? []).every(output => root.connected.includes(output))
+      && Array.from(requires?.enabled ?? []).every(output => root.enabled.includes(output));
+  }
+
+  function names(name, output) {
+    return [name, `${output.make} ${output.model} ${output.serial ?? "Unknown"}`];
+  }
+
+  CommandReader {
     id: status
-    command: ["kanshictl", "status"]
-    stdout: StdioCollector {
-      onStreamFinished: root.profile = text.match(/Current profile: (.+)/)?.[1] ?? ""
+    shell: Config.commands.displayProfile
+    onRead: text => root.profile = text.trim()
+  }
+
+  // niri reports an output that is off without a logical size.
+  CommandReader {
+    id: outputs
+    shell: Config.commands.outputs
+    onRead: text => {
+      const all = Object.entries(JSON.parse(text));
+      root.connected = [].concat(...all.map(([name, output]) => root.names(name, output)));
+      root.enabled = [].concat(...all.filter(([, output]) => output.logical).map(([name, output]) => root.names(name, output)));
     }
   }
 }

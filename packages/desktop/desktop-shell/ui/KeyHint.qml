@@ -2,22 +2,27 @@ import QtQuick
 import qs
 import "WhichKey.js" as WhichKey
 
-// The key that triggers an item, followed by the separator: the menu's `a ➜`.
-Row {
+// The key that triggers an item, in a gutter of `chars` characters so a level's labels start together.
+Item {
   id: root
 
   property var key
+  property bool paired: false
+  property int chars: 1
 
-  spacing: Config.theme.spacing
+  implicitWidth: cell.advanceWidth * chars
+  implicitHeight: label.implicitHeight
 
-  Label {
-    tone: "primary"
-    font.bold: true
-    text: WhichKey.label(root.key)
+  TextMetrics {
+    id: cell
+    font: label.font
+    text: "0"
   }
 
   Label {
-    tone: "dim"
-    text: Glyphs.separator
+    id: label
+    tone: "primary"
+    font.bold: true
+    text: WhichKey.label(root.key, root.paired)
   }
 }

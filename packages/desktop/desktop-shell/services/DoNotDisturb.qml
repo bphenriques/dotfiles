@@ -3,35 +3,32 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
-// dunst's paused state: read once, then followed through the PropertiesChanged signal dunst emits on every change.
+// Whether notifications are paused, as Config.commands.notifications prints it: once, then on every change.
 Singleton {
   id: root
 
   property bool enabled: false
 
-  QtObject {
-    id: parser
-    property bool pausedNext: false
+  // Started here rather than by bindings: a running binding can turn true before the command binding has the command.
+  function watch() {
+    if (!Config.commands.notifications) return;
+    watcher.command = ["sh", "-c", Config.commands.notifications];
+    watcher.running = true;
+  }
+
+  Component.onCompleted: watch()
+
+  Connections {
+    target: Config.commands
+    function onNotificationsChanged() { root.watch(); }
   }
 
   Process {
-    running: true
-    command: ["dunstctl", "is-paused"]
-    stdout: StdioCollector {
-      onStreamFinished: root.enabled = text.trim() === "true"
-    }
-  }
-
-  // dbus-monitor prints the property name and its value on consecutive lines.
-  Process {
-    running: true
-    command: ["dbus-monitor", "--session", "type='signal',path='/org/freedesktop/Notifications',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'"]
+    id: watcher
     stdout: SplitParser {
-      onRead: line => {
-        if (parser.pausedNext) root.enabled = line.includes("boolean true");
-        parser.pausedNext = line.includes('string "paused"');
-      }
+      onRead: line => root.enabled = line.trim() === "true"
     }
   }
 }

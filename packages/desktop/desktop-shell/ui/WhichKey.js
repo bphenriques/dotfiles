@@ -15,6 +15,7 @@ function name(event) {
   case Qt.Key_Escape: return "Escape";
   case Qt.Key_Backspace: return "BackSpace";
   }
+  if (event.key >= Qt.Key_0 && event.key <= Qt.Key_9) return String.fromCharCode(event.key);
   if (event.key >= Qt.Key_A && event.key <= Qt.Key_Z) {
     const letter = String.fromCharCode(event.key);
     return event.modifiers & Qt.ShiftModifier ? letter : letter.toLowerCase();
@@ -22,18 +23,35 @@ function name(event) {
   return event.text;
 }
 
-// Whether an entry key (a name or a list of names) matches a key name.
+// The names an entry key stands for: a single name or a list of them.
+function names(key) {
+  return typeof key === "string" ? [key] : Array.from(key);
+}
+
+// Whether an entry runs one command per key, shown as one row (e.g. Down and Up). Lists from config.json are
+// list-like objects, not JavaScript arrays, so Array.isArray cannot tell.
+function isPair(entry) {
+  return entry?.cmd != null && typeof entry.cmd !== "string";
+}
+
+// Whether an entry key matches a key name.
 function matches(key, name) {
-  return typeof key === "string" ? key === name : Array.from(key).includes(name);
+  return names(key).includes(name);
 }
 
-// Short label for an entry key: its first name, with arrows as symbols.
-function label(key) {
-  const first = typeof key === "string" ? key : key[0];
-  return { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "Space", Return: "Enter" }[first] ?? first;
+// Short label for an entry key: its first name, or every name for a pair, with arrows as symbols.
+function label(key, paired = false) {
+  const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "Space", Return: "Enter" };
+  return (paired ? names(key) : names(key).slice(0, 1)).map(name => symbols[name] ?? name).join("");
 }
 
-// One key per label for entries known only at runtime: each label's first letter not taken yet, else a digit.
+// Whether text matches a pattern where * stands for anything.
+function glob(pattern, text) {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp("^" + escaped + "$").test(text);
+}
+
+// One key per entry of an app's own menu: each label's first letter not taken yet, else a digit.
 function assign(labels) {
   const taken = new Set();
   return labels.map(label => {

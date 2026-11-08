@@ -60,6 +60,18 @@ in
     ];
   };
 
+  my.programs.volume-osd.pins = {
+    sinks = [
+      { match = "alsa_output.pci-*analog-stereo"; label = "Speakers"; type = "internal"; }
+      { match = "*Arctis*"; label = "Headset"; type = "headset"; }
+      { match = "*EDIFIER*"; label = "Desk speakers"; type = "external"; }
+    ];
+    sources = [
+      { match = "alsa_input.pci-*"; label = "Microphone"; type = "microphone"; }
+      { match = "*Arctis*"; label = "Headset"; type = "headset"; }
+    ];
+  };
+
   wayland.windowManager.niri.settings.input = {
     touchpad = { tap = { }; natural-scroll = { }; drag = false; };
     mouse.accel-profile = "flat";

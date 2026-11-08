@@ -3,32 +3,30 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
-// The backlight brightnessctl controls. Its sysfs file is watched: every brightnessctl write notifies it.
+// The backlight's file and maximum come from Config.commands.brightness; the file is watched, every write to it notifies.
 Singleton {
   id: root
 
-  property string device: ""
+  property string file: ""
   property int maximum: 0
   property int current: 0
   readonly property bool present: maximum > 0
   readonly property int percentage: present ? Math.round(current * 100 / maximum) : 0
 
-  Process {
-    running: true
-    command: ["brightnessctl", "--machine-readable", "--class=backlight", "info"]
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const [name, , value, , maximum] = text.trim().split(",");
-        root.device = name ?? "";
-        root.current = parseInt(value) || 0;
-        root.maximum = parseInt(maximum) || 0;
-      }
+  CommandReader {
+    shell: Config.commands.brightness
+    atStart: true
+    onRead: text => {
+      const [file, maximum] = text.trim().split("\t");
+      root.file = file ?? "";
+      root.maximum = parseInt(maximum) || 0;
     }
   }
 
   FileView {
-    path: root.device ? "/sys/class/backlight/" + root.device + "/brightness" : ""
+    path: root.file
     watchChanges: true
     printErrors: false
     onFileChanged: reload()

@@ -4,7 +4,7 @@ let
   colors = config.lib.stylix.colors.withHashtag;
 
   volume          = lib.getExe config.my.programs.volume-osd.package;
-  brightness      = lib.getExe config.my.programs.brightness-osd.package;
+  brightnessctl   = "${lib.getExe pkgs.brightnessctl} --class=backlight";
   terminal        = config.my.programs.terminal.exec;
   playerctl       = lib.getExe pkgs.playerctl;
   dmenu           = "${lib.getExe config.programs.fuzzel.package} -d";
@@ -165,7 +165,6 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Mod+Return"        = ''spawn-sh "${terminal}"'';
       "Mod+Period"        = ''spawn "${lib.getExe emoji}"'';
       "Mod+Shift+E"       = ''spawn "${lib.getExe pkgs.nautilus}"'';
-      "Mod+K"             = ''spawn-sh "${lib.getExe config.my.programs.niri-keyboard-layout.package} next"'';
       "Mod+Shift+Q"       = ''spawn-sh "${config.my.programs.session.exec.dmenu}"'';
       "Mod+L"             = ''spawn-sh "${config.my.programs.session.exec.lock}"'';
 
@@ -202,8 +201,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Shift+XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${volume} sink-move-prev"'';
 
       # Brightness
-      "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn-sh "${brightness} increase"'';
-      "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightness} decrease"'';
+      "XF86MonBrightnessUp   allow-when-locked=true" = ''spawn-sh "${brightnessctl} set 5%+"'';
+      "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightnessctl} set 5%-"'';
     };
   };
 

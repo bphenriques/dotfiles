@@ -1,15 +1,13 @@
 import QtQuick
 import qs
 
-// Text in the theme font. `tone` gives it meaning: normal, dim, primary, warning or alert.
+// Text in the theme font, coloured by `tone` (see Tone).
 Text {
   property string tone: "normal"
 
-  color: tone === "primary" ? Config.theme.primary
-    : tone === "warning" ? Config.theme.warning
-    : tone === "alert" ? Config.theme.alert
-    : Config.theme.foreground
-  opacity: tone === "dim" ? Config.theme.dimOpacity : 1
+  color: Tone.color(tone)
   font.family: Config.theme.monospaceFont
   font.pointSize: Config.theme.fontSize
+  // Never rich text: stream titles can carry whole XML documents (Bauer Media radio does).
+  textFormat: Text.PlainText
 }

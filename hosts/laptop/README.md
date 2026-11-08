@@ -26,4 +26,4 @@ Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 - **Editor**: [IntelliJ IDEA](https://www.jetbrains.com/idea/) but moving to [Helix](https://github.com/helix-editor/helix) _slowly_
 - **Music**: [Music Player Daemon](https://www.musicpd.org/) with a custom wrapper around [`mpc`](https://www.musicpd.org/clients/mpc/)
 - **Internet Browser**: [Firefox](https://www.mozilla.org/firefox/new/) but exploring alternatives
-- **Quick Menu**: [Quickshell](https://quickshell.org) (`packages/desktop/desktop-shell`), a keyboard menu with live status in the style of [`wlr-which-key`](https://github.com/MaxVerevkin/wlr-which-key)
+- **Quick Menu**: [Quickshell](https://quickshell.org) (`packages/desktop/desktop-shell`), a keyboard menu with live status in the style of [`wlr-which-key`](https://github.com/MaxVerevkin/wlr-which-key), plus volume, brightness and keyboard-layout pop-ups

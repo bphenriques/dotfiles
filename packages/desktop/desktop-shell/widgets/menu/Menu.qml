@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -11,8 +13,51 @@ import qs.ui
 Scope {
   id: root
 
+  readonly property bool open: menu.open
+
+  // A row of the menu: its key, then its status or label.
+  component MenuRow: ListItem {
+    id: row
+    required property var modelData
+    property int chars: 1
+
+    enabled: modelData.enabled !== false
+    onActivated: menu.activate(modelData)
+    onSecondaryActivated: menu.openMenu(modelData)
+    onScrolled: up => menu.act(modelData, up ? "Up" : "Down")
+
+    KeyHint {
+      key: row.modelData.key
+      paired: row.modelData.paired ?? false
+      chars: row.chars
+    }
+
+    MenuStatus {
+      Layout.fillWidth: true
+      image: row.modelData.image ?? ""
+      status: row.modelData.status ?? ""
+      fallback: row.modelData.desc
+      fallbackDetail: row.modelData.detail ?? ""
+      icon: row.modelData.icon ?? ""
+      active: row.modelData.active ?? false
+      pins: row.modelData.entry?.pins ?? []
+    }
+  }
+
   MenuModel {
     id: menu
+  }
+
+  Binding {
+    target: Audio
+    property: "live"
+    value: menu.open
+  }
+
+  Binding {
+    target: Audio
+    property: "metering"
+    value: menu.level?.status === "source"
   }
 
   IpcHandler {
@@ -24,15 +69,23 @@ Scope {
   }
 
   LazyLoader {
+    id: dismiss
     active: menu.open
 
-    DismissArea {
-      onDismissed: menu.hide()
+    Variants {
+      model: Quickshell.screens
+
+      DismissArea {
+        required property var modelData
+        screen: modelData
+        onDismissed: menu.hide()
+      }
     }
   }
 
+  // Created after the dismiss areas, so it stacks above them on the same layer.
   LazyLoader {
-    active: menu.open
+    active: menu.open && dismiss.item !== null
 
     OverlayWindow {
       anchors.bottom: true
@@ -43,18 +96,6 @@ Scope {
       implicitWidth: card.width
       implicitHeight: card.height
 
-      Subscription {
-        service: Audio
-      }
-
-      Subscription {
-        service: Niri
-      }
-
-      Subscription {
-        service: Display
-      }
-
       SystemClock {
         id: clock
         precision: SystemClock.Minutes
@@ -62,7 +103,7 @@ Scope {
 
       Surface {
         id: card
-        width: Config.menu.width
+        width: menu.width
         height: content.implicitHeight + 2 * Config.theme.padding
 
         focus: true
@@ -84,18 +125,32 @@ Scope {
             // Inside a level the title goes back up, like Backspace.
             ListItem {
               enabled: menu.level !== null
+              dimsWhenDisabled: false
               onActivated: menu.back()
 
               Label {
                 font.bold: true
-                text: menu.level?.title ?? Qt.formatDateTime(clock.date, "ddd dd MMM  hh:mm")
+                text: menu.level?.title ?? Qt.formatDateTime(clock.date, "dddd hh:mm")
               }
             }
 
+            // Always shown, so their state is known at a glance: lit when on, dim when off.
+            Icon {
+              visible: menu.level === null
+              tone: DoNotDisturb.enabled ? "alert" : "dim"
+              glyph: DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications
+            }
+
+            Icon {
+              visible: menu.level === null
+              tone: IdleInhibit.enabled ? "primary" : "dim"
+              glyph: Glyphs.keepAwake
+            }
+
             Label {
-              visible: menu.level === null && DoNotDisturb.enabled
-              tone: "alert"
-              text: Glyphs.doNotDisturb
+              visible: menu.level?.entry?.list === "tray"
+              tone: "dim"
+              text: "Ctrl+digit: app menu"
             }
 
             Item {
@@ -105,48 +160,59 @@ Scope {
             MenuStatus {
               Layout.fillWidth: false
               visible: menu.level === null
+              quiet: true
               status: "layout"
             }
 
+            // A level that lists its items (tray apps, devices, networks) shows only its state, not the items again.
             MenuStatus {
               Layout.fillWidth: false
-              status: menu.level === null ? "battery" : menu.level.status ?? ""
+              quiet: true
+              compact: !!menu.level?.entry?.list
+              status: menu.level === null ? "battery" : menu.level.entry?.list === "tray" ? "" : menu.level.status ?? ""
             }
           }
 
-          // Laid out like wlr-which-key: columns of a fixed number of rows.
+          // Declared, not inferred: the level's own columns, else menu.columns; entries flow across, so neighbours sit side by side.
+          // Hidden when empty: an empty GridLayout keeps the height of its last rows.
           GridLayout {
+            id: actionsGrid
             Layout.fillWidth: true
-            flow: GridLayout.TopToBottom
-            rows: Math.max(1, Math.min(Config.menu.rowsPerColumn, menu.items.length))
+            visible: menu.actions.length > 0
+            flow: GridLayout.LeftToRight
+            columns: menu.level?.entry?.columns ?? Config.menu.columns
             columnSpacing: Config.theme.padding
             rowSpacing: Config.theme.listSpacing
 
             Repeater {
-              model: menu.items
+              model: menu.actions
 
-              ListItem {
-                id: item
-                required property var modelData
-
+              MenuRow {
+                required property int index
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
-                onActivated: menu.activate(modelData)
-                onSecondaryActivated: menu.openMenu(modelData)
-                onScrolled: up => menu.act(modelData, up ? "Up" : "Down")
+                chars: menu.columnChars(index, actionsGrid.columns)
+              }
+            }
+          }
 
-                KeyHint {
-                  key: item.modelData.key
-                }
+          Divider {
+            Layout.fillWidth: true
+            visible: menu.actions.length > 0 && menu.rows.length > 0
+          }
 
-                MenuStatus {
-                  Layout.fillWidth: true
-                  image: item.modelData.image ?? ""
-                  status: item.modelData.status ?? ""
-                  fallback: item.modelData.desc
-                  fallbackDetail: item.modelData.detail ?? ""
-                  icon: item.modelData.icon ?? ""
-                }
+          // What a level lists, apart from its actions and across the full width.
+          ColumnLayout {
+            Layout.fillWidth: true
+            visible: menu.rows.length > 0
+            spacing: Config.theme.listSpacing
+
+            Repeater {
+              model: menu.rows
+
+              MenuRow {
+                Layout.fillWidth: true
+                chars: menu.keyChars(menu.rows)
               }
             }
           }

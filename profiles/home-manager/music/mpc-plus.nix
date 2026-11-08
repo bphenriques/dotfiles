@@ -48,20 +48,18 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
 
   my.programs.desktop-shell.settings.glyphs.music = glyphs;
 
-  my.programs.desktop-shell.menu.entries = lib.mkOrder 100 [
+  my.programs.desktop-shell.menu.entries = lib.mkOrder 700 [
     { key = "m"; desc = "Music"; status = "music"; submenu = [
-      { key = "p";            desc = "Play/Pause";        cmd = "${mpc-plus} play-pause";           keepOpen = true; }
+      { key = "p";            desc = "Play/pause";        cmd = "${mpc-plus} play-pause";           keepOpen = true; }
       { key = "s";            desc = "Stop";              cmd = "${mpc-plus} stop"; }
-      { key = "Left";         desc = "Previous track";    cmd = "${mpc-plus} previous";             keepOpen = true; }
-      { key = "Right";        desc = "Next track";        cmd = "${mpc-plus} next";                 keepOpen = true; }
-      { key = "Up";           desc = "Increase volume";   cmd = "${mpc-plus} volume-increase";      keepOpen = true; }
-      { key = "Down";         desc = "Reduce volume";     cmd = "${mpc-plus} volume-decrease";      keepOpen = true; }
-      { key = "z";            desc = "Repeat";            cmd = "${mpc-plus} toggle-repeat";        keepOpen = true; }
-      { key = "x";            desc = "Random";            cmd = "${mpc-plus} toggle-random";        keepOpen = true; }
-      { key = "space";        desc = "Play...";           cmd = "${mpc-plus} dmenu-file-exec play"; }
-      { key = "r";            desc = "Stream...";         cmd = "${mpc-plus} dmenu-radio-stream"; }
-      { key = "a";            desc = "Shuffle library";   cmd = "${mpc-plus} play-shuffled"; }
-      { key = "d";            desc = "Select Server";     cmd = "${mpc-plus} dmenu-select-server"; }
+      { key = [ "Left" "Right" ]; desc = "Track";           cmd = [ "${mpc-plus} previous" "${mpc-plus} next" ];                   keepOpen = true; }
+      { key = [ "Down" "Up" ];    desc = "Volume";          cmd = [ "${mpc-plus} volume-decrease" "${mpc-plus} volume-increase" ]; keepOpen = true; }
+      { key = "z";            desc = "Repeat";            activeWhen = "repeat"; cmd = "${mpc-plus} toggle-repeat";        keepOpen = true; }
+      { key = "x";            desc = "Shuffle";           activeWhen = "shuffle"; cmd = "${mpc-plus} toggle-random";        keepOpen = true; }
+      { key = "space";        desc = "Play file...";        cmd = "${mpc-plus} dmenu-file-exec play"; }
+      { key = "r";            desc = "Radio...";            cmd = "${mpc-plus} dmenu-radio-stream"; }
+      { key = "a";            desc = "Play all shuffled"; cmd = "${mpc-plus} play-shuffled"; }
+      { key = "d";            desc = "Server...";           cmd = "${mpc-plus} dmenu-select-server"; }
     ]; }
   ];
 }

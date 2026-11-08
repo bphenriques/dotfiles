@@ -15,17 +15,18 @@ let
   systemd-boot-windows = lib.optionals osConfig.boot.loader.systemd-boot.enable
     (mapAttrsToList (name: value: {
       id = "session-${name}";
+      key = "W";
       symbol = "";
       label = "Reboot to ${value.title}";
       exec = rebootToWindowsCmd value; # systemctl reboot --boot-loader-entry=help
     }) osConfig.boot.loader.systemd-boot.windows);
   sessionActions = [
-    { id = "session-lock";      symbol = ""; label = "Lock";                 exec = cfg.exec.lock; }
-    { id = "session-suspend";   symbol = "󰤄"; label = "Suspend";              exec = cfg.exec.suspend; }
-    { id = "session-shutdown";  symbol = ""; label = "Shutdown";             exec = cfg.exec.shutdown; }
-    { id = "session-reboot";    symbol = ""; label = "Reboot";               exec = cfg.exec.reboot; }
+    { id = "session-lock";      key = "l"; symbol = ""; label = "Lock";                 exec = cfg.exec.lock; }
+    { id = "session-suspend";   key = "s"; symbol = "󰤄"; label = "Suspend";              exec = cfg.exec.suspend; }
+    { id = "session-shutdown";  key = "S"; symbol = ""; label = "Shutdown";             exec = cfg.exec.shutdown; }
+    { id = "session-reboot";    key = "R"; symbol = ""; label = "Reboot";               exec = cfg.exec.reboot; }
   ] ++ systemd-boot-windows ++ [
-    { id = "session-efi";       symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
+    { id = "session-efi";       key = "E"; symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
   ];
 
   dmenu = self.lib.builders.writeFuzzelDmenuApplication {
@@ -67,7 +68,7 @@ in
     ];
 
     my.programs.desktop-shell.menu.entries = lib.mkOrder 2000 [
-      { key = "q"; desc = "Session"; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; cmd = cfg.exec.dmenu; }
+      { key = "q"; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; }) sessionActions; }
     ];
   };
 }

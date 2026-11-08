@@ -1,6 +1,8 @@
 { lib, pkgs, ... }:
 let
   kanshictl = lib.getExe' pkgs.kanshi "kanshictl";
+  brightnessctl = "${lib.getExe pkgs.brightnessctl} --class=backlight";
+  brightness = [ "${brightnessctl} set 5%-" "${brightnessctl} set 5%+" ];
 
   laptopScreen = {
     criteria = "eDP-1";
@@ -20,38 +22,36 @@ let
 
   enable = screen: screen // { status = "enable"; };
   disable = screen: screen // { status = "disable"; };
+
+  profiles = [
+    { name = "internal";             key = "1"; desc = "Laptop";         outputs = [ (enable laptopScreen) ]; }
+    { name = "external-office";      key = "2"; desc = "Office monitor"; outputs = [ (disable laptopScreen) (enable dellScreen) ]; }
+    { name = "external-living-room"; key = "3"; desc = "Living room TV"; outputs = [ (disable laptopScreen) (enable livingRoomScreen) ]; }
+  ];
 in
 {
   services.kanshi = {
     enable = true;
-    settings = [
-      {
-        profile = {
-          name = "internal";
-          outputs = [ (enable laptopScreen) ];
-        };
-      }
-      {
-        profile = {
-          name = "external-office";
-          outputs = [ (disable laptopScreen) (enable dellScreen) ];
-        };
-      }
-      {
-        profile = {
-          name = "external-living-room";
-          outputs = [ (disable laptopScreen) (enable livingRoomScreen) ];
-        };
-      }
-    ];
+    settings = map (profile: { profile = { inherit (profile) name outputs; }; }) profiles;
   };
 
-  my.programs.desktop-shell.menu.entries = lib.mkAfter [
+  my.programs.desktop-shell.settings = {
+    osd.adjust = { inherit brightness; };
+    commands.displayProfile = "${kanshictl} status | ${lib.getExe pkgs.gnused} -n 's/^Current profile: //p'";
+  };
+
+  my.programs.desktop-shell.menu.entries = lib.mkOrder 500 [
     { key = "d"; desc = "Display"; status = "display"; submenu = [
-      { key = "l"; desc = "Laptop";         cmd = "${kanshictl} switch internal"; }
-      { key = "o"; desc = "Office monitor"; cmd = "${kanshictl} switch external-office"; }
-      { key = "t"; desc = "Living room TV"; cmd = "${kanshictl} switch external-living-room"; }
-      { key = "c"; desc = "Configure";      cmd = lib.getExe pkgs.wdisplays; }
+      # The backlight only dims the laptop screen, so it does nothing while a profile has it off.
+      { key = [ "Down" "Up" ]; desc = "Brightness"; cmd = brightness; keepOpen = true; requires.enabled = [ laptopScreen.criteria ]; }
+    ] ++ map (profile: {
+      inherit (profile) key desc;
+      profile = profile.name;
+      cmd = "${kanshictl} switch ${profile.name}";
+      # A profile can only apply while the screens it turns on are connected.
+      requires.connected = map (output: output.criteria) (lib.filter (output: output.status == "enable") profile.outputs);
+    }) profiles ++ [
+      { key = "c"; desc = "Configure..."; cmd = lib.getExe pkgs.wdisplays; }
     ]; }
   ];
 }

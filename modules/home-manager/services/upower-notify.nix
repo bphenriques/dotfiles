@@ -48,8 +48,6 @@ in
       default = self.packages.upower-notify.override {
         icons = mkLevelAttrs (b: mkIcon "battery${toString b.level}" b.glyph b.color);
         chargingIcons = mkLevelAttrs (b: mkIcon "battery${toString b.level}-charging" b.chargingGlyph config.lib.stylix.colors.withHashtag.base0B);
-        dischargeGlyphs = mkLevelAttrs (b: b.glyph);
-        chargeGlyphs = mkLevelAttrs (b: b.chargingGlyph);
       };
     };
   };

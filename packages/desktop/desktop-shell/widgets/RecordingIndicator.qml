@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
@@ -32,23 +34,24 @@ LazyLoader {
         // The record dot; it squares into a stop button on hover.
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
-          width: 10
-          height: 10
-          radius: mouse.containsMouse ? 2 : 5
-          color: Config.theme.alert
+          width: Config.theme.iconSize / 3
+          height: width
+          radius: mouse.containsMouse ? Config.theme.borderWidth * 2 : width / 2
+          color: Tone.color("alert")
         }
 
+        // Padded to the time's width (the font is monospace), so the pill keeps its size under the pointer.
         Label {
+          readonly property string time: Math.floor(Recorder.elapsed / 60) + ":" + String(Recorder.elapsed % 60).padStart(2, "0")
+
           anchors.verticalCenter: parent.verticalCenter
-          text: mouse.containsMouse
-            ? "Stop"
-            : Math.floor(Recorder.elapsed / 60) + ":" + String(Recorder.elapsed % 60).padStart(2, "0")
+          text: mouse.containsMouse ? "Stop".padEnd(time.length) : time
         }
 
-        Label {
+        Icon {
           anchors.verticalCenter: parent.verticalCenter
           tone: Recorder.micLive ? "alert" : "dim"
-          text: Recorder.micLive ? Glyphs.microphone : Glyphs.microphoneOff
+          glyph: Recorder.micLive ? Glyphs.microphone : Glyphs.microphoneOff
         }
       }
 

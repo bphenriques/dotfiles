@@ -28,14 +28,13 @@
     home.packages = [
       pkgs.xdg-user-dirs  # Relevant for desktop
       pkgs.gparted        # GUI partition editor
+      pkgs.brightnessctl  # Backlight, used by the brightness keys and the desktop shell
     ];
 
     my.programs = {
       screenshot.enable = true;
       session.enable = true;
       volume-osd.enable = true;
-      brightness-osd.enable = true;
-      niri-keyboard-layout.enable = true;
       file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
     };
 

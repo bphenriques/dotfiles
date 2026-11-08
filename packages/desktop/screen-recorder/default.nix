@@ -11,6 +11,7 @@ pkgs.writeShellApplication {
   runtimeInputs = [
     pkgs.coreutils
     pkgs.procps
+    pkgs.util-linux
     pkgs.wl-screenrec
     pkgs.slurp
     pkgs.libnotify

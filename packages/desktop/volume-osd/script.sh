@@ -48,7 +48,7 @@ friendly_device_name() {
   esac
 }
 
-# Maps device type to the label used in env var names (OSD_VOLUME_<label>_ICON, OSD_VOLUME_<label>_GLYPH, etc.)
+# Maps device type to the label used in env var names (OSD_VOLUME_<label>_ICON)
 _device_label() {
   case "$1" in
     microphone) echo -n "MICROPHONE" ;;
@@ -59,59 +59,14 @@ _device_label() {
   esac
 }
 
-# Returns the icon for a device type and mute state.
-# Uses indirect variable expansion to look up OSD_VOLUME_*_ICON env vars.
+# Returns the icon for a device type through indirect expansion of the OSD_VOLUME_*_ICON env vars.
 get_icon() {
-  local label muted="$2"
-  label="$(_device_label "$1")"
-  [ -z "$label" ] && return
-  local var="OSD_VOLUME_${label}_${muted:+MUTE_}ICON"
-  echo -n "${!var}"
-}
-
-# Returns the glyph for a device type.
-get_glyph() {
   local label
   label="$(_device_label "$1")"
   [ -z "$label" ] && return
-  local var="OSD_VOLUME_${label}_GLYPH"
+  local var="OSD_VOLUME_${label}_ICON"
   echo -n "${!var}"
 }
-
-notify_current_device() {
-  local kind="$1"
-  local device_json dtype muted
-
-  case "$kind" in
-    sink) device_json="$(get_sink "$(pactl get-default-sink)")" ;;
-    source) device_json="$(get_source "$(pactl get-default-source)")" ;;
-  esac
-
-  dtype="$(device_type "$kind" "$device_json")"
-
-  local wpctl_output progress display_progress
-  wpctl_output="$(wpctl get-volume "@DEFAULT_${kind^^}@")"
-  progress="$(awk '{ printf "%d", $2 * 100 }' <<<"$wpctl_output")"
-
-  muted=
-  if [[ $wpctl_output == *"[MUTED]"* ]]; then
-    muted=true
-    display_progress=0
-  else
-    display_progress="$(awk -v p="$progress" -v limit="$VOLUME_LIMIT" 'BEGIN { printf "%d", p / limit }')"
-  fi
-
-  notify-send \
-    --icon "$(get_icon "$dtype" "$muted")" \
-    --category "volume-osd-$kind" \
-    --hint "string:x-canonical-private-synchronous:volume-$kind" \
-    --hint int:value:"$display_progress" \
-    --transient \
-    "$(friendly_device_name "$device_json" "$dtype")" "${progress}%"
-}
-
-notify_current_sink() { notify_current_device sink; }
-notify_current_source() { notify_current_device source; }
 
 notify_failure() {
   notify-send \
@@ -177,6 +132,16 @@ set_source_and_move() {
   fi
 }
 
+# One line per device: rank (internal first), kind, name, type and friendly name.
+print_devices() {
+  local kind="$1" device dtype rank
+  while read -r device; do
+    dtype="$(device_type "$kind" "$device")"
+    case "$dtype" in internal | microphone) rank=0 ;; *) rank=1 ;; esac
+    printf '%s\t%s\t%s\t%s\t%s\n' "$rank" "$kind" "$(jq -r .name <<<"$device")" "$dtype" "$(friendly_device_name "$device" "$dtype")"
+  done < <(jq -c '.[]' <<<"$2")
+}
+
 device_dmenu_options() {
   local kind="$1" all_devices="$2"
   local device_json dtype
@@ -184,7 +149,7 @@ device_dmenu_options() {
     dtype="$(device_type "$kind" "$device_json")"
     printf '%s\u0000icon\u001f%s\n' \
       "$(friendly_device_name "$device_json" "$dtype")" \
-      "$(get_icon "$dtype" "")"
+      "$(get_icon "$dtype")"
   done < <(echo "$all_devices" | jq -c '.[]')
 }
 
@@ -220,41 +185,47 @@ device_select_fuzzel() {
 
 case "${1:-}" in
   # Sinks (audio output)
-  sink-toggle-mute) set_mute @DEFAULT_SINK@ toggle && notify_current_sink ;;
-  sink-increase) set_volume @DEFAULT_SINK@ "${2:-5}%+" && notify_current_sink ;;
-  sink-decrease) set_volume @DEFAULT_SINK@ "${2:-5}%-" && notify_current_sink ;;
-  sink-move-next) set_sink_and_move "$(get_next_sink "+1")" && notify_current_sink ;;
-  sink-move-prev) set_sink_and_move "$(get_next_sink "-1")" && notify_current_sink ;;
+  sink-toggle-mute) set_mute @DEFAULT_SINK@ toggle ;;
+  sink-increase) set_volume @DEFAULT_SINK@ "${2:-5}%+" ;;
+  sink-decrease) set_volume @DEFAULT_SINK@ "${2:-5}%-" ;;
+  sink-move-next) set_sink_and_move "$(get_next_sink "+1")" ;;
+  sink-move-prev) set_sink_and_move "$(get_next_sink "-1")" ;;
   sink-move-fuzzel)
     selection="$(device_select_fuzzel sink "$(list_sinks)")"
     if [[ -n $selection ]]; then
-      set_sink_and_move "$selection" && notify_current_sink
+      set_sink_and_move "$selection"
     fi
     ;;
 
-  # Status (read-only)
+  # The output's type and friendly name, tab separated (read by the desktop shell).
   sink-status)
     device_json="$(get_sink "$(pactl get-default-sink)")"
     dtype="$(device_type sink "$device_json")"
-    name="$(friendly_device_name "$device_json" "$dtype")"
-    wpctl_output="$(wpctl get-volume "@DEFAULT_SINK@")"
-    volume="$(awk '{ printf "%d", $2 * 100 }' <<<"$wpctl_output")"
-    muted=false
-    [[ $wpctl_output == *"[MUTED]"* ]] && muted=true
-    glyph="$(get_glyph "$dtype")"
-    printf '%s\t%s\t%s\t%s\t%s\n' "$dtype" "$name" "$volume" "$muted" "$glyph"
+    printf '%s\t%s\n' "$dtype" "$(friendly_device_name "$device_json" "$dtype")"
+    ;;
+
+  # Every output and input, internal first then by name: kind, name, type and friendly name, tab separated (read by the desktop shell).
+  devices)
+    { print_devices sink "$(list_sinks)"; print_devices source "$(list_sources)"; } | sort -t $'\t' -k2,2 -k1,1n -k5,5 | cut -f2-
+    ;;
+
+  select)
+    case "$2" in
+      sink) set_sink_and_move "$3" ;;
+      source) set_source_and_move "$3" ;;
+    esac
     ;;
 
   # Sources (audio input)
-  source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle && notify_current_source ;;
-  source-increase) set_volume @DEFAULT_SOURCE@ "${2:-5}%+" && notify_current_source ;;
-  source-decrease) set_volume @DEFAULT_SOURCE@ "${2:-5}%-" && notify_current_source ;;
-  source-move-next) set_source_and_move "$(get_next_source "+1")" && notify_current_source ;;
-  source-move-prev) set_source_and_move "$(get_next_source "-1")" && notify_current_source ;;
+  source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle ;;
+  source-increase) set_volume @DEFAULT_SOURCE@ "${2:-5}%+" ;;
+  source-decrease) set_volume @DEFAULT_SOURCE@ "${2:-5}%-" ;;
+  source-move-next) set_source_and_move "$(get_next_source "+1")" ;;
+  source-move-prev) set_source_and_move "$(get_next_source "-1")" ;;
   source-move-fuzzel)
     selection="$(device_select_fuzzel source "$(list_sources)")"
     if [[ -n $selection ]]; then
-      set_source_and_move "$selection" && notify_current_source
+      set_source_and_move "$selection"
     fi
     ;;
 esac

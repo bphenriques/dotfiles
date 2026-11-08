@@ -17,14 +17,34 @@ let
         description = "Label shown next to the key";
       };
       cmd = mkOption {
-        type = types.nullOr types.str;
+        type = types.nullOr (types.either types.str (types.listOf types.str));
         default = null;
-        description = "Command to run";
+        description = "Command to run, or one per key for a pair (e.g. Down and Up) shown as one row";
       };
       keepOpen = mkOption {
         type = types.nullOr types.bool;
         default = null;
         description = "Keep the menu open after running cmd";
+      };
+      activeWhen = mkOption {
+        type = types.nullOr (types.enum [ "wifi" "bluetooth" "repeat" "shuffle" ]);
+        default = null;
+        description = "State that lights the entry while on, for a toggle";
+      };
+      profile = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Display profile the entry selects, lit while it is the current one";
+      };
+      width = mkOption {
+        type = types.nullOr types.ints.positive;
+        default = null;
+        description = "Width of this entry's level; menu.width otherwise";
+      };
+      columns = mkOption {
+        type = types.nullOr types.ints.positive;
+        default = null;
+        description = "Columns of this entry's level, entries flowing across; menu.columns otherwise";
       };
       submenu = mkOption {
         type = types.nullOr (types.listOf entry);
@@ -32,14 +52,47 @@ let
         description = "Nested entries";
       };
       list = mkOption {
-        type = types.nullOr (types.enum [ "tray" ]);
+        type = types.nullOr (types.enum [ "tray" "bluetooth" "wifi" "sinks" "sources" ]);
         default = null;
-        description = "Nested entries filled at runtime, e.g. tray apps";
+        description = "Nested entries filled at runtime (tray apps, paired Bluetooth devices, saved Wi-Fi networks in range, audio outputs or inputs), numbered after any submenu";
+      };
+      pins = mkOption {
+        type = types.listOf (types.submodule {
+          options = {
+            match = mkOption {
+              type = types.str;
+              description = "Pattern, with * for anything, on the item's id: audio node name, Bluetooth address, Wi-Fi name or tray app id";
+            };
+            label = mkOption {
+              type = types.str;
+              description = "Name shown for the item, also while it is absent";
+            };
+            icon = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Glyph shown for the item, the same present or absent";
+            };
+          };
+        });
+        default = [ ];
+        description = "Items of the list that keep digits 1 onwards, dimmed while absent";
       };
       status = mkOption {
         type = types.nullOr (types.enum [ "sink" "source" "music" "brightness" "network" "bluetooth" "display" "tray" "wallpaper" ]);
         default = null;
         description = "Status shown in place of the label";
+      };
+      requires = {
+        connected = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          description = "Outputs that must be connected for the entry to be enabled: connector name, or make, model and serial";
+        };
+        enabled = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          description = "Outputs that must also be on, e.g. the panel a brightness entry dims";
+        };
       };
       icon = mkOption {
         type = types.nullOr types.str;
@@ -51,6 +104,8 @@ let
 
   # Esc closes the menu and Backspace goes back a level.
   reservedKeys = [ "Escape" "BackSpace" ];
+
+  digits = map toString (lib.range 0 9);
 
   keysOf = entries: lib.concatMap (e: lib.toList e.key) entries;
 
@@ -66,8 +121,12 @@ let
       { assertion = reserved == [ ]; message = "my.programs.desktop-shell.menu: ${toString reserved} in ${path} are reserved for the menu"; }
     ]
     ++ lib.concatMap (e: [
-      { assertion = lib.count (x: x != null) [ e.cmd e.submenu e.list ] == 1; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs exactly one of cmd, submenu or list"; }
+      { assertion = (e.cmd != null) != (e.submenu != null || e.list != null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs either cmd, or submenu and/or list"; }
       { assertion = e.keepOpen == null || e.cmd != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set keepOpen with cmd"; }
+      { assertion = e.pins == [ ] || e.list != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set pins with list"; }
+      { assertion = lib.length e.pins <= 9; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} has more pins than digits"; }
+      { assertion = e.list == null || lib.intersectLists digits (keysOf (if e.submenu != null then e.submenu else [ ])) == [ ]; message = "my.programs.desktop-shell.menu: digits in '${e.desc}' are reserved for its list"; }
+      { assertion = !(lib.isList e.cmd) || (lib.isList e.key && lib.length e.cmd == lib.length e.key); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} pairs keys and commands, so needs as many of each"; }
     ]) entries
     ++ lib.concatMap (e: lib.optionals (e.submenu != null) (levelAssertions "${path} > ${e.desc}" e.submenu)) entries;
 in
@@ -93,10 +152,10 @@ in
       description = "Menu entries, laid out and triggered like wlr-which-key";
     };
 
-    exec.menu = mkOption {
+    exec.ipc = mkOption {
       type = types.str;
-      default = "${lib.getExe config.programs.quickshell.package} -c desktop-shell ipc call menu toggle";
-      description = "Command that opens or closes the menu";
+      default = "${lib.getExe config.programs.quickshell.package} -c desktop-shell ipc call";
+      description = "Prefix for the shell's IPC calls; append the target and function, e.g. `menu toggle`";
     };
   };
 
@@ -111,20 +170,31 @@ in
         dimOpacity = 0.5;
         radius = 10;
         itemRadius = 6;
-        iconSize = 16;
-        borderWidth = 1;
+        iconSize = 24;
+        borderWidth = 2;
         spacing = 8;
-        padding = 12;
+        padding = 14;
         itemPaddingX = 8;
-        itemPaddingY = 4;
+        itemPaddingY = 5;
         listSpacing = 0;
-        edgeMargin = 12;
+        edgeMargin = 35;
+        osdLength = 160;
+        osdIconSize = 28;
+        meterThickness = 6;
+        meterLength = 48;
+        minimapHeight = 30;
+        minimapMaxWidth = 180;
+        minimapOpacity = 0.7;
+        minimapBorderWidth = 1;
       };
       menu = {
         inherit (cfg.menu) entries;
-        width = lib.mkDefault 720;
-        rowsPerColumn = lib.mkDefault 5;
+        width = lib.mkDefault 960;
+        columns = lib.mkDefault 2;
       };
+      osd.timeout = lib.mkDefault 1500;
+      # exec, so stopping it closes the inhibitor's stdin rather than orphaning it with the lock held.
+      commands.keepAwake = lib.mkDefault "exec ${pkgs.systemd}/bin/systemd-inhibit --what=idle --who=desktop-shell --why=\"Keep awake\" cat";
     };
 
     xdg.configFile."desktop-shell/config.json".source = settingsFile;

@@ -11,6 +11,8 @@ Singleton {
   readonly property alias menu: adapter.menu
   readonly property alias keyboard: adapter.keyboard
   readonly property alias glyphs: adapter.glyphs
+  readonly property alias osd: adapter.osd
+  readonly property alias commands: adapter.commands
 
   FileView {
     path: (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/desktop-shell/config.json"
@@ -39,6 +41,14 @@ Singleton {
         property int itemPaddingY
         property int listSpacing
         property int edgeMargin
+        property int osdLength
+        property int osdIconSize
+        property int meterThickness
+        property int meterLength
+        property int minimapHeight
+        property int minimapMaxWidth
+        property real minimapOpacity
+        property int minimapBorderWidth
       }
 
       property JsonObject battery: JsonObject {
@@ -49,20 +59,46 @@ Singleton {
       property JsonObject menu: JsonObject {
         property var entries: []
         property int width
-        property int rowsPerColumn
+        property int columns
       }
 
       property JsonObject keyboard: JsonObject {
         property var labels: []
       }
 
-      // Glyphs owned by other programs: upower-notify, volume-osd, brightness-osd, mpc-plus, awww.
+
+      property JsonObject osd: JsonObject {
+        property int timeout
+        // Commands the wheel runs on each level, down then up: sink, source, brightness.
+        property var adjust: ({})
+      }
+
+      // External commands, each set by the module that owns the tool, run with sh -c. One left unset shows as an empty status.
+      property JsonObject commands: JsonObject {
+        // One device per line: kind (sink or source), name, type and friendly name, tab separated, internal first.
+        property string audioDevices
+        // Given a kind and a device name, makes it the default.
+        property string audioSelect
+        // Prints the output's type (headphones, headset, internal, external), a tab, and its friendly name.
+        property string audioDevice
+        // Prints the path of a file holding the backlight's value, a tab, and its maximum.
+        property string brightness
+        // Prints the current display profile.
+        property string displayProfile
+        // niri msg --json outputs.
+        property string outputs
+        // Prints true or false for do-not-disturb, then again on every change.
+        property string notifications
+        // Inhibits idle until its stdin closes.
+        property string keepAwake
+        property string recordingStop
+      }
+
+      // Glyphs owned by other programs: upower-notify, volume-osd, mpc-plus.
       property JsonObject glyphs: JsonObject {
         property var battery: ({ discharging: [], charging: [] })
         property var audio: ({})
-        property var brightness: ({})
         property var music: ({})
-        property string wallpaper
       }
     }
   }

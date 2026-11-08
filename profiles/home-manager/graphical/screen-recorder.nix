@@ -39,6 +39,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   # The recording state file must exist up front for Quickshell to watch it.
   systemd.user.tmpfiles.rules = [ "f %t/screen-recorder 0600 - - -" ];
 
+  my.programs.desktop-shell.settings.commands.recordingStop = "${screen-recorder} stop";
+
   my.programs.niri.bindings = {
     "Ctrl+Print"       = ''spawn "${screen-recorder}" "screen" "${directory}"'';
     "Ctrl+Shift+Print" = ''spawn "${screen-recorder}" "region" "${directory}"'';

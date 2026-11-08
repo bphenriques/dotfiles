@@ -12,12 +12,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   systemd.user.tmpfiles.rules = [ "f %t/wallpaper 0600 - - -" ];
 
   my.programs.desktop-shell = {
-    settings.glyphs.wallpaper = "󰸉";
-    menu.entries = lib.mkOrder 1600 [
-      { key = "w"; desc = "Wallpaper"; status = "wallpaper"; submenu = [
-        { key = [ "Left" "Up" ];    desc = "Previous wallpaper"; cmd = "${awww-util} prev ${wallpapers}";   keepOpen = true; }
-        { key = [ "Right" "Down" ]; desc = "Next wallpaper";     cmd = "${awww-util} next ${wallpapers}";   keepOpen = true; }
-        { key = "r";                desc = "Random";             cmd = "${awww-util} random ${wallpapers}"; keepOpen = true; }
+    menu.entries = lib.mkOrder 600 [
+      { key = "w"; desc = "Wallpaper"; width = 640; status = "wallpaper"; submenu = [
+        { key = [ "Left" "Right" ]; desc = "Wallpaper"; width = 640; cmd = [ "${awww-util} prev ${wallpapers}" "${awww-util} next ${wallpapers}" ]; keepOpen = true; }
+        { key = "r";                desc = "Random";    cmd = "${awww-util} random ${wallpapers}"; keepOpen = true; }
       ]; }
     ];
   };

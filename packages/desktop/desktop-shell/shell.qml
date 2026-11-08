@@ -13,5 +13,10 @@ ShellRoot {
   }
 
   Menu {}
+
+  Osd {}
+
+  WorkspaceMap {}
+
   RecordingIndicator {}
 }

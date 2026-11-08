@@ -4,8 +4,25 @@ let
   inherit (config) stylix;
 
   backgroundOpacity = "F2"; # 95%
+
+  # For the desktop shell: whether notifications are paused, then again on every change dunst signals.
+  # dbus-monitor prints the property name and its value on consecutive lines.
+  pausedWatch = pkgs.writeShellApplication {
+    name = "dunst-paused-watch";
+    runtimeInputs = [ config.services.dunst.package pkgs.dbus ];
+    text = ''
+      dunstctl is-paused
+      next=0
+      dbus-monitor --session "type='signal',path='/org/freedesktop/Notifications',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'" | while read -r line; do
+        if [[ $next == 1 ]]; then if [[ $line == *"boolean true"* ]]; then echo true; else echo false; fi; fi
+        if [[ $line == *'string "paused"'* ]]; then next=1; else next=0; fi
+      done
+    '';
+  };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  my.programs.desktop-shell.settings.commands.notifications = lib.getExe pausedWatch;
+
   services.dunst = {
     enable = true;
     iconTheme = {
@@ -73,9 +90,6 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         msg_urgency = "critical";
         fullscreen = "show";
       };
-      fullscreen_show_volume = { category = "volume-osd*"; fullscreen = "show"; };
-      fullscreen_show_brightness = { category = "brightness-osd"; fullscreen = "show"; };
-      fullscreen_show_keyboard = { category = "keyboard-input"; fullscreen = "show"; };
 
     };
   };

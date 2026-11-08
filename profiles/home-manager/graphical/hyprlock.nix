@@ -1,6 +1,9 @@
-{ pkgs, config, self, lib, ... }:
+{ pkgs, config, lib, ... }:
 let
-  background = self.packages.wallpapers.files.lake;
+  colors = config.lib.stylix.colors;
+  font = config.stylix.fonts.monospace.name;
+  # Without an outline hyprlock colours the whole box on failure and Caps Lock, so only a faint tint.
+  tint = base: "rgba(${colors."${base}-rgb-r"}, ${colors."${base}-rgb-g"}, ${colors."${base}-rgb-b"}, 0.2)";
   lockPackage = pkgs.writeShellApplication {
     name = "session-lock";
     runtimeInputs = [
@@ -10,51 +13,64 @@ let
     ];
     text = ''pidof hyprlock || { niri msg action do-screen-transition --delay-ms 750 && hyprlock; }'';
   };
+  # hyprlock's $LAYOUT stays empty under niri, so ask niri for the current layout.
+  keyboardLayout = pkgs.writeShellApplication {
+    name = "lock-keyboard-layout";
+    runtimeInputs = [ pkgs.niri pkgs.jq ];
+    text = ''
+      niri msg --json keyboard-layouts | jq -r --argjson names '${builtins.toJSON (map (l: l.label) config.my.programs.niri.keyboardLayouts)}' \
+        '$names[.current_idx] // ""'
+    '';
+  };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.session.exec.lock = lib.getExe lockPackage;
+  # Black, a username and a password prompt: the same look as the tuigreet login.
   programs.hyprlock = {
     enable = true;
     settings = {
-      general.disable_loading_bar = true;
-      background = [{
-        path = background;
-        blur_passes = 3;
-        blur_size = 12;
-      }];
+      general = {
+        hide_cursor = true;
+      };
+      background = [{ color = "rgb(000000)"; }];
+      label = [
+        {
+          text = "$USER";
+          font_family = font;
+          font_size = 28;
+          color = "rgb(${colors.base05})";
+          position = "0, 60";
+          halign = "center";
+          valign = "center";
+        }
+        {
+          text = "cmd[update:1000] ${lib.getExe keyboardLayout}";
+          font_family = font;
+          font_size = 16;
+          color = "rgb(${colors.base03})";
+          # Inside the password box, at its right edge.
+          position = "170, -20";
+          zindex = 1;
+          halign = "center";
+          valign = "center";
+        }
+      ];
       input-field = [{
-        size = "300, 50";
-        valign = "bottom";
-        position = "0%, 10%";
-
-        outline_thickness = 1;
-        placeholder_text = "Enter Password";
-
-        font_color = "rgb(b6c4ff)";
-        outer_color = "rgba(180, 180, 180, 0.5)";
-        inner_color = "rgba(200, 200, 200, 0.1)";
-        check_color = "rgba(247, 193, 19, 0.5)";
-        fail_color = "rgba(255, 106, 134, 0.5)";
-
-        fade_on_empty = false;
-
-        shadow_color = "rgba(0, 0, 0, 0.1)";
-        shadow_size = 7;
-        shadow_passes = 2;
-      }];
-      label = [{
-        text = ''cmd[update:1000] echo "<span font-weight='ultralight' >$(date +'%H:%M')</span>"'';
-
-        font_size = 350;
-        font_family = config.stylix.fonts.sansSerif.name;
-        color = "rgb(b6c4ff)";
-        position = "0%, 2%";
-        valign = "center";
+        size = "400, 60";
+        position = "0, -20";
         halign = "center";
-        shadow_color = "rgba(0, 0, 0, 0.1)";
-        shadow_size = 20;
-        shadow_passes = 2;
-        shadow_boost = 0.3;
+        valign = "center";
+        outline_thickness = 0;
+        dots_center = true;
+        fade_on_empty = false;
+        placeholder_text = "_";
+        fail_text = ''<span foreground="##${colors.base08}">$FAIL ($ATTEMPTS)</span>'';
+        font_family = font;
+        font_color = "rgb(${colors.base05})";
+        inner_color = "rgb(000000)";
+        check_color = "rgb(000000)";
+        fail_color = tint "base08";
+        capslock_color = tint "base0A";
       }];
     };
   };

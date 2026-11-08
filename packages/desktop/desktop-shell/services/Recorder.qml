@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
 // Contract with packages/desktop/screen-recorder: the state file holds the start time (epoch seconds) while recording and is empty otherwise.
 Singleton {
@@ -16,12 +17,7 @@ Singleton {
   readonly property bool micLive: !Audio.sourceMuted
 
   function stop() {
-    Quickshell.execDetached(["screen-recorder", "stop"]);
-  }
-
-  Subscription {
-    service: Audio
-    active: root.recording
+    if (Config.commands.recordingStop) Quickshell.execDetached(["sh", "-c", Config.commands.recordingStop]);
   }
 
   FileView {

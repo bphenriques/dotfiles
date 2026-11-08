@@ -24,8 +24,6 @@ _round_level() {
 
 get_discharge_icon() { echo "$UPOWER_DISCHARGE_ICON_DIR/$(_round_level "$1")"; }
 get_charge_icon() { echo "$UPOWER_CHARGE_ICON_DIR/$(_round_level "$1")"; }
-get_discharge_glyph() { echo -n "${UPOWER_DISCHARGE_GLYPH[$(_round_level "$1")]}"; }
-get_charge_glyph() { echo -n "${UPOWER_CHARGE_GLYPH[$(_round_level "$1")]}"; }
 
 notify_current_battery() {
   local percentage="$1"
@@ -139,20 +137,4 @@ upower_monitor() {
 case "${1:-}" in
   notify) notify_current_battery "$(get_battery_percentage)" ;;
   monitor) upower --monitor | upower_monitor ;;
-  status)
-    pct="$(get_battery_percentage)"
-    state=discharging glyph="" severity=normal
-    if is_plugged; then
-      state=charging
-      glyph="$(get_charge_glyph "$pct")"
-    else
-      glyph="$(get_discharge_glyph "$pct")"
-      if [ "$pct" -lt "$UPOWER_NOTIFY_CRITICAL" ]; then
-        severity=critical
-      elif [ "$pct" -lt "$UPOWER_NOTIFY_LOW" ]; then
-        severity=low
-      fi
-    fi
-    printf '%s\t%s\t%s\t%s\n' "$state" "$pct" "$glyph" "$severity"
-    ;;
 esac
