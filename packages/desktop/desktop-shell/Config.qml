@@ -26,29 +26,29 @@ Singleton {
         property color primary
         property color alert
         property color warning
-        property real surfaceOpacity
-        property real highlightOpacity
-        property real dimOpacity
+        property real surfaceOpacity: 0.92
+        property real highlightOpacity: 0.25
+        property real dimOpacity: 0.5
         property string monospaceFont
         property int fontSize
-        property int radius
-        property int itemRadius
-        property int iconSize
-        property int borderWidth
-        property int spacing
-        property int padding
-        property int itemPaddingX
-        property int itemPaddingY
-        property int listSpacing
-        property int edgeMargin
-        property int osdLength
-        property int osdIconSize
-        property int meterThickness
-        property int meterLength
-        property int minimapHeight
-        property int minimapMaxWidth
-        property real minimapOpacity
-        property int minimapBorderWidth
+        property int radius: 10
+        property int itemRadius: 6
+        property int iconSize: 24
+        property int borderWidth: 2
+        property int spacing: 8
+        property int padding: 14
+        property int itemPaddingX: 8
+        property int itemPaddingY: 5
+        property int listSpacing: 0
+        property int edgeMargin: 35
+        property int osdLength: 160
+        property int osdIconSize: 28
+        property int meterThickness: 6
+        property int meterLength: 48
+        property int minimapHeight: 30
+        property int minimapMaxWidth: 180
+        property real minimapOpacity: 0.7
+        property int minimapBorderWidth: 1
       }
 
       property JsonObject battery: JsonObject {
@@ -58,8 +58,8 @@ Singleton {
 
       property JsonObject menu: JsonObject {
         property var entries: []
-        property int width
-        property int columns
+        property int width: 960
+        property int columns: 2
       }
 
       property JsonObject keyboard: JsonObject {
@@ -68,7 +68,7 @@ Singleton {
 
 
       property JsonObject osd: JsonObject {
-        property int timeout
+        property int timeout: 1500
         // Commands the wheel runs on each level, down then up: sink, source, brightness.
         property var adjust: ({})
       }

@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import qs
 import qs.services
 import qs.ui
-import "../../ui/WhichKey.js" as WhichKey
 
 // Status line for a menu status id (`status` in my.programs.desktop-shell.menu.entries), or an icon and label without one.
 StatusLine {
@@ -41,7 +40,7 @@ StatusLine {
   }
 
   function pinned(id, name) {
-    return Array.from(pins).find(pin => WhichKey.glob(pin.match, id))?.label ?? name;
+    return Array.from(pins).find(pin => MenuKeys.glob(pin.match, id))?.label ?? name;
   }
 
   function glyphFor(status) {

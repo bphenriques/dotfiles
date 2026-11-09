@@ -19,9 +19,11 @@ Singleton {
     outputs.refresh();
   }
 
-  // Whether an entry's requirements hold: the outputs it needs connected, and those it needs on.
+  // Whether an entry's requirements hold: the outputs it needs connected, those it needs off, and
+  // those it needs on.
   function available(requires) {
     return Array.from(requires?.connected ?? []).every(output => root.connected.includes(output))
+      && Array.from(requires?.disconnected ?? []).every(output => !root.connected.includes(output))
       && Array.from(requires?.enabled ?? []).every(output => root.enabled.includes(output));
   }
 

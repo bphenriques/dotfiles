@@ -88,6 +88,11 @@ let
           default = [ ];
           description = "Outputs that must be connected for the entry to be enabled: connector name, or make, model and serial";
         };
+        disconnected = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          description = "Outputs that must stay unplugged for the entry to be enabled, e.g. the screens a profile has no line for";
+        };
         enabled = mkOption {
           type = types.listOf types.str;
           default = [ ];
@@ -149,7 +154,7 @@ in
     menu.entries = mkOption {
       type = types.listOf entry;
       default = [ ];
-      description = "Menu entries, laid out and triggered like wlr-which-key";
+      description = "Menu entries";
     };
 
     exec.ipc = mkOption {
@@ -163,39 +168,7 @@ in
     assertions = [ (lib.hm.assertions.assertPlatform "my.programs.desktop-shell" pkgs lib.platforms.linux) ]
       ++ levelAssertions "the top level" cfg.menu.entries;
 
-    my.programs.desktop-shell.settings = {
-      theme = lib.mapAttrs (_: lib.mkDefault) {
-        surfaceOpacity = 0.92;
-        highlightOpacity = 0.25;
-        dimOpacity = 0.5;
-        radius = 10;
-        itemRadius = 6;
-        iconSize = 24;
-        borderWidth = 2;
-        spacing = 8;
-        padding = 14;
-        itemPaddingX = 8;
-        itemPaddingY = 5;
-        listSpacing = 0;
-        edgeMargin = 35;
-        osdLength = 160;
-        osdIconSize = 28;
-        meterThickness = 6;
-        meterLength = 48;
-        minimapHeight = 30;
-        minimapMaxWidth = 180;
-        minimapOpacity = 0.7;
-        minimapBorderWidth = 1;
-      };
-      menu = {
-        inherit (cfg.menu) entries;
-        width = lib.mkDefault 960;
-        columns = lib.mkDefault 2;
-      };
-      osd.timeout = lib.mkDefault 1500;
-      # exec, so stopping it closes the inhibitor's stdin rather than orphaning it with the lock held.
-      commands.keepAwake = lib.mkDefault "exec ${pkgs.systemd}/bin/systemd-inhibit --what=idle --who=desktop-shell --why=\"Keep awake\" cat";
-    };
+    my.programs.desktop-shell.settings.menu = { inherit (cfg.menu) entries; };
 
     xdg.configFile."desktop-shell/config.json".source = settingsFile;
 

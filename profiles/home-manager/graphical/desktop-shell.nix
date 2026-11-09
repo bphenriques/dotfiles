@@ -18,6 +18,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         warning = colors.base0A;
         monospaceFont = config.stylix.fonts.monospace.name;
         fontSize = config.stylix.fonts.sizes.popups;
+        # niri rounds the menu's blur to match.
+        radius = 10;
       };
       battery = {
         low = osConfig.services.upower.percentageLow;
@@ -27,6 +29,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       commands = {
         brightness = "${lib.getExe pkgs.brightnessctl} --machine-readable --class=backlight info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
         outputs = "${niri} msg --json outputs";
+        # exec, so stopping it closes the inhibitor's stdin rather than orphaning it with the lock held.
+        keepAwake = "exec ${lib.getExe' pkgs.systemd "systemd-inhibit"} --what=idle --who=desktop-shell --why=\"Keep awake\" cat";
       };
     };
 

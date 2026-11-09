@@ -1,6 +1,6 @@
 # desktop-shell
 
-A [Quickshell](https://quickshell.org) menu with live status, a pop-up for volume, brightness, keyboard-layout and keep-awake changes, a workspace minimap when where you are changes, and the screen-recording pill. Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input.
+A [Quickshell](https://quickshell.org) menu with live status, a pop-up for volume, brightness, keyboard-layout and keep-awake changes, a workspace minimap when where you are changes, and the screen-recording pill. Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input. `Config.qml` holds the defaults; the module only passes settings through.
 
 ## Design rules
 
@@ -26,7 +26,7 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 
 ## Menu
 
-wlr-which-key's grammar: every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected`, `requires.disconnected` and `requires.enabled` dim an entry until the outputs it needs are plugged in, unplugged, or on. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
 ## Kit
 

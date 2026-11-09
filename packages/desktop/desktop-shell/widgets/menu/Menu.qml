@@ -9,7 +9,7 @@ import qs
 import qs.services
 import qs.ui
 
-// wlr-which-key with live status: entries come from my.programs.desktop-shell.menu.entries.
+// The keyboard menu with live status: entries come from my.programs.desktop-shell.menu.entries.
 Scope {
   id: root
 
@@ -126,7 +126,7 @@ Scope {
           anchors.margins: Config.theme.padding
           spacing: Config.theme.padding
 
-          // The clock and alerts on the left, steady state on the right; inside a level its title and status.
+          // The clock on the left, steady state and alerts on the right; inside a level its title and status.
           RowLayout {
             Layout.rightMargin: Config.theme.itemPaddingX
             spacing: Config.theme.spacing
@@ -143,6 +143,16 @@ Scope {
               }
             }
 
+            Label {
+              visible: menu.level?.entry?.list === "tray"
+              tone: "dim"
+              text: "Ctrl+digit: app menu"
+            }
+
+            Item {
+              Layout.fillWidth: true
+            }
+
             // Always shown, so their state is known at a glance: lit when on, dim when off.
             Icon {
               visible: menu.level === null
@@ -154,16 +164,6 @@ Scope {
               visible: menu.level === null
               tone: IdleInhibit.enabled ? "primary" : "dim"
               glyph: Glyphs.keepAwake
-            }
-
-            Label {
-              visible: menu.level?.entry?.list === "tray"
-              tone: "dim"
-              text: "Ctrl+digit: app menu"
-            }
-
-            Item {
-              Layout.fillWidth: true
             }
 
             MenuStatus {

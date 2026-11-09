@@ -23,11 +23,29 @@ let
   enable = screen: screen // { status = "enable"; };
   disable = screen: screen // { status = "disable"; };
 
+  # Kanshi matches a profile only when its outputs pair off one-for-one with the connected heads,
+  # and a head left out keeps whatever state it had, so there is a profile per set of screens
+  # plugged in, each saying what all of them do. Add a screen to this list and to the profiles
+  # below together, or the sets stop covering each other and nothing matches.
+  screens = [ laptopScreen dellScreen livingRoomScreen ];
+
+  # Two profiles pair with the same set of heads whenever a screen can be on or off with the rest
+  # plugged in, and kanshi takes the first that matches: plugging a screen in should light it up,
+  # so the profile turning it on is listed first. Selecting from the menu is by name and ignores
+  # the order.
   profiles = [
-    { name = "internal";             key = "1"; desc = "Laptop";         outputs = [ (enable laptopScreen) ]; }
-    { name = "external-office";      key = "2"; desc = "Office monitor"; outputs = [ (disable laptopScreen) (enable dellScreen) ]; }
-    { name = "external-living-room"; key = "3"; desc = "Living room TV"; outputs = [ (disable laptopScreen) (enable livingRoomScreen) ]; }
+    { name = "internal";             key = "1"; desc = "Laptop";              outputs = [ (enable laptopScreen) ]; }
+    { name = "external-office";      key = "2"; desc = "Office monitor";      outputs = [ (disable laptopScreen) (enable dellScreen) ]; }
+    { name = "internal-office";      key = "3"; desc = "Laptop, monitor off"; outputs = [ (enable laptopScreen) (disable dellScreen) ]; }
+    { name = "external-living-room"; key = "4"; desc = "Living room TV";      outputs = [ (disable laptopScreen) (enable livingRoomScreen) ]; }
+    { name = "internal-living-room"; key = "5"; desc = "Laptop, TV off";      outputs = [ (enable laptopScreen) (disable livingRoomScreen) ]; }
   ];
+
+  # The screens a profile names, and those it expects unplugged: kanshi takes the first profile
+  # whose outputs pair with the heads, so both hold only in the setup the profile is for.
+  named = profile: map (output: output.criteria) profile.outputs;
+  unplugged = profile: map (screen: screen.criteria)
+    (lib.filter (screen: !lib.elem screen.criteria (named profile)) screens);
 in
 {
   services.kanshi = {
@@ -48,8 +66,12 @@ in
       inherit (profile) key desc;
       profile = profile.name;
       cmd = "${kanshictl} switch ${profile.name}";
-      # A profile can only apply while the screens it turns on are connected.
-      requires.connected = map (output: output.criteria) (lib.filter (output: output.status == "enable") profile.outputs);
+      # Any other set of screens and kanshi has no profile pairing the heads: it refuses the
+      # switch, and the menu would look like nothing happened, so dim the entry instead.
+      requires = {
+        connected = named profile;
+        disconnected = unplugged profile;
+      };
     }) profiles ++ [
       { key = "c"; desc = "Configure..."; cmd = lib.getExe pkgs.wdisplays; }
     ]; }
