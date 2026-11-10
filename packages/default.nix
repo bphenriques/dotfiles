@@ -29,6 +29,7 @@ let
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       desktop-shell = pkgs.callPackage ./desktop/desktop-shell { };
+      displayctl = pkgs.callPackage ./desktop/displayctl { };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }
   );
