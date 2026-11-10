@@ -20,13 +20,13 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 
 ## Layout
 
-- `services/`: state read from its source (D-Bus, Pipewire, niri, files), pushed by events. Sources without events (kanshi, volume-osd's device type) are read on `refresh()`, which the menu calls as it opens, through `CommandReader`.
+- `services/`: state read from its source (D-Bus, Pipewire, niri, files), pushed by events. Sources without events (the niri output list, volume-osd's device type) are read on `refresh()`, which the menu calls as it opens, through `CommandReader`.
 - `ui/`: the kit below. Widgets use it and the theme from `Config`, never raw colours or sizes.
 - `widgets/`: the surfaces. `menu/` splits into `MenuModel` (state, keys) and `Menu`, `MenuStatus` (view).
 
 ## Menu
 
-Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected`, `requires.disconnected` and `requires.enabled` dim an entry until the outputs it needs are plugged in, unplugged, or on. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on, and `onOutput` lights it while its own output is on. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
 ## Kit
 
@@ -49,4 +49,4 @@ Every key visible, then its status, labels starting together after a gutter as w
 
 ## Runtime
 
-Nothing runs from PATH: each external command arrives through `Config.commands`, set by the module that owns the tool (volume-osd, dunst, kanshi, screen-recorder), so swapping a tool means changing its module, not the shell. One left unset shows as an empty status. niri is the exception: the shell follows its event stream directly.
+Nothing runs from PATH: each external command arrives through `Config.commands`, set by the module that owns the tool (volume-osd, dunst, display, screen-recorder), so swapping a tool means changing its module, not the shell. One left unset shows as an empty status. niri is the exception: the shell follows its event stream directly, except for the outputs, which niri reports no events for.

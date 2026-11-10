@@ -12,6 +12,7 @@ Singleton {
   readonly property alias keyboard: adapter.keyboard
   readonly property alias glyphs: adapter.glyphs
   readonly property alias osd: adapter.osd
+  readonly property alias display: adapter.display
   readonly property alias commands: adapter.commands
 
   FileView {
@@ -73,6 +74,11 @@ Singleton {
         property var adjust: ({})
       }
 
+      property JsonObject display: JsonObject {
+        // What the Display menu calls each screen, keyed as niri is told about it.
+        property var labels: ({})
+      }
+
       // External commands, each set by the module that owns the tool, run with sh -c. One left unset shows as an empty status.
       property JsonObject commands: JsonObject {
         // One device per line: kind (sink or source), name, type and friendly name, tab separated, internal first.
@@ -83,8 +89,6 @@ Singleton {
         property string audioDevice
         // Prints the path of a file holding the backlight's value, a tab, and its maximum.
         property string brightness
-        // Prints the current display profile.
-        property string displayProfile
         // niri msg --json outputs.
         property string outputs
         // Prints true or false for do-not-disturb, then again on every change.

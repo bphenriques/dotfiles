@@ -85,7 +85,7 @@ StatusLine {
       return { text: Bluez.connected.map(device => pinned(device.address, device.name)).join(", "), detail: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : "" };
     }
     case "display":
-      return { text: Display.profile, detail: Brightness.present ? Brightness.percentage + "%" : "" };
+      return { text: Display.summary, detail: Brightness.present ? Brightness.percentage + "%" : "" };
     case "tray":
       return { text: Tray.items.map(app => pinned(app.id, app.title || app.id)).join(", "), detail: "" };
     case "wallpaper":

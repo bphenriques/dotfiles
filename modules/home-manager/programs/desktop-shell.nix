@@ -31,10 +31,10 @@ let
         default = null;
         description = "State that lights the entry while on, for a toggle";
       };
-      profile = mkOption {
+      onOutput = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Display profile the entry selects, lit while it is the current one";
+        description = "Output whose being on lights the entry: connector name, or make, model and serial";
       };
       width = mkOption {
         type = types.nullOr types.ints.positive;
@@ -87,11 +87,6 @@ let
           type = types.listOf types.str;
           default = [ ];
           description = "Outputs that must be connected for the entry to be enabled: connector name, or make, model and serial";
-        };
-        disconnected = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = "Outputs that must stay unplugged for the entry to be enabled, e.g. the screens a profile has no line for";
         };
         enabled = mkOption {
           type = types.listOf types.str;

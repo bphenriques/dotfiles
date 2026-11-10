@@ -36,7 +36,7 @@ Scope {
     }
 
     // An entry's own actions by letter, then what its list holds by digit.
-    const actions = Array.from(level.entry.submenu ?? []).map(action => ({ key: action.key, desc: action.desc, enabled: Display.available(action.requires), paired: MenuKeys.isPair(action), active: isOn(action.activeWhen) || action.profile === Display.profile, listed: /^[0-9]$/.test(action.key), entry: action }));
+    const actions = Array.from(level.entry.submenu ?? []).map(action => ({ key: action.key, desc: action.desc, enabled: Display.available(action.requires), paired: MenuKeys.isPair(action), active: isOn(action.activeWhen) || Display.enabled.includes(action.onOutput), listed: /^[0-9]$/.test(action.key), entry: action }));
     return actions.concat(numbered(level.entry.list, level.entry.pins));
   }
 

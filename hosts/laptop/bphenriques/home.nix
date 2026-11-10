@@ -12,7 +12,7 @@ in
     ../../../profiles/home-manager/development
     ../../../profiles/home-manager/gaming
     ../../../profiles/home-manager/music
-    ./kanshi.nix
+    ./display.nix
   ];
 
   # NAS symlinks. Avoid mounting directly to $HOME to prevent slowdowns when offline
