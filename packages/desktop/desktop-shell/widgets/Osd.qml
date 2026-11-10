@@ -134,6 +134,8 @@ Scope {
         anchors.fill: parent
         visible: !window.metered
         padding: Config.theme.padding
+        // The bar's radius, not the capsule: the two shapes swap as the kind changes, so they must agree.
+        radius: Config.theme.radius
 
         Icon {
           anchors.verticalCenter: parent.verticalCenter
