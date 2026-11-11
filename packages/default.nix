@@ -22,13 +22,14 @@ let
       pkgs = nixpkgs.legacyPackages.${system};
       b = builders.${system};
     in rec {
-      volume-osd = pkgs.callPackage ./desktop/volume-osd { };
+      audioctl = pkgs.callPackage ./desktop/audioctl { };
       upower-notify = pkgs.callPackage ./desktop/upower-notify { };
       awww-util = pkgs.callPackage ./desktop/awww-util { };
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       desktop-shell = pkgs.callPackage ./desktop/desktop-shell { };
+      desktop-shell-preview = pkgs.callPackage ./desktop/desktop-shell/preview { };
       displayctl = pkgs.callPackage ./desktop/displayctl { };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }

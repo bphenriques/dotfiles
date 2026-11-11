@@ -28,14 +28,8 @@ get_charge_icon() { echo "$UPOWER_CHARGE_ICON_DIR/$(_round_level "$1")"; }
 notify_current_battery() {
   local percentage="$1"
 
-  local urgency=
-  if [ "$percentage" -ge 0 ] && [ "$percentage" -lt "$UPOWER_NOTIFY_CRITICAL" ]; then
-    urgency=critical
-  elif [ "$percentage" -ge "$UPOWER_NOTIFY_CRITICAL" ] && [ "$percentage" -lt "$UPOWER_NOTIFY_LOW" ]; then
-    urgency=low
-  else
-    urgency=normal
-  fi
+  local urgency=normal
+  [ "$percentage" -le "$UPOWER_NOTIFY_CRITICAL" ] && urgency=critical
 
   local icon=
   if is_plugged; then
@@ -135,6 +129,5 @@ upower_monitor() {
 }
 
 case "${1:-}" in
-  notify) notify_current_battery "$(get_battery_percentage)" ;;
   monitor) upower --monitor | upower_monitor ;;
 esac

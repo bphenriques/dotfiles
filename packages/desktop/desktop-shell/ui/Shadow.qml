@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 
-// niri's default shadow, for a surface drawn inside a larger window, where niri's own would outline the window.
+// A shadow like niri's default, for a surface drawn inside a larger window, where the compositor's own would outline the window.
 RectangularShadow {
   offset.y: 5
   spread: 5

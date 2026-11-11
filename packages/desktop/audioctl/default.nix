@@ -10,7 +10,7 @@
   ...
 }:
 pkgs.writeShellApplication {
-  name = "volume-osd";
+  name = "audioctl";
   runtimeInputs = [
     pkgs.coreutils
     pkgs.pulseaudio
@@ -22,17 +22,17 @@ pkgs.writeShellApplication {
   text = ''
     # Variables are accessed via indirect expansion (''${!var}) in get_icon
     # shellcheck disable=SC2034
-    OSD_VOLUME_HEADPHONES_ICON="${headphonesIcon}"
+    AUDIOCTL_HEADPHONES_ICON="${headphonesIcon}"
     # shellcheck disable=SC2034
-    OSD_VOLUME_HEADSET_ICON="${headsetIcon}"
+    AUDIOCTL_HEADSET_ICON="${headsetIcon}"
     # shellcheck disable=SC2034
-    OSD_VOLUME_INTERNAL_SPEAKERS_ICON="${internalSpeakersIcon}"
+    AUDIOCTL_INTERNAL_SPEAKERS_ICON="${internalSpeakersIcon}"
     # shellcheck disable=SC2034
-    OSD_VOLUME_EXTERNAL_SPEAKERS_ICON="${externalSpeakersIcon}"
+    AUDIOCTL_EXTERNAL_SPEAKERS_ICON="${externalSpeakersIcon}"
     # shellcheck disable=SC2034
-    OSD_VOLUME_MICROPHONE_ICON="${microphoneIcon}"
+    AUDIOCTL_MICROPHONE_ICON="${microphoneIcon}"
     # shellcheck disable=SC2034
-    OSD_VOLUME_ERROR_ICON="${errorIcon}"
+    AUDIOCTL_ERROR_ICON="${errorIcon}"
 
     ${lib.fileContents ./script.sh}
   '';

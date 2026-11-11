@@ -60,7 +60,7 @@ in
     ];
   };
 
-  my.programs.volume-osd.pins = {
+  my.programs.audioctl.pins = {
     sinks = [
       { match = "alsa_output.pci-*analog-stereo"; label = "Speakers"; type = "internal"; }
       { match = "*Arctis*"; label = "Headset"; type = "headset"; }

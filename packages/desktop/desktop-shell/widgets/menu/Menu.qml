@@ -13,8 +13,6 @@ import qs.ui
 Scope {
   id: root
 
-  readonly property bool open: menu.open
-
   function ordinal(day) {
     if (day >= 11 && day <= 13) return "th";
     return ["th", "st", "nd", "rd"][day % 10] ?? "th";
@@ -46,6 +44,19 @@ Scope {
       icon: row.modelData.icon ?? ""
       active: row.modelData.active ?? false
       pins: row.modelData.entry?.pins ?? []
+    }
+  }
+
+  // A header toggle: a click flips it, and its compositor key shows before it on request.
+  component HeaderToggle: ListItem {
+    id: toggle
+    property string shortcut
+    property bool shortcutShown: false
+
+    KeyHint {
+      visible: toggle.shortcutShown && toggle.shortcut !== ""
+      key: toggle.shortcut
+      chars: toggle.shortcut.length
     }
   }
 
@@ -131,8 +142,29 @@ Scope {
         width: menu.width
         height: content.implicitHeight + 2 * Config.theme.padding
 
+        // Super held a second shows the header toggles' compositor keys, not at once, so a Super shortcut does not flash them.
+        property bool shortcutsShown: false
+
+        function isSuper(event) {
+          return event.key === Qt.Key_Super_L || event.key === Qt.Key_Super_R || event.key === Qt.Key_Meta;
+        }
+
         focus: true
-        Keys.onPressed: event => event.accepted = menu.handleKey(event)
+        Keys.onPressed: event => {
+          if (isSuper(event) && !event.isAutoRepeat) superHeld.start();
+          event.accepted = menu.handleKey(event);
+        }
+        Keys.onReleased: event => {
+          if (!isSuper(event)) return;
+          superHeld.stop();
+          shortcutsShown = false;
+        }
+
+        Timer {
+          id: superHeld
+          interval: 1000
+          onTriggered: card.shortcutsShown = true
+        }
 
         ColumnLayout {
           id: content
@@ -147,11 +179,11 @@ Scope {
             Layout.rightMargin: Config.theme.itemPaddingX
             spacing: Config.theme.spacing
 
-            // Inside a level the title goes back up, like Backspace.
+            // Inside a level the title goes back up, like Backspace; at the top the clock opens the calendar.
             ListItem {
-              enabled: menu.level !== null
+              enabled: menu.level !== null || menu.calendar !== null
               dimsWhenDisabled: false
-              onActivated: menu.back()
+              onActivated: menu.level ? menu.back() : menu.activate(menu.calendar)
 
               Label {
                 font.bold: true
@@ -169,24 +201,45 @@ Scope {
               Layout.fillWidth: true
             }
 
-            // Always shown, so their state is known at a glance: lit when on, dim when off.
-            Icon {
+            // Always shown, so their state is known at a glance: lit when on, dim when off. A click flips them, like their compositor keys.
+            // No spacing: each item's own padding already spaces them.
+            RowLayout {
               visible: menu.level === null
-              tone: DoNotDisturb.enabled ? "alert" : "dim"
-              glyph: DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications
-            }
+              spacing: 0
 
-            Icon {
-              visible: menu.level === null
-              tone: IdleInhibit.enabled ? "primary" : "dim"
-              glyph: Glyphs.keepAwake
-            }
+              HeaderToggle {
+                shortcut: Config.shortcuts.notifications
+                shortcutShown: card.shortcutsShown
+                onActivated: DoNotDisturb.toggle()
 
-            MenuStatus {
-              Layout.fillWidth: false
-              visible: menu.level === null
-              quiet: true
-              status: "layout"
+                Icon {
+                  tone: DoNotDisturb.enabled ? "alert" : "dim"
+                  glyph: DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications
+                }
+              }
+
+              HeaderToggle {
+                shortcut: Config.shortcuts.keepAwake
+                shortcutShown: card.shortcutsShown
+                onActivated: IdleInhibit.toggle()
+
+                Icon {
+                  tone: IdleInhibit.enabled ? "primary" : "dim"
+                  glyph: Glyphs.keepAwake
+                }
+              }
+
+              HeaderToggle {
+                visible: KeyboardLayout.names.length > 0
+                shortcut: Config.shortcuts.keyboardLayout
+                shortcutShown: card.shortcutsShown
+                onActivated: KeyboardLayout.next()
+
+                MenuStatus {
+                  quiet: true
+                  status: "layout"
+                }
+              }
             }
 
             // A level that lists its items (tray apps, devices, networks) shows only its state, not the items again.
@@ -240,6 +293,14 @@ Scope {
                 chars: menu.keyChars(menu.rows)
               }
             }
+          }
+
+          MenuCalendar {
+            Layout.fillWidth: true
+            visible: menu.level?.entry?.view === "calendar"
+            today: clock.date
+            offset: menu.monthOffset
+            onStepped: months => menu.monthOffset += months
           }
         }
       }

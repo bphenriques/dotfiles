@@ -12,29 +12,19 @@ import qs.ui
 Scope {
   id: root
 
-  property bool shown: false
-  // Held open while the pointer is over it.
-  property bool hovered: false
   // What is or was last shown: "sink", "source", "brightness", "layout" or "idle"; kept while the window closes.
   property string kind: ""
 
   function show(newKind) {
-    if (!state.armed) return;
+    if (!transient.armed) return;
     kind = newKind;
-    shown = true;
-    hideTimer.restart();
+    transient.show();
   }
 
-  QtObject {
-    id: state
+  Transient {
+    id: transient
     // Bound here, not read in show(): singletons start on first use, and this one must start with the shell.
-    readonly property bool armed: Startup.settled
-  }
-
-  Timer {
-    id: hideTimer
-    interval: Config.osd.timeout
-    onTriggered: if (root.hovered) restart(); else root.shown = false
+    armed: Startup.settled
   }
 
   Connections {
@@ -62,7 +52,7 @@ Scope {
   }
 
   LazyLoader {
-    active: root.shown
+    active: transient.shown
 
     OverlayWindow {
       id: window
@@ -98,9 +88,9 @@ Scope {
         WheelSteps {
           anchors.fill: parent
           hoverEnabled: true
-          onContainsMouseChanged: root.hovered = containsMouse
+          onContainsMouseChanged: transient.held = containsMouse
           onStepped: up => {
-            const commands = Config.osd.adjust[root.kind];
+            const commands = Config.commands.adjust[root.kind];
             if (commands) Quickshell.execDetached(["sh", "-c", commands[up ? 1 : 0]]);
           }
         }

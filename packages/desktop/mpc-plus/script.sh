@@ -11,9 +11,6 @@ MPC_PLUS_SELECTED_HOST="${MPC_PLUS_STATE_DIR}/selected.env"
 
 _notify() { notify-send --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
 
-toggle_random() { case "$(mpc status '%random%')" in off) mpc random on >/dev/null && echo on ;; on) mpc random off >/dev/null && echo off ;; esac }
-toggle_repeat() { case "$(mpc status '%repeat%')" in off) mpc repeat on >/dev/null && echo on ;; on) mpc repeat off >/dev/null && echo off ;; esac }
-
 list_title_artist_album() {
   mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
     # Minor safeguard and assumption: the library is organized using the standard (?) Artist/Album/Song. Works for me. Might not work with you.
@@ -189,20 +186,8 @@ case "${1:-}" in
   volume-increase) mpc volume "+${2:-5}" ;;
   volume-decrease) mpc volume "-${2:-5}" ;;
   play-shuffled) mpc random on && mpc clear && mpc add / && mpc play ;;
-  toggle-random)
-    new_state="$(toggle_random)"
-    case "$new_state" in
-      on) _notify -i "${MPC_PLUS_RANDOM_ICON}" "Shuffle Songs: on" ;;
-      off) _notify -i "${MPC_PLUS_NO_RANDOM_ICON}" "Shuffle Songs: off" ;;
-    esac
-    ;;
-  toggle-repeat)
-    new_state="$(toggle_repeat)"
-    case "$new_state" in
-      on) _notify -i "${MPC_PLUS_REPEAT_ICON}" "Repeat Song: on" ;;
-      off) _notify -i "${MPC_PLUS_NO_REPEAT_ICON}" "Repeat Song: off" ;;
-    esac
-    ;;
+  toggle-random) mpc random >/dev/null ;;
+  toggle-repeat) mpc repeat >/dev/null ;;
   dmenu-file-exec)
     selection="$(select_title_artist_album)"
     if [[ -n $selection ]]; then

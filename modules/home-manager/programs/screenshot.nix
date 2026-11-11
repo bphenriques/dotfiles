@@ -2,16 +2,11 @@
 let
   cfg = config.my.programs.screenshot;
 
-  screenshot = lib.getExe cfg.package;
-  exec = {
-    screen        = ''${screenshot} ${cfg.directory} screen'';
-    region        = ''${screenshot} ${cfg.directory} region'';
-    window        = ''${screenshot} ${cfg.directory} window'';
-  };
+  screenshot = mode: "${lib.getExe cfg.package} ${lib.escapeShellArg "${cfg.directory}/${cfg.format}"} ${mode}";
 in
 {
   options.my.programs.screenshot = {
-    enable = lib.mkEnableOption "custom-screenshot";
+    enable = lib.mkEnableOption "screenshots with an edit action";
     package = lib.mkOption {
       type = lib.types.package;
       default = self.packages.screenshot;
@@ -30,7 +25,7 @@ in
     exec = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       readOnly = true;
-      default = { inherit (exec) screen region window; };
+      default = lib.genAttrs [ "screen" "region" "window" ] screenshot;
       description = "Screenshot commands for use in keybindings";
     };
   };

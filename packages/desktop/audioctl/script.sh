@@ -48,7 +48,7 @@ friendly_device_name() {
   esac
 }
 
-# Maps device type to the label used in env var names (OSD_VOLUME_<label>_ICON)
+# Maps device type to the label used in env var names (AUDIOCTL_<label>_ICON)
 _device_label() {
   case "$1" in
     microphone) echo -n "MICROPHONE" ;;
@@ -59,23 +59,23 @@ _device_label() {
   esac
 }
 
-# Returns the icon for a device type through indirect expansion of the OSD_VOLUME_*_ICON env vars.
+# Returns the icon for a device type through indirect expansion of the AUDIOCTL_*_ICON env vars.
 get_icon() {
   local label
   label="$(_device_label "$1")"
   [ -z "$label" ] && return
-  local var="OSD_VOLUME_${label}_ICON"
+  local var="AUDIOCTL_${label}_ICON"
   echo -n "${!var}"
 }
 
 notify_failure() {
   notify-send \
     --urgency=critical \
-    --icon "$OSD_VOLUME_ERROR_ICON" \
-    --category "volume-osd" \
+    --icon "$AUDIOCTL_ERROR_ICON" \
+    --category "audioctl" \
     --hint string:x-canonical-private-synchronous:volume \
     --transient \
-    "${1:-Failure while running volume-osd}" "${2:-}"
+    "${1:-Failure while running audioctl}" "${2:-}"
 }
 
 # Process substitution (< <(...)) keeps the loop in the main shell so rc accumulates correctly.
@@ -110,7 +110,6 @@ get_next_device() {
 }
 
 get_next_sink() { get_next_device "$(list_sinks)" "$(pactl get-default-sink)" "${1:-+1}"; }
-get_next_source() { get_next_device "$(list_sources)" "$(pactl get-default-source)" "${1:-+1}"; }
 
 set_sink_and_move() {
   if ! pactl set-default-sink "$1"; then
@@ -197,13 +196,6 @@ case "${1:-}" in
     fi
     ;;
 
-  # The output's type and friendly name, tab separated (read by the desktop shell).
-  sink-status)
-    device_json="$(get_sink "$(pactl get-default-sink)")"
-    dtype="$(device_type sink "$device_json")"
-    printf '%s\t%s\n' "$dtype" "$(friendly_device_name "$device_json" "$dtype")"
-    ;;
-
   # Every output and input, internal first then by name: kind, name, type and friendly name, tab separated (read by the desktop shell).
   devices)
     { print_devices sink "$(list_sinks)"; print_devices source "$(list_sources)"; } | sort -t $'\t' -k2,2 -k1,1n -k5,5 | cut -f2-
@@ -220,8 +212,6 @@ case "${1:-}" in
   source-toggle-mute) set_mute @DEFAULT_SOURCE@ toggle ;;
   source-increase) set_volume @DEFAULT_SOURCE@ "${2:-5}%+" ;;
   source-decrease) set_volume @DEFAULT_SOURCE@ "${2:-5}%-" ;;
-  source-move-next) set_source_and_move "$(get_next_source "+1")" ;;
-  source-move-prev) set_source_and_move "$(get_next_source "-1")" ;;
   source-move-fuzzel)
     selection="$(device_select_fuzzel source "$(list_sources)")"
     if [[ -n $selection ]]; then

@@ -9,26 +9,36 @@ import qs
 Singleton {
   id: root
 
-  property bool enabled: false
+  readonly property bool enabled: internal.enabled
 
-  // Started here rather than by bindings: a running binding can turn true before the command binding has the command.
-  function watch() {
-    if (!Config.commands.notifications) return;
-    watcher.command = ["sh", "-c", Config.commands.notifications];
-    watcher.running = true;
+  function toggle() {
+    if (Config.commands.notificationsToggle) Quickshell.execDetached(["sh", "-c", Config.commands.notificationsToggle]);
   }
 
-  Component.onCompleted: watch()
+  QtObject {
+    id: internal
+
+    property bool enabled: false
+
+    // Started here rather than by bindings: a running binding can turn true before the command binding has the command.
+    function watch() {
+      if (!Config.commands.notifications) return;
+      watcher.command = ["sh", "-c", Config.commands.notifications];
+      watcher.running = true;
+    }
+  }
+
+  Component.onCompleted: internal.watch()
 
   Connections {
     target: Config.commands
-    function onNotificationsChanged() { root.watch(); }
+    function onNotificationsChanged() { internal.watch(); }
   }
 
   Process {
     id: watcher
     stdout: SplitParser {
-      onRead: line => root.enabled = line.trim() === "true"
+      onRead: line => internal.enabled = line.trim() === "true"
     }
     // Delayed so a command that fails at once cannot loop.
     onExited: restartTimer.restart()
@@ -37,6 +47,6 @@ Singleton {
   Timer {
     id: restartTimer
     interval: 5000
-    onTriggered: root.watch()
+    onTriggered: internal.watch()
   }
 }

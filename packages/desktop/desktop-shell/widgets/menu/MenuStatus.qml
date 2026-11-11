@@ -18,6 +18,8 @@ StatusLine {
   // Only the glyph and detail, e.g. on or off, without the text.
   property bool compact: false
 
+  // The integration a status not built in names, if any.
+  readonly property var integration: Integrations.get(status)
   readonly property var value: valueFor(status)
 
   glyph: status ? glyphFor(status) : icon
@@ -53,14 +55,12 @@ StatusLine {
     case "source": return Audio.sourceMuted ? Glyphs.microphoneOff : Glyphs.audioDevice(Audio.sourceType);
     case "music": return Glyphs.music;
     case "network": return Network.kind === "wifi" ? Glyphs.wifi : Network.kind === "wired" ? Glyphs.ethernet : Glyphs.disconnected;
-    case "brightness": return Glyphs.brightness(Brightness.percentage);
     case "bluetooth": return !Bluez.enabled ? Glyphs.bluetoothOff : Bluez.connected.length ? Glyphs.bluetoothConnected : Glyphs.bluetooth;
     case "display": return Glyphs.display(Display.layout);
     case "tray": return Glyphs.tray;
-    case "wallpaper": return Glyphs.wallpaper;
     case "battery": return Power.present ? Glyphs.battery(Power.percentage, Power.pluggedIn) : "";
     case "layout": return Glyphs.keyboard;
-    default: return "";
+    default: return integration?.glyph ?? "";
     }
   }
 
@@ -79,27 +79,24 @@ StatusLine {
     }
     case "network":
       return { text: Network.kind === "wifi" ? pinned(Network.ssid, Network.ssid) : Network.kind === "wired" ? "Ethernet" : "Disconnected", detail: Network.wifiEnabled ? "" : "Wi-Fi off" };
-    case "brightness":
-      return { text: "", detail: Brightness.lit ? Brightness.percentage + "%" : "" };
     case "bluetooth": {
       if (!Bluez.present) return { text: "", detail: "" };
       if (!Bluez.enabled) return { text: "", detail: "off" };
-      const device = Bluez.connected[0];
-      if (!device) return { text: "", detail: "on" };
-      return { text: Bluez.connected.map(device => pinned(device.address, device.name)).join(", "), detail: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : "" };
+      const [device, ...others] = Bluez.connected;
+      if (!device) return { text: "No device connected", detail: "" };
+      if (others.length) return { text: Bluez.connected.length + " devices connected", detail: "" };
+      return { text: pinned(device.address, device.name), detail: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : "" };
     }
     case "display":
       return { text: Config.display.layouts[Display.layout] ?? "", detail: Brightness.lit ? Brightness.percentage + "%" : "" };
     case "tray":
       return { text: Tray.items.map(app => pinned(app.id, app.title || app.id)).join(", "), detail: "" };
-    case "wallpaper":
-      return { text: Wallpaper.name, detail: "" };
     case "battery":
       return { text: Power.present ? Power.percentage + "%" : "", detail: "" };
     case "layout":
       return { text: KeyboardLayout.label || KeyboardLayout.name, detail: "" };
     default:
-      return { text: "", detail: "" };
+      return { text: integration?.text ?? "", detail: integration?.detail ?? "" };
     }
   }
 }

@@ -14,6 +14,10 @@ Singleton {
   readonly property alias osd: adapter.osd
   readonly property alias display: adapter.display
   readonly property alias commands: adapter.commands
+  readonly property alias shortcuts: adapter.shortcuts
+  readonly property alias music: adapter.music
+  readonly property alias calendar: adapter.calendar
+  readonly property alias integrations: adapter.integrations
 
   FileView {
     path: (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/desktop-shell/config.json"
@@ -22,16 +26,16 @@ Singleton {
       id: adapter
 
       property JsonObject theme: JsonObject {
-        property color background
-        property color foreground
-        property color primary
-        property color alert
-        property color warning
+        property color background: "#1d1f21"
+        property color foreground: "#c5c8c6"
+        property color primary: "#81a2be"
+        property color alert: "#cc6666"
+        property color warning: "#f0c674"
         property real surfaceOpacity: 0.92
         property real highlightOpacity: 0.25
         property real dimOpacity: 0.5
-        property string monospaceFont
-        property int fontSize
+        property string monospaceFont: "monospace"
+        property int fontSize: 11
         property int radius: 10
         property int itemRadius: 6
         property int iconSize: 24
@@ -46,15 +50,11 @@ Singleton {
         property int osdIconSize: 28
         property int meterThickness: 6
         property int meterLength: 48
-        property int minimapHeight: 30
-        property int minimapMaxWidth: 180
-        property real minimapOpacity: 0.7
-        property int minimapBorderWidth: 1
       }
 
       property JsonObject battery: JsonObject {
-        property int low
-        property int critical
+        property int low: 20
+        property int critical: 5
       }
 
       property JsonObject menu: JsonObject {
@@ -67,11 +67,25 @@ Singleton {
         property var labels: []
       }
 
+      // Compositor keys of the header's toggles, shown while Super is held; set by the module that binds them.
+      property JsonObject shortcuts: JsonObject {
+        property string notifications
+        property string keepAwake
+        property string keyboardLayout
+      }
+
+      property JsonObject music: JsonObject {
+        // The MPRIS identity of the player the Music status follows; unset, the one playing, else any.
+        property string player
+      }
+
+      property JsonObject calendar: JsonObject {
+        // 0 for Sunday to 6 for Saturday; the locale's by default.
+        property int firstDayOfWeek: Qt.locale().firstDayOfWeek
+      }
 
       property JsonObject osd: JsonObject {
         property int timeout: 1500
-        // Commands the wheel runs on each level, down then up: sink, source, brightness.
-        property var adjust: ({})
       }
 
       property JsonObject display: JsonObject {
@@ -87,22 +101,24 @@ Singleton {
         property string audioDevices
         // Given a kind and a device name, makes it the default.
         property string audioSelect
-        // Prints the output's type (headphones, headset, internal, external), a tab, and its friendly name.
-        property string audioDevice
         // Prints the path of a file holding the backlight's value, a tab, and its maximum.
         property string brightness
         // Prints the display layout, then the layouts the connected screens allow, one per line.
         property string displayLayout
-        // niri msg --json outputs.
-        property string outputs
         // Prints true or false for do-not-disturb, then again on every change.
         property string notifications
+        // Pauses notifications, or resumes them.
+        property string notificationsToggle
         // Inhibits idle until its stdin closes.
         property string keepAwake
-        property string recordingStop
+        // The OSD wheel's commands for each level, down then up: sink, source, brightness.
+        property var adjust: ({})
       }
 
-      // Glyphs owned by other programs: upower-notify, volume-osd, mpc-plus, display.
+      // Optional parts by name, each { source, settings }: see README.md#integrations.
+      property var integrations: ({})
+
+      // Glyphs owned by other programs: upower-notify, audioctl, mpc-plus, display.
       property JsonObject glyphs: JsonObject {
         property var battery: ({ discharging: [], charging: [] })
         property var audio: ({})

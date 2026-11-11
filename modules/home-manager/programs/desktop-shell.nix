@@ -3,6 +3,10 @@ let
   inherit (lib) mkOption types;
 
   cfg = config.my.programs.desktop-shell;
+  builtinStatuses = [ "sink" "source" "music" "network" "bluetooth" "display" "tray" ];
+  builtinStates = [ "wifi" "bluetooth" "repeat" "shuffle" "sink-muted" "source-muted" ];
+  # Integrations may not take a built-in name; battery and layout are the header's.
+  builtinNames = builtinStatuses ++ builtinStates ++ [ "battery" "layout" ];
   settingsFormat = pkgs.formats.json { };
   settingsFile = settingsFormat.generate "desktop-shell-config.json" cfg.settings;
 
@@ -27,9 +31,9 @@ let
         description = "Keep the menu open after running cmd";
       };
       activeWhen = mkOption {
-        type = types.nullOr (types.enum [ "wifi" "bluetooth" "repeat" "shuffle" "sink-muted" "source-muted" ]);
+        type = types.nullOr types.str;
         default = null;
-        description = "State that lights the entry while on, for a toggle";
+        description = "State that lights the entry while on, for a toggle: one of ${toString builtinStates}, or an integration's name";
       };
       layout = mkOption {
         type = types.nullOr types.str;
@@ -77,10 +81,15 @@ let
         default = [ ];
         description = "Items of the list that keep digits 1 onwards, dimmed while absent";
       };
-      status = mkOption {
-        type = types.nullOr (types.enum [ "sink" "source" "music" "brightness" "network" "bluetooth" "display" "tray" "wallpaper" ]);
+      view = mkOption {
+        type = types.nullOr (types.enum [ "calendar" ]);
         default = null;
-        description = "Status shown in place of the label";
+        description = "What the entry's level shows in place of entries: a month calendar";
+      };
+      status = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Status shown in place of the label: one of ${toString builtinStatuses}, or an integration's name";
       };
       requires = {
         connected = mkOption {
@@ -107,6 +116,12 @@ let
 
   digits = map toString (lib.range 0 9);
 
+  # Unset options stay out of config.json, so the shell's own defaults apply.
+  withoutNulls = value:
+    if lib.isAttrs value then lib.mapAttrs (_: withoutNulls) (lib.filterAttrs (_: v: v != null) value)
+    else if lib.isList value then map withoutNulls value
+    else value;
+
   keysOf = entries: lib.concatMap (e: lib.toList e.key) entries;
 
   levelAssertions = path: entries:
@@ -121,7 +136,10 @@ let
       { assertion = reserved == [ ]; message = "my.programs.desktop-shell.menu: ${toString reserved} in ${path} are reserved for the menu"; }
     ]
     ++ lib.concatMap (e: [
-      { assertion = (e.cmd != null) != (e.submenu != null || e.list != null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs either cmd, or submenu and/or list"; }
+      { assertion = (e.cmd != null) != (e.submenu != null || e.list != null || e.view != null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs either cmd, submenu and/or list, or view"; }
+      { assertion = e.status == null || lib.elem e.status (builtinStatuses ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} shows status '${toString e.status}', neither built in nor an integration's"; }
+      { assertion = e.activeWhen == null || lib.elem e.activeWhen (builtinStates ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} is lit by '${toString e.activeWhen}', neither built in nor an integration's"; }
+      { assertion = e.view == null || (e.submenu == null && e.list == null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} cannot combine view with submenu or list"; }
       { assertion = e.keepOpen == null || e.cmd != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set keepOpen with cmd"; }
       { assertion = e.submenu == null || lib.all (a: a.icon != null) e.submenu; message = "my.programs.desktop-shell.menu: every action in '${e.desc}' needs an icon"; }
       { assertion = e.pins == [ ] || e.list != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set pins with list"; }
@@ -147,6 +165,25 @@ in
       description = "Written to $XDG_CONFIG_HOME/desktop-shell/config.json, the shell's only input from Nix";
     };
 
+    integrations = mkOption {
+      type = types.attrsOf (types.submodule {
+        options = {
+          source = mkOption {
+            type = types.nullOr (types.either types.path types.str);
+            default = null;
+            description = "QML file whose root is an Integration: a path, or relative to the shell; unset, the one it ships under this name (`workspace-map`: `integrations/WorkspaceMap.qml`)";
+          };
+          settings = mkOption {
+            type = settingsFormat.type;
+            default = { };
+            description = "Passed to the integration as `settings`";
+          };
+        };
+      });
+      default = { };
+      description = "Optional parts of the shell, by the name menu entries use in `status` and `activeWhen`";
+    };
+
     menu.entries = mkOption {
       type = types.listOf entry;
       default = [ ];
@@ -162,9 +199,11 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "my.programs.desktop-shell" pkgs lib.platforms.linux) ]
+      ++ [ { assertion = lib.intersectLists (lib.attrNames cfg.integrations) builtinNames == [ ]; message = "my.programs.desktop-shell.integrations: ${toString (lib.intersectLists (lib.attrNames cfg.integrations) builtinNames)} are built-in names"; } ]
       ++ levelAssertions "the top level" cfg.menu.entries;
 
-    my.programs.desktop-shell.settings.menu = { inherit (cfg.menu) entries; };
+    my.programs.desktop-shell.settings.menu.entries = withoutNulls cfg.menu.entries;
+    my.programs.desktop-shell.settings.integrations = withoutNulls cfg.integrations;
 
     xdg.configFile."desktop-shell/config.json".source = settingsFile;
 

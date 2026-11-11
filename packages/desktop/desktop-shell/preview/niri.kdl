@@ -1,0 +1,19 @@
+// Two layouts, so the layout pop-up and click have something to switch.
+input {
+    keyboard {
+        xkb {
+            layout "us,pt"
+        }
+    }
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+// Pointer tests start at the top left corner, which would open the overview.
+gestures {
+    hot-corners {
+        off
+    }
+}

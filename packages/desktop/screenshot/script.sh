@@ -1,12 +1,15 @@
 #shellcheck shell=bash
 
-mkdir -p -- "$1"
+# $1 is the destination as a strftime pattern, like niri's screenshot-path.
+destination="$(date +"$1")"
+mkdir -p -- "$(dirname -- "$destination")"
 tmp="$(mktemp --suffix=.png)"
 trap 'rm -f -- "$tmp"' EXIT
 
 case "${2:-screen}" in
   screen)
-    grim "$tmp"
+    niri msg action screenshot-screen --write-to-disk=false --show-pointer=false
+    wl-paste --type image/png >"$tmp"
     ;;
   region)
     geometry="$(slurp)" || exit 0
@@ -22,7 +25,6 @@ case "${2:-screen}" in
     ;;
 esac
 
-destination="$1/screenshot-$(date +'%Y%m%d-%H%M%S').png"
 mv -- "$tmp" "$destination"
 wl-copy --type image/png <"$destination"
 

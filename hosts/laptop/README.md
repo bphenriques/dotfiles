@@ -27,3 +27,7 @@ Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 - **Music**: [Music Player Daemon](https://www.musicpd.org/) with a custom wrapper around [`mpc`](https://www.musicpd.org/clients/mpc/)
 - **Internet Browser**: [Firefox](https://www.mozilla.org/firefox/new/) but exploring alternatives
 - **Quick Menu**: [Quickshell](https://quickshell.org) (`packages/desktop/desktop-shell`), a keyboard menu with live status in the style of [`wlr-which-key`](https://github.com/MaxVerevkin/wlr-which-key), plus volume, brightness and keyboard-layout pop-ups
+
+## Display
+
+niri holds each screen's settings (`bphenriques/display.nix`), the Display menu (`Mod+P`) picks a layout like Windows' Win+P without Duplicate, and `displayctl follow` restores the layout last picked for the screens plugged in, External only by default. Anything finer (a subset of screens, positions, rotation) is for Configure or the niri config.

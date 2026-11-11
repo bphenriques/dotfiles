@@ -1,6 +1,4 @@
-# Screens and what switches them: niri holds each screen's settings, the Display menu picks a
-# layout, and a reactor restores the one last picked for what is plugged in. Anything finer
-# (a subset of screens, positions, rotation) is for Configure or the niri config.
+# Screens, brightness and display layouts; see ../README.md#display.
 {
   config,
   lib,
@@ -10,7 +8,9 @@
 }:
 let
   brightnessctl = "${lib.getExe pkgs.brightnessctl} --class=backlight";
-  brightness = [ "${brightnessctl} set 5%-" "${brightnessctl} set 5%+" ];
+  brightnessDown = "${brightnessctl} set 5%-";
+  brightnessUp = "${brightnessctl} set 5%+";
+  brightness = [ brightnessDown brightnessUp ];
 
   # The panel. niri only knows it by its connector name; the externals below are named by make,
   # model and serial so they keep their settings when they move to another port.
@@ -43,11 +43,16 @@ in
 
   my.programs.desktop-shell = {
     settings = {
-      osd.adjust.brightness = brightness;
-      commands.displayLayout = "${displayctl} status";
-      display.panel = panel;
+      commands = {
+        adjust.brightness = brightness;
+        brightness = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
+        displayLayout = "${displayctl} status";
+      };
+      display = {
+        inherit panel;
+        layouts = lib.listToAttrs (map (layout: lib.nameValuePair layout.layout layout.desc) layouts);
+      };
       glyphs.display = glyphs;
-      display.layouts = lib.listToAttrs (map (layout: lib.nameValuePair layout.layout layout.desc) layouts);
     };
     menu.entries = lib.mkOrder 500 [
       { key = menuKey; desc = "Display"; status = "display"; submenu = [
@@ -57,7 +62,11 @@ in
     ];
   };
 
-  my.programs.niri.bindings."Mod+P repeat=false" = ''spawn-sh "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}"'';
+  my.programs.niri.bindings = {
+    "Mod+P repeat=false" = ''spawn-sh "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}"'';
+    "XF86MonBrightnessUp allow-when-locked=true" = ''spawn-sh "${brightnessUp}"'';
+    "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightnessDown}"'';
+  };
 
   systemd.user.services.display-policy = {
     Unit = {

@@ -36,11 +36,13 @@ in
     percentageCritical = lib.mkOption {
       type = lib.types.int;
       default = 20;
+      description = "Battery percentage at or below which the warning is critical.";
     };
 
     percentageLow = lib.mkOption {
       type = lib.types.int;
       default = 30;
+      description = "Battery percentage at or below which the low warning is sent.";
     };
 
     package = lib.mkOption {

@@ -12,6 +12,8 @@ let
   };
   screen-recorder = lib.getExe package;
   directory = config.xdg.userDirs.extraConfig.RECORDINGS;
+  # Under $XDG_RUNTIME_DIR, where screen-recorder writes the start time while recording.
+  stateFile = "screen-recorder";
 
   screenRecordingActions = [
     { id = "recording-screen"; symbol = self.lib.glyphs."md-monitor_screenshot"; label = "Screen"; exec = ''${screen-recorder} screen "${directory}"''; }
@@ -37,9 +39,11 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   ];
 
   # The recording state file must exist up front for Quickshell to watch it.
-  systemd.user.tmpfiles.rules = [ "f %t/screen-recorder 0600 - - -" ];
+  systemd.user.tmpfiles.rules = [ "f %t/${stateFile} 0600 - - -" ];
 
-  my.programs.desktop-shell.settings.commands.recordingStop = "${screen-recorder} stop";
+  my.programs.desktop-shell.integrations.recording = {
+    settings = { file = stateFile; stop = "${screen-recorder} stop"; };
+  };
 
   my.programs.niri.bindings = {
     "Ctrl+Print"       = ''spawn "${screen-recorder}" "screen" "${directory}"'';

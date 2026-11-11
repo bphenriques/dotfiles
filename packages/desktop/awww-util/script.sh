@@ -9,13 +9,16 @@ set_wallpaper() {
   printf '%s\n' "$1" >"$STATE_FILE" # in place: replacing the file would drop the desktop shell's watch
 }
 
-random_file() { find "$1" -type f | shuf -n 1; }
+current_file() { cat "$STATE_FILE" 2>/dev/null || true; }
+
+# Never the current one, so every press changes it.
+random_file() { find "$1" -type f | grep -vxF -- "$(current_file)" | shuf -n 1; }
 
 # The file after the current one (before it when $2 is -1), wrapping around.
 step_file() {
   local current count index=-1
   local -a files
-  current="$(cat "$STATE_FILE" 2>/dev/null || true)"
+  current="$(current_file)"
   mapfile -t files < <(find "$1" -type f | sort)
   count=${#files[@]}
   [ "$count" -gt 0 ] || return 0

@@ -4,6 +4,7 @@ let
   inherit (config) stylix;
 
   backgroundOpacity = "F2"; # 95%
+  pauseKey = "Mod+D";
 
   # For the desktop shell: whether notifications are paused, then again on every change dunst signals.
   # dbus-monitor prints the property name and its value on consecutive lines.
@@ -21,7 +22,13 @@ let
   };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  my.programs.desktop-shell.settings.commands.notifications = lib.getExe pausedWatch;
+  my.programs.desktop-shell.settings = {
+    commands = {
+      notifications = lib.getExe pausedWatch;
+      notificationsToggle = "${lib.getExe' config.services.dunst.package "dunstctl"} set-paused toggle";
+    };
+    shortcuts.notifications = pauseKey;
+  };
 
   services.dunst = {
     enable = true;
@@ -99,7 +106,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
       "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
       "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';
-      "Mod+D"        = ''spawn-sh "${dunstctl} set-paused toggle"'';
+      ${pauseKey}    = ''spawn-sh "${dunstctl} set-paused toggle"'';
     };
     layerRules = {
       screenCapture.block = [ ''namespace="^notifications$"'' ];

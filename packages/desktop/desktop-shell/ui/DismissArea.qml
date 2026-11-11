@@ -1,8 +1,7 @@
 import QtQuick
 import Quickshell.Wayland
 
-// Invisible full-output layer under a popup that reports clicks outside it.
-// A separate window, so the popup's blur and shadow layer rules stay popup-sized.
+// Invisible full-output layer under a popup that reports clicks outside it; one per screen, so a click on any screen counts.
 OverlayWindow {
   id: root
 

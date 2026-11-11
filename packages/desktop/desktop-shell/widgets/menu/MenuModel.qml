@@ -12,6 +12,8 @@ Scope {
   property bool open: false
   // Levels opened below the top one, the last is shown: an entry's (kind "entry") or an app's own menu (kind "menu").
   property var stack: []
+  // Months away from today's, in a calendar level.
+  property int monthOffset: 0
 
   readonly property var entries: Array.from(Config.menu.entries)
   readonly property var level: stack[stack.length - 1] ?? null
@@ -19,6 +21,8 @@ Scope {
   readonly property var actions: items.filter(item => !item.listed)
   readonly property var rows: items.filter(item => item.listed)
   readonly property int width: level?.width ?? Config.menu.width
+  // The top-level entry the clock opens.
+  readonly property var calendar: itemsOf(null).find(item => item.entry.view === "calendar") ?? null
 
   function itemsOf(level) {
     if (level === null)
@@ -70,7 +74,7 @@ Scope {
     case "shuffle": return Music.shuffle;
     case "sink-muted": return Audio.sinkMuted;
     case "source-muted": return Audio.sourceMuted;
-    default: return false;
+    default: return Integrations.get(state)?.active ?? false;
     }
   }
 
@@ -125,7 +129,6 @@ Scope {
 
   function show() {
     // Sources without change events are read as the menu opens.
-    Audio.refresh();
     Audio.refreshDevices();
     Display.refresh();
     open = true;
@@ -191,7 +194,8 @@ Scope {
       const target = item.device ?? item.network;
       if (target.connected) target.disconnect();
       else target.connect();
-    } else if (item.entry.submenu || item.entry.list) {
+    } else if (item.entry.submenu || item.entry.list || item.entry.view) {
+      monthOffset = 0;
       push({ kind: "entry", title: item.entry.desc, status: item.entry.status, entry: item.entry, width: item.entry.width });
     } else {
       run(item.entry, name);
@@ -212,9 +216,12 @@ Scope {
   // Esc and Backspace are kept free of entries by the assertions in modules/home-manager/programs/desktop-shell.nix.
   function handleKey(event) {
     const name = MenuKeys.name(event);
+    // A modifier on its own has no name.
+    if (!name) return false;
     const item = find(items, name);
     if (name === "Escape") hide();
     else if (name === "BackSpace" && level) back();
+    else if (level?.entry?.view === "calendar" && (name === "Left" || name === "Right")) monthOffset += name === "Right" ? 1 : -1;
     else if (item?.listed && event.modifiers & Qt.ControlModifier) openMenu(item);
     else if (item && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) activate(item, name);
     else return false;

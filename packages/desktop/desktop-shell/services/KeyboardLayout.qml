@@ -4,11 +4,15 @@ import QtQuick
 import Quickshell
 import qs
 
-// niri's keyboard layouts, with the short labels from Config.keyboard.labels.
+// The compositor's keyboard layouts, with the short labels from Config.keyboard.labels.
 Singleton {
-  readonly property var names: Niri.layouts
-  readonly property int index: Niri.layoutIndex
+  readonly property var names: Compositor.layouts
+  readonly property int index: Compositor.layoutIndex
   readonly property string name: names[index] ?? ""
   // "" without a label.
-  readonly property string label: Config.keyboard.labels[index] ?? ""
+  readonly property string label: names.length ? Config.keyboard.labels[index] ?? "" : ""
+
+  function next() {
+    Compositor.nextLayout();
+  }
 }

@@ -9,21 +9,30 @@ import qs
 Singleton {
   id: root
 
-  property bool enabled: false
+  readonly property bool enabled: internal.enabled
+
+  function toggle() {
+    internal.enabled = !internal.enabled;
+  }
+
+  QtObject {
+    id: internal
+    property bool enabled: false
+  }
 
   IpcHandler {
     target: "idle"
 
     function toggle(): void {
-      root.enabled = !root.enabled;
+      root.toggle();
     }
   }
 
   // The inhibitor holds until its stdin closes, which happens whenever it stops or the shell exits.
   Process {
-    running: root.enabled
+    running: internal.enabled
     stdinEnabled: true
     command: ["sh", "-c", Config.commands.keepAwake]
-    onExited: root.enabled = false
+    onExited: internal.enabled = false
   }
 }
