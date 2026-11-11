@@ -5,8 +5,10 @@ let
   cfg = config.my.programs.desktop-shell;
   builtinStatuses = [ "sink" "source" "music" "network" "bluetooth" "display" "tray" ];
   builtinStates = [ "wifi" "bluetooth" "repeat" "shuffle" "sink-muted" "source-muted" ];
-  # Integrations may not take a built-in name; battery and layout are the header's.
-  builtinNames = builtinStatuses ++ builtinStates ++ [ "battery" "layout" ];
+  headerItems = [ "clock" "notifications" "keepAwake" "keyboardLayout" "battery" ];
+  # Integrations may not take a built-in name.
+  builtinNames = builtinStatuses ++ builtinStates ++ headerItems;
+  headerNames = lib.concatLists (lib.filter (slot: slot != null) (lib.attrValues cfg.menu.header));
   settingsFormat = pkgs.formats.json { };
   settingsFile = settingsFormat.generate "desktop-shell-config.json" cfg.settings;
 
@@ -128,11 +130,14 @@ let
     let
       keys = keysOf entries;
       duplicates = lib.unique (lib.filter (k: lib.count (x: x == k) keys > 1) keys);
-      withModifiers = lib.filter (k: k != "+" && lib.hasInfix "+" k) keys;
+      # Ctrl and Alt may prefix a key (Ctrl+Left); Shift is the capital letter, Super the compositor's.
+      badModifiers = lib.filter (k: k != "+" && builtins.match "((Ctrl|Alt)\\+)*[^+]+" k == null) keys;
+      appMenuKeys = lib.filter (k: builtins.match "(Alt\\+)?Ctrl\\+(Alt\\+)?[0-9]" k != null) keys;
       reserved = lib.intersectLists reservedKeys keys;
     in [
       { assertion = duplicates == [ ]; message = "my.programs.desktop-shell.menu: duplicate keys in ${path}: ${toString duplicates}"; }
-      { assertion = withModifiers == [ ]; message = "my.programs.desktop-shell.menu: modifiers are not supported in ${path}: ${toString withModifiers}"; }
+      { assertion = badModifiers == [ ]; message = "my.programs.desktop-shell.menu: only Ctrl+ and Alt+ may prefix a key in ${path}: ${toString badModifiers}"; }
+      { assertion = appMenuKeys == [ ]; message = "my.programs.desktop-shell.menu: Ctrl+digit opens a listed item's own menu, so ${toString appMenuKeys} in ${path} cannot be bound"; }
       { assertion = reserved == [ ]; message = "my.programs.desktop-shell.menu: ${toString reserved} in ${path} are reserved for the menu"; }
     ]
     ++ lib.concatMap (e: [
@@ -190,6 +195,12 @@ in
       description = "Menu entries";
     };
 
+    menu.header = lib.genAttrs [ "left" "center" "right" ] (slot: mkOption {
+      type = types.nullOr (types.listOf types.str);
+      default = null;
+      description = "Items in the header's ${slot} third, like waybar's modules-${slot}: ${toString headerItems} or integrations; unset, the shell's default";
+    });
+
     exec.ipc = mkOption {
       type = types.str;
       default = "${lib.getExe config.programs.quickshell.package} -c desktop-shell ipc call";
@@ -200,9 +211,11 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [ (lib.hm.assertions.assertPlatform "my.programs.desktop-shell" pkgs lib.platforms.linux) ]
       ++ [ { assertion = lib.intersectLists (lib.attrNames cfg.integrations) builtinNames == [ ]; message = "my.programs.desktop-shell.integrations: ${toString (lib.intersectLists (lib.attrNames cfg.integrations) builtinNames)} are built-in names"; } ]
+      ++ [ { assertion = lib.all (name: lib.elem name headerItems || cfg.integrations ? ${name}) headerNames; message = "my.programs.desktop-shell.menu.header: ${toString (lib.filter (name: !(lib.elem name headerItems || cfg.integrations ? ${name})) headerNames)} are neither built in nor integrations"; } ]
       ++ levelAssertions "the top level" cfg.menu.entries;
 
     my.programs.desktop-shell.settings.menu.entries = withoutNulls cfg.menu.entries;
+    my.programs.desktop-shell.settings.menu.header = withoutNulls cfg.menu.header;
     my.programs.desktop-shell.settings.integrations = withoutNulls cfg.integrations;
 
     xdg.configFile."desktop-shell/config.json".source = settingsFile;

@@ -36,7 +36,7 @@ in
       (pkgs.makeDesktopItem {
         name = "file-explorer";
         desktopName = "File Explorer";
-        icon = mkIcon "file-explorer" self.lib.glyphs."custom-folder_open";
+        icon = mkIcon "file-explorer" self.lib.glyphs."md-folder_open";
         exec = cfg.browser;
         actions = let
           bookmarkToAction = b: nameValuePair (replaceStrings [" "] ["-"] b.name) {

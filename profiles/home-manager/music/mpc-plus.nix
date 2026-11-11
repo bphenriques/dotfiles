@@ -3,8 +3,8 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   glyphs = {
-    music = self.lib.glyphs."fa-music";
-    shuffle = self.lib.glyphs."fa-shuffle";
+    music = self.lib.glyphs."md-music";
+    shuffle = self.lib.glyphs."md-shuffle_variant";
     repeat = self.lib.glyphs."md-repeat";
   };
 
@@ -12,9 +12,9 @@ let
     musicIcon = mkIcon "mpc-plus-track" glyphs.music;
     artistIcon = mkIcon "mpc-plus-artist" self.lib.glyphs."md-account_music";
     albumIcon = mkIcon "mpc-plus-album" self.lib.glyphs."md-album";
-    stoppedIcon = mkIcon "mpc-plus-stopped" self.lib.glyphs."fa-stop";
+    stoppedIcon = mkIcon "mpc-plus-stopped" self.lib.glyphs."md-stop";
     deviceIcon = mkIcon "mpc-plus-device" self.lib.glyphs."md-speaker";
-    errorIcon = mkIcon "mpc-plus-error" self.lib.glyphs."cod-error";
+    errorIcon = mkIcon "mpc-plus-error" self.lib.glyphs."md-alert_circle";
   };
   mpc-plus = lib.getExe package;
 
@@ -42,7 +42,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
-  my.programs.desktop-shell.settings.glyphs.music = glyphs;
+  my.programs.desktop-shell.settings.music.glyphs = glyphs;
 
   my.programs.desktop-shell.menu.entries = lib.mkOrder 700 [
     { key = "m"; desc = "Music"; status = "music"; submenu = [

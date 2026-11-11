@@ -43,16 +43,15 @@ in
 
   my.programs.desktop-shell = {
     settings = {
-      commands = {
-        adjust.brightness = brightness;
-        brightness = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
-        displayLayout = "${displayctl} status";
+      brightness = {
+        backlight = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
+        adjust = brightness;
       };
       display = {
-        inherit panel;
+        status = "${displayctl} status";
+        inherit panel glyphs;
         layouts = lib.listToAttrs (map (layout: lib.nameValuePair layout.layout layout.desc) layouts);
       };
-      glyphs.display = glyphs;
     };
     menu.entries = lib.mkOrder 500 [
       { key = menuKey; desc = "Display"; status = "display"; submenu = [

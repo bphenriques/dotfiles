@@ -12,4 +12,9 @@ Scope {
   property string text
   property string detail
   property bool active: false
+  // Its compositor key, shown in the header while Super is held; set from its settings by the module that binds it.
+  property string shortcut
+
+  // What a click on its header item does.
+  function activate() {}
 }

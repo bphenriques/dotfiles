@@ -22,12 +22,10 @@ let
   };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  my.programs.desktop-shell.settings = {
-    commands = {
-      notifications = lib.getExe pausedWatch;
-      notificationsToggle = "${lib.getExe' config.services.dunst.package "dunstctl"} set-paused toggle";
-    };
-    shortcuts.notifications = pauseKey;
+  my.programs.desktop-shell.settings.notifications = {
+    watch = lib.getExe pausedWatch;
+    toggle = "${lib.getExe' config.services.dunst.package "dunstctl"} set-paused toggle";
+    shortcut = pauseKey;
   };
 
   services.dunst = {

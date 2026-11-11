@@ -66,6 +66,8 @@ Integration {
     id: tracked
     property var workspaces: ({})
     property var windows: ({})
+    // The window focus was last on; a layer such as the menu taking the keyboard reports none, and giving it back the same one.
+    property var focused: null
   }
 
   function columnsOf(workspace) {
@@ -118,7 +120,11 @@ Integration {
       const workspace = tracked.workspaces[event.WorkspaceActiveWindowChanged.workspace_id];
       if (workspace) workspace.active_window_id = event.WorkspaceActiveWindowChanged.active_window_id;
     } else if (event.WindowFocusChanged) {
-      pendingMove.restart();
+      const id = event.WindowFocusChanged.id;
+      if (id !== null && id !== tracked.focused) {
+        tracked.focused = id;
+        pendingMove.restart();
+      }
       return;
     } else if (event.WindowsChanged) {
       tracked.windows = byId(event.WindowsChanged.windows);

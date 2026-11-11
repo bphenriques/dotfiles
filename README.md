@@ -13,8 +13,9 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 </p>
 
 <p float="center">
-  <img src="hosts/laptop/screenshots/general.png" width="49%" />
-  <img src="hosts/laptop/screenshots/music-menu.png" width="49%" />
+  <img src="hosts/laptop/screenshots/menu-top.png" width="32%" />
+  <img src="hosts/laptop/screenshots/menu-audio.png" width="32%" />
+  <img src="hosts/laptop/screenshots/menu-calendar.png" width="32%" />
 </p>
 
 ## Hosts

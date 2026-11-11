@@ -90,7 +90,7 @@ Scope {
           hoverEnabled: true
           onContainsMouseChanged: transient.held = containsMouse
           onStepped: up => {
-            const commands = Config.commands.adjust[root.kind];
+            const commands = root.kind === "brightness" ? Config.brightness.adjust : Config.audio.adjust[root.kind];
             if (commands) Quickshell.execDetached(["sh", "-c", commands[up ? 1 : 0]]);
           }
         }
@@ -144,7 +144,7 @@ Scope {
           id: value
           anchors.verticalCenter: parent.verticalCenter
           // As wide as the widest value, so the pill holds still as it changes.
-          width: Math.max(3, ...Array.from(Config.keyboard.labels).map(label => label.length)) * cell.advanceWidth
+          width: Math.max(3, ...Array.from(Config.keyboardLayout.labels).map(label => label.length)) * cell.advanceWidth
           tone: window.tone
           text: root.kind === "layout" ? (KeyboardLayout.label || KeyboardLayout.name.slice(0, 2))
             : IdleInhibit.enabled ? "on" : "off"

@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs
 
-// Keeps the screen awake with Config.commands.keepAwake, a systemd idle inhibitor hypridle honours. Off again when the shell restarts.
+// Keeps the screen awake with Config.keepAwake.command, a systemd idle inhibitor hypridle honours. Off again when the shell restarts.
 Singleton {
   id: root
 
@@ -32,7 +32,7 @@ Singleton {
   Process {
     running: internal.enabled
     stdinEnabled: true
-    command: ["sh", "-c", Config.commands.keepAwake]
+    command: ["sh", "-c", Config.keepAwake.command]
     onExited: internal.enabled = false
   }
 }

@@ -55,7 +55,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    my.programs.desktop-shell.settings.glyphs.battery = {
+    my.programs.desktop-shell.settings.battery.glyphs = {
       discharging = lib.map (b: b.glyph) batteryLevels;
       charging = lib.map (b: b.chargingGlyph) batteryLevels;
     };

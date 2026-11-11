@@ -25,15 +25,18 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         low = osConfig.services.upower.percentageLow;
         critical = osConfig.services.upower.percentageCritical;
       };
-      keyboard.labels = lib.map (layout: layout.label) config.my.programs.niri.keyboardLayouts;
-      calendar.firstDayOfWeek = 1; # Monday, as glibc's pt_PT has it; Qt's locale data says Sunday
-      shortcuts = {
-        keepAwake = keepAwakeKey;
-        keyboardLayout = layoutKey;
+      keyboardLayout = {
+        labels = lib.map (layout: layout.label) config.my.programs.niri.keyboardLayouts;
+        shortcut = layoutKey;
       };
-      commands = {
+      clock = {
+        locale = "en_GB";
+        format = "%A, %-d%o %B %H:%M";
+      };
+      keepAwake = {
         # exec, so stopping it closes the inhibitor's stdin rather than orphaning it with the lock held.
-        keepAwake = "exec ${lib.getExe' pkgs.systemd "systemd-inhibit"} --what=idle --who=desktop-shell --why=\"Keep awake\" cat";
+        command = "exec ${lib.getExe' pkgs.systemd "systemd-inhibit"} --what=idle --who=desktop-shell --why=\"Keep awake\" cat";
+        shortcut = keepAwakeKey;
       };
     };
 

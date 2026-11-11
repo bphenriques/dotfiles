@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs
 
-// The backlight's file and maximum come from Config.commands.brightness; the file is watched, every write to it notifies.
+// The backlight's file and maximum come from Config.brightness.backlight; the file is watched, every write to it notifies.
 Singleton {
   id: root
 
@@ -22,7 +22,7 @@ Singleton {
   }
 
   CommandReader {
-    shell: Config.commands.brightness
+    shell: Config.brightness.backlight
     atStart: true
     onRead: text => {
       const [file, maximum] = text.trim().split("\t");

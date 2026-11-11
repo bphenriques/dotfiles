@@ -14,6 +14,8 @@ Rectangle {
   signal scrolled(bool up)
 
   implicitWidth: row.implicitWidth + 2 * Config.theme.itemPaddingX
+  // Squeezed in a layout, no narrower than its content can go (its text shortened, never its icons).
+  Layout.minimumWidth: row.Layout.minimumWidth + 2 * Config.theme.itemPaddingX
   implicitHeight: row.implicitHeight + 2 * Config.theme.itemPaddingY
   radius: Config.theme.itemRadius
   // Disabled rows dim whole, images included.

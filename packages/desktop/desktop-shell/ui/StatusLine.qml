@@ -26,6 +26,8 @@ RowLayout {
   Label {
     visible: root.text !== ""
     Layout.fillWidth: true
+    // Squeezed, text ends in an ellipsis, but a short value (80%, EN) stays whole.
+    Layout.minimumWidth: Math.min(implicitWidth, 6 * cell.advanceWidth)
     elide: Text.ElideRight
     tone: root.tone
     text: root.text
@@ -40,7 +42,7 @@ RowLayout {
   Label {
     id: detailLabel
     visible: root.detail !== ""
-    Layout.minimumWidth: root.detailChars * cell.advanceWidth
+    Layout.minimumWidth: Math.max(implicitWidth, root.detailChars * cell.advanceWidth)
     horizontalAlignment: Text.AlignRight
     tone: "dim"
     text: root.detail

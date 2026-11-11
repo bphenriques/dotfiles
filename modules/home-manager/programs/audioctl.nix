@@ -69,15 +69,14 @@ in
       { assertion = osConfig.services.pipewire.wireplumber.enable; message = "Requires pipewire wireplumber enabled in the system."; }
     ];
 
-    my.programs.desktop-shell.settings.glyphs.audio = glyphs;
-
-    my.programs.desktop-shell.settings.commands = {
+    my.programs.desktop-shell.settings.audio = {
+      devices = "${audioctl} devices";
+      select = "${audioctl} select";
       adjust = {
         sink = volume "sink";
         source = volume "source";
       };
-      audioDevices = "${audioctl} devices";
-      audioSelect = "${audioctl} select";
+      inherit glyphs;
     };
 
     my.programs.desktop-shell.menu.entries = lib.mkOrder 100 [

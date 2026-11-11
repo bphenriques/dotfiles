@@ -35,7 +35,7 @@ Singleton {
 
   CommandReader {
     id: layoutStatus
-    shell: Config.commands.displayLayout
+    shell: Config.display.status
     onRead: text => {
       const [current, ...allowed] = text.split("\n");
       internal.layout = current;

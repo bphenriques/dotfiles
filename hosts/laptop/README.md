@@ -3,8 +3,9 @@
 Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 
 <p float="center">
-  <img src="screenshots/general.png" width="49%" />
-  <img src="screenshots/music-menu.png" width="49%" />
+  <img src="screenshots/menu-top.png" width="32%" />
+  <img src="screenshots/menu-audio.png" width="32%" />
+  <img src="screenshots/menu-calendar.png" width="32%" />
 </p>
 
 ## Hardware

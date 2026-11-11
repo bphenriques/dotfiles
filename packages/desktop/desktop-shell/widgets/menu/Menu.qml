@@ -13,11 +13,6 @@ import qs.ui
 Scope {
   id: root
 
-  function ordinal(day) {
-    if (day >= 11 && day <= 13) return "th";
-    return ["th", "st", "nd", "rd"][day % 10] ?? "th";
-  }
-
   // A row of the menu: its key, then its status or label.
   component MenuRow: ListItem {
     id: row
@@ -47,16 +42,88 @@ Scope {
     }
   }
 
-  // A header toggle: a click flips it, and its compositor key shows before it on request.
-  component HeaderToggle: ListItem {
-    id: toggle
-    property string shortcut
-    property bool shortcutShown: false
+  // Part of the header: its items in a row, aligned left, centre or right. The sides share the width equally, each at least
+  // what its items need; the centre takes the width its items want of the rest, shortening its text when crowded.
+  component HeaderSlot: Item {
+    id: slot
+    property var items: []
+    property int alignment: Qt.AlignLeft
+    readonly property bool centre: alignment === Qt.AlignHCenter
+    // The least its items need, their text shortened, never their icons.
+    readonly property real contentMinimum: row.Layout.minimumWidth
+    // Set on the sides: at least what their items need, or what either side needs when there is a centre to keep centred.
+    property real sideMinimum: 0
+    property bool centred: false
+    default property alias content: row.data
+
+    visible: !centre || slot.items.length > 0
+    Layout.fillWidth: true
+    Layout.minimumWidth: centre ? contentMinimum : sideMinimum
+    // Sides start from what their items want, or both from the same width when keeping a centre centred.
+    Layout.preferredWidth: centre || !centred ? row.implicitWidth : sideMinimum
+    Layout.maximumWidth: centre ? row.implicitWidth : Number.POSITIVE_INFINITY
+    implicitHeight: row.implicitHeight
+
+    RowLayout {
+      id: row
+      anchors.verticalCenter: parent.verticalCenter
+      // Never wider than its share: its items' text gives way instead (see StatusLine).
+      width: Math.min(implicitWidth, slot.width)
+      x: slot.alignment === Qt.AlignRight ? slot.width - width : slot.alignment === Qt.AlignHCenter ? (slot.width - width) / 2 : 0
+      // No spacing: each item's own padding already spaces them.
+      spacing: 0
+
+      Repeater {
+        model: Array.from(slot.items)
+
+        HeaderItem {}
+      }
+    }
+  }
+
+  // A header item by name: built in, or an integration's. A click does what its compositor key does, shown while Super is held.
+  component HeaderItem: ListItem {
+    id: item
+    required property string modelData
+    // Shrinks, never grows: its text gives way before its neighbours.
+    Layout.fillWidth: true
+    Layout.maximumWidth: implicitWidth
+    readonly property bool builtin: ["clock", "notifications", "keepAwake", "keyboardLayout", "battery"].includes(modelData)
+    readonly property var integration: builtin ? null : Integrations.get(modelData)
+    readonly property string shortcut: integration?.shortcut ?? Config[modelData]?.shortcut ?? ""
+
+    visible: modelData === "keyboardLayout" ? KeyboardLayout.names.length > 0 : modelData === "battery" ? Power.present : builtin || integration !== null
+    // The battery only shows state; the clock opens the calendar when there is one.
+    enabled: modelData === "clock" ? menu.calendar !== null : modelData !== "battery"
+    dimsWhenDisabled: false
+    onActivated: {
+      switch (modelData) {
+      case "clock": menu.activate(menu.calendar); break;
+      case "notifications": DoNotDisturb.toggle(); break;
+      case "keepAwake": IdleInhibit.toggle(); break;
+      case "keyboardLayout": KeyboardLayout.next(); break;
+      default: integration?.activate();
+      }
+    }
 
     KeyHint {
-      visible: toggle.shortcutShown && toggle.shortcut !== ""
-      key: toggle.shortcut
-      chars: toggle.shortcut.length
+      visible: menu.shortcutsShown && item.shortcut !== ""
+      key: item.shortcut
+      chars: item.shortcut.length
+    }
+
+    Label {
+      visible: item.modelData === "clock"
+      Layout.fillWidth: true
+      elide: Text.ElideRight
+      font.bold: true
+      text: Clock.text
+    }
+
+    MenuStatus {
+      visible: item.modelData !== "clock"
+      quiet: true
+      status: item.modelData === "clock" ? "" : item.modelData
     }
   }
 
@@ -129,11 +196,6 @@ Scope {
         radius: card.radius
       }
 
-      SystemClock {
-        id: clock
-        precision: SystemClock.Minutes
-      }
-
       Surface {
         id: card
         anchors.horizontalCenter: parent.horizontalCenter
@@ -141,9 +203,6 @@ Scope {
         anchors.bottomMargin: Config.theme.edgeMargin
         width: menu.width
         height: content.implicitHeight + 2 * Config.theme.padding
-
-        // Super held a second shows the header toggles' compositor keys, not at once, so a Super shortcut does not flash them.
-        property bool shortcutsShown: false
 
         function isSuper(event) {
           return event.key === Qt.Key_Super_L || event.key === Qt.Key_Super_R || event.key === Qt.Key_Meta;
@@ -157,13 +216,13 @@ Scope {
         Keys.onReleased: event => {
           if (!isSuper(event)) return;
           superHeld.stop();
-          shortcutsShown = false;
+          menu.shortcutsShown = false;
         }
 
         Timer {
           id: superHeld
           interval: 1000
-          onTriggered: card.shortcutsShown = true
+          onTriggered: menu.shortcutsShown = true
         }
 
         ColumnLayout {
@@ -174,80 +233,64 @@ Scope {
           anchors.margins: Config.theme.padding
           spacing: Config.theme.padding
 
-          // The clock on the left, steady state and alerts on the right; inside a level its title and status.
+          // Like waybar's: none grows the menu; in a side too full, its text ends in an ellipsis.
+          // At the top level they hold Config.menu.header's items; inside a level, its title on the left and its state on the right.
           RowLayout {
-            Layout.rightMargin: Config.theme.itemPaddingX
+            id: header
+            // Both sides as wide when there is a centre to keep centred.
+            readonly property bool centred: centreSlot.visible
+            readonly property real sideMinimum: Math.max(leftSlot.contentMinimum, rightSlot.contentMinimum)
+
+            Layout.fillWidth: true
+            // Never widens the menu: a header whose icons cannot fit overflows instead (rule 4: make the menu wider).
+            Layout.minimumWidth: 0
             spacing: Config.theme.spacing
 
-            // Inside a level the title goes back up, like Backspace; at the top the clock opens the calendar.
-            ListItem {
-              enabled: menu.level !== null || menu.calendar !== null
-              dimsWhenDisabled: false
-              onActivated: menu.level ? menu.back() : menu.activate(menu.calendar)
+            HeaderSlot {
+              id: leftSlot
+              centred: header.centred
+              sideMinimum: header.centred ? header.sideMinimum : contentMinimum
+              items: menu.level ? [] : Config.menu.header.left
+
+              // Inside a level the title goes back up, like Backspace.
+              ListItem {
+                visible: menu.level !== null
+                onActivated: menu.back()
+
+                Label {
+                  font.bold: true
+                  text: menu.title
+                }
+              }
 
               Label {
-                font.bold: true
-                text: menu.level?.title ?? Qt.formatDateTime(clock.date, "dddd, d'" + root.ordinal(clock.date.getDate()) + "' MMMM hh:mm")
+                visible: menu.level?.entry?.list === "tray"
+                tone: "dim"
+                text: "Ctrl+digit: app menu"
               }
             }
 
-            Label {
-              visible: menu.level?.entry?.list === "tray"
-              tone: "dim"
-              text: "Ctrl+digit: app menu"
+            HeaderSlot {
+              id: centreSlot
+              alignment: Qt.AlignHCenter
+              items: menu.level ? [] : Config.menu.header.center
             }
 
-            Item {
-              Layout.fillWidth: true
-            }
+            HeaderSlot {
+              id: rightSlot
+              centred: header.centred
+              sideMinimum: header.centred ? header.sideMinimum : contentMinimum
+              alignment: Qt.AlignRight
+              items: menu.level ? [] : Config.menu.header.right
 
-            // Always shown, so their state is known at a glance: lit when on, dim when off. A click flips them, like their compositor keys.
-            // No spacing: each item's own padding already spaces them.
-            RowLayout {
-              visible: menu.level === null
-              spacing: 0
-
-              HeaderToggle {
-                shortcut: Config.shortcuts.notifications
-                shortcutShown: card.shortcutsShown
-                onActivated: DoNotDisturb.toggle()
-
-                Icon {
-                  tone: DoNotDisturb.enabled ? "alert" : "dim"
-                  glyph: DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications
-                }
+              // A level that lists its items (tray apps, devices, networks) shows only its state, not the items again.
+              MenuStatus {
+                visible: menu.level !== null
+                Layout.rightMargin: Config.theme.itemPaddingX
+                quiet: true
+                compact: !!menu.level?.entry?.list
+                status: menu.level?.entry?.list === "tray" ? "" : menu.level?.status ?? ""
               }
-
-              HeaderToggle {
-                shortcut: Config.shortcuts.keepAwake
-                shortcutShown: card.shortcutsShown
-                onActivated: IdleInhibit.toggle()
-
-                Icon {
-                  tone: IdleInhibit.enabled ? "primary" : "dim"
-                  glyph: Glyphs.keepAwake
-                }
-              }
-
-              HeaderToggle {
-                visible: KeyboardLayout.names.length > 0
-                shortcut: Config.shortcuts.keyboardLayout
-                shortcutShown: card.shortcutsShown
-                onActivated: KeyboardLayout.next()
-
-                MenuStatus {
-                  quiet: true
-                  status: "layout"
-                }
-              }
-            }
-
-            // A level that lists its items (tray apps, devices, networks) shows only its state, not the items again.
-            MenuStatus {
-              Layout.fillWidth: false
-              quiet: true
-              compact: !!menu.level?.entry?.list
-              status: menu.level === null ? "battery" : menu.level.entry?.list === "tray" ? "" : menu.level.status ?? ""
             }
           }
 
@@ -276,7 +319,7 @@ Scope {
 
           Divider {
             Layout.fillWidth: true
-            visible: menu.actions.length > 0 && menu.rows.length > 0
+            visible: menu.actions.length > 0 && (menu.rows.length > 0 || menu.level?.entry?.view === "calendar")
           }
 
           // What a level lists, apart from its actions and across the full width.
@@ -298,9 +341,9 @@ Scope {
           MenuCalendar {
             Layout.fillWidth: true
             visible: menu.level?.entry?.view === "calendar"
-            today: clock.date
-            offset: menu.monthOffset
-            onStepped: months => menu.monthOffset += months
+            selected: menu.selected
+            onStepped: months => menu.moveSelected(0, months, 0)
+            onPicked: day => menu.selected = day
           }
         }
       }

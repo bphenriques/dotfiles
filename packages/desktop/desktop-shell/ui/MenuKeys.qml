@@ -7,8 +7,14 @@ import Quickshell
 Singleton {
   id: root
 
-  // The name of a key event, ignoring Ctrl.
+  // The name of a key event, Ctrl and Alt first when held (Ctrl+Left); Shift only picks the capital letter. "" for a modifier alone.
   function name(event) {
+    const key = keyName(event);
+    if (!key) return "";
+    return (event.modifiers & Qt.ControlModifier ? "Ctrl+" : "") + (event.modifiers & Qt.AltModifier ? "Alt+" : "") + key;
+  }
+
+  function keyName(event) {
     switch (event.key) {
     case Qt.Key_Up: return "Up";
     case Qt.Key_Down: return "Down";
@@ -25,7 +31,8 @@ Singleton {
       const letter = String.fromCharCode(event.key);
       return event.modifiers & Qt.ShiftModifier ? letter : letter.toLowerCase();
     }
-    return event.text;
+    // Held with Ctrl, a key's text is a control character.
+    return event.modifiers & Qt.ControlModifier ? "" : event.text;
   }
 
   // The names an entry key stands for: a single name or a list of them.
@@ -44,10 +51,13 @@ Singleton {
     return root.names(key).includes(name);
   }
 
-  // Short label for an entry key: its first name, or every name for a pair, with arrows as symbols.
+  // Short label for an entry key: its first name, or every name for a pair with their shared modifiers once (Ctrl+←→), arrows as symbols.
   function label(key, paired = false) {
     const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Return: "RET" };
-    return (paired ? root.names(key) : root.names(key).slice(0, 1)).map(name => symbols[name] ?? name).join("");
+    const names = paired ? root.names(key) : root.names(key).slice(0, 1);
+    const modifiers = names[0].match(/^((Ctrl|Alt)\+)*/)[0];
+    const shared = names.every(name => name.startsWith(modifiers)) ? modifiers : "";
+    return shared + names.map(name => name.slice(shared.length)).map(name => symbols[name] ?? name).join("");
   }
 
   // Whether text matches a pattern where * stands for anything.

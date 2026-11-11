@@ -12,7 +12,7 @@ Singleton {
   readonly property PwNode sink: Pipewire.defaultAudioSink
   readonly property PwNode source: Pipewire.defaultAudioSource
 
-  // Every output and input as Config.commands.audioDevices lists them, internal first: { kind, name, type, label }.
+  // Every output and input as Config.audio.devices lists them, internal first: { kind, name, type, label }.
   readonly property var sinks: internal.devices.filter(device => device.kind === "sink")
   readonly property var sources: internal.devices.filter(device => device.kind === "source")
 
@@ -38,7 +38,7 @@ Singleton {
   }
 
   function select(kind, name) {
-    if (Config.commands.audioSelect) Quickshell.execDetached(["sh", "-c", Config.commands.audioSelect + ' "$1" "$2"', "sh", kind, name]);
+    if (Config.audio.select) Quickshell.execDetached(["sh", "-c", Config.audio.select + ' "$1" "$2"', "sh", kind, name]);
   }
 
   QtObject {
@@ -72,7 +72,7 @@ Singleton {
 
   CommandReader {
     id: lister
-    shell: Config.commands.audioDevices
+    shell: Config.audio.devices
     atStart: true
     onRead: text => internal.devices = text.trim().split("\n").filter(line => line).map(line => {
       const [kind, name, type, label] = line.split("\t");

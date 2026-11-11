@@ -6,8 +6,8 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   package = self.packages.screen-recorder.override {
-    informationIcon = mkIcon "screen-recorder-information-icon" self.lib.glyphs."cod-info";
-    errorIcon = mkIcon "screen-recorder-error-icon" self.lib.glyphs."cod-error";
+    informationIcon = mkIcon "screen-recorder-information-icon" self.lib.glyphs."md-information";
+    errorIcon = mkIcon "screen-recorder-error-icon" self.lib.glyphs."md-alert_circle";
     audioDevice = "recording.monitor";  # desktop + mic mix, profiles/nixos/graphical/audio.nix
   };
   screen-recorder = lib.getExe package;
@@ -17,7 +17,7 @@ let
 
   screenRecordingActions = [
     { id = "recording-screen"; symbol = self.lib.glyphs."md-monitor_screenshot"; label = "Screen"; exec = ''${screen-recorder} screen "${directory}"''; }
-    { id = "recording-region"; symbol = self.lib.glyphs."cod-screen_full"; label = "Region"; exec = ''${screen-recorder} region "${directory}"''; }
+    { id = "recording-region"; symbol = self.lib.glyphs."md-selection_drag"; label = "Region"; exec = ''${screen-recorder} region "${directory}"''; }
   ];
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {

@@ -5,14 +5,14 @@ import Quickshell
 import Quickshell.Io
 import qs
 
-// Whether notifications are paused, as Config.commands.notifications prints it: once, then on every change.
+// Whether notifications are paused, as Config.notifications.watch prints it: once, then on every change.
 Singleton {
   id: root
 
   readonly property bool enabled: internal.enabled
 
   function toggle() {
-    if (Config.commands.notificationsToggle) Quickshell.execDetached(["sh", "-c", Config.commands.notificationsToggle]);
+    if (Config.notifications.toggle) Quickshell.execDetached(["sh", "-c", Config.notifications.toggle]);
   }
 
   QtObject {
@@ -22,8 +22,8 @@ Singleton {
 
     // Started here rather than by bindings: a running binding can turn true before the command binding has the command.
     function watch() {
-      if (!Config.commands.notifications) return;
-      watcher.command = ["sh", "-c", Config.commands.notifications];
+      if (!Config.notifications.watch) return;
+      watcher.command = ["sh", "-c", Config.notifications.watch];
       watcher.running = true;
     }
   }
@@ -31,8 +31,8 @@ Singleton {
   Component.onCompleted: internal.watch()
 
   Connections {
-    target: Config.commands
-    function onNotificationsChanged() { internal.watch(); }
+    target: Config.notifications
+    function onWatchChanged() { internal.watch(); }
   }
 
   Process {

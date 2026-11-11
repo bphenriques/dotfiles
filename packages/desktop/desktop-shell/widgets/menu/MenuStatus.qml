@@ -30,7 +30,8 @@ StatusLine {
   // Volumes run from "5%" to "muted": room for the longest, so the glyph beside it holds still.
   detailChars: compact && (status === "sink" || status === "source") ? 5 : 0
   // Dim when quiet (the header) or when a status has nothing to report, e.g. music while mpd is not running.
-  tone: active ? "primary"
+  tone: status === "notifications" && DoNotDisturb.enabled ? "alert"
+    : active || status === "keepAwake" && IdleInhibit.enabled || quiet && integration?.active ? "primary"
     : status === "battery" && Power.level === "critical" ? "alert"
     : status === "battery" && Power.level === "low" ? "warning"
     : quiet || status && !value.text && !value.detail ? "dim"
@@ -59,7 +60,9 @@ StatusLine {
     case "display": return Glyphs.display(Display.layout);
     case "tray": return Glyphs.tray;
     case "battery": return Power.present ? Glyphs.battery(Power.percentage, Power.pluggedIn) : "";
-    case "layout": return Glyphs.keyboard;
+    case "keyboardLayout": return Glyphs.keyboard;
+    case "notifications": return DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications;
+    case "keepAwake": return Glyphs.keepAwake;
     default: return integration?.glyph ?? "";
     }
   }
@@ -93,7 +96,7 @@ StatusLine {
       return { text: Tray.items.map(app => pinned(app.id, app.title || app.id)).join(", "), detail: "" };
     case "battery":
       return { text: Power.present ? Power.percentage + "%" : "", detail: "" };
-    case "layout":
+    case "keyboardLayout":
       return { text: KeyboardLayout.label || KeyboardLayout.name, detail: "" };
     default:
       return { text: integration?.text ?? "", detail: integration?.detail ?? "" };

@@ -1,18 +1,18 @@
 # desktop-shell
 
-A [Quickshell](https://quickshell.org) menu with live status and a calendar, and a pop-up for volume, brightness, keyboard-layout and keep-awake changes; optional integrations add the rest (a workspace minimap, the screen-recording pill, the wallpaper's name). Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input. `Config.qml` holds the defaults; the module only passes settings through.
+A [Quickshell](https://quickshell.org) menu with live status and a calendar, and a pop-up for volume, brightness, keyboard-layout and keep-awake changes; optional integrations add the rest (a workspace minimap, the screen-recording pill, the wallpaper's name). Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input. `Config.qml` holds the defaults; the module only passes settings through. Settings are grouped by feature, like waybar's modules (`clock`, `audio`, `notifications`, ...); one the shell does not know is logged at startup and ignored.
 
 ## Design rules
 
 Every change follows these; a change that cannot is a reason to revisit the rule here first, not to work around it.
 
 1. **Data, not code.** What the menu shows and does comes from `menu.entries`. QML has no case for a particular entry, tool or device; a new need becomes a schema field in the module, with an assertion when it can be wrong.
-2. **Tools through `Config.commands`.** QML runs nothing by name. The module that owns a tool sets its command, and the shell reads only output it defines (a layout name, `true`/`false` lines), never a tool's own format. What needs more of one tool is an integration. The compositor is reached only through `Compositor` (see Compositor).
+2. **Tools through the config.** QML runs nothing by name. The module that owns a tool sets its command, and the shell reads only output it defines (a layout name, `true`/`false` lines), never a tool's own format. What needs more of one tool is an integration. The compositor is reached only through `Compositor` (see Compositor).
 3. **Events over polling.** What has no events is read when the menu opens; what must sample (the mic level) runs only while shown.
 4. **Layout is declared.** A level's columns and width come from its entry (`columns`, `width`, else `menu.columns`, `menu.width`), never measured from what it shows, so it holds still; entries flow across, so order decides neighbours. Make the menu wider before adding columns or truncating.
 5. **Order is explicit.** Top level by `lib.mkOrder`: 100 audio, 300 network, 400 Bluetooth, 500 display, 600 wallpaper, 700 music, 800 tray, 900 calendar, 2000 session. Within a level, the list order, paired for the row it shares.
 6. **Labels.** Sentence case; `...` when it opens a picker or an app; a pair named for what it changes (`Volume`, `Track`). Device levels put Power on `p` and Configure... on `c`; every action in a level carries an icon; `space` is only ever a fuzzel picker. What ends the session takes Shift (Reboot, Shutdown).
-7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. Modifiers other than Shift run nothing else. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
+7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. A key may carry Ctrl or Alt in its name (`Ctrl+Left`), shown in its hint; a modifier never runs the plain key, Shift only picks the capital letter, and Super stays the compositor's. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
 8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state. A top-level status names its state only when it has no value to show (`off`, `muted`, `paused`). What cannot run right now dims, so keys hold still; what can never run on this machine is not declared.
 9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted.
 10. **Done means seen working.** A change is tested where it runs (see Testing), not only evaluated.
@@ -28,9 +28,13 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 
 ## Menu
 
-Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. `view = "calendar"` gives a level a month in the system locale instead of entries, weeks starting on `calendar.firstDayOfWeek` (the locale's by default), `←→` stepping the month. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
-The mouse reaches what the keys do, nothing more: a click runs a row, a right click opens a tray app's menu, the wheel steps a row's pair (volume, brightness) or the calendar's month, the title goes back (at the top, the clock opens the calendar), and a click on the header's notifications, keep awake or keyboard layout flips it. Holding Super for a second shows those three's compositor keys (`shortcuts`, set by the module that binds them).
+The header is `menu.header.left`, `center` and `right`, like waybar's modules: built-in items (`clock`, `notifications`, `keepAwake`, `keyboardLayout`, `battery`) and integrations, by name. The centre is as wide as its items and centred, the sides share the rest, so the menu holds still; crowded, text shortens with an ellipsis, the centre's first, while icons and short values (`80%`, `EN`) stay whole. Inside a level the left holds its title, the right its state. The clock takes `clock.format`, strftime as waybar's (`%A, %-d%o %B %H:%M`, `%o` the English ordinal), else the locale's long date; `clock.locale` (`en_GB`) names days and months for the clock and the calendar, else the system's.
+
+`view = "calendar"` gives a level a month instead of entries, titled by the month, weeks starting on `clock.firstDayOfWeek` (the locale's by default). Its keys are action rows: arrows move the selected day by a day or a week, `Ctrl+←→` by a month, `Ctrl+↑↓` by a year, `t` back to today.
+
+The mouse reaches what the keys do, nothing more: a click runs a row, a right click opens a tray app's menu, the wheel steps a row's pair (volume, brightness) or the calendar's month, a click on a day selects it, the title goes back (at the top, the clock opens the calendar), and a click on a header item flips it (notifications, keep awake, keyboard layout) or calls an integration's `activate()`. Holding Super for a second shows their compositor keys (each feature's `shortcut`, set by the module that binds it, or an integration's).
 
 ## Kit
 
@@ -51,7 +55,7 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `Shadow` | a shadow like niri's default, for a surface inside a larger window |
 | `OverlayWindow`, `DismissArea` | a popup above everything; the click-outside catcher under it |
 | `Transient` | shown for a moment on `show()`, held while `held`, ignoring startup's replayed state until `armed` |
-| `Glyphs` | the icon set; glyphs other programs own arrive through `Config.glyphs` |
+| `Glyphs` | the icon set, Material Design from Nerd Fonts, each an escape (`"\u{F05A9}"`) named after its entry; glyphs other programs own arrive in their feature's `glyphs` (`audio.glyphs`) |
 
 `alert` is only for what needs attention: critical battery, recording, do-not-disturb.
 
@@ -62,8 +66,8 @@ An integration is one QML file whose root is `Integration`, listed by name under
 Its API, and the only one:
 
 - In: `name`, and `settings`, its own part of the config; it holds the defaults (`settings.height ?? 30`).
-- Out: `glyph`, `text` and `detail`, shown by a menu entry whose `status` is its name, and `active`, which lights one whose `activeWhen` is. The module rejects either naming an integration not listed, and an integration taking a built-in name.
-- Uses: the theme (`Config.theme`, `Config.osd`), the kit, and the services' APIs (`Audio`, `Network`, `Bluez`, `Power`, `Display`, `Brightness`, `Music`, `Tray`, `Startup`, `Compositor`), plus a compositor's own backend when it is built on one (`Niri`, whose `received` passes on every event).
+- Out: `glyph`, `text` and `detail`, shown by a menu entry whose `status` is its name and in the header when `menu.header` names it; `active`, which lights either; `activate()`, what a click on its header item does; and `shortcut`, its compositor key, shown while Super is held. The module rejects either naming an integration not listed, and an integration taking a built-in name.
+- Uses: the theme (`Config.theme`, `Config.popups`), the kit, and the services' APIs (`Audio`, `Network`, `Bluez`, `Power`, `Display`, `Brightness`, `Music`, `Tray`, `Startup`, `Compositor`), plus a compositor's own backend when it is built on one (`Niri`, whose `received` passes on every event).
 - Actions: an `IpcHandler` targeting its name, which menu entries and compositor keys call through `exec.ipc`.
 
 | Shipped | Shows | Settings |
@@ -85,10 +89,12 @@ What only one compositor has stays with its backend (`Niri`: workspaces, windows
 
 ## Runtime
 
-Nothing runs from PATH: each external command arrives through `Config.commands` or an integration's settings, set by the module that owns the tool, so swapping a tool means changing its module, not the shell. One left unset shows as an empty status. The compositor is the exception: its backend talks to it directly, niri's through its socket.
+Nothing runs from PATH: each external command arrives in its feature's settings (`audio.devices`, `notifications.toggle`) or an integration's, set by the module that owns the tool, so swapping a tool means changing its module, not the shell. One left unset shows as an empty status. The compositor is the exception: its backend talks to it directly, niri's through its socket.
 
 ## Testing
 
 `check.sh` holds the rules above that a text search can (an integration's root and imports, Compositor, Label, theme colours, commands from the config); every build runs it.
 
 `nix run .#desktop-shell-preview -- <shell dir> [config.json]` runs a working tree in a nested niri, with your `config.json` or a fixture (the built one edited with `jq`), and opens a shell inside it with `wtype`, `wlrctl` and `grim` at hand. Exit that shell to stop it. Session actions run for real, so never press them there.
+
+Screenshots come from the live desktop after a switch, not the preview (it only draws while its window is visible): open a level with `qs -c desktop-shell ipc call menu toggleEntry <key>` (`menu toggle` for the top level), wait a second, `grim <file>`, then close it with `menu toggle`. A pop-up shows on its own change (`niri msg action switch-layout next`, `qs -c desktop-shell ipc call idle toggle`, then the same again to undo). Anything opened inside the preview runs its `$SHELL`, so never point that at a script.

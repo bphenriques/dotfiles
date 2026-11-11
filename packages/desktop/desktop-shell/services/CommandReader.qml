@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell.Io
 
-// A command from Config.commands, run on refresh() and read whole. A request while it runs runs it once more afterwards, so the last state wins.
+// A command from the config, run on refresh() and read whole. A request while it runs runs it once more afterwards, so the last state wins.
 Process {
   id: root
 

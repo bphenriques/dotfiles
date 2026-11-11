@@ -1,82 +1,80 @@
 import QtQuick
 import QtQuick.Layouts
 import qs
+import qs.services
 import qs.ui
 
-// A month in the system locale's month and weekday names, weeks starting on Config.calendar.firstDayOfWeek.
+// The month of the selected day in the clock's locale, weeks starting on its first day (services/Clock.qml).
+// Today is lit, the selected day highlighted, days of the months around dim.
 Item {
   id: root
 
-  required property date today
-  // Months away from today's.
-  required property int offset
+  required property var selected
 
   signal stepped(int months)
+  signal picked(var day)
 
-  readonly property date shown: new Date(today.getFullYear(), today.getMonth() + offset, 1)
-  readonly property int firstDay: Config.calendar.firstDayOfWeek
+  readonly property int firstDay: Clock.firstDayOfWeek
   // Six weeks from the one holding the 1st, so the grid never changes height.
   readonly property var days: {
-    const lead = (shown.getDay() - firstDay + 7) % 7;
-    return Array.from({ length: 42 }, (_, i) => new Date(shown.getFullYear(), shown.getMonth(), 1 - lead + i));
+    const first = new Date(selected.getFullYear(), selected.getMonth(), 1);
+    const lead = (first.getDay() - firstDay + 7) % 7;
+    return Array.from({ length: 42 }, (_, i) => new Date(first.getFullYear(), first.getMonth(), 1 - lead + i));
   }
 
-  implicitHeight: column.implicitHeight
+  implicitHeight: grid.implicitHeight
 
-  ColumnLayout {
-    id: column
+  GridLayout {
+    id: grid
     anchors.left: parent.left
     anchors.right: parent.right
-    spacing: Config.theme.spacing
+    columns: 7
+    columnSpacing: 0
+    rowSpacing: 0
 
-    RowLayout {
-      Layout.leftMargin: Config.theme.itemPaddingX
-      spacing: Config.theme.spacing
-
-      KeyHint {
-        key: ["Left", "Right"]
-        paired: true
-        chars: 2
-      }
+    Repeater {
+      model: 7
 
       Label {
-        font.bold: true
-        text: Qt.locale().standaloneMonthName(root.shown.getMonth()) + " " + root.shown.getFullYear()
+        required property int index
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        Layout.bottomMargin: Config.theme.itemPaddingY
+        horizontalAlignment: Text.AlignHCenter
+        tone: "dim"
+        // Some locales' short names are whole words (pt: segunda), too wide for a column.
+        text: Clock.locale.dayName((root.firstDay + index) % 7, Locale.ShortFormat).slice(0, 3)
       }
     }
 
-    GridLayout {
-      Layout.fillWidth: true
-      columns: 7
-      columnSpacing: 0
-      rowSpacing: Config.theme.spacing
+    Repeater {
+      model: root.days
 
-      Repeater {
-        model: 7
+      Rectangle {
+        id: cell
+        required property date modelData
+        readonly property bool isToday: modelData.toDateString() === Clock.date.toDateString()
+        readonly property bool isSelected: modelData.toDateString() === root.selected.toDateString()
+
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: day.implicitHeight + 2 * Config.theme.itemPaddingY
+        radius: Config.theme.itemRadius
+        color: isSelected || mouse.containsMouse ? Qt.alpha(Config.theme.primary, Config.theme.highlightOpacity) : "transparent"
 
         Label {
-          required property int index
-          Layout.fillWidth: true
-          Layout.preferredWidth: 1
-          horizontalAlignment: Text.AlignHCenter
-          tone: "dim"
-          // Some locales' short names are whole words (pt: segunda), too wide for a column.
-          text: Qt.locale().dayName((root.firstDay + index) % 7, Locale.ShortFormat).slice(0, 3)
+          id: day
+          anchors.centerIn: parent
+          tone: cell.isToday ? "primary" : cell.modelData.getMonth() === root.selected.getMonth() ? "normal" : "dim"
+          font.bold: cell.isToday
+          text: cell.modelData.getDate()
         }
-      }
 
-      Repeater {
-        model: root.days
-
-        Label {
-          required property date modelData
-          readonly property bool isToday: modelData.toDateString() === root.today.toDateString()
-          Layout.fillWidth: true
-          Layout.preferredWidth: 1
-          horizontalAlignment: Text.AlignHCenter
-          tone: isToday ? "primary" : modelData.getMonth() === root.shown.getMonth() ? "normal" : "dim"
-          font.bold: isToday
-          text: modelData.getDate()
+        MouseArea {
+          id: mouse
+          anchors.fill: parent
+          hoverEnabled: true
+          onClicked: root.picked(cell.modelData)
         }
       }
     }
@@ -85,6 +83,7 @@ Item {
   // Up goes back in time, as scrolling up a page would.
   WheelSteps {
     anchors.fill: parent
+    acceptedButtons: Qt.NoButton
     onStepped: up => root.stepped(up ? -1 : 1)
   }
 }
