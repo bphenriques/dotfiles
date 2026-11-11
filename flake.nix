@@ -47,6 +47,10 @@
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
     hermes-agent.inputs.home-manager.follows = "home-manager";
     omp.url = "github:can1357/oh-my-pi/v18.16.0";                        # Terminal coding agent. No binary cache, so keep upstream's tested nixpkgs.
+
+    ## Data
+    nerd-fonts-glyphs.url = "file+https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v3.5.0/glyphnames.json"; # Glyph names, the release nixpkgs ships
+    nerd-fonts-glyphs.flake = false;
   };
 
   outputs = inputs @ { self, nixpkgs, treefmt-nix, ... }:
@@ -66,6 +70,15 @@
         producers = [ "compute" ];   # selfhost hosts that supply landing-page services
       };
     in {
+      # Nerd Font glyphs by name, e.g. self.lib.glyphs."md-cog".
+      lib.glyphs =
+        let
+          names = builtins.fromJSON (builtins.readFile inputs.nerd-fonts-glyphs);
+          shipped = builtins.head (nixpkgs.lib.splitString "+" nixpkgs.legacyPackages.x86_64-linux.nerd-fonts.hack.version);
+        in
+        assert nixpkgs.lib.assertMsg (names.METADATA.version == shipped)
+          "nerd-fonts-glyphs is ${names.METADATA.version} but nixpkgs ships ${shipped}: point its URL at that release";
+        nixpkgs.lib.mapAttrs (_: glyph: glyph.char) (removeAttrs names [ "METADATA" ]);
       lib.builders = forAllSystems (system:
         import ./lib/builders.nix {
           inherit (nixpkgs) lib;

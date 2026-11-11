@@ -46,7 +46,7 @@ Singleton {
 
   // Short label for an entry key: its first name, or every name for a pair, with arrows as symbols.
   function label(key, paired = false) {
-    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "Space", Return: "Enter" };
+    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Return: "RET" };
     return (paired ? root.names(key) : root.names(key).slice(0, 1)).map(name => symbols[name] ?? name).join("");
   }
 

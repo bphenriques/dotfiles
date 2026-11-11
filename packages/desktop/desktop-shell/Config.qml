@@ -75,8 +75,10 @@ Singleton {
       }
 
       property JsonObject display: JsonObject {
-        // What the Display menu calls each screen, keyed as niri is told about it.
-        property var labels: ({})
+        // What the Display row calls each layout.
+        property var layouts: ({})
+        // The laptop's panel, the screen the backlight dims.
+        property string panel
       }
 
       // External commands, each set by the module that owns the tool, run with sh -c. One left unset shows as an empty status.
@@ -89,6 +91,8 @@ Singleton {
         property string audioDevice
         // Prints the path of a file holding the backlight's value, a tab, and its maximum.
         property string brightness
+        // Prints the display layout, then the layouts the connected screens allow, one per line.
+        property string displayLayout
         // niri msg --json outputs.
         property string outputs
         // Prints true or false for do-not-disturb, then again on every change.
@@ -98,11 +102,12 @@ Singleton {
         property string recordingStop
       }
 
-      // Glyphs owned by other programs: upower-notify, volume-osd, mpc-plus.
+      // Glyphs owned by other programs: upower-notify, volume-osd, mpc-plus, display.
       property JsonObject glyphs: JsonObject {
         property var battery: ({ discharging: [], charging: [] })
         property var audio: ({})
         property var music: ({})
+        property var display: ({})
       }
     }
   }

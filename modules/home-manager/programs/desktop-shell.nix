@@ -27,14 +27,14 @@ let
         description = "Keep the menu open after running cmd";
       };
       activeWhen = mkOption {
-        type = types.nullOr (types.enum [ "wifi" "bluetooth" "repeat" "shuffle" ]);
+        type = types.nullOr (types.enum [ "wifi" "bluetooth" "repeat" "shuffle" "sink-muted" "source-muted" ]);
         default = null;
         description = "State that lights the entry while on, for a toggle";
       };
-      onOutput = mkOption {
+      layout = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Output whose being on lights the entry: connector name, or make, model and serial";
+        description = "Display layout the entry selects, lit while current and dim while the connected screens do not allow it";
       };
       width = mkOption {
         type = types.nullOr types.ints.positive;
@@ -97,7 +97,7 @@ let
       icon = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Glyph shown before the label of an entry without status";
+        description = "Glyph shown before the label: on every action in a level, and on a top-level entry without status";
       };
     };
   };
@@ -123,6 +123,7 @@ let
     ++ lib.concatMap (e: [
       { assertion = (e.cmd != null) != (e.submenu != null || e.list != null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs either cmd, or submenu and/or list"; }
       { assertion = e.keepOpen == null || e.cmd != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set keepOpen with cmd"; }
+      { assertion = e.submenu == null || lib.all (a: a.icon != null) e.submenu; message = "my.programs.desktop-shell.menu: every action in '${e.desc}' needs an icon"; }
       { assertion = e.pins == [ ] || e.list != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set pins with list"; }
       { assertion = lib.length e.pins <= 9; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} has more pins than digits"; }
       { assertion = e.list == null || lib.intersectLists digits (keysOf (if e.submenu != null then e.submenu else [ ])) == [ ]; message = "my.programs.desktop-shell.menu: digits in '${e.desc}' are reserved for its list"; }

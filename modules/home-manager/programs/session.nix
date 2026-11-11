@@ -17,17 +17,17 @@ let
     (mapAttrsToList (name: value: {
       id = "session-${name}";
       key = "W";
-      symbol = "";
+      symbol = self.lib.glyphs."custom-windows";
       label = "Reboot to ${value.title}";
       exec = rebootToWindowsCmd value; # systemctl reboot --boot-loader-entry=help
     }) osConfig.boot.loader.systemd-boot.windows);
   sessionActions = [
-    { id = "session-lock";      key = "l"; symbol = ""; label = "Lock";                 exec = cfg.exec.lock; }
-    { id = "session-suspend";   key = "s"; symbol = "󰤄"; label = "Suspend";              exec = cfg.exec.suspend; }
-    { id = "session-shutdown";  key = "S"; symbol = ""; label = "Shutdown";             exec = cfg.exec.shutdown; }
-    { id = "session-reboot";    key = "R"; symbol = ""; label = "Reboot";               exec = cfg.exec.reboot; }
+    { id = "session-lock";      key = "l"; symbol = self.lib.glyphs."seti-lock"; label = "Lock";                 exec = cfg.exec.lock; }
+    { id = "session-suspend";   key = "s"; symbol = self.lib.glyphs."md-power_sleep"; label = "Suspend";              exec = cfg.exec.suspend; }
+    { id = "session-shutdown";  key = "S"; symbol = self.lib.glyphs."fa-power_off"; label = "Shutdown";             exec = cfg.exec.shutdown; }
+    { id = "session-reboot";    key = "R"; symbol = self.lib.glyphs."fa-arrows_rotate"; label = "Reboot";               exec = cfg.exec.reboot; }
   ] ++ systemd-boot-windows ++ [
-    { id = "session-efi";       key = "E"; symbol = ""; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
+    { id = "session-efi";       key = "E"; symbol = self.lib.glyphs."md-chip"; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
   ];
 in
 {
@@ -49,7 +49,7 @@ in
       (pkgs.makeDesktopItem {
         name = "session-menu";
         desktopName = "Session";
-        icon = mkIcon "session" "";
+        icon = mkIcon "session" self.lib.glyphs."oct-person";
         exec = cfg.exec.menu;
         actions = let
           toAction = b: nameValuePair b.id {
@@ -62,7 +62,7 @@ in
     ];
 
     my.programs.desktop-shell.menu.entries = lib.mkOrder 2000 [
-      { key = menuKey; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; }) sessionActions; }
+      { key = menuKey; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; icon = a.symbol; }) sessionActions; }
     ];
   };
 }

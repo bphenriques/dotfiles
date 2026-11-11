@@ -14,8 +14,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.desktop-shell = {
     menu.entries = lib.mkOrder 600 [
       { key = "w"; desc = "Wallpaper"; width = 640; status = "wallpaper"; submenu = [
-        { key = [ "Left" "Right" ]; desc = "Wallpaper"; width = 640; cmd = [ "${awww-util} prev ${wallpapers}" "${awww-util} next ${wallpapers}" ]; keepOpen = true; }
-        { key = "r";                desc = "Random";    cmd = "${awww-util} random ${wallpapers}"; keepOpen = true; }
+        { key = [ "Left" "Right" ]; desc = "Wallpaper"; icon = self.lib.glyphs."md-image_multiple"; cmd = [ "${awww-util} prev ${wallpapers}" "${awww-util} next ${wallpapers}" ]; keepOpen = true; }
+        { key = "r";                desc = "Random"; icon = self.lib.glyphs."md-dice_multiple";    cmd = "${awww-util} random ${wallpapers}"; keepOpen = true; }
       ]; }
     ];
   };

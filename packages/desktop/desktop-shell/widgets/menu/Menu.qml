@@ -97,13 +97,26 @@ Scope {
     active: menu.open && dismiss.item !== null
 
     OverlayWindow {
+      // The whole screen, so levels of different sizes never resize the window: a resize shows the old size for a frame.
+      anchors.top: true
       anchors.bottom: true
-      margins.bottom: Config.theme.edgeMargin
+      anchors.left: true
+      anchors.right: true
       WlrLayershell.namespace: "menu"
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+      // Clicks beside the card reach the dismiss area below.
+      mask: Region {
+        item: card
+      }
+      BackgroundEffect.blurRegion: Region {
+        item: card
+        radius: Config.theme.radius
+      }
 
-      implicitWidth: card.width
-      implicitHeight: card.height
+      Shadow {
+        anchors.fill: card
+        radius: card.radius
+      }
 
       SystemClock {
         id: clock
@@ -112,6 +125,9 @@ Scope {
 
       Surface {
         id: card
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Config.theme.edgeMargin
         width: menu.width
         height: content.implicitHeight + 2 * Config.theme.padding
 

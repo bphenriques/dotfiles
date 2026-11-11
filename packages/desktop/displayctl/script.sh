@@ -1,61 +1,96 @@
 #shellcheck shell=bash
 
-# Switch one screen, or follow the panel to what else is plugged in.
-# A screen is named as the Display menu names it: a connector, or make, model and serial.
-toggle() {
-  outputs=$(niri msg --json outputs)
-  conn=$(echo "$outputs" | jq -r --arg want "$1" '
-    to_entries[]
-    | select(.key == $want or (([.value.make, .value.model, .value.serial] | join(" ")) == $want))
-    | .key')
-  # Not plugged in, and the menu has already greyed the entry out.
-  [ -n "$conn" ] || return 0
-  # An output turned off is still listed, only without its `logical` geometry.
-  if echo "$outputs" | jq -e --arg conn "$conn" '.[$conn].logical' >/dev/null; then
-    niri msg output "$conn" off
-    # Nothing lit left is a black screen, so the panel takes over.
-    if ! niri msg --json outputs | jq -e "any(.[]; .logical)" >/dev/null; then
-      niri msg output "$panel" on || true
-    fi
-  else
-    niri msg output "$conn" on
-  fi
+# Screens are niri connectors here; the panel is the laptop's, every other one is an external.
+state="${XDG_STATE_HOME:-$HOME/.local/state}/displayctl/layouts.json"
+
+outputs() { niri msg --json outputs; }
+externals() { jq -r --arg panel "$panel" 'keys[] | select(. != $panel)' <<<"$1"; }
+# The externals by make, model and serial, so a screen is the same on any port.
+setup() { jq -r --arg panel "$panel" '[to_entries[] | select(.key != $panel) | .value | "\(.make) \(.model) \(.serial // "Unknown")"] | sort | join(" + ")' <<<"$1"; }
+# A screen unplugged a moment ago is gone, and that is fine.
+switch() { niri msg output "$1" "$2" || true; }
+
+# The layout the screens are in, empty if none fits. An output that is off has no `logical` geometry.
+current() {
+  jq -r --arg panel "$panel" '
+    (.[$panel].logical != null) as $laptop |
+    (to_entries | map(select(.key != $panel)) | any(.value.logical != null)) as $external |
+    if $laptop and $external then "extend" elif $external then "external" elif $laptop then "laptop" else "" end' <<<"$1"
 }
 
-# Keep the panel dark while any other screen is on: plug something in and the laptop goes
-# out, unplug everything and it comes back.
-#
-# Only the set of *connected* screens is looked at, since switching one off with the menu
-# leaves it connected, so this never undoes what the menu just did.
-connected=""
-panel_follows() {
-  outputs=$(niri msg --json outputs)
-  now=$(echo "$outputs" | jq -r 'keys | sort | join(" ")')
-  [ "$now" != "$connected" ] || return 0
-  connected=$now
-  if echo "$outputs" | jq -e --arg panel "$panel" 'any(keys[]; . != $panel)' >/dev/null; then
-    niri msg output "$panel" off || true
-  else
-    niri msg output "$panel" on || true
-  fi
+# The layout last picked with these externals plugged in, External only the first time.
+wanted() {
+  local setup
+  setup=$(setup "$1")
+  if [ -z "$setup" ]; then echo laptop; return; fi
+  jq -r --arg setup "$setup" '.[$setup] // "external"' "$state" 2>/dev/null || echo external
 }
 
-# The kernel says so over udev: niri's IPC has no event for a screen arriving or leaving,
-# and a screen switched off is still listed, so a drm change is the only real news here.
+remember() {
+  mkdir -p "${state%/*}"
+  { cat "$state" 2>/dev/null || echo '{}'; } | jq --arg setup "$1" --arg layout "$2" '.[$setup] = $layout' >"$state.new"
+  mv "$state.new" "$state"
+}
+
+# laptop: the panel alone; external: every external, panel off; extend: every screen.
+# What is needed is turned on before anything is turned off, so a screen stays lit.
+layout() {
+  local all setup
+  all=$(outputs)
+  mapfile -t ext < <(externals "$all")
+  case "$1" in
+    laptop)
+      switch "$panel" on
+      for o in "${ext[@]}"; do switch "$o" off; done
+      ;;
+    external)
+      [ "${#ext[@]}" -gt 0 ] || return 0
+      for o in "${ext[@]}"; do switch "$o" on; done
+      switch "$panel" off
+      ;;
+    extend)
+      for o in "${ext[@]}"; do switch "$o" on; done
+      switch "$panel" on
+      ;;
+    *) usage ;;
+  esac
+  setup=$(setup "$all")
+  [ -z "$setup" ] || remember "$setup" "$1"
+}
+
+# The layout the screens are in, then the layouts the connected screens allow, one per line.
+status() {
+  local all
+  all=$(outputs)
+  current "$all"
+  echo laptop
+  [ -z "$(externals "$all")" ] || printf 'external\nextend\n'
+}
+
+# Whenever the set of connected screens changes, the layout wanted for it, unless already in it:
+# starting again changes nothing, and switching a screen by hand leaves the set as it is.
+# niri reports no screen arriving or leaving, but its workspaces move with them.
 follow() {
-  panel_follows
-  udevadm monitor --subsystem-match=drm | while read -r _; do
-    # A screen plugged in this moment has not been picked up by niri yet.
-    sleep 0.3
-    panel_follows
-  done
+  local connected="" all now want event
+  while read -r event; do
+    [[ $event == '{"WorkspacesChanged"'* ]] || continue
+    all=$(outputs)
+    now=$(jq -r 'keys | sort | join(" ")' <<<"$all")
+    [ "$now" != "$connected" ] || continue
+    connected=$now
+    want=$(wanted "$all")
+    [ "$(current "$all")" = "$want" ] || layout "$want"
+  done < <(niri msg --json event-stream)
+}
+
+usage() {
+  echo "usage: displayctl layout laptop|external|extend | status | follow" >&2
+  exit 2
 }
 
 case "${1:-}" in
-  toggle) toggle "${2:-}" ;;
+  layout) layout "${2:-}" ;;
+  status) status ;;
   follow) follow ;;
-  *)
-    echo "usage: displayctl toggle <screen> | follow" >&2
-    exit 2
-    ;;
+  *) usage ;;
 esac

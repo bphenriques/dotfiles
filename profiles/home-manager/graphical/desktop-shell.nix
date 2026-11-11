@@ -1,4 +1,4 @@
-{ config, lib, pkgs, osConfig, ... }:
+{ config, lib, pkgs, osConfig, self, ... }:
 let
   cfg = config.my.programs.desktop-shell;
   colors = config.lib.stylix.colors.withHashtag;
@@ -18,8 +18,6 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         warning = colors.base0A;
         monospaceFont = config.stylix.fonts.monospace.name;
         fontSize = config.stylix.fonts.sizes.popups;
-        # niri rounds the menu's blur to match.
-        radius = 10;
       };
       battery = {
         low = osConfig.services.upower.percentageLow;
@@ -37,8 +35,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     menu.entries = lib.mkMerge [
       (lib.mkOrder 300 [
         { key = "n"; desc = "Network"; width = 640; status = "network"; list = "wifi"; submenu = [
-          { key = "p";     desc = "Power";      activeWhen = "wifi"; cmd = ''${nmcli} radio wifi "$([ "$(${nmcli} radio wifi)" = enabled ] && echo off || echo on)"''; keepOpen = true; }
-          { key = "c";     desc = "Configure..."; cmd = config.my.programs.terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
+          { key = "p";     desc = "Power"; icon = self.lib.glyphs."md-toggle_switch";      activeWhen = "wifi"; cmd = ''${nmcli} radio wifi "$([ "$(${nmcli} radio wifi)" = enabled ] && echo off || echo on)"''; keepOpen = true; }
+          { key = "c";     desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = config.my.programs.terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
         ]; }
       ])
       (lib.mkOrder 800 [
@@ -56,22 +54,6 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
     layerRules = {
       screenCapture.block = [ ''namespace="^recording-indicator$"'' ];
-      base = [
-        ''
-          layer-rule {
-            match namespace="^menu$"
-            shadow {
-              on
-            }
-
-            geometry-corner-radius ${toString cfg.settings.theme.radius}
-
-            background-effect {
-              blur true
-            }
-          }
-        ''
-      ];
     };
   };
 }

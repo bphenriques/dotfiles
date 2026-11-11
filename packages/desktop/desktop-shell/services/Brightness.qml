@@ -13,6 +13,8 @@ Singleton {
   property int maximum: 0
   property int current: 0
   readonly property bool present: maximum > 0
+  // The panel it dims is on; Display only knows while the menu is open.
+  readonly property bool lit: present && Display.enabled.includes(Config.display.panel)
   readonly property int percentage: present ? Math.round(current * 100 / maximum) : 0
 
   CommandReader {

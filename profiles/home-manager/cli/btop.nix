@@ -19,7 +19,7 @@ in
     (pkgs.makeDesktopItem {
       name = "system-monitor";
       desktopName = "System Monitor";
-      icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "system-monitor" "";
+      icon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; } "system-monitor" self.lib.glyphs."oct-cpu";
       exec = system-monitor;
     })
   ];

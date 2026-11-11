@@ -36,7 +36,7 @@ in
       (pkgs.makeDesktopItem {
         name = "file-explorer";
         desktopName = "File Explorer";
-        icon = mkIcon "file-explorer" "";
+        icon = mkIcon "file-explorer" self.lib.glyphs."custom-folder_open";
         exec = cfg.browser;
         actions = let
           bookmarkToAction = b: nameValuePair (replaceStrings [" "] ["-"] b.name) {
@@ -52,22 +52,22 @@ in
     my.programs.file-explorer.bookmarks = lib.mkDefault [
       {
         name = "Documents";
-        icon = mkIcon "documents" "󱧶";
+        icon = mkIcon "documents" self.lib.glyphs."md-folder_file";
         path = config.xdg.userDirs.documents;
       }
       {
         name = "Pictures";
-        icon = mkIcon "pictures" "󰉏";
+        icon = mkIcon "pictures" self.lib.glyphs."md-folder_image";
         path = config.xdg.userDirs.pictures;
       }
       {
         name = "Music";
-        icon = mkIcon "music" "󱍙";
+        icon = mkIcon "music" self.lib.glyphs."md-folder_music";
         path = config.xdg.userDirs.music;
       }
       {
         name = "Downloads";
-        icon = mkIcon "downloads" "󰉍";
+        icon = mkIcon "downloads" self.lib.glyphs."md-folder_download";
         path = config.xdg.userDirs.download;
       }
     ];

@@ -36,7 +36,7 @@ Scope {
     }
 
     // An entry's own actions by letter, then what its list holds by digit.
-    const actions = Array.from(level.entry.submenu ?? []).map(action => ({ key: action.key, desc: action.desc, enabled: Display.available(action.requires), paired: MenuKeys.isPair(action), active: isOn(action.activeWhen) || Display.enabled.includes(action.onOutput), listed: /^[0-9]$/.test(action.key), entry: action }));
+    const actions = Array.from(level.entry.submenu ?? []).map(action => ({ key: action.key, desc: action.desc, icon: action.icon ?? "", enabled: Display.available(action.requires) && Display.allows(action.layout), paired: MenuKeys.isPair(action), active: isOn(action.activeWhen) || action.layout === Display.layout, listed: /^[0-9]$/.test(action.key), entry: action }));
     return actions.concat(numbered(level.entry.list, level.entry.pins));
   }
 
@@ -68,6 +68,8 @@ Scope {
     case "bluetooth": return Bluez.enabled;
     case "repeat": return Music.repeat;
     case "shuffle": return Music.shuffle;
+    case "sink-muted": return Audio.sinkMuted;
+    case "source-muted": return Audio.sourceMuted;
     default: return false;
     }
   }

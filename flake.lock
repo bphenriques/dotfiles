@@ -422,6 +422,18 @@
         "type": "github"
       }
     },
+    "nerd-fonts-glyphs": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-D6Ps74cpvVFg/2T0fWbaDqdpY2x6FZl78H2gQBIq/xk=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v3.5.0/glyphnames.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v3.5.0/glyphnames.json"
+      }
+    },
     "nix-bun": {
       "inputs": {
         "nixpkgs": [
@@ -728,6 +740,7 @@
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager",
         "microvm": "microvm",
+        "nerd-fonts-glyphs": "nerd-fonts-glyphs",
         "nix-darwin": "nix-darwin",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs",

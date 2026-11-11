@@ -7,7 +7,7 @@ import qs
 import qs.services
 import qs.ui
 
-// A minimap in the corner after where you are changes: the non-empty workspaces top to bottom, then the active one's columns to scale (none when empty),
+// A minimap in the corner when you move to another window or workspace: the non-empty workspaces top to bottom, then the active one's columns to scale (none when empty),
 // the focused window lit, between thin strips of the workspaces above and below.
 // niri does not report how far a workspace is scrolled, so the map shows every column rather than the visible ones.
 Scope {
@@ -43,8 +43,6 @@ Scope {
   QtObject {
     id: state
     readonly property bool armed: Startup.settled
-    // Where you are, without the neighbours: only a change here shows the map.
-    property string here: ""
   }
 
   Timer {
@@ -55,10 +53,7 @@ Scope {
 
   Connections {
     target: Niri
-    function onMapChanged() {
-      const here = JSON.stringify([Niri.map.output, Niri.map.workspaces, Niri.map.columns]);
-      if (here === state.here) return;
-      state.here = here;
+    function onMoved() {
       if (Niri.overview || !state.armed) return;
       root.shown = true;
       hideTimer.restart();

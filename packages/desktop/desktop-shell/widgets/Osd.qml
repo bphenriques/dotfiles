@@ -72,6 +72,7 @@ Scope {
         : root.kind === "source" ? Audio.sourceMuted
         : root.kind === "idle" ? !IdleInhibit.enabled
         : false
+      readonly property string tone: muted ? "dim" : root.kind === "idle" ? "primary" : "normal"
       readonly property string glyph: root.kind === "sink" ? (muted ? Glyphs.volumeOff : Glyphs.audioDevice(Audio.sinkType))
         : root.kind === "source" ? (muted ? Glyphs.microphoneOff : Glyphs.audioDevice(Audio.sourceType))
         : root.kind === "brightness" ? Glyphs.brightness(Brightness.percentage)
@@ -122,7 +123,7 @@ Scope {
           Icon {
             anchors.horizontalCenter: parent.horizontalCenter
             size: Config.theme.osdIconSize
-            tone: window.muted ? "dim" : "normal"
+            tone: window.tone
             glyph: window.glyph
           }
         }
@@ -139,13 +140,22 @@ Scope {
 
         Icon {
           anchors.verticalCenter: parent.verticalCenter
-          tone: window.muted ? "dim" : "normal"
+          tone: window.tone
           glyph: window.glyph
         }
 
+        TextMetrics {
+          id: cell
+          font: value.font
+          text: "0"
+        }
+
         Label {
+          id: value
           anchors.verticalCenter: parent.verticalCenter
-          tone: window.muted ? "dim" : "normal"
+          // As wide as the widest value, so the pill holds still as it changes.
+          width: Math.max(3, ...Array.from(Config.keyboard.labels).map(label => label.length)) * cell.advanceWidth
+          tone: window.tone
           text: root.kind === "layout" ? (KeyboardLayout.label || KeyboardLayout.name.slice(0, 2))
             : IdleInhibit.enabled ? "on" : "off"
         }

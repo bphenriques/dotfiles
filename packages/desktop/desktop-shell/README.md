@@ -1,6 +1,6 @@
 # desktop-shell
 
-A [Quickshell](https://quickshell.org) menu with live status, a pop-up for volume, brightness, keyboard-layout and keep-awake changes, a workspace minimap when where you are changes, and the screen-recording pill. Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input. `Config.qml` holds the defaults; the module only passes settings through.
+A [Quickshell](https://quickshell.org) menu with live status, a pop-up for volume, brightness, keyboard-layout and keep-awake changes, a workspace minimap when you move between windows or workspaces, and the screen-recording pill. Configured by `modules/home-manager/programs/desktop-shell.nix`, which writes `$XDG_CONFIG_HOME/desktop-shell/config.json`: the shell's only input. `Config.qml` holds the defaults; the module only passes settings through.
 
 ## Design rules
 
@@ -11,9 +11,9 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 3. **Events over polling.** What has no events is read when the menu opens; what must sample (the mic level) runs only while shown.
 4. **Layout is declared.** A level's columns and width come from its entry (`columns`, `width`, else `menu.columns`, `menu.width`), never measured from what it shows, so it holds still; entries flow across, so order decides neighbours. Make the menu wider before adding columns or truncating.
 5. **Order is explicit.** Top level by `lib.mkOrder`: 100 audio, 300 network, 400 Bluetooth, 500 display, 600 wallpaper, 700 music, 800 tray, 2000 session. Within a level, the list order, paired for the row it shares.
-6. **Labels.** Sentence case; `...` when it opens a picker or an app; a pair named for what it changes (`Volume`, `Track`). Device levels put Power on `p` and Configure... on `c`; `space` is only ever a fuzzel picker. What ends the session takes Shift (Reboot, Shutdown).
+6. **Labels.** Sentence case; `...` when it opens a picker or an app; a pair named for what it changes (`Volume`, `Track`). Device levels put Power on `p` and Configure... on `c`; every action in a level carries an icon; `space` is only ever a fuzzel picker. What ends the session takes Shift (Reboot, Shutdown).
 7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. Modifiers other than Shift run nothing else. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
-8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state.
+8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state. What cannot run right now dims, so keys hold still; what can never run on this machine is not declared.
 9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted.
 10. **Done means seen working.** A change is tested where it runs (a fixture, a nested niri, keys sent with `wtype`), not only evaluated.
 11. **Widgets compose the kit.** Colour and dimming come from a `tone`, glyphs go through `Icon`, the wheel through `WheelSteps`; a widget never sets opacity to dim, picks a theme colour itself, or draws a glyph as text.
@@ -26,7 +26,7 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 
 ## Menu
 
-Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on, and `onOutput` lights it while its own output is on. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
 ## Kit
 
@@ -42,6 +42,7 @@ Every key visible, then its status, labels starting together after a gutter as w
 | `ListItem` | a row with hover, click, right click and wheel; dims itself when disabled |
 | `WheelSteps` | a pointer area that turns the wheel into one step per notch |
 | `Surface`, `Pill` | a panel; a capsule outlined in its tone |
+| `Shadow` | niri's default shadow, for a surface inside a larger window |
 | `OverlayWindow`, `DismissArea` | a popup above everything; the click-outside catcher under it |
 | `Glyphs` | the icon set; glyphs other programs own arrive through `Config.glyphs` |
 

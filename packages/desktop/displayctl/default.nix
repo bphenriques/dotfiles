@@ -5,7 +5,6 @@ pkgs.writeShellApplication {
     pkgs.coreutils
     pkgs.jq
     pkgs.niri
-    pkgs.systemd
   ];
   text = ''
     # The laptop panel, as niri names it.

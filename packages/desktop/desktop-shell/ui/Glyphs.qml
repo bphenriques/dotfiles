@@ -31,6 +31,11 @@ Singleton {
   readonly property var brightnessLevels: [String.fromCodePoint(0xF00DE), String.fromCodePoint(0xF00DF), String.fromCodePoint(0xF00E0)] // md-brightness_5, _6, _7
   readonly property string check: "✓"
 
+  // The display layout: laptop, external or extend.
+  function display(layout) {
+    return Config.glyphs.display[layout] ?? monitor;
+  }
+
   // volume-osd's device type: headphones, headset, internal, external or microphone.
   function audioDevice(type) {
     return Config.glyphs.audio[type] ?? Config.glyphs.audio.external ?? "";

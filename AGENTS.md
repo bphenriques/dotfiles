@@ -39,6 +39,7 @@ Flake inputs with a local checkout. Edit them there, never in a scratch clone.
 ## Code Style
 
 - Keep it simple and idiomatic; avoid fancy constructs
+- Nerd Font glyphs are written by name, `self.lib.glyphs."md-cog"`, never pasted: the names are Nerd Fonts' own list (`nerd-fonts-glyphs` input).
 - Prefer architecturally sound and idiomatic solutions over quick shortcuts
 - Ensure consistency with existing patterns; read neighboring files before writing new code
 - Inline host-specific logic rather than creating non-reusable modules

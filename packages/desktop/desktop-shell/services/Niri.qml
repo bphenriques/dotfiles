@@ -15,6 +15,8 @@ Singleton {
   // On the focused output: its non-empty workspaces in order { active }, then the columns of the active one and of the workspaces above and below it,
   // each column its windows top to bottom { appId, width, height, focused }; focused is the window focus lands on in that workspace.
   property var map: null
+  // You moved: focus went to another window or workspace. A window that opens or closes moves focus without it.
+  signal moved()
 
   QtObject {
     id: state
@@ -71,12 +73,16 @@ Singleton {
     } else if (event.WorkspaceActiveWindowChanged) {
       const workspace = state.workspaces[event.WorkspaceActiveWindowChanged.workspace_id];
       if (workspace) workspace.active_window_id = event.WorkspaceActiveWindowChanged.active_window_id;
+    } else if (event.WindowFocusChanged) {
+      pendingMove.restart();
+      return;
     } else if (event.WindowsChanged) {
       state.windows = byId(event.WindowsChanged.windows);
     } else if (event.WindowOpenedOrChanged) {
       const window = event.WindowOpenedOrChanged.window;
       state.windows[window.id] = window;
     } else if (event.WindowClosed) {
+      pendingMove.stop();
       delete state.windows[event.WindowClosed.id];
     } else if (event.WindowLayoutsChanged) {
       for (const [id, layout] of event.WindowLayoutsChanged.changes) if (state.windows[id]) state.windows[id].layout = layout;
@@ -94,6 +100,14 @@ Singleton {
       return;
     }
     update();
+    if (event.WorkspaceActivated?.focused) pendingMove.restart();
+  }
+
+  // Closing a window moves focus first and reports the close right after: a move waits a moment to see whether it was one.
+  Timer {
+    id: pendingMove
+    interval: 50
+    onTriggered: root.moved()
   }
 
   Socket {

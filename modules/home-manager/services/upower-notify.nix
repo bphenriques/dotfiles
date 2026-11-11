@@ -5,17 +5,17 @@ let
   mkIcon = text: icon: textColor: self.lib.builders.mkNerdFontIcon { inherit textColor; } text icon;
 
   batteryLevels = [
-    { level = 0;   glyph = "󰂎"; chargingGlyph = "󰢟"; color = config.lib.stylix.colors.withHashtag.base08; }
-    { level = 10;  glyph = "󰁺"; chargingGlyph = "󰢜"; color = config.lib.stylix.colors.withHashtag.base08; }
-    { level = 20;  glyph = "󰁻"; chargingGlyph = "󰂆"; color = config.lib.stylix.colors.withHashtag.base0A; }
-    { level = 30;  glyph = "󰁼"; chargingGlyph = "󰂇"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 40;  glyph = "󰁽"; chargingGlyph = "󰂈"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 50;  glyph = "󰁾"; chargingGlyph = "󰢝"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 60;  glyph = "󰁿"; chargingGlyph = "󰂉"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 70;  glyph = "󰂀"; chargingGlyph = "󰢞"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 80;  glyph = "󰂁"; chargingGlyph = "󰂊"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 90;  glyph = "󰂂"; chargingGlyph = "󰂋"; color = config.lib.stylix.colors.withHashtag.base0B; }
-    { level = 100; glyph = "󰁹"; chargingGlyph = "󰂅"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 0;   glyph = self.lib.glyphs."md-battery_outline"; chargingGlyph = self.lib.glyphs."md-battery_charging_outline"; color = config.lib.stylix.colors.withHashtag.base08; }
+    { level = 10;  glyph = self.lib.glyphs."md-battery_10"; chargingGlyph = self.lib.glyphs."md-battery_charging_10"; color = config.lib.stylix.colors.withHashtag.base08; }
+    { level = 20;  glyph = self.lib.glyphs."md-battery_20"; chargingGlyph = self.lib.glyphs."md-battery_charging_20"; color = config.lib.stylix.colors.withHashtag.base0A; }
+    { level = 30;  glyph = self.lib.glyphs."md-battery_30"; chargingGlyph = self.lib.glyphs."md-battery_charging_30"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 40;  glyph = self.lib.glyphs."md-battery_40"; chargingGlyph = self.lib.glyphs."md-battery_charging_40"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 50;  glyph = self.lib.glyphs."md-battery_50"; chargingGlyph = self.lib.glyphs."md-battery_charging_50"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 60;  glyph = self.lib.glyphs."md-battery_60"; chargingGlyph = self.lib.glyphs."md-battery_charging_60"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 70;  glyph = self.lib.glyphs."md-battery_70"; chargingGlyph = self.lib.glyphs."md-battery_charging_70"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 80;  glyph = self.lib.glyphs."md-battery_80"; chargingGlyph = self.lib.glyphs."md-battery_charging_80"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 90;  glyph = self.lib.glyphs."md-battery_90"; chargingGlyph = self.lib.glyphs."md-battery_charging_90"; color = config.lib.stylix.colors.withHashtag.base0B; }
+    { level = 100; glyph = self.lib.glyphs."md-battery"; chargingGlyph = self.lib.glyphs."md-battery_charging_100"; color = config.lib.stylix.colors.withHashtag.base0B; }
   ];
 
   mkLevelAttrs = fn: builtins.listToAttrs (map (b: {

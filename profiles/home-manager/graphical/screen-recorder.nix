@@ -6,16 +6,16 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   package = self.packages.screen-recorder.override {
-    informationIcon = mkIcon "screen-recorder-information-icon" "";
-    errorIcon = mkIcon "screen-recorder-error-icon" "";
+    informationIcon = mkIcon "screen-recorder-information-icon" self.lib.glyphs."cod-info";
+    errorIcon = mkIcon "screen-recorder-error-icon" self.lib.glyphs."cod-error";
     audioDevice = "recording.monitor";  # desktop + mic mix, profiles/nixos/graphical/audio.nix
   };
   screen-recorder = lib.getExe package;
   directory = config.xdg.userDirs.extraConfig.RECORDINGS;
 
   screenRecordingActions = [
-    { id = "recording-screen"; symbol = "󰹑"; label = "Screen"; exec = ''${screen-recorder} screen "${directory}"''; }
-    { id = "recording-region"; symbol = ""; label = "Region"; exec = ''${screen-recorder} region "${directory}"''; }
+    { id = "recording-screen"; symbol = self.lib.glyphs."md-monitor_screenshot"; label = "Screen"; exec = ''${screen-recorder} screen "${directory}"''; }
+    { id = "recording-region"; symbol = self.lib.glyphs."cod-screen_full"; label = "Region"; exec = ''${screen-recorder} region "${directory}"''; }
   ];
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
@@ -24,7 +24,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     (pkgs.makeDesktopItem {
       name = "screen-recorder";
       desktopName = "Screen Recording";
-      icon = mkIcon "screen-recorder" "󰑋";
+      icon = mkIcon "screen-recorder" self.lib.glyphs."md-record_rec";
       exec = ''${screen-recorder} screen "${directory}"'';
       actions = let
         toAction = b: nameValuePair b.id {

@@ -21,10 +21,12 @@ StatusLine {
   readonly property var value: valueFor(status)
 
   glyph: status ? glyphFor(status) : icon
+  // In the header an icon sits closer to its own text than to its neighbours.
+  spacing: quiet ? Config.theme.spacing / 2 : Config.theme.spacing
   text: compact ? "" : value.text || fallback
   detail: value.detail || fallbackDetail
-  // Room for "muted", the longest detail beside the header's glyph.
-  detailChars: compact ? 5 : 0
+  // Volumes run from "5%" to "muted": room for the longest, so the glyph beside it holds still.
+  detailChars: compact && (status === "sink" || status === "source") ? 5 : 0
   // Dim when quiet (the header) or when a status has nothing to report, e.g. music while mpd is not running.
   tone: active ? "primary"
     : status === "battery" && Power.level === "critical" ? "alert"
@@ -35,6 +37,8 @@ StatusLine {
   // The input moving as you speak, only in its own level: beside the volume on the top row it reads as a picture of that number.
   Meter {
     visible: root.compact && root.status === "source"
+    // A neighbour, not part of the value: the full gap, half of it from the row.
+    Layout.leftMargin: Config.theme.spacing / 2
     Layout.preferredWidth: Config.theme.meterLength
     value: Audio.sourceMuted ? 0 : Audio.sourceLevel
   }
@@ -51,7 +55,7 @@ StatusLine {
     case "network": return Network.kind === "wifi" ? Glyphs.wifi : Network.kind === "wired" ? Glyphs.ethernet : Glyphs.disconnected;
     case "brightness": return Glyphs.brightness(Brightness.percentage);
     case "bluetooth": return !Bluez.enabled ? Glyphs.bluetoothOff : Bluez.connected.length ? Glyphs.bluetoothConnected : Glyphs.bluetooth;
-    case "display": return Glyphs.monitor;
+    case "display": return Glyphs.display(Display.layout);
     case "tray": return Glyphs.tray;
     case "wallpaper": return Glyphs.wallpaper;
     case "battery": return Power.present ? Glyphs.battery(Power.percentage, Power.pluggedIn) : "";
@@ -76,7 +80,7 @@ StatusLine {
     case "network":
       return { text: Network.kind === "wifi" ? pinned(Network.ssid, Network.ssid) : Network.kind === "wired" ? "Ethernet" : "Disconnected", detail: Network.wifiEnabled ? "" : "Wi-Fi off" };
     case "brightness":
-      return { text: "", detail: Brightness.present ? Brightness.percentage + "%" : "" };
+      return { text: "", detail: Brightness.lit ? Brightness.percentage + "%" : "" };
     case "bluetooth": {
       if (!Bluez.present) return { text: "", detail: "" };
       if (!Bluez.enabled) return { text: "", detail: "off" };
@@ -85,7 +89,7 @@ StatusLine {
       return { text: Bluez.connected.map(device => pinned(device.address, device.name)).join(", "), detail: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : "" };
     }
     case "display":
-      return { text: Display.summary, detail: Brightness.present ? Brightness.percentage + "%" : "" };
+      return { text: Config.display.layouts[Display.layout] ?? "", detail: Brightness.lit ? Brightness.percentage + "%" : "" };
     case "tray":
       return { text: Tray.items.map(app => pinned(app.id, app.title || app.id)).join(", "), detail: "" };
     case "wallpaper":

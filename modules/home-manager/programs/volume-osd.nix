@@ -7,12 +7,12 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   glyphs = {
-    headphones = "󰋋";
-    headset = "󰋎";
-    internal = "󰽟";
-    external = "󰓃";
-    microphone = "󰍬";
-    microphoneOff = "󰍭";
+    headphones = self.lib.glyphs."md-headphones";
+    headset = self.lib.glyphs."md-headset";
+    internal = self.lib.glyphs."md-monitor_speaker";
+    external = self.lib.glyphs."md-speaker";
+    microphone = self.lib.glyphs."md-microphone";
+    microphoneOff = self.lib.glyphs."md-microphone_off";
   };
 
   pin = lib.types.submodule {
@@ -56,7 +56,7 @@ in
         internalSpeakersIcon = mkIcon "volume-osd-internal" glyphs.internal;
         externalSpeakersIcon = mkIcon "volume-osd-external" glyphs.external;
         microphoneIcon = mkIcon "volume-osd-micro" glyphs.microphone;
-        errorIcon = mkIcon "volume-osd-error-icon" "󰀨";
+        errorIcon = mkIcon "volume-osd-error-icon" self.lib.glyphs."md-alert_circle";
       };
     };
   };
@@ -85,17 +85,17 @@ in
 
     my.programs.desktop-shell.menu.entries = lib.mkOrder 100 [
       { key = "a"; desc = "Audio output"; status = "sink"; list = "sinks"; pins = menuPins cfg.pins.sinks; submenu = [
-        { key = [ "Down" "Up" ];    desc = "Volume";          cmd = volume "sink"; keepOpen = true; }
-        { key = "m";              desc = "Mute";            cmd = "${volume-osd} sink-toggle-mute"; keepOpen = true; }
-        { key = "space";          desc = "Choose device...";  cmd = "${volume-osd} sink-move-fuzzel"; }
-        { key = "c";              desc = "Configure...";      cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
+        { key = [ "Down" "Up" ];    desc = "Volume"; icon = self.lib.glyphs."md-volume_high";          cmd = volume "sink"; keepOpen = true; }
+        { key = "m";              desc = "Mute"; icon = self.lib.glyphs."md-volume_off"; activeWhen = "sink-muted";            cmd = "${volume-osd} sink-toggle-mute"; keepOpen = true; }
+        { key = "space";          desc = "Choose device..."; icon = self.lib.glyphs."md-swap_horizontal";  cmd = "${volume-osd} sink-move-fuzzel"; }
+        { key = "c";              desc = "Configure..."; icon = self.lib.glyphs."md-cog";      cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
       ]; }
 
       { key = "A"; desc = "Audio input"; status = "source"; list = "sources"; pins = menuPins cfg.pins.sources; submenu = [
-        { key = [ "Down" "Up" ];    desc = "Volume";          cmd = volume "source"; keepOpen = true; }
-        { key = "m";              desc = "Mute";            cmd = "${volume-osd} source-toggle-mute"; keepOpen = true; }
-        { key = "space";          desc = "Choose device...";  cmd = "${volume-osd} source-move-fuzzel"; }
-        { key = "c";              desc = "Configure...";      cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
+        { key = [ "Down" "Up" ];    desc = "Volume"; icon = glyphs.microphone;          cmd = volume "source"; keepOpen = true; }
+        { key = "m";              desc = "Mute"; icon = glyphs.microphoneOff; activeWhen = "source-muted";            cmd = "${volume-osd} source-toggle-mute"; keepOpen = true; }
+        { key = "space";          desc = "Choose device..."; icon = self.lib.glyphs."md-swap_horizontal";  cmd = "${volume-osd} source-move-fuzzel"; }
+        { key = "c";              desc = "Configure..."; icon = self.lib.glyphs."md-cog";      cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
       ]; }
     ];
 

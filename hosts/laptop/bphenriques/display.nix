@@ -1,7 +1,6 @@
-# Screens and what switches them: niri holds the settings for each screen and the runtime
-# on/off state, a menu entry toggles one screen, and a small reactor keeps the panel dark while
-# anything else is plugged in. There is no profile to pick: a screen keeps its settings whatever
-# port it is plugged into and whatever else is plugged in beside it.
+# Screens and what switches them: niri holds each screen's settings, the Display menu picks a
+# layout, and a reactor restores the one last picked for what is plugged in. Anything finer
+# (a subset of screens, positions, rotation) is for Configure or the niri config.
 {
   config,
   lib,
@@ -17,113 +16,58 @@ let
   # model and serial so they keep their settings when they move to another port.
   panel = "eDP-1";
 
-  # The screens the Display menu lists, in that order. Modes are the exact strings
-  # `niri msg --json outputs` reports, refresh in mHz: the highest the screen accepts at the
-  # resolution wanted. A mode niri cannot set it ignores, and picks one itself.
+  # Modes are the exact strings `niri msg --json outputs` reports, refresh in mHz: the highest the
+  # screen accepts at the resolution wanted. A mode niri cannot set it ignores, and picks one itself.
   screens = [
-    {
-      key = "1";
-      name = panel;
-      label = "Laptop";
-      desc = "Laptop panel";
-      mode = "2880x1800@120.001";
-      scale = 1.75;
-    }
-    {
-      key = "2";
-      name = "Dell Inc. DELL S2721DGF 4P11R83";
-      label = "Monitor";
-      desc = "Office monitor";
-      mode = "2560x1440@143.912";
-      scale = 1.0;
-    }
-    {
-      key = "3";
-      name = "LG Electronics LG TV SSCR2 0x01010101";
-      label = "TV";
-      desc = "Living room TV";
-      mode = "2560x1440@119.998";
-      scale = 1.0;
-    }
+    { name = panel; mode = "2880x1800@120.001"; scale = 1.75; }
+    { name = "Dell Inc. DELL S2721DGF 4P11R83"; mode = "2560x1440@143.912"; scale = 1.0; }
+    { name = "LG Electronics LG TV SSCR2 0x01010101"; mode = "2560x1440@119.998"; scale = 1.0; }
   ];
 
-  # `niri msg output` takes the connector name, which for a monitor depends on the port it is
-  # plugged into, so both the menu and the reactor resolve a screen through it. The tool lives
-  # in packages/desktop/displayctl; all it is told here is which connector is the panel.
-  displayctl = self.packages.displayctl.override { inherit panel; };
+  # Windows' Win+P without Duplicate: niri cannot mirror yet.
+  layouts = [
+    { key = "l"; desc = "Laptop only";   layout = "laptop"; }
+    { key = "e"; desc = "External only"; layout = "external"; }
+    { key = "x"; desc = "Extend";        layout = "extend"; }
+  ];
 
-  # A menu entry is one command string, so the toggle is spelled out here once.
-  toggleCmd = "${lib.getExe displayctl} toggle";
+  menuKey = "d";
+
+  # md-laptop, md-monitor, md-monitor_multiple: each layout's icon, also on the Display row.
+  glyphs = { laptop = self.lib.glyphs."md-laptop"; external = self.lib.glyphs."md-monitor"; extend = self.lib.glyphs."md-monitor_multiple"; };
+
+  displayctl = lib.getExe (self.packages.displayctl.override { inherit panel; });
 in
 {
-  home.packages = [ displayctl ];
-  # The settings DSL writes each attrset key as a KDL node name, and an output is a
-  # node with a string argument, so the screens go in as raw config instead.
-  wayland.windowManager.niri.extraConfig = lib.mkAfter (
-    lib.concatMapStrings (screen: ''
-      output "${screen.name}" {
-          mode "${screen.mode}"
-          scale ${toString screen.scale}
-      }
-    '') screens
-  );
+  wayland.windowManager.niri.settings._children = map (screen: { output = { _args = [ screen.name ]; inherit (screen) mode scale; }; }) screens;
 
   my.programs.desktop-shell = {
     settings = {
       osd.adjust.brightness = brightness;
-      # The Display menu row lists the screens that are on by these names.
-      display.labels = builtins.listToAttrs (
-        map (screen: {
-          inherit (screen) name;
-          value = screen.label;
-        }) screens
-      );
+      commands.displayLayout = "${displayctl} status";
+      display.panel = panel;
+      glyphs.display = glyphs;
+      display.layouts = lib.listToAttrs (map (layout: lib.nameValuePair layout.layout layout.desc) layouts);
     };
     menu.entries = lib.mkOrder 500 [
-      {
-        key = "d";
-        desc = "Display";
-        status = "display";
-        submenu =
-          [
-            {
-              key = [
-                "Down"
-                "Up"
-              ];
-              desc = "Brightness";
-              cmd = brightness;
-              keepOpen = true;
-              requires.enabled = [ panel ];
-            }
-          ]
-          ++ map (screen: {
-            inherit (screen) key desc;
-            cmd = "${toggleCmd} ${lib.escapeShellArg screen.name}";
-            keepOpen = true;
-            requires.connected = [ screen.name ];
-            onOutput = screen.name;
-          }) screens
-          ++ [
-            {
-              key = "c";
-              desc = "Configure...";
-              cmd = lib.getExe pkgs.wdisplays;
-            }
-          ];
-      }
+      { key = menuKey; desc = "Display"; status = "display"; submenu = [
+        { key = [ "Down" "Up" ]; desc = "Brightness"; icon = self.lib.glyphs."md-brightness_6"; cmd = brightness; keepOpen = true; requires.enabled = [ panel ]; }
+        { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
+      ] ++ map (layout: layout // { cmd = "${displayctl} layout ${layout.layout}"; icon = glyphs.${layout.layout}; }) layouts; }
     ];
   };
 
+  my.programs.niri.bindings."Mod+P repeat=false" = ''spawn-sh "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}"'';
+
   systemd.user.services.display-policy = {
     Unit = {
-      description = "Keep the laptop panel off while an external screen is connected";
+      Description = "Restore the display layout last picked for the screens plugged in";
       PartOf = [ config.wayland.systemd.target ];
       After = [ config.wayland.systemd.target ];
-      X-Restart-Triggers = [ "${displayctl}" ];
+      X-Restart-Triggers = [ displayctl ];
     };
     Service = {
-      ExecStart = "${lib.getExe displayctl} follow";
+      ExecStart = "${displayctl} follow";
       Restart = "always";
       RestartSec = 5;
     };

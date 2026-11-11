@@ -29,32 +29,32 @@ in
     bookmarks = [
       {
         name = "NAS Private";
-        icon = mkIcon "nas-private" "󰉐";
+        icon = mkIcon "nas-private" self.lib.glyphs."md-folder_lock";
         path = nasShares.bphenriques.root;
       }
       {
         name = "NAS Media";
-        icon = mkIcon "nas-media" "󰥠";
+        icon = mkIcon "nas-media" self.lib.glyphs."md-disc_player";
         path = nasShares.media.root;
       }
       {
         name = "NAS Documents";
-        icon = mkIcon "nas-documents" "󰈙";
+        icon = mkIcon "nas-documents" self.lib.glyphs."md-file_document";
         path = "${nasShares.bphenriques.root}/documents";
       }
       {
         name = "NAS Movies";
-        icon = mkIcon "nas-movies" "󰎁";
+        icon = mkIcon "nas-movies" self.lib.glyphs."md-movie";
         path = "${nasShares.media.root}/movies";
       }
       {
         name = "NAS TV";
-        icon = mkIcon "nas-tv" "󰟴";
+        icon = mkIcon "nas-tv" self.lib.glyphs."md-television_classic";
         path = "${nasShares.media.root}/tv";
       }
       {
         name = "NAS Downloads";
-        icon = mkIcon "nas-downloads" "󰇚";
+        icon = mkIcon "nas-downloads" self.lib.glyphs."md-download";
         path = "${nasShares.media.root}/downloads";
       }
     ];

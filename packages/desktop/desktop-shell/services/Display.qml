@@ -12,17 +12,23 @@ Singleton {
   property var connected: []
   // The same, for the outputs that are on.
   property var enabled: []
-  // What the outputs that are on are called in the menu, e.g. "Laptop + Monitor", for the Display row.
-  property string summary: ""
+  // The layout the screens are in, and the layouts the connected screens allow.
+  property string layout: ""
+  property var layouts: []
 
   function refresh() {
     outputs.refresh();
+    layoutStatus.refresh();
   }
 
   // Whether an entry's requirements hold: the outputs it needs connected, and those it needs on.
   function available(requires) {
     return Array.from(requires?.connected ?? []).every(output => root.connected.includes(output))
       && Array.from(requires?.enabled ?? []).every(output => root.enabled.includes(output));
+  }
+
+  function allows(layout) {
+    return !layout || root.layouts.includes(layout);
   }
 
   function names(name, output) {
@@ -36,10 +42,17 @@ Singleton {
     onRead: text => {
       const all = Object.entries(JSON.parse(text));
       root.connected = [].concat(...all.map(([name, output]) => root.names(name, output)));
-      const on = all.filter(([, output]) => output.logical);
-      root.enabled = [].concat(...on.map(([name, output]) => root.names(name, output)));
-      const labels = Config.display.labels;
-      root.summary = on.map(([name, output]) => labels[name] ?? labels[root.names(name, output)[1]] ?? name).sort().join(" + ");
+      root.enabled = [].concat(...all.filter(([, output]) => output.logical).map(([name, output]) => root.names(name, output)));
+    }
+  }
+
+  CommandReader {
+    id: layoutStatus
+    shell: Config.commands.displayLayout
+    onRead: text => {
+      const [current, ...allowed] = text.split("\n");
+      root.layout = current;
+      root.layouts = allowed.filter(layout => layout);
     }
   }
 }
