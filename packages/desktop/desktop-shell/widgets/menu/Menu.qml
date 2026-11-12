@@ -196,17 +196,10 @@ Scope {
       Shadow {
         anchors.fill: card
         radius: card.radius
-        opacity: card.opacity
       }
 
       Surface {
         id: card
-        // Fades in; closing is instant, as a fade-out would hold the keyboard (rule 13).
-        NumberAnimation on opacity {
-          from: 0
-          to: 1
-          duration: Config.theme.animationDuration
-        }
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Config.theme.edgeMargin

@@ -131,11 +131,12 @@ Scope {
     }
   }
 
+  // Off says nothing here: the header already shows it, and Power is a key away.
   function emptyFor(list) {
     switch (list) {
     case "tray": return "No apps in the tray";
-    case "wifi": return Network.wifiEnabled ? "No saved networks in range" : "Wi-Fi off";
-    case "bluetooth": return !Bluez.present ? "No Bluetooth adapter" : Bluez.enabled ? "No paired devices" : "Bluetooth off";
+    case "wifi": return Network.wifiEnabled ? "No saved networks in range" : "";
+    case "bluetooth": return !Bluez.present ? "No Bluetooth adapter" : Bluez.enabled ? "No paired devices" : "";
     case "sinks": return "No outputs";
     case "sources": return "No inputs";
     default: return "";

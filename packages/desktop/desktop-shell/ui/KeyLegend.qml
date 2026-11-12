@@ -19,7 +19,7 @@ RowLayout {
       required property var modelData
       readonly property string label: MenuKeys.label(modelData.key, true)
 
-      spacing: Config.theme.spacing / 2
+      spacing: Config.theme.spacing
 
       KeyHint {
         key: entry.modelData.key
