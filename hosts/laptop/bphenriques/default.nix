@@ -21,7 +21,8 @@ in
       ++ lib.optionals smbCfg.enable (lib.mapAttrsToList (_: mount: mount.group) smbCfg.shares);
 
     openssh.authorizedKeys.keys = config.fleet.ssh.authorizedKeys ++ [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7T3w1ex/9s2FBy8EM0HTSjF0kQIQi61ZwBh/mXQyNv ios-terminus" # the phone gets the laptop only and hops on from there
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7T3w1ex/9s2FBy8EM0HTSjF0kQIQi61ZwBh/mXQyNv ios-terminus"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAU2QHSKkqYS+FE5jYLvcf2Yq8gvd60EoI6xtCaNYeFZ bruno.henriques@iterable"
     ];
   };
 

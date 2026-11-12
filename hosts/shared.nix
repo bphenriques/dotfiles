@@ -22,7 +22,6 @@ in
   ssh = {
     authorizedKeys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBETAZZTh/Czemis4B6JKqySKLqWn5IUPqIvaJbEIe/3 laptop"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAU2QHSKkqYS+FE5jYLvcf2Yq8gvd60EoI6xtCaNYeFZ bruno.henriques@iterable"
     ];
   };
   ups = {
