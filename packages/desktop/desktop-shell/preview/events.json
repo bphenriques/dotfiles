@@ -1,0 +1,16 @@
+{
+  "updated": "2026-11-12T08:30",
+  "events": [
+    { "title": "Standup", "start": "2026-11-12T09:30", "end": "2026-11-12T09:45", "allDay": false, "color": "#4285f4", "location": "Office, 3rd floor" },
+    { "title": "Dentist appointment with a title long enough to be cut short", "start": "2026-11-12T14:00", "end": "2026-11-12T15:00", "allDay": false, "color": "#33b679", "location": "Rua Augusta 120, 1100-053 Lisboa, Portugal" },
+    { "title": "Birthday", "start": "2026-11-12", "end": "2026-11-12", "allDay": true, "color": "#33b679" },
+    { "title": "Call", "start": "2026-11-12T17:00", "end": "2026-11-12T17:30", "allDay": false, "color": "#4285f4" },
+    { "title": "Reminder", "start": "2026-11-12T18:00", "end": "2026-11-12T18:00", "allDay": false, "color": "#4285f4" },
+    { "title": "Dinner", "start": "2026-11-12T20:00", "end": "2026-11-12T22:00", "allDay": false, "color": "#33b679", "location": "Home" },
+    { "title": "Night shift", "start": "2026-11-14T22:00", "end": "2026-11-15T06:00", "allDay": false, "color": "#4285f4", "location": "Hospital" },
+    { "title": "Standup", "start": "2026-11-19T09:30", "end": "2026-11-19T09:45", "allDay": false, "color": "#4285f4", "location": "Office, 3rd floor" },
+    { "title": "Lisbon trip", "start": "2026-11-20", "end": "2026-11-22", "allDay": true, "color": "#33b679" },
+    { "title": "Standup", "start": "2026-11-26T09:30", "end": "2026-11-26T09:45", "allDay": false, "color": "#4285f4", "location": "Office, 3rd floor" },
+    { "title": "Year end", "start": "2026-12-31", "end": "2027-01-01", "allDay": true, "color": "#4285f4" }
+  ]
+}

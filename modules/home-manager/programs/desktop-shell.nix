@@ -85,9 +85,9 @@ let
         description = "Items of the list that keep digits 1 onwards, dimmed while absent";
       };
       view = mkOption {
-        type = types.nullOr (types.enum [ "calendar" ]);
+        type = types.nullOr (types.enum [ "calendar" "agenda" ]);
         default = null;
-        description = "What the entry's level shows in place of entries: a month calendar";
+        description = "What the entry's level shows under its entries: a month and its days, or the agenda";
       };
       status = mkOption {
         type = types.nullOr types.str;
@@ -146,7 +146,7 @@ let
       { assertion = e.status == null || lib.elem e.status (builtinStatuses ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} shows status '${toString e.status}', neither built in nor an integration's"; }
       { assertion = e.activeWhen == null || lib.elem e.activeWhen (builtinStates ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} is lit by '${toString e.activeWhen}', neither built in nor an integration's"; }
       { assertion = e.layout == null || lib.elem e.layout displayLayouts; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} selects layout '${toString e.layout}', not one of display.layouts: ${toString displayLayouts}"; }
-      { assertion = e.view == null || (e.submenu == null && e.list == null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} cannot combine view with submenu or list"; }
+      { assertion = e.view == null || e.list == null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} cannot combine view with list"; }
       { assertion = e.keepOpen == null || e.cmd != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set keepOpen with cmd"; }
       { assertion = e.submenu == null || lib.all (a: a.icon != null) e.submenu; message = "my.programs.desktop-shell.menu: every action in '${e.desc}' needs an icon"; }
       { assertion = e.pins == [ ] || e.list != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set pins with list"; }

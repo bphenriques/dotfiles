@@ -12,6 +12,7 @@ Singleton {
   readonly property alias theme: adapter.theme
   readonly property alias menu: adapter.menu
   readonly property alias clock: adapter.clock
+  readonly property alias calendar: adapter.calendar
   readonly property alias popups: adapter.popups
   readonly property alias audio: adapter.audio
   readonly property alias brightness: adapter.brightness
@@ -99,6 +100,14 @@ Singleton {
         property string locale
         // The calendar's, 0 for Sunday to 6 for Saturday; unset (-1), the locale's.
         property int firstDayOfWeek: -1
+      }
+
+      property JsonObject calendar: JsonObject {
+        // The events file the month shows (README.md#menu); unset or not there yet, the month alone.
+        property string file
+        // How many days from today the agenda lists, and its height in two-line events.
+        property int agendaDays: 7
+        property int agendaRows: 6
       }
 
       property JsonObject popups: JsonObject {

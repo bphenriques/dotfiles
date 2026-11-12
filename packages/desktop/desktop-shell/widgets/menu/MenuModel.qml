@@ -14,6 +14,8 @@ Scope {
   property var stack: []
   // The day selected in a calendar level.
   property var selected: new Date()
+  // The event in focus in a calendar's day or the agenda, by its place in that list; -1 for none.
+  property int eventFocus: -1
   // Super held a second shows the header's compositor keys, not at once, so a Super shortcut does not flash them.
   property bool shortcutsShown: false
 
@@ -30,20 +32,42 @@ Scope {
   // The top-level entry the clock opens.
   readonly property var calendar: itemsOf(null).find(item => item.entry.view === "calendar") ?? null
   // A calendar level's keys: each moves the selected day by [years, months, days] per key, or back to today (null).
+  // The arrows go unlisted, as Return into the day's events does (README.md#menu).
   readonly property var calendarKeys: [
-    { key: ["Left", "Right"], what: "day", moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
-    { key: ["Up", "Down"], what: "week", moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
+    { key: ["Left", "Right"], what: "day", unlisted: true, moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
+    { key: ["Up", "Down"], what: "week", unlisted: true, moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
     { key: ["Ctrl+Left", "Ctrl+Right"], what: "month", moves: { "Ctrl+Left": [0, -1, 0], "Ctrl+Right": [0, 1, 0] } },
     { key: ["Ctrl+Up", "Ctrl+Down"], what: "year", moves: { "Ctrl+Up": [-1, 0, 0], "Ctrl+Down": [1, 0, 0] } },
     { key: "t", what: "today", moves: { t: null } }
   ]
-  // Keys a level takes beyond its rows, shown on one line under the header (KeyLegend): { key, what }.
-  readonly property var legend: level?.entry?.view === "calendar" ? calendarKeys
+  // Keys a level takes beyond its rows, shown under the header (KeyLegend): { key, what }.
+  readonly property var legend: level?.entry?.view === "calendar" ? calendarKeys.filter(entry => !entry.unlisted)
     : level?.entry?.list === "tray" ? [{ key: "Ctrl+digit", what: "app menu" }]
     : []
 
-  // Whether a calendar key was pressed, and if so its move made.
+  onSelectedChanged: eventFocus = -1
+
+  // Moves the event in focus up or down among `count`, from none to the first.
+  function stepEvent(name, count) {
+    eventFocus = Math.min(Math.max(eventFocus + (name === "Up" ? -1 : 1), 0), count - 1);
+  }
+
+  // Whether a calendar key was pressed, acting on it if so: Return focuses the day's events, which the arrows then step
+  // through and Backspace leaves; any other key moves the day, which leaves them too.
   function calendarKey(name) {
+    const count = Calendar.enabled ? Calendar.eventsOn(selected).length : 0;
+    if (name === "Return") {
+      if (count > 0) eventFocus = 0;
+      return true;
+    }
+    if (eventFocus >= 0 && (name === "Up" || name === "Down")) {
+      stepEvent(name, count);
+      return true;
+    }
+    if (eventFocus >= 0 && name === "BackSpace") {
+      eventFocus = -1;
+      return true;
+    }
     const entry = calendarKeys.find(entry => MenuKeys.matches(entry.key, name));
     if (!entry) return false;
     const move = entry.moves[name];
@@ -222,12 +246,15 @@ Scope {
     shortcutsShown = false;
   }
 
+  // A level starts with no event in focus, coming back to it too.
   function back() {
     stack = stack.slice(0, -1);
+    eventFocus = -1;
   }
 
   function push(next) {
     stack = stack.concat([next]);
+    eventFocus = -1;
   }
 
   function find(candidates, name) {
@@ -287,8 +314,10 @@ Scope {
     const item = find(items, name);
     const listed = find(rows, name.replace(/^Ctrl\+/, ""));
     if (name === "Escape") hide();
-    else if (name === "BackSpace" && level) back();
     else if (level?.entry?.view === "calendar" && calendarKey(name)) return true;
+    // The agenda is its events: the arrows step through them from the start.
+    else if (level?.entry?.view === "agenda" && (name === "Up" || name === "Down")) stepEvent(name, Calendar.upcoming.filter(item => item.event).length);
+    else if (name === "BackSpace" && level) back();
     else if (name.startsWith("Ctrl+") && listed) openMenu(listed);
     else if (item) activate(item, name);
     else return false;

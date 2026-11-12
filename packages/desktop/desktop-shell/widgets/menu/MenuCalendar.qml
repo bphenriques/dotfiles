@@ -5,7 +5,7 @@ import qs.services
 import qs.ui
 
 // The month of the selected day in the clock's locale, weeks starting on its first day (services/Clock.qml).
-// Today is lit, the selected day highlighted, days of the months around dim.
+// Today is lit, the selected day highlighted, days of the months around dim; a dot per colour marks a day's events.
 Item {
   id: root
 
@@ -15,6 +15,12 @@ Item {
   signal picked(var day)
 
   readonly property int firstDay: Clock.firstDayOfWeek
+  readonly property real dotSize: Config.theme.fontSize / 2
+  readonly property real dotGap: Config.theme.spacing / 4
+  // More would spill into the next day.
+  readonly property int maxDots: 4
+  // Tighter than a menu row: six weeks of them stack up.
+  readonly property real cellPadding: Config.theme.itemPaddingY / 2
   // Six weeks from the one holding the 1st, so the grid never changes height.
   readonly property var days: {
     const first = new Date(selected.getFullYear(), selected.getMonth(), 1);
@@ -55,19 +61,41 @@ Item {
         required property date modelData
         readonly property bool isToday: modelData.toDateString() === Clock.date.toDateString()
         readonly property bool isSelected: modelData.toDateString() === root.selected.toDateString()
+        readonly property bool inMonth: modelData.getMonth() === root.selected.getMonth()
 
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        implicitHeight: day.implicitHeight + 2 * Config.theme.itemPaddingY
+        // Room for the dots whether a day has events or not, so the grid holds still.
+        implicitHeight: day.implicitHeight + (Calendar.enabled ? root.dotSize + root.dotGap : 0) + 2 * root.cellPadding
         radius: Config.theme.itemRadius
         color: isSelected || mouse.containsMouse ? Qt.alpha(Config.theme.primary, Config.theme.highlightOpacity) : "transparent"
 
         Label {
           id: day
-          anchors.centerIn: parent
-          tone: cell.isToday ? "primary" : cell.modelData.getMonth() === root.selected.getMonth() ? "normal" : "dim"
+          anchors.horizontalCenter: parent.horizontalCenter
+          anchors.top: parent.top
+          anchors.topMargin: root.cellPadding
+          tone: cell.isToday ? "primary" : cell.inMonth ? "normal" : "dim"
           font.bold: cell.isToday
           text: cell.modelData.getDate()
+        }
+
+        Row {
+          anchors.horizontalCenter: parent.horizontalCenter
+          anchors.top: day.bottom
+          anchors.topMargin: root.dotGap
+          spacing: root.dotGap
+
+          Repeater {
+            model: Calendar.enabled ? Calendar.colorsOn(cell.modelData).slice(0, root.maxDots) : []
+
+            Swatch {
+              required property string modelData
+              size: root.dotSize
+              fill: modelData
+              tone: cell.inMonth ? "normal" : "dim"
+            }
+          }
         }
 
         MouseArea {

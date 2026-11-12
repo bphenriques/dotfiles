@@ -114,6 +114,7 @@ in
     notify = {
       ntfy.enable = true;
       ntfy.remotePublishers.storage-backup.topics = [ "backup" "admin" ];
+      ntfy.remotePublishers.laptop.topics = [ "public" ];
       defaultTopic = "admin";
       topics = lib.mapAttrs (_: public: { inherit public; }) config.fleet.notifyTopics;
     };

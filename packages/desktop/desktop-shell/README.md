@@ -16,7 +16,7 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state. A top-level status names its state only when it has no value to show (`off`, `muted`, `paused`). What cannot run right now dims, so keys hold still; what can never run on this machine is not declared.
 9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted. The one source-specific case in the core is next to it: Music reads song and artist out of the XML some radio streams (Bauer Media) send as their title, since MPRIS leaves no glue to do it in.
 10. **Done means seen working.** A change is tested where it runs (see Testing), not only evaluated.
-11. **Widgets compose the kit.** Colour and dimming come from a `tone`, glyphs go through `Icon`, the wheel through `WheelSteps`; a widget never sets opacity to dim, picks a theme colour itself, or draws a glyph as text.
+11. **Widgets compose the kit.** Colour and dimming come from a `tone`, glyphs go through `Icon`, the wheel through `WheelSteps`, a colour that is data (a calendar's) through `Swatch`; a widget never sets opacity to dim, picks a theme colour itself, or draws a glyph as text.
 12. **The core is what every desktop has.** Audio, network, Bluetooth, power, display, tray, notifications, music, the calendar. Anything tied to one tool or taste is an integration: off until listed, reaching the shell only through its API (see Integrations), and held to these rules like the core, keyboard first and built from the kit.
 13. **Motion confirms, never delays.** Surfaces fade in and out, colours ease, all over `theme.animationDuration` (`0` for none) and through the kit (`Fade`, `Label`, `Icon`, `ListItem`), never a widget's own. Nothing waits on an animation: a key acts at once, the menu appears and closes at once (its background blur cannot fade with it, and a fade-out would hold the keyboard), and nothing moves or resizes.
 
@@ -26,14 +26,30 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 - `ui/`: the kit below. Widgets use it and the theme from `Config`, never raw colours or sizes.
 - `widgets/`: the surfaces. `menu/` splits into `MenuModel` (state, keys) and `Menu`, `MenuStatus` (view).
 - `integrations/`: the integrations the shell ships; `Integration.qml` is their root, `services/Integrations.qml` loads them.
+- `calendar-sync/`: its own package, which writes `calendar.file` from a list of calendars (vdirsyncer, khal); the shell never runs it.
 
 ## Menu
 
-Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. A list with nothing in it says why in its place (`No paired devices`, `No saved networks in range`), unless the header already does (off). `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. A level that takes keys beyond its rows lists them on one line under its header (`KeyLegend`), from the same list that handles them: the calendar's, and Ctrl+digit for a tray app's menu. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. A list with nothing in it says why in its place (`No paired devices`, `No saved networks in range`), unless the header already does (off). `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. A level that takes keys beyond its rows lists them on one line under its header (`KeyLegend`), with the level's actions on the right of it, from the same list that handles them: the calendar's, and Ctrl+digit for a tray app's menu. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
 The header is `menu.header.left`, `center` and `right`, like waybar's modules: built-in items (`clock`, `notifications`, `keepAwake`, `keyboardLayout`, `battery`) and integrations, by name. The centre is as wide as its items and centred, the sides share the rest, so the menu holds still; crowded, text shortens with an ellipsis, the centre's first, while icons and short values (`80%`, `EN`) stay whole. Inside a level the left holds its title, the right its state. The clock takes `clock.format`, strftime as waybar's (`%A, %-d%o %B %H:%M`, `%o` the English ordinal), else the locale's long date; `clock.locale` (`en_GB`) names days and months for the clock and the calendar, else the system's.
 
-`view = "calendar"` gives a level a month instead of entries, titled by the month, weeks starting on `clock.firstDayOfWeek` (the locale's by default). Its keys are on the level's legend line: arrows move the selected day by a day or a week, `Ctrl+←→` by a month, `Ctrl+↑↓` by a year, `t` back to today.
+`view = "calendar"` gives a level a month under its entries, titled by the month, weeks starting on `clock.firstDayOfWeek` (the locale's by default). Arrows move the selected day by a day or a week, unlisted since the grid shows it; the rest are on the legend line: `Ctrl+←→` by a month, `Ctrl+↑↓` by a year, `t` back to today.
+
+Once `calendar.file` exists, the month shows events: a dot per colour under each day that has them (four at most, in the order of its events), and beside it, as tall as the month, the selected day's events under its heading, `No events` when it has none. `Return` focuses them, unlisted like the arrows since they are in view: the arrows then step through them, and Backspace or any other calendar key returns to the month. `view = "agenda"` lists what is coming instead, `calendar.agendaDays` days from today under a heading per day with events, `calendar.agendaRows` two-line events tall; the arrows step through it. Both list an event the same way: all-day first, then by start; a bar in its colour, start over end, then title over location, one line when neither has a second; a timed event that fills the day reads as all-day. Once a list does not all fit, the one in focus stays in view, the first shown keeps its day's heading, and a count says where it is out of all (`5/26`): the event in focus, else the last shown. The header's right holds the file's state in either: `syncing…`, `sync failed` (the reason under the legend), or when it was `updated`. The shell only reads the file, watching it for changes; the module that owns the calendar tool writes it, replacing it whole:
+
+```json
+{
+  "updated": "2026-11-12T14:30",
+  "error": "personal: could not sync",
+  "events": [
+    { "title": "Dentist", "start": "2026-11-12T14:00", "end": "2026-11-12T15:00", "allDay": false, "color": "#4285f4", "location": "Rua Augusta 120" },
+    { "title": "Trip", "start": "2026-11-20", "end": "2026-11-22", "allDay": true, "color": "#33b679" }
+  ]
+}
+```
+
+Times are local, without an offset; an all-day event's `start` and `end` are dates, `end` its last day. A repeating event is one entry per occurrence. `location` is optional. `error` says why the last sync failed, over the events it kept, and `syncing: true` marks one under way; both are left out otherwise. Events are shown, never acted on.
 
 The mouse reaches what the keys do, nothing more: a click runs a row, a right click opens a tray app's menu, the wheel steps a row's pair (volume, brightness) or the calendar's month, a click on a day selects it, the title goes back (at the top, the clock opens the calendar), and a click on a header item flips it (notifications, keep awake, keyboard layout) or calls an integration's `activate()`. Holding Super for a second shows their compositor keys (each feature's `shortcut`, set by the module that binds it, or an integration's).
 
@@ -54,6 +70,7 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `ListItem` | a row with hover, click, right click and wheel; dims itself when disabled |
 | `WheelSteps` | a pointer area that turns the wheel into one step per notch |
 | `Surface`, `Pill` | a panel; a capsule outlined in its tone |
+| `Swatch` | a dot, or a bar when stretched, in a colour that is data (a calendar's), dimmed by its tone like the rest |
 | `Shadow` | a shadow like niri's default, for a surface inside a larger window |
 | `OverlayWindow`, `DismissArea` | a popup above everything; the click-outside catcher under it |
 | `Transient` | shown for a moment on `show()`, held while `held`, ignoring startup's replayed state until `armed` |
@@ -99,6 +116,6 @@ Nothing runs from PATH: each external command arrives in its feature's settings 
 
 `check.sh` holds the rules above that a text search can (an integration's root and imports, Compositor, Label, theme colours, commands from the config); every build runs it.
 
-`nix run .#desktop-shell-preview -- <shell dir> [config.json]` runs a working tree in a nested niri, with your `config.json` or a fixture (the built one edited with `jq`), and opens a shell inside it with `wtype`, `wlrctl` and `grim` at hand. Exit that shell to stop it. Session actions run for real, so never press them there.
+`nix run .#desktop-shell-preview -- <shell dir> [config.json]` runs a working tree in a nested niri, with your `config.json` or a fixture (the built one edited with `jq`), and opens a shell inside it with `wtype`, `wlrctl` and `grim` at hand. Exit that shell to stop it. Session actions run for real, so never press them there. `preview/events.json` is a calendar to point `calendar.file` at, around 12 November 2026.
 
 Screenshots come from the live desktop after a switch, not the preview (it only draws while its window is visible): open a level with `qs -c desktop-shell ipc call menu toggleEntry <key>` (`menu toggle` for the top level), wait a second, `grim <file>`, then close it with `menu toggle`. A pop-up shows on its own change (`niri msg action switch-layout next`, `qs -c desktop-shell ipc call idle toggle`, then the same again to undo). Anything opened inside the preview runs its `$SHELL`, so never point that at a script.

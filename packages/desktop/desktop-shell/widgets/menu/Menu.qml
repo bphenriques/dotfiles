@@ -287,41 +287,73 @@ Scope {
                 compact: !!menu.level?.entry?.list
                 status: menu.level?.entry?.list === "tray" ? "" : menu.level?.status ?? ""
               }
-            }
-          }
 
-          KeyLegend {
-            Layout.leftMargin: Config.theme.itemPaddingX
-            visible: menu.legend.length > 0
-            keys: menu.legend
-          }
-
-          // Declared, not inferred: the level's own columns, else menu.columns; entries flow across, so neighbours sit side by side.
-          // Hidden when empty: an empty GridLayout keeps the height of its last rows.
-          GridLayout {
-            id: actionsGrid
-            Layout.fillWidth: true
-            visible: menu.actions.length > 0
-            flow: GridLayout.LeftToRight
-            columns: menu.level?.entry?.columns ?? Config.menu.columns
-            columnSpacing: Config.theme.padding
-            rowSpacing: Config.theme.listSpacing
-
-            Repeater {
-              model: menu.actions
-
-              MenuRow {
-                required property int index
-                Layout.fillWidth: true
-                Layout.preferredWidth: 1
-                chars: menu.columnChars(index, actionsGrid.columns)
+              // A calendar's state, as its events file tells it: syncing, failed (why, under the legend), or when written, the
+              // date too once that is not today.
+              Label {
+                readonly property var updated: Calendar.updated
+                visible: !!menu.level?.entry?.view && (Calendar.syncing || Calendar.error !== "" || updated !== null)
+                Layout.rightMargin: Config.theme.itemPaddingX
+                tone: Calendar.error !== "" && !Calendar.syncing ? "warning" : "dim"
+                text: Calendar.syncing ? "syncing…" : Calendar.error !== "" ? "sync failed" : !updated ? ""
+                  : "updated " + Clock.format(updated, updated.toDateString() === Clock.date.toDateString() ? "%H:%M" : "%-d %b %H:%M")
               }
             }
           }
 
+          // A level's legend shares its line with its actions, the keys on the left and the actions on the right.
+          RowLayout {
+            Layout.fillWidth: true
+            visible: menu.legend.length > 0 || menu.actions.length > 0
+            spacing: Config.theme.padding
+
+            KeyLegend {
+              Layout.leftMargin: Config.theme.itemPaddingX
+              visible: menu.legend.length > 0
+              keys: menu.legend
+            }
+
+            Item {
+              Layout.fillWidth: menu.legend.length > 0
+            }
+
+            // Declared, not inferred: the level's own columns, else menu.columns; entries flow across, so neighbours sit side by
+            // side. Hidden when empty: an empty GridLayout keeps the height of its last rows.
+            GridLayout {
+              id: actionsGrid
+              Layout.fillWidth: menu.legend.length === 0
+              visible: menu.actions.length > 0
+              flow: GridLayout.LeftToRight
+              columns: menu.level?.entry?.columns ?? Config.menu.columns
+              columnSpacing: Config.theme.padding
+              rowSpacing: Config.theme.listSpacing
+
+              Repeater {
+                model: menu.actions
+
+                MenuRow {
+                  required property int index
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: 1
+                  chars: menu.columnChars(index, actionsGrid.columns)
+                }
+              }
+            }
+          }
+
+          Label {
+            Layout.fillWidth: true
+            Layout.leftMargin: Config.theme.itemPaddingX
+            Layout.rightMargin: Config.theme.itemPaddingX
+            visible: !!menu.level?.entry?.view && Calendar.error !== "" && !Calendar.syncing
+            tone: "warning"
+            wrapMode: Text.Wrap
+            text: Calendar.error
+          }
+
           Divider {
             Layout.fillWidth: true
-            visible: menu.actions.length > 0 && (menu.rows.length > 0 || menu.emptyText !== "" || menu.level?.entry?.view === "calendar")
+            visible: menu.actions.length > 0 && (menu.rows.length > 0 || menu.emptyText !== "" || !!menu.level?.entry?.view)
           }
 
           // An empty list says why, in its place.
@@ -348,12 +380,49 @@ Scope {
             }
           }
 
-          MenuCalendar {
+          // The month, and the selected day's events beside it as tall as the month, 2 to 3, the events taking more.
+          RowLayout {
             Layout.fillWidth: true
             visible: menu.level?.entry?.view === "calendar"
-            selected: menu.selected
-            onStepped: months => menu.moveSelected(0, months, 0)
-            onPicked: day => menu.selected = day
+            spacing: Config.theme.padding
+
+            MenuCalendar {
+              Layout.fillWidth: true
+              Layout.preferredWidth: 2
+              Layout.alignment: Qt.AlignTop
+              selected: menu.selected
+              onStepped: months => menu.moveSelected(0, months, 0)
+              onPicked: day => menu.selected = day
+            }
+
+            Divider {
+              Layout.fillHeight: true
+              implicitWidth: Config.theme.borderWidth / 2
+              visible: day.visible
+            }
+
+            MenuEvents {
+              id: day
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              Layout.preferredWidth: 3
+              Layout.preferredHeight: 0
+              visible: Calendar.enabled
+              items: Calendar.day(menu.selected)
+              emptyText: "No events"
+              focusedEvent: menu.eventFocus
+            }
+          }
+
+          // What is coming, from today on.
+          MenuEvents {
+            id: agenda
+            Layout.fillWidth: true
+            Layout.preferredHeight: agenda.rowsHeight(Config.calendar.agendaRows)
+            visible: menu.level?.entry?.view === "agenda"
+            items: Calendar.upcoming
+            emptyText: "No events in the next " + Config.calendar.agendaDays + " days"
+            focusedEvent: menu.eventFocus
           }
         }
       }

@@ -1,0 +1,15 @@
+# The calendars desktop-shell shows, read-only; saving this file syncs them.
+# Each needs a unique name (letters, digits, - and _), an iCal address, and a colour as "#rrggbb", quoted.
+# For a Google Calendar, its "Secret address in iCal format" (Settings, Integrate calendar).
+# One behind a login takes basicAuth: a username, and a password or a passwordFile (read at each sync, e.g. a sops secret).
+#
+# - name: portugal
+#   url: https://calendar.google.com/calendar/ical/en.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
+#   color: "#33b679"
+#
+# - name: personal
+#   url: https://dav.example.com/user/calendar/
+#   color: "#4285f4"
+#   basicAuth:
+#     username: user
+#     passwordFile: /run/secrets/radicale
