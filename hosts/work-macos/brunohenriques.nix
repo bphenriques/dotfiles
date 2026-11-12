@@ -1,4 +1,4 @@
-{ lib, config, pkgs, private, ... }:
+{ lib, config, osConfig, pkgs, private, ... }:
 let
   branchPrefix = "dpt";
   # Only new branches are checked, so pushing to main or a colleague's branch is never blocked.
@@ -55,6 +55,10 @@ in
   programs.awscli.enable = true;
   programs.pyenv.enable = true;
   programs.ssh.includes = [ "$HOME/.ssh/iterable-config.local" ];
+  programs.ssh.settings.laptop = {
+    HostName = osConfig.fleet.lan.hosts.laptop;
+    User = "bphenriques";
+  };
 
   home.stateVersion = "26.05";
 }
