@@ -380,7 +380,7 @@ Scope {
             }
           }
 
-          // The month, and the selected day's events beside it as tall as the month, 2 to 3, the events taking more.
+          // The month, and the events from its selected day beside it as tall as the month, 2 to 3.
           RowLayout {
             Layout.fillWidth: true
             visible: menu.level?.entry?.view === "calendar"
@@ -392,37 +392,25 @@ Scope {
               Layout.alignment: Qt.AlignTop
               selected: menu.selected
               onStepped: months => menu.moveSelected(0, months, 0)
-              onPicked: day => menu.selected = day
+              onPicked: day => menu.select(day)
             }
 
             Divider {
               Layout.fillHeight: true
               implicitWidth: Config.theme.borderWidth / 2
-              visible: day.visible
+              visible: events.visible
             }
 
             MenuEvents {
-              id: day
+              id: events
               Layout.fillWidth: true
               Layout.fillHeight: true
               Layout.preferredWidth: 3
               Layout.preferredHeight: 0
               visible: Calendar.enabled
-              items: Calendar.day(menu.selected)
-              emptyText: "No events"
+              selected: menu.selected
               focusedEvent: menu.eventFocus
             }
-          }
-
-          // What is coming, from today on.
-          MenuEvents {
-            id: agenda
-            Layout.fillWidth: true
-            Layout.preferredHeight: agenda.rowsHeight(Config.calendar.agendaRows)
-            visible: menu.level?.entry?.view === "agenda"
-            items: Calendar.upcoming
-            emptyText: "No events in the next " + Config.calendar.agendaDays + " days"
-            focusedEvent: menu.eventFocus
           }
         }
       }

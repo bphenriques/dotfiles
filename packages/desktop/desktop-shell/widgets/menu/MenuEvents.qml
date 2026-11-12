@@ -6,40 +6,57 @@ import qs
 import qs.services
 import qs.ui
 
-// A list of events under a heading per day, as services/Calendar.qml gives it (one day's, or the agenda): a bar
-// in the event's colour, start over end, then title over location, one line when neither has a second. It fills the
-// height it is given, keeps the event in focus in view, and gives the first one shown its day's heading; a count of
-// where it is, out of all, shows once they do not all fit.
+// Every event, under a heading per day (Calendar.timeline), from the selected day on: it starts at that day, `No events`
+// under its heading when it has none, and keeps the event in focus in view as the arrows move through it. Each is a bar in
+// its colour, start over end, then title over location, one line when neither has a second. The first one shown always
+// has its day's heading.
 ColumnLayout {
   id: root
 
-  // { day } headings and { day, event } events, in order.
-  required property var items
-  // What stands for the events when there are none.
-  required property string emptyText
+  required property var selected
   // The event in focus, by its place among the events; -1 for none.
   property int focusedEvent: -1
-  // The first item shown, moved only to keep the event in focus in view.
+  // The first item shown.
   property int start: 0
 
+  // The timeline, with the selected day in it even when it has no events: { day } headings, { day, event } events, and
+  // { day, none } for a day without them.
+  readonly property var items: {
+    const day = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
+    const at = Calendar.timeline.findIndex(item => item.day >= day);
+    if (at >= 0 && Calendar.timeline[at].day.getTime() === day.getTime()) return Calendar.timeline;
+    const before = at < 0 ? Calendar.timeline.length : at;
+    return Calendar.timeline.slice(0, before).concat([{ day }, { day, none: true }], Calendar.timeline.slice(before));
+  }
   // Where each event sits in items.
   readonly property var eventAt: items.map((item, i) => item.event ? i : -1).filter(i => i >= 0)
+  // Where the selected day's heading sits.
+  readonly property int dayAt: items.findIndex(item => !item.event && !item.none && item.day.toDateString() === selected.toDateString())
   readonly property real line: probe.implicitHeight
-  readonly property real budget: list.height
   readonly property int count: fitting(start)
   // The items shown as { item, at }, at being the place in items; the heading carried over a scroll has none.
   readonly property var shown: (items[start]?.event ? [{ item: { day: items[start].day }, at: -1 }] : [])
     .concat(items.slice(start, start + count).map((item, i) => ({ item, at: start + i })))
-  // The place of the event in focus, else of the last one shown, counting from 1.
-  readonly property int position: focusedEvent >= 0 ? focusedEvent + 1 : items.slice(0, start + count).filter(item => item.event).length
 
   spacing: Config.theme.spacing / 2
 
-  onItemsChanged: {
-    start = 0;
-    reveal();
+  // Once the list has caught up with the change: the day, the focus and the list change together.
+  onItemsChanged: Qt.callLater(follow)
+  onSelectedChanged: Qt.callLater(follow)
+  onFocusedEventChanged: Qt.callLater(follow)
+
+  // With an event in focus, keeps it in view; else starts at the selected day.
+  function follow() {
+    if (list.height <= 0) return;
+    const at = eventAt[focusedEvent];
+    if (at === undefined) {
+      start = Math.max(dayAt, 0);
+      return;
+    }
+    // Going up, an event that opens its day takes its heading along.
+    if (at < start) start = at > 0 && !items[at - 1].event ? at - 1 : at;
+    while (start < at && at >= start + fitting(start)) start++;
   }
-  onFocusedEventChanged: reveal()
 
   // The left column's two lines on `day`: "All day" for an event that fills it, with its last day when it runs past,
   // else start and end, `…` for what falls on another day.
@@ -56,17 +73,13 @@ ColumnLayout {
     ];
   }
 
-  // The height of `rows` two-line events, with the count below them.
-  function rowsHeight(rows) {
-    return rows * (2 * line + 2 * Config.theme.itemPaddingY) + rows * spacing + line;
-  }
-
   function compact(item) {
     return !times(item.event, item.day)[1] && !item.event.location;
   }
 
   function heightOf(item) {
-    return item.event ? (compact(item) ? 1 : 2) * line + 2 * Config.theme.itemPaddingY : line + Config.theme.itemPaddingY;
+    if (item.event) return (compact(item) ? 1 : 2) * line + 2 * Config.theme.itemPaddingY;
+    return item.none ? line + 2 * Config.theme.itemPaddingY : line + Config.theme.itemPaddingY;
   }
 
   // How many items from `from` fit, after the heading carried over when `from` is an event.
@@ -75,25 +88,13 @@ ColumnLayout {
     let fit = 0;
     for (let i = from; i < items.length; i++) {
       const height = heightOf(items[i]) + (used > 0 ? spacing : 0);
-      // A heading only goes in with its day's first event, if it has one.
-      const first = items[i].event || !items[i + 1] ? 0 : spacing + heightOf(items[i + 1]);
-      if (used + height + first > budget) break;
+      // A heading only goes in with what follows it.
+      const next = items[i].event || items[i].none || !items[i + 1] ? 0 : spacing + heightOf(items[i + 1]);
+      if (used + height + next > list.height) break;
       used += height;
       fit++;
     }
     return fit;
-  }
-
-  // Keeps the event in focus in view; with none, the list starts over.
-  function reveal() {
-    const at = eventAt[focusedEvent];
-    if (at === undefined) {
-      start = 0;
-      return;
-    }
-    // Going up, an event that opens its day takes its heading along.
-    if (at < start) start = at > 0 && !items[at - 1].event ? at - 1 : at;
-    while (at >= start + fitting(start)) start++;
   }
 
   function heading(day) {
@@ -123,6 +124,8 @@ ColumnLayout {
     clip: true
     spacing: root.spacing
 
+    onHeightChanged: Qt.callLater(root.follow)
+
     Repeater {
       model: root.shown
 
@@ -133,19 +136,28 @@ ColumnLayout {
         readonly property var event: item.event ?? null
         readonly property var lines: event ? root.times(event, item.day) : ["", ""]
         readonly property bool compact: !!event && root.compact(item)
-        readonly property bool focused: !!event && root.eventAt.indexOf(modelData.at) === root.focusedEvent && root.focusedEvent >= 0
+        readonly property bool focused: root.focusedEvent >= 0 && root.eventAt[root.focusedEvent] === modelData.at
 
         Layout.fillWidth: true
         implicitHeight: root.heightOf(item)
 
         Label {
-          visible: !slot.event
+          visible: !slot.event && !slot.item.none
           anchors.bottom: parent.bottom
           anchors.left: parent.left
           anchors.leftMargin: Config.theme.itemPaddingX
           tone: "dim"
           font.bold: true
           text: root.heading(slot.item.day)
+        }
+
+        Label {
+          visible: !!slot.item.none
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.left: parent.left
+          anchors.leftMargin: Config.theme.itemPaddingX
+          tone: "dim"
+          text: "No events"
         }
 
         Rectangle {
@@ -211,23 +223,8 @@ ColumnLayout {
       }
     }
 
-    Label {
-      visible: root.eventAt.length === 0
-      Layout.leftMargin: Config.theme.itemPaddingX
-      Layout.topMargin: Config.theme.itemPaddingY
-      tone: "dim"
-      text: root.emptyText
-    }
-
     Item {
       Layout.fillHeight: true
     }
-  }
-
-  Label {
-    Layout.leftMargin: Config.theme.itemPaddingX
-    tone: "dim"
-    // Empty rather than hidden, so the list's height holds.
-    text: root.focusedEvent >= 0 || root.position < root.eventAt.length ? root.position + "/" + root.eventAt.length : ""
   }
 }

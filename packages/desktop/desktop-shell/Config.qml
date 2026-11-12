@@ -105,9 +105,6 @@ Singleton {
       property JsonObject calendar: JsonObject {
         // The events file the month shows (README.md#menu); unset or not there yet, the month alone.
         property string file
-        // How many days from today the agenda lists, and its height in two-line events.
-        property int agendaDays: 7
-        property int agendaRows: 6
       }
 
       property JsonObject popups: JsonObject {

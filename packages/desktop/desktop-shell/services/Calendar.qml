@@ -17,8 +17,20 @@ Singleton {
   // Whether a sync is running, and why the last one failed ("" when it did not): the file's own word.
   readonly property bool syncing: store.syncing
   readonly property string error: store.error
-  // What is coming: Calendar.agenda from today.
-  readonly property var upcoming: agenda(Clock.date)
+  // Every day with events, in order, as one list: a heading { day }, then { day, event } for each of its events. An event
+  // over several days is under each of them.
+  readonly property var timeline: {
+    if (events.length === 0) return [];
+    const first = events.reduce((min, event) => event.start < min ? event.start : min, events[0].start);
+    const last = events.reduce((max, event) => event.end > max ? event.end : max, events[0].end);
+    const items = [];
+    for (let day = new Date(first.getFullYear(), first.getMonth(), first.getDate()); day <= last;
+         day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1)) {
+      const on = eventsOn(day);
+      if (on.length > 0) items.push({ day }, ...on.map(event => ({ day, event })));
+    }
+    return items;
+  }
 
   // The events overlapping a day, all-day first, then by start.
   function eventsOn(day) {
@@ -29,27 +41,14 @@ Singleton {
       .sort((a, b) => (b.allDay - a.allDay) || (a.start - b.start));
   }
 
-  // The days from `day` on, Config.calendar.agendaDays of them, as a list of headings and events: { day } for a day with
-  // events, then { day, event } for each of them. Days without events are left out.
-  function agenda(day) {
-    const items = [];
-    for (let i = 0; i < Config.calendar.agendaDays; i++) {
-      const date = new Date(day.getFullYear(), day.getMonth(), day.getDate() + i);
-      const events = eventsOn(date);
-      if (events.length > 0) items.push({ day: date }, ...events.map(event => ({ day: date, event })));
-    }
-    return items;
-  }
-
-  // One day as the same list: its heading, whether it has events or not, then its events.
-  function day(date) {
-    const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    return [{ day }].concat(eventsOn(day).map(event => ({ day, event })));
-  }
-
   // The colours of a day's events, each once, in the order eventsOn gives.
   function colorsOn(day) {
     return [...new Set(eventsOn(day).map(event => event.color))];
+  }
+
+  // Text on one line, as a row shows it: an address often comes as several.
+  function line(text) {
+    return (text ?? "").trim().replace(/\s*\n\s*/g, ", ");
   }
 
   // "2026-11-12" or "2026-11-12T14:00" as local time: Date would read a bare date as UTC.
@@ -82,7 +81,7 @@ Singleton {
           const end = root.parse(event.end);
           // An all-day event's end is its last day; it runs to the start of the next.
           if (event.allDay) end.setDate(end.getDate() + 1);
-          return { title: event.title ?? "", start, end, allDay: !!event.allDay, color: event.color ?? "", location: event.location ?? "" };
+          return { title: root.line(event.title), start, end, allDay: !!event.allDay, color: event.color ?? "", location: root.line(event.location) };
         });
         store.updated = json.updated ? root.parse(json.updated) : null;
         store.syncing = !!json.syncing;

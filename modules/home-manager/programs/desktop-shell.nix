@@ -85,9 +85,9 @@ let
         description = "Items of the list that keep digits 1 onwards, dimmed while absent";
       };
       view = mkOption {
-        type = types.nullOr (types.enum [ "calendar" "agenda" ]);
+        type = types.nullOr (types.enum [ "calendar" ]);
         default = null;
-        description = "What the entry's level shows under its entries: a month and its days, or the agenda";
+        description = "What the entry's level shows under its entries: a month and its events";
       };
       status = mkOption {
         type = types.nullOr types.str;

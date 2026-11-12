@@ -7,7 +7,6 @@ in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.desktop-shell.menu.entries = lib.mkOrder 900 [
     { key = "c"; desc = "Calendar"; icon = self.lib.glyphs."md-calendar"; width = 960; view = "calendar"; submenu = [
-      { key = "a"; desc = "Agenda"; icon = self.lib.glyphs."md-view_agenda"; width = 640; view = "agenda"; }
       { key = "s"; desc = "Sync"; icon = self.lib.glyphs."md-sync"; cmd = "systemctl --user start --no-block calendar-sync.service"; keepOpen = true; }
     ]; }
   ];

@@ -14,7 +14,7 @@ Scope {
   property var stack: []
   // The day selected in a calendar level.
   property var selected: new Date()
-  // The event in focus in a calendar's day or the agenda, by its place in that list; -1 for none.
+  // The calendar's event in focus, by its place among Calendar.timeline's events; -1 while the keys move the day.
   property int eventFocus: -1
   // Super held a second shows the header's compositor keys, not at once, so a Super shortcut does not flash them.
   property bool shortcutsShown: false
@@ -32,7 +32,7 @@ Scope {
   // The top-level entry the clock opens.
   readonly property var calendar: itemsOf(null).find(item => item.entry.view === "calendar") ?? null
   // A calendar level's keys: each moves the selected day by [years, months, days] per key, or back to today (null).
-  // The arrows go unlisted, as Return into the day's events does (README.md#menu).
+  // The arrows go unlisted, as Return into the events does (README.md#menu).
   readonly property var calendarKeys: [
     { key: ["Left", "Right"], what: "day", unlisted: true, moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
     { key: ["Up", "Down"], what: "week", unlisted: true, moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
@@ -45,23 +45,25 @@ Scope {
     : level?.entry?.list === "tray" ? [{ key: "Ctrl+digit", what: "app menu" }]
     : []
 
-  onSelectedChanged: eventFocus = -1
-
-  // Moves the event in focus up or down among `count`, from none to the first.
-  function stepEvent(name, count) {
-    eventFocus = Math.min(Math.max(eventFocus + (name === "Up" ? -1 : 1), 0), count - 1);
+  // Selects a day, by key or click, leaving the events.
+  function select(day) {
+    selected = day;
+    eventFocus = -1;
   }
 
-  // Whether a calendar key was pressed, acting on it if so: Return focuses the day's events, which the arrows then step
-  // through and Backspace leaves; any other key moves the day, which leaves them too.
+  // Whether a calendar key was pressed, acting on it if so. Return focuses the events from the selected day on; the arrows
+  // then step through them, the day following the event in focus, and Backspace leaves them. Any other key moves the day.
   function calendarKey(name) {
-    const count = Calendar.enabled ? Calendar.eventsOn(selected).length : 0;
+    const events = Calendar.timeline.filter(item => item.event);
     if (name === "Return") {
-      if (count > 0) eventFocus = 0;
+      const day = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
+      eventFocus = events.findIndex(item => item.day >= day);
+      if (eventFocus >= 0) selected = events[eventFocus].day;
       return true;
     }
     if (eventFocus >= 0 && (name === "Up" || name === "Down")) {
-      stepEvent(name, count);
+      eventFocus = Math.min(Math.max(eventFocus + (name === "Up" ? -1 : 1), 0), events.length - 1);
+      selected = events[eventFocus].day;
       return true;
     }
     if (eventFocus >= 0 && name === "BackSpace") {
@@ -72,7 +74,7 @@ Scope {
     if (!entry) return false;
     const move = entry.moves[name];
     if (move) moveSelected(...move);
-    else selected = new Date();
+    else select(new Date());
     return true;
   }
 
@@ -81,7 +83,7 @@ Scope {
     const year = selected.getFullYear() + years;
     const month = selected.getMonth() + months;
     const last = new Date(year, month + 1, 0).getDate();
-    selected = new Date(year, month, Math.min(selected.getDate(), last) + days);
+    select(new Date(year, month, Math.min(selected.getDate(), last) + days));
   }
 
   function itemsOf(level) {
@@ -315,8 +317,6 @@ Scope {
     const listed = find(rows, name.replace(/^Ctrl\+/, ""));
     if (name === "Escape") hide();
     else if (level?.entry?.view === "calendar" && calendarKey(name)) return true;
-    // The agenda is its events: the arrows step through them from the start.
-    else if (level?.entry?.view === "agenda" && (name === "Up" || name === "Down")) stepEvent(name, Calendar.upcoming.filter(item => item.event).length);
     else if (name === "BackSpace" && level) back();
     else if (name.startsWith("Ctrl+") && listed) openMenu(listed);
     else if (item) activate(item, name);
