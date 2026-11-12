@@ -23,18 +23,34 @@ Scope {
   readonly property var actions: items.filter(item => !item.listed)
   readonly property var rows: items.filter(item => item.listed)
   readonly property int width: level?.width ?? Config.menu.width
+  // Why a level's list is empty, in its place; "" while it lists something.
+  readonly property string emptyText: level?.entry?.list && rows.length === 0 ? emptyFor(level.entry.list) : ""
   // A calendar level is titled by the month it shows.
   readonly property string title: level?.entry?.view === "calendar" ? Clock.locale.standaloneMonthName(selected.getMonth()) + " " + selected.getFullYear() : level?.title ?? ""
   // The top-level entry the clock opens.
   readonly property var calendar: itemsOf(null).find(item => item.entry.view === "calendar") ?? null
-  // A calendar level's keys, each a move of the selected day by [years, months, days], or back to today.
-  readonly property var calendarActions: [
-    { key: ["Left", "Right"], desc: "Day", icon: Glyphs.calendarDay, paired: true, moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
-    { key: ["Up", "Down"], desc: "Week", icon: Glyphs.calendarWeek, paired: true, moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
-    { key: ["Ctrl+Left", "Ctrl+Right"], desc: "Month", icon: Glyphs.calendarMonth, paired: true, moves: { "Ctrl+Left": [0, -1, 0], "Ctrl+Right": [0, 1, 0] } },
-    { key: ["Ctrl+Up", "Ctrl+Down"], desc: "Year", icon: Glyphs.calendarYear, paired: true, moves: { "Ctrl+Up": [-1, 0, 0], "Ctrl+Down": [1, 0, 0] } },
-    { key: "t", desc: "Today", icon: Glyphs.calendarToday, moves: { t: null } }
+  // A calendar level's keys: each moves the selected day by [years, months, days] per key, or back to today (null).
+  readonly property var calendarKeys: [
+    { key: ["Left", "Right"], what: "day", moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
+    { key: ["Up", "Down"], what: "week", moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
+    { key: ["Ctrl+Left", "Ctrl+Right"], what: "month", moves: { "Ctrl+Left": [0, -1, 0], "Ctrl+Right": [0, 1, 0] } },
+    { key: ["Ctrl+Up", "Ctrl+Down"], what: "year", moves: { "Ctrl+Up": [-1, 0, 0], "Ctrl+Down": [1, 0, 0] } },
+    { key: "t", what: "today", moves: { t: null } }
   ]
+  // Keys a level takes beyond its rows, shown on one line under the header (KeyLegend): { key, what }.
+  readonly property var legend: level?.entry?.view === "calendar" ? calendarKeys
+    : level?.entry?.list === "tray" ? [{ key: "Ctrl+digit", what: "app menu" }]
+    : []
+
+  // Whether a calendar key was pressed, and if so its move made.
+  function calendarKey(name) {
+    const entry = calendarKeys.find(entry => MenuKeys.matches(entry.key, name));
+    if (!entry) return false;
+    const move = entry.moves[name];
+    if (move) moveSelected(...move);
+    else selected = new Date();
+    return true;
+  }
 
   // Moves the selected day; a month or year away keeps the day, or the month's last when it has fewer.
   function moveSelected(years, months, days) {
@@ -46,7 +62,15 @@ Scope {
 
   function itemsOf(level) {
     if (level === null)
-      return entries.map(entry => ({ key: entry.key, desc: entry.desc, status: entry.status ?? "", icon: entry.icon ?? "", enabled: Display.available(entry.requires), paired: MenuKeys.isPair(entry), entry: entry }));
+      return entries.map(entry => ({
+        key: entry.key,
+        desc: entry.desc,
+        status: entry.status ?? "",
+        icon: entry.icon ?? "",
+        enabled: Display.available(entry.requires),
+        paired: MenuKeys.isPair(entry),
+        entry: entry
+      }));
     if (level.kind === "menu") {
       const children = Array.from(menuOpener.children.values).filter(child => !child.isSeparator && child.enabled);
       const labels = children.map(child => child.text.replace(/_/g, ""));
@@ -54,15 +78,23 @@ Scope {
       return children.map((child, i) => ({
         key: keys[i],
         desc: labels[i],
-        detail: child.checkState === Qt.Checked ? Glyphs.check : child.hasChildren ? "›" : "",
+        glyphs: child.checkState === Qt.Checked ? [Glyphs.check] : child.hasChildren ? [Glyphs.submenu] : [],
         menuEntry: child
       }));
     }
 
-    // An entry's own actions by letter (a calendar's keys first), then what its list holds by digit.
-    const own = level.entry.view === "calendar" ? calendarActions : [];
-    const actions = Array.from(level.entry.submenu ?? []).map(action => ({ key: action.key, desc: action.desc, icon: action.icon ?? "", enabled: Display.available(action.requires) && Display.allows(action.layout), paired: MenuKeys.isPair(action), active: isOn(action.activeWhen) || action.layout === Display.layout, listed: /^[0-9]$/.test(action.key), entry: action }));
-    return own.concat(actions, numbered(level.entry.list, level.entry.pins));
+    // An entry's own actions by letter, then what its list holds by digit.
+    const actions = Array.from(level.entry.submenu ?? []).map(action => ({
+      key: action.key,
+      desc: action.desc,
+      icon: action.icon ?? "",
+      enabled: Display.available(action.requires) && Display.allows(action.layout),
+      paired: MenuKeys.isPair(action),
+      active: isOn(action.activeWhen) || action.layout === Display.layout,
+      listed: /^[0-9]$/.test(action.key),
+      entry: action
+    }));
+    return actions.concat(numbered(level.entry.list, level.entry.pins));
   }
 
   // Pins first, each keeping its digit, dimmed while what it matches is absent; the rest follow in the list's order.
@@ -96,6 +128,17 @@ Scope {
     case "sink-muted": return Audio.sinkMuted;
     case "source-muted": return Audio.sourceMuted;
     default: return Integrations.get(state)?.active ?? false;
+    }
+  }
+
+  function emptyFor(list) {
+    switch (list) {
+    case "tray": return "No apps in the tray";
+    case "wifi": return Network.wifiEnabled ? "No saved networks in range" : "Wi-Fi off";
+    case "bluetooth": return !Bluez.present ? "No Bluetooth adapter" : Bluez.enabled ? "No paired devices" : "Bluetooth off";
+    case "sinks": return "No outputs";
+    case "sources": return "No inputs";
+    default: return "";
     }
   }
 
@@ -201,12 +244,7 @@ Scope {
   // An item with a level below opens it, any other runs.
   function activate(item, name) {
     if (item.enabled === false) return;
-    if (item.moves) {
-      // A pair clicked names no key, so it moves nothing.
-      const move = item.moves[name];
-      if (move) moveSelected(...move);
-      else if (move === null) selected = new Date();
-    } else if (item.app) {
+    if (item.app) {
       hide();
       item.app.activate();
     } else if (item.menuEntry?.hasChildren) {
@@ -243,15 +281,15 @@ Scope {
   // Esc and Backspace are kept free of entries by the assertions in modules/home-manager/programs/desktop-shell.nix.
   function handleKey(event) {
     const name = MenuKeys.name(event);
-    // A modifier on its own has no name.
-    if (!name) return false;
+    // A modifier on its own has no name, and Super belongs to the compositor: a chord with it runs nothing here.
+    if (!name || event.modifiers & Qt.MetaModifier) return false;
     const item = find(items, name);
     const listed = find(rows, name.replace(/^Ctrl\+/, ""));
     if (name === "Escape") hide();
     else if (name === "BackSpace" && level) back();
+    else if (level?.entry?.view === "calendar" && calendarKey(name)) return true;
     else if (name.startsWith("Ctrl+") && listed) openMenu(listed);
-    // Super belongs to the compositor: a chord with it runs nothing here.
-    else if (item && !(event.modifiers & Qt.MetaModifier)) activate(item, name);
+    else if (item) activate(item, name);
     else return false;
     return true;
   }

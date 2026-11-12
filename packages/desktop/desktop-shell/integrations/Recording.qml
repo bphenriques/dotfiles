@@ -25,6 +25,15 @@ Integration {
   text: recording ? Math.floor(elapsed / 60) + ":" + String(elapsed % 60).padStart(2, "0") : ""
   active: recording
 
+  // The time the pill shows, kept while it fades out so it holds its size.
+  property string shownTime: ""
+  onTextChanged: if (recording) shownTime = text
+
+  Fade {
+    id: fade
+    shown: root.recording
+  }
+
   function stop() {
     if (settings.stop) Quickshell.execDetached(["sh", "-c", settings.stop]);
   }
@@ -47,7 +56,7 @@ Integration {
   }
 
   LazyLoader {
-    active: root.recording
+    active: fade.loaded
 
     Variants {
       model: Quickshell.screens
@@ -67,6 +76,7 @@ Integration {
 
         Pill {
           id: pill
+          opacity: fade.value
           anchors.fill: parent
           tone: "alert"
 
@@ -82,7 +92,7 @@ Integration {
           // Padded to the time's width (the font is monospace), so the pill keeps its size under the pointer.
           Label {
             anchors.verticalCenter: parent.verticalCenter
-            text: mouse.containsMouse ? "Stop".padEnd(root.text.length) : root.text
+            text: mouse.containsMouse ? "Stop".padEnd(root.shownTime.length) : root.shownTime
           }
 
           Icon {

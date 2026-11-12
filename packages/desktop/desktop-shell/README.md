@@ -12,12 +12,13 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 4. **Layout is declared.** A level's columns and width come from its entry (`columns`, `width`, else `menu.columns`, `menu.width`), never measured from what it shows, so it holds still; entries flow across, so order decides neighbours. Make the menu wider before adding columns or truncating.
 5. **Order is explicit.** Top level by `lib.mkOrder`: 100 audio, 300 network, 400 Bluetooth, 500 display, 600 wallpaper, 700 music, 800 tray, 900 calendar, 2000 session. Within a level, the list order, paired for the row it shares.
 6. **Labels.** Sentence case; `...` when it opens a picker or an app; a pair named for what it changes (`Volume`, `Track`). Device levels put Power on `p` and Configure... on `c`; every action in a level carries an icon; `space` is only ever a fuzzel picker. What ends the session takes Shift (Reboot, Shutdown).
-7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. A key may carry Ctrl or Alt in its name (`Ctrl+Left`), shown in its hint; a modifier never runs the plain key, Shift only picks the capital letter, and Super stays the compositor's. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
+7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. A key may carry Ctrl or Alt in its name (`Ctrl+Left`, as niri writes bindings); hints show keys Emacs-style, `C-` Ctrl, `M-` Alt, `s-` Super, Shift as the capital letter (`C-←→`, `s-k`); a modifier never runs the plain key, Shift only picks the capital letter, and Super stays the compositor's. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
 8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state. A top-level status names its state only when it has no value to show (`off`, `muted`, `paused`). What cannot run right now dims, so keys hold still; what can never run on this machine is not declared.
-9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted.
+9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted. The one source-specific case in the core is next to it: Music reads song and artist out of the XML some radio streams (Bauer Media) send as their title, since MPRIS leaves no glue to do it in.
 10. **Done means seen working.** A change is tested where it runs (see Testing), not only evaluated.
 11. **Widgets compose the kit.** Colour and dimming come from a `tone`, glyphs go through `Icon`, the wheel through `WheelSteps`; a widget never sets opacity to dim, picks a theme colour itself, or draws a glyph as text.
 12. **The core is what every desktop has.** Audio, network, Bluetooth, power, display, tray, notifications, music, the calendar. Anything tied to one tool or taste is an integration: off until listed, reaching the shell only through its API (see Integrations), and held to these rules like the core, keyboard first and built from the kit.
+13. **Motion confirms, never delays.** Surfaces fade in and out, colours ease, all over `theme.animationDuration` (`0` for none) and through the kit (`Fade`, `Label`, `Icon`, `ListItem`), never a widget's own. Nothing waits on an animation: a key acts at once, the menu closes at once (a fade-out would hold the keyboard), and nothing moves or resizes.
 
 ## Layout
 
@@ -28,11 +29,11 @@ Every change follows these; a change that cannot is a reason to revisit the rule
 
 ## Menu
 
-Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
+Every key visible, then its status, labels starting together after a gutter as wide as the longest key in their column. A letter opens a level or runs a command; Esc closes, Backspace goes back. A key pair (`[ "Down" "Up" ]` with one command each) shares a row. A level can also list things found at runtime under its actions, numbered 1 to 9: `list = "tray"`, `"bluetooth"`, `"wifi"`, `"sinks"` or `"sources"`, with `pins` for items that keep their digit. A list with nothing in it says why in its place (`Bluetooth off`, `No saved networks in range`). `requires.connected` and `requires.enabled` dim an entry until the outputs it needs are plugged in or on. `layout` lights an entry while the screens are in that layout, and dims it while they cannot be. A level that takes keys beyond its rows lists them on one line under its header (`KeyLegend`), from the same list that handles them: the calendar's, and Ctrl+digit for a tray app's menu. `menu toggleEntry <key>` over IPC opens a top-level entry directly, for a compositor shortcut; Backspace still leads to the top level.
 
 The header is `menu.header.left`, `center` and `right`, like waybar's modules: built-in items (`clock`, `notifications`, `keepAwake`, `keyboardLayout`, `battery`) and integrations, by name. The centre is as wide as its items and centred, the sides share the rest, so the menu holds still; crowded, text shortens with an ellipsis, the centre's first, while icons and short values (`80%`, `EN`) stay whole. Inside a level the left holds its title, the right its state. The clock takes `clock.format`, strftime as waybar's (`%A, %-d%o %B %H:%M`, `%o` the English ordinal), else the locale's long date; `clock.locale` (`en_GB`) names days and months for the clock and the calendar, else the system's.
 
-`view = "calendar"` gives a level a month instead of entries, titled by the month, weeks starting on `clock.firstDayOfWeek` (the locale's by default). Its keys are action rows: arrows move the selected day by a day or a week, `Ctrl+←→` by a month, `Ctrl+↑↓` by a year, `t` back to today.
+`view = "calendar"` gives a level a month instead of entries, titled by the month, weeks starting on `clock.firstDayOfWeek` (the locale's by default). Its keys are on the level's legend line: arrows move the selected day by a day or a week, `Ctrl+←→` by a month, `Ctrl+↑↓` by a year, `t` back to today.
 
 The mouse reaches what the keys do, nothing more: a click runs a row, a right click opens a tray app's menu, the wheel steps a row's pair (volume, brightness) or the calendar's month, a click on a day selects it, the title goes back (at the top, the clock opens the calendar), and a click on a header item flips it (notifications, keep awake, keyboard layout) or calls an integration's `activate()`. Holding Super for a second shows their compositor keys (each feature's `shortcut`, set by the module that binds it, or an integration's).
 
@@ -45,8 +46,9 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `Label` | all text, coloured by `tone`: `normal`, `dim`, `primary`, `warning` or `alert` |
 | `Tone` | the colour of each tone; `dim` is the normal colour at reduced alpha |
 | `Icon` | a glyph or an image in the same square |
-| `StatusLine` | icon, text, and a dim detail on the right |
+| `StatusLine` | icon, text, and a dim detail on the right, glyphs before it drawn as icons (a mode, a submenu) |
 | `KeyHint` | a key in its gutter |
+| `KeyLegend` | keys a level takes beyond its rows, on one line under the header: each key as `KeyHint` shows it, then what it does |
 | `Meter` | a thin level bar |
 | `Divider` | a line between two groups of rows |
 | `ListItem` | a row with hover, click, right click and wheel; dims itself when disabled |
@@ -55,6 +57,8 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `Shadow` | a shadow like niri's default, for a surface inside a larger window |
 | `OverlayWindow`, `DismissArea` | a popup above everything; the click-outside catcher under it |
 | `Transient` | shown for a moment on `show()`, held while `held`, ignoring startup's replayed state until `armed` |
+| `Fade` | fades a surface in and out over `theme.animationDuration`; `loaded` holds a `LazyLoader` until it has faded out |
+| `MenuKeys` | key names as entries declare them (`Ctrl+Left`), their hints, and keys for an app's own menu |
 | `Glyphs` | the icon set, Material Design from Nerd Fonts, each an escape (`"\u{F05A9}"`) named after its entry; glyphs other programs own arrive in their feature's `glyphs` (`audio.glyphs`) |
 
 `alert` is only for what needs attention: critical battery, recording, do-not-disturb.
@@ -83,7 +87,7 @@ The core asks the compositor for two things, through `Compositor`, and nothing m
 - The outputs connected and the outputs on, each by connector name and by make, model and serial (what `requires` and `display.panel` name).
 - The keyboard layouts, the current one, and switching to the next.
 
-A backend per compositor answers them, under `services/compositor/`, picked at startup from the environment (`NIRI_SOCKET`, `HYPRLAND_INSTANCE_SIGNATURE`). Without one, the outputs come from Wayland, which only knows those on, so `requires.connected` reads as `requires.enabled`, and the layout status stays empty. A backend ships once it is seen working (rule 10): niri today.
+A backend per compositor answers them, under `services/compositor/`, picked at startup from the environment (`NIRI_SOCKET` today; another compositor would add its own, such as `HYPRLAND_INSTANCE_SIGNATURE`). Without one, the outputs come from Wayland, which only knows those on, so `requires.connected` reads as `requires.enabled`, and the layout status stays empty. A backend ships once it is seen working (rule 10): niri today.
 
 What only one compositor has stays with its backend (`Niri`: workspaces, windows, every event), for integrations built on it; such an integration names its compositor (the workspace map is niri's). What the compositor is told (keys, layer rules, outputs) lives in the Nix modules, never in the shell.
 

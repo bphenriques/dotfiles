@@ -20,7 +20,15 @@ Rectangle {
   radius: Config.theme.itemRadius
   // Disabled rows dim whole, images included.
   opacity: enabled || !dimsWhenDisabled ? 1 : Config.theme.dimOpacity
-  color: mouse.containsMouse ? Qt.alpha(Config.theme.primary, Config.theme.highlightOpacity) : "transparent"
+  // Highlighted under the pointer, more so while pressed, so a click is felt.
+  color: mouse.pressed ? Qt.alpha(Config.theme.primary, 2 * Config.theme.highlightOpacity)
+    : mouse.containsMouse ? Qt.alpha(Config.theme.primary, Config.theme.highlightOpacity)
+    : "transparent"
+  Behavior on color {
+    ColorAnimation {
+      duration: Config.theme.animationDuration
+    }
+  }
 
   RowLayout {
     id: row

@@ -11,6 +11,8 @@ RowLayout {
   property string image
   property string text
   property string detail
+  // Glyphs on the right before the detail (a mode, a submenu), drawn as icons the height of its text.
+  property var detailGlyphs: []
   // Characters the detail always takes, so what is beside it holds still as the value changes.
   property int detailChars: 0
   property string tone: "normal"
@@ -37,6 +39,17 @@ RowLayout {
     id: cell
     font: detailLabel.font
     text: "0"
+  }
+
+  Repeater {
+    model: root.detailGlyphs
+
+    Icon {
+      required property string modelData
+      size: detailLabel.implicitHeight
+      tone: "dim"
+      glyph: modelData
+    }
   }
 
   Label {

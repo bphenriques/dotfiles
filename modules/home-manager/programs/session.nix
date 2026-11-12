@@ -1,7 +1,7 @@
 { lib, pkgs, config, self, osConfig, ... }:
 let
   inherit (builtins) listToAttrs;
-  inherit (lib) nameValuePair mapAttrsToList;
+  inherit (lib) nameValuePair attrNames imap0;
 
   cfg = config.my.programs.session;
 
@@ -11,16 +11,16 @@ let
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
   systemctl = lib.getExe' pkgs.systemd "systemctl";
-  rebootToWindowsCmd = value: ''${systemctl} reboot --boot-loader-entry="windows_${value.title}.conf"'';
-
+  windows = osConfig.boot.loader.systemd-boot.windows;
+  # Shift letters, as everything that ends the session (W first); nixpkgs names each entry's file after its attribute.
   systemd-boot-windows = lib.optionals osConfig.boot.loader.systemd-boot.enable
-    (mapAttrsToList (name: value: {
+    (imap0 (i: name: {
       id = "session-${name}";
-      key = "W";
+      key = lib.elemAt [ "W" "V" "X" "Y" "Z" ] i;
       symbol = self.lib.glyphs."md-microsoft_windows";
-      label = "Reboot to ${value.title}";
-      exec = rebootToWindowsCmd value; # systemctl reboot --boot-loader-entry=help
-    }) osConfig.boot.loader.systemd-boot.windows);
+      label = "Reboot to ${windows.${name}.title}";
+      exec = ''${systemctl} reboot --boot-loader-entry="windows_${name}.conf"''; # systemctl reboot --boot-loader-entry=help
+    }) (attrNames windows));
   sessionActions = [
     { id = "session-lock";      key = "l"; symbol = self.lib.glyphs."md-lock"; label = "Lock";                 exec = cfg.exec.lock; }
     { id = "session-suspend";   key = "s"; symbol = self.lib.glyphs."md-power_sleep"; label = "Suspend";              exec = cfg.exec.suspend; }

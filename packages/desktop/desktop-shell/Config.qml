@@ -60,6 +60,8 @@ Singleton {
         property real surfaceOpacity: 0.92
         property real highlightOpacity: 0.25
         property real dimOpacity: 0.5
+        // Milliseconds a fade or colour change takes; 0 for none.
+        property int animationDuration: 100
         property string monospaceFont: "monospace"
         property int fontSize: 11
         property int radius: 10
@@ -80,7 +82,7 @@ Singleton {
 
       property JsonObject menu: JsonObject {
         property var entries: []
-        // The top level's header, like waybar's modules-left, -center and -right: built-in items (clock, notifications, keepAwake, keyboardLayout, battery) and integrations, by name.
+        // The top level's header, like waybar's modules-left, -center and -right: built-in items and integrations, by name (README.md#menu).
         property JsonObject header: JsonObject {
           property var left: ["clock"]
           property var center: []

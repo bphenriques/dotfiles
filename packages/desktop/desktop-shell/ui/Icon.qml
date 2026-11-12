@@ -31,5 +31,11 @@ Item {
     source: root.source
     // An image has no colour to dim, so a dim one fades instead.
     opacity: root.tone === "dim" ? Config.theme.dimOpacity : 1
+
+    Behavior on opacity {
+      NumberAnimation {
+        duration: Config.theme.animationDuration
+      }
+    }
   }
 }

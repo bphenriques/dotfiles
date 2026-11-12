@@ -51,13 +51,25 @@ Singleton {
     return root.names(key).includes(name);
   }
 
-  // Short label for an entry key: its first name, or every name for a pair with their shared modifiers once (Ctrl+←→), arrows as symbols.
+  // A key as the shell shows it, Emacs-style: C- Ctrl, M- Alt (Meta), s- Super (niri's Mod), Shift as the capital letter
+  // (S- on other keys); arrows as symbols. A pair shows its shared modifiers once (C-←→).
   function label(key, paired = false) {
-    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Return: "RET" };
-    const names = paired ? root.names(key) : root.names(key).slice(0, 1);
-    const modifiers = names[0].match(/^((Ctrl|Alt)\+)*/)[0];
-    const shared = names.every(name => name.startsWith(modifiers)) ? modifiers : "";
-    return shared + names.map(name => name.slice(shared.length)).map(name => symbols[name] ?? name).join("");
+    const parts = (paired ? root.names(key) : root.names(key).slice(0, 1)).map(root.shortName);
+    const shared = parts.every(part => part.prefix === parts[0].prefix);
+    return shared ? parts[0].prefix + parts.map(part => part.key).join("") : parts.map(part => part.prefix + part.key).join("");
+  }
+
+  function shortName(name) {
+    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Space: "SPC", Return: "RET" };
+    const [, chord, base] = name.match(/^((?:(?:Ctrl|Alt|Mod|Super|Shift)\+)*)(.*)$/);
+    const modifiers = chord.split("+");
+    const shift = modifiers.includes("Shift");
+    const letter = /^[A-Za-z]$/.test(base);
+    // In a chord a letter is its key, so lowercase unless Shift is held; alone, its case is already the key's.
+    const key = chord && letter ? (shift ? base.toUpperCase() : base.toLowerCase()) : symbols[base] ?? base;
+    const prefix = (modifiers.includes("Ctrl") ? "C-" : "") + (modifiers.includes("Alt") ? "M-" : "")
+      + (modifiers.includes("Mod") || modifiers.includes("Super") ? "s-" : "") + (shift && !letter ? "S-" : "");
+    return { prefix: prefix, key: key };
   }
 
   // Whether text matches a pattern where * stands for anything.

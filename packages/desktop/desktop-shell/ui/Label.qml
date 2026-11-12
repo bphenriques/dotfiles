@@ -6,6 +6,11 @@ Text {
   property string tone: "normal"
 
   color: Tone.color(tone)
+  Behavior on color {
+    ColorAnimation {
+      duration: Config.theme.animationDuration
+    }
+  }
   font.family: Config.theme.monospaceFont
   font.pointSize: Config.theme.fontSize
   // Never rich text: stream titles can carry whole XML documents (Bauer Media radio does).

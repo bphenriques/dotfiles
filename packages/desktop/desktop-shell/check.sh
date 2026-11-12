@@ -21,6 +21,11 @@ for file in $(grep -rlE '^\s*Text \{' --include='*.qml' . | grep -v '^\./ui/Labe
   fail "$file: Text outside Label"
 done
 
+# Rule 11: glyphs go through Icon, never into text or a detail.
+for file in $(grep -rlE '(text|detail|fallbackDetail): .*Glyphs\.' --include='*.qml' . | grep -v '^\./ui/Icon\.qml$'); do
+  fail "$file: a glyph drawn as text"
+done
+
 # Rule 11: colours come from the theme.
 for file in $(grep -rlE '"#[0-9a-fA-F]{6,8}"' --include='*.qml' . | grep -vE '^\./(Config\.qml|ui/)'); do
   fail "$file: a colour outside the theme"

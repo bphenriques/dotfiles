@@ -6,25 +6,18 @@ let
   backgroundOpacity = "F2"; # 95%
   pauseKey = "Mod+D";
 
-  # For the desktop shell: whether notifications are paused, then again on every change dunst signals.
-  # dbus-monitor prints the property name and its value on consecutive lines.
+  dunstctl = lib.getExe' config.services.dunst.package "dunstctl";
+
   pausedWatch = pkgs.writeShellApplication {
     name = "dunst-paused-watch";
     runtimeInputs = [ config.services.dunst.package pkgs.dbus ];
-    text = ''
-      dunstctl is-paused
-      next=0
-      dbus-monitor --session "type='signal',path='/org/freedesktop/Notifications',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'" | while read -r line; do
-        if [[ $next == 1 ]]; then if [[ $line == *"boolean true"* ]]; then echo true; else echo false; fi; fi
-        if [[ $line == *'string "paused"'* ]]; then next=1; else next=0; fi
-      done
-    '';
+    text = lib.fileContents ./dunst-paused-watch.sh;
   };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.desktop-shell.settings.notifications = {
     watch = lib.getExe pausedWatch;
-    toggle = "${lib.getExe' config.services.dunst.package "dunstctl"} set-paused toggle";
+    toggle = "${dunstctl} set-paused toggle";
     shortcut = pauseKey;
   };
 
@@ -100,7 +93,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   };
 
   my.programs.niri = {
-    bindings = let dunstctl = lib.getExe' pkgs.dunst "dunstctl"; in {
+    bindings = {
       "Mod+N"        = ''spawn-sh "${dunstctl} action"'';
       "Mod+Shift+N"  = ''spawn-sh "${dunstctl} context"'';
       "Mod+Ctrl+N"   = ''spawn-sh "${dunstctl} close"'';

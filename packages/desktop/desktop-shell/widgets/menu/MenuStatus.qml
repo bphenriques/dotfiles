@@ -11,6 +11,7 @@ StatusLine {
   required property string status
   property string fallback: ""
   property string fallbackDetail: ""
+  property var fallbackGlyphs: []
   property string icon: ""
   property bool quiet: false
   property bool active: false
@@ -27,6 +28,7 @@ StatusLine {
   spacing: quiet ? Config.theme.spacing / 2 : Config.theme.spacing
   text: compact ? "" : value.text || fallback
   detail: value.detail || fallbackDetail
+  detailGlyphs: value.glyphs ?? fallbackGlyphs
   // Volumes run from "5%" to "muted": room for the longest, so the glyph beside it holds still.
   detailChars: compact && (status === "sink" || status === "source") ? 5 : 0
   // Dim when quiet (the header) or when a status has nothing to report, e.g. music while mpd is not running.
@@ -77,8 +79,11 @@ StatusLine {
       return { text: pinned(Audio.source.name, Audio.sourceName), detail: Audio.sourceMuted ? "muted" : Math.round(Audio.sourceVolume * 100) + "%" };
     case "music": {
       if (!Music.present || !Music.title) return { text: "", detail: "" };
-      const modes = [Music.repeat ? Glyphs.repeat : "", Music.shuffle ? Glyphs.shuffle : "", Music.playing ? "" : "paused"];
-      return { text: Music.title + (Music.artist ? " · " + Music.artist : ""), detail: modes.filter(mode => mode).join(" ") };
+      return {
+        text: Music.title + (Music.artist ? " · " + Music.artist : ""),
+        detail: Music.playing ? "" : "paused",
+        glyphs: [Music.repeat ? Glyphs.repeat : "", Music.shuffle ? Glyphs.shuffle : ""].filter(glyph => glyph)
+      };
     }
     case "network":
       return { text: Network.kind === "wifi" ? pinned(Network.ssid, Network.ssid) : Network.kind === "wired" ? "Ethernet" : "Disconnected", detail: Network.wifiEnabled ? "" : "Wi-Fi off" };

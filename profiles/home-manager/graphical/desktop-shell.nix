@@ -53,7 +53,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         { key = "t"; desc = "Tray"; width = 640; status = "tray"; list = "tray"; }
       ])
       (lib.mkOrder 900 [
-        { key = "c"; desc = "Calendar"; icon = self.lib.glyphs."md-calendar"; width = 480; view = "calendar"; }
+        { key = "c"; desc = "Calendar"; icon = self.lib.glyphs."md-calendar"; width = 640; view = "calendar"; }
       ])
     ];
   };

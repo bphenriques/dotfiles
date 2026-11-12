@@ -36,6 +36,7 @@ Scope {
       status: row.modelData.status ?? ""
       fallback: row.modelData.desc
       fallbackDetail: row.modelData.detail ?? ""
+      fallbackGlyphs: row.modelData.glyphs ?? []
       icon: row.modelData.icon ?? ""
       active: row.modelData.active ?? false
       pins: row.modelData.entry?.pins ?? []
@@ -44,6 +45,7 @@ Scope {
 
   // Part of the header: its items in a row, aligned left, centre or right. The sides share the width equally, each at least
   // what its items need; the centre takes the width its items want of the rest, shortening its text when crowded.
+  // A plain row of equal parts was simpler but cut the clock and could widen the menu; the minimums prevent both.
   component HeaderSlot: Item {
     id: slot
     property var items: []
@@ -109,7 +111,7 @@ Scope {
     KeyHint {
       visible: menu.shortcutsShown && item.shortcut !== ""
       key: item.shortcut
-      chars: item.shortcut.length
+      chars: MenuKeys.label(item.shortcut).length
     }
 
     Label {
@@ -194,10 +196,17 @@ Scope {
       Shadow {
         anchors.fill: card
         radius: card.radius
+        opacity: card.opacity
       }
 
       Surface {
         id: card
+        // Fades in; closing is instant, as a fade-out would hold the keyboard (rule 13).
+        NumberAnimation on opacity {
+          from: 0
+          to: 1
+          duration: Config.theme.animationDuration
+        }
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Config.theme.edgeMargin
@@ -262,12 +271,6 @@ Scope {
                   text: menu.title
                 }
               }
-
-              Label {
-                visible: menu.level?.entry?.list === "tray"
-                tone: "dim"
-                text: "Ctrl+digit: app menu"
-              }
             }
 
             HeaderSlot {
@@ -292,6 +295,12 @@ Scope {
                 status: menu.level?.entry?.list === "tray" ? "" : menu.level?.status ?? ""
               }
             }
+          }
+
+          KeyLegend {
+            Layout.leftMargin: Config.theme.itemPaddingX
+            visible: menu.legend.length > 0
+            keys: menu.legend
           }
 
           // Declared, not inferred: the level's own columns, else menu.columns; entries flow across, so neighbours sit side by side.
@@ -319,7 +328,15 @@ Scope {
 
           Divider {
             Layout.fillWidth: true
-            visible: menu.actions.length > 0 && (menu.rows.length > 0 || menu.level?.entry?.view === "calendar")
+            visible: menu.actions.length > 0 && (menu.rows.length > 0 || menu.emptyText !== "" || menu.level?.entry?.view === "calendar")
+          }
+
+          // An empty list says why, in its place.
+          Label {
+            visible: menu.emptyText !== ""
+            Layout.leftMargin: Config.theme.itemPaddingX
+            tone: "dim"
+            text: menu.emptyText
           }
 
           // What a level lists, apart from its actions and across the full width.

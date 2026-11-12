@@ -35,7 +35,7 @@ remember() {
 # laptop: the panel alone; external: every external, panel off; extend: every screen.
 # What is needed is turned on before anything is turned off, so a screen stays lit.
 layout() {
-  local all setup
+  local all setup ext
   all=$(outputs)
   mapfile -t ext < <(externals "$all")
   case "$1" in

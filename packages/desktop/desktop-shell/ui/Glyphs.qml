@@ -29,13 +29,9 @@ Singleton {
   readonly property string wallpaper: "\u{F0E09}" // md-wallpaper
   readonly property string window: "\u{F0614}" // md-application_outline
   readonly property string record: "\u{F044B}" // md-record_rec
-  readonly property string calendarDay: "\u{F00EE}" // md-calendar_blank
-  readonly property string calendarWeek: "\u{F0A33}" // md-calendar_week
-  readonly property string calendarMonth: "\u{F0E17}" // md-calendar_month
-  readonly property string calendarYear: "\u{F0679}" // md-calendar_range
-  readonly property string calendarToday: "\u{F00F6}" // md-calendar_today
   readonly property var brightnessLevels: ["\u{F00DE}", "\u{F00DF}", "\u{F00E0}"] // md-brightness_5, _6, _7
-  readonly property string check: "✓"
+  readonly property string check: "\u{F012C}" // md-check
+  readonly property string submenu: "\u{F0142}" // md-chevron_right
 
   // The display layout: laptop, external or extend.
   function display(layout) {

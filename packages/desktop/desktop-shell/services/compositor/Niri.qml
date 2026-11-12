@@ -33,8 +33,8 @@ Singleton {
   }
 
   // One request on its own connection, as `niri msg` does: the event stream's connection carries only events.
-  function request(message, onReply) {
-    requestComponent.createObject(root, { message: JSON.stringify(message), onReply: onReply ?? null });
+  function request(message, callback) {
+    requestComponent.createObject(root, { message: JSON.stringify(message), callback: callback ?? null });
   }
 
   function switchLayout() {
@@ -56,7 +56,13 @@ Singleton {
     Socket {
       id: socket
       property string message
-      property var onReply
+      property var callback
+      // One that never connects or answers is dropped, rather than kept for good.
+      property Timer expiry: Timer {
+        interval: 5000
+        running: true
+        onTriggered: socket.destroy()
+      }
 
       path: Quickshell.env("NIRI_SOCKET")
       connected: true
@@ -72,7 +78,7 @@ Singleton {
       parser: SplitParser {
         onRead: line => {
           const reply = JSON.parse(line);
-          if (reply.Ok && socket.onReply) socket.onReply(reply.Ok);
+          if (reply.Ok && socket.callback) socket.callback(reply.Ok);
           socket.connected = false;
         }
       }

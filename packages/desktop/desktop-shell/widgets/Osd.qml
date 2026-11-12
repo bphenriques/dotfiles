@@ -16,7 +16,6 @@ Scope {
   property string kind: ""
 
   function show(newKind) {
-    if (!transient.armed) return;
     kind = newKind;
     transient.show();
   }
@@ -25,6 +24,11 @@ Scope {
     id: transient
     // Bound here, not read in show(): singletons start on first use, and this one must start with the shell.
     armed: Startup.settled
+  }
+
+  Fade {
+    id: fade
+    shown: transient.shown
   }
 
   Connections {
@@ -52,7 +56,7 @@ Scope {
   }
 
   LazyLoader {
-    active: transient.shown
+    active: fade.loaded
 
     OverlayWindow {
       id: window
@@ -79,6 +83,7 @@ Scope {
       // A level: a vertical bar, the level above the icon.
       Surface {
         id: bar
+        opacity: fade.value
         anchors.fill: parent
         visible: window.metered
         implicitWidth: Config.theme.osdIconSize + 2 * Config.theme.padding
@@ -122,6 +127,7 @@ Scope {
       // A state without a level (layout, keep awake): a pill with the icon and what it is now.
       Pill {
         id: pill
+        opacity: fade.value
         anchors.fill: parent
         visible: !window.metered
         padding: Config.theme.padding

@@ -9,6 +9,7 @@ let
   # Integrations may not take a built-in name.
   builtinNames = builtinStatuses ++ builtinStates ++ headerItems;
   headerNames = lib.concatLists (lib.filter (slot: slot != null) (lib.attrValues cfg.menu.header));
+  displayLayouts = lib.attrNames (cfg.settings.display.layouts or { });
   settingsFormat = pkgs.formats.json { };
   settingsFile = settingsFormat.generate "desktop-shell-config.json" cfg.settings;
 
@@ -16,7 +17,7 @@ let
     options = {
       key = mkOption {
         type = types.either types.str (types.listOf types.str);
-        description = "Key or keys that trigger the entry, as xkb key names without modifiers (e.g. `a`, `A`, `Left`, `space`)";
+        description = "Key or keys that trigger the entry, as xkb key names, Ctrl+ or Alt+ allowed before them (e.g. `a`, `A`, `Left`, `space`, `Ctrl+Left`)";
       };
       desc = mkOption {
         type = types.str;
@@ -144,6 +145,7 @@ let
       { assertion = (e.cmd != null) != (e.submenu != null || e.list != null || e.view != null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} needs either cmd, submenu and/or list, or view"; }
       { assertion = e.status == null || lib.elem e.status (builtinStatuses ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} shows status '${toString e.status}', neither built in nor an integration's"; }
       { assertion = e.activeWhen == null || lib.elem e.activeWhen (builtinStates ++ lib.attrNames cfg.integrations); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} is lit by '${toString e.activeWhen}', neither built in nor an integration's"; }
+      { assertion = e.layout == null || lib.elem e.layout displayLayouts; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} selects layout '${toString e.layout}', not one of display.layouts: ${toString displayLayouts}"; }
       { assertion = e.view == null || (e.submenu == null && e.list == null); message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} cannot combine view with submenu or list"; }
       { assertion = e.keepOpen == null || e.cmd != null; message = "my.programs.desktop-shell.menu: '${e.desc}' in ${path} can only set keepOpen with cmd"; }
       { assertion = e.submenu == null || lib.all (a: a.icon != null) e.submenu; message = "my.programs.desktop-shell.menu: every action in '${e.desc}' needs an icon"; }

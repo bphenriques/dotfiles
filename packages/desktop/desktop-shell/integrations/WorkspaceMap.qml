@@ -26,15 +26,13 @@ Integration {
   // Changes only when the layout does: titles are left out.
   property var map: null
 
-  property real fade: transient.shown ? 1 : 0
-  Behavior on fade {
-    NumberAnimation {
-      duration: 150
-    }
+  Fade {
+    id: fade
+    shown: transient.shown
   }
 
   readonly property var screen: Quickshell.screens.find(screen => screen.name === root.map?.output) ?? null
-  readonly property int gap: 2 * borderWidth
+  readonly property int gap: 2 * root.borderWidth
   readonly property real dot: root.mapHeight / 8
   readonly property real strip: root.mapHeight / 5
   // Sized to mapHeight for the output's height, shrunk further if any of the three workspaces would pass maxWidth.
@@ -171,7 +169,7 @@ Integration {
 
     radius: Config.theme.itemRadius / 2
     color: Tone.surface(root.tileOpacity)
-    border.width: borderWidth
+    border.width: root.borderWidth
     border.color: Tone.color(focused ? "primary" : "dim")
 
     Icon {
@@ -208,7 +206,7 @@ Integration {
   }
 
   LazyLoader {
-    active: root.fade > 0 && root.screen !== null
+    active: fade.loaded && root.screen !== null
 
     OverlayWindow {
       screen: root.screen
@@ -224,7 +222,7 @@ Integration {
 
       Row {
         id: content
-        opacity: root.fade
+        opacity: fade.value
         spacing: Config.theme.spacing
 
         // niri stacks workspaces vertically; the active one is the long mark.
