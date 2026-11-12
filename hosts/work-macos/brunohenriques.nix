@@ -38,6 +38,10 @@ in
 
   programs.nh.darwinFlake = "${config.programs.nh.flake}#work-macos";   # the work-managed hostname must stay
   programs.zsh.initContent = ''eval "$(fnm env --use-on-cd --shell zsh)"'';
+
+  # AI Agent
+  home.shellAliases.agent = "cursor-agent"; # The cursor-cli cask only links cursor-agent
+
   programs.git.includes = [{
     condition = "hasconfig:remote.*.url:git@github.com:${private.settings.git.org}/**";
     contents.user.email = private.settings.git.email;

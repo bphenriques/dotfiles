@@ -14,6 +14,7 @@ in
 
     casks = [
       "cursor"
+      "cursor-cli"
       "visual-studio-code"
     ];
 
