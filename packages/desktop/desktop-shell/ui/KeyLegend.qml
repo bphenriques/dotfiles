@@ -2,24 +2,30 @@ import QtQuick
 import QtQuick.Layouts
 import qs
 
-// Keys a level takes beyond its rows, on one line: each key as KeyHint shows it, then what it does.
+// Keys a level takes beyond its rows, on one line: each key as KeyHint shows it, then what it does; a single key also takes a click.
 RowLayout {
   id: root
 
-  // [{ key, what }], a key being a name or a pair of names (["Left", "Right"]).
+  // [{ key, what, clickable }], a key being a name or a pair of names (["Left", "Right"]).
   property var keys: []
 
-  spacing: 2 * Config.theme.spacing
+  signal picked(var key)
+
+  // No spacing: each entry's own padding already spaces them.
+  spacing: 0
 
   Repeater {
     model: root.keys
 
-    RowLayout {
+    // A click does what the key does, where that is one thing (`clickable`): a pair names no one key.
+    ListItem {
       id: entry
       required property var modelData
       readonly property string label: MenuKeys.label(modelData.key, true)
 
-      spacing: Config.theme.spacing
+      enabled: !!modelData.clickable
+      dimsWhenDisabled: false
+      onActivated: root.picked(modelData.key)
 
       KeyHint {
         key: entry.modelData.key

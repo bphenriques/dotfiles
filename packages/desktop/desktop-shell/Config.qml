@@ -103,8 +103,12 @@ Singleton {
       }
 
       property JsonObject calendar: JsonObject {
-        // The events file the month shows (README.md#menu); unset or not there yet, the month alone.
+        // The events file the month shows (README.md#calendar); unset or not there yet, the month alone.
         property string file
+        // Given an event's title and when (14:00 · Rua Augusta 120), reminds of it; unset, no reminders.
+        property string remind
+        // How many minutes before a timed event starts.
+        property int remindBefore: 10
       }
 
       property JsonObject popups: JsonObject {

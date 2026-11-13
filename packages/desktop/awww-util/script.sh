@@ -6,7 +6,7 @@ STATE_FILE="${XDG_RUNTIME_DIR:?}/wallpaper"
 set_wallpaper() {
   test -f "$1" || return 0
   awww img --transition-type none "$1"
-  printf '%s\n' "$1" >"$STATE_FILE" # in place: replacing the file would drop the desktop shell's watch
+  printf '%s\n' "$1" >"$STATE_FILE"
 }
 
 current_file() { cat "$STATE_FILE" 2>/dev/null || true; }

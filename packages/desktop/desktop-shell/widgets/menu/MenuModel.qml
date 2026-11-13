@@ -14,8 +14,8 @@ Scope {
   property var stack: []
   // The day selected in a calendar level.
   property var selected: new Date()
-  // The calendar's event in focus, by its place among Calendar.timeline's events; -1 while the keys move the day.
-  property int eventFocus: -1
+  // The calendar's event in focus, by its row id in Calendar.timeline, so a new read of the file keeps it; "" while the keys move the day.
+  property string eventFocus: ""
   // Super held a second shows the header's compositor keys, not at once, so a Super shortcut does not flash them.
   property bool shortcutsShown: false
 
@@ -32,45 +32,53 @@ Scope {
   // The top-level entry the clock opens.
   readonly property var calendar: itemsOf(null).find(item => item.entry.view === "calendar") ?? null
   // A calendar level's keys: each moves the selected day by [years, months, days] per key, or back to today (null).
-  // The arrows go unlisted, as Return into the events does (README.md#menu).
+  // The arrows go unlisted, since the grid shows them; Return focuses the events (README.md#calendar).
   readonly property var calendarKeys: [
     { key: ["Left", "Right"], what: "day", unlisted: true, moves: { Left: [0, 0, -1], Right: [0, 0, 1] } },
     { key: ["Up", "Down"], what: "week", unlisted: true, moves: { Up: [0, 0, -7], Down: [0, 0, 7] } },
     { key: ["Ctrl+Left", "Ctrl+Right"], what: "month", moves: { "Ctrl+Left": [0, -1, 0], "Ctrl+Right": [0, 1, 0] } },
     { key: ["Ctrl+Up", "Ctrl+Down"], what: "year", moves: { "Ctrl+Up": [-1, 0, 0], "Ctrl+Down": [1, 0, 0] } },
-    { key: "t", what: "today", moves: { t: null } }
+    { key: "t", what: "today", clickable: true, moves: { t: null } },
+    { key: "Return", what: "events", clickable: true }
   ]
+  // With the events in focus, the keys that move through them and back.
+  readonly property var eventKeys: [{ key: ["Up", "Down"], what: "event" }, { key: "BackSpace", what: "back", clickable: true }]
   // Keys a level takes beyond its rows, shown under the header (KeyLegend): { key, what }.
-  readonly property var legend: level?.entry?.view === "calendar" ? calendarKeys.filter(entry => !entry.unlisted)
+  readonly property var legend: level?.entry?.view === "calendar" ? (eventFocus ? eventKeys : calendarKeys.filter(entry => !entry.unlisted))
     : level?.entry?.list === "tray" ? [{ key: "Ctrl+digit", what: "app menu" }]
     : []
 
   // Selects a day, by key or click, leaving the events.
   function select(day) {
     selected = day;
-    eventFocus = -1;
+    eventFocus = "";
+  }
+
+  // Focuses an event's row, by key or click, selecting its day.
+  function focusEvent(row) {
+    eventFocus = row.id;
+    selected = row.day;
   }
 
   // Whether a calendar key was pressed, acting on it if so. Return focuses the events from the selected day on; the arrows
   // then step through them, the day following the event in focus, and Backspace leaves them. Any other key moves the day.
   function calendarKey(name) {
-    const events = Calendar.timeline.filter(item => item.event);
+    const rows = Calendar.timeline;
+    const at = eventFocus ? rows.findIndex(row => row.id === eventFocus) : -1;
     if (name === "Return") {
-      const day = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
-      eventFocus = events.findIndex(item => item.day >= day);
-      if (eventFocus >= 0) selected = events[eventFocus].day;
+      const first = rows.find(row => row.key >= Calendar.key(selected));
+      if (first) focusEvent(first);
       return true;
     }
-    if (eventFocus >= 0 && (name === "Up" || name === "Down")) {
-      eventFocus = Math.min(Math.max(eventFocus + (name === "Up" ? -1 : 1), 0), events.length - 1);
-      selected = events[eventFocus].day;
+    if (at >= 0 && (name === "Up" || name === "Down")) {
+      focusEvent(rows[Math.min(Math.max(at + (name === "Up" ? -1 : 1), 0), rows.length - 1)]);
       return true;
     }
-    if (eventFocus >= 0 && name === "BackSpace") {
-      eventFocus = -1;
+    if (eventFocus && name === "BackSpace") {
+      eventFocus = "";
       return true;
     }
-    const entry = calendarKeys.find(entry => MenuKeys.matches(entry.key, name));
+    const entry = calendarKeys.find(entry => entry.moves && MenuKeys.matches(entry.key, name));
     if (!entry) return false;
     const move = entry.moves[name];
     if (move) moveSelected(...move);
@@ -251,12 +259,12 @@ Scope {
   // A level starts with no event in focus, coming back to it too.
   function back() {
     stack = stack.slice(0, -1);
-    eventFocus = -1;
+    eventFocus = "";
   }
 
   function push(next) {
     stack = stack.concat([next]);
-    eventFocus = -1;
+    eventFocus = "";
   }
 
   function find(candidates, name) {

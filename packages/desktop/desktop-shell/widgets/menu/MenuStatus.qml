@@ -61,12 +61,33 @@ StatusLine {
     case "bluetooth": return !Bluez.enabled ? Glyphs.bluetoothOff : Bluez.connected.length ? Glyphs.bluetoothConnected : Glyphs.bluetooth;
     case "display": return Glyphs.display(Display.layout);
     case "tray": return Glyphs.tray;
+    case "calendar": return Glyphs.calendar;
     case "battery": return Power.present ? Glyphs.battery(Power.percentage, Power.pluggedIn) : "";
     case "keyboardLayout": return Glyphs.keyboard;
     case "notifications": return DoNotDisturb.enabled ? Glyphs.doNotDisturb : Glyphs.notifications;
     case "keepAwake": return Glyphs.keepAwake;
     default: return integration?.glyph ?? "";
     }
+  }
+
+
+  // In a level's header how old the events are; on a row the next event, and when.
+  function calendarValue() {
+    if (!Calendar.enabled) return { text: "", detail: "" };
+    if (quiet) {
+      const updated = Calendar.updated;
+      return {
+        text: "",
+        // Its age even after a failed sync, the line under the legend saying why: the events shown are that old.
+        detail: Calendar.syncing ? "syncing…" : !updated ? ""
+          : "updated " + Clock.format(updated, updated.toDateString() === Clock.date.toDateString() ? "%H:%M" : "%-d %b %H:%M")
+      };
+    }
+    const next = Calendar.next;
+    if (!next) return { text: "", detail: "" };
+    const today = next.start.toDateString() === Clock.date.toDateString() || next.start < Clock.date;
+    const when = next.allDay ? (today ? "today" : Clock.format(next.start, "%a")) : Clock.format(next.start, today ? "%H:%M" : "%a %H:%M");
+    return { text: next.title, detail: when };
   }
 
   function valueFor(status) {
@@ -97,6 +118,8 @@ StatusLine {
     }
     case "display":
       return { text: Config.display.layouts[Display.layout] ?? "", detail: Brightness.lit ? Brightness.percentage + "%" : "" };
+    case "calendar":
+      return calendarValue();
     case "tray":
       return { text: Tray.items.map(app => pinned(app.id, app.title || app.id)).join(", "), detail: "" };
     case "battery":

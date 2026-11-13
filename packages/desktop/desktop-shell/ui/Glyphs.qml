@@ -29,6 +29,7 @@ Singleton {
   readonly property string wallpaper: "\u{F0E09}" // md-wallpaper
   readonly property string window: "\u{F0614}" // md-application_outline
   readonly property string record: "\u{F044B}" // md-record_rec
+  readonly property string calendar: "\u{F00ED}" // md-calendar
   readonly property var brightnessLevels: ["\u{F00DE}", "\u{F00DF}", "\u{F00E0}"] // md-brightness_5, _6, _7
   readonly property string check: "\u{F012C}" // md-check
   readonly property string submenu: "\u{F0142}" // md-chevron_right

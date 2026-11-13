@@ -140,17 +140,11 @@ Scope {
           glyph: window.glyph
         }
 
-        TextMetrics {
-          id: cell
-          font: value.font
-          text: "0"
-        }
-
         Label {
           id: value
           anchors.verticalCenter: parent.verticalCenter
           // As wide as the widest value, so the pill holds still as it changes.
-          width: Math.max(3, ...Array.from(Config.keyboardLayout.labels).map(label => label.length)) * cell.advanceWidth
+          width: Math.max(3, ...Array.from(Config.keyboardLayout.labels).map(label => label.length)) * Metrics.cell
           tone: window.tone
           text: root.kind === "layout" ? (KeyboardLayout.label || KeyboardLayout.name.slice(0, 2))
             : IdleInhibit.enabled ? "on" : "off"

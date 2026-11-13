@@ -60,7 +60,7 @@ Singleton {
   }
 
   function shortName(name) {
-    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Space: "SPC", Return: "RET" };
+    const symbols = { Up: "↑", Down: "↓", Left: "←", Right: "→", space: "SPC", Space: "SPC", Return: "RET", BackSpace: "DEL" };
     const [, chord, base] = name.match(/^((?:(?:Ctrl|Alt|Mod|Super|Shift)\+)*)(.*)$/);
     const modifiers = chord.split("+");
     const shift = modifiers.includes("Shift");

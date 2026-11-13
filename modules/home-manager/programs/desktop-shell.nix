@@ -3,7 +3,7 @@ let
   inherit (lib) mkOption types;
 
   cfg = config.my.programs.desktop-shell;
-  builtinStatuses = [ "sink" "source" "music" "network" "bluetooth" "display" "tray" ];
+  builtinStatuses = [ "sink" "source" "music" "network" "bluetooth" "display" "tray" "calendar" ];
   builtinStates = [ "wifi" "bluetooth" "repeat" "shuffle" "sink-muted" "source-muted" ];
   headerItems = [ "clock" "notifications" "keepAwake" "keyboardLayout" "battery" ];
   # Integrations may not take a built-in name.

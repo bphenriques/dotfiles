@@ -114,6 +114,13 @@ def events [config: path]: nothing -> list {
   }
 }
 
+# vdirsyncer's first error line, its addresses left out: one can be secret.
+def reason [stderr: string]: nothing -> string {
+  let errors = $stderr | lines | where {|line| $line =~ '(?i)error' }
+  if ($errors | is-empty) { return "could not sync" }
+  $errors | first | str replace --all --regex 'https?://\S+' '<address>' | str replace --regex '^.*?error:\s*' '' | str trim
+}
+
 # Replaced whole, so the shell never reads half a file.
 def write-events [file: path, content: record] {
   $content | to json | save -f $"($file).tmp"
@@ -145,19 +152,27 @@ def main [calendars_file: path, events_file: path] {
   vdirsyncer-config $calendars $state | save -f $vdirsyncer
   khal-config $calendars $state | save -f $khal
 
-  # One calendar at a time, so a failure names it and keeps its last events without holding back the others. Discover
-  # is a no-op once the pairs are known, and needed whenever one is added.
-  let failed = try {
-    ^vdirsyncer -c $vdirsyncer discover
-    $calendars | where {|c| try { ^vdirsyncer -c $vdirsyncer sync $c.name; false } catch { true } } | get name
-  } catch { $calendars.name }
-  let events = try { events $khal } catch { $kept.events }
-
-  let synced = { updated: (date now | format date "%Y-%m-%dT%H:%M"), events: $events }
-  if ($failed | is-empty) {
-    write-events $events_file $synced
+  # One calendar at a time, so a failure names it and its reason and keeps its last events without holding back the
+  # others. Discover is a no-op once the pairs are known, and needed whenever one is added.
+  let discovered = ^vdirsyncer -c $vdirsyncer discover | complete
+  let failures = if $discovered.exit_code != 0 {
+    $calendars | each {|c| { name: $c.name, reason: (reason $discovered.stderr) } }
   } else {
-    write-events $events_file ($synced | insert error $"($failed | str join ', '): could not sync")
+    $calendars | each {|c|
+      let run = ^vdirsyncer -c $vdirsyncer sync $c.name | complete
+      if $run.exit_code != 0 { { name: $c.name, reason: (reason $run.stderr) } }
+    } | compact
+  }
+  let events = try { events $khal } catch { $kept.events }
+  let now = date now | format date "%Y-%m-%dT%H:%M"
+
+  if ($failures | is-empty) {
+    write-events $events_file { updated: $now, events: $events }
+  } else {
+    let error = $failures | group-by reason | items {|reason, failed| $"($failed.name | str join ', '): ($reason)" } | str join "; "
+    # Only a sync that fetched something makes the events newer.
+    let updated = if ($failures | length) == ($calendars | length) { $kept.updated } else { $now }
+    write-events $events_file { updated: $updated, events: $events, error: $error }
     exit 1
   }
 }

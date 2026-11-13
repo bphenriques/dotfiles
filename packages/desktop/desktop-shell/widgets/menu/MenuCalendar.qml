@@ -56,53 +56,47 @@ Item {
     Repeater {
       model: root.days
 
-      Rectangle {
+      ListItem {
         id: cell
         required property date modelData
         readonly property bool isToday: modelData.toDateString() === Clock.date.toDateString()
-        readonly property bool isSelected: modelData.toDateString() === root.selected.toDateString()
         readonly property bool inMonth: modelData.getMonth() === root.selected.getMonth()
 
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        // Room for the dots whether a day has events or not, so the grid holds still.
-        implicitHeight: day.implicitHeight + (Calendar.enabled ? root.dotSize + root.dotGap : 0) + 2 * root.cellPadding
-        radius: Config.theme.itemRadius
-        color: isSelected || mouse.containsMouse ? Qt.alpha(Config.theme.primary, Config.theme.highlightOpacity) : "transparent"
+        verticalPadding: root.cellPadding
+        current: modelData.toDateString() === root.selected.toDateString()
+        onActivated: root.picked(cell.modelData)
 
-        Label {
-          id: day
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.top: parent.top
-          anchors.topMargin: root.cellPadding
-          tone: cell.isToday ? "primary" : cell.inMonth ? "normal" : "dim"
-          font.bold: cell.isToday
-          text: cell.modelData.getDate()
-        }
-
-        Row {
-          anchors.horizontalCenter: parent.horizontalCenter
-          anchors.top: day.bottom
-          anchors.topMargin: root.dotGap
+        ColumnLayout {
+          Layout.fillWidth: true
           spacing: root.dotGap
 
-          Repeater {
-            model: Calendar.enabled ? Calendar.colorsOn(cell.modelData).slice(0, root.maxDots) : []
+          Label {
+            Layout.alignment: Qt.AlignHCenter
+            tone: cell.isToday ? "primary" : cell.inMonth ? "normal" : "dim"
+            font.bold: cell.isToday
+            text: cell.modelData.getDate()
+          }
 
-            Swatch {
-              required property string modelData
-              size: root.dotSize
-              fill: modelData
-              tone: cell.inMonth ? "normal" : "dim"
+          // Room for the dots whether a day has events or not, so the grid holds still.
+          Row {
+            visible: Calendar.enabled
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: root.dotSize
+            spacing: root.dotGap
+
+            Repeater {
+              model: Calendar.enabled ? Calendar.colorsOn(cell.modelData).slice(0, root.maxDots) : []
+
+              Swatch {
+                required property string modelData
+                size: root.dotSize
+                fill: modelData
+                tone: cell.inMonth ? "normal" : "dim"
+              }
             }
           }
-        }
-
-        MouseArea {
-          id: mouse
-          anchors.fill: parent
-          hoverEnabled: true
-          onClicked: root.picked(cell.modelData)
         }
       }
     }

@@ -15,7 +15,7 @@ Rectangle {
   implicitWidth: vertical ? Config.theme.meterThickness : 0
   implicitHeight: vertical ? 0 : Config.theme.meterThickness
   radius: Math.min(width, height) / 2
-  color: Qt.alpha(Config.theme.foreground, Config.theme.highlightOpacity)
+  color: Tone.wash("normal")
 
   Rectangle {
     anchors.left: parent.left
@@ -27,12 +27,12 @@ Rectangle {
 
     Behavior on width {
       NumberAnimation {
-        duration: 80
+        duration: Config.theme.animationDuration
       }
     }
     Behavior on height {
       NumberAnimation {
-        duration: 80
+        duration: Config.theme.animationDuration
       }
     }
   }

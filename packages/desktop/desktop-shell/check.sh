@@ -26,6 +26,16 @@ for file in $(grep -rlE '(text|detail|fallbackDetail): .*Glyphs\.' --include='*.
   fail "$file: a glyph drawn as text"
 done
 
+# Rule 11: a widget never picks a theme colour itself; tones and the kit do.
+for file in $(grep -rlE 'Config\.theme\.(primary|foreground|background|alert|warning)\b' --include='*.qml' . | grep -vE '^\./(Config\.qml|ui/)'); do
+  fail "$file: picks a theme colour itself"
+done
+
+# Rule 11: sizes in characters or lines come from Metrics.
+for file in $(grep -rlE '^\s*(TextMetrics|FontMetrics) \{' --include='*.qml' . | grep -v '^\./ui/Metrics\.qml$'); do
+  fail "$file: measures the font itself"
+done
+
 # Rule 11: colours come from the theme.
 for file in $(grep -rlE '"#[0-9a-fA-F]{6,8}"' --include='*.qml' . | grep -vE '^\./(Config\.qml|ui/)'); do
   fail "$file: a colour outside the theme"

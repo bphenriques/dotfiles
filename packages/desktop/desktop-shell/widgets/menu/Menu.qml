@@ -287,17 +287,6 @@ Scope {
                 compact: !!menu.level?.entry?.list
                 status: menu.level?.entry?.list === "tray" ? "" : menu.level?.status ?? ""
               }
-
-              // A calendar's state, as its events file tells it: syncing, failed (why, under the legend), or when written, the
-              // date too once that is not today.
-              Label {
-                readonly property var updated: Calendar.updated
-                visible: !!menu.level?.entry?.view && (Calendar.syncing || Calendar.error !== "" || updated !== null)
-                Layout.rightMargin: Config.theme.itemPaddingX
-                tone: Calendar.error !== "" && !Calendar.syncing ? "warning" : "dim"
-                text: Calendar.syncing ? "syncing…" : Calendar.error !== "" ? "sync failed" : !updated ? ""
-                  : "updated " + Clock.format(updated, updated.toDateString() === Clock.date.toDateString() ? "%H:%M" : "%-d %b %H:%M")
-              }
             }
           }
 
@@ -308,9 +297,9 @@ Scope {
             spacing: Config.theme.padding
 
             KeyLegend {
-              Layout.leftMargin: Config.theme.itemPaddingX
               visible: menu.legend.length > 0
               keys: menu.legend
+              onPicked: key => menu.calendarKey(key)
             }
 
             Item {
@@ -346,7 +335,8 @@ Scope {
             Layout.leftMargin: Config.theme.itemPaddingX
             Layout.rightMargin: Config.theme.itemPaddingX
             visible: !!menu.level?.entry?.view && Calendar.error !== "" && !Calendar.syncing
-            tone: "warning"
+            // Alert, not warning: the warning hue sits too close to calendar colours to read as a fault.
+            tone: "alert"
             wrapMode: Text.Wrap
             text: Calendar.error
           }
@@ -409,7 +399,8 @@ Scope {
               Layout.preferredHeight: 0
               visible: Calendar.enabled
               selected: menu.selected
-              focusedEvent: menu.eventFocus
+              focused: menu.eventFocus
+              onPicked: row => menu.focusEvent(row)
             }
           }
         }

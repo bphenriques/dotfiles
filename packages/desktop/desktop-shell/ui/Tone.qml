@@ -17,8 +17,13 @@ Singleton {
     }
   }
 
-  // The background of a panel, at the opacity given.
-  function surface(opacity) {
+  // The background of a panel, at the theme's opacity unless given.
+  function surface(opacity = Config.theme.surfaceOpacity) {
     return Qt.alpha(Config.theme.background, opacity);
+  }
+
+  // A tone's colour behind something: a highlight, or a meter's track. `strength` multiplies theme.highlightOpacity.
+  function wash(tone, strength = 1) {
+    return Qt.alpha(color(tone), strength * Config.theme.highlightOpacity);
   }
 }

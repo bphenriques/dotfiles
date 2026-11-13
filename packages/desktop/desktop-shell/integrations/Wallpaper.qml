@@ -5,7 +5,7 @@ import qs
 import qs.ui
 
 // The wallpaper last set, by name.
-// settings.file: under $XDG_RUNTIME_DIR, the path of the wallpaper last set, rewritten in place on every change.
+// settings.file: under $XDG_RUNTIME_DIR, the path of the wallpaper last set, rewritten on every change.
 Integration {
   id: root
 

@@ -29,16 +29,10 @@ RowLayout {
     visible: root.text !== ""
     Layout.fillWidth: true
     // Squeezed, text ends in an ellipsis, but a short value (80%, EN) stays whole.
-    Layout.minimumWidth: Math.min(implicitWidth, 6 * cell.advanceWidth)
+    Layout.minimumWidth: Math.min(implicitWidth, 6 * Metrics.cell)
     elide: Text.ElideRight
     tone: root.tone
     text: root.text
-  }
-
-  TextMetrics {
-    id: cell
-    font: detailLabel.font
-    text: "0"
   }
 
   Repeater {
@@ -55,7 +49,7 @@ RowLayout {
   Label {
     id: detailLabel
     visible: root.detail !== ""
-    Layout.minimumWidth: Math.max(implicitWidth, root.detailChars * cell.advanceWidth)
+    Layout.minimumWidth: Math.max(implicitWidth, root.detailChars * Metrics.cell)
     horizontalAlignment: Text.AlignRight
     tone: "dim"
     text: root.detail
