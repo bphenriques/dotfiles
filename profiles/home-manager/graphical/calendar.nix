@@ -5,7 +5,7 @@ let
   eventsFile = "${config.xdg.stateHome}/calendar/events.json";
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  my.programs.desktop-shell.menu.entries = lib.mkOrder 900 [
+  my.programs.desktop-shell.menu.entries = lib.mkOrder 800 [
     { key = "c"; desc = "Calendar"; status = "calendar"; width = 960; view = "calendar"; submenu = [
       { key = "s"; desc = "Sync"; icon = self.lib.glyphs."md-sync"; cmd = "${lib.getExe' pkgs.systemd "systemctl"} --user start --no-block calendar-sync.service"; keepOpen = true; }
     ]; }

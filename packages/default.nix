@@ -8,6 +8,7 @@ let
       pkgs = nixpkgs.legacyPackages.${system};
       b = builders.${system};
     in rec {
+      alfredo = pkgs.callPackage ./cli/alfredo { inherit (b) writeNushellScript; };
       preview = pkgs.callPackage ./cli/preview { };
       fzf-rg = pkgs.callPackage ./cli/fzf-rg { builders = b; };
       project = pkgs.callPackage ./cli/project { inherit preview; builders = b; };

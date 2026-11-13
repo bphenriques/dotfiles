@@ -13,6 +13,7 @@ in
     ../../../profiles/home-manager/gaming
     ../../../profiles/home-manager/music
     ./display.nix
+    ./alfredo.nix
   ];
 
   # NAS symlinks. Avoid mounting directly to $HOME to prevent slowdowns when offline

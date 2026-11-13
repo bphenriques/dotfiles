@@ -7,12 +7,12 @@ A [Quickshell](https://quickshell.org) menu with live status and a calendar, and
 Every change follows these; a change that cannot is a reason to revisit the rule here first, not to work around it.
 
 1. **Data, not code.** What the menu shows and does comes from `menu.entries`. QML has no case for a particular entry, tool or device; a new need becomes a schema field in the module, with an assertion when it can be wrong.
-2. **Tools through the config.** QML runs nothing by name. The module that owns a tool sets its command, and the shell reads only output it defines (a layout name, `true`/`false` lines), never a tool's own format. What needs more of one tool is an integration. The compositor is reached only through `Compositor` (see Compositor).
+2. **Tools through the config.** QML runs nothing by name. The module that owns a tool sets its command, and the shell reads only output it defines (a layout name, `true`/`false` lines), never a tool's own format. What needs more of one tool is an integration. The compositor is reached only through `Compositor` (see Compositor). The one exception: a link opens with the desktop's handler for links.
 3. **Events over polling.** What has no events is read when the menu opens; what must sample (the mic level) runs only while shown.
 4. **Layout is declared.** A level's columns and width come from its entry (`columns`, `width`, else `menu.columns`, `menu.width`), never measured from what it shows, so it holds still; entries flow across, so order decides neighbours. Make the menu wider before adding columns or truncating.
-5. **Order is explicit.** Top level by `lib.mkOrder`: 100 audio, 300 network, 400 Bluetooth, 500 display, 600 wallpaper, 700 music, 800 tray, 900 calendar, 2000 session. Within a level, the list order, paired for the row it shares.
+5. **Order is explicit.** Top level by `lib.mkOrder`: 100 audio, 300 network, 400 Bluetooth, 500 display, 600 wallpaper, 700 music, 800 calendar, 900 tray, 2000 session: rows pair related things, yours (music, calendar) before the system's (tray, session). Within a level, the list order, paired for the row it shares.
 6. **Labels.** Sentence case; `...` when it opens a picker or an app; a pair named for what it changes (`Volume`, `Track`). Device levels put Power on `p` and Configure... on `c`; every action in a level carries an icon; `space` is only ever a fuzzel picker. What ends the session takes Shift (Reboot, Shutdown).
-7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. A key may carry Ctrl or Alt in its name (`Ctrl+Left`, as niri writes bindings); hints show keys Emacs-style, `C-` Ctrl, `M-` Alt, `s-` Super, Shift as the capital letter (`C-←→`, `s-k`), symbols for the arrows, `DEL` for Backspace as Emacs writes it; a modifier never runs the plain key, Shift only picks the capital letter, and Super stays the compositor's. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
+7. **Keys hold still.** Letters are actions, digits are list items, Ctrl+digit an item's own menu, which keeps letters from the labels its app supplies. A key may carry Ctrl or Alt in its name (`Ctrl+Left`, as niri writes bindings); hints show keys Emacs-style, `C-` Ctrl, `M-` Alt, `s-` Super, Shift as the capital letter (`C-←→`, `s-k`), symbols for the arrows, `DEL` for Backspace and `ESC` for Escape as Emacs writes them; a modifier never runs the plain key, Shift only picks the capital letter, and Super stays the compositor's. Pinned items keep their digit and dim while absent, and their label names them wherever the menu shows them; the rest follow by name (internal audio first), never by signal or recency.
 8. **State is visible.** The menu shows state, the OSD shows changes; a level that lists its items shows only its state in the header. A listed item in use and a toggle that is on (`activeWhen`) take the `primary` tone; the right of a row holds data (battery, signal), never a word for that state. A top-level status names its state only when it has no value to show (`off`, `muted`, `paused`). What cannot run right now dims, so keys hold still; what can never run on this machine is not declared.
 9. **Text is plain.** Everything renders through `Label`, which never interprets markup: titles from apps and streams are untrusted. The one source-specific case in the core is next to it: Music reads song and artist out of the XML some radio streams (Bauer Media) send as their title, since MPRIS leaves no glue to do it in.
 10. **Done means seen working.** A change is tested where it runs (see Testing), not only evaluated.
@@ -71,6 +71,9 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `KeyHint` | a key in its gutter |
 | `KeyLegend` | keys a level takes beyond its rows, on one line under the header: each key as `KeyHint` shows it, then what it does |
 | `Meter` | a thin level bar |
+| `TextField` | text typed in, plain and wrapped, coloured by `tone`; a dim `placeholder` while empty, and `copyOnSelect` to copy what the mouse selects |
+| `TextArea` | a `TextField` that grows to `maxLines`, then scrolls to the cursor; its keys reach `keyPressed` first |
+| `Spinner` | something under way: a turning glyph, still when animations are off |
 | `Divider` | a line between two groups of rows |
 | `ListItem` | a row with hover, click, right click and wheel, highlighted while `current` (a selected day, an event in focus); dims itself when disabled |
 | `WheelSteps` | a pointer area that turns the wheel into one step per notch |
@@ -98,9 +101,12 @@ Its API, and the only one:
 
 | Shipped | Shows | Settings |
 |---|---|---|
+| `Ask.qml` | a panel for quick turns with an agent, its keys below; a reply's links as rows; the tool in use while waiting; a notification while hidden; lit while waiting or unread | `ask` (prompt, session, image: a JSON object per line, `{run, session}`, `{status}`, `{approval}`, then `{session, reply}` or `{error}`), `approve` (run, allow or deny), `stop` (run), `notify` (title, text; prints `default` when clicked), `pasteImage` (file; fails when the clipboard holds no image), `open` (session), `title`, `glyph` |
 | `Recording.qml` | a pill on every screen while recording, a click stops it; status: the time, lit while recording | `file` (under `$XDG_RUNTIME_DIR`), `stop` |
 | `Wallpaper.qml` | status: the wallpaper's name | `file` (under `$XDG_RUNTIME_DIR`) |
 | `WorkspaceMap.qml` | a minimap of niri's workspaces as you move between windows or workspaces | `height`, `maxWidth`, `opacity`, `borderWidth` |
+
+`Ask.qml`'s keys: `RET` sends (a failed or stopped prompt sent again replaces its exchange), `S-RET` breaks the line, `C-v` attaches the clipboard's image when it holds one. `ESC` steps back: denies an approval, else stops the run, else clears the prompt and image, else hides; twice quickly hides from anywhere, never losing the conversation. `C-y` allows an approval, `C-l` starts a new conversation, `C-o` moves it to a terminal between runs.
 
 ## Compositor
 

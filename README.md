@@ -14,8 +14,8 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 
 <p float="center">
   <img src="hosts/laptop/screenshots/menu-top.png" width="32%" />
-  <img src="hosts/laptop/screenshots/menu-audio.png" width="32%" />
   <img src="hosts/laptop/screenshots/menu-calendar.png" width="32%" />
+  <img src="hosts/laptop/screenshots/ask.png" width="32%" />
 </p>
 
 ## Hosts
@@ -67,7 +67,7 @@ dot compute c        # show changelog for the compute host
 
 ## AI Disclaimer
 
-AI was used from January 2026 onwards, starting with the [`compute`](./hosts/compute) host to learn and iterate faster. I drive the architecture, review and verify the changes.
+Since January 2026 I have been using AI assistants (cloud and self-hosted). I define the architecture, design and expected outcomes and, where it matters, I review changes line by line. Above all, it lets me build and learn faster, while keeping things simple, idiomatic and composable.
 
 ## Acknowledgements
 

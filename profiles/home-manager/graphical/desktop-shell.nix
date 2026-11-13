@@ -49,7 +49,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = config.my.programs.terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
         ]; }
       ])
-      (lib.mkOrder 800 [
+      (lib.mkOrder 900 [
         { key = "t"; desc = "Tray"; width = 640; status = "tray"; list = "tray"; }
       ])
     ];

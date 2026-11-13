@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793615990,
-        "narHash": "sha256-A+VV0mGFH4i73W5deMpVw9JBOT+Mavgy/q0egPKOm5M=",
+        "lastModified": 1794582431,
+        "narHash": "sha256-S+CNUCiFO8xLYkW65Hm5U4GmwNO7ZsVjWaShTWrukrQ=",
         "owner": "bphenriques",
         "repo": "agents-alfredo",
-        "rev": "d482278fc4308262b47e6220714f42e5548f3c93",
+        "rev": "5f84a9e7625e7a07a4f362eb37d6ec00d7ee286a",
         "type": "github"
       },
       "original": {
