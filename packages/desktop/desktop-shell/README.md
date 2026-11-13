@@ -73,7 +73,7 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `Meter` | a thin level bar |
 | `TextField` | text typed in, plain and wrapped, coloured by `tone`; a dim `placeholder` while empty, and `copyOnSelect` to copy what the mouse selects |
 | `TextArea` | a `TextField` that grows to `maxLines`, then scrolls to the cursor; its keys reach `keyPressed` first |
-| `Spinner` | something under way: a turning glyph, still when animations are off |
+| `Spinner` | a wait in one block cell, its `mood` saying whose turn it is: `working` spins, `attention` knocks; its own tempo, still when animations are off |
 | `Divider` | a line between two groups of rows |
 | `ListItem` | a row with hover, click, right click and wheel, highlighted while `current` (a selected day, an event in focus); dims itself when disabled |
 | `WheelSteps` | a pointer area that turns the wheel into one step per notch |
@@ -81,6 +81,7 @@ What the core's surfaces and the integrations are built from; an integration tha
 | `Swatch` | a dot, or a bar when stretched, in a colour that is data (a calendar's), dimmed by its tone like the rest |
 | `Shadow` | a shadow like niri's default, for a surface inside a larger window |
 | `OverlayWindow`, `DismissArea` | a popup above everything; the click-outside catcher under it |
+| `CornerPill` | a pill top right on every screen while `shown`, fading in and out; `slot` stacks it under the ones above, `hovered` and `clicked` for its pointer |
 | `Transient` | shown for a moment on `show()`, held while `held`, ignoring startup's replayed state until `armed` |
 | `Fade` | fades a surface in and out over `theme.animationDuration`; `loaded` holds a `LazyLoader` until it has faded out |
 | `MenuKeys` | key names as entries declare them (`Ctrl+Left`), their hints, and keys for an app's own menu |
@@ -95,13 +96,15 @@ An integration is one QML file whose root is `Integration`, listed by name under
 Its API, and the only one:
 
 - In: `name`, and `settings`, its own part of the config; it holds the defaults (`settings.height ?? 30`).
+- Commands: a setting holding a command runs through `exec(setting, ...args)`, or `commandLine(setting, ...args)` for a `Process`, its arguments passed as `$1`, `$2`; one that prints as it goes is followed by `CommandWatcher` (each line on `read`, restarted a moment after it exits), one read whole on demand by `CommandReader`.
 - Out: `glyph`, `text` and `detail`, shown by a menu entry whose `status` is its name and in the header when `menu.header` names it; `active`, which lights either; `activate()`, what a click on its header item does; and `shortcut`, its compositor key, shown while Super is held. The module rejects either naming an integration not listed, and an integration taking a built-in name.
 - Uses: the theme (`Config.theme`, `Config.popups`), the kit, and the services' APIs (`Audio`, `Network`, `Bluez`, `Power`, `Display`, `Brightness`, `Music`, `Tray`, `Startup`, `Compositor`), plus a compositor's own backend when it is built on one (`Niri`, whose `received` passes on every event).
 - Actions: an `IpcHandler` targeting its name, which menu entries and compositor keys call through `exec.ipc`.
 
 | Shipped | Shows | Settings |
 |---|---|---|
-| `Ask.qml` | a panel for quick turns with an agent, its keys below; a reply's links as rows; the tool in use while waiting; a notification while hidden; lit while waiting or unread | `ask` (prompt, session, image: a JSON object per line, `{run, session}`, `{status}`, `{approval}`, then `{session, reply}` or `{error}`), `approve` (run, allow or deny), `stop` (run), `notify` (title, text; prints `default` when clicked), `pasteImage` (file; fails when the clipboard holds no image), `open` (session), `title`, `glyph` |
+| `Ask.qml` | a panel for quick turns with an agent, its keys below; a reply's links as rows; the tool in use while waiting, a knock while an approval waits; a notification while hidden; lit while waiting or unread | `ask` (prompt, session, image: a JSON object per line, `{run, session}`, `{status}`, `{approval}`, then `{session, reply}` or `{error}`), `approve` (run, allow or deny), `stop` (run), `notify` (title, text; prints `default` when clicked), `pasteImage` (file; fails when the clipboard holds no image), `open` (session), `title`, `glyph` |
+| `Dictation.qml` | a dim pill on every screen while dictating, top right one slot under the recording pill: its icon while it listens (dim while the mic is muted), a spinner while it transcribes; a click stops it; lit while dictating | `status` (prints `recording`, `transcribing` or anything else for idle, one per line as it changes), `stop`, `glyph` |
 | `Recording.qml` | a pill on every screen while recording, a click stops it; status: the time, lit while recording | `file` (under `$XDG_RUNTIME_DIR`), `stop` |
 | `Wallpaper.qml` | status: the wallpaper's name | `file` (under `$XDG_RUNTIME_DIR`) |
 | `WorkspaceMap.qml` | a minimap of niri's workspaces as you move between windows or workspaces | `height`, `maxWidth`, `opacity`, `borderWidth` |

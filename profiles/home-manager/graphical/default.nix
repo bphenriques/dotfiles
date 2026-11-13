@@ -8,6 +8,7 @@
     ./hyprlock.nix          # Lock screen
     ./niri.nix              # Window Manager
     ./screen-recorder.nix   # Screen recording
+    ./dictation.nix         # Voice dictation (Voxtype)
     ./desktop-shell.nix     # Menu and recording indicator (Quickshell)
     ./calendar.nix          # Calendar menu entry and its events (desktop-shell-calendar-sync)
     ./awww.nix              # Wallpaper daemon

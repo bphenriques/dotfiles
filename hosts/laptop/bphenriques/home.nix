@@ -14,6 +14,7 @@ in
     ../../../profiles/home-manager/music
     ./display.nix
     ./alfredo.nix
+    ./dictation.nix
   ];
 
   # NAS symlinks. Avoid mounting directly to $HOME to prevent slowdowns when offline

@@ -33,7 +33,6 @@ Singleton {
   readonly property var brightnessLevels: ["\u{F00DE}", "\u{F00DF}", "\u{F00E0}"] // md-brightness_5, _6, _7
   readonly property string check: "\u{F012C}" // md-check
   readonly property string submenu: "\u{F0142}" // md-chevron_right
-  readonly property string loading: "\u{F0772}" // md-loading
   readonly property string link: "\u{F0337}" // md-link
 
   // The display layout: laptop, external or extend.

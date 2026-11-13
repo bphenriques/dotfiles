@@ -17,4 +17,14 @@ Scope {
 
   // What a click on its header item does.
   function activate() {}
+
+  // A command from its settings as a Process takes it, the arguments passed as $1, $2... so none is parsed by the shell.
+  function commandLine(shell, ...args) {
+    return ["sh", "-c", shell + args.map((_, i) => ' "$' + (i + 1) + '"').join(""), "sh", ...args];
+  }
+
+  // Runs a command from its settings and forgets it; nothing when unset.
+  function exec(shell, ...args) {
+    if (shell) Quickshell.execDetached(commandLine(shell, ...args));
+  }
 }

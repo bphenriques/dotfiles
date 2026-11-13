@@ -67,10 +67,6 @@ Integration {
     if (shown) unread = false;
   }
 
-  function commandLine(setting, ...args) {
-    return ["sh", "-c", setting + args.map((_, i) => ' "$' + (i + 1) + '"').join(""), "sh", ...args];
-  }
-
   function send(prompt) {
     prompt = prompt.trim();
     if ((!prompt && !image) || busy || request.stopping || !settings.ask) return false;
@@ -101,7 +97,7 @@ Integration {
     // Stopped before it said its name: closing the stream does not stop a run, so stop it now that it has one.
     if (request.stopping) {
       if (answer.run) {
-        Quickshell.execDetached(commandLine(settings.stop, answer.run));
+        exec(settings.stop, answer.run);
         request.stopping = false;
         request.running = false;
       }
@@ -155,7 +151,7 @@ Integration {
 
   function answerApproval(allowed) {
     if (!approval || !settings.approve) return;
-    Quickshell.execDetached(commandLine(settings.approve, run, allowed ? "allow" : "deny"));
+    exec(settings.approve, run, allowed ? "allow" : "deny");
     approval = "";
   }
 
@@ -167,7 +163,7 @@ Integration {
     if (!settings.stop) {
       request.running = false;
     } else if (run) {
-      Quickshell.execDetached(commandLine(settings.stop, run));
+      exec(settings.stop, run);
       request.running = false;
     } else {
       request.stopping = true;
@@ -186,7 +182,7 @@ Integration {
   // Only between runs: a run lives as long as its stream here.
   function moveToTerminal() {
     if (!canMove) return;
-    if (settings.open) Quickshell.execDetached(commandLine(settings.open, session));
+    exec(settings.open, session);
     reset();
     shown = false;
   }
@@ -341,6 +337,7 @@ Integration {
       Spinner {
         tone: "dim"
         size: Metrics.line
+        mood: root.approval ? "attention" : "working"
       }
 
       Label {
