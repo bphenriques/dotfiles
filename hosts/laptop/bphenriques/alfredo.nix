@@ -10,7 +10,7 @@ in
 {
   home.packages = [ package ];
 
-  my.programs.desktop-shell.integrations.ask.settings = {
+  programs.quickkey.settings.plugins.ask.settings = {
     title = "Alfredo";
     glyph = self.lib.glyphs."fa-user_tie";
     ask = "${alfredo} ask";
@@ -24,5 +24,5 @@ in
     shortcut = key;
   };
 
-  my.programs.niri.bindings."${key} repeat=false" = ''spawn-sh "${config.my.programs.desktop-shell.exec.ipc} ask toggle"'';
+  my.programs.niri.bindings."${key} repeat=false" = ''spawn-sh "${config.programs.quickkey.exec.ipc} ask toggle"'';
 }

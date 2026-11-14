@@ -15,11 +15,12 @@ let
   };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  my.programs.desktop-shell.settings.notifications = {
+  programs.quickkey.settings.plugins.doNotDisturb.settings = {
     watch = lib.getExe pausedWatch;
-    toggle = "${dunstctl} set-paused toggle";
+    activate = "${dunstctl} set-paused toggle";
     shortcut = pauseKey;
   };
+  programs.quickkey.settings.menu.header.right = lib.mkBefore [ "doNotDisturb" ];
 
   services.dunst = {
     enable = true;

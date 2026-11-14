@@ -732,6 +732,27 @@
         "type": "github"
       }
     },
+    "quickkey": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix_3"
+      },
+      "locked": {
+        "lastModified": 1794666278,
+        "narHash": "sha256-BKX1z7i3j2gT4YJL9TXZ1VHy4a8xKcHrVIzH7Y1jxXo=",
+        "ref": "refs/heads/main",
+        "rev": "ea2407bd9dd1687ed87a0fccb0e15840ad5d9b23",
+        "revCount": 3,
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/quickkey"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/bphenriques/quickkey"
+      }
+    },
     "root": {
       "inputs": {
         "agents-alfredo": "agents-alfredo",
@@ -746,6 +767,7 @@
         "nixpkgs": "nixpkgs",
         "nur": "nur",
         "omp": "omp",
+        "quickkey": "quickkey",
         "selfhost-nix": "selfhost-nix",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
@@ -753,7 +775,7 @@
           "stylix",
           "tinted-schemes"
         ],
-        "treefmt-nix": "treefmt-nix_4"
+        "treefmt-nix": "treefmt-nix_5"
       }
     },
     "rust-overlay": {
@@ -782,7 +804,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_3"
+        "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
         "lastModified": 1793973636,
@@ -1022,6 +1044,27 @@
     "treefmt-nix_3": {
       "inputs": {
         "nixpkgs": [
+          "quickkey",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791885023,
+        "narHash": "sha256-C3alQ2MEt0zVrUSho5NUDo3jmhbff72++bfwoqT9Omo=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "0d6d739a833ba9a9c93034862e4a7b061a062a1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_4": {
+      "inputs": {
+        "nixpkgs": [
           "selfhost-nix",
           "nixpkgs"
         ]
@@ -1040,7 +1083,7 @@
         "type": "github"
       }
     },
-    "treefmt-nix_4": {
+    "treefmt-nix_5": {
       "inputs": {
         "nixpkgs": "nixpkgs_5"
       },

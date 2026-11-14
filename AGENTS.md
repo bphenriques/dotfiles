@@ -16,6 +16,7 @@ Flake inputs with a local checkout. Edit them there, never in a scratch clone.
 | `dotfiles-private` | `~/.dotfiles-private` | secrets, household data, per-host private facts |
 | `selfhost-nix` | `~/workdir/selfhost-nix` | selfhost framework, own AGENTS.md |
 | `agents-alfredo` | `~/workdir/agents-alfredo` | Alfredo's definition, own AGENTS.md |
+| `quickkey` | `~/workdir/quickkey` | keyboard menu (Quickshell), own AGENTS.md |
 
 - Iterate with `--override-input <input> <checkout>` on eval, build or deploy. It reads the working tree, uncommitted changes included.
 - Land a change by pushing the checkout, then `nix flake update <input>` here. Until then hosts keep the locked revision.

@@ -6,7 +6,6 @@ let
   cfg = config.my.programs.session;
 
   mkAppOpt = default: lib.mkOption { type = lib.types.str; inherit default; };
-  menuKey = "q";
 
   mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
 
@@ -34,12 +33,18 @@ in
   options.my.programs.session = {
     enable = lib.mkEnableOption "custom-session";
     exec = {
-      menu       = mkAppOpt "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}";
+      menu       = lib.mkOption { type = lib.types.str; };   # comes from the menu profile
       lock       = lib.mkOption { type = lib.types.str; };   # comes from the lock-screen profile
       suspend    = mkAppOpt "${systemctl} suspend";
       shutdown   = mkAppOpt "${systemctl} poweroff";
       reboot     = mkAppOpt "${systemctl} reboot";
       reboot-efi = mkAppOpt "${systemctl} reboot --firmware-setup";
+    };
+    actions = lib.mkOption {
+      type = lib.types.listOf (lib.types.attrsOf lib.types.str);
+      readOnly = true;
+      default = sessionActions;
+      description = "Session actions (id, key, symbol, label, exec), for menus";
     };
   };
 
@@ -59,10 +64,6 @@ in
           };
         in listToAttrs (lib.map toAction sessionActions);
       })
-    ];
-
-    my.programs.desktop-shell.menu.entries = lib.mkOrder 2000 [
-      { key = menuKey; desc = "Session"; width = 640; icon = (lib.findFirst (a: a.id == "session-shutdown") null sessionActions).symbol; submenu = map (a: { inherit (a) key; desc = a.label; cmd = a.exec; icon = a.symbol; }) sessionActions; }
     ];
   };
 }

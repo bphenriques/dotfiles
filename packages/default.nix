@@ -29,9 +29,6 @@ let
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };
       screenshot = pkgs.callPackage ./desktop/screenshot { };
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
-      desktop-shell = pkgs.callPackage ./desktop/desktop-shell { };
-      desktop-shell-preview = pkgs.callPackage ./desktop/desktop-shell/preview { };
-      desktop-shell-calendar-sync = pkgs.callPackage ./desktop/desktop-shell/calendar-sync { inherit (b) writeNushellScript; };
       displayctl = pkgs.callPackage ./desktop/displayctl { };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }

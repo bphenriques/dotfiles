@@ -26,43 +26,53 @@ let
 
   # Windows' Win+P without Duplicate: niri cannot mirror yet.
   layouts = [
-    { key = "l"; desc = "Laptop only";   layout = "laptop"; }
-    { key = "e"; desc = "External only"; layout = "external"; }
-    { key = "x"; desc = "Extend";        layout = "extend"; }
+    { id = "laptop";   label = "Laptop only";   icon = self.lib.glyphs."md-laptop"; }
+    { id = "external"; label = "External only"; icon = self.lib.glyphs."md-monitor"; }
+    { id = "extend";   label = "Extend";        icon = self.lib.glyphs."md-monitor_multiple"; }
   ];
 
   menuKey = "d";
 
-  # md-laptop, md-monitor, md-monitor_multiple: each layout's icon, also on the Display row.
-  glyphs = { laptop = self.lib.glyphs."md-laptop"; external = self.lib.glyphs."md-monitor"; extend = self.lib.glyphs."md-monitor_multiple"; };
-
   displayctl = lib.getExe (self.packages.displayctl.override { inherit panel; });
+
+  # displayctl's status as the displayLayout plugin's state line.
+  layoutState = pkgs.writeShellApplication {
+    name = "display-layout-state";
+    runtimeInputs = [ pkgs.jq ];
+    text = ''
+      ${displayctl} status | jq -cRs \
+        --argjson layouts ${lib.escapeShellArg (builtins.toJSON layouts)} \
+        --arg fallback ${lib.escapeShellArg self.lib.glyphs."md-monitor"} \
+        -f ${./display-layouts.jq}
+    '';
+  };
 in
 {
   wayland.windowManager.niri.settings._children = map (screen: { output = { _args = [ screen.name ]; inherit (screen) mode scale; }; }) screens;
 
-  my.programs.desktop-shell = {
-    settings = {
-      brightness = {
-        backlight = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
-        adjust = brightness;
-      };
-      display = {
-        status = "${displayctl} status";
-        inherit panel glyphs;
-        layouts = lib.listToAttrs (map (layout: lib.nameValuePair layout.layout layout.desc) layouts);
+  programs.quickkey.settings = {
+    brightness = {
+      backlight = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
+      adjust = brightness;
+      inherit panel;
+    };
+    plugins.displayLayout = {
+      source = "command";
+      settings = {
+        read = lib.getExe layoutState;
+        select = "${displayctl} layout";
       };
     };
     menu.entries = lib.mkOrder 500 [
-      { key = menuKey; desc = "Display"; status = "display"; submenu = [
+      { key = menuKey; desc = "Display"; status = "brightness"; list = "displayLayout"; submenu = [
         { key = [ "Down" "Up" ]; desc = "Brightness"; icon = self.lib.glyphs."md-brightness_6"; cmd = brightness; keepOpen = true; requires.enabled = [ panel ]; }
         { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
-      ] ++ map (layout: layout // { cmd = "${displayctl} layout ${layout.layout}"; icon = glyphs.${layout.layout}; }) layouts; }
+      ]; }
     ];
   };
 
   my.programs.niri.bindings = {
-    "Mod+P repeat=false" = ''spawn-sh "${config.my.programs.desktop-shell.exec.ipc} menu toggleEntry ${menuKey}"'';
+    "Mod+P repeat=false" = ''spawn-sh "${config.programs.quickkey.exec.ipc} menu toggleEntry ${menuKey}"'';
     "XF86MonBrightnessUp allow-when-locked=true" = ''spawn-sh "${brightnessUp}"'';
     "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightnessDown}"'';
   };

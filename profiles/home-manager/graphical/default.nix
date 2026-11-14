@@ -9,8 +9,10 @@
     ./niri.nix              # Window Manager
     ./screen-recorder.nix   # Screen recording
     ./dictation.nix         # Voice dictation (Voxtype)
-    ./desktop-shell.nix     # Menu and recording indicator (Quickshell)
-    ./calendar.nix          # Calendar menu entry and its events (desktop-shell-calendar-sync)
+    ./quickkey.nix          # Keyboard menu with live status (Quickshell)
+    ./audio.nix             # Audio menu entries
+    ./session.nix           # Session menu entry
+    ./calendar.nix          # Calendar menu entry and its events (quickkey calendar sync)
     ./awww.nix              # Wallpaper daemon
     ./xdg-userdirs.nix      # XDG user directories, screenshots, recordings
     ./gtk.nix               # Setup theming for some set of apps

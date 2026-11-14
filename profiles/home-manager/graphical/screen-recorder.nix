@@ -12,7 +12,7 @@ let
   };
   screen-recorder = lib.getExe package;
   directory = config.xdg.userDirs.extraConfig.RECORDINGS;
-  # Under $XDG_RUNTIME_DIR, where screen-recorder writes the start time while recording.
+  # Under $XDG_RUNTIME_DIR, where screen-recorder writes quickkey's state line while recording.
   stateFile = "screen-recorder";
 
   screenRecordingActions = [
@@ -41,7 +41,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   # The recording state file must exist up front for Quickshell to watch it.
   systemd.user.tmpfiles.rules = [ "f %t/${stateFile} 0600 - - -" ];
 
-  my.programs.desktop-shell.integrations.recording = {
+  programs.quickkey.settings.plugins.recording = {
     settings = { file = stateFile; stop = "${screen-recorder} stop"; };
   };
 

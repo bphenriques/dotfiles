@@ -42,9 +42,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
-  my.programs.desktop-shell.settings.music.glyphs = glyphs;
-
-  my.programs.desktop-shell.menu.entries = lib.mkOrder 700 [
+  programs.quickkey.settings.menu.entries = lib.mkOrder 700 [
     { key = "m"; desc = "Music"; status = "music"; submenu = [
       { key = "p"; desc = "Play/pause"; icon = self.lib.glyphs."md-play_pause"; cmd = "${mpc-plus} play-pause"; keepOpen = true; }
       { key = "s"; desc = "Stop"; icon = self.lib.glyphs."md-stop"; cmd = "${mpc-plus} stop"; }
