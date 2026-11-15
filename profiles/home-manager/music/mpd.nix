@@ -31,7 +31,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   # Upstream mkdirs playlistDirectory and fails while the share is unreachable; a user unit cannot wait on the system mount.
   systemd.user.services.mpd.Service.ExecStartPre = lib.mkForce [ ];
 
-  programs.quickkey.settings.music.player = "Music Player Daemon";  # mpdris2's MPRIS identity
+  programs.quick-key.settings.music.player = "Music Player Daemon";  # mpdris2's MPRIS identity
 
   services.mpdris2 = {
     enable = true;

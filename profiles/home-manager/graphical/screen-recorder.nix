@@ -12,7 +12,7 @@ let
   };
   screen-recorder = lib.getExe package;
   directory = config.xdg.userDirs.extraConfig.RECORDINGS;
-  # Under $XDG_RUNTIME_DIR, where screen-recorder writes quickkey's state line while recording.
+  # Under $XDG_RUNTIME_DIR, where screen-recorder writes quick-key's state line while recording.
   stateFile = "screen-recorder";
 
   screenRecordingActions = [
@@ -38,15 +38,15 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     })
   ];
 
-  # The recording state file must exist up front for Quickshell to watch it.
-  systemd.user.tmpfiles.rules = [ "f %t/${stateFile} 0600 - - -" ];
-
-  programs.quickkey.settings.plugins.recording = {
+  programs.quick-key.settings.plugins.recording = {
     settings = { file = stateFile; stop = "${screen-recorder} stop"; };
   };
 
-  my.programs.niri.bindings = {
-    "Ctrl+Print"       = ''spawn "${screen-recorder}" "screen" "${directory}"'';
-    "Ctrl+Shift+Print" = ''spawn "${screen-recorder}" "region" "${directory}"'';
+  my.programs.niri = {
+    bindings = {
+      "Ctrl+Print"       = ''spawn "${screen-recorder}" "screen" "${directory}"'';
+      "Ctrl+Shift+Print" = ''spawn "${screen-recorder}" "region" "${directory}"'';
+    };
+    layerRules.screenCapture.block = [ ''namespace="^recording-indicator$"'' ];
   };
 }

@@ -10,10 +10,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   services.awww.enable = true;
   home.packages = [ self.packages.awww-util ];
 
-  # The wallpaper state file must exist up front for quickkey to watch it.
-  systemd.user.tmpfiles.rules = [ "f %t/${stateFile} 0600 - - -" ];
-
-  programs.quickkey.settings = {
+  programs.quick-key.settings = {
     plugins.wallpaper.settings.file = stateFile;
     menu.entries = lib.mkOrder 600 [
       { key = "w"; desc = "Wallpaper"; width = 640; status = "wallpaper"; submenu = [

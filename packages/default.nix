@@ -23,7 +23,6 @@ let
       pkgs = nixpkgs.legacyPackages.${system};
       b = builders.${system};
     in rec {
-      audioctl = pkgs.callPackage ./desktop/audioctl { };
       upower-notify = pkgs.callPackage ./desktop/upower-notify { };
       awww-util = pkgs.callPackage ./desktop/awww-util { };
       screen-recorder = pkgs.callPackage ./desktop/screen-recorder { };

@@ -7,20 +7,11 @@ let
   pauseKey = "Mod+D";
 
   dunstctl = lib.getExe' config.services.dunst.package "dunstctl";
-
-  pausedWatch = pkgs.writeShellApplication {
-    name = "dunst-paused-watch";
-    runtimeInputs = [ config.services.dunst.package pkgs.dbus ];
-    text = lib.fileContents ./dunst-paused-watch.sh;
-  };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  programs.quickkey.settings.plugins.doNotDisturb.settings = {
-    watch = lib.getExe pausedWatch;
-    activate = "${dunstctl} set-paused toggle";
-    shortcut = pauseKey;
-  };
-  programs.quickkey.settings.menu.header.right = lib.mkBefore [ "doNotDisturb" ];
+  programs.quick-key.extraPackages = [ config.services.dunst.package pkgs.dbus ];   # the dunst plugin calls dunstctl and dbus-monitor
+  programs.quick-key.settings.plugins.dunst.settings.shortcut = pauseKey;
+  programs.quick-key.settings.menu.header.right = lib.mkBefore [ "dunst" ];
 
   services.dunst = {
     enable = true;

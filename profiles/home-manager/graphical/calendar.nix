@@ -1,13 +1,13 @@
 { config, lib, pkgs, self, ... }:
 let
-  inherit (config.programs.quickkey.calendarSync) eventsFile;
+  inherit (config.programs.quick-key.calendarSync) eventsFile exec;
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  programs.quickkey.calendarSync.enable = true;
-  programs.quickkey.settings = {
+  programs.quick-key.calendarSync.enable = true;
+  programs.quick-key.settings = {
     menu.entries = lib.mkOrder 800 [
       { key = "c"; desc = "Calendar"; status = "calendar"; width = 960; view = "calendar"; submenu = [
-        { key = "s"; desc = "Sync"; icon = self.lib.glyphs."md-sync"; cmd = "${lib.getExe' pkgs.systemd "systemctl"} --user start --no-block quickkey-calendar-sync.service"; keepOpen = true; }
+        { key = "s"; desc = "Sync"; icon = self.lib.glyphs."md-sync"; cmd = exec.sync; keepOpen = true; }
       ]; }
     ];
   };

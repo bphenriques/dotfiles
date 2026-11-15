@@ -732,25 +732,29 @@
         "type": "github"
       }
     },
-    "quickkey": {
+    "quick-key": {
       "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1794666278,
-        "narHash": "sha256-BKX1z7i3j2gT4YJL9TXZ1VHy4a8xKcHrVIzH7Y1jxXo=",
-        "ref": "refs/heads/main",
-        "rev": "ea2407bd9dd1687ed87a0fccb0e15840ad5d9b23",
-        "revCount": 3,
-        "type": "git",
-        "url": "ssh://git@github.com/bphenriques/quickkey"
+        "lastModified": 1794757665,
+        "narHash": "sha256-Nxq7WWudLPDUiXvjNqtwnGsqPWAAY3vDhPMUTZl4Y40=",
+        "owner": "bphenriques",
+        "repo": "quick-key",
+        "rev": "9b64431ba67d7947c6bf94dcf93ea7ddddbda9a3",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/bphenriques/quickkey"
+        "owner": "bphenriques",
+        "ref": "v0.2.0",
+        "repo": "quick-key",
+        "type": "github"
       }
     },
     "root": {
@@ -767,7 +771,7 @@
         "nixpkgs": "nixpkgs",
         "nur": "nur",
         "omp": "omp",
-        "quickkey": "quickkey",
+        "quick-key": "quick-key",
         "selfhost-nix": "selfhost-nix",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
@@ -1044,7 +1048,7 @@
     "treefmt-nix_3": {
       "inputs": {
         "nixpkgs": [
-          "quickkey",
+          "quick-key",
           "nixpkgs"
         ]
       },

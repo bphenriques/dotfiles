@@ -9,10 +9,10 @@
     ./niri.nix              # Window Manager
     ./screen-recorder.nix   # Screen recording
     ./dictation.nix         # Voice dictation (Voxtype)
-    ./quickkey.nix          # Keyboard menu with live status (Quickshell)
+    ./quick-key.nix         # Keyboard menu with live status (Quickshell)
     ./audio.nix             # Audio menu entries
     ./session.nix           # Session menu entry
-    ./calendar.nix          # Calendar menu entry and its events (quickkey calendar sync)
+    ./calendar.nix          # Calendar menu entry and its events (quick-key calendar sync)
     ./awww.nix              # Wallpaper daemon
     ./xdg-userdirs.nix      # XDG user directories, screenshots, recordings
     ./gtk.nix               # Setup theming for some set of apps
@@ -37,7 +37,7 @@
     my.programs = {
       screenshot.enable = true;
       session.enable = true;
-      audioctl.enable = true;
+      audio.enable = true;
       file-explorer.browser = config.my.programs.terminal.execApp { title = "yazi-tui"; cmd = lib.getExe config.programs.yazi.package; };
     };
 

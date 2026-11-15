@@ -58,13 +58,12 @@ layout() {
   [ -z "$setup" ] || remember "$setup" "$1"
 }
 
-# The layout the screens are in, then the layouts the connected screens allow, one per line.
+# quick-key's state line: the layout the screens are in, and those the connected screens allow.
 status() {
-  local all
+  local all enabled='["laptop"]'
   all=$(outputs)
-  current "$all"
-  echo laptop
-  [ -z "$(externals "$all")" ] || printf 'external\nextend\n'
+  [ -z "$(externals "$all")" ] || enabled='["laptop","external","extend"]'
+  jq -cn --arg value "$(current "$all")" --argjson enabled "$enabled" '{$value, $enabled}'
 }
 
 # Whenever the set of connected screens changes, the layout wanted for it, unless already in it:

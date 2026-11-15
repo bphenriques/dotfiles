@@ -1,17 +1,16 @@
 { config, lib, pkgs, osConfig, self, inputs, ... }:
 let
-  cfg = config.programs.quickkey;
+  cfg = config.programs.quick-key;
   colors = config.lib.stylix.colors.withHashtag;
-  nmcli = lib.getExe' pkgs.networkmanager "nmcli";
   niri = lib.getExe pkgs.niri;
   layoutKey = "Mod+K";
   keepAwakeKey = "Mod+I";
 in
 {
-  imports = [ inputs.quickkey.homeManagerModules.default ];
+  imports = [ inputs.quick-key.homeModules.default ];
 
   config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    programs.quickkey = {
+    programs.quick-key = {
       enable = true;
 
       themes.stylix = {
@@ -49,7 +48,7 @@ in
         menu.entries = lib.mkMerge [
           (lib.mkOrder 300 [
             { key = "n"; desc = "Network"; width = 640; status = "network"; list = "wifi"; submenu = [
-              { key = "p"; desc = "Power"; icon = self.lib.glyphs."md-toggle_switch"; activeWhen = "wifi"; cmd = ''${nmcli} radio wifi "$([ "$(${nmcli} radio wifi)" = enabled ] && echo off || echo on)"''; keepOpen = true; }
+              { key = "p"; desc = "Power"; action = "wifi"; }
               { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = config.my.programs.terminal.execApp { title = "nmtui-tui"; cmd = lib.getExe' pkgs.networkmanager "nmtui"; }; }
             ]; }
           ])
@@ -60,16 +59,11 @@ in
       };
     };
 
-    my.programs.niri = {
-      bindings = {
-        "Mod+Ctrl+Space repeat=false" = ''spawn-sh "${cfg.exec.ipc} menu toggle"'';
-        # A spawn, not the switch-layout action: only spawns run while locked.
-        "${layoutKey} allow-when-locked=true" = ''spawn-sh "${niri} msg action switch-layout next"'';
-        ${keepAwakeKey} = ''spawn-sh "${cfg.exec.ipc} idle toggle"'';
-      };
-      layerRules = {
-        screenCapture.block = [ ''namespace="^recording-indicator$"'' ];
-      };
+    my.programs.niri.bindings = {
+      "Mod+Ctrl+Space repeat=false" = ''spawn-sh "${cfg.exec.ipc} menu toggle"'';
+      # A spawn, not the switch-layout action: only spawns run while locked.
+      "${layoutKey} allow-when-locked=true" = ''spawn-sh "${niri} msg action switch-layout next"'';
+      ${keepAwakeKey} = ''spawn-sh "${cfg.exec.ipc} idle toggle"'';
     };
   };
 }

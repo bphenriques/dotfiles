@@ -34,33 +34,18 @@ let
   menuKey = "d";
 
   displayctl = lib.getExe (self.packages.displayctl.override { inherit panel; });
-
-  # displayctl's status as the displayLayout plugin's state line.
-  layoutState = pkgs.writeShellApplication {
-    name = "display-layout-state";
-    runtimeInputs = [ pkgs.jq ];
-    text = ''
-      ${displayctl} status | jq -cRs \
-        --argjson layouts ${lib.escapeShellArg (builtins.toJSON layouts)} \
-        --arg fallback ${lib.escapeShellArg self.lib.glyphs."md-monitor"} \
-        -f ${./display-layouts.jq}
-    '';
-  };
 in
 {
   wayland.windowManager.niri.settings._children = map (screen: { output = { _args = [ screen.name ]; inherit (screen) mode scale; }; }) screens;
 
-  programs.quickkey.settings = {
-    brightness = {
-      backlight = "${brightnessctl} --machine-readable info | ${lib.getExe pkgs.gawk} -F, -v OFS='\\t' '{ print \"/sys/class/backlight/\" $1 \"/brightness\", $5 }'";
-      adjust = brightness;
-      inherit panel;
-    };
+  programs.quick-key.settings = {
+    brightness.adjust = brightness;
     plugins.displayLayout = {
       source = "command";
       settings = {
-        read = lib.getExe layoutState;
+        read = "${displayctl} status";
         select = "${displayctl} layout";
+        items = layouts;
       };
     };
     menu.entries = lib.mkOrder 500 [
@@ -72,7 +57,7 @@ in
   };
 
   my.programs.niri.bindings = {
-    "Mod+P repeat=false" = ''spawn-sh "${config.programs.quickkey.exec.ipc} menu toggleEntry ${menuKey}"'';
+    "Mod+P repeat=false" = ''spawn-sh "${config.programs.quick-key.exec.ipc} menu toggleEntry ${menuKey}"'';
     "XF86MonBrightnessUp allow-when-locked=true" = ''spawn-sh "${brightnessUp}"'';
     "XF86MonBrightnessDown allow-when-locked=true" = ''spawn-sh "${brightnessDown}"'';
   };

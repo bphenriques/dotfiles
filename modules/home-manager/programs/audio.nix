@@ -1,9 +1,6 @@
 { lib, pkgs, config, osConfig, self, ... }:
 let
-  cfg = config.my.programs.audioctl;
-
-  audioctl = lib.getExe cfg.package;
-  mkIcon = self.lib.builders.mkNerdFontIcon { textColor = config.lib.stylix.colors.withHashtag.base07; };
+  cfg = config.my.programs.audio;
 
   glyphs = {
     headphones = self.lib.glyphs."md-headphones";
@@ -32,8 +29,8 @@ let
   };
 in
 {
-  options.my.programs.audioctl = {
-    enable = lib.mkEnableOption "audioctl, the audio glue menus and keys call";
+  options.my.programs.audio = {
+    enable = lib.mkEnableOption "PipeWire audio tools";
     pins = {
       sinks = lib.mkOption {
         type = lib.types.listOf pin;
@@ -44,17 +41,6 @@ in
         type = lib.types.listOf pin;
         default = [ ];
         description = "Known inputs, in the order menus list them";
-      };
-    };
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = self.packages.audioctl.override {
-        headphonesIcon = mkIcon "audioctl-headphones" glyphs.headphones;
-        headsetIcon = mkIcon "audioctl-headset" glyphs.headset;
-        internalSpeakersIcon = mkIcon "audioctl-internal" glyphs.internal;
-        externalSpeakersIcon = mkIcon "audioctl-external" glyphs.external;
-        microphoneIcon = mkIcon "audioctl-micro" glyphs.microphone;
-        errorIcon = mkIcon "audioctl-error-icon" self.lib.glyphs."md-alert_circle";
       };
     };
 
@@ -68,24 +54,13 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "my.programs.audioctl" pkgs lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "my.programs.audio" pkgs lib.platforms.linux)
       { assertion = osConfig.services.pipewire.enable; message = "Requires pipewire enabled in the system."; }
       { assertion = osConfig.services.pipewire.pulse.enable; message = "Requires pipewire-pulse enabled in the system."; }
       { assertion = osConfig.services.pipewire.wireplumber.enable; message = "Requires pipewire wireplumber enabled in the system."; }
     ];
 
-    my.programs.niri.bindings = {
-      "XF86AudioRaiseVolume allow-when-locked=true" = ''spawn-sh "${audioctl} sink-increase"'';
-      "XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${audioctl} sink-decrease"'';
-      "XF86AudioMute allow-when-locked=true" = ''spawn-sh "${audioctl} sink-toggle-mute"'';
-      "XF86AudioMicMute allow-when-locked=true" = ''spawn-sh "${audioctl} source-toggle-mute"'';
-      "Shift+XF86AudioRaiseVolume allow-when-locked=true" = ''spawn-sh "${audioctl} sink-move-next"'';
-      "Shift+XF86AudioLowerVolume allow-when-locked=true" = ''spawn-sh "${audioctl} sink-move-prev"'';
-    };
-
     home.packages = [
-      cfg.package
-
       # Using pulseaudio tools without actually using pulseaudio
       pkgs.pavucontrol  # UI
       pkgs.pipewire     # Preferred command line interface

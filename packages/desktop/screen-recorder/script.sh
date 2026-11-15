@@ -25,7 +25,7 @@ record() {
   shift 1
   wl-screenrec --filename="$destination" --audio --audio-device "$AUDIO_DEVICE" "$@" &
   local recorder=$!
-  printf '{"active":true,"since":%s}\n' "$(date +%s)" >"$STATE_FILE" # in place: replacing the file would drop the watch
+  printf '{"active":true,"since":%s}\n' "$(date +%s)" >"$STATE_FILE"
   trap ': >"$STATE_FILE"' EXIT
 
   local status=0

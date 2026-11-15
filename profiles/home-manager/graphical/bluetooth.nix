@@ -1,11 +1,8 @@
 { config, lib, pkgs, osConfig, self, ... }:
-let
-  rfkill = lib.getExe' pkgs.util-linux "rfkill";
-in
 lib.mkIf (pkgs.stdenv.hostPlatform.isLinux && osConfig.hardware.bluetooth.enable) {
-  programs.quickkey.settings.menu.entries = lib.mkOrder 400 [
+  programs.quick-key.settings.menu.entries = lib.mkOrder 400 [
     { key = "b"; desc = "Bluetooth"; width = 640; status = "bluetooth"; list = "bluetooth"; submenu = [
-      { key = "p"; desc = "Power"; icon = self.lib.glyphs."md-toggle_switch"; activeWhen = "bluetooth"; cmd = "${rfkill} toggle bluetooth"; keepOpen = true; }
+      { key = "p"; desc = "Power"; action = "bluetooth"; }
       { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = config.my.programs.terminal.execApp { title = "bluetui-tui"; cmd = lib.getExe pkgs.bluetui; }; }
     ]; }
   ];

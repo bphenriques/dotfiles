@@ -27,13 +27,14 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         fallback_to_clipboard = true;
         notification.on_transcription = false;   # the text itself is the feedback
       };
-      osd.enabled = false;   # quickkey's dictation pill shows it
+      osd.enabled = false;   # quick-key's dictation pill shows it
     };
   };
 
-  programs.quickkey.settings.plugins.dictation.settings = {
+  programs.quick-key.settings.plugins.dictation.settings = {
     glyph = self.lib.glyphs."fa-microphone_lines";
-    watch = "${voxtype} status --follow | ${lib.getExe pkgs.gnused} -u 's/^streaming$/recording/'";
+    watch = "${voxtype} status --follow";
+    show.streaming.phase = "recording";
     stop = "${voxtype} record stop";
   };
 

@@ -22,8 +22,9 @@
     agents-alfredo.url = "github:bphenriques/agents-alfredo";                       # Household assistant
     agents-alfredo.inputs.nixpkgs.follows = "nixpkgs";
     agents-alfredo.inputs.hermes-agent.follows = "hermes-agent";
-    quickkey.url = "git+ssh://git@github.com/bphenriques/quickkey";                 # Keyboard menu (Quickshell)
-    quickkey.inputs.nixpkgs.follows = "nixpkgs";
+    quick-key.url = "github:bphenriques/quick-key/v0.2.0";                          # Keyboard menu (Quickshell)
+    quick-key.inputs.nixpkgs.follows = "nixpkgs";
+    quick-key.inputs.home-manager.follows = "home-manager";
 
     # Community flakes
     ## Basic
