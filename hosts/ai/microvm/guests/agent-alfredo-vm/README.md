@@ -2,7 +2,7 @@
 
 A **sealed** cloud-hypervisor microVM on [`ai`](../../..) running `hermes-agent` as a personal assistant reachable via [the chat UI](../../../../compute/selfhost/services/open-webui) on compute:
 - Inference stays on the host, reached through the bridge gateway; tools and memory stay in the guest
-- Egress is internet-only plus four holes: the gateway on `11434` and `8090` (Ollama, whisper), `storage:445` (its NAS doors) and `compute:2222` (gitea's SSH), never the rest of the LAN
+- Egress is internet-only plus four holes: the gateway on `11434` and `8090` (inference, whisper), `storage:445` (its NAS doors) and `compute:2222` (gitea's SSH), never the rest of the LAN
 - The vault and recipes come from the NAS as its own SMB principal, `machine-agent-alfredo-vm`, through doors that expose only those folders ([storage](../../../../storage/README.md))
 - The API (`:8642`) admits only compute (`ingressFrom`), which routes to ai's bridge and fronts it with Traefik. The key is generated on compute and copied into this guest's sops, like the SMB password; the one credential of its own is the Cookidoo token (see below)
 

@@ -11,7 +11,7 @@ let
   };
 in
 {
-  # Vulkan places the ~810 MiB model in the 2 GiB VRAM carve-out, which ROCm leaves nearly empty, not the GTT pool Ollama and ComfyUI share.
+  # Vulkan places the ~810 MiB model in the 2 GiB VRAM carve-out, which ROCm leaves nearly empty, not the GTT pool the Gufo models share.
   systemd.services.whisper = {
     description = "Speech-to-text API (whisper.cpp on the iGPU)";
     wantedBy = [ "multi-user.target" ];

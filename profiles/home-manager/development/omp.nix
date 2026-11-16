@@ -13,18 +13,28 @@ let
     };
 
   jsonFormat = pkgs.formats.json { };
+  yamlFormat = pkgs.formats.yaml { };
 
   inherit (osConfig.fleet) ai;
+
+  models.providers.ai = {
+    baseUrl = "http://${ai.endpoint.host}:${toString ai.endpoint.port}/v1";
+    api = "openai-completions";
+    auth = "none";
+    models = [{
+      id = ai.model;
+      reasoning = true;
+      input = [ "text" "image" ];
+      contextWindow = ai.contextLength;
+      compat.supportsReasoningEffort = true;
+    }];
+  };
 in
 {
   imports = [ inputs.omp.homeManagerModules.default ];
 
   config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    # Only reaches shells started after the next login; omp defaults to localhost until then.
-    home.sessionVariables = {
-      OLLAMA_BASE_URL = "http://${ai.endpoint.host}:${toString ai.endpoint.port}";
-      OLLAMA_CONTEXT_LENGTH = toString ai.contextLength;   # `/api/show` reports the training window
-    };
+    home.file.".omp/agent/models.yml".source = yamlFormat.generate "models.yml" models;
     home.file.".omp/agent/themes/onedark-transparent.json".source = jsonFormat.generate "onedark-transparent.json" onedarkTransparent;
 
     programs.omp = {
@@ -34,10 +44,9 @@ in
         tools.approvalMode = "write";
         secrets.enabled = true;       # Redact credentials before they reach the provider.
 
-        # `/model` switches until the next switch restores these; `:high` reaches Ollama as reasoning.effort.
-        modelRoles.default = "ollama/${ai.codingModel}:high";
-        # Pinned so background tasks stay local, on the MoE because it decodes 3x the dense coder.
-        modelRoles.tiny = "ollama/${ai.model}";
+        # `/model` switches until the next switch restores these; `:high` reaches Gufo as reasoning_effort.
+        modelRoles.default = "ai/${ai.model}:high";
+        modelRoles.tiny = "ai/${ai.model}";   # pinned so background tasks stay local
 
         # Nix owns the version.
         startup.checkUpdate = false;

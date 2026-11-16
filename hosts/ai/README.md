@@ -1,7 +1,8 @@
 # AI Host
 
-NixOS box running local inference for the fleet: Ollama serves an OpenAI-compatible endpoint on the
-iGPU, ComfyUI serves image generation and whisper.cpp (native, Vulkan) serves speech-to-text.
+NixOS box running local inference for the fleet: llama-swap serves one OpenAI-compatible endpoint for chat,
+coding, images and embeddings, each model a [Gufo](https://github.com/gufo-org/gufo) container on the iGPU,
+and whisper.cpp (native, Vulkan) serves speech-to-text.
 The chat UI and the laptop's coding agent reach them through `fleet.ai`. It also hosts the sealed
 [`agent-alfredo-vm`](microvm/guests/agent-alfredo-vm), which reaches them through its bridge gateway. Powered on over
 Wake-on-LAN when needed; suspend is off, so it is either running or off.
@@ -47,56 +48,55 @@ firmware change could move these offsets, so the script vets each record's tempe
 ## Architecture
 
 ```
-  compute         ──┐                                     ┌──▶ Ollama  :11434  (chat, coding, hermes)
-  laptop          ──┼──▶ nftables, per-host allow ────────┤
-  agent-alfredo-vm ─┘    nothing behind it authenticates  ├──▶ ComfyUI :8000   (image generation)
-   (bridge, Ollama + whisper only)                        └──▶ whisper :8090   (speech-to-text)
-                                                                     │
-                                                                     ▼
-                                                 Radeon 8060S iGPU, one pool, no arbitration
+  compute         ──┐                                     ┌──▶ llama-swap :11434  (chat, coding, images, embeddings)
+  laptop          ──┼──▶ nftables, per-host allow ────────┤         │ starts and stops one Gufo container per model
+  agent-alfredo-vm ─┘    nothing behind it authenticates  └──▶ whisper    :8090   (speech-to-text)
+   (bridge, inference + whisper only)                               │
+                                                                    ▼
+                                                     Radeon 8060S iGPU, one pool
 
   node + smartctl exporters ────────────────────────▶ compute Prometheus
   upsmon ───────────────────────────────────────────▶ storage NUT
 ```
 
 No endpoint authenticates, so reachability is the access control and `firewall.nix` is the whole
-gate: compute and laptop, nothing else. The guest's seal opens it only Ollama and whisper, on the bridge
+gate: compute and laptop, nothing else. The guest's seal opens it only inference and whisper, on the bridge
 address; see [`microvm/`](microvm) for its holes.
 
-All three share the one iGPU with no arbitration between them, so a long image generation
-stalls chat and coding for its duration.
+llama-swap decides which models share the iGPU (see [Memory](#memory)); whisper's model sits in the
+separate VRAM carve-out.
 
 ## Models
 
-`fleet.ai` declares the models the fleet depends on and they are pulled or created on boot. Anything pulled by
-hand survives deploys and reboots until removed; `ollama-models {list,pull,rm}` on this host is the way
-to manage those.
+`fleet.ai` names the models and [`llama-swap.nix`](services/llama-swap.nix) serves them under those ids.
+[`models.nix`](services/models.nix) pins every file by revision and sha256; `llama-swap-configure` downloads
+what is missing on boot and trusts what is present. Gufo has kernels per model, so a quant or fine-tune it
+does not list may not load: Flash-Next only runs unsloth's UD-Q4_K_XL.
 
-`qwen3.8-flash-next` (`codingModel`) is created instead, from a sharded GGUF plus its MTP head (`DRAFT`),
-neither of which the registry serves. `ollama-configure` downloads the files and runs `ollama create` when
-the model is missing; to apply an edit to its Modelfile, `ollama rm` it and restart the unit.
+`qwen3.8-27b-uncensored` is gated behind a click-through on Hugging Face, so its two files are placed by hand
+in `/var/lib/llama-swap/models/qwen3.8-27b-uncensored/` (names and hashes in `models.nix`).
 
-It and `ai.model` evict each other, so the assistant works while coding, just slower. `ai.model` reloads
-with the default 10m keep-alive instead of the pin until `ollama-configure` runs again.
+| Model                    | Serves                                       | GTT    |
+| ------------------------ | -------------------------------------------- | ------ |
+| `qwen3.8-flash-next`     | Alfredo, the chat UI, coding (two sessions)  | 90 GiB |
+| `qwen3.8-27b-uncensored` | the chat UI, with vision                     | 24 GiB |
+| `qwen-image-2.1-turbo`   | image generation and editing                 | 32 GiB |
+| `embeddinggemma-2`       | the chat UI's document search                | 1 GiB  |
 
 ## Memory
 
-The iGPU's pool (`ttm.pages_limit`) is carved from the same 123.5 GiB of RAM, and Ollama checks fit
-against the pool only. The cap must leave room for what lives outside it, mostly Flash-Next's 28 GiB
-n-gram table:
+The iGPU's pool (`ttm.pages_limit`) is carved from the same 123.5 GiB of RAM, so overcommitting it means
+the kernel OOM killer, or a panic when killed GPU processes do not release memory (2026-11-05, 2026-11-06).
+llama-swap's matrix allows two combinations and swaps between them, so a request can only be slow, never
+overcommit:
 
-| Mode                    | iGPU         | RAM outside it |
-| ----------------------- | ------------ | -------------- |
-| Coding                  | 67 GiB       | 28 + ~5 GiB    |
-| Assistant plus ComfyUI  | 22 + 54 GiB  | ~5 GiB         |
+| Set      | Models                                 | GTT      | RAM left |
+| -------- | -------------------------------------- | -------- | -------- |
+| `text`   | Flash-Next, embeddings                 | 91 GiB   | 24 GiB   |
+| `images` | uncensored 27B, Qwen-Image, embeddings | 57 GiB   | 59 GiB   |
 
-86 GiB fits either mode, and Ollama swaps between `ai.model` and Flash-Next within it. Raising it lets
-Ollama load both (89 GiB plus the table), which overcommits RAM and lets the kernel OOM killer take the
-agent VM and user managers (2026-11-05).
-
-Do not generate images while coding. ComfyUI also stages ~24 GiB in RAM outside the pool while loading,
-and nothing coordinates it with Ollama: an overlap OOM-kills Flash-Next's runner, or panics and reboots the
-host when the killed GPU processes do not release memory (2026-11-06).
+The cap is 96 GiB: `text` plus headroom. Flash-Next is preloaded at boot. A swap takes 25-40 s with the
+weights in page cache, so the first chat after an image (or the first image after a chat) waits that long.
 
 ## Monitoring
 
@@ -114,19 +114,6 @@ very different points.
 | Secrets    | Bootstrap via `dotfiles-secrets init-host` (Bitwarden) | [`apps/nixos-install`](../../apps/nixos-install/README.md) |
 
 Run [`apps/nixos-install`](../../apps/nixos-install/README.md): disko partitioning, secrets provisioning, NixOS install.
-
-## Post-Install
-
-### ComfyUI
-
-Model weights are a manual download, tens of GB behind interactive menus, and nothing generates until
-they are there. Entries 1 to 4 pull the two models the chat UI uses, each with its faster variant:
-
-```bash
-podman exec -it comfyui /opt/get_qwen_image.sh <n>
-```
-
-Entries 1 and 3 serve text-to-image, 2 and 4 image editing. The chat UI's [workflows](../compute/selfhost/services/open-webui) name the exact files each one loads.
 
 ## References
 

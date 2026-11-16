@@ -3,7 +3,7 @@ let
   # ai is this guest's host, reached through the bridge gateway; the seal drops its LAN address.
   endpoint = "http://${config.my.microvm.guest.gateway}:${toString config.fleet.ai.endpoint.port}/v1";
   aiEndpoint = {
-    api_key = "ollama";   # dummy; Ollama needs no auth
+    api_key = "none";     # dummy; llama-swap needs no auth
     base_url = endpoint;
   };
 in
@@ -58,9 +58,6 @@ in
           extra = {
             host = "0.0.0.0";
             inherit (config.fleet.ai.assistantEndpoint) port;
-
-            # Extra dropdown models need an explicit route or they fall back to model.default.
-            model_routes = lib.genAttrs [ config.fleet.ai.codingModel ] (m: aiEndpoint // { provider = "custom:ai"; model = m; });
           };
         };
       }

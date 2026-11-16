@@ -48,25 +48,21 @@ in
   ai = {
     endpoint = {
       host = lan.hosts.ai;
-      port = 11434;                     # Ollama's default, served from a container rather than nixpkgs
-    };
-    imageEndpoint = {
-      host = lan.hosts.ai;
-      port = 8000;                      # the toolbox image's own launcher port, kept so its docs still apply
+      port = 11434;
     };
     speechEndpoint = {
       host = lan.hosts.ai;
-      port = 8090;                      # whisper-server's default 8080 is the ad-hoc experiments port
+      port = 8090;
     };
     assistantEndpoint = {
       host = microvmTables.ai.guests.agent-alfredo-vm.ip;
-      port = 8642;                      # hermes-agent's API server default
+      port = 8642;
     };
-    model = "qwen3.6:35b-a3b";
-    uncensoredModel = "huggingface.co/orcarouter/Qwen3.8-27B-Uncensored-GGUF";
-    codingModel = "qwen3.8-flash-next";      # not in the registry: hosts/ai/services/ollama.nix creates it
-    embeddingModel = "embeddinggemma";
-    contextLength = 65536;              # Hermes requires >=64K
+    model = "qwen3.8-flash-next";
+    uncensoredModel = "qwen3.8-27b-uncensored";
+    imageModel = "qwen-image-2.1-turbo";
+    embeddingModel = "embeddinggemma-2";
+    contextLength = 131072;             # per session; Hermes needs >=64K, 256K x2 overflows the GPU cap
   };
 
   forge.sshEndpoint = {

@@ -25,18 +25,10 @@ _final: prev: let
       tagSuffix = "-rootless";
       homepage = "https://github.com/papra-hq/papra";
     };
-    # Toolbox image with a bare-shell Cmd (comfyui.nix supplies the launch line), datestamped tags only.
-    comfyui = {
-      image = "docker.io/kyuz0/amd-strix-halo-comfyui";
-      version = "20260811-102353";
-      versionPattern = "[0-9]{8}-[0-9]{6}";
-      homepage = "https://github.com/kyuz0/amd-strix-halo-comfyui-toolboxes";
-    };
-    ollama = {
-      image = "docker.io/ollama/ollama";
-      version = "0.40.13";
-      tagSuffix = "-rocm";   # The variant that carries the AMD GPU runtime.
-      homepage = "https://github.com/ollama/ollama";
+    gufo = {
+      image = "ghcr.io/gufo-org/toolboxes/gufo-runtime";
+      version = "0.34.0";
+      homepage = "https://github.com/gufo-org/gufo";
     };
   };
   tagged = lib.mapAttrs (_: img: let

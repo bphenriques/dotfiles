@@ -69,16 +69,6 @@
           description = "Port the inference API listens on.";
         };
       };
-      imageEndpoint = {
-        host = lib.mkOption {
-          type = lib.types.str;
-          description = "Address serving image generation and editing.";
-        };
-        port = lib.mkOption {
-          type = lib.types.port;
-          description = "Port the image API listens on.";
-        };
-      };
       speechEndpoint = {
         host = lib.mkOption {
           type = lib.types.str;
@@ -101,15 +91,15 @@
       };
       model = lib.mkOption {
         type = lib.types.str;
-        description = "Default model id for the assistant and the chat UI.";
+        description = "Default model id for the assistant, the chat UI and coding agents.";
       };
       uncensoredModel = lib.mkOption {
         type = lib.types.str;
         description = "Uncensored model id.";
       };
-      codingModel = lib.mkOption {
+      imageModel = lib.mkOption {
         type = lib.types.str;
-        description = "Default model id for terminal coding agents.";
+        description = "Model id for image generation and editing.";
       };
       embeddingModel = lib.mkOption {
         type = lib.types.str;

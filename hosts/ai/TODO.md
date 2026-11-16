@@ -40,6 +40,9 @@ Do not write `0x26-0x28` (fan 1) or `0x46-0x48` (fan 2). Those are firmware-mana
 
 ## Inference runtime
 
+Settled 2026-11-16: Gufo behind llama-swap replaced Ollama and ComfyUI (README "Models"). What follows is
+the survey and measurements that led there.
+
 Measured 2026-10-25 on Ollama 0.40.2-rocm. Short prompts are a 300-word story (prose) and a Python module with
 tests (code); the long prompt is 10K tokens.
 
@@ -79,6 +82,28 @@ memory with Ollama means remembering to unload one, and the project is two month
 text models and no embeddings. As of 2026-10-29 it cuts near-daily releases (v0.23 to v0.27 in a week), serves
 `/embeddings` (EmbeddingGemma 2) and moved to ROCm 10.1. Flash-Next peaks at ~89-91 GiB, so it still cannot sit
 beside the 22 GB `ai.model` under the 112 GiB limit.
+
+Measured 2026-11-16, Gufo 0.34.0 (podman), Flash-Next UD-Q4_K_XL plus the shared MTP head, `--sessions 2
+--context 65536`, 100 GiB `ttm.pages_limit`, Ollama and ComfyUI stopped:
+
+| Flash-Next             | Prose tok/s | Code tok/s | pp @12K | pp / tg @43K | pp / tg @61K | Load | GTT / RAM      |
+| ---------------------- | ----------- | ---------- | ------- | ------------ | ------------ | ---- | -------------- |
+| Gufo                   | 43          | 66         | 1668    | 1631 / 54    | 1632 / 50    | 23-43s | 88G / 3-5G   |
+| Ollama (IQ4_XS, above) | 27-28       | 46         | 465     | 391 / 27 @36K | 328 / 25    | ~85s | 67G / +28G table |
+
+- Alfredo-shaped turns (11.8K system prompt, six tools): cold 7.0s to first token (Ollama: 9.5s on
+  `qwen3.6:35b-a3b`, 25s on Flash-Next), warm 0.24s, tool turn 1.2s total. Live Hermes traffic: cold 8.7s at
+  14.5K, cached follow-ups 0.13-0.42s, decode 51-69, MTP acceptance 65-86%.
+- Two sessions at once: no eviction, cold 11.5 / 13.9s, decode splits to ~28 each.
+- Reasoning defaults on; `--reasoning-effort low` keeps tool turns short (`plan_week` direct, 1.2s vs 3.8s).
+  Tool calls correct throughout.
+- Qwen-Image-2.1-Turbo (`gufo serve image`, 8 steps, 1024x1024): 26s first image, 20.5s after; 32G GTT, ~4G RAM
+  outside it. Cannot sit beside Flash-Next (88G), so an image means a swap: Flash-Next back in 23s with the
+  weights in page cache.
+- Third-party fine-tunes load: `orcarouter/Qwen3.8-27B-Uncensored-GGUF` (Ollama's Q4_K_M blob plus its f16
+  mmproj) runs with vision, 22G GTT. Without speculation 12.5 tok/s; with z-lab's DFlash2 Q4_K_M draft (1.1 GB,
+  24G total) 28 prose / 36 code / 30 vision, acceptance 39-51%. Ollama: 15-16 / 24-29 on the stock 27B. It fits
+  beside Qwen-Image (24 + 32G).
 
 **[Halogen](https://github.com/peonist-ai/halogen-flash-server)**: Peonist's engine for Flash-Next only, gfx1151
 only, podman image, OpenAI and Anthropic APIs on one port. Proprietary binary under an EULA. Vendor numbers:

@@ -4,37 +4,15 @@ let
   inherit (config.fleet) ai;
 
   hermesModel = "hermes-agent";
-  comfyUrl = "http://${ai.imageEndpoint.host}:${toString ai.imageEndpoint.port}";
-
-  # kyuz0's workflow with the unet as fp8mixed and 1.0 MP sampling, compacted because an EnvironmentFile line holds no newlines.
-  imageEditWorkflow = builtins.toJSON (builtins.fromJSON (builtins.readFile ./qwen-image-edit.json));
-
-  # Only these three: mapping steps or negative_prompt writes a null into the graph. Size follows the uploaded image.
-  imageEditNodes = builtins.toJSON [
-    { type = "prompt"; node_ids = [ "68" ]; key = "prompt"; }
-    { type = "image"; node_ids = [ "41" ]; key = "image"; }
-    { type = "seed"; node_ids = [ "65" ]; key = "seed"; }
-  ];
-
-  # Upstream loads the *Edit* LoRA into text-to-image (a copy-paste slip), so this names the Qwen-Image one.
-  imageWorkflow = builtins.toJSON (builtins.fromJSON (builtins.readFile ./qwen-image.json));
-
-  # No negative_prompt: the playground never sends one, so a mapped node would write a null.
-  imageNodes = builtins.toJSON [
-    { type = "prompt"; node_ids = [ "6" ]; key = "text"; }
-    { type = "width"; node_ids = [ "58" ]; key = "width"; }
-    { type = "height"; node_ids = [ "58" ]; key = "height"; }
-    { type = "n"; node_ids = [ "58" ]; key = "batch_size"; }
-    { type = "steps"; node_ids = [ "3" ]; key = "steps"; }
-    { type = "seed"; node_ids = [ "3" ]; key = "seed"; }
-  ];
+  aiUrl = "http://${ai.endpoint.host}:${toString ai.endpoint.port}/v1";
+  aiKey = "none"; # dummy; llama-swap needs no auth
 
   # URLs, keys and configs are paired by position, so all three come from this one.
   backends = [
     {
-      url = "http://${ai.endpoint.host}:${toString ai.endpoint.port}/v1";
-      key = "ollama"; # dummy; Ollama needs no auth
-      model_ids = [ ai.model ai.codingModel ai.uncensoredModel ];
+      url = aiUrl;
+      key = aiKey;
+      model_ids = [ ai.model ai.uncensoredModel ];
     }
     {
       url = "http://${ai.assistantEndpoint.host}:${toString ai.assistantEndpoint.port}/v1";
@@ -46,7 +24,7 @@ in
 {
   selfhost.apps.open-webui.enable = true;
 
-  # This deployment only: who may reach it, and which models and image pipelines it talks to.
+  # This deployment only: who may reach it.
   selfhost.services.open-webui = {
     displayName = "Chat";
     access.allowedGroups = [ cfg.groups.admin ];
@@ -58,10 +36,6 @@ in
       OPENAI_API_BASE_URLS=${lib.concatMapStringsSep ";" (b: b.url) backends}
       OPENAI_API_KEYS=${lib.concatMapStringsSep ";" (b: b.key) backends}
       OPENAI_API_CONFIGS=${builtins.toJSON (lib.listToAttrs (map (b: lib.nameValuePair b.url { inherit (b) model_ids; }) backends))}
-      IMAGES_EDIT_COMFYUI_WORKFLOW=${imageEditWorkflow}
-      IMAGES_EDIT_COMFYUI_WORKFLOW_NODES=${imageEditNodes}
-      COMFYUI_WORKFLOW=${imageWorkflow}
-      COMFYUI_WORKFLOW_NODES=${imageNodes}
     '';
     restartUnits = [ "open-webui.service" ];
   };
@@ -87,21 +61,30 @@ in
       ENABLE_CODE_EXECUTION = "False";
       ENABLE_CODE_INTERPRETER = "False";
 
-      ENABLE_IMAGE_EDIT = "True";
-      IMAGE_EDIT_ENGINE = "comfyui";
-      IMAGES_EDIT_COMFYUI_BASE_URL = comfyUrl;
       ENABLE_IMAGE_PROMPT_GENERATION = "False"; # a whole extra LLM turn before the diffusion one
 
       ENABLE_IMAGE_GENERATION = "True";
-      IMAGE_GENERATION_ENGINE = "comfyui";
-      COMFYUI_BASE_URL = comfyUrl;
-      # Both reach the graph here: Qwen-Image is 1328x1328 native and Lightning wants 4 steps, not 50.
-      IMAGE_SIZE = "1328x1328";
-      IMAGE_STEPS = "4";
+      IMAGE_GENERATION_ENGINE = "openai";
+      IMAGES_OPENAI_API_BASE_URL = aiUrl;
+      IMAGES_OPENAI_API_KEY = aiKey;
+      IMAGE_GENERATION_MODEL = ai.imageModel;
+      IMAGE_SIZE = "1024x1024";
 
-      RAG_EMBEDDING_ENGINE = "ollama"; # otherwise it embeds in-process on this host's CPU
-      RAG_OLLAMA_BASE_URL = "http://${ai.endpoint.host}:${toString ai.endpoint.port}";
+      # No size: the edit keeps the uploaded image's aspect ratio.
+      ENABLE_IMAGE_EDIT = "True";
+      IMAGE_EDIT_ENGINE = "openai";
+      IMAGES_EDIT_OPENAI_API_BASE_URL = aiUrl;
+      IMAGES_EDIT_OPENAI_API_KEY = aiKey;
+      IMAGE_EDIT_MODEL = ai.imageModel;
+
+      RAG_EMBEDDING_ENGINE = "openai"; # otherwise it embeds in-process on this host's CPU
+      RAG_OPENAI_API_BASE_URL = aiUrl;
+      RAG_OPENAI_API_KEY = aiKey;
       RAG_EMBEDDING_MODEL = ai.embeddingModel;
+      # EmbeddingGemma's task prefixes, applied by Gufo from the checkpoint's named prompts.
+      RAG_EMBEDDING_PREFIX_FIELD_NAME = "prompt_name";
+      RAG_EMBEDDING_QUERY_PREFIX = "query";
+      RAG_EMBEDDING_CONTENT_PREFIX = "document";
     };
   };
 }

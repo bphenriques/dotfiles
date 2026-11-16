@@ -12,7 +12,7 @@ in
       guests.guests
       {
         agent-alfredo-vm.egress = {
-          allowHostPorts = [ config.fleet.ai.endpoint.port config.fleet.ai.speechEndpoint.port ];   # Ollama and speech-to-text
+          allowHostPorts = [ config.fleet.ai.endpoint.port config.fleet.ai.speechEndpoint.port ];   # inference and speech-to-text
           allowLan = [
             { host = "storage"; ports = [ 445 ]; }   # its NAS doors
             { inherit (config.fleet.forge.sshEndpoint) host; ports = [ config.fleet.forge.sshEndpoint.port ]; }   # its own repo

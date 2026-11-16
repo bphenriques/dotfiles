@@ -45,7 +45,6 @@ let
       { from = "storage"; control = "compute"; to = hosts.compute; port = compute.selfhost.apps.gitea.ssh.port; expect = "open"; label = "compute: Gitea SSH"; }
       { from = "storage"; control = "compute"; to = hosts.compute; port = compute.selfhost.services.jellyfin.port; expect = "blocked"; label = "compute: Jellyfin only via Traefik"; }
       { from = "storage"; control = "compute"; to = hosts.ai; port = ai.endpoint.port; expect = "blocked"; label = "ai: inference endpoint"; }
-      { from = "storage"; control = "compute"; to = hosts.ai; port = ai.imageEndpoint.port; expect = "blocked"; label = "ai: ComfyUI"; }
       { from = "ai"; control = "compute"; to = hosts.storage; port = storageExporters.node.port; expect = "blocked"; label = "storage: node exporter"; }
     ];
 in

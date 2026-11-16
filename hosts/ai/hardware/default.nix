@@ -9,7 +9,7 @@
   hardware.graphics.enable = true;  # RADV, for whisper's Vulkan; the containers bring their own ROCm
 
   boot = {
-    kernelParams = [ "ttm.pages_limit=22544384" ];  # 86 GiB for the iGPU, see README "Memory"
+    kernelParams = [ "ttm.pages_limit=25165824" ];  # 96 GiB for the iGPU, see README "Memory"
     blacklistedKernelModules = [
       "mt7925e"        # WiFi
       "btusb"          # Takes btrtl/btintel/btmtk/btbcm with it

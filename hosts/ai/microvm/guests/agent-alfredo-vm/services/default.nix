@@ -14,7 +14,7 @@ in
       inherit (alfredoVm) vaultRoot recipesRoot stateRoot;
       recipesUrl = fleetFacts.publicUrls.cook-recipes;
       speechUrl = "http://${gateway}:${toString config.fleet.ai.speechEndpoint.port}/inference";
-      modelUrl = "http://${gateway}:${toString config.fleet.ai.endpoint.port}";
+      modelUrl = "http://${gateway}:${toString config.fleet.ai.endpoint.port}/v1";
       inherit (config.fleet.ai) model;
       cookidooCollection = private.cookidoo.collection;
     };
