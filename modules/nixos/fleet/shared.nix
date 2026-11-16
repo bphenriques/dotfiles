@@ -1,4 +1,15 @@
 { lib, ... }:
+let
+  endpoint = description: lib.mkOption {
+    inherit description;
+    type = lib.types.submodule {
+      options = {
+        host = lib.mkOption { type = lib.types.str; };
+        port = lib.mkOption { type = lib.types.port; };
+      };
+    };
+  };
+in
 {
   options.fleet = {
     ssh = {
@@ -59,36 +70,9 @@
     };
 
     ai = {
-      endpoint = {
-        host = lib.mkOption {
-          type = lib.types.str;
-          description = "Address serving the OpenAI-compatible inference API.";
-        };
-        port = lib.mkOption {
-          type = lib.types.port;
-          description = "Port the inference API listens on.";
-        };
-      };
-      speechEndpoint = {
-        host = lib.mkOption {
-          type = lib.types.str;
-          description = "Address serving speech-to-text (whisper.cpp server).";
-        };
-        port = lib.mkOption {
-          type = lib.types.port;
-          description = "Port the speech-to-text API listens on.";
-        };
-      };
-      assistantEndpoint = {
-        host = lib.mkOption {
-          type = lib.types.str;
-          description = "Address serving the assistant's OpenAI-compatible API.";
-        };
-        port = lib.mkOption {
-          type = lib.types.port;
-          description = "Port the assistant API listens on.";
-        };
-      };
+      endpoint = endpoint "OpenAI-compatible inference API.";
+      speechEndpoint = endpoint "Speech-to-text API (whisper.cpp server).";
+      assistantEndpoint = endpoint "Assistant's OpenAI-compatible API.";
       model = lib.mkOption {
         type = lib.types.str;
         description = "Default model id for the assistant, the chat UI and coding agents.";
@@ -111,15 +95,6 @@
       };
     };
 
-    forge.sshEndpoint = {
-      host = lib.mkOption {
-        type = lib.types.str;
-        description = "Address serving the forge's git over SSH.";
-      };
-      port = lib.mkOption {
-        type = lib.types.port;
-        description = "Port the forge's SSH listens on.";
-      };
-    };
+    forge.sshEndpoint = endpoint "Forge's git over SSH.";
   };
 }

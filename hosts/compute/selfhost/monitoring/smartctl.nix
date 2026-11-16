@@ -45,7 +45,7 @@ _:
           labels.severity = "warning";
           annotations.summary = "{{ $labels.device }}: {{ $value }} reallocated sector(s)";
         }
-        # Split by media: the Toshiba HDDs top out at 55C, NVMe runs far hotter without concern.
+        # Split by media: the Toshiba HDDs top out at 55C, NVMe runs far hotter without concern. ai has its own (ai.nix).
         {
           alert = "DiskTooHot";
           expr = ''smartctl_device_temperature{device=~"sd.*",temperature_type="current"} > 50'';
@@ -55,7 +55,7 @@ _:
         }
         {
           alert = "NVMeTooHot";
-          expr = ''smartctl_device_temperature{device=~"nvme.*",temperature_type="current"} > 65'';
+          expr = ''smartctl_device_temperature{device=~"nvme.*",instance!="ai",temperature_type="current"} > 65'';
           "for" = "5m";
           labels.severity = "warning";
           annotations.summary = "{{ $labels.device }}: {{ $value }}C";

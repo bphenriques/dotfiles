@@ -1,6 +1,6 @@
 # Cloudflare
 
-Manages my Cloudflare account (DNS, redirects)
+Manages my Cloudflare account (DNS, redirects).
 
 ## Run
 

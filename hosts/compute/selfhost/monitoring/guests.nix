@@ -21,7 +21,6 @@ let
         inherit name;
         rules = [
           { alert = "GuestHighCpu"; expr = ''(1 - avg by(instance) (rate(node_cpu_seconds_total{instance="${name}",mode="idle"}[5m]))) * 100 > 90''; for = "15m"; labels.severity = "warning"; annotations.summary = "${name} CPU over 90% for 15m"; }
-          { alert = "GuestUnitFailed"; expr = ''node_systemd_unit_state{instance="${name}",state="failed"} == 1''; for = "15m"; labels.severity = "warning"; annotations.summary = "{{ $labels.name }} on ${name} has failed"; }
           { alert = "GuestStorageNearCap"; expr = ''node_filesystem_avail_bytes{mountpoint="${stateRoot}",fstype="ext4"} / node_filesystem_size_bytes{mountpoint="${stateRoot}",fstype="ext4"} < 0.1''; for = "15m"; labels.severity = "warning"; annotations.summary = "${stateRoot} on ${name} is over 90% full"; }
         ];
       }];

@@ -41,7 +41,5 @@ in {
   trackedContainerVersions = lib.mapAttrsToList (name: img: {
     inherit name;
     inherit (img) version image tagPrefix tagSuffix;
-  } // lib.optionalAttrs (img ? versionPattern) {
-    inherit (img) versionPattern;
   }) tagged;
 }

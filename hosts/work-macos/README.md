@@ -1,6 +1,6 @@
 # Work MacOS
 
-Work Macbook Pro using [nix-darwin](https://github.com/nix-darwin/nix-darwin). Keeping it light since there is a balance to be made since I do not own it.
+Work Macbook Pro using [nix-darwin](https://github.com/nix-darwin/nix-darwin). Kept light, since I do not own it.
 
 ## Install
 

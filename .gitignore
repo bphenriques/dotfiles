@@ -5,7 +5,7 @@ result
 .claude
 .idea/
 
-# OpenTofu / Terraform (infra) — state is kept, encrypted, in dotfiles-private
+# OpenTofu / Terraform (infra): state is kept, encrypted, in dotfiles-private
 .terraform/
 .terraform.lock.hcl
 *.tfstate

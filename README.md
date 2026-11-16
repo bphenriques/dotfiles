@@ -23,7 +23,7 @@ Hi! 👋 This is how I manage my fleet with [NixOS](https://nixos.org/), includi
 | Host                                                           | Platform      | Description                                            |
 | -------------------------------------------------------------- | ------------- | ------------------------------------------------------ |
 | [laptop](./hosts/laptop)                                       | NixOS         | Personal laptop                                        |
-| [compute](./hosts/compute)                                     | NixOS         | Compute headless server                                |
+| [compute](./hosts/compute)                                     | NixOS         | Headless server                                        |
 | [storage](./hosts/storage)                                     | NixOS         | Headless NAS                                           |
 | [ai](./hosts/ai)                                               | NixOS         | Headless AI inference                                  |
 | [agent-alfredo-vm](./hosts/ai/microvm/guests/agent-alfredo-vm) | NixOS microVM | Private AI assistant                                   |
@@ -48,7 +48,7 @@ Key dependencies:
 - [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) for remote installations
 - [`selfhost-nix`](https://github.com/bphenriques/selfhost-nix) personal flake that does the heavy-lifting when it comes to self-hosting (reverse Proxy, OIDC, and secrets)
 - `dotfiles-private` private dependency to store SOPS secrets, personal information, and wallpapers. Typically under `~/.dotfiles-private`.
-- [`infra`](./infra) that setups my Cloudflare account through IaC.
+- [`infra`](./infra) that sets up my Cloudflare account through IaC.
 
 Not using [flake-utils](https://github.com/numtide/flake-utils) or [impermanence](https://github.com/nix-community/impermanence) intentionally.
 

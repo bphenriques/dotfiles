@@ -41,7 +41,7 @@ Made some tweaks to ensure thermal stability with sustained workloads:
                                       ▼
                                 ┌───────────┐
                                 │    NAS    │
-                                │ (Storage)│
+                                │ (Storage) │
                                 └───────────┘
                                   SMB mounts
 ```
@@ -63,6 +63,27 @@ for nothing, so anyone on the tunnel reaches them whatever their group.
 
 RomM runs in kiosk mode: it is readable without logging in, and only `admin` can modify the library.
 
+## WireGuard
+
+A device's tier is its address: `10.100.0.0/28` reaches the LAN, every other address in the tunnel
+reaches Traefik on 80 and 443 and nothing else. The firewall matches the prefix, so an address is
+bounded by where it sits rather than by any list being correct. Compute forwards only for those
+full-access devices, containers and Thread (`firewall.nix`); anything else routed through it is dropped.
+
+Own devices take `--full-access`, which allocates from that `/28`: thirteen addresses, and `wg-manage`
+errors rather than spilling out of the block.
+
+Peers are runtime state in `/var/lib/wireguard/peers.json`, applied live. `wg-manage status` is the
+inventory and `remove <name>` cuts a peer. `wireguard-apply-peers` restores the file whenever the
+interface appears; `wg-manage apply` re-syncs it after a hand edit, the escape hatch for anything the
+other commands do not cover.
+
+A config cannot be shown again: the private key is minted in memory and never stored, so replacing a
+lost one is `wg-manage remove <name>` then `add`, which issues a new key.
+
+The backup keeps the peer file but not the server key. A rebuilt host gets a new key, so each device
+updates one field (`PublicKey`); addresses and peer keys come back from the file.
+
 ## Onboarding a guest
 
 Two grants, both runtime. Neither needs a commit or a deploy.
@@ -83,24 +104,6 @@ Uploads land under their Pocket-ID username rather than a UUID.
 Offboarding is `pocket-id-manage guest remove <username>` plus `wg-manage remove <name>`. The first
 refuses anyone outside the `guests` group, so it cannot touch a household account. Deleting the
 Pocket-ID account ends access; the Immich data outlives it and is removed in the Immich admin UI.
-
-A device's tier is its address: `10.100.0.0/28` reaches the LAN, every other address in the tunnel
-reaches Traefik on 80 and 443 and nothing else. The firewall matches the prefix, so an address is
-bounded by where it sits rather than by any list being correct. Compute forwards only for those
-full-access devices, containers and Thread (`firewall.nix`); anything else routed through it is dropped.
-
-Peers are runtime state in `/var/lib/wireguard/peers.json`, applied live.
-
-A config cannot be shown again: the private key is minted in memory and never stored, so replacing a
-lost one is `wg-manage remove <name>` then `add`, which issues a new key.
-
-`wg-manage status` is the inventory and `remove <name>` cuts a peer. `wireguard-apply-peers` restores
-the file whenever the interface appears; `wg-manage apply` re-syncs it after a hand edit, which is the
-escape hatch for anything the three commands do not cover.
-
-Backups carry the peer file, not the server private key. Losing the host therefore costs every device
-one edited field (the peer's `PublicKey`), which the restored file is what makes possible: it still
-holds who had which address and which key.
 
 ## Setup
 
@@ -179,8 +182,3 @@ only while Obsidian is open: background replication is desktop-only.
 ### Radicale
 
 Share CalDAV/CardDAV URL with clients: `dav.<domain>` with generated `htpasswd` credentials
-
-### WireGuard
-
-Own devices take `--full-access`, which allocates from `10.100.0.0/28`. Thirteen addresses, and
-`wg-manage` errors rather than spilling out of the block.

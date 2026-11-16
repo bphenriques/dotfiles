@@ -35,7 +35,7 @@ Flake inputs with a local checkout. Edit them there, never in a scratch clone.
 
 ## Naming Conventions
 
-- **Systemd setup units**: `*-configure.nix` files define `<service>-configure` units
+- **Systemd setup units**: a service's reconcile oneshot is named `<service>-configure`, in a `configure.nix` beside the service or inline in its file
 
 ## Code Style
 

@@ -12,7 +12,7 @@ let
     in {
       source = "container";
       container = lib.concatStringsSep "/" (lib.tail parts);
-      include_regex = "${prefix}${img.versionPattern or numeric}${suffix}";
+      include_regex = "${prefix}${numeric}${suffix}";
     } // lib.optionalAttrs (registry != "docker.io") { inherit registry; }
       // lib.optionalAttrs (prefix != "" || suffix != "") {
         from_pattern = "^${prefix}(.*)${suffix}$";

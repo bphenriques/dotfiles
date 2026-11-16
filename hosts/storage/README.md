@@ -40,9 +40,9 @@ Alerting lives on compute by decision: a NAS should not be the thing that notice
 - **Household**: `media` and `shared`. **Personal**: one dataset each under `tank/users`.
 - **Private settings** own personal share names, owners, Samba access and the 5GbE MAC. Datasets and
   their children are read back from `disko/pool.nix`, so the pool layout is declared once. The share
-  inventory in `shares/` is transport-neutral; the SMB view over it is `services/samba.nix`.
+  inventory in `shares.nix` is transport-neutral; the SMB view over it is `services/samba.nix`.
 - **Principals** are `selfhost.users` (people) and `selfhost.serviceAccounts` (machines) with
-  `storage.smb.enable`, granted on a share under `access.users` and `access.serviceAccounts`. Clients must
+  `storage.smb.enable`, granted on a share under `smb.access.users`, `smb.access.groups` and `smb.access.serviceAccounts`. Clients must
   speak SMB 3.1.1.
 - **Doors**: `services/samba.nix` opens extra shares onto a subdirectory of a share, for a principal that
   must see only that part. They take the share's group, so files stay readable through every door.

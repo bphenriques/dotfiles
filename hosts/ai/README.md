@@ -1,12 +1,15 @@
 # AI Host
 
-NixOS box running local inference for the fleet: llama-swap serves one OpenAI-compatible endpoint for chat,
+NixOS box running local inference for the fleet. llama-swap serves one OpenAI-compatible endpoint for chat,
 coding, images and embeddings, each model a [Gufo](https://github.com/gufo-org/gufo) container on the iGPU,
-and whisper.cpp (native, Vulkan) serves speech-to-text.
-The chat UI and the laptop's coding agent reach them through `fleet.ai`. It also hosts the sealed
-[`agent-alfredo-vm`](microvm/guests/agent-alfredo-vm), which reaches them through its bridge gateway. Powered on over
-Wake-on-LAN when needed; suspend is off, so it is either running or off.
-What depends on it fails per request meanwhile and recovers on its own.
+and whisper.cpp (native, Vulkan) serves speech-to-text. The chat UI and the laptop's coding agent reach
+them through `fleet.ai`.
+
+It also hosts the sealed [`agent-alfredo-vm`](microvm/guests/agent-alfredo-vm), which reaches them
+through its bridge gateway.
+
+Powered on over Wake-on-LAN when needed; suspend is off, so it is either running or off. What depends on
+it fails per request meanwhile and recovers on its own.
 
 ## Hardware
 
@@ -34,13 +37,11 @@ up is left stock, so behaviour under load is unchanged. Raising that end is park
 | Stock | 20% | 20% | 22% | 23% | 25% | 28% | 32% |
 | Now   | 10% | 10% | 22% | 23% | 25% | 28% | 32% |
 
-The EC reverts to stock on power cycle, hence the boot-time oneshot. Firmware re-reads the tables
-continuously, so `fan-idle-duty <percent>` applies immediately and is how to find the stall floor by
-ear, there being no tachometer to read. Values set that way are lost on reboot; the declared one is
-`runtimeEnv.IDLE_DUTY`. Going too low can only stall the fans below 45C, where the untouched 22%
-record takes over. 10% is quiet and holds temperature at 38.5C idle, 2C above stock. Community profiles
-for this board put idle between 6% (`ultrasilenzioso`) and 12% (`silenzioso`), so 10% is ordinary and
-going down to 6% is known not to stall these fans.
+The EC reverts to stock on power cycle, hence the boot-time oneshot. `fan-idle-duty <percent>` applies
+immediately (firmware re-reads the tables) and is how to find the stall floor by ear; it is lost on
+reboot, the declared value is `runtimeEnv.IDLE_DUTY`. Too low can only stall the fans below 45C, where
+the untouched 22% record takes over. 10% holds 38.5C idle, 2C above stock; community profiles for this
+board idle at 6-12%, and 6% is known not to stall these fans.
 
 A BIOS update is not a fan fix: 1.10 and 1.11 are EC firmware bumps plus a Windows WOL fix. An EC
 firmware change could move these offsets, so the script vets each record's temperature before writing.
