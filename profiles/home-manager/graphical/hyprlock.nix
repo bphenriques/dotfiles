@@ -1,7 +1,8 @@
 { pkgs, config, lib, ... }:
 let
   colors = config.lib.stylix.colors;
-  font = config.stylix.fonts.monospace.name;
+  # The kernel draws the tuigreet console in Terminus (TER16x32) on a HiDPI panel.
+  font = "Terminus (TTF)";
   # Without an outline hyprlock colours the whole box on failure and Caps Lock, so only a faint tint.
   tint = base: "rgba(${colors."${base}-rgb-r"}, ${colors."${base}-rgb-g"}, ${colors."${base}-rgb-b"}, 0.2)";
   lockPackage = pkgs.writeShellApplication {
@@ -25,6 +26,7 @@ let
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   my.programs.session.exec.lock = lib.getExe lockPackage;
+  home.packages = [ pkgs.terminus_font_ttf ];
   # Black, a username and a password prompt: the same look as the tuigreet login.
   programs.hyprlock = {
     enable = true;
@@ -37,7 +39,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         {
           text = "$USER";
           font_family = font;
-          font_size = 28;
+          font_size = 33;
           color = "rgb(${colors.base05})";
           position = "0, 60";
           halign = "center";
@@ -46,7 +48,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         {
           text = "cmd[update:1000] ${lib.getExe keyboardLayout}";
           font_family = font;
-          font_size = 16;
+          font_size = 22;
           color = "rgb(${colors.base03})";
           # Inside the password box, at its right edge.
           position = "170, -20";
@@ -61,7 +63,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         halign = "center";
         valign = "center";
         outline_thickness = 0;
+        rounding = 0;
         dots_center = true;
+        dots_text_format = "*";
+        dots_size = 0.3;
         fade_on_empty = false;
         placeholder_text = "_";
         fail_text = ''<span foreground="##${colors.base08}">$FAIL ($ATTEMPTS)</span>'';

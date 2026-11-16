@@ -12,7 +12,20 @@ pkgs.writeShellApplication {
     API_KEY_FILE = apiKeyFile;
   };
   text = ''
-    exec nu ${script} "$@"
+    if [ "''${1:-}" != ask ]; then exec nu ${script} "$@"; fi
+
+    # quick-key stops a turn by ending this command, but the run lives on the guest: stop it there, once `ask` has named it.
+    RUN_FILE=$(mktemp)
+    export RUN_FILE
+    trap 'rm -f "$RUN_FILE"' EXIT
+    stop() {
+      until [ -s "$RUN_FILE" ] || ! kill -0 "$turn" 2>/dev/null; do sleep 0.1; done
+      if [ -s "$RUN_FILE" ]; then nu ${script} stop "$(cat "$RUN_FILE")"; fi
+    }
+    nu ${script} "$@" <&0 &
+    turn=$!
+    trap stop TERM
+    while kill -0 "$turn" 2>/dev/null; do wait "$turn" || true; done
   '';
   meta.platforms = lib.platforms.all;
 }

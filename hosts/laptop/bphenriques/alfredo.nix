@@ -10,16 +10,11 @@ in
 {
   home.packages = [ package ];
 
-  programs.quick-key.settings.plugins.ask.settings = {
+  programs.quick-key.settings.plugins.ask = {
     title = "Alfredo";
     glyph = self.lib.glyphs."fa-user_tie";
     ask = "${alfredo} ask";
-    approve = "${alfredo} approve";
-    stop = "${alfredo} stop";
     notify = "${lib.getExe pkgs.libnotify} --app-name=Alfredo --action=default=Open";   # dunst's left click runs `default`
-    # Any image type: the adapter converts what it gets.
-    pasteImage = let wl-paste = lib.getExe' pkgs.wl-clipboard "wl-paste"; in
-      ''sh -c 'type=$(${wl-paste} --list-types | ${lib.getExe pkgs.gnugrep} -m1 "^image/") && ${wl-paste} --type "$type" > "$1"' paste-image'';
     open = config.my.programs.terminal.execApp { title = "Alfredo"; cmd = "${alfredo} open"; };
     shortcut = key;
   };

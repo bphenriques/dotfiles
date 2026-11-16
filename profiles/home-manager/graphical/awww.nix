@@ -11,7 +11,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ self.packages.awww-util ];
 
   programs.quick-key.settings = {
-    plugins.wallpaper.settings.file = stateFile;
+    plugins.wallpaper.file = stateFile;
     menu.entries = lib.mkOrder 600 [
       { key = "w"; desc = "Wallpaper"; width = 640; status = "wallpaper"; submenu = [
         { key = [ "Left" "Right" ]; desc = "Wallpaper"; icon = self.lib.glyphs."md-image_multiple"; cmd = [ "${awww-util} prev ${wallpapers}" "${awww-util} next ${wallpapers}" ]; keepOpen = true; }

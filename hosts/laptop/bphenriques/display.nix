@@ -41,16 +41,14 @@ in
   programs.quick-key.settings = {
     brightness.adjust = brightness;
     plugins.displayLayout = {
-      source = "command";
-      settings = {
-        read = "${displayctl} status";
-        select = "${displayctl} layout";
-        items = layouts;
-      };
+      type = "command";
+      read = "${displayctl} status";
+      select = "${displayctl} layout";
+      items = layouts;
     };
     menu.entries = lib.mkOrder 500 [
       { key = menuKey; desc = "Display"; status = "brightness"; list = "displayLayout"; submenu = [
-        { key = [ "Down" "Up" ]; desc = "Brightness"; icon = self.lib.glyphs."md-brightness_6"; cmd = brightness; keepOpen = true; requires.enabled = [ panel ]; }
+        { key = [ "Down" "Up" ]; desc = "Brightness"; action = "brightness"; }
         { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
       ]; }
     ];

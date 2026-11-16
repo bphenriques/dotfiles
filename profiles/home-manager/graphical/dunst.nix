@@ -10,7 +10,7 @@ let
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.quick-key.extraPackages = [ config.services.dunst.package pkgs.dbus ];   # the dunst plugin calls dunstctl and dbus-monitor
-  programs.quick-key.settings.plugins.dunst.settings.shortcut = pauseKey;
+  programs.quick-key.settings.plugins.dunst.shortcut = pauseKey;
   programs.quick-key.settings.menu.header.right = lib.mkBefore [ "dunst" ];
 
   services.dunst = {

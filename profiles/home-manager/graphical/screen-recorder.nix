@@ -38,9 +38,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     })
   ];
 
-  programs.quick-key.settings.plugins.recording = {
-    settings = { file = stateFile; stop = "${screen-recorder} stop"; };
-  };
+  programs.quick-key.settings.plugins.recording = { file = stateFile; stop = "${screen-recorder} stop"; };
 
   my.programs.niri = {
     bindings = {

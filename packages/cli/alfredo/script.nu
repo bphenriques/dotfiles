@@ -67,7 +67,7 @@ def plain [] {
 }
 
 # One server-sent event line, read with the line before it (its `event:` name), as what `ask` prints, or nothing.
-def frame [previous: string, line: string, session: string] {
+def frame [previous: string, line: string] {
   # Not a stream at all: the API refused the request.
   if ($line | str starts-with "{") {
     return {error: ($line | from json | get --optional error.message | default "No answer")}
@@ -75,12 +75,12 @@ def frame [previous: string, line: string, session: string] {
   if not ($line | str starts-with "data: ") { return null }
   let data = $line | str substring 6.. | from json
   match ($previous | str replace "event: " "") {
-    "run.started" => {run: $data.run_id, session: $session}
-    # Waits for `approve`, or fails closed after approvals.timeout.
+    "run.started" => {run: $data.run_id}
+    # Waits for its answer, or fails closed after approvals.timeout.
     "approval.request" => {approval: ($data.command? | default $data.description? | default "an action")}
     # An MCP tool by its server (mcp__meals__plan_week: meals), the rest by name.
     "tool.started" => {status: (if ($data.tool_name | str starts-with "mcp__") { $data.tool_name | split row "__" | get 1 } else { $data.tool_name })}
-    "assistant.completed" => (if ($data.interrupted? | default false) { {error: "Stopped"} } else { {session: $session, reply: ($data.content | plain)} })
+    "assistant.completed" => (if ($data.interrupted? | default false) { {error: "Stopped"} } else { {reply: ($data.content | plain)} })
     "error" => {error: $data.message}
     _ => null
   }
@@ -92,9 +92,12 @@ def "main open" [session: string = ""] {
   exec ssh -t $env.SSH_HOST sudo -u hermes hermes --tui ...$resume
 }
 
-# Answers a run's pending approval: allow (once) or deny.
-def "main approve" [run: string, answer: string] {
-  {choice: $answer} | to json --raw | api $"/v1/runs/($run | checked)/approval" | ignore
+# A run's controls: its name for the wrapper to stop it by, and stdin's lines (allow once, or deny) answering its approvals.
+def control [run: string] {
+  $run | save --force $env.RUN_FILE
+  job spawn {
+    open --raw /dev/stdin | lines | each {|answer| {choice: $answer} | to json --raw | api $"/v1/runs/($run | checked)/approval" | ignore } | ignore
+  }
 }
 
 # Stops a run on the guest, not only its stream here.
@@ -110,22 +113,23 @@ def message [prompt: string, image: string] {
     | where {|part| $part.type != "text" or $part.text != "" }
 }
 
-# One turn, with an image when given. Prints a JSON object per line: {"run", "session"} first, {"status"} for each tool it
-# uses, {"approval"} when it waits for one, then {"session", "reply"} or {"error"}.
+# One turn, with an image when given. Prints a JSON object per line: {"session"} first, {"status"} for each tool it uses,
+# {"approval"} when it waits for one, answered on stdin, then {"reply"} or {"error"}.
 def "main ask" [prompt: string, session: string = "", image: string = ""] {
   let session = if $session != "" { try { $session | checked } catch { fail "Not a session" } } else {
     let created = try { '{}' | api /api/sessions | from json } catch { fail }
     $created.session?.id? | default { fail ($created.error?.message? | default "Could not start a session") } | checked
   }
+  print ({session: $session} | to json --raw)
   # For this turn only, so the session keeps its Markdown when it moves to the terminal.
   let printed = {message: (message $prompt $image), instructions: $instructions} | to json --raw
     | api $"/api/sessions/($session)/chat/stream"
     | lines
     | prepend ""
     | window 2
-    | each {|pair| frame $pair.0 $pair.1 $session }
+    | each {|pair| frame $pair.0 $pair.1 }
     | compact
-    | each {|answer| print ($answer | to json --raw); $answer }
+    | each {|answer| if $answer.run? != null { control $answer.run } else { print ($answer | to json --raw) }; $answer }
   if not ($printed | any {|answer| $answer.reply? != null or $answer.error? != null }) { fail }
 }
 

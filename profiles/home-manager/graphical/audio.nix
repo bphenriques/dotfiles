@@ -4,12 +4,13 @@ let
   inherit (cfg) glyphs;
   wpctl = lib.getExe' pkgs.wireplumber "wpctl";
   default = { sink = "@DEFAULT_AUDIO_SINK@"; source = "@DEFAULT_AUDIO_SOURCE@"; };
-  volume = kind: [ "${wpctl} set-volume ${default.${kind}} 5%-" "${wpctl} set-volume -l 1.5 ${default.${kind}} 5%+" ];
+  maxVolume = 150;   # percent, for the keys and the menu alike
+  volume = kind: [ "${wpctl} set-volume ${default.${kind}} 5%-" "${wpctl} set-volume -l ${toString (maxVolume / 100.0)} ${default.${kind}} 5%+" ];
   mute = kind: "${wpctl} set-mute ${default.${kind}} toggle";
   menuPins = map (pin: { inherit (pin) match label; icon = glyphs.${pin.type}; });
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  programs.quick-key.settings.audio.max = 150;
+  programs.quick-key.settings.audio.max = maxVolume;
 
   programs.quick-key.settings.menu.entries = lib.mkOrder 100 [
     { key = "a"; desc = "Audio output"; status = "sink"; list = "sinks"; pins = menuPins cfg.pins.sinks; submenu = [
