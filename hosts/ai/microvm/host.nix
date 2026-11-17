@@ -16,6 +16,7 @@ in
           allowLan = [
             { host = "storage"; ports = [ 445 ]; }   # its NAS doors
             { inherit (config.fleet.forge.sshEndpoint) host; ports = [ config.fleet.forge.sshEndpoint.port ]; }   # its own repo
+            { host = "compute"; ports = [ 443 ]; }   # Radicale, through Traefik's dav. route
           ];
         };
       }

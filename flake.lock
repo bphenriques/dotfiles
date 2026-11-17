@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794849636,
-        "narHash": "sha256-4Pd0UF7EDPd9QKGP1SU+RnXraBhbB/eTzOsWNLsn3Bc=",
+        "lastModified": 1794931931,
+        "narHash": "sha256-BrXh2s8Sq2ur6ZCaDL2Dr9y2yJPt41uitlRJUQU4pRU=",
         "owner": "bphenriques",
         "repo": "agents-alfredo",
-        "rev": "674344b301aeb2f0ce6ed887995685de7a634997",
+        "rev": "e2f068a0b1247024d6b05905a13dc8c30a2e27ca",
         "type": "github"
       },
       "original": {
@@ -181,11 +181,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793616597,
-        "narHash": "sha256-5v51QkO3Blc9oHQM/Xlnyi4Lkmog3dxWpcDOv/CvZnE=",
+        "lastModified": 1794930998,
+        "narHash": "sha256-j5yertbMoqwKx+aXM4jwTJKNsppEpwCkxx9rI/YWm2U=",
         "ref": "refs/heads/main",
-        "rev": "b53890048ca593a093c9e895c558b8af3fb358e5",
-        "revCount": 154,
+        "rev": "2a3b4334776437f5dcc8baee9897e17fd869c86d",
+        "revCount": 161,
         "type": "git",
         "url": "ssh://git@github.com/bphenriques/dotfiles-private"
       },
@@ -811,11 +811,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1793973636,
-        "narHash": "sha256-saU8t7GpOqz343p+9UomXaKmQBE3PhAUttD5cWZhhZg=",
+        "lastModified": 1794929012,
+        "narHash": "sha256-4BWgypMW8lTPc+M2oU3PqmxtApU7N6PsiHdejRSRcZI=",
         "owner": "bphenriques",
         "repo": "selfhost-nix",
-        "rev": "9afd7f93729b9a10bf24e01728b8635381cc7cfa",
+        "rev": "ac8c0eb419415bda724a63ec5ea6ff5905bbebf9",
         "type": "github"
       },
       "original": {

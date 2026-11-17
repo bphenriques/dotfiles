@@ -64,7 +64,7 @@ in
     ];
   };
 
-  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts ];   # `sudo -u hermes cookidoo login` once; `meals propose` to check
+  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts alfredo.agenda ];   # `sudo -u hermes cookidoo login` once; `meals propose` or `agenda list` to check
 
   # The mounts force their group with 0660, so membership is the whole of the agent's write access.
   users.users.hermes.extraGroups = [ "vault" "recipes" ];

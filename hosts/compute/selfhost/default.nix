@@ -163,15 +163,16 @@ in
 
     users = private.users // extraUsers;
 
-    # agent-alfredo-vm's forge identity: the key is generated in the guest, so only the public half is declared here.
+    # agent-alfredo-vm's identity: the key is generated in the guest, so only the public half is declared here.
     serviceAccounts.personal-agent = {
-      description = "agent-alfredo-vm's forge principal, for git over SSH to its inbox repository";
+      description = "agent-alfredo-vm's principal, for git over SSH to its inbox repository and the calendars it is granted";
       services.gitea = {
         enable = true;
         sshKeys = [
           { key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOHDIQhIOmKJMbCGKncBgpYnKnReeUR4TK1CgxMZbbj+ personal-agent@agent-vm"; }
         ];
       };
+      services.radicale.enable = true;   # its generated password is copied into the guest's secrets for calendars-sync
     };
   };
 

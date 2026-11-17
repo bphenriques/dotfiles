@@ -4,6 +4,7 @@ let
 in
 {
   imports = [
+    ./calendars-sync.nix
     ./cookidoo-sync.nix
     ./hermes-agent.nix
   ];
@@ -17,6 +18,8 @@ in
       modelUrl = "http://${gateway}:${toString config.fleet.ai.endpoint.port}/v1";
       inherit (config.fleet.ai) model;
       cookidooCollection = private.cookidoo.collection;
+      inherit (alfredoVm) calendarsRoot;
+      defaultCalendar = private.calendars.default;
     };
   };
 }
