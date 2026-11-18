@@ -10,8 +10,10 @@ let
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.quick-key.extraPackages = [ config.services.dunst.package pkgs.dbus ];   # the dunst plugin calls dunstctl and dbus-monitor
-  programs.quick-key.settings.plugins.dunst.shortcut = pauseKey;
-  programs.quick-key.settings.menu.header.right = lib.mkBefore [ "dunst" ];
+  programs.quick-key.settings.plugins.dunst = { };
+  programs.quick-key.settings.menu.header.right = lib.mkBefore [
+    { key = "d"; desc = "Notifications"; status = "dunst"; cmd = "${dunstctl} set-paused toggle"; keepOpen = true; shortcut = pauseKey; }
+  ];
 
   services.dunst = {
     enable = true;
@@ -33,7 +35,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         gap_size = 12;
         padding = 12;
         horizontal_padding = 20;
-        frame_width = 2;
+        frame_width = 1;
+        frame_color = colors.withHashtag.base03;
         icon_position = "left";
         min_icon_size = 64;
         max_icon_size = 64;
@@ -59,18 +62,11 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         mouse_right_click = "close_all";
       };
 
-      urgency_low = {
-        frame_color = colors.withHashtag.base0B + backgroundOpacity;
-        timeout = 3;
-      };
-
-      urgency_normal = {
-        frame_color = colors.withHashtag.base0D + backgroundOpacity;
-        timeout = 8;
-      };
+      urgency_low.timeout = 3;
+      urgency_normal.timeout = 8;
 
       urgency_critical = {
-        frame_color = colors.withHashtag.base08 + backgroundOpacity;
+        frame_color = colors.withHashtag.base08;
         highlight = "${colors.withHashtag.base0F}, ${colors.withHashtag.base08}";
         timeout = 0;
       };

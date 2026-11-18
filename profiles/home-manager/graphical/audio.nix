@@ -13,15 +13,15 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.quick-key.settings.audio.max = maxVolume;
 
   programs.quick-key.settings.menu.entries = lib.mkOrder 100 [
-    { key = "a"; desc = "Audio output"; status = "sink"; list = "sinks"; pins = menuPins cfg.pins.sinks; submenu = [
-      { key = [ "Down" "Up" ]; desc = "Volume"; action = "sinkVolume"; }
-      { key = "m"; desc = "Mute"; action = "sinkMute"; }
+    { key = "a"; desc = "Audio output"; width = 640; status = "sink"; list = "sinks"; pins = menuPins cfg.pins.sinks; submenu = [
+      { key = [ "Down" "Up" ]; desc = "Output volume"; action = "sinkVolume"; }
+      { key = "m"; desc = "Mute output"; action = "sinkMute"; }
       { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = "${lib.getExe pkgs.pavucontrol} --tab=3"; }
     ]; }
 
-    { key = "A"; desc = "Audio input"; status = "source"; list = "sources"; pins = menuPins cfg.pins.sources; submenu = [
-      { key = [ "Down" "Up" ]; desc = "Volume"; icon = glyphs.microphone; action = "sourceVolume"; }
-      { key = "m"; desc = "Mute"; icon = glyphs.microphoneOff; action = "sourceMute"; }
+    { key = "A"; desc = "Audio input"; width = 640; status = "source"; list = "sources"; pins = menuPins cfg.pins.sources; submenu = [
+      { key = [ "Down" "Up" ]; desc = "Input volume"; icon = glyphs.microphone; action = "sourceVolume"; }
+      { key = "m"; desc = "Mute input"; icon = glyphs.microphoneOff; action = "sourceMute"; }
       { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = "${lib.getExe pkgs.pavucontrol} --tab=4"; }
     ]; }
   ];

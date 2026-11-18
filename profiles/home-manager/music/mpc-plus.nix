@@ -42,14 +42,18 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
-  programs.quick-key.settings.menu.entries = lib.mkOrder 700 [
-    { key = "m"; desc = "Music"; status = "music"; submenu = [
+  programs.quick-key.settings.menu.entries = lib.mkOrder 1000 [
+    { key = "m"; desc = "Music"; width = 640; status = "music"; header = {
+      left = [ { desc = "Song"; status = "music"; format = "{song}"; } ];
+      right = [
+        { key = "z"; desc = "Repeat"; icon = glyphs.repeat; activeWhen = "repeat"; cmd = "${mpc-plus} toggle-repeat"; keepOpen = true; }
+        { key = "x"; desc = "Shuffle"; icon = glyphs.shuffle; activeWhen = "shuffle"; cmd = "${mpc-plus} toggle-random"; keepOpen = true; }
+      ];
+    }; submenu = [
       { key = "p"; desc = "Play/pause"; icon = self.lib.glyphs."md-play_pause"; cmd = "${mpc-plus} play-pause"; keepOpen = true; }
       { key = "s"; desc = "Stop"; icon = self.lib.glyphs."md-stop"; cmd = "${mpc-plus} stop"; }
       { key = [ "Left" "Right" ]; desc = "Track"; icon = self.lib.glyphs."md-skip_next"; cmd = [ "${mpc-plus} previous" "${mpc-plus} next" ]; keepOpen = true; }
       { key = [ "Down" "Up" ]; desc = "Volume"; icon = self.lib.glyphs."md-volume_high"; cmd = [ "${mpc-plus} volume-decrease" "${mpc-plus} volume-increase" ]; keepOpen = true; }
-      { key = "z"; desc = "Repeat"; icon = glyphs.repeat; activeWhen = "repeat"; cmd = "${mpc-plus} toggle-repeat"; keepOpen = true; }
-      { key = "x"; desc = "Shuffle"; icon = glyphs.shuffle; activeWhen = "shuffle"; cmd = "${mpc-plus} toggle-random"; keepOpen = true; }
       { key = "space"; desc = "Play file..."; icon = self.lib.glyphs."md-file_music"; cmd = "${mpc-plus} dmenu-file-exec play"; }
       { key = "r"; desc = "Radio..."; icon = self.lib.glyphs."md-radio"; cmd = "${mpc-plus} dmenu-radio-stream"; }
       { key = "a"; desc = "Play all shuffled"; icon = self.lib.glyphs."md-playlist_play"; cmd = "${mpc-plus} play-shuffled"; }

@@ -47,8 +47,8 @@ in
       items = layouts;
     };
     menu.entries = lib.mkOrder 500 [
-      { key = menuKey; desc = "Display"; status = "brightness"; list = "displayLayout"; submenu = [
-        { key = [ "Down" "Up" ]; desc = "Brightness"; action = "brightness"; }
+      { key = menuKey; desc = "Display"; width = 640; status = "displayLayout"; list = "displayLayout"; submenu = [
+        { key = [ "Down" "Up" ]; desc = "Brightness"; action = "brightness"; status = "brightness"; }
         { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
       ]; }
     ];

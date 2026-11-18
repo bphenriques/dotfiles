@@ -52,8 +52,25 @@ let
     name = "vdirsyncer-alfredo";
     text = ''exec ${lib.getExe pkgs.vdirsyncer} -c ${conf} "$@"'';
   };
+
+  # One sync at a time, the timer's or Alfredo's after a change: vdirsyncer has no lock.
+  sync = pkgs.writeShellApplication {
+    name = "calendars-sync";
+    runtimeInputs = [ pkgs.util-linux vdirsyncer ];
+    text = ''
+      # Before the sign-in, sync would wait for a browser.
+      [ -e "${state}/google-token.json" ] || { echo "Not signed in to Google yet"; exit 0; }
+      exec 9>"${state}/lock"
+      flock 9
+      vdirsyncer-alfredo discover
+      vdirsyncer-alfredo sync
+      vdirsyncer-alfredo metasync
+    '';
+  };
 in
 {
+  _module.args.calendarsSync = sync;
+
   environment.systemPackages = [ vdirsyncer ];   # `sudo -u hermes vdirsyncer-alfredo discover` signs in once
 
   sops.secrets."calendar/google/clientId".owner = "hermes";
@@ -62,11 +79,10 @@ in
 
   systemd.services.calendars-sync = {
     description = "Sync Alfredo's calendars with their servers";
-    unitConfig.ConditionPathExists = "${state}/google-token.json";   # before the sign-in, sync would wait for a browser
     serviceConfig = {
       Type = "oneshot";
       User = "hermes";
-      ExecStart = map (command: "${lib.getExe vdirsyncer} ${command}") [ "discover" "sync" "metasync" ];
+      ExecStart = lib.getExe sync;
       ProtectSystem = "strict";
       ReadWritePaths = [ alfredoVm.stateRoot ];
       PrivateTmp = true;

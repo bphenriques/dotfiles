@@ -1,4 +1,4 @@
-{ config, pkgs, fleetFacts, alfredoVm, private, inputs, ... }:
+{ config, lib, pkgs, fleetFacts, alfredoVm, private, inputs, calendarsSync, ... }:
 let
   inherit (config.my.microvm.guest) gateway;
 in
@@ -20,6 +20,7 @@ in
       cookidooCollection = private.cookidoo.collection;
       inherit (alfredoVm) calendarsRoot;
       defaultCalendar = private.calendars.default;
+      syncCalendars = lib.getExe calendarsSync;
     };
   };
 }

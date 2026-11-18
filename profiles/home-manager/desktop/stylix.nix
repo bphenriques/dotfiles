@@ -52,7 +52,10 @@
       size = 16;
     };
 
-    opacity.terminal = lib.mkIf pkgs.stdenv.hostPlatform.isLinux 0.92; # Needed for niri blur to show through
+    opacity = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {  # Needed for niri blur to show through
+      terminal = 0.92;
+      popups = 0.92;
+    };
 
     targets = {
       font-packages.enable = true;

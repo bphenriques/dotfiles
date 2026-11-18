@@ -29,7 +29,7 @@ plugin code never enters the vault sync and is not reachable this way.
 ## Calendars
 
 `calendars-sync` keeps the calendars the agent reads and writes as a vdir in `/var/lib/hermes/calendars`, 2 minutes
-after boot and every 30 minutes, as `hermes`. A failed sync shows as a failed unit.
+after boot, every 30 minutes and after each change Alfredo makes, as `hermes`. A failed sync shows as a failed unit.
 
 - **Radicale**: every collection of the owner named in dotfiles-private, as compute's `personal-agent`. The owner's
   grant lets it change items and add collections, never delete, replace, rename or share one, and every change is a
@@ -82,6 +82,7 @@ journalctl -u hermes-agent -f      # tool calls and model errors
 sudo -u hermes hermes chat         # CLI against the same state
 sudo systemctl start cookidoo-sync # sync the Cookidoo collection now
 sudo systemctl start calendars-sync # sync the calendars now
+sudo -u hermes agenda list         # today's events and open tasks, as Alfredo sees them
 ```
 
 To rotate the API key, delete `/var/lib/homelab-secrets/hermes-api-server-key` on compute, deploy it, and copy the new value into this guest's `secrets.yaml` as `hermes.api-key`.

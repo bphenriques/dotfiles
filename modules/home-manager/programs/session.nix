@@ -23,7 +23,7 @@ let
   sessionActions = [
     { id = "session-lock";      key = "l"; symbol = self.lib.glyphs."md-lock"; label = "Lock";                 exec = cfg.exec.lock; }
     { id = "session-suspend";   key = "s"; symbol = self.lib.glyphs."md-power_sleep"; label = "Suspend";              exec = cfg.exec.suspend; }
-    { id = "session-shutdown";  key = "S"; symbol = self.lib.glyphs."md-power"; label = "Shutdown";             exec = cfg.exec.shutdown; }
+    { id = "session-shutdown";  key = "P"; symbol = self.lib.glyphs."md-power"; label = "Power off";            exec = cfg.exec.shutdown; }
     { id = "session-reboot";    key = "R"; symbol = self.lib.glyphs."md-restart"; label = "Reboot";               exec = cfg.exec.reboot; }
   ] ++ systemd-boot-windows ++ [
     { id = "session-efi";       key = "E"; symbol = self.lib.glyphs."md-chip"; label = "Reboot to EFI setup";  exec = cfg.exec.reboot-efi; }
