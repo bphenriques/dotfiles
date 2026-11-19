@@ -19,6 +19,8 @@ def checked [] {
 }
 
 const column_width = 30
+# A Markdown table's separator row (outer pipes are optional).
+const table_separator = '^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?$'
 
 # Words in lines of at most `width` characters; a longer word keeps its own line.
 def wrap [width: int] {
@@ -33,7 +35,7 @@ def wrap [width: int] {
 # Markdown tables as aligned columns, long cells wrapped inside theirs. Tools write tables (the meals plan), and the model
 # relays them as written, whatever it is asked.
 def untable [] {
-  let separator = '^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?$'
+  let separator = $table_separator
   # Runs of lines with a pipe; a run is a table when it has a separator row (outer pipes are optional in Markdown).
   let blocks = $in | lines | reduce --fold [] {|line, blocks|
     let row = $line | str contains "|"
@@ -66,6 +68,20 @@ def plain [] {
   untable | str replace --all --regex '\*\*|__|`' '' | str replace --all --regex '(?m)^#+ ' ''
 }
 
+# The reply as `ask` prints it: plain text, `table` when it held one (its rows stay whole), and a numbered list ending it
+# (1. … 2. …) as the `options` a digit picks, taken out of the text.
+def answer []: string -> record {
+  let content = $in
+  let text = $content | plain | str trim
+  let lines = $text | lines
+  let numbered = $lines | reverse | take while {|line| $line =~ '^\s*\d+[.)]\s+\S' } | reverse
+  let ordered = $numbered | enumerate | all {|it| ($it.item | str trim | parse --regex '^(?<n>\d+)' | get n.0 | into int) == $it.index + 1 }
+  let options = if ($numbered | length) >= 2 and $ordered and ($lines | length) > ($numbered | length) { $numbered | each { str replace --regex '^\s*\d+[.)]\s+' '' | str trim } } else { [] }
+  {reply: ($lines | first (($lines | length) - ($options | length)) | str join "\n" | str trim)}
+    | merge (if ($options | is-empty) { {} } else { {options: $options} })
+    | merge (if ($content | lines | any {|line| ($line | str trim) =~ $table_separator }) { {table: true} } else { {} })
+}
+
 # One server-sent event line, read with the line before it (its `event:` name), as what `ask` prints, or nothing.
 def frame [previous: string, line: string] {
   # Not a stream at all: the API refused the request.
@@ -79,8 +95,8 @@ def frame [previous: string, line: string] {
     # Waits for its answer, or fails closed after approvals.timeout.
     "approval.request" => {approval: ($data.command? | default $data.description? | default "an action")}
     # An MCP tool by its server (mcp__meals__plan_week: meals), the rest by name.
-    "tool.started" => {status: (if ($data.tool_name | str starts-with "mcp__") { $data.tool_name | split row "__" | get 1 } else { $data.tool_name })}
-    "assistant.completed" => (if ($data.interrupted? | default false) { {error: "Stopped"} } else { {reply: ($data.content | plain)} })
+    "tool.started" => {status: (if ($data.tool_name | str starts-with "mcp__") { $data.tool_name | split row "__" | get 1 } else { $data.tool_name }), tool: $data.tool_name}
+    "assistant.completed" => (if ($data.interrupted? | default false) { {error: "Stopped"} } else { $data.content | answer })
     "error" => {error: $data.message}
     _ => null
   }
@@ -129,8 +145,10 @@ def "main ask" [prompt: string, session: string = "", image: string = ""] {
     | window 2
     | each {|pair| frame $pair.0 $pair.1 }
     | compact
-    | each {|answer| if $answer.run? != null { control $answer.run } else { print ($answer | to json --raw) }; $answer }
+    | each {|answer| if $answer.run? != null { control $answer.run } else { print ($answer | reject --optional tool | to json --raw) }; $answer }
   if not ($printed | any {|answer| $answer.reply? != null or $answer.error? != null }) { fail }
+  # The agenda's changes reach this machine only through a sync: after a turn that used one of its tools that write (all but list_*).
+  if ($env.SYNC? | default "") != "" and ($printed | any {|answer| ($answer.tool? | default "") =~ '^mcp__agenda__(?!list_)' }) { ^sh -c $env.SYNC }
 }
 
 def main [] {

@@ -30,7 +30,6 @@ let
       mpc-plus = pkgs.callPackage ./desktop/mpc-plus { };
       displayctl = pkgs.callPackage ./desktop/displayctl { };
       calendar-cli = pkgs.callPackage ./desktop/calendar-cli { };
-      alfredo-task = pkgs.callPackage ./desktop/alfredo-task { inherit (b) writeNushellScript; };
       handheld-sync = pkgs.callPackage ./devices/handheld-sync { inherit (b) writeNushellScript; };
     }
   );

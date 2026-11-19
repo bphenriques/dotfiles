@@ -1,5 +1,5 @@
-# The agent's guest as the host that runs it says: its SSH name, its API's port and where it keeps the API key.
-{ lib, pkgs, writeNushellScript, sshHost ? "agent-alfredo-vm", apiPort ? 8642, apiKeyFile ? "/run/secrets/hermes/api-key" }:
+# The agent's guest as the host that runs it says: its SSH name, its API's port, where it keeps the API key, and the sync that brings the agenda's changes here.
+{ lib, pkgs, writeNushellScript, sshHost ? "agent-alfredo-vm", apiPort ? 8642, apiKeyFile ? "/run/secrets/hermes/api-key", syncCommand ? "" }:
 let
   script = writeNushellScript "alfredo" ./script.nu;
 in
@@ -10,6 +10,7 @@ pkgs.writeShellApplication {
     SSH_HOST = sshHost;
     API_PORT = toString apiPort;
     API_KEY_FILE = apiKeyFile;
+    SYNC = syncCommand;
   };
   text = ''
     if [ "''${1:-}" != ask ]; then exec nu ${script} "$@"; fi
