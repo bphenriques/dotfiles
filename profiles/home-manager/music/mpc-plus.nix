@@ -42,6 +42,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     };
   };
 
+  # Short lists quick-key shows as levels, the station playing and the server in use lit.
+  programs.quick-key.settings.plugins = {
+    radio = { type = "command"; read = "${mpc-plus} radio-items ${self.lib.glyphs."md-radio"}"; select = "${mpc-plus} play-radio"; };
+    mpdServer = { type = "command"; read = "${mpc-plus} server-items ${self.lib.glyphs."md-server"}"; select = "${mpc-plus} select-server"; };
+  };
+
   programs.quick-key.settings.menu.entries = lib.mkOrder 1000 [
     { key = "m"; desc = "Music"; width = 640; status = "music"; header = {
       left = [ { desc = "Song"; status = "music"; format = "{song}"; } ];
@@ -55,9 +61,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       { key = [ "Left" "Right" ]; desc = "Track"; icon = self.lib.glyphs."md-skip_next"; cmd = [ "${mpc-plus} previous" "${mpc-plus} next" ]; keepOpen = true; }
       { key = [ "Down" "Up" ]; desc = "Volume"; icon = self.lib.glyphs."md-volume_high"; cmd = [ "${mpc-plus} volume-decrease" "${mpc-plus} volume-increase" ]; keepOpen = true; }
       { key = "f"; desc = "Play file..."; icon = self.lib.glyphs."md-file_music"; cmd = "${mpc-plus} dmenu-file-exec play"; }
-      { key = "r"; desc = "Radio..."; icon = self.lib.glyphs."md-radio"; cmd = "${mpc-plus} dmenu-radio-stream"; }
+      { key = "r"; desc = "Radio"; icon = self.lib.glyphs."md-radio"; list = "radio"; }
       { key = "a"; desc = "Play all shuffled"; icon = self.lib.glyphs."md-playlist_play"; cmd = "${mpc-plus} play-shuffled"; }
-      { key = "d"; desc = "Server..."; icon = self.lib.glyphs."md-server"; cmd = "${mpc-plus} dmenu-select-server"; }
+      { key = "d"; desc = "Server"; icon = self.lib.glyphs."md-server"; list = "mpdServer"; }
     ]; }
   ];
 }

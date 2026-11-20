@@ -31,7 +31,6 @@ in
           "battery"
           { desc = "Tray"; list = "tray"; limit = 5; }
         ];
-        menu.picker = "${lib.getExe config.programs.fuzzel.package} --dmenu";
 
         plugins.niriMinimap = { };
 

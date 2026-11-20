@@ -25,13 +25,18 @@ list_title_artist_album() {
 }
 select_title_artist_album() { list_title_artist_album | fuzzel --dmenu --with-nth=2 --accept-nth=1 --counter --placeholder "Search by title, artist, or album..."; }
 
-list_radio_stream() {
-  mpc lsplaylists | while read -r pl; do
-    [[ $pl == radio* ]] || continue
-    printf "%s\t%s\n" "$pl" "$pl"
-  done | LC_ALL=C sort --unique
+list_radio_stream() { mpc lsplaylists | grep '^radio' | LC_ALL=C sort --unique || true; }
+
+# quick-key items (a state line): each radio playlist by name without its prefix, the one playing lit.
+radio_items() {
+  local icon="$1" current pl active
+  current="$(mpc current -f '%file%' 2>/dev/null || true)"
+  list_radio_stream | while read -r pl; do
+    active=false
+    [[ -n $current ]] && mpc -f '%file%' playlist "$pl" | grep -qxF "$current" && active=true
+    jq -cn --arg id "$pl" --arg icon "$icon" --argjson active "$active" '{id: $id, label: ($id | sub("^radio[-_ ]*"; "") | (.[:1] | ascii_upcase) + .[1:]), icon: $icon, active: $active}'
+  done | jq -cs '{items: ., empty: "No radio playlists"}'
 }
-select_radio_stream() { list_radio_stream | fuzzel --dmenu --accept-nth=1 --with-nth="2.."; }
 
 # Runs in a subshell with pipefail so a failing mpc doesn't get masked by magick's exit code.
 _try_mpc_art() {
@@ -163,6 +168,11 @@ load_config() {
 }
 
 config_list_servers() { find -L "${MPC_PLUS_CONFIG_DIR}" -type f -name '*.json' ! -name 'config.json' -exec basename {} ".json" \;; }
+
+# quick-key items (a state line): each configured server, the one in use lit.
+server_items() {
+  config_list_servers | LC_ALL=C sort | jq -cR --arg icon "$1" --arg current "$MPD_HOST_DISPLAY_NAME" '{id: ., label: ((.[:1] | ascii_upcase) + .[1:]), icon: $icon, active: (. == $current)}' | jq -cs '{items: .}'
+}
 config_set_server() {
   local selected="$1"
   local device_file="${MPC_PLUS_CONFIG_DIR}/$selected.json"
@@ -198,18 +208,12 @@ case "${1:-}" in
       esac
     fi
     ;;
-  dmenu-radio-stream)
-    selection="$(select_radio_stream)"
-    if [[ -n $selection ]]; then
-      mpc clear && mpc load "${selection}" && mpc play
-    fi
-    ;;
-  dmenu-select-server)
-    selection="$(config_list_servers | fuzzel --dmenu --mesg "Current: ${MPD_HOST_DISPLAY_NAME}")"
-    if [[ -n $selection ]]; then
-      config_set_server "$selection"
-      _notify -i "${MPC_PLUS_DEVICE_ICON}" "MPD Server: $selection"
-    fi
+  radio-items) radio_items "${2:-}" ;;
+  play-radio) mpc clear && mpc load "$2" && mpc play ;;
+  server-items) server_items "${2:-}" ;;
+  select-server)
+    config_set_server "$2"
+    _notify -i "${MPC_PLUS_DEVICE_ICON}" "MPD Server: $2"
     ;;
   # Long-lived daemon: process substitution (< <(...)) keeps the loop in the main shell so CURRENT_* globals persist.
   # mpc idleloop blocks until an event occurs, so no busy-looping. Outer loop reconnects if MPD restarts.

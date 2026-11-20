@@ -64,7 +64,16 @@ in
     ];
   };
 
-  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts alfredo.agenda ];   # `sudo -u hermes cookidoo login` once; `meals propose` or `agenda list` to check
+  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts alfredo.agenda ]   # `sudo -u hermes cookidoo login` once; `meals propose` or `agenda list` to check
+    # ACP on stdio for the laptop's quick-key, over SSH: hermes-acp as the gateway runs, with its user, home, PATH and workspace.
+    ++ [ (pkgs.writeShellApplication {
+      name = "alfredo-acp";
+      text = ''
+        exec sudo -u hermes env HERMES_HOME=${config.systemd.services.hermes-agent.environment.HERMES_HOME} \
+          HOME=${config.services.hermes-agent.stateDir} PATH=${lib.escapeShellArg config.systemd.services.hermes-agent.environment.PATH} \
+          sh -c 'cd ${config.services.hermes-agent.workingDirectory} && exec hermes-acp'
+      '';
+    }) ];
 
   # The mounts force their group with 0660, so membership is the whole of the agent's write access.
   users.users.hermes.extraGroups = [ "vault" "recipes" ];

@@ -1,29 +1,29 @@
-{ config, lib, pkgs, osConfig, self, ... }:
+{ config, lib, pkgs, self, ... }:
 let
-  package = self.packages.alfredo.override {
-    sshHost = "agent-alfredo-vm";
-    apiPort = osConfig.fleet.ai.assistantEndpoint.port;
-    # Whatever he changes in the calendar or tasks shows once synced, from any surface.
-    syncCommand = config.programs.quick-key.calendarSync.exec.sync;
-  };
-  alfredo = lib.getExe package;
-  key = "Mod+Shift+Space";
+  sshHost = "agent-alfredo-vm";
+  package = self.packages.alfredo.override { inherit sshHost; };
 in
 {
   home.packages = [ package ];
 
   programs.quick-key.settings.plugins.ask = {
     title = "Alfredo";
+    shortcut = "Mod+Shift+Space";
     glyph = self.lib.glyphs."fa-user_tie";
-    ask = "${alfredo} ask";
+    # ACP over SSH: his guest runs hermes-acp as its gateway runs Hermes (alfredo-acp), and the API key never leaves it.
+    ask = "ssh ${sshHost} alfredo-acp";
+    cwd = "/var/lib/hermes/workspace";
+    # Whatever he writes to the agenda shows here once synced, from any surface: after any of its tools that write (all but list_*).
+    toolMatch = "^mcp__agenda__(?!list_)";
+    toolRun = config.programs.quick-key.calendarSync.exec.sync;
     notify = "${lib.getExe pkgs.libnotify} --app-name=Alfredo --action=default=Open";   # dunst's left click runs `default`
-    open = config.my.programs.terminal.execApp { title = "Alfredo"; cmd = "${alfredo} open"; };
-    shortcut = key;
+    open = config.my.programs.terminal.execApp { title = "Alfredo"; cmd = lib.getExe package; };
   };
 
   programs.quick-key.settings.menu.header.right = lib.mkBefore [ "ask" ];
   # The top level's catch-all.
   programs.quick-key.settings.menu.input = { desc = "Ask Alfredo"; plugin = "ask"; };
 
-  my.programs.niri.bindings."${key} repeat=false" = ''spawn-sh "${config.programs.quick-key.exec.ipc} ask activate"'';
+  # Opens the menu with that input focused.
+  my.programs.niri.bindings."Mod+Shift+Space repeat=false" = ''spawn-sh "${config.programs.quick-key.exec.ipc} menu press Tab"'';
 }
