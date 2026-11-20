@@ -48,7 +48,7 @@ in
       "Mod+Ctrl+Space repeat=false" = ''spawn-sh "${cfg.exec.ipc} menu toggle"'';
       # A spawn, not the switch-layout action: only spawns run while locked.
       "${layoutKey} allow-when-locked=true" = ''spawn-sh "${niri} msg action switch-layout next"'';
-      ${keepAwakeKey} = ''spawn-sh "${cfg.exec.ipc} idle toggle"'';
+      ${keepAwakeKey} = ''spawn-sh "${cfg.exec.ipc} keepAwake toggle"'';
     };
   };
 }
