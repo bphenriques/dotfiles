@@ -178,6 +178,7 @@ in
 
   # Upstream's 12h would expire a backup failure before a phone switched off for the weekend reads it.
   services.ntfy-sh.settings.cache-duration = "72h";
+  services.ntfy-sh.settings.upstream-base-url = "https://ntfy.sh"; # iOS wake-up goes through APNs; only a hashed topic and the message ID reach ntfy.sh, the app fetches the body from here
 
   virtualisation = {
     podman.enable = true;
