@@ -9,7 +9,7 @@ MPC_PLUS_CONFIG_DIR="${XDG_CONFIG_HOME}/mpc-plus"
 MPC_PLUS_STATE_DIR="${XDG_STATE_HOME}/mpc-plus"
 MPC_PLUS_SELECTED_HOST="${MPC_PLUS_STATE_DIR}/selected.env"
 
-_notify() { notify-send --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
+_notify() { notify-send --app-name "Music" --category "mpc-plus" --hint string:x-canonical-private-synchronous:mpc-plus --transient "$@"; }
 
 list_title_artist_album() {
   mpc -f '%file%\t%title%\t%artist%\t%album%' listall | while IFS=$'\t' read -r file title artist album; do
@@ -123,22 +123,22 @@ refresh_current_state() {
   cache_artwork "$next" &
 }
 
+# A song change soon after a volume change keeps the level, so the card keeps its meter instead of shrinking under you.
+LAST_MIXER=0
 handle_event() {
+  local volume=""
   case "$1" in
-    player)
-      refresh_current_state
-      _notify -i "$CURRENT_ICON" "$CURRENT_SUMMARY" "$CURRENT_MSG"
-      ;;
-    mixer)
-      local volume
-      volume="$(mpc volume | grep -Eo '[0-9]+' || true)" # mpc volume may return 'n/a' when unavailable
-      if [[ -n $volume ]]; then
-        _notify -i "$CURRENT_ICON" -h "int:value:${volume}" "$CURRENT_SUMMARY" "$CURRENT_MSG"
-      else
-        _notify -i "$CURRENT_ICON" "$CURRENT_SUMMARY" "$CURRENT_MSG"
-      fi
-      ;;
+    player) refresh_current_state ;;
+    mixer) LAST_MIXER=$SECONDS ;;
   esac
+  if (( SECONDS - LAST_MIXER < 10 )); then
+    volume="$(mpc volume | grep -Eo '[0-9]+' || true)" # mpc volume may return 'n/a' when unavailable
+  fi
+  if [[ -n $volume ]]; then
+    _notify -i "$CURRENT_ICON" -h "int:value:${volume}" "$CURRENT_SUMMARY" "$CURRENT_MSG"
+  else
+    _notify -i "$CURRENT_ICON" "$CURRENT_SUMMARY" "$CURRENT_MSG"
+  fi
 }
 
 # shellcheck source=/dev/null

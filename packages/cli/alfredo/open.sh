@@ -4,4 +4,4 @@ if [[ ! $session =~ ^[A-Za-z0-9_-]*$ ]]; then
   echo "Not a session: $session" >&2
   exit 1
 fi
-exec ssh -t "$SSH_HOST" sudo -u hermes hermes --tui ${session:+--resume "$session"}
+exec ssh -t "$SSH_HOST" alfredo tui "$session"

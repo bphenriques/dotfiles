@@ -64,14 +64,19 @@ in
     ];
   };
 
-  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts alfredo.agenda ]   # `sudo -u hermes cookidoo login` once; `meals propose` or `agenda list` to check
-    # ACP on stdio for the laptop's quick-key, over SSH: hermes-acp as the gateway runs, with its user, home, PATH and workspace.
+  environment.systemPackages = [ alfredo.cookidoo alfredo.meals alfredo.drafts alfredo.agenda ]   # see the README's Ops
+    # Hermes as the gateway runs it (user, home, PATH, workspace), for the laptop over SSH: `alfredo acp` is ACP on stdio for quick-key, `alfredo tui [session]` his own interface.
     ++ [ (pkgs.writeShellApplication {
-      name = "alfredo-acp";
+      name = "alfredo";
       text = ''
-        exec sudo -u hermes env HERMES_HOME=${config.systemd.services.hermes-agent.environment.HERMES_HOME} \
-          HOME=${config.services.hermes-agent.stateDir} PATH=${lib.escapeShellArg config.systemd.services.hermes-agent.environment.PATH} \
-          sh -c 'cd ${config.services.hermes-agent.workingDirectory} && exec hermes-acp'
+        case "''${1:-}" in
+          acp) set -- hermes-acp ;;
+          tui) if [ -n "''${2:-}" ]; then set -- hermes --tui --resume "$2"; else set -- hermes --tui; fi ;;
+          *) echo "usage: alfredo acp | alfredo tui [session]" >&2; exit 2 ;;
+        esac
+        exec sudo -u hermes env -C ${config.services.hermes-agent.workingDirectory} \
+          HERMES_HOME=${config.systemd.services.hermes-agent.environment.HERMES_HOME} HOME=${config.services.hermes-agent.stateDir} \
+          PATH=${lib.escapeShellArg config.systemd.services.hermes-agent.environment.PATH} "$@"
       '';
     }) ];
 

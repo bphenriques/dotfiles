@@ -1,6 +1,6 @@
 #shellcheck shell=bash
 
-_notify() { notify-send --category "screen-recorder" --hint string:x-canonical-private-synchronous:screen-recorder "$@"; }
+_notify() { notify-send --app-name "Screen recorder" --category "screen-recorder" --hint string:x-canonical-private-synchronous:screen-recorder "$@"; }
 
 STATE_FILE="${XDG_RUNTIME_DIR:?}/screen-recorder"
 LOCK_FILE="${XDG_RUNTIME_DIR:?}/screen-recorder.lock"
@@ -9,9 +9,19 @@ notify_saved() {
   local destination="$1" thumb action
   thumb="$(mktemp --suffix=.png)"
   if ffmpeg -y -loglevel error -i "$destination" -frames:v 1 "$thumb"; then
-    action="$(_notify --action "default=Play" --expire-time 10000 --icon "$thumb" \
+    # Untagged, unlike _notify: mako would hand a later answer to this waiting process too.
+    # Delete sent first: makoctl menu lists the last sent first, so Play (a click) tops it.
+    action="$(notify-send --app-name "Screen recorder" --category "screen-recorder" \
+      --expire-time 15000 --icon "$thumb" \
+      --action "delete=Delete" --action "folder=Open folder" --action "copy=Copy file" --action "default=Play" \
       "Screen Recorder" "$(basename "$destination")" 2>/dev/null || true)"
-    if [[ $action == "default" ]]; then xdg-open "$destination" >/dev/null 2>&1 || true; fi
+    case "$action" in
+      default) xdg-open "$destination" >/dev/null 2>&1 || true ;;
+      # As a file, so a chat app attaches it.
+      copy) wl-copy --type text/uri-list "file://$destination" ;;
+      folder) xdg-open "$(dirname -- "$destination")" >/dev/null 2>&1 || true ;;
+      delete) gio trash -- "$destination" && _notify --urgency low --icon user-trash "Moved to trash" "$(basename "$destination")" ;;
+    esac
   else
     _notify --icon "$INFORMATION_ICON" "Screen Recorder" "Recording saved"
   fi

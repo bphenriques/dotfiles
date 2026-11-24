@@ -34,7 +34,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.quick-key.settings.plugins.dictation = {
     glyph = self.lib.glyphs."fa-microphone_lines";
     watch = "${voxtype} status --follow";
-    show.streaming.phase = "recording";
+    show.streaming.stage = "recording";
     stop = "${voxtype} record stop";
   };
 

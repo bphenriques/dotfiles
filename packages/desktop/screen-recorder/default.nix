@@ -17,6 +17,8 @@ pkgs.writeShellApplication {
     pkgs.libnotify
     pkgs.ffmpeg-headless
     pkgs.xdg-utils
+    pkgs.wl-clipboard
+    pkgs.glib
   ];
   text = ''
     INFORMATION_ICON="${informationIcon}"

@@ -21,7 +21,7 @@ Personal NixOS laptop with a minimalist, keyboard-oriented setup.
 - **Compositor**: [`niri`](https://github.com/YaLTeR/niri)
 - **Launcher**: [`fuzzel`](https://codeberg.org/dnkl/fuzzel)
 - **Terminal**: [`ghostty`](https://ghostty.org)
-- **Notifications**: [`dunst`](https://github.com/dunst-project/dunst)
+- **Notifications**: [`quick-key`](https://github.com/bphenriques/quick-key)
 - **Shell**: [`zsh`](https://www.zsh.org/)
 - **File Manager**: [Nautilus](https://gitlab.gnome.org/GNOME/nautilus) but moving to [Yazi](https://github.com/sxyazi/yazi) _slowly_
 - **Editor**: [IntelliJ IDEA](https://www.jetbrains.com/idea/) but moving to [Helix](https://github.com/helix-editor/helix) _slowly_

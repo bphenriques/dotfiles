@@ -27,7 +27,7 @@ _final: prev: let
     };
     gufo = {
       image = "ghcr.io/gufo-org/toolboxes/gufo-runtime";
-      version = "0.35.0";
+      version = "0.36.0";
       homepage = "https://github.com/gufo-org/gufo";
     };
   };

@@ -2,7 +2,7 @@
 {
   imports = [
     ./fuzzel.nix            # Application launcher
-    ./dunst.nix             # Notifications
+    ./notifications.nix     # Notifications (mako)
     ./bluetooth.nix         # Bluetooth menu entry
     ./hypridle.nix          # Idle behaviour
     ./hyprlock.nix          # Lock screen
@@ -52,10 +52,6 @@
         save-after-copy = false;
         output-filename = with config.my.programs.screenshot; "${directory}/${format}";
       };
-    };
-
-    my.services = {
-      upower-notify = { inherit (osConfig.services.upower) enable percentageLow percentageCritical; };
     };
   };
 }

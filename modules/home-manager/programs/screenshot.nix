@@ -35,13 +35,5 @@ in
 
     home.packages = [ cfg.package ];
 
-    # Suppress niri's built-in screenshot notification (we show our own with an edit action).
-    services.dunst.settings.niri_screenshot = {
-      appname = "niri";
-      summary = "Screenshot captured";
-      skip_display = true;
-      history_ignore = true;
-    };
-
   };
 }

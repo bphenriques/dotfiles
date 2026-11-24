@@ -10,7 +10,6 @@ let
   brightnessctl = "${lib.getExe pkgs.brightnessctl} --class=backlight";
   brightnessDown = "${brightnessctl} set 5%-";
   brightnessUp = "${brightnessctl} set 5%+";
-  brightness = [ brightnessDown brightnessUp ];
 
   # The panel. niri only knows it by its connector name; the externals below are named by make,
   # model and serial so they keep their settings when they move to another port.
@@ -39,20 +38,20 @@ in
   wayland.windowManager.niri.settings._children = map (screen: { output = { _args = [ screen.name ]; inherit (screen) mode scale; }; }) screens;
 
   programs.quick-key.settings = {
-    brightness.adjust = brightness;
     plugins.displayLayout = {
       type = "command";
       read = "${displayctl} status";
       select = "${displayctl} layout";
       items = layouts;
     };
-    menu.entries = lib.mkOrder 500 [
-      { key = menuKey; desc = "Display"; width = 640; status = "displayLayout"; list = "displayLayout"; submenu = [
-        { key = [ "Down" "Up" ]; desc = "Brightness"; action = "brightness"; status = "brightness"; }
-        { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
-      ]; }
-    ];
   };
+
+  my.quick-key.entries.display = [
+    { key = menuKey; desc = "Display"; width = 640; status = "displayLayout"; list = "displayLayout"; submenu = [
+      { key = [ "Down" "Up" ]; desc = "Brightness"; action = "brightness"; status = "brightness"; }
+      { key = "c"; desc = "Configure..."; icon = self.lib.glyphs."md-cog"; cmd = lib.getExe pkgs.wdisplays; }
+    ]; }
+  ];
 
   my.programs.niri.bindings = {
     "Mod+P repeat=false" = ''spawn-sh "${config.programs.quick-key.exec.ipc} menu toggleEntry ${menuKey}"'';

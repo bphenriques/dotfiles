@@ -1,15 +1,16 @@
 #shellcheck shell=bash
 
-# Contract with the desktop shell: the state file holds the wallpaper last set.
+# Contract with the desktop shell: the state file is a state line, the wallpaper last set as its value and its name as its text.
 STATE_FILE="${XDG_RUNTIME_DIR:?}/wallpaper"
 
 set_wallpaper() {
   test -f "$1" || return 0
   awww img --transition-type none "$1"
-  printf '%s\n' "$1" >"$STATE_FILE"
+  name=$(basename "$1")
+  jq -nc --arg value "$1" --arg text "${name%.*}" '{ $value, $text }' >"$STATE_FILE"
 }
 
-current_file() { cat "$STATE_FILE" 2>/dev/null || true; }
+current_file() { jq -r '.value // empty' "$STATE_FILE" 2>/dev/null || true; }
 
 # Never the current one, so every press changes it.
 random_file() { find "$1" -type f | grep -vxF -- "$(current_file)" | shuf -n 1; }

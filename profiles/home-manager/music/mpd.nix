@@ -32,6 +32,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   systemd.user.services.mpd.Service.ExecStartPre = lib.mkForce [ ];
 
   programs.quick-key.settings.music.player = "Music Player Daemon";  # mpdris2's MPRIS identity
+  # Bauer Media radio sends an XML document as the stream title: its song, then its artist.
+  programs.quick-key.settings.music.titleMatch = ''^<\?xml(?=[\s\S]*<DB_SONG_NAME>([^<]*))(?=(?:[\s\S]*<DB_LEAD_ARTIST_NAME>([^<]*))?)'';
 
   services.mpdris2 = {
     enable = true;

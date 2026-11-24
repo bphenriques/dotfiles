@@ -12,9 +12,10 @@ let
     musicIcon = mkIcon "mpc-plus-track" glyphs.music;
     artistIcon = mkIcon "mpc-plus-artist" self.lib.glyphs."md-account_music";
     albumIcon = mkIcon "mpc-plus-album" self.lib.glyphs."md-album";
-    stoppedIcon = mkIcon "mpc-plus-stopped" self.lib.glyphs."md-stop";
-    deviceIcon = mkIcon "mpc-plus-device" self.lib.glyphs."md-speaker";
-    errorIcon = mkIcon "mpc-plus-error" self.lib.glyphs."md-alert_circle";
+    # Notifications only: theme icons by name, drawn beside the text; the glyphs above are the picker's, and a file would show as album art.
+    stoppedIcon = "media-playback-stop-symbolic";
+    deviceIcon = "audio-speakers-symbolic";
+    errorIcon = "dialog-error-symbolic";
   };
   mpc-plus = lib.getExe package;
 
@@ -48,7 +49,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     mpdServer = { type = "command"; read = "${mpc-plus} server-items ${self.lib.glyphs."md-server"}"; select = "${mpc-plus} select-server"; };
   };
 
-  programs.quick-key.settings.menu.entries = lib.mkOrder 1000 [
+  my.quick-key.entries.music = [
     { key = "m"; desc = "Music"; width = 640; status = "music"; header = {
       left = [ { desc = "Song"; status = "music"; format = "{song}"; } ];
       right = [
@@ -61,9 +62,9 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       { key = [ "Left" "Right" ]; desc = "Track"; icon = self.lib.glyphs."md-skip_next"; cmd = [ "${mpc-plus} previous" "${mpc-plus} next" ]; keepOpen = true; }
       { key = [ "Down" "Up" ]; desc = "Volume"; icon = self.lib.glyphs."md-volume_high"; cmd = [ "${mpc-plus} volume-decrease" "${mpc-plus} volume-increase" ]; keepOpen = true; }
       { key = "f"; desc = "Play file..."; icon = self.lib.glyphs."md-file_music"; cmd = "${mpc-plus} dmenu-file-exec play"; }
-      { key = "r"; desc = "Radio"; icon = self.lib.glyphs."md-radio"; list = "radio"; }
+      { key = "r"; desc = "Radio..."; icon = self.lib.glyphs."md-radio"; list = "radio"; }
       { key = "a"; desc = "Play all shuffled"; icon = self.lib.glyphs."md-playlist_play"; cmd = "${mpc-plus} play-shuffled"; }
-      { key = "d"; desc = "Server"; icon = self.lib.glyphs."md-server"; list = "mpdServer"; }
+      { key = "d"; desc = "Server..."; icon = self.lib.glyphs."md-server"; list = "mpdServer"; }
     ]; }
   ];
 }

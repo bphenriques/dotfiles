@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795044499,
-        "narHash": "sha256-SdJ0pXTA4oWIOYeZ7wsoW4wQSNt0PyYx+Dvt3Zq7RZI=",
+        "lastModified": 1795534381,
+        "narHash": "sha256-fsB1MZ2fSSfWOyFFf3ss0NS4WZJcxDq3bGy4CYxAqq0=",
         "owner": "bphenriques",
         "repo": "agents-alfredo",
-        "rev": "3e249d85dbfdc6aae9ad8f0b5550143dd0b7c5f6",
+        "rev": "a0dd6fcacb0f09ad49c983a469ea381fa3772778",
         "type": "github"
       },
       "original": {
@@ -743,16 +743,16 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1795212345,
-        "narHash": "sha256-vB04olPskEWHP7AQTxs8zivyPJtmwlGw7mwdKTx9r/Y=",
+        "lastModified": 1795538042,
+        "narHash": "sha256-2IBH/llt915J3/ysvdNo5oQGJ2uiTn6L3EOdNtC45nY=",
         "owner": "bphenriques",
         "repo": "quick-key",
-        "rev": "730d104b6496e92cd7a2bd793ac41bfb7b55a323",
+        "rev": "3ab301b23fc486d5f56ffe8c6066fa5b8c0099b1",
         "type": "github"
       },
       "original": {
         "owner": "bphenriques",
-        "ref": "v0.20.0",
+        "ref": "v0.27.0-beta.7",
         "repo": "quick-key",
         "type": "github"
       }
